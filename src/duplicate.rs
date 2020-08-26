@@ -71,10 +71,9 @@ impl DuplicateFinder {
 
         self.included_directories = checked_directories;
 
-        println!("{:?}", self.included_directories);
+        println!("Included directories - {:?}", self.included_directories);
     }
 
-    //
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
         if exclude_directory.len() == 0 {
             return;
@@ -89,25 +88,27 @@ impl DuplicateFinder {
                 println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");
             }
             if directory.contains("*") {
-                println!("Include Directory ERROR: Wildcards are not supported, please don't use it.");
+                println!("Exclude Directory ERROR: Wildcards are not supported, please don't use it.");
                 process::exit(1);
             }
             if directory.starts_with("~") {
-                println!("Include Directory ERROR: ~ in path isn't supported.");
+                println!("Exclude Directory ERROR: ~ in path isn't supported.");
                 process::exit(1);
             }
             if !directory.starts_with("/") {
-                println!("Include Directory ERROR: Relative path are not supported.");
+                println!("Exclude Directory ERROR: Relative path are not supported.");
                 process::exit(1);
             }
             checked_directories.push(directory);
         }
 
-        self.included_directories = checked_directories;
+        self.excluded_directories = checked_directories;
 
-        println!("{:?}", &self.excluded_directories);
+        println!("Excluded directories - {:?}", &self.excluded_directories);
     }
+
     pub fn debug_print(&self) {
+        println!("---------------DEBUG PRINT---------------");
         println!("Number of all checked files - {}", self.number_of_checked_files);
         println!(
             "Number of all files with duplicates - {}",
@@ -115,8 +116,48 @@ impl DuplicateFinder {
         );
         println!("Number of duplicated files - {}", self.number_of_duplicated_files);
         println!("Files list - {}", self.files.len());
-        println!("Exclued  - {:?}", self.excluded_directories);
-        println!("Included directiories - {:?}", self.included_directories);
+        println!("Excluded directories - {:?}", self.excluded_directories);
+        println!("Included directories - {:?}", self.included_directories);
+        println!("-----------------------------------------");
+    }
+    // Usuwa wykluczone katalogi z wyszukiwania jeśli akurat included i excluded na siebie nachodzą
+    pub fn optimize_checked_directories(&mut self) {
+        let mut optimized_included: Vec<String> = Vec::<String>::new();
+        let mut optimized_excluded: Vec<String> = Vec::<String>::new();
+        // Remove duplicated entries like: "/", "/"
+
+        self.excluded_directories.sort();
+        self.included_directories.sort();
+
+        self.excluded_directories.dedup();
+        self.included_directories.dedup();
+
+        // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"- TODO
+        // for id_1 in &self.excluded_directories {
+        //     for id_2 in &self.included_directories {
+        //         if id_1 != id_2 && id_1.starts_with(id_2) {}
+        //         // optimized_included.push(id.to_string());
+        //     }
+        // }
+        // self.included_directories = optimized_included;
+        // optimized_included = Vec::<String>::new();
+        // self.excluded_directories = optimized_excluded;
+
+        // Remove include directories which are inside any exclude directory
+        for ed in &self.excluded_directories {
+            for id in &self.included_directories {
+                if id.starts_with(ed) {
+                    continue;
+                }
+                optimized_included.push(id.to_string());
+            }
+        }
+        self.included_directories = optimized_included;
+
+        if self.included_directories.len() == 0 {
+            println!("Optimize Directories ERROR: Excluded directories overlaps all included directories.");
+            process::exit(1);
+        }
     }
 }
 
