@@ -1,0 +1,4 @@
+
+newline_style = "Unix"
+max_width = 120
+remove_nested_parens = true
