@@ -27,6 +27,7 @@ fn main() {
             df.set_include_directory(arguments[2].to_string());
             df.optimize_directories();
             df.debug_print();
+            df.find_duplicates();
         }
         argum => println!("{} argument is not supported, check help for more info.", argum),
     };

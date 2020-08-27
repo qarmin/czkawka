@@ -1,13 +1,20 @@
 // Todo, należy upewnić się, że ma wystarczające uprawnienia do odczytu i usuwania
 use std::collections::HashMap;
-use std::process;
+use std::fs::Metadata;
+use std::path::Path;
+use std::time::SystemTime;
+use std::{fs, process};
 
 pub struct DuplicateFinder {
     number_of_checked_files: u64,
+    number_of_checked_folders: u64,
+    number_of_ignored_things: u64,
     number_of_files_which_has_duplicated_entries: u64,
     number_of_duplicated_files: u64,
     // files : Vec<HashMap<FileEntry, Vec<FileEntry>>>,
-    files: HashMap<u64, Vec<FileEntry>>,
+    files: HashMap<u64, FileEntry>,
+    files_with_duplicated_entries: HashMap<u64, FileEntry>,
+    // duplicated_entries // Same as files, but only with 2+ entries
     // files : Vec<Vec<FileEntry>>,
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
@@ -17,22 +24,88 @@ impl DuplicateFinder {
     pub fn new() -> DuplicateFinder {
         DuplicateFinder {
             number_of_checked_files: 0,
+            number_of_checked_folders: 0,
+            number_of_ignored_things: 0,
             number_of_files_which_has_duplicated_entries: 0,
             number_of_duplicated_files: 0,
             files: Default::default(),
+            files_with_duplicated_entries: Default::default(),
             excluded_directories: vec![],
             included_directories: vec![],
         }
     }
     // pub fn clear(&mut self) {
     //     self.number_of_checked_files = 0;
+    //     self.number_of_checked_folders = 0;
+    //     self.number_of_ignored_things = 0;
     //     self.number_of_files_which_has_duplicated_entries = 0;
     //     self.number_of_duplicated_files = 0;
     //     self.files.clear();
     //     self.excluded_directories.clear();
     //     self.included_directories.clear();
     // }
-    // pub fn find_duplicates(&mut self) {}
+    pub fn find_duplicates(&mut self) {
+        //let mut path;
+        let start_time: SystemTime = SystemTime::now();
+        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 16); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+
+        // Add root folders for finding
+        for id in &self.included_directories {
+            folders_to_check.push(id.to_string());
+        }
+
+        let mut current_folder: String;
+        let mut next_folder: String;
+        while !folders_to_check.is_empty() {
+            current_folder = folders_to_check.pop().unwrap();
+
+            let read_dir = fs::read_dir(&current_folder);
+            let read_dir = match read_dir {
+                Ok(t) => t,
+                _ => continue,
+            };
+            for entry in read_dir {
+                let entry_data = entry.unwrap();
+                let metadata: Metadata = entry_data.metadata().unwrap();
+                if metadata.is_dir() {
+                    let mut is_excluded_dir = false;
+                    next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
+                    for ed in &self.excluded_directories {
+                        if next_folder == ed.to_string() {
+                            is_excluded_dir = true;
+                            break;
+                        }
+                    }
+                    if !is_excluded_dir {
+                        folders_to_check.push(next_folder);
+                    }
+                    self.number_of_checked_folders += 1;
+
+                //println!("Directory\t - {:?}", next_folder); // DEBUG
+                } else if metadata.is_file() {
+                    let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
+                    //file_to_check
+                    let fe: FileEntry = FileEntry {
+                        path: current_file_name,
+                        size: metadata.len(),
+                        created_date: metadata.created().unwrap(),
+                        modified_date: metadata.modified().unwrap(),
+                    };
+                    self.files.insert(metadata.len(), fe);
+
+                    self.number_of_checked_files += 1;
+                // println!("File\t\t - {:?}", current_file); // DEBUG
+                } else {
+                    // Probably this is symbolic links so we are free to ignore this
+                    // println!("Found another type of file {} {:?}","".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap(), metadata) //DEBUG
+                    self.number_of_ignored_things += 1;
+                }
+            }
+        }
+        self.debug_print();
+        let end_time: SystemTime = SystemTime::now();
+        println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
+    }
     // pub fn save_to_file(&self) {}
 
     /// Setting include directories, panics when there is not directories available
@@ -59,6 +132,14 @@ impl DuplicateFinder {
             }
             if !directory.starts_with("/") {
                 println!("Include Directory ERROR: Relative path are not supported.");
+                process::exit(1);
+            }
+            if !Path::new(&directory).exists() {
+                println!("Include Directory ERROR: Path {} doens't exists.", directory);
+                process::exit(1);
+            }
+            if !Path::new(&directory).exists() {
+                println!("Include Directory ERROR: {} isn't folder.", directory);
                 process::exit(1);
             }
 
@@ -105,6 +186,14 @@ impl DuplicateFinder {
                 println!("Exclude Directory ERROR: Relative path are not supported.");
                 process::exit(1);
             }
+            if !Path::new(&directory).exists() {
+                println!("Exclude Directory ERROR: Path {} doens't exists.", directory);
+                process::exit(1);
+            }
+            if !Path::new(&directory).exists() {
+                println!("Exclude Directory ERROR: {} isn't folder.", directory);
+                process::exit(1);
+            }
 
             // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
             if !directory.ends_with("/") {
@@ -122,10 +211,9 @@ impl DuplicateFinder {
     pub fn debug_print(&self) {
         println!("---------------DEBUG PRINT---------------");
         println!("Number of all checked files - {}", self.number_of_checked_files);
-        println!(
-            "Number of all files with duplicates - {}",
-            self.number_of_files_which_has_duplicated_entries
-        );
+        println!("Number of all checked folders - {}", self.number_of_checked_folders);
+        println!("Number of all ignored things - {}", self.number_of_ignored_things);
+        println!("Number of all files with duplicates - {}", self.number_of_files_which_has_duplicated_entries);
         println!("Number of duplicated files - {}", self.number_of_duplicated_files);
         println!("Files list - {}", self.files.len());
         println!("Excluded directories - {:?}", self.excluded_directories);
@@ -186,19 +274,60 @@ impl DuplicateFinder {
         self.included_directories = optimized_included;
         optimized_included = Vec::<String>::new();
         self.excluded_directories = optimized_excluded;
-        // optimized_excluded = Vec::<String>::new();
+        optimized_excluded = Vec::<String>::new();
 
         // Remove include directories which are inside any exclude directory
-        for ed in &self.excluded_directories {
-            for id in &self.included_directories {
+        for id in &self.included_directories {
+            let mut is_inside: bool = false;
+            for ed in &self.excluded_directories {
                 if id.starts_with(ed) {
-                    continue;
+                    is_inside = true;
+                    break;
                 }
+            }
+            if !is_inside {
                 optimized_included.push(id.to_string());
             }
         }
         self.included_directories = optimized_included;
+        optimized_included = Vec::<String>::new();
+
+        // Remove non existed directories
+        for id in &self.included_directories {
+            let path = Path::new(id);
+            if path.exists() {
+                optimized_included.push(id.to_string());
+            }
+        }
+
+        for ed in &self.excluded_directories {
+            let path = Path::new(ed);
+            if path.exists() {
+                optimized_excluded.push(ed.to_string());
+            }
+        }
+
+        self.included_directories = optimized_included;
         // optimized_included = Vec::<String>::new();
+        self.excluded_directories = optimized_excluded;
+        optimized_excluded = Vec::<String>::new();
+
+        // Excluded paths must are inside include path, because  TODO
+        for ed in &self.excluded_directories {
+            let mut is_inside: bool = false;
+            for id in &self.included_directories {
+                if ed.starts_with(id) {
+                    is_inside = true;
+                    break;
+                }
+            }
+            if is_inside {
+                optimized_excluded.push(ed.to_string());
+            }
+        }
+
+        self.excluded_directories = optimized_excluded;
+        // optimized_excluded = Vec::<String>::new();
 
         if self.included_directories.len() == 0 {
             println!("Optimize Directories ERROR: Excluded directories overlaps all included directories.");
@@ -212,6 +341,8 @@ impl DuplicateFinder {
 }
 
 struct FileEntry {
-    file_path: String,
-    file_size: u64,
+    pub path: String,
+    pub size: u64,
+    pub created_date: SystemTime,
+    pub modified_date: SystemTime,
 }
