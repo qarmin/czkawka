@@ -25,7 +25,7 @@ fn main() {
             let mut df = duplicate::DuplicateFinder::new();
             df.set_exclude_directory(arguments[3].to_string());
             df.set_include_directory(arguments[2].to_string());
-            df.optimize_checked_directories();
+            df.optimize_directories();
             df.debug_print();
         }
         argum => println!("{} argument is not supported, check help for more info.", argum),
