@@ -1,23 +1,28 @@
 // Todo, należy upewnić się, że ma wystarczające uprawnienia do odczytu i usuwania
 use std::collections::HashMap;
-use std::fs::Metadata;
+use std::fs::{File, Metadata};
+use std::hash::Hash;
+use std::io::prelude::*;
 use std::path::Path;
 use std::time::SystemTime;
 use std::{fs, process};
 
 pub struct DuplicateFinder {
-    number_of_checked_files: u64,
-    number_of_checked_folders: u64,
-    number_of_ignored_things: u64,
-    number_of_files_which_has_duplicated_entries: u64,
-    number_of_duplicated_files: u64,
+    number_of_checked_files: usize,
+    number_of_checked_folders: usize,
+    number_of_ignored_things: usize,
+    number_of_duplicated_files: usize,
     // files : Vec<HashMap<FileEntry, Vec<FileEntry>>>,
-    files: HashMap<u64, FileEntry>,
-    files_with_duplicated_entries: HashMap<u64, FileEntry>,
+    files_size: HashMap<u64, Vec<FileEntry>>,
+    // files_hashes: HashMap<[u8],Vec<FileEntry>>,
     // duplicated_entries // Same as files, but only with 2+ entries
     // files : Vec<Vec<FileEntry>>,
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
+    // ignored_extensions: Vec<String>,
+    // allowed_extensions: Vec<String>,
+    // ignored_file_names: Vec<String>, // TODO Regex Support
+    // allowed_file_names: Vec<String>, // TODO Regex Support
 }
 
 impl DuplicateFinder {
@@ -26,25 +31,31 @@ impl DuplicateFinder {
             number_of_checked_files: 0,
             number_of_checked_folders: 0,
             number_of_ignored_things: 0,
-            number_of_files_which_has_duplicated_entries: 0,
             number_of_duplicated_files: 0,
-            files: Default::default(),
-            files_with_duplicated_entries: Default::default(),
+            files_size: Default::default(),
+            // files_hashes: Default::default(),
             excluded_directories: vec![],
             included_directories: vec![],
+            // ignored_extensions: vec![],
+            // allowed_extensions: vec![],
+            // ignored_file_names: vec![],
+            // allowed_file_names: vec![]
         }
     }
+    // TODO - Still isn't used but it will be probably required with GUI
     // pub fn clear(&mut self) {
+    //
     //     self.number_of_checked_files = 0;
     //     self.number_of_checked_folders = 0;
     //     self.number_of_ignored_things = 0;
     //     self.number_of_files_which_has_duplicated_entries = 0;
     //     self.number_of_duplicated_files = 0;
-    //     self.files.clear();
+    //     self.files_sizeclear();
     //     self.excluded_directories.clear();
     //     self.included_directories.clear();
     // }
-    pub fn find_duplicates(&mut self) {
+    pub fn find_duplicates_by_size(&mut self) {
+        // TODO add multithread checking for file hash
         //let mut path;
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 16); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -84,6 +95,7 @@ impl DuplicateFinder {
                 //println!("Directory\t - {:?}", next_folder); // DEBUG
                 } else if metadata.is_file() {
                     let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
+                    // println!("File\t\t - {:?}", current_file_name); // DEBUG
                     //file_to_check
                     let fe: FileEntry = FileEntry {
                         path: current_file_name,
@@ -91,10 +103,12 @@ impl DuplicateFinder {
                         created_date: metadata.created().unwrap(),
                         modified_date: metadata.modified().unwrap(),
                     };
-                    self.files.insert(metadata.len(), fe);
+                    if !self.files_size.contains_key(&metadata.len()) {
+                        self.files_size.insert(metadata.len(), Vec::new());
+                    }
+                    self.files_size.get_mut(&metadata.len()).unwrap().push(fe);
 
                     self.number_of_checked_files += 1;
-                // println!("File\t\t - {:?}", current_file); // DEBUG
                 } else {
                     // Probably this is symbolic links so we are free to ignore this
                     // println!("Found another type of file {} {:?}","".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap(), metadata) //DEBUG
@@ -103,34 +117,110 @@ impl DuplicateFinder {
             }
         }
         self.debug_print();
-        let end_time: SystemTime = SystemTime::now();
-        println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "find_duplicates".to_string());
+        //println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
     }
     // pub fn save_to_file(&self) {}
 
+    /// Remove files which have unique size
+    pub fn remove_files_with_unique_size(&mut self) {
+        let start_time: SystemTime = SystemTime::now();
+        self.debug_print();
+        let mut new_hashmap: HashMap<u64, Vec<FileEntry>> = Default::default();
+
+        self.number_of_duplicated_files = 0;
+
+        for entry in &self.files_size {
+            if entry.1.len() > 1 {
+                self.number_of_duplicated_files += entry.1.len() - 1;
+                new_hashmap.insert(*entry.0, entry.1.clone());
+            }
+        }
+
+        self.files_size = new_hashmap;
+
+        self.debug_print();
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "optimize_files".to_string());
+    }
+
+    /// Should be slower than checking in different ways, but still needs to be checked
+    pub fn find_duplicates_by_hashing(mut self) {
+        let start_time: SystemTime = SystemTime::now();
+        let mut file_handler: File;
+
+        for entry in self.files_size {
+            let mut hashes: Vec<String> = Vec::new();
+            if entry.1.len() > 5 {
+                println!("{}", entry.1.len());
+            }
+
+            for file_entry in entry.1.iter().enumerate() {
+                file_handler = match File::open(&file_entry.1.path) {
+                    Ok(T) => T,
+                    Err(_) => {
+                        // Removing File may happens,so we should handle this
+                        hashes.push("".to_owned());
+                        continue;
+                    }
+                };
+
+                let mut hasher: blake3::Hasher = blake3::Hasher::new();
+                let mut buffer = [0u8; 16384];
+                loop {
+                    let n = file_handler.read(&mut buffer).unwrap();
+                    if n == 0 {
+                        break;
+                    }
+                    hasher.update(&buffer[..n]);
+                }
+                //println!("{}", hasher.finalize().to_hex().to_string());
+            }
+        }
+
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "find_duplicates_by_hashing".to_string());
+    }
+    // /// I'mm not sure about performance, so maybe I
+    // pub fn find_small_duplicates_by_hashing(mut self){
+    //     let start_time: SystemTime = SystemTime::now();
+    //     let size_limit_for_small_files u64 =  // 16 MB
+    //     let mut new_hashmap
+    //
+    //     DuplicateFinder::print_time(start_time, SystemTime::now(), "find_duplicates_by_comparting_begin_bytes_of_file".to_string());
+    // }
+
+    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
+        println!(
+            "Execution of function \"{}\" took {:?}",
+            function_name,
+            end_time.duration_since(start_time).expect("Time cannot go reverse.")
+        );
+    }
+
     /// Setting include directories, panics when there is not directories available
     pub fn set_include_directory(&mut self, mut include_directory: String) {
-        if include_directory.len() == 0 {
+        let start_time: SystemTime = SystemTime::now();
+
+        if include_directory.is_empty() {
             println!("At least one directory must be provided")
         }
 
         include_directory = include_directory.replace("\"", "");
-        let directories: Vec<String> = include_directory.split(",").map(String::from).collect();
+        let directories: Vec<String> = include_directory.split(',').map(String::from).collect();
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
             if directory == "/" {
                 println!("Using / is probably not good idea, you may go out of ram.");
             }
-            if directory.contains("*") {
+            if directory.contains('*') {
                 println!("Include Directory ERROR: Wildcards are not supported, please don't use it.");
                 process::exit(1);
             }
-            if directory.starts_with("~") {
+            if directory.starts_with('~') {
                 println!("Include Directory ERROR: ~ in path isn't supported.");
                 process::exit(1);
             }
-            if !directory.starts_with("/") {
+            if !directory.starts_with('/') {
                 println!("Include Directory ERROR: Relative path are not supported.");
                 process::exit(1);
             }
@@ -144,45 +234,46 @@ impl DuplicateFinder {
             }
 
             // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
-            if !directory.ends_with("/") {
+            if !directory.ends_with('/') {
                 checked_directories.push(directory + "/");
             } else {
                 checked_directories.push(directory);
             }
         }
 
-        if checked_directories.len() == 0 {
+        if checked_directories.is_empty() {
             println!("Not found even one correct path to include.");
             process::exit(1);
         }
 
         self.included_directories = checked_directories;
 
-        println!("Included directories - {:?}", self.included_directories);
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
     }
 
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
-        if exclude_directory.len() == 0 {
+        let start_time: SystemTime = SystemTime::now();
+        if exclude_directory.is_empty() {
             return;
         }
 
         exclude_directory = exclude_directory.replace("\"", "");
-        let directories: Vec<String> = exclude_directory.split(",").map(String::from).collect();
+        let directories: Vec<String> = exclude_directory.split(',').map(String::from).collect();
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
             if directory == "/" {
                 println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");
             }
-            if directory.contains("*") {
+            if directory.contains('*') {
                 println!("Exclude Directory ERROR: Wildcards are not supported, please don't use it.");
                 process::exit(1);
             }
-            if directory.starts_with("~") {
+            if directory.starts_with('~') {
                 println!("Exclude Directory ERROR: ~ in path isn't supported.");
                 process::exit(1);
             }
-            if !directory.starts_with("/") {
+            if !directory.starts_with('/') {
                 println!("Exclude Directory ERROR: Relative path are not supported.");
                 process::exit(1);
             }
@@ -196,7 +287,7 @@ impl DuplicateFinder {
             }
 
             // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
-            if !directory.ends_with("/") {
+            if !directory.ends_with('/') {
                 checked_directories.push(directory + "/");
             } else {
                 checked_directories.push(directory);
@@ -205,7 +296,7 @@ impl DuplicateFinder {
 
         self.excluded_directories = checked_directories;
 
-        println!("Excluded directories - {:?}", &self.excluded_directories);
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
 
     pub fn debug_print(&self) {
@@ -213,9 +304,8 @@ impl DuplicateFinder {
         println!("Number of all checked files - {}", self.number_of_checked_files);
         println!("Number of all checked folders - {}", self.number_of_checked_folders);
         println!("Number of all ignored things - {}", self.number_of_ignored_things);
-        println!("Number of all files with duplicates - {}", self.number_of_files_which_has_duplicated_entries);
         println!("Number of duplicated files - {}", self.number_of_duplicated_files);
-        println!("Files list - {}", self.files.len());
+        println!("Files list - {}", self.files_size.len());
         println!("Excluded directories - {:?}", self.excluded_directories);
         println!("Included directories - {:?}", self.included_directories);
         println!("-----------------------------------------");
@@ -225,6 +315,8 @@ impl DuplicateFinder {
     /// let df : DuplicateFinder = saf
     /// ```
     pub fn optimize_directories(&mut self) {
+        let start_time: SystemTime = SystemTime::now();
+
         let mut optimized_included: Vec<String> = Vec::<String>::new();
         let mut optimized_excluded: Vec<String> = Vec::<String>::new();
         // Remove duplicated entries like: "/", "/"
@@ -249,7 +341,7 @@ impl DuplicateFinder {
                     break;
                 }
             }
-            if is_inside == false {
+            if !is_inside {
                 optimized_excluded.push(ed_checked.to_string());
             }
         }
@@ -266,7 +358,7 @@ impl DuplicateFinder {
                     break;
                 }
             }
-            if is_inside == false {
+            if !is_inside {
                 optimized_included.push(id_checked.to_string());
             }
         }
@@ -329,7 +421,7 @@ impl DuplicateFinder {
         self.excluded_directories = optimized_excluded;
         // optimized_excluded = Vec::<String>::new();
 
-        if self.included_directories.len() == 0 {
+        if self.included_directories.is_empty() {
             println!("Optimize Directories ERROR: Excluded directories overlaps all included directories.");
             process::exit(1);
         }
@@ -337,12 +429,24 @@ impl DuplicateFinder {
         // Not needed, but better is to have sorted everything
         self.excluded_directories.sort();
         self.included_directories.sort();
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
 }
 
+#[derive(Clone)]
 struct FileEntry {
     pub path: String,
     pub size: u64,
     pub created_date: SystemTime,
     pub modified_date: SystemTime,
+}
+impl FileEntry {
+    // pub fn return_copy(&self) -> FileEntry {
+    //     let new_copy : FileEntry = FileEntry{
+    //         path: self.path.to_string(),
+    //         size: self.size,
+    //         created_date: self.created_date,
+    //         modified_date: self.modified_date
+    //     };
+    // }
 }

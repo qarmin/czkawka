@@ -1,9 +1,10 @@
 [package]
 name = "czkawka"
 version = "0.1.0"
-authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
+authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+rayon = "1.4.0"
+blake3 = "0.3.6"
+multimap = "0.8.2"
