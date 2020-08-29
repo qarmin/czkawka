@@ -9,7 +9,7 @@ use std::{fs, process};
 const MIN_FILE_SIZE: u64 = 1000;
 
 #[derive(PartialEq)]
-#[allow(dead_code)]
+#[allow(dead_code)] // For now I only use Hash method
 pub enum CheckingMethod {
     SIZE,
     HASH,
@@ -48,7 +48,7 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn find_duplicates(mut self, check_method: CheckingMethod) {
+    pub fn find_duplicates(mut self, check_method: CheckingMethod, delete_files: bool) {
         self.optimize_directories();
         self.debug_print();
         self.check_files_size();
@@ -56,7 +56,10 @@ impl DuplicateFinder {
         if check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
-        // self.print_duplicated_entries(check_method);
+        self.print_duplicated_entries(&check_method);
+        if delete_files {
+            self.delete_files(&check_method);
+        }
     }
 
     pub fn set_min_file_size(&mut self, min_size: u64) {
@@ -71,33 +74,34 @@ impl DuplicateFinder {
         if allowed_extensions.is_empty() {
             println!("No allowed extension was provided, so all are allowed");
         }
-        allowed_extensions = allowed_extensions.replace("IMAGE","jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
-        allowed_extensions = allowed_extensions.replace("VIDEO","mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
+        allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
+        allowed_extensions = allowed_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
         allowed_extensions = allowed_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
 
         let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
-        for mut extension in extensions{
-            if extension.contains('.'){
-                if !extension.starts_with('.'){
-                    println!("{} is not valid extension(valid extension doesn't have dot inside)",extension);
+        for mut extension in extensions {
+            if extension.contains('.') {
+                if !extension.starts_with('.') {
+                    println!("{} is not valid extension(valid extension doesn't have dot inside)", extension);
+                    continue;
                 }
-                extension = extension.replace('.',"");
+                extension = extension.replace('.', "");
             }
-
-
-            self.allowed_extensions.push(extension.trim().to_string());
+            if !self.allowed_extensions.contains(&extension.trim().to_string()) {
+                self.allowed_extensions.push(extension.trim().to_string());
+            }
         }
 
-        if self.allowed_extensions.len() == 0{
+        println!("{:?}", &self.allowed_extensions);
+        if self.allowed_extensions.is_empty() {
             println!("No valid extensions were provided, so allowing all extensions by default.");
         }
-
     }
     pub fn set_include_directory(&mut self, mut include_directory: String) {
         // let start_time: SystemTime = SystemTime::now();
 
         if include_directory.is_empty() {
-            println!("At least one directory must be provided")
+            println!("At least one directory must be provided");
         }
 
         include_directory = include_directory.replace("\"", "");
@@ -247,7 +251,22 @@ impl DuplicateFinder {
 
                 //println!("Directory\t - {:?}", next_folder); // DEBUG
                 } else if metadata.is_file() {
-                    if metadata.len() >= MIN_FILE_SIZE {
+                    let mut have_valid_extension: bool;
+                    let file_name_lowercase: String = entry_data.file_name().into_string().unwrap().to_lowercase();
+
+                    if !self.allowed_extensions.is_empty() {
+                        have_valid_extension = false;
+                        for i in &self.allowed_extensions {
+                            if file_name_lowercase.ends_with(&i.to_lowercase()) {
+                                have_valid_extension = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        have_valid_extension = true;
+                    }
+
+                    if metadata.len() >= MIN_FILE_SIZE && have_valid_extension {
                         let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
                         // println!("File\t\t - {:?}", current_file_name); // DEBUG
                         //file_to_check
@@ -363,33 +382,32 @@ impl DuplicateFinder {
 
     /// Setting include directories, panics when there is not directories available
 
-
     fn debug_print(&self) {
-        // println!("---------------DEBUG PRINT---------------");
-        // println!("Number of all checked files - {}", self.number_of_checked_files);
-        // println!("Number of all ignored files - {}", self.number_of_ignored_files);
-        // println!("Number of all checked folders - {}", self.number_of_checked_folders);
-        // println!("Number of all ignored things - {}", self.number_of_ignored_things);
-        // println!("Number of duplicated files - {}", self.number_of_duplicated_files);
-        // let mut file_size : u64 = 0;
-        // for i in &self.files_with_identical_size{
-        //     file_size += i.1.len() as u64;
-        // }
-        // println!("Files list size - {} ({})", self.files_with_identical_size.len(), file_size);
-        // let mut hashed_file_size : u64 = 0;
-        // for i in &self.files_with_identical_hashes{
-        //     for j in i.1{
-        //         hashed_file_size += j.len() as u64;
-        //     }
-        // }
-        // println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
-        // println!("Excluded directories - {:?}", self.excluded_directories);
-        // println!("Included directories - {:?}", self.included_directories);
-        // println!("-----------------------------------------");
+        println!("---------------DEBUG PRINT---------------");
+        println!("Number of all checked files - {}", self.number_of_checked_files);
+        println!("Number of all ignored files - {}", self.number_of_ignored_files);
+        println!("Number of all checked folders - {}", self.number_of_checked_folders);
+        println!("Number of all ignored things - {}", self.number_of_ignored_things);
+        println!("Number of duplicated files - {}", self.number_of_duplicated_files);
+        let mut file_size: u64 = 0;
+        for i in &self.files_with_identical_size {
+            file_size += i.1.len() as u64;
+        }
+        println!("Files list size - {} ({})", self.files_with_identical_size.len(), file_size);
+        let mut hashed_file_size: u64 = 0;
+        for i in &self.files_with_identical_hashes {
+            for j in i.1 {
+                hashed_file_size += j.len() as u64;
+            }
+        }
+        println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
+        println!("Excluded directories - {:?}", self.excluded_directories);
+        println!("Included directories - {:?}", self.included_directories);
+        println!("-----------------------------------------");
     }
 
     #[allow(dead_code)]
-    fn print_duplicated_entries(&self, check_method: CheckingMethod) {
+    fn print_duplicated_entries(&self, check_method: &CheckingMethod) {
         let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
         let mut number_of_groups: u64 = 0;
@@ -551,6 +569,43 @@ impl DuplicateFinder {
         self.excluded_directories.sort();
         self.included_directories.sort();
         DuplicateFinder::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
+    }
+
+    fn delete_files(&mut self, check_method: &CheckingMethod) {
+        let start_time: SystemTime = SystemTime::now();
+        let mut errors: Vec<String> = Vec::new();
+        match check_method {
+            CheckingMethod::HASH => {
+                for entry in &self.files_with_identical_hashes {
+                    for vector in entry.1 {
+                        for files in vector.iter().enumerate() {
+                            if files.0 != 0 {
+                                match fs::remove_file(&files.1.path) {
+                                    Ok(_) => (),
+                                    Err(_) => errors.push(files.1.path.clone()),
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            CheckingMethod::SIZE => {
+                for entry in &self.files_with_identical_size {
+                    for files in entry.1.iter().enumerate() {
+                        if files.0 != 0 {
+                            match fs::remove_file(&files.1.path) {
+                                Ok(_) => (),
+                                Err(_) => errors.push(files.1.path.clone()),
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        for i in errors {
+            println!("Failed to delete {}", i);
+        }
+        DuplicateFinder::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
 
