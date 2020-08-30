@@ -1,4 +1,5 @@
 // Todo, należy upewnić się, że ma wystarczające uprawnienia do odczytu i usuwania
+use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
@@ -6,14 +7,13 @@ use std::path::Path;
 use std::time::SystemTime;
 use std::{fs, process};
 
-const MIN_FILE_SIZE: u64 = 1000;
 
 #[derive(PartialEq)]
-#[allow(dead_code)] // For now I only use Hash method
 pub enum CheckingMethod {
     SIZE,
     HASH,
 }
+
 
 pub struct DuplicateFinder {
     number_of_checked_files: usize,
@@ -24,6 +24,7 @@ pub struct DuplicateFinder {
     files_with_identical_size: HashMap<u64, Vec<FileEntry>>,
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
     allowed_extensions: Vec<String>, // jpg, jpeg, mp4
+    lost_space: u64,
     // excluded_items: Vec<String>,
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
@@ -43,8 +44,9 @@ impl DuplicateFinder {
             // excluded_items: vec![],
             excluded_directories: vec![],
             included_directories: vec![],
-            min_file_size: 0,
+            min_file_size: 1024,
             allowed_extensions: vec![],
+            lost_space: 0,
         }
     }
 
@@ -56,6 +58,7 @@ impl DuplicateFinder {
         if check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
+        self.calculate_lost_space(&check_method);
         self.print_duplicated_entries(&check_method);
         if delete_files {
             self.delete_files(&check_method);
@@ -77,6 +80,7 @@ impl DuplicateFinder {
         allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
         allowed_extensions = allowed_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
         allowed_extensions = allowed_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
+        allowed_extensions = allowed_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
 
         let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
         for mut extension in extensions {
@@ -178,8 +182,8 @@ impl DuplicateFinder {
                 process::exit(1);
             }
             if !Path::new(&directory).exists() {
-                println!("Exclude Directory ERROR: Path {} doesn't exists.", directory);
-                process::exit(1);
+                println!("Exclude Directory WARNING: Path {} doesn't exists.", directory);
+                //process::exit(1); // Better just print warning witohut closing
             }
             if !Path::new(&directory).exists() {
                 println!("Exclude Directory ERROR: {} isn't folder.", directory);
@@ -197,6 +201,25 @@ impl DuplicateFinder {
         self.excluded_directories = checked_directories;
 
         //DuplicateFinder::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
+    }
+    fn calculate_lost_space(&mut self, check_method: &CheckingMethod) {
+        let mut bytes: u64 = 0;
+
+        match check_method {
+            CheckingMethod::SIZE => {
+                for i in &self.files_with_identical_size {
+                    bytes += i.0 * (i.1.len() as u64 - 1);
+                }
+            }
+            CheckingMethod::HASH => {
+                for i in &self.files_with_identical_hashes {
+                    for j in i.1 {
+                        bytes += i.0 * (j.len() as u64 - 1);
+                    }
+                }
+            }
+        }
+        self.lost_space = bytes;
     }
 
     // TODO - Still isn't used but it will be probably required with GUI
@@ -257,7 +280,7 @@ impl DuplicateFinder {
                     if !self.allowed_extensions.is_empty() {
                         have_valid_extension = false;
                         for i in &self.allowed_extensions {
-                            if file_name_lowercase.ends_with(&i.to_lowercase()) {
+                            if file_name_lowercase.ends_with(&(".".to_string() + &*i.to_lowercase().to_string())) {
                                 have_valid_extension = true;
                                 break;
                             }
@@ -266,7 +289,7 @@ impl DuplicateFinder {
                         have_valid_extension = true;
                     }
 
-                    if metadata.len() >= MIN_FILE_SIZE && have_valid_extension {
+                    if metadata.len() >= self.min_file_size && have_valid_extension {
                         let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
                         // println!("File\t\t - {:?}", current_file_name); // DEBUG
                         //file_to_check
@@ -383,27 +406,27 @@ impl DuplicateFinder {
     /// Setting include directories, panics when there is not directories available
 
     fn debug_print(&self) {
-        println!("---------------DEBUG PRINT---------------");
-        println!("Number of all checked files - {}", self.number_of_checked_files);
-        println!("Number of all ignored files - {}", self.number_of_ignored_files);
-        println!("Number of all checked folders - {}", self.number_of_checked_folders);
-        println!("Number of all ignored things - {}", self.number_of_ignored_things);
-        println!("Number of duplicated files - {}", self.number_of_duplicated_files);
-        let mut file_size: u64 = 0;
-        for i in &self.files_with_identical_size {
-            file_size += i.1.len() as u64;
-        }
-        println!("Files list size - {} ({})", self.files_with_identical_size.len(), file_size);
-        let mut hashed_file_size: u64 = 0;
-        for i in &self.files_with_identical_hashes {
-            for j in i.1 {
-                hashed_file_size += j.len() as u64;
-            }
-        }
-        println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
-        println!("Excluded directories - {:?}", self.excluded_directories);
-        println!("Included directories - {:?}", self.included_directories);
-        println!("-----------------------------------------");
+        // println!("---------------DEBUG PRINT---------------");
+        // println!("Number of all checked files - {}", self.number_of_checked_files);
+        // println!("Number of all ignored files - {}", self.number_of_ignored_files);
+        // println!("Number of all checked folders - {}", self.number_of_checked_folders);
+        // println!("Number of all ignored things - {}", self.number_of_ignored_things);
+        // println!("Number of duplicated files - {}", self.number_of_duplicated_files);
+        // let mut file_size: u64 = 0;
+        // for i in &self.files_with_identical_size {
+        //     file_size += i.1.len() as u64;
+        // }
+        // println!("Files list size - {} ({})", self.files_with_identical_size.len(), file_size);
+        // let mut hashed_file_size: u64 = 0;
+        // for i in &self.files_with_identical_hashes {
+        //     for j in i.1 {
+        //         hashed_file_size += j.len() as u64;
+        //     }
+        // }
+        // println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
+        // println!("Excluded directories - {:?}", self.excluded_directories);
+        // println!("Included directories - {:?}", self.included_directories);
+        // println!("-----------------------------------------");
     }
 
     #[allow(dead_code)]
@@ -420,7 +443,12 @@ impl DuplicateFinder {
                         number_of_groups += 1;
                     }
                 }
-                println!("Found {} files in {} groups with same content:", number_of_files, number_of_groups);
+                println!(
+                    "Found {} files in {} groups with same content which took {}:",
+                    number_of_files,
+                    number_of_groups,
+                    self.lost_space.file_size(options::BINARY).unwrap()
+                );
                 for i in &self.files_with_identical_hashes {
                     println!("Size - {}", i.0);
                     for j in i.1 {
@@ -437,21 +465,26 @@ impl DuplicateFinder {
                     number_of_files += i.1.len() as u64;
                     number_of_groups += 1;
                 }
-                println!("Found {} files in {} groups with same size(may have different content):", number_of_files, number_of_groups);
-                for i in &self.files_with_identical_size {
-                    println!("Size - {}", i.0);
-                    for j in i.1 {
-                        println!("{}", j.path);
-                    }
-                    println!();
-                }
+                println!(
+                    "Found {} files in {} groups with same size(may have different content) which took {}:",
+                    number_of_files,
+                    number_of_groups,
+                    self.lost_space.file_size(options::BINARY).unwrap()
+                );
+                // for i in &self.files_with_identical_size {
+                //     println!("Size - {}", i.0);
+                //     for j in i.1 {
+                //         println!("{}", j.path);
+                //     }
+                //     println!();
+                // }
             }
         }
         DuplicateFinder::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
     }
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated
     /// ```
-    /// let df : DuplicateFinder = saf
+    // let df : DuplicateFinder = saf
     /// ```
     fn optimize_directories(&mut self) {
         let start_time: SystemTime = SystemTime::now();
@@ -615,14 +648,4 @@ struct FileEntry {
     pub size: u64,
     pub created_date: SystemTime,
     pub modified_date: SystemTime,
-}
-impl FileEntry {
-    // pub fn return_copy(&self) -> FileEntry {
-    //     let new_copy : FileEntry = FileEntry{
-    //         path: self.path.to_string(),
-    //         size: self.size,
-    //         created_date: self.created_date,
-    //         modified_date: self.modified_date
-    //     };
-    // }
 }

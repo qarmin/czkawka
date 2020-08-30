@@ -4,12 +4,18 @@ It is in very early development, so most of the functions aren't added and doesn
 
 
 ## Done
-- Basic menu
+- Basic menu(need refactoring)
+- Duplicated file finding
+  - Including and excluding directories(absolute pathes)
+  - Option to remove file
+  - Fast(by size) or accurate(by hash) file checking
+  - 
 
 ## TODO
-- Graphical UI(GTK)
 - Duplicated file finding
-- Setting include and exclude directories
+  - saving to file
+  - support for * when excluding files and folders
+- Graphical UI(GTK)
 - Removing empty folders
 - Files with debug symbols
 - Support for showing only duplicates with specific extension, name(Regex support needed)

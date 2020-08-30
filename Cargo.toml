@@ -5,7 +5,7 @@ authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2018"
 
 [dependencies]
-rayon = "1.4.0"
+humansize = "1.1.0"
+#rayon = "1.4.0"
 blake3 = "0.3.6"
-multimap = "0.8.2"
-regex = "1.3.9"
+#regex = "1.3.9"
