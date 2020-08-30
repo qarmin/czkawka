@@ -7,13 +7,22 @@ use std::path::Path;
 use std::time::SystemTime;
 use std::{fs, process};
 
-
 #[derive(PartialEq)]
 pub enum CheckingMethod {
     SIZE,
     HASH,
 }
 
+// TODO
+#[allow(dead_code)]
+pub enum TypeOfDelete {
+    AllExceptRandom, // Choose one random file from duplicates which won't be deleted
+    AllExceptNewest,
+    AllExceptOldest,
+    OneOldest,
+    OneNewest,
+    OneRandom
+}
 
 pub struct DuplicateFinder {
     number_of_checked_files: usize,
@@ -96,7 +105,6 @@ impl DuplicateFinder {
             }
         }
 
-        println!("{:?}", &self.allowed_extensions);
         if self.allowed_extensions.is_empty() {
             println!("No valid extensions were provided, so allowing all extensions by default.");
         }
@@ -197,7 +205,6 @@ impl DuplicateFinder {
                 checked_directories.push(directory.trim().to_string());
             }
         }
-        println!("{:?}", checked_directories);
         self.excluded_directories = checked_directories;
 
         //DuplicateFinder::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
@@ -429,7 +436,6 @@ impl DuplicateFinder {
         // println!("-----------------------------------------");
     }
 
-    #[allow(dead_code)]
     fn print_duplicated_entries(&self, check_method: &CheckingMethod) {
         let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
@@ -471,13 +477,13 @@ impl DuplicateFinder {
                     number_of_groups,
                     self.lost_space.file_size(options::BINARY).unwrap()
                 );
-                // for i in &self.files_with_identical_size {
-                //     println!("Size - {}", i.0);
-                //     for j in i.1 {
-                //         println!("{}", j.path);
-                //     }
-                //     println!();
-                // }
+                for i in &self.files_with_identical_size {
+                    println!("Size - {}", i.0);
+                    for j in i.1 {
+                        println!("{}", j.path);
+                    }
+                    println!();
+                }
             }
         }
         DuplicateFinder::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
