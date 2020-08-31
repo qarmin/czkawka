@@ -1,4 +1,4 @@
-// Todo, należy upewnić się, że ma wystarczające uprawnienia do odczytu i usuwania
+// TODO when using GUI all or most println!() should be used as variables passed by argument
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata};
@@ -7,14 +7,14 @@ use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, process};
 
+use crate::common::Common;
+
 #[derive(PartialEq)]
 pub enum CheckingMethod {
     SIZE,
     HASH,
 }
 
-// TODO
-#[allow(dead_code)]
 #[derive(Eq, PartialEq)]
 pub enum DeleteMethod {
     None,
@@ -42,7 +42,7 @@ pub struct DuplicateFinder {
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
     allowed_extensions: Vec<String>, // jpg, jpeg, mp4
     lost_space: u64,
-    // excluded_items: Vec<String>,
+    // excluded_items: Vec<String>, // TODO
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
     min_file_size: u64,
@@ -166,7 +166,7 @@ impl DuplicateFinder {
 
         self.included_directories = checked_directories;
 
-        //DuplicateFinder::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
+        //Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
     }
 
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
@@ -213,7 +213,7 @@ impl DuplicateFinder {
         }
         self.excluded_directories = checked_directories;
 
-        //DuplicateFinder::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
+        //Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
     fn calculate_lost_space(&mut self, check_method: &CheckingMethod) {
         let mut bytes: u64 = 0;
@@ -332,7 +332,7 @@ impl DuplicateFinder {
             }
         }
         self.debug_print();
-        DuplicateFinder::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
         //println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
     }
     // pub fn save_results_to_file(&self) {}
@@ -355,7 +355,7 @@ impl DuplicateFinder {
         self.files_with_identical_size = new_hashmap;
 
         self.debug_print();
-        DuplicateFinder::print_time(start_time, SystemTime::now(), "remove_files_with_unique_size".to_string());
+        Common::print_time(start_time, SystemTime::now(), "remove_files_with_unique_size".to_string());
     }
 
     /// Should be slower than checking in different ways, but still needs to be checked
@@ -397,7 +397,7 @@ impl DuplicateFinder {
             }
         }
         self.debug_print();
-        DuplicateFinder::print_time(start_time, SystemTime::now(), "check_files_hash".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files_hash".to_string());
     }
     // /// I'mm not sure about performance, so maybe I
     // pub fn find_small_duplicates_by_hashing(mut self){
@@ -405,16 +405,8 @@ impl DuplicateFinder {
     //     let size_limit_for_small_files u64 =  // 16 MB
     //     let mut new_hashmap
     //
-    //     DuplicateFinder::print_time(start_time, SystemTime::now(), "find_duplicates_by_comparting_begin_bytes_of_file".to_string());
+    //     Common::print_time(start_time, SystemTime::now(), "find_duplicates_by_comparting_begin_bytes_of_file".to_string());
     // }
-
-    fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
-        println!(
-            "Execution of function \"{}\" took {:?}",
-            function_name,
-            end_time.duration_since(start_time).expect("Time cannot go reverse.")
-        );
-    }
 
     /// Setting include directories, panics when there is not directories available
 
@@ -492,7 +484,7 @@ impl DuplicateFinder {
                 }
             }
         }
-        DuplicateFinder::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
     }
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated
     /// ```
@@ -511,7 +503,7 @@ impl DuplicateFinder {
         self.excluded_directories.dedup();
         self.included_directories.dedup();
 
-        // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"- TODO
+        // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
         let mut is_inside: bool;
         for ed_checked in &self.excluded_directories {
             is_inside = false;
@@ -588,7 +580,7 @@ impl DuplicateFinder {
         self.excluded_directories = optimized_excluded;
         optimized_excluded = Vec::<String>::new();
 
-        // Excluded paths must are inside include path, because  TODO
+        // Excluded paths must are inside include path, because
         for ed in &self.excluded_directories {
             let mut is_inside: bool = false;
             for id in &self.included_directories {
@@ -613,7 +605,7 @@ impl DuplicateFinder {
         // Not needed, but better is to have sorted everything
         self.excluded_directories.sort();
         self.included_directories.sort();
-        DuplicateFinder::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
+        Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
 
     fn delete_files(&mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
@@ -636,10 +628,14 @@ impl DuplicateFinder {
                 }
             }
         }
-        for i in errors {
-            println!("Failed to delete {}", i);
+        if !errors.is_empty() {
+            println!("Failed to delete some files, because they have got deleted earlier or you have too low privileges - try run it as root.");
+            println!("List of files which wasn't deleted:");
         }
-        DuplicateFinder::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        for i in errors {
+            println!("{}", i);
+        }
+        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
 fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut Vec<String>) {

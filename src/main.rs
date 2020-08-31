@@ -1,6 +1,8 @@
 use std::{env, process};
 
+mod common;
 mod duplicate;
+mod empty_folder;
 
 fn main() {
     // Parse argument
@@ -127,13 +129,30 @@ fn main() {
             }
 
             df.find_duplicates(&check_method, &delete_method);
-        },
+        }
         "--h" | "--help" => {
             print_help();
-        },
-        "-e" =>{
+        }
+        "--e" => {
+            let mut ef = empty_folder::EmptyFolder::new();
+            let mut delete_folders: bool = false;
 
-        },
+            if ArgumentsPair::has_command(&arguments, "-i") {
+                ef.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+            } else {
+                println!("FATAL ERROR: Parameter -i with set of included files is required.");
+                process::exit(1);
+            }
+            if ArgumentsPair::has_command(&arguments, "-e") {
+                ef.set_exclude_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-delete") {
+                delete_folders = true;
+            }
+
+            ef.find_empty_folders(delete_folders);
+        }
         argum => {
             println!("FATAL ERROR: \"{}\" argument is not supported, check help for more info.", argum);
             process::exit(1);
