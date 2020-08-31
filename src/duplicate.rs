@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::path::Path;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, process};
 
 #[derive(PartialEq)]
@@ -15,13 +15,21 @@ pub enum CheckingMethod {
 
 // TODO
 #[allow(dead_code)]
-pub enum TypeOfDelete {
-    AllExceptRandom, // Choose one random file from duplicates which won't be deleted
+#[derive(Eq, PartialEq)]
+pub enum DeleteMethod {
+    None,
     AllExceptNewest,
     AllExceptOldest,
     OneOldest,
     OneNewest,
-    OneRandom
+}
+
+#[derive(Clone)]
+struct FileEntry {
+    pub path: String,
+    pub size: u64,
+    pub created_date: SystemTime,
+    pub modified_date: SystemTime,
 }
 
 pub struct DuplicateFinder {
@@ -59,19 +67,17 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn find_duplicates(mut self, check_method: CheckingMethod, delete_files: bool) {
+    pub fn find_duplicates(mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
         self.optimize_directories();
         self.debug_print();
         self.check_files_size();
         self.remove_files_with_unique_size();
-        if check_method == CheckingMethod::HASH {
+        if *check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
-        self.calculate_lost_space(&check_method);
-        self.print_duplicated_entries(&check_method);
-        if delete_files {
-            self.delete_files(&check_method);
-        }
+        self.calculate_lost_space(check_method);
+        self.print_duplicated_entries(check_method);
+        self.delete_files(check_method, delete_method);
     }
 
     pub fn set_min_file_size(&mut self, min_size: u64) {
@@ -610,34 +616,23 @@ impl DuplicateFinder {
         DuplicateFinder::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
 
-    fn delete_files(&mut self, check_method: &CheckingMethod) {
+    fn delete_files(&mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
+        if *delete_method == DeleteMethod::None {
+            return;
+        }
         let start_time: SystemTime = SystemTime::now();
         let mut errors: Vec<String> = Vec::new();
         match check_method {
             CheckingMethod::HASH => {
                 for entry in &self.files_with_identical_hashes {
                     for vector in entry.1 {
-                        for files in vector.iter().enumerate() {
-                            if files.0 != 0 {
-                                match fs::remove_file(&files.1.path) {
-                                    Ok(_) => (),
-                                    Err(_) => errors.push(files.1.path.clone()),
-                                };
-                            }
-                        }
+                        delete_files(&vector, &delete_method, &mut errors);
                     }
                 }
             }
             CheckingMethod::SIZE => {
                 for entry in &self.files_with_identical_size {
-                    for files in entry.1.iter().enumerate() {
-                        if files.0 != 0 {
-                            match fs::remove_file(&files.1.path) {
-                                Ok(_) => (),
-                                Err(_) => errors.push(files.1.path.clone()),
-                            };
-                        }
-                    }
+                    delete_files(&entry.1, &delete_method, &mut errors);
                 }
             }
         }
@@ -647,11 +642,73 @@ impl DuplicateFinder {
         DuplicateFinder::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
-
-#[derive(Clone)]
-struct FileEntry {
-    pub path: String,
-    pub size: u64,
-    pub created_date: SystemTime,
-    pub modified_date: SystemTime,
+fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut Vec<String>) {
+    assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
+    let mut q_index: usize = 0;
+    let mut q_time: u64 = 0;
+    match delete_method {
+        DeleteMethod::OneOldest => {
+            for files in vector.iter().enumerate() {
+                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+                if q_time == 0 || q_time > time_since_epoch {
+                    q_time = time_since_epoch;
+                    q_index = files.0;
+                }
+            }
+            match fs::remove_file(vector[q_index].path.clone()) {
+                Ok(_) => (),
+                Err(_) => errors.push(vector[q_index].path.clone()),
+            };
+        }
+        DeleteMethod::OneNewest => {
+            for files in vector.iter().enumerate() {
+                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+                if q_time == 0 || q_time < time_since_epoch {
+                    q_time = time_since_epoch;
+                    q_index = files.0;
+                }
+            }
+            match fs::remove_file(vector[q_index].path.clone()) {
+                Ok(_) => (),
+                Err(_) => errors.push(vector[q_index].path.clone()),
+            };
+        }
+        DeleteMethod::AllExceptOldest => {
+            for files in vector.iter().enumerate() {
+                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+                if q_time == 0 || q_time > time_since_epoch {
+                    q_time = time_since_epoch;
+                    q_index = files.0;
+                }
+            }
+            for files in vector.iter().enumerate() {
+                if q_index != files.0 {
+                    match fs::remove_file(vector[files.0].path.clone()) {
+                        Ok(_) => (),
+                        Err(_) => errors.push(vector[files.0].path.clone()),
+                    };
+                }
+            }
+        }
+        DeleteMethod::AllExceptNewest => {
+            for files in vector.iter().enumerate() {
+                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+                if q_time == 0 || q_time < time_since_epoch {
+                    q_time = time_since_epoch;
+                    q_index = files.0;
+                }
+            }
+            for files in vector.iter().enumerate() {
+                if q_index != files.0 {
+                    match fs::remove_file(vector[files.0].path.clone()) {
+                        Ok(_) => (),
+                        Err(_) => errors.push(vector[files.0].path.clone()),
+                    };
+                }
+            }
+        }
+        DeleteMethod::None => {
+            panic!();
+        }
+    };
 }
