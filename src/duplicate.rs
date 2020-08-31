@@ -263,8 +263,7 @@ impl DuplicateFinder {
         while !folders_to_check.is_empty() {
             current_folder = folders_to_check.pop().unwrap();
 
-            let read_dir = fs::read_dir(&current_folder);
-            let read_dir = match read_dir {
+            let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 _ => continue,
             };

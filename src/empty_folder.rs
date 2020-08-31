@@ -1,7 +1,21 @@
 use crate::common::Common;
+use std::collections::HashMap;
+use std::fs::Metadata;
 use std::path::Path;
-use std::process;
 use std::time::SystemTime;
+use std::{fs, process};
+
+enum FolderEmptiness {
+    Yes,
+    No,
+    Maybe,
+}
+struct FolderEntry {
+    self_path: String,
+    parent_path: Option<String>,
+    is_empty: FolderEmptiness,
+}
+impl FolderEntry {}
 
 pub struct EmptyFolder {
     number_of_checked_folders: usize,
@@ -31,8 +45,83 @@ impl EmptyFolder {
             self.delete_empty_folders();
         }
     }
-    fn check_for_empty_folders(&self) {}
-    fn delete_empty_folders(&self) {}
+    fn check_for_empty_folders(&self) {
+        let start_time: SystemTime = SystemTime::now();
+        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_checked: HashMap<String, FolderEntry> = Default::default();
+
+        // Add root folders for finding
+        for id in &self.included_directories {
+            folders_checked.insert(
+                id.clone(),
+                FolderEntry {
+                    self_path: id.clone(),
+                    parent_path: None,
+                    is_empty: FolderEmptiness::Maybe,
+                },
+            );
+            folders_to_check.push(id.to_string());
+        }
+
+        let mut current_folder: String;
+        let mut next_folder: String;
+        while !folders_to_check.is_empty() {
+            current_folder = folders_to_check.pop().unwrap();
+
+            let read_dir = match fs::read_dir(&current_folder) {
+                Ok(t) => t,
+                _ => {
+                    folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
+                    continue;
+                }
+            };
+            for entry in read_dir {
+                let entry_data = entry.unwrap();
+                let metadata: Metadata = entry_data.metadata().unwrap();
+                if metadata.is_dir() {
+                    let mut is_excluded_dir = false;
+                    next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
+                    for ed in &self.excluded_directories {
+                        if next_folder == *ed {
+                            is_excluded_dir = true;
+                            break;
+                        }
+                    }
+                    if !is_excluded_dir {
+                        folders_to_check.push(next_folder.clone());
+
+                        folders_checked.insert(
+                            next_folder.clone(),
+                            FolderEntry {
+                                self_path: next_folder,
+                                parent_path: Option::from(current_folder.clone()),
+                                is_empty: FolderEmptiness::Maybe,
+                            },
+                        );
+                    }
+                } else {
+                    // Not folder so it may be a file or symbolic link
+                    folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
+                    let mut d = folders_checked.get_mut(&current_folder).unwrap();
+                    let mut cf: String = current_folder.clone();
+                    loop {
+                        d.is_empty = FolderEmptiness::No;
+                        if d.parent_path != None {
+                            cf = d.parent_path.clone().unwrap();
+                            d = folders_checked.get_mut(&cf).unwrap();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        self.debug_print();
+        Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+    }
+    fn delete_empty_folders(&self) {
+        // Need to check again because folder may stop be empty
+    }
     fn print_empty_folders(&self) {
         if !self.empty_folder_list.is_empty() {
             println!("Found {} empty folders", self.empty_folder_list.len());
