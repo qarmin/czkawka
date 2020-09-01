@@ -186,6 +186,7 @@ Usage of Czkawka:
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -delete - delete found empty folders
+      czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
     "###
     );
 }

@@ -127,35 +127,40 @@ impl DuplicateFinder {
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
+            let directory : String = directory.trim().to_string();
+
+            if directory == "" {
+                continue
+            }
             if directory == "/" {
                 println!("Using / is probably not good idea, you may go out of ram.");
             }
             if directory.contains('*') {
-                println!("Include Directory ERROR: Wildcards are not supported, please don't use it.");
-                process::exit(1);
+                println!("Include Directory ERROR: Wildcards are not supported, ignoring path {}.", directory);
+                continue;
             }
             if directory.starts_with('~') {
-                println!("Include Directory ERROR: ~ in path isn't supported.");
-                process::exit(1);
+                println!("Include Directory ERROR: ~ in path isn't supported, ignoring path {}.", directory);
+                continue;
             }
             if !directory.starts_with('/') {
-                println!("Include Directory ERROR: Relative path are not supported.");
-                process::exit(1);
+                println!("Include Directory ERROR: Relative path are not supported, ignoring path {}.", directory);
+                continue;
             }
             if !Path::new(&directory).exists() {
                 println!("Include Directory ERROR: Path {} doesn't exists.", directory);
-                process::exit(1);
+                continue;
             }
             if !Path::new(&directory).exists() {
                 println!("Include Directory ERROR: {} isn't folder.", directory);
-                process::exit(1);
+                continue;
             }
 
             // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
             if !directory.ends_with('/') {
-                checked_directories.push(directory.trim().to_string() + "/");
+                checked_directories.push(directory + "/");
             } else {
-                checked_directories.push(directory.trim().to_string());
+                checked_directories.push(directory);
             }
         }
 
@@ -180,28 +185,34 @@ impl DuplicateFinder {
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
+            let directory : String = directory.trim().to_string();
+
+            if directory == "" {
+                continue
+            }
             if directory == "/" {
                 println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");
+                break;
             }
             if directory.contains('*') {
-                println!("Exclude Directory ERROR: Wildcards are not supported, please don't use it.");
-                process::exit(1);
+                println!("Exclude Directory ERROR: Wildcards are not supported, ignoring path {}.", directory);
+                continue;
             }
             if directory.starts_with('~') {
-                println!("Exclude Directory ERROR: ~ in path isn't supported.");
-                process::exit(1);
+                println!("Exclude Directory ERROR: ~ in path isn't supported, ignoring path {}.", directory);
+                continue;
             }
             if !directory.starts_with('/') {
-                println!("Exclude Directory ERROR: Relative path are not supported.");
-                process::exit(1);
+                println!("Exclude Directory ERROR: Relative path are not supported, ignoring path {}.", directory);
+                continue;
             }
             if !Path::new(&directory).exists() {
-                println!("Exclude Directory WARNING: Path {} doesn't exists.", directory);
-                //process::exit(1); // Better just print warning witohut closing
+                println!("Exclude Directory ERROR: Path {} doesn't exists.", directory);
+                continue;
             }
             if !Path::new(&directory).exists() {
                 println!("Exclude Directory ERROR: {} isn't folder.", directory);
-                process::exit(1);
+                continue;
             }
 
             // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
@@ -447,13 +458,13 @@ impl DuplicateFinder {
                     }
                 }
                 println!(
-                    "Found {} files in {} groups with same content which took {}:",
+                    "Found {} duplicated files in {} groups with same content which took {}:",
                     number_of_files,
                     number_of_groups,
                     self.lost_space.file_size(options::BINARY).unwrap()
                 );
                 for i in &self.files_with_identical_hashes {
-                    println!("Size - {}", i.0);
+                    println!("Size - {}", i.0.file_size(options::BINARY).unwrap());
                     for j in i.1 {
                         for k in j {
                             println!("{}", k.path);
