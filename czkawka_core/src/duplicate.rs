@@ -42,7 +42,7 @@ pub struct DuplicateFinder {
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
     allowed_extensions: Vec<String>, // jpg, jpeg, mp4
     lost_space: u64,
-    // excluded_items: Vec<String>, // TODO
+    // excluded_items: Vec<String>, // TODO, support for e.g. */.git/*
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
     min_file_size: u64,
@@ -127,10 +127,10 @@ impl DuplicateFinder {
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
-            let directory : String = directory.trim().to_string();
+            let directory: String = directory.trim().to_string();
 
             if directory == "" {
-                continue
+                continue;
             }
             if directory == "/" {
                 println!("Using / is probably not good idea, you may go out of ram.");
@@ -185,10 +185,10 @@ impl DuplicateFinder {
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
-            let directory : String = directory.trim().to_string();
+            let directory: String = directory.trim().to_string();
 
             if directory == "" {
-                continue
+                continue;
             }
             if directory == "/" {
                 println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");

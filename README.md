@@ -20,5 +20,23 @@ It is in very early development, so most of the functions aren't added and doesn
 - Support for showing only duplicates with specific extension, name(Regex support needed)
 - Maybe windows support, but this will need some refactoring in code
 
+## Usage
+- Install requirements for GTK(minimum 3.16)
+```
+apt install -y libgtk-3-dev
+```
+- Download source
+```
+git clone github/czkawka // TODO
+cd czkawka
+```
+- Run GUI(Still WIP)
+```
+cargo run --bin czkawka_gui
+```
+- Run CLI
+
+
+
 ## License
 Czkawka is released under the terms of the GNU Lesser General Public License, version 2.1 or, at your option, any later version, as published by the Free Software Foundation. 

@@ -1,5 +1,7 @@
 use std::time::SystemTime;
 
+/// Class for common functions used across other class/functions
+
 pub struct Common();
 impl Common {
     pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {

@@ -1,13 +1,12 @@
+use czkawka_core::{duplicate, empty_folder};
 use std::{env, process};
-
-mod common;
-mod duplicate;
-mod empty_folder;
 
 fn main() {
     // Parse argument
     let mut all_arguments: Vec<String> = env::args().collect();
     let mut commands_arguments: Vec<String> = Vec::new();
+
+    println!("{:?}", all_arguments);
 
     all_arguments.remove(0); // Removing program name from arguments
 

@@ -345,10 +345,10 @@ impl EmptyFolder {
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
-            let directory : String = directory.trim().to_string();
+            let directory: String = directory.trim().to_string();
 
             if directory == "" {
-                continue
+                continue;
             }
             if directory == "/" {
                 println!("Using / is probably not good idea, you may go out of ram.");
@@ -403,10 +403,10 @@ impl EmptyFolder {
         let mut checked_directories: Vec<String> = Vec::new();
 
         for directory in directories {
-            let directory : String = directory.trim().to_string();
+            let directory: String = directory.trim().to_string();
 
             if directory == "" {
-                continue
+                continue;
             }
             if directory == "/" {
                 println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");

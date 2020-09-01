@@ -1,0 +1,11 @@
+[package]
+name = "czkawka_core"
+version = "0.1.0"
+authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+humansize = "1.1.0"
+blake3 = "0.3.6"
+#rayon = "1.4.0"
+#regex = "1.3.9"

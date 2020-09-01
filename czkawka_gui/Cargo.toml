@@ -1,0 +1,18 @@
+[package]
+name = "czkawka_gui"
+version = "0.1.0"
+authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+czkawka_core = { path = "../czkawka_core" }
+gdk = "0.13.2"
+gio = "0.9.1"
+
+
+[dependencies.gtk]
+version = "0.9.2"
+default-features = false  # just in case
+features = ["v3_18"]
