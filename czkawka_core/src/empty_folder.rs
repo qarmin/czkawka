@@ -5,18 +5,22 @@ use std::path::Path;
 use std::time::SystemTime;
 use std::{fs, process};
 
+/// Enum with values which show if folder is empty.
+/// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessery to put it here
 #[derive(Eq, PartialEq, Copy, Clone)]
 enum FolderEmptiness {
     No,
     Maybe,
 }
 
+/// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
 #[derive(Clone)]
 struct FolderEntry {
     parent_path: Option<String>,
     is_empty: FolderEmptiness,
 }
 
+/// Struct to store most basics info about  all folder
 pub struct EmptyFolder {
     number_of_checked_folders: usize,
     number_of_empty_folders: usize,
@@ -25,7 +29,9 @@ pub struct EmptyFolder {
     included_directories: Vec<String>,
 }
 
+/// Method implementation for EmptyFolder
 impl EmptyFolder {
+    /// New function providing basics values
     pub fn new() -> EmptyFolder {
         EmptyFolder {
             number_of_checked_folders: 0,
@@ -36,6 +42,7 @@ impl EmptyFolder {
         }
     }
 
+    /// Public function used by CLI to search for empty folders
     pub fn find_empty_folders(mut self, delete_folders: bool) {
         self.optimize_directories();
         self.debug_print();
@@ -68,7 +75,8 @@ impl EmptyFolder {
         self.empty_folder_list = new_directory_folders;
     }
 
-    /// Function to check if folder are empty, initial_checking is used to check again if folder is
+    /// Function to check if folder are empty.
+    /// Parameter initial_checking for second check before deleting to be sure that checked folder is still empty
     fn check_for_empty_folders(&mut self, initial_checking: bool) {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -87,7 +95,7 @@ impl EmptyFolder {
                 folders_to_check.push(id.clone());
             }
         } else {
-            // Add root folders for finding
+            // Add folders searched before
             for id in &self.empty_folder_list {
                 folders_checked.insert(
                     id.0.clone(),
@@ -104,7 +112,7 @@ impl EmptyFolder {
         let mut next_folder: String;
         while !folders_to_check.is_empty() {
             current_folder = folders_to_check.pop().unwrap();
-
+            // Checked folder may be deleted so we assume that cannot removed folder be empty
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 _ => {
@@ -112,9 +120,11 @@ impl EmptyFolder {
                     continue;
                 }
             };
+
             for entry in read_dir {
                 let entry_data = entry.unwrap();
                 let metadata: Metadata = entry_data.metadata().unwrap();
+                // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
                     let mut is_excluded_dir = false;
                     next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
@@ -136,7 +146,7 @@ impl EmptyFolder {
                         );
                     }
                 } else {
-                    // Not folder so it may be a file or symbolic link
+                    // Not folder so it may be a file or symbolic link so it isn't empty
                     folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
                     let mut d = folders_checked.get_mut(&current_folder).unwrap();
                     let mut cf: String;
@@ -153,13 +163,14 @@ impl EmptyFolder {
             }
         }
         if initial_checking {
+            // We need to set empty folder list
             for entry in folders_checked {
                 if entry.1.is_empty != FolderEmptiness::No {
                     self.empty_folder_list.insert(entry.0, entry.1);
                 }
             }
         } else {
-            // Sprawdzenie
+            // We need to check if parent of folder isn't also empty, because we wan't to delete only parent with two empty folders except this folders and at the end parent folder
             let mut new_folders_list: HashMap<String, FolderEntry> = Default::default();
             for entry in folders_checked {
                 if entry.1.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&entry.0) {
@@ -172,9 +183,11 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "check_for_empty_folder".to_string());
     }
 
+    /// Deletes earlier finded empty folders
     fn delete_empty_folders(&self) {
         let start_time: SystemTime = SystemTime::now();
         let mut errors: Vec<String> = Vec::new();
+        // Folders may be deleted or require too big privileges
         for entry in &self.empty_folder_list {
             match fs::remove_dir_all(entry.0) {
                 Ok(_) => (),
@@ -192,6 +205,7 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 
+    /// Prints basic info about empty folders
     fn print_empty_folders(&self) {
         if !self.empty_folder_list.is_empty() {
             println!("Found {} empty folders", self.empty_folder_list.len());
@@ -201,6 +215,7 @@ impl EmptyFolder {
         }
     }
 
+    /// Debug print
     fn debug_print(&self) {
         if false {
             println!("---------------DEBUG PRINT---------------");
@@ -216,6 +231,7 @@ impl EmptyFolder {
     }
 
     // TODO maybe move this and one from duplicated finder to one common class to avoid duplicating code
+    /// Optimize include and exclude directories by removing duplicates etc.
     fn optimize_directories(&mut self) {
         let start_time: SystemTime = SystemTime::now();
 
@@ -333,6 +349,8 @@ impl EmptyFolder {
         self.included_directories.sort();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
+
+    /// Set include dir which needst to be relative, exists,
     pub fn set_include_directory(&mut self, mut include_directory: String) {
         // let start_time: SystemTime = SystemTime::now();
 
@@ -369,7 +387,7 @@ impl EmptyFolder {
                 println!("Include Directory ERROR: Path {} doesn't exists.", directory);
                 continue;
             }
-            if !Path::new(&directory).exists() {
+            if !Path::new(&directory).is_dir() {
                 println!("Include Directory ERROR: {} isn't folder.", directory);
                 continue;
             }
@@ -428,7 +446,7 @@ impl EmptyFolder {
                 println!("Exclude Directory ERROR: Path {} doesn't exists.", directory);
                 continue;
             }
-            if !Path::new(&directory).exists() {
+            if !Path::new(&directory).is_dir() {
                 println!("Exclude Directory ERROR: {} isn't folder.", directory);
                 continue;
             }

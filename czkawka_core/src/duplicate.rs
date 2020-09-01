@@ -151,7 +151,7 @@ impl DuplicateFinder {
                 println!("Include Directory ERROR: Path {} doesn't exists.", directory);
                 continue;
             }
-            if !Path::new(&directory).exists() {
+            if !Path::new(&directory).is_dir() {
                 println!("Include Directory ERROR: {} isn't folder.", directory);
                 continue;
             }
@@ -210,7 +210,7 @@ impl DuplicateFinder {
                 println!("Exclude Directory ERROR: Path {} doesn't exists.", directory);
                 continue;
             }
-            if !Path::new(&directory).exists() {
+            if !Path::new(&directory).is_dir() {
                 println!("Exclude Directory ERROR: {} isn't folder.", directory);
                 continue;
             }
