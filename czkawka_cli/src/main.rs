@@ -181,6 +181,7 @@ Usage of Czkawka:
       czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -delete
       czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash"
       czkawka --d -i "/etc/" -delete "aeo"
+
   --e <-i directory_to_search> [-e exclude_directories = ""] [-delete] - option to find and delete empty folders
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.

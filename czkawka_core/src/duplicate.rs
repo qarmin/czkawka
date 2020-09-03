@@ -156,7 +156,7 @@ impl DuplicateFinder {
                 continue;
             }
 
-            // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
+            // directory must end with /, due to possibility of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
             if !directory.ends_with('/') {
                 checked_directories.push(directory + "/");
             } else {
@@ -215,7 +215,7 @@ impl DuplicateFinder {
                 continue;
             }
 
-            // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
+            // directory must end with /, due to possibility of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
             if !directory.ends_with('/') {
                 checked_directories.push(directory.trim().to_string() + "/");
             } else {
@@ -259,7 +259,7 @@ impl DuplicateFinder {
     //     self.included_directories.clear();
     // }
     fn check_files_size(&mut self) {
-        // TODO maybe add multithread checking for file hash
+        // TODO maybe add multithreading checking for file hash
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and
                                                                               // big enough to store most of paths without needing to resize vector
@@ -409,13 +409,13 @@ impl DuplicateFinder {
         self.debug_print();
         Common::print_time(start_time, SystemTime::now(), "check_files_hash".to_string());
     }
-    // /// I'mm not sure about performance, so maybe I
+    // /// I'm not sure about performance, so maybe I
     // pub fn find_small_duplicates_by_hashing(mut self){
     //     let start_time: SystemTime = SystemTime::now();
     //     let size_limit_for_small_files u64 =  // 16 MB
     //     let mut new_hashmap
     //
-    //     Common::print_time(start_time, SystemTime::now(), "find_duplicates_by_comparting_begin_bytes_of_file".to_string());
+    //     Common::print_time(start_time, SystemTime::now(), "find_duplicates_by_comparing_begin_bytes_of_file".to_string());
     // }
 
     /// Setting include directories, panics when there is not directories available

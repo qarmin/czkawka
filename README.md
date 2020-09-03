@@ -22,7 +22,8 @@ It is in very early development, so most of the functions aren't added and doesn
   - saving results to file
   - support for * when excluding files and folders
 - GUI(GTK)
-- Files with debug symbols
+- Alternative GUI with orbtk
+- Finding files with debug symbols
 - Support for showing only duplicates with specific extension, name(Regex support needed)
 - Maybe windows support, but this will need some refactoring in code
 
@@ -45,6 +46,19 @@ cargo run --bin czkawka_gui
 ```
 cargo run --bin czkawka_cli
 ```
+
+## How it works?
+### Duplicate Finder
+The only required parameter for checking duplicates is included folders `-i`. This parameter validates provided folders - which must have absolute path(without ~ and other similar symbols at the beginning),  not contains *(wildcard), be dir(not file or symlink), exists. Later same things are done with excluded folders `-e`.  
+Next, this included and excluded folders are optimized due to tree structure of file system:
+- Folders which contains another folders are combined(separately for included and excluded) - `/home/pulpet` and `/home/pulpet/a` are combined to `/home/pulpet`
+- Inlcuded folders which are located inside excluded ones are delete - Included folder `/etc/tomcat/` is deleted because excluded folder is `/etc/`
+- Non existed directories are removed
+- Excluded path which are outside include path are deleted - Exclude path `/etc/` is removed if included path is `/home/`
+If after optimization there is no include folders, then program ends with non zero value(TODO, this should be handled by returning value).
+Next with provided by user minimal size of checked size `-s`, program checks requsively(TODO should be an option to turn off a recursion)  included folders and checks files by sizes and put it files with same sizes to different boxes. 
+Next boxes which contains only one element are removed because files inside are not duplicated.
+Next by default also is checked hash to get 
 
 ## License
 Czkawka is released under the terms of the GNU Lesser General Public License, version 2.1 or, at your option, any later version, as published by the Free Software Foundation. 

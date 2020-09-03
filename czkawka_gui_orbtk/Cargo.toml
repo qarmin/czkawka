@@ -1,0 +1,9 @@
+[package]
+name = "czkawka_gui_orbtk"
+version = "0.1.0"
+authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+czkawka_core = { path = "../czkawka_core" }
+orbtk = "=0.3.1-alpha3"
