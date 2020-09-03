@@ -26,6 +26,7 @@ It is in very early development, so most of the functions aren't added and doesn
 - Finding files with debug symbols
 - Support for showing only duplicates with specific extension, name(Regex support needed)
 - Maybe windows support, but this will need some refactoring in code
+- Translation support
 
 ## Usage
 For now only Linux(and probably also macOS) is supported
