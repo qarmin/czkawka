@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.36.0 
+
+The MIT License (MIT)
+
+Copyright (c) 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Rafał Mikrut
+
+-->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.22"/>
+  <!-- interface-license-type mit -->
+  <!-- interface-name Czkawka -->
+  <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders etc. -->
+  <!-- interface-authors Rafa\305\202 Mikrut -->
   <object class="GtkDialog" id="delete_confirmation_dialog">
     <property name="can_focus">False</property>
     <property name="icon_name">applications-engineering</property>
@@ -65,17 +95,24 @@
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="ask_in_future">
-            <property name="label" translatable="yes">Ask for this in future?</property>
+          <object class="GtkAlignment">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="active">True</property>
-            <property name="draw_indicator">True</property>
+            <property name="can_focus">False</property>
+            <property name="xscale">0</property>
+            <child>
+              <object class="GtkCheckButton" id="ask_in_future">
+                <property name="label" translatable="yes">Ask for this in future?</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -85,13 +122,11 @@
       <placeholder/>
     </child>
   </object>
-  <object class="GtkFileFilter" id="folderfilter"/>
   <object class="GtkFileChooserDialog" id="folder_chooser">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
     <property name="action">select-folder</property>
     <property name="create_folders">False</property>
-    <property name="filter">folderfilter</property>
     <property name="select_multiple">True</property>
     <property name="show_hidden">True</property>
     <child internal-child="vbox">
@@ -144,18 +179,58 @@
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkHeaderBar">
+          <object class="GtkNotebook">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="title" translatable="yes">Czkawka</property>
+            <property name="can_focus">True</property>
+            <property name="tab_pos">left</property>
             <child>
               <placeholder/>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Duplicate Finder</property>
+              </object>
+              <packing>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Empty Folders</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">page 3</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -201,10 +276,62 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkBox" id="buttons">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkBox" id="action_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="control_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTextView" id="errors">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="editable">False</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
         </child>
       </object>
     </child>

@@ -1,7 +1,7 @@
 # Czkawka
 Czkawka is simple and easy to use alternative to Fslint written in Rust.  
 It is in very early development, so most of the functions aren't added and doesn't work.  
-
+This is my first ever project in Rust so probably a lot of things are written in the most optimal way.
 
 ## Done
 - Rich instruction with examples - CLI(`cargo run --bin czkawka_cli`)
@@ -62,4 +62,4 @@ Next boxes which contains only one element are removed because files inside are 
 Next by default also is checked hash to get 
 
 ## License
-Czkawka is released under the terms of the GNU Lesser General Public License, version 2.1 or, at your option, any later version, as published by the Free Software Foundation. 
+Code is distributed under MIT license.
