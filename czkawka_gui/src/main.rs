@@ -14,12 +14,9 @@ fn main() {
     let builder = gtk::Builder::from_string(glade_src);
 
     // Show first window
-    let window : gtk::Window = builder.get_object("main_window").unwrap();
+    let window: gtk::Window = builder.get_object("main_window").unwrap();
     window.show_all();
 
-
-
-// We start the gtk main loop.
+    // We start the gtk main loop.
     gtk::main();
-
 }
