@@ -39,9 +39,13 @@ apt install -y libgtk-3-dev
 git clone https://github.com/qarmin/czkawka.git
 cd czkawka
 ```
-- Run GUI(Still WIP)
+- Run GTK GUI(Still WIP)
 ```
 cargo run --bin czkawka_gui
+```
+- Run alternative Orbtk GUI(Still WIP)
+```
+cargo run --bin czkawka_gui_orbtk
 ```
 - Run CLI
 ```
@@ -51,15 +55,19 @@ cargo run --bin czkawka_cli
 ## How it works?
 ### Duplicate Finder
 The only required parameter for checking duplicates is included folders `-i`. This parameter validates provided folders - which must have absolute path(without ~ and other similar symbols at the beginning),  not contains *(wildcard), be dir(not file or symlink), exists. Later same things are done with excluded folders `-e`.  
+
 Next, this included and excluded folders are optimized due to tree structure of file system:
 - Folders which contains another folders are combined(separately for included and excluded) - `/home/pulpet` and `/home/pulpet/a` are combined to `/home/pulpet`
 - Inlcuded folders which are located inside excluded ones are delete - Included folder `/etc/tomcat/` is deleted because excluded folder is `/etc/`
 - Non existed directories are removed
 - Excluded path which are outside include path are deleted - Exclude path `/etc/` is removed if included path is `/home/`
 If after optimization there is no include folders, then program ends with non zero value(TODO, this should be handled by returning value).
-Next with provided by user minimal size of checked size `-s`, program checks requsively(TODO should be an option to turn off a recursion)  included folders and checks files by sizes and put it files with same sizes to different boxes. 
+
+Next with provided by user minimal size of checked size `-s`, program checks recursively(TODO should be an option to turn off a recursion)  included folders and checks files by sizes and put it files with same sizes to different boxes. 
 Next boxes which contains only one element are removed because files inside are not duplicated.
-Next by default also is checked hash to get 
+
+Next by default also is checked hash to be sure that files with equal size are identical.
+
 
 ## License
 Code is distributed under MIT license.
