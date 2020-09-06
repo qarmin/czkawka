@@ -3,7 +3,7 @@ use czkawka_core::{duplicate, empty_folder};
 
 extern crate gtk;
 use gtk::prelude::*;
-use gtk::{ButtonsType, DialogFlags, MessageDialog, MessageType, Window};
+// use gtk::{ButtonsType, DialogFlags, MessageDialog, MessageType, Window};
 
 fn main() {
     gtk::init().expect("Failed to initialize GTK.");

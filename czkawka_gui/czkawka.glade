@@ -32,6 +32,11 @@ Author: Rafał Mikrut
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkDialog" id="delete_confirmation_dialog">
     <property name="can_focus">False</property>
     <property name="icon_name">applications-engineering</property>
@@ -191,7 +196,12 @@ Author: Rafał Mikrut
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <placeholder/>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">button</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
             </child>
             <child type="tab">
               <object class="GtkLabel">
@@ -204,7 +214,15 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">button</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child type="tab">
               <object class="GtkLabel">
@@ -218,7 +236,15 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">button</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
             </child>
             <child type="tab">
               <object class="GtkLabel">
@@ -256,7 +282,7 @@ Author: Rafał Mikrut
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Minimal file size</property>
+                        <property name="label" translatable="yes">Minimal file size(in bytes)</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -317,7 +343,15 @@ Author: Rafał Mikrut
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <placeholder/>
+                  <object class="GtkTreeView">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection">
+                        <property name="mode">none</property>
+                      </object>
+                    </child>
+                  </object>
                 </child>
               </object>
               <packing>
