@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
 edition = "2018"
 

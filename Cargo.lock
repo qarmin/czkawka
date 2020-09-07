@@ -228,12 +228,12 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09ee0cc8804d5393478d743b035099520087a5186f3b93fa58cec08fa62407b6"
+checksum = "b153fe7cbef478c567df0f972e02e6d736db11affe43dfc9c56a9374d1adfb87"
 dependencies = [
- "cfg-if",
  "crossbeam-utils",
+ "maybe-uninit",
 ]
 
 [[package]]
@@ -285,14 +285,14 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "czkawka_core",
 ]
 
 [[package]]
 name = "czkawka_core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "blake3",
  "humansize",
@@ -300,7 +300,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "czkawka_core",
  "gdk",
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui_orbtk"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "czkawka_core",
  "orbtk",
