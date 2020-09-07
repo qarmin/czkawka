@@ -1029,8 +1029,7 @@ dependencies = [
 [[package]]
 name = "orbtk"
 version = "0.3.1-alpha3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bba6b4c0ed9508eb25bd3a2eb602be9457fcb4e10c69b4e7bbae6cde09013369"
+source = "git+https://github.com/redox-os/orbtk#00f44b943333e9683cc1cf9441643b353dd7756d"
 dependencies = [
  "dces",
  "orbtk-api",
