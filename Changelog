@@ -1,0 +1,7 @@
+## Version 0.10
+- Initial Version
+- Duplicate file finder
+- Empty folder finder
+- Very WIP Orbtk GUI frontend
+- Basic GTK Frontend(without any logic)
+- CLI

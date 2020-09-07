@@ -122,8 +122,14 @@ impl EmptyFolder {
             };
 
             for entry in read_dir {
-                let entry_data = entry.unwrap();
-                let metadata: Metadata = entry_data.metadata().unwrap();
+                let entry_data = match entry{
+                    Ok(t) => t,
+                    Err(_) => continue, //Permissions denied
+            };
+                let metadata: Metadata = match entry_data.metadata(){
+                    Ok(t) => t,
+                    Err(_) => continue, //Permissions denied
+                };
                 // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
                     let mut is_excluded_dir = false;

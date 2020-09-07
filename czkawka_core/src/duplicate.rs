@@ -279,7 +279,10 @@ impl DuplicateFinder {
                 _ => continue,
             };
             for entry in read_dir {
-                let entry_data = entry.unwrap();
+                let entry_data = match entry{
+                    Ok(t) => t,
+                    Err(_) => continue, //Permissions denied
+                };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => continue, //Permissions denied
