@@ -80,7 +80,6 @@ I checked my home directory without any folder exceptions(I removed all director
 
 First run reads file entry and save it to cache so this step is mostly limited by disk performance, and with second run cache helps it so searching is a lot of faster.
 
-
 | App| Executing Time |
 |:----------:|:-------------:|
 | Fslint (First Run)| 140s |
@@ -90,6 +89,7 @@ First run reads file entry and save it to cache so this step is mostly limited b
 | Czkawka CLI Release(First Run) | 128s |
 | Czkawka CLI Release(Second Run) | 8s |
 
+Differences should be more visible when using slower processor or faster disk.
 
 ## License
 Code is distributed under MIT license.
