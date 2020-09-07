@@ -280,8 +280,15 @@ impl DuplicateFinder {
             };
             for entry in read_dir {
                 let entry_data = entry.unwrap();
-                let metadata: Metadata = entry_data.metadata().unwrap();
+                let metadata: Metadata = match entry_data.metadata() {
+                    Ok(t) => t,
+                    Err(_) => continue, //Permissions denied
+                };
                 if metadata.is_dir() {
+                    if entry_data.file_name().into_string().is_err() {
+                        continue; // Permissions denied
+                    }
+
                     let mut is_excluded_dir = false;
                     next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
                     for ed in &self.excluded_directories {
@@ -319,8 +326,14 @@ impl DuplicateFinder {
                         let fe: FileEntry = FileEntry {
                             path: current_file_name,
                             size: metadata.len(),
-                            created_date: metadata.created().unwrap(),
-                            modified_date: metadata.modified().unwrap(),
+                            created_date: match metadata.created() {
+                                Ok(t) => t,
+                                Err(_) => SystemTime::now(),
+                            },
+                            modified_date: match metadata.modified() {
+                                Ok(t) => t,
+                                Err(_) => SystemTime::now(),
+                            },
                         };
                         // // self.files_with_identical_size.entry from below should be faster according to clippy
                         // if !self.files_with_identical_size.contains_key(&metadata.len()) {
@@ -385,18 +398,28 @@ impl DuplicateFinder {
                     }
                 };
 
+                let mut error_reading_file: bool = false;
+
                 let mut hasher: blake3::Hasher = blake3::Hasher::new();
                 let mut buffer = [0u8; 16384];
                 loop {
-                    let n = file_handler.read(&mut buffer).unwrap();
+                    let n = match file_handler.read(&mut buffer) {
+                        Ok(t) => t,
+                        Err(_) => {
+                            error_reading_file = true;
+                            break;
+                        }
+                    }; //.unwrap();
                     if n == 0 {
                         break;
                     }
                     hasher.update(&buffer[..n]);
                 }
-                let hash_string: String = hasher.finalize().to_hex().to_string();
-                hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                hashmap_with_hash.get_mut(&*hash_string).unwrap().push(file_entry.1.to_owned());
+                if !error_reading_file {
+                    let hash_string: String = hasher.finalize().to_hex().to_string();
+                    hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
+                    hashmap_with_hash.get_mut(&*hash_string).unwrap().push(file_entry.1.to_owned());
+                }
             }
             for hash_entry in hashmap_with_hash {
                 if hash_entry.1.len() > 1 {
@@ -648,6 +671,12 @@ impl DuplicateFinder {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
+impl Default for DuplicateFinder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut Vec<String>) {
     assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
     let mut q_index: usize = 0;

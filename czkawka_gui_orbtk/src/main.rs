@@ -58,7 +58,7 @@ fn main() {
                                 )
                                 .child(
                                     TextBlock::new()
-                                        .text("Info:")
+                                        .text("Info:\n\n rr")
                                         .v_align("center")
                                         .h_align("start")
                                         .attach(Grid::column(0))

@@ -463,3 +463,8 @@ impl EmptyFolder {
         //Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
 }
+impl Default for EmptyFolder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
