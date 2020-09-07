@@ -25,6 +25,8 @@ fn main() {
     gtk::main();
 }
 fn prepare_buttons_at_start(builder : Builder){
+    // let buttons_search : gtk::Button = builder.get_object("buttons_search").unwrap();
+    // buttons_search.connect_clicked(|| duplicate::);
     let buttons_stop : gtk::Button = builder.get_object("buttons_stop").unwrap();
     buttons_stop.hide();
     let buttons_resume : gtk::Button = builder.get_object("buttons_resume").unwrap();
