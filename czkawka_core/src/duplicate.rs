@@ -75,6 +75,8 @@ impl DuplicateFinder {
         if *check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
+        println!("FF");
+        self.debug_print();
         self.calculate_lost_space(check_method);
         self.print_duplicated_entries(check_method);
         self.delete_files(check_method, delete_method);
@@ -99,6 +101,10 @@ impl DuplicateFinder {
 
         let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
         for mut extension in extensions {
+            if extension == ""{
+                continue;
+            }
+
             if extension.contains('.') {
                 if !extension.starts_with('.') {
                     println!("{} is not valid extension(valid extension doesn't have dot inside)", extension);
@@ -447,27 +453,27 @@ impl DuplicateFinder {
     /// Setting include directories, panics when there is not directories available
 
     fn debug_print(&self) {
-        // println!("---------------DEBUG PRINT---------------");
-        // println!("Number of all checked files - {}", self.number_of_checked_files);
-        // println!("Number of all ignored files - {}", self.number_of_ignored_files);
-        // println!("Number of all checked folders - {}", self.number_of_checked_folders);
-        // println!("Number of all ignored things - {}", self.number_of_ignored_things);
-        // println!("Number of duplicated files - {}", self.number_of_duplicated_files);
-        // let mut file_size: u64 = 0;
-        // for i in &self.files_with_identical_size {
-        //     file_size += i.1.len() as u64;
-        // }
-        // println!("Files list size - {} ({})", self.files_with_identical_size.len(), file_size);
-        // let mut hashed_file_size: u64 = 0;
-        // for i in &self.files_with_identical_hashes {
-        //     for j in i.1 {
-        //         hashed_file_size += j.len() as u64;
-        //     }
-        // }
-        // println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
-        // println!("Excluded directories - {:?}", self.excluded_directories);
-        // println!("Included directories - {:?}", self.included_directories);
-        // println!("-----------------------------------------");
+        println!("---------------DEBUG PRINT---------------");
+        println!("Number of all checked files - {}", self.number_of_checked_files);
+        println!("Number of all ignored files - {}", self.number_of_ignored_files);
+        println!("Number of all checked folders - {}", self.number_of_checked_folders);
+        println!("Number of all ignored things - {}", self.number_of_ignored_things);
+        println!("Number of duplicated files - {}", self.number_of_duplicated_files);
+        let mut file_size: u64 = 0;
+        for i in &self.files_with_identical_size {
+            file_size += i.1.len() as u64;
+        }
+        println!("Files list size - {} ({})", self.files_with_identical_size.len(), file_size);
+        let mut hashed_file_size: u64 = 0;
+        for i in &self.files_with_identical_hashes {
+            for j in i.1 {
+                hashed_file_size += j.len() as u64;
+            }
+        }
+        println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
+        println!("Excluded directories - {:?}", self.excluded_directories);
+        println!("Included directories - {:?}", self.included_directories);
+        println!("-----------------------------------------");
     }
 
     fn print_duplicated_entries(&self, check_method: &CheckingMethod) {

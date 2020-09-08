@@ -4,6 +4,8 @@ use czkawka_core::{duplicate, empty_folder};
 extern crate gtk;
 use gtk::prelude::*;
 use gtk::{Builder, TreeView, TreeViewColumn};
+use duplicate::DuplicateFinder;
+use czkawka_core::duplicate::{CheckingMethod, DeleteMethod};
 // use gtk::{ButtonsType, DialogFlags, MessageDialog, MessageType, Window};
 
 fn main() {
@@ -25,8 +27,8 @@ fn main() {
     gtk::main();
 }
 fn prepare_buttons_at_start(builder : Builder){
-    // let buttons_search : gtk::Button = builder.get_object("buttons_search").unwrap();
-    // buttons_search.connect_clicked(|| duplicate::);
+    let buttons_search : gtk::Button = builder.get_object("buttons_search").unwrap();
+    buttons_search.connect_clicked(search_for_duplicates);
     let buttons_stop : gtk::Button = builder.get_object("buttons_stop").unwrap();
     buttons_stop.hide();
     let buttons_resume : gtk::Button = builder.get_object("buttons_resume").unwrap();
@@ -42,9 +44,9 @@ fn prepare_buttons_at_start(builder : Builder){
     let buttons_save : gtk::Button = builder.get_object("buttons_save").unwrap();
     buttons_save.hide();
 
-    search_for_duplicates(builder);
+    search_for_duplicates_layout(builder);
 }
-fn search_for_duplicates(builder:Builder){
+fn search_for_duplicates_layout(builder:Builder){
 
     let scrolled_window_duplicate_finder : gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
 
@@ -55,9 +57,14 @@ fn search_for_duplicates(builder:Builder){
     name_column.set_min_width(50);
 
     let path_column : gtk::TreeViewColumn = TreeViewColumn::new();
-    path_column.set_title("File Name");
+    path_column.set_title("Path");
     path_column.set_resizable(true);
     path_column.set_min_width(50);
+
+    let modification_date_column : gtk::TreeViewColumn = TreeViewColumn::new();
+    modification_date_column.set_title("Modification Date");
+    modification_date_column.set_resizable(true);
+    modification_date_column.set_min_width(50);
 
     let col_types: [glib::types::Type; 2] = [
         glib::types::Type::String,
@@ -69,7 +76,19 @@ fn search_for_duplicates(builder:Builder){
 
     tree_view_duplicate_finder.append_column(&name_column);
     tree_view_duplicate_finder.append_column(&path_column);
+    tree_view_duplicate_finder.append_column(&modification_date_column);
 
     scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
     scrolled_window_duplicate_finder.show_all();
+}
+fn search_for_duplicates(button : &gtk::Button){// : gtk::Button){
+    println!("Szukam");
+    button.hide();
+    let mut df  = DuplicateFinder::new();
+    df.set_include_directory("/home/rafal/Pulpit".to_owned());
+    df.set_exclude_directory("/rafa/".to_owned());
+    df.set_allowed_extensions("".to_owned());
+    df.set_min_file_size(1000);
+    df.find_duplicates(&CheckingMethod::HASH, &DeleteMethod::None);
+    button.show();
 }
