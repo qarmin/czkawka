@@ -31,15 +31,12 @@ fn main() {
 
     // Notebooks
     let notebook_chooser_tool: gtk::Notebook = builder.get_object("notebook_chooser_tool").unwrap();
-    // let children_of_notebook_chooser_tool = notebook_chooser_tool.get_children();
     let mut notebook_chooser_tool_children_names: Vec<String> = Vec::new();
 
     for i in notebook_chooser_tool.get_children() {
         notebook_chooser_tool_children_names.push(i.get_buildable_name().unwrap().to_string());
     }
 
-    println!("{}", notebook_chooser_tool.get_current_page().unwrap());
-    println!("{:?}", notebook_chooser_tool_children_names);
     // Entry
     let info_entry: gtk::Entry = builder.get_object("info_entry").unwrap(); // To show default
 
