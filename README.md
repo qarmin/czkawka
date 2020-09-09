@@ -27,6 +27,7 @@ This is my first ever project in Rust so probably a lot of things are written in
 - Support for showing only duplicates with specific extension, name(Regex support needed)
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
+- Add support for fast searching based on checking only first ~1MB of file.
 
 ## Usage and requirements
 Rustc 1.46 works fine(not sure about a minimal version)  
@@ -83,16 +84,23 @@ I checked my home directory without any folder exceptions(I removed all director
 
 First run reads file entry and save it to cache so this step is mostly limited by disk performance, and with second run cache helps it so searching is a lot of faster.
 
-Duplicate Checker
+Duplicate Checker(Version 0.1)
 
 | App| Executing Time |
 |:----------:|:-------------:|
 | Fslint (First Run)| 140s |
 | Fslint (Second Run)| 23s |
-| Czkawka CLI Debug(First Run) | 136s |
-| Czkawka CLI Debug(Second Run) | 14s |
 | Czkawka CLI Release(First Run) | 128s |
 | Czkawka CLI Release(Second Run) | 8s |
+
+| App| Idle Ram | Max Operational Ram Usage |
+|:----------:|:-------------:|:-------------:|
+| Fslint |  |  |
+| Czkawka CLI Debug |  |
+| Czkawka CLI Release |  |
+| Czkawka GUI Debug |  |
+| Czkawka GUI Release |  |
+
 
 Empty folder finder
 

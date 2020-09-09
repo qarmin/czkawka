@@ -101,7 +101,7 @@ impl DuplicateFinder {
 
         let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
         for mut extension in extensions {
-            if extension == ""{
+            if extension == "" {
                 continue;
             }
 
@@ -285,7 +285,7 @@ impl DuplicateFinder {
                 _ => continue,
             };
             for entry in read_dir {
-                let entry_data = match entry{
+                let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => continue, //Permissions denied
                 };

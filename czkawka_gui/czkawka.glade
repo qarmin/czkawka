@@ -245,13 +245,13 @@ Author: Rafał Mikrut
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook">
+          <object class="GtkNotebook" id="notebook_chooser_tool">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="tab_pos">left</property>
             <property name="scrollable">True</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="notebook_duplicate_finder_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -301,7 +301,7 @@ Author: Rafał Mikrut
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
@@ -309,7 +309,7 @@ Author: Rafał Mikrut
               </object>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="notebook_duplicate_finder_label">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Duplicates files</property>
@@ -319,7 +319,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkScrolledWindow" id="notebook_empty_folders_label">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -738,34 +738,10 @@ Author: Rafał Mikrut
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkEntry" id="info_entry">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkListBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkTreeView">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
+            <property name="can_focus">True</property>
+            <property name="editable">False</property>
           </object>
           <packing>
             <property name="expand">False</property>

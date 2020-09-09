@@ -122,11 +122,11 @@ impl EmptyFolder {
             };
 
             for entry in read_dir {
-                let entry_data = match entry{
+                let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => continue, //Permissions denied
-            };
-                let metadata: Metadata = match entry_data.metadata(){
+                };
+                let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => continue, //Permissions denied
                 };
