@@ -33,29 +33,47 @@ struct FileEntry {
 }
 
 pub struct DuplicateFinder {
-    number_of_checked_files: usize,
-    number_of_ignored_files: usize,
-    number_of_checked_folders: usize,
-    number_of_ignored_things: usize,
-    number_of_duplicated_files: usize,
+    infos: Info,
     files_with_identical_size: HashMap<u64, Vec<FileEntry>>,
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
     allowed_extensions: Vec<String>, // jpg, jpeg, mp4
-    lost_space: u64,
     // excluded_items: Vec<String>, // TODO, support for e.g. */.git/*
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
     min_file_size: u64,
 }
 
-impl DuplicateFinder {
-    pub fn new() -> DuplicateFinder {
-        DuplicateFinder {
+pub struct Info {
+    number_of_checked_files: usize,
+    number_of_ignored_files: usize,
+    number_of_checked_folders: usize,
+    number_of_ignored_things: usize,
+    number_of_duplicated_files: usize,
+    lost_space: u64,
+}
+impl Info {
+    pub fn new() -> Info {
+        Info {
             number_of_checked_files: 0,
             number_of_ignored_files: 0,
             number_of_checked_folders: 0,
             number_of_ignored_things: 0,
             number_of_duplicated_files: 0,
+            lost_space: 0,
+        }
+    }
+}
+
+impl Default for Info {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DuplicateFinder {
+    pub fn new() -> DuplicateFinder {
+        DuplicateFinder {
+            infos: Info::new(),
             files_with_identical_size: Default::default(),
             files_with_identical_hashes: Default::default(),
             // excluded_items: vec![],
@@ -63,22 +81,18 @@ impl DuplicateFinder {
             included_directories: vec![],
             min_file_size: 1024,
             allowed_extensions: vec![],
-            lost_space: 0,
         }
     }
 
     pub fn find_duplicates(mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
         self.optimize_directories();
-        self.debug_print();
         self.check_files_size();
         self.remove_files_with_unique_size();
         if *check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
-        println!("FF");
         self.debug_print();
         self.calculate_lost_space(check_method);
-        self.print_duplicated_entries(check_method);
         self.delete_files(check_method, delete_method);
     }
 
@@ -249,7 +263,7 @@ impl DuplicateFinder {
                 }
             }
         }
-        self.lost_space = bytes;
+        self.infos.lost_space = bytes;
     }
 
     // TODO - Still isn't used but it will be probably required with GUI
@@ -309,7 +323,7 @@ impl DuplicateFinder {
                     if !is_excluded_dir {
                         folders_to_check.push(next_folder);
                     }
-                    self.number_of_checked_folders += 1;
+                    self.infos.number_of_checked_folders += 1;
 
                 //println!("Directory\t - {:?}", next_folder); // DEBUG
                 } else if metadata.is_file() {
@@ -352,18 +366,17 @@ impl DuplicateFinder {
 
                         self.files_with_identical_size.get_mut(&metadata.len()).unwrap().push(fe);
 
-                        self.number_of_checked_files += 1;
+                        self.infos.number_of_checked_files += 1;
                     } else {
-                        self.number_of_ignored_files += 1;
+                        self.infos.number_of_ignored_files += 1;
                     }
                 } else {
                     // Probably this is symbolic links so we are free to ignore this
                     // println!("Found another type of file {} {:?}","".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap(), metadata) //DEBUG
-                    self.number_of_ignored_things += 1;
+                    self.infos.number_of_ignored_things += 1;
                 }
             }
         }
-        self.debug_print();
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
         //println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
     }
@@ -372,21 +385,19 @@ impl DuplicateFinder {
     /// Remove files which have unique size
     fn remove_files_with_unique_size(&mut self) {
         let start_time: SystemTime = SystemTime::now();
-        self.debug_print();
         let mut new_hashmap: HashMap<u64, Vec<FileEntry>> = Default::default();
 
-        self.number_of_duplicated_files = 0;
+        self.infos.number_of_duplicated_files = 0;
 
         for entry in &self.files_with_identical_size {
             if entry.1.len() > 1 {
-                self.number_of_duplicated_files += entry.1.len() - 1;
+                self.infos.number_of_duplicated_files += entry.1.len() - 1;
                 new_hashmap.insert(*entry.0, entry.1.clone());
             }
         }
 
         self.files_with_identical_size = new_hashmap;
 
-        self.debug_print();
         Common::print_time(start_time, SystemTime::now(), "remove_files_with_unique_size".to_string());
     }
 
@@ -434,31 +445,24 @@ impl DuplicateFinder {
                 if hash_entry.1.len() > 1 {
                     self.files_with_identical_hashes.entry(*entry.0).or_insert_with(Vec::new);
                     self.files_with_identical_hashes.get_mut(entry.0).unwrap().push(hash_entry.1);
-                    // self.files_with_identical_hashes.insert(*entry.0,hash_entry.1);
                 }
             }
         }
-        self.debug_print();
         Common::print_time(start_time, SystemTime::now(), "check_files_hash".to_string());
     }
-    // /// I'm not sure about performance, so maybe I
-    // pub fn find_small_duplicates_by_hashing(mut self){
-    //     let start_time: SystemTime = SystemTime::now();
-    //     let size_limit_for_small_files u64 =  // 16 MB
-    //     let mut new_hashmap
-    //
-    //     Common::print_time(start_time, SystemTime::now(), "find_duplicates_by_comparing_begin_bytes_of_file".to_string());
-    // }
 
+    #[allow(dead_code)]
     /// Setting include directories, panics when there is not directories available
-
     fn debug_print(&self) {
+        if true {
+            return;
+        }
         println!("---------------DEBUG PRINT---------------");
-        println!("Number of all checked files - {}", self.number_of_checked_files);
-        println!("Number of all ignored files - {}", self.number_of_ignored_files);
-        println!("Number of all checked folders - {}", self.number_of_checked_folders);
-        println!("Number of all ignored things - {}", self.number_of_ignored_things);
-        println!("Number of duplicated files - {}", self.number_of_duplicated_files);
+        println!("Number of all checked files - {}", self.infos.number_of_checked_files);
+        println!("Number of all ignored files - {}", self.infos.number_of_ignored_files);
+        println!("Number of all checked folders - {}", self.infos.number_of_checked_folders);
+        println!("Number of all ignored things - {}", self.infos.number_of_ignored_things);
+        println!("Number of duplicated files - {}", self.infos.number_of_duplicated_files);
         let mut file_size: u64 = 0;
         for i in &self.files_with_identical_size {
             file_size += i.1.len() as u64;
@@ -476,6 +480,8 @@ impl DuplicateFinder {
         println!("-----------------------------------------");
     }
 
+    #[allow(dead_code)]
+    /// Print information about duplicated entries
     fn print_duplicated_entries(&self, check_method: &CheckingMethod) {
         let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
@@ -483,8 +489,8 @@ impl DuplicateFinder {
 
         match check_method {
             CheckingMethod::HASH => {
-                for i in &self.files_with_identical_hashes {
-                    for j in i.1 {
+                for (_size, vector) in self.files_with_identical_hashes.iter() {
+                    for j in vector {
                         number_of_files += j.len() as u64;
                         number_of_groups += 1;
                     }
@@ -493,11 +499,11 @@ impl DuplicateFinder {
                     "Found {} duplicated files in {} groups with same content which took {}:",
                     number_of_files,
                     number_of_groups,
-                    self.lost_space.file_size(options::BINARY).unwrap()
+                    self.infos.lost_space.file_size(options::BINARY).unwrap()
                 );
-                for i in &self.files_with_identical_hashes {
-                    println!("Size - {}", i.0.file_size(options::BINARY).unwrap());
-                    for j in i.1 {
+                for (key, vector) in self.files_with_identical_hashes.iter().rev() {
+                    println!("Size - {}", key.file_size(options::BINARY).unwrap());
+                    for j in vector {
                         for k in j {
                             println!("{}", k.path);
                         }
@@ -515,7 +521,7 @@ impl DuplicateFinder {
                     "Found {} files in {} groups with same size(may have different content) which took {}:",
                     number_of_files,
                     number_of_groups,
-                    self.lost_space.file_size(options::BINARY).unwrap()
+                    self.infos.lost_space.file_size(options::BINARY).unwrap()
                 );
                 for i in &self.files_with_identical_size {
                     println!("Size - {}", i.0);

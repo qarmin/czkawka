@@ -356,7 +356,7 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
 
-    /// Set include dir which needst to be relative, exists,
+    /// Set include dir which needs to be relative, exists,
     pub fn set_include_directory(&mut self, mut include_directory: String) {
         // let start_time: SystemTime = SystemTime::now();
 
