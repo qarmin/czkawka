@@ -67,7 +67,7 @@ fn main() {
                                 )
                                 .build(ctx),
                         )
-                        .close_button(true) // change this to false when will be fixed GH#320
+                        .close_button(false)
                         .tab("Empty Folders", TextBlock::new().text("Empty Folders").build(ctx))
                         .build(ctx),
                 )
