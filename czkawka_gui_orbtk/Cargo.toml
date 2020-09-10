@@ -6,5 +6,5 @@ edition = "2018"
 
 [dependencies]
 czkawka_core = { path = "../czkawka_core" }
-orbtk = {git = "https://github.com/redox-os/orbtk", branch="develop"}
-#orbtk = "=0.3.1-alpha3"
+#orbtk = {git = "https://github.com/redox-os/orbtk", branch="develop"}
+orbtk = "=0.3.1-alpha3"
