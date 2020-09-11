@@ -5,11 +5,13 @@ This is my first ever project in Rust so probably a lot of things are written in
 
 ## Done
 - Rich instruction with examples - CLI(`cargo run --bin czkawka_cli`)
-- Duplicated file finding - CLI
+- GTK Frontend(Still WIP) - (`cargo run --bin czkawka_gui`)
+- Orbtk Frontend(Still very early WIP) - (`cargo run --bin czkawka_gui_orbtk`)
+- Duplicated file finding
   - Including and excluding directories(absolute paths)
   - Option to remove all except newest, oldest and one oldest or newest
   - Fast(by size) or accurate(by hash) file checking
-- Empty folders finding - CLI
+- Empty folders finding
   - Advanced empty files finding(finds and remove folders which contains only empty folders)
   - Option to remove all files
 
@@ -21,8 +23,6 @@ This is my first ever project in Rust so probably a lot of things are written in
 - Duplicated file finding - CLI
   - saving results to file
   - support for * when excluding files and folders
-- GUI with GTK
-- Alternative GUI with Orbtk
 - Finding files with debug symbols
 - Support for showing only duplicates with specific extension, name(Regex support needed)
 - Maybe windows support, but this will need some refactoring in code

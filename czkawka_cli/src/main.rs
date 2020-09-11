@@ -6,7 +6,7 @@ fn main() {
     let mut all_arguments: Vec<String> = env::args().collect();
     let mut commands_arguments: Vec<String> = Vec::new();
 
-    println!("{:?}", all_arguments);
+    // println!("{:?}", all_arguments);
 
     all_arguments.remove(0); // Removing program name from arguments
 
@@ -23,10 +23,7 @@ fn main() {
         if argument.starts_with("--") {
             commands_arguments.push(argument);
         } else if argument.starts_with('-') {
-            let a: ArgumentsPair = ArgumentsPair {
-                command: argument,
-                argument: Option::None,
-            };
+            let a: ArgumentsPair = ArgumentsPair { command: argument, argument: Option::None };
             arguments.push(a);
         } else {
             if arguments.is_empty() {
@@ -42,16 +39,16 @@ fn main() {
         }
     }
 
-    for a in &arguments {
-        println!(
-            "Argument number {} - {}",
-            a.command,
-            match &a.argument {
-                Some(t) => t.clone(),
-                None => "MISSING_ARGUMENT".to_string(),
-            }
-        );
-    }
+    // for a in &arguments {
+    //     println!(
+    //         "Argument number {} - {}",
+    //         a.command,
+    //         match &a.argument {
+    //             Some(t) => t.clone(),
+    //             None => "MISSING_ARGUMENT".to_string(),
+    //         }
+    //     );
+    // }
 
     if commands_arguments.is_empty() {
         println! {"FATAL ERROR: Missing type of app which you want to run, please read help for more info."};
@@ -63,7 +60,9 @@ fn main() {
             let mut check_method: duplicate::CheckingMethod = duplicate::CheckingMethod::HASH;
 
             if ArgumentsPair::has_command(&arguments, "-i") {
-                df.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+                if !df.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false)) {
+                    process::exit(1);
+                }
             } else {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
@@ -74,12 +73,16 @@ fn main() {
 
             if ArgumentsPair::has_command(&arguments, "-s") {
                 let min_size = match ArgumentsPair::get_argument(&arguments, "-s", false).parse::<u64>() {
-                    Ok(t) => t,
+                    Ok(t) => {
+                        if t == 0 {
+                            println!("ERROR: Minimum file size must be at least 1 byte.");
+                            1
+                        } else {
+                            t
+                        }
+                    }
                     Err(_) => {
-                        println!(
-                            "FATAL ERROR: \"{}\" is not valid file size(allowed range <0,u64::max>)",
-                            ArgumentsPair::get_argument(&arguments, "-s", false)
-                        );
+                        println!("FATAL ERROR: \"{}\" is not valid file size(allowed range <1,u64::max>)", ArgumentsPair::get_argument(&arguments, "-s", false));
                         process::exit(1);
                     }
                 };
@@ -128,6 +131,38 @@ fn main() {
             }
 
             df.find_duplicates(&check_method, &delete_method);
+
+            let info = df.get_infos();
+
+            if !info.messages.is_empty() {
+                println!("-------------------------------MESSAGES--------------------------------");
+            }
+            for i in &info.messages {
+                println!("{}", i);
+            }
+            if !info.messages.is_empty() {
+                println!("---------------------------END OF MESSAGES-----------------------------");
+            }
+
+            if !info.warnings.is_empty() {
+                println!("-------------------------------WARNINGS--------------------------------");
+            }
+            for i in &info.warnings {
+                println!("{}", i);
+            }
+            if !info.warnings.is_empty() {
+                println!("---------------------------END OF WARNINGS-----------------------------");
+            }
+
+            if !info.errors.is_empty() {
+                println!("--------------------------------ERRORS---------------------------------");
+            }
+            for i in &info.errors {
+                println!("{}", i);
+            }
+            if !info.errors.is_empty() {
+                println!("----------------------------END OF ERRORS------------------------------");
+            }
         }
         "--h" | "--help" => {
             print_help();
@@ -218,6 +253,6 @@ impl ArgumentsPair {
                 };
             }
         }
-        panic!("FATAL ERROR: Get argument should always return value");
+        panic!("INTERNAL ERROR: Get argument should always return value");
     }
 }

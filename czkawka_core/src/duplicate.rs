@@ -1,11 +1,11 @@
 // TODO when using GUI all or most println!() should be used as variables passed by argument
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
+use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
-use std::{fs, process};
 
 use crate::common::Common;
 
@@ -32,6 +32,7 @@ struct FileEntry {
     pub modified_date: SystemTime,
 }
 
+/// Struct with required information's to work
 pub struct DuplicateFinder {
     infos: Info,
     files_with_identical_size: HashMap<u64, Vec<FileEntry>>,
@@ -43,23 +44,36 @@ pub struct DuplicateFinder {
     min_file_size: u64,
 }
 
+/// Info struck with helpful information's about results
 pub struct Info {
-    number_of_checked_files: usize,
-    number_of_ignored_files: usize,
-    number_of_checked_folders: usize,
-    number_of_ignored_things: usize,
-    number_of_duplicated_files: usize,
-    lost_space: u64,
+    pub errors: Vec<String>,
+    pub warnings: Vec<String>,
+    pub messages: Vec<String>,
+    pub number_of_checked_files: usize,
+    pub number_of_checked_folders: usize,
+    pub number_of_ignored_files: usize,
+    pub number_of_ignored_things: usize,
+    pub number_of_duplicated_files: usize,
+    pub lost_space: u64,
+    pub number_of_removed_files: usize,
+    pub number_of_failed_to_remove_files: usize,
+    pub gained_space: u64,
 }
 impl Info {
     pub fn new() -> Info {
         Info {
+            errors: vec![],
+            warnings: vec![],
+            messages: vec![],
             number_of_checked_files: 0,
             number_of_ignored_files: 0,
             number_of_checked_folders: 0,
             number_of_ignored_things: 0,
             number_of_duplicated_files: 0,
             lost_space: 0,
+            number_of_removed_files: 0,
+            number_of_failed_to_remove_files: 0,
+            gained_space: 0,
         }
     }
 }
@@ -83,17 +97,20 @@ impl DuplicateFinder {
             allowed_extensions: vec![],
         }
     }
+    pub fn get_infos(&self) -> &Info {
+        &self.infos
+    }
 
-    pub fn find_duplicates(mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
+    pub fn find_duplicates(&mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
         self.optimize_directories();
         self.check_files_size();
         self.remove_files_with_unique_size();
         if *check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
-        self.debug_print();
         self.calculate_lost_space(check_method);
         self.delete_files(check_method, delete_method);
+        self.debug_print();
     }
 
     pub fn set_min_file_size(&mut self, min_size: u64) {
@@ -106,7 +123,8 @@ impl DuplicateFinder {
     }
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) {
         if allowed_extensions.is_empty() {
-            println!("No allowed extension was provided, so all are allowed");
+            self.infos.messages.push("No allowed extension was provided, so all are allowed".to_string());
+            return;
         }
         allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
         allowed_extensions = allowed_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
@@ -121,7 +139,7 @@ impl DuplicateFinder {
 
             if extension.contains('.') {
                 if !extension.starts_with('.') {
-                    println!("{} is not valid extension(valid extension doesn't have dot inside)", extension);
+                    self.infos.warnings.push(extension + " is not valid extension(valid extension doesn't have dot inside)");
                     continue;
                 }
                 extension = extension.replace('.', "");
@@ -132,14 +150,15 @@ impl DuplicateFinder {
         }
 
         if self.allowed_extensions.is_empty() {
-            println!("No valid extensions were provided, so allowing all extensions by default.");
+            self.infos.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
     }
-    pub fn set_include_directory(&mut self, mut include_directory: String) {
+    pub fn set_include_directory(&mut self, mut include_directory: String) -> bool {
         // let start_time: SystemTime = SystemTime::now();
 
         if include_directory.is_empty() {
-            println!("At least one directory must be provided");
+            self.infos.errors.push("At least one directory must be provided".to_string());
+            return false;
         }
 
         include_directory = include_directory.replace("\"", "");
@@ -152,27 +171,20 @@ impl DuplicateFinder {
             if directory == "" {
                 continue;
             }
-            if directory == "/" {
-                println!("Using / is probably not good idea, you may go out of ram.");
-            }
             if directory.contains('*') {
-                println!("Include Directory ERROR: Wildcards are not supported, ignoring path {}.", directory);
-                continue;
-            }
-            if directory.starts_with('~') {
-                println!("Include Directory ERROR: ~ in path isn't supported, ignoring path {}.", directory);
+                self.infos.warnings.push("Include Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + &*directory);
                 continue;
             }
             if !directory.starts_with('/') {
-                println!("Include Directory ERROR: Relative path are not supported, ignoring path {}.", directory);
+                self.infos.warnings.push("Include Directory Warning: Relative path are not supported, ignoring ".to_string() + &*directory);
                 continue;
             }
             if !Path::new(&directory).exists() {
-                println!("Include Directory ERROR: Path {} doesn't exists.", directory);
+                self.infos.warnings.push("Include Directory Warning: Provided folder path must exits, ignoring ".to_string() + &*directory);
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                println!("Include Directory ERROR: {} isn't folder.", directory);
+                self.infos.warnings.push("Include Directory Warning: Provided path must point at the directory, ignoring ".to_string() + &*directory);
                 continue;
             }
 
@@ -185,13 +197,14 @@ impl DuplicateFinder {
         }
 
         if checked_directories.is_empty() {
-            println!("Not found even one correct path to include.");
-            process::exit(1);
+            self.infos.errors.push("Include Directory ERROR: Not found even one correct path to include which is required.".to_string());
+            return false;
         }
 
         self.included_directories = checked_directories;
 
         //Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
+        true
     }
 
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
@@ -211,27 +224,23 @@ impl DuplicateFinder {
                 continue;
             }
             if directory == "/" {
-                println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");
+                self.infos.errors.push("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
                 break;
             }
             if directory.contains('*') {
-                println!("Exclude Directory ERROR: Wildcards are not supported, ignoring path {}.", directory);
-                continue;
-            }
-            if directory.starts_with('~') {
-                println!("Exclude Directory ERROR: ~ in path isn't supported, ignoring path {}.", directory);
+                self.infos.warnings.push("Exclude Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + &*directory);
                 continue;
             }
             if !directory.starts_with('/') {
-                println!("Exclude Directory ERROR: Relative path are not supported, ignoring path {}.", directory);
+                self.infos.warnings.push("Exclude Directory Warning: Relative path are not supported, ignoring ".to_string() + &*directory);
                 continue;
             }
             if !Path::new(&directory).exists() {
-                println!("Exclude Directory ERROR: Path {} doesn't exists.", directory);
+                self.infos.warnings.push("Exclude Directory Warning: Provided folder path must exits, ignoring ".to_string() + &*directory);
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                println!("Exclude Directory ERROR: {} isn't folder.", directory);
+                self.infos.warnings.push("Exclude Directory Warning: Provided path must point at the directory, ignoring ".to_string() + &*directory);
                 continue;
             }
 
@@ -266,23 +275,10 @@ impl DuplicateFinder {
         self.infos.lost_space = bytes;
     }
 
-    // TODO - Still isn't used but it will be probably required with GUI
-    // pub fn clear(&mut self) {
-    //
-    //     self.number_of_checked_files = 0;
-    //     self.number_of_checked_folders = 0;
-    //     self.number_of_ignored_things = 0;
-    //     self.number_of_files_which_has_duplicated_entries = 0;
-    //     self.number_of_duplicated_files = 0;
-    //     self.files_sizeclear();
-    //     self.excluded_directories.clear();
-    //     self.included_directories.clear();
-    // }
     fn check_files_size(&mut self) {
         // TODO maybe add multithreading checking for file hash
         let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and
-                                                                              // big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
         for id in &self.included_directories {
@@ -296,21 +292,31 @@ impl DuplicateFinder {
 
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                _ => continue,
+                Err(_) => {
+                    self.infos.warnings.push("Cannot open dir ".to_string() + &*current_folder);
+                    continue;
+                } // Permissions denied
             };
             for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => continue, //Permissions denied
+                    Err(_) => {
+                        self.infos.warnings.push("Cannot read entry in dir ".to_string() + &*current_folder);
+                        continue;
+                    } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => continue, //Permissions denied
+                    Err(_) => {
+                        self.infos.warnings.push("Cannot read metadata in dir ".to_string() + &*current_folder);
+                        continue;
+                    } //Permissions denied
                 };
                 if metadata.is_dir() {
-                    if entry_data.file_name().into_string().is_err() {
-                        continue; // Permissions denied
-                    }
+                    // if entry_data.file_name().into_string().is_err() { // Probably this can be removed, if crash still will be happens, then uncomment this line
+                    //     self.infos.warnings.push("Cannot read folder name in dir ".to_string() + &*current_folder);
+                    //     continue; // Permissions denied
+                    // }
 
                     let mut is_excluded_dir = false;
                     next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
@@ -324,8 +330,6 @@ impl DuplicateFinder {
                         folders_to_check.push(next_folder);
                     }
                     self.infos.number_of_checked_folders += 1;
-
-                //println!("Directory\t - {:?}", next_folder); // DEBUG
                 } else if metadata.is_file() {
                     let mut have_valid_extension: bool;
                     let file_name_lowercase: String = entry_data.file_name().into_string().unwrap().to_lowercase();
@@ -344,26 +348,27 @@ impl DuplicateFinder {
 
                     if metadata.len() >= self.min_file_size && have_valid_extension {
                         let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
-                        // println!("File\t\t - {:?}", current_file_name); // DEBUG
-                        //file_to_check
+
                         let fe: FileEntry = FileEntry {
-                            path: current_file_name,
+                            path: current_file_name.clone(),
                             size: metadata.len(),
                             created_date: match metadata.created() {
                                 Ok(t) => t,
-                                Err(_) => SystemTime::now(),
+                                Err(_) => {
+                                    self.infos.warnings.push("Unable to get creation date from file ".to_string() + &*current_file_name);
+                                    SystemTime::now()
+                                } // Permissions Denied
                             },
                             modified_date: match metadata.modified() {
                                 Ok(t) => t,
-                                Err(_) => SystemTime::now(),
+                                Err(_) => {
+                                    self.infos.warnings.push("Unable to get modification date from file ".to_string() + &*current_file_name);
+                                    SystemTime::now()
+                                } // Permissions Denied
                             },
                         };
-                        // // self.files_with_identical_size.entry from below should be faster according to clippy
-                        // if !self.files_with_identical_size.contains_key(&metadata.len()) {
-                        //     self.files_with_identical_size.insert(metadata.len(), Vec::new());
-                        // }
-                        self.files_with_identical_size.entry(metadata.len()).or_insert_with(Vec::new);
 
+                        self.files_with_identical_size.entry(metadata.len()).or_insert_with(Vec::new);
                         self.files_with_identical_size.get_mut(&metadata.len()).unwrap().push(fe);
 
                         self.infos.number_of_checked_files += 1;
@@ -372,7 +377,6 @@ impl DuplicateFinder {
                     }
                 } else {
                     // Probably this is symbolic links so we are free to ignore this
-                    // println!("Found another type of file {} {:?}","".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap(), metadata) //DEBUG
                     self.infos.number_of_ignored_things += 1;
                 }
             }
@@ -414,6 +418,7 @@ impl DuplicateFinder {
                 file_handler = match File::open(&file_entry.1.path) {
                     Ok(t) => t,
                     Err(_) => {
+                        self.infos.warnings.push("Unable to check hash of file ".to_string() + &*file_entry.1.path);
                         continue;
                     }
                 };
@@ -426,6 +431,7 @@ impl DuplicateFinder {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
                         Err(_) => {
+                            self.infos.warnings.push("Error happened when checking hash of file ".to_string() + &*file_entry.1.path);
                             error_reading_file = true;
                             break;
                         }
@@ -454,14 +460,11 @@ impl DuplicateFinder {
     #[allow(dead_code)]
     /// Setting include directories, panics when there is not directories available
     fn debug_print(&self) {
-        if true {
-            return;
-        }
         println!("---------------DEBUG PRINT---------------");
-        println!("Number of all checked files - {}", self.infos.number_of_checked_files);
-        println!("Number of all ignored files - {}", self.infos.number_of_ignored_files);
-        println!("Number of all checked folders - {}", self.infos.number_of_checked_folders);
-        println!("Number of all ignored things - {}", self.infos.number_of_ignored_things);
+        println!("Number of checked files - {}", self.infos.number_of_checked_files);
+        println!("Number of checked folders - {}", self.infos.number_of_checked_folders);
+        println!("Number of ignored files - {}", self.infos.number_of_ignored_files);
+        println!("Number of ignored things(like symbolic links) - {}", self.infos.number_of_ignored_things);
         println!("Number of duplicated files - {}", self.infos.number_of_duplicated_files);
         let mut file_size: u64 = 0;
         for i in &self.files_with_identical_size {
@@ -475,14 +478,17 @@ impl DuplicateFinder {
             }
         }
         println!("Hashed Files list size - {} ({})", self.files_with_identical_hashes.len(), hashed_file_size);
+        println!("Number of removed files - {}", self.infos.number_of_removed_files);
+        println!("Number of failed to remove files - {}", self.infos.number_of_failed_to_remove_files);
+        println!("Lost space - {} ({} bytes)", self.infos.lost_space.file_size(options::BINARY).unwrap(), self.infos.lost_space);
+        println!("Gained space by removing duplicated entries - {} ({} bytes)", self.infos.gained_space.file_size(options::BINARY).unwrap(), self.infos.gained_space);
         println!("Excluded directories - {:?}", self.excluded_directories);
         println!("Included directories - {:?}", self.included_directories);
         println!("-----------------------------------------");
     }
 
-    #[allow(dead_code)]
     /// Print information about duplicated entries
-    fn print_duplicated_entries(&self, check_method: &CheckingMethod) {
+    pub fn print_duplicated_entries(&self, check_method: &CheckingMethod) {
         let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
         let mut number_of_groups: u64 = 0;
@@ -538,7 +544,7 @@ impl DuplicateFinder {
     /// ```
     // let df : DuplicateFinder = saf
     /// ```
-    fn optimize_directories(&mut self) {
+    fn optimize_directories(&mut self) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
         let mut optimized_included: Vec<String> = Vec::<String>::new();
@@ -646,14 +652,15 @@ impl DuplicateFinder {
         // optimized_excluded = Vec::<String>::new();
 
         if self.included_directories.is_empty() {
-            println!("Optimize Directories ERROR: Excluded directories overlaps all included directories.");
-            process::exit(1);
+            self.infos.errors.push("Optimize Directories ERROR: Excluded directories overlaps all included directories.".to_string());
+            return false;
         }
 
         // Not needed, but better is to have sorted everything
         self.excluded_directories.sort();
         self.included_directories.sort();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
+        true
     }
 
     fn delete_files(&mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
@@ -661,28 +668,28 @@ impl DuplicateFinder {
             return;
         }
         let start_time: SystemTime = SystemTime::now();
-        let mut errors: Vec<String> = Vec::new();
+
         match check_method {
             CheckingMethod::HASH => {
                 for entry in &self.files_with_identical_hashes {
                     for vector in entry.1 {
-                        delete_files(&vector, &delete_method, &mut errors);
+                        let tuple: (u64, usize, usize) = delete_files(&vector, &delete_method, &mut self.infos.warnings);
+                        self.infos.gained_space += tuple.0;
+                        self.infos.number_of_removed_files += tuple.1;
+                        self.infos.number_of_failed_to_remove_files += tuple.2;
                     }
                 }
             }
             CheckingMethod::SIZE => {
                 for entry in &self.files_with_identical_size {
-                    delete_files(&entry.1, &delete_method, &mut errors);
+                    let tuple: (u64, usize, usize) = delete_files(&entry.1, &delete_method, &mut self.infos.warnings);
+                    self.infos.gained_space += tuple.0;
+                    self.infos.number_of_removed_files += tuple.1;
+                    self.infos.number_of_failed_to_remove_files += tuple.2;
                 }
             }
         }
-        if !errors.is_empty() {
-            println!("Failed to delete some files, because they have got deleted earlier or you have too low privileges - try run it as root.");
-            println!("List of files which wasn't deleted:");
-        }
-        for i in errors {
-            println!("{}", i);
-        }
+
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
@@ -692,10 +699,15 @@ impl Default for DuplicateFinder {
     }
 }
 
-fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut Vec<String>) {
+fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &mut Vec<String>) -> (u64, usize, usize) {
     assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
     let mut q_index: usize = 0;
     let mut q_time: u64 = 0;
+
+    let mut gained_space: u64 = 0;
+    let mut removed_files: usize = 0;
+    let mut failed_to_remove_files: usize = 0;
+
     match delete_method {
         DeleteMethod::OneOldest => {
             for files in vector.iter().enumerate() {
@@ -706,8 +718,14 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut
                 }
             }
             match fs::remove_file(vector[q_index].path.clone()) {
-                Ok(_) => (),
-                Err(_) => errors.push(vector[q_index].path.clone()),
+                Ok(_) => {
+                    removed_files += 1;
+                    gained_space += vector[q_index].size;
+                }
+                Err(_) => {
+                    failed_to_remove_files += 1;
+                    warnings.push("Failed to delete".to_string() + &*vector[q_index].path);
+                }
             };
         }
         DeleteMethod::OneNewest => {
@@ -719,8 +737,14 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut
                 }
             }
             match fs::remove_file(vector[q_index].path.clone()) {
-                Ok(_) => (),
-                Err(_) => errors.push(vector[q_index].path.clone()),
+                Ok(_) => {
+                    removed_files += 1;
+                    gained_space += vector[q_index].size;
+                }
+                Err(_) => {
+                    failed_to_remove_files += 1;
+                    warnings.push("Failed to delete".to_string() + &*vector[q_index].path);
+                }
             };
         }
         DeleteMethod::AllExceptOldest => {
@@ -734,8 +758,14 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut
             for files in vector.iter().enumerate() {
                 if q_index != files.0 {
                     match fs::remove_file(vector[files.0].path.clone()) {
-                        Ok(_) => (),
-                        Err(_) => errors.push(vector[files.0].path.clone()),
+                        Ok(_) => {
+                            removed_files += 1;
+                            gained_space += vector[files.0].size;
+                        }
+                        Err(_) => {
+                            failed_to_remove_files += 1;
+                            warnings.push("Failed to delete".to_string() + &*vector[files.0].path);
+                        }
                     };
                 }
             }
@@ -751,8 +781,14 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut
             for files in vector.iter().enumerate() {
                 if q_index != files.0 {
                     match fs::remove_file(vector[files.0].path.clone()) {
-                        Ok(_) => (),
-                        Err(_) => errors.push(vector[files.0].path.clone()),
+                        Ok(_) => {
+                            removed_files += 1;
+                            gained_space += vector[files.0].size;
+                        }
+                        Err(_) => {
+                            failed_to_remove_files += 1;
+                            warnings.push("Failed to delete".to_string() + &*vector[files.0].path);
+                        }
                     };
                 }
             }
@@ -761,4 +797,6 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, errors: &mut
             panic!();
         }
     };
+    println!("{}    {}    {}", gained_space, removed_files, failed_to_remove_files);
+    (gained_space, removed_files, failed_to_remove_files)
 }

@@ -8,10 +8,6 @@ impl Common {
         if true {
             return;
         }
-        println!(
-            "Execution of function \"{}\" took {:?}",
-            function_name,
-            end_time.duration_since(start_time).expect("Time cannot go reverse.")
-        );
+        println!("Execution of function \"{}\" took {:?}", function_name, end_time.duration_since(start_time).expect("Time cannot go reverse."));
     }
 }

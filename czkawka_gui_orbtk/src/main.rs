@@ -16,15 +16,7 @@ fn main() {
                                 .columns(Columns::create().push(105.0).push(67.0))
                                 .rows(Rows::create().push(50.0).push(32.0).push(32.0).push(32.0).push(32.0))
                                 .margin((84, 40))
-                                .child(
-                                    TextBlock::new()
-                                        .text("Include Directory:")
-                                        .v_align("center")
-                                        .h_align("start")
-                                        .attach(Grid::column(0))
-                                        .attach(Grid::row(0))
-                                        .build(ctx),
-                                )
+                                .child(TextBlock::new().text("Include Directory:").v_align("center").h_align("start").attach(Grid::column(0)).attach(Grid::row(0)).build(ctx))
                                 .child(
                                     TextBox::new()
                                         .id("include_directory")
@@ -36,15 +28,7 @@ fn main() {
                                         .min_width(300.0)
                                         .build(ctx),
                                 )
-                                .child(
-                                    TextBlock::new()
-                                        .text("Exclude Directory:")
-                                        .v_align("center")
-                                        .h_align("start")
-                                        .attach(Grid::column(0))
-                                        .attach(Grid::row(1))
-                                        .build(ctx),
-                                )
+                                .child(TextBlock::new().text("Exclude Directory:").v_align("center").h_align("start").attach(Grid::column(0)).attach(Grid::row(1)).build(ctx))
                                 .child(
                                     TextBox::new()
                                         .id("exclude_directory")
@@ -56,15 +40,7 @@ fn main() {
                                         .min_width(300.0)
                                         .build(ctx),
                                 )
-                                .child(
-                                    TextBlock::new()
-                                        .text("Info:\n\n rr")
-                                        .v_align("center")
-                                        .h_align("start")
-                                        .attach(Grid::column(0))
-                                        .attach(Grid::row(2))
-                                        .build(ctx),
-                                )
+                                .child(TextBlock::new().text("Info:\n\n rr").v_align("center").h_align("start").attach(Grid::column(0)).attach(Grid::row(2)).build(ctx))
                                 .build(ctx),
                         )
                         .close_button(false)
