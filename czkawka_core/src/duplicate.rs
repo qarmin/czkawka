@@ -1,4 +1,3 @@
-// TODO when using GUI all or most println!() should be used as variables passed by argument
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
@@ -38,7 +37,7 @@ pub struct DuplicateFinder {
     files_with_identical_size: HashMap<u64, Vec<FileEntry>>,
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
     allowed_extensions: Vec<String>, // jpg, jpeg, mp4
-    // excluded_items: Vec<String>, // TODO, support for e.g. */.git/*
+    excluded_items: Vec<String>,     // TODO, support for e.g. */.git/*
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
     min_file_size: u64,
@@ -90,7 +89,7 @@ impl DuplicateFinder {
             infos: Info::new(),
             files_with_identical_size: Default::default(),
             files_with_identical_hashes: Default::default(),
-            // excluded_items: vec![],
+            excluded_items: vec![],
             excluded_directories: vec![],
             included_directories: vec![],
             min_file_size: 1024,
@@ -117,9 +116,32 @@ impl DuplicateFinder {
         self.min_file_size = min_size;
     }
 
-    pub fn set_excluded_items(&mut self, _excluded_items: String) {
-        // TODO Still don't know how to exactly parse this
-        // Things like /.git/ should be by default hidden with help of this *.git*
+    pub fn set_excluded_items(&mut self, mut excluded_items: String) {
+        // let start_time: SystemTime = SystemTime::now();
+
+        if excluded_items.is_empty() {
+            return;
+        }
+
+        excluded_items = excluded_items.replace("\"", "");
+        let expressions: Vec<String> = excluded_items.split(',').map(String::from).collect();
+        let mut checked_expressions: Vec<String> = Vec::new();
+
+        for expression in expressions {
+            let expression: String = expression.trim().to_string();
+
+            if expression == "" {
+                continue;
+            }
+            if !expression.contains('*') {
+                self.infos.warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + &*expression);
+                continue;
+            }
+
+            checked_expressions.push(expression);
+        }
+
+        self.excluded_items = checked_expressions;
     }
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) {
         if allowed_extensions.is_empty() {
@@ -320,6 +342,7 @@ impl DuplicateFinder {
 
                     let mut is_excluded_dir = false;
                     next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
+
                     for ed in &self.excluded_directories {
                         if next_folder == *ed {
                             is_excluded_dir = true;
@@ -327,6 +350,16 @@ impl DuplicateFinder {
                         }
                     }
                     if !is_excluded_dir {
+                        let mut found_expression: bool = false;
+                        for expression in &self.excluded_items {
+                            if Common::regex_check(expression, &next_folder) {
+                                found_expression = true;
+                                break;
+                            }
+                        }
+                        if found_expression {
+                            break;
+                        }
                         folders_to_check.push(next_folder);
                     }
                     self.infos.number_of_checked_folders += 1;
@@ -334,6 +367,7 @@ impl DuplicateFinder {
                     let mut have_valid_extension: bool;
                     let file_name_lowercase: String = entry_data.file_name().into_string().unwrap().to_lowercase();
 
+                    // Checking allowed extensions
                     if !self.allowed_extensions.is_empty() {
                         have_valid_extension = false;
                         for i in &self.allowed_extensions {
@@ -346,9 +380,23 @@ impl DuplicateFinder {
                         have_valid_extension = true;
                     }
 
+                    // Checking files
                     if metadata.len() >= self.min_file_size && have_valid_extension {
                         let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
 
+                        // Checking expressions
+                        let mut found_expression: bool = false;
+                        for expression in &self.excluded_items {
+                            if Common::regex_check(expression, &current_file_name) {
+                                found_expression = true;
+                                break;
+                            }
+                        }
+                        if found_expression {
+                            break;
+                        }
+
+                        // Creating new file entry
                         let fe: FileEntry = FileEntry {
                             path: current_file_name.clone(),
                             size: metadata.len(),
@@ -384,7 +432,7 @@ impl DuplicateFinder {
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
         //println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
     }
-    // pub fn save_results_to_file(&self) {}
+    // pub fn save_results_to_file(&self) {} // TODO Saving results to files
 
     /// Remove files which have unique size
     fn remove_files_with_unique_size(&mut self) {
@@ -541,9 +589,6 @@ impl DuplicateFinder {
         Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
     }
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated
-    /// ```
-    // let df : DuplicateFinder = saf
-    /// ```
     fn optimize_directories(&mut self) -> bool {
         let start_time: SystemTime = SystemTime::now();
 

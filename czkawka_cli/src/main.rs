@@ -1,3 +1,4 @@
+use czkawka_core::duplicate::Info;
 use czkawka_core::{duplicate, empty_folder};
 use std::{env, process};
 
@@ -132,37 +133,7 @@ fn main() {
 
             df.find_duplicates(&check_method, &delete_method);
 
-            let info = df.get_infos();
-
-            if !info.messages.is_empty() {
-                println!("-------------------------------MESSAGES--------------------------------");
-            }
-            for i in &info.messages {
-                println!("{}", i);
-            }
-            if !info.messages.is_empty() {
-                println!("---------------------------END OF MESSAGES-----------------------------");
-            }
-
-            if !info.warnings.is_empty() {
-                println!("-------------------------------WARNINGS--------------------------------");
-            }
-            for i in &info.warnings {
-                println!("{}", i);
-            }
-            if !info.warnings.is_empty() {
-                println!("---------------------------END OF WARNINGS-----------------------------");
-            }
-
-            if !info.errors.is_empty() {
-                println!("--------------------------------ERRORS---------------------------------");
-            }
-            for i in &info.errors {
-                println!("{}", i);
-            }
-            if !info.errors.is_empty() {
-                println!("----------------------------END OF ERRORS------------------------------");
-            }
+            print_infos(df.get_infos());
         }
         "--h" | "--help" => {
             print_help();
@@ -205,16 +176,18 @@ Usage of Czkawka:
       czkawka --help
       czkawka
 
-  --d <-i directory_to_search> [-e exclude_directories = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-delete = "aeo"] - search for duplicates files
+  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-delete = "aeo"] - search for duplicates files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
+    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
     -s min_size - minimum size of checked files in bytes, assigning bigger value may speed up searching.
-    -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png.There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
+    -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
     -l type_of_search - allows to use fastest which takes into account only size, and more accurate which check if file contnet is same(hashes).
     -delete - delete found files, by default remove all except the most oldest one, it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
     Usage example:
       czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -delete
       czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash"
+      czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
       czkawka --d -i "/etc/" -delete "aeo"
 
   --e <-i directory_to_search> [-e exclude_directories = ""] [-delete] - option to find and delete empty folders
@@ -224,6 +197,38 @@ Usage of Czkawka:
       czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
     "###
     );
+}
+/// Printing infos about warnings, messages and errors
+fn print_infos(infos: &Info) {
+    if !infos.messages.is_empty() {
+        println!("-------------------------------MESSAGES--------------------------------");
+    }
+    for i in &infos.messages {
+        println!("{}", i);
+    }
+    if !infos.messages.is_empty() {
+        println!("---------------------------END OF MESSAGES-----------------------------");
+    }
+
+    if !infos.warnings.is_empty() {
+        println!("-------------------------------WARNINGS--------------------------------");
+    }
+    for i in &infos.warnings {
+        println!("{}", i);
+    }
+    if !infos.warnings.is_empty() {
+        println!("---------------------------END OF WARNINGS-----------------------------");
+    }
+
+    if !infos.errors.is_empty() {
+        println!("--------------------------------ERRORS---------------------------------");
+    }
+    for i in &infos.errors {
+        println!("{}", i);
+    }
+    if !infos.errors.is_empty() {
+        println!("----------------------------END OF ERRORS------------------------------");
+    }
 }
 
 struct ArgumentsPair {
