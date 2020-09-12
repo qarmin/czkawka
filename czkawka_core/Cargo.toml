@@ -6,5 +6,5 @@ edition = "2018"
 
 [dependencies]
 humansize = "1"
-blake3 = "0.3.6"
+blake3 = "0.3"
 #rayon = "1"

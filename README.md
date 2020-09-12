@@ -28,6 +28,7 @@ This is my first ever project in Rust so probably a lot of things are written in
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
 - Add support for fast searching based on checking only first ~1MB of file.
+- Selecting different objects in 
 
 ## Usage and requirements
 Rustc 1.46 works fine(not sure about a minimal version)  

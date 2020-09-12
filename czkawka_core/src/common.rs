@@ -1,14 +1,54 @@
+use std::fs;
+use std::path::Path;
 use std::time::SystemTime;
 
 /// Class for common functions used across other class/functions
 
 pub struct Common();
 impl Common {
+    /// Printing time which took between start and stop point and prints also function name
     pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
         if false {
             return;
         }
         println!("Execution of function \"{}\" took {:?}", function_name, end_time.duration_since(start_time).expect("Time cannot go reverse."));
+    }
+
+    pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
+        let mut path: &Path;
+        let mut warnings: Vec<String> = Vec::new();
+        for entry in entries {
+            path = Path::new(entry);
+            if path.is_dir() {
+                match fs::remove_dir_all(&entry) {
+                    Ok(_) => (),
+                    Err(_) => warnings.push("Failed to remove folder ".to_owned() + entry.as_str()),
+                }
+            } else {
+                match fs::remove_file(&entry) {
+                    Ok(_) => (),
+                    Err(_) => warnings.push("Failed to remove file ".to_owned() + entry.as_str()),
+                }
+            }
+        }
+        warnings
+    }
+    pub fn delete_one_entry(entry: &str) -> String {
+        let path: &Path = Path::new(entry);
+        let mut warning: String = String::from("");
+            if path.is_dir() {
+                match fs::remove_dir_all(&entry) {
+                    Ok(_) => (),
+                    Err(_) => warning = "Failed to remove folder ".to_owned() + entry,
+                }
+            } else {
+                match fs::remove_file(&entry) {
+                    Ok(_) => (),
+                    Err(_) => warning = "Failed to remove file ".to_owned() + entry,
+                }
+
+        }
+        warning
     }
 
     /// Function to check if directory match expression

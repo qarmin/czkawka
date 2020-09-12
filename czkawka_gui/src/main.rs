@@ -6,6 +6,7 @@ use czkawka_core::duplicate::{CheckingMethod, DeleteMethod};
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
 use gtk::{Builder, TreeView, TreeViewColumn};
+use std::collections::HashMap;
 
 fn main() {
     gtk::init().expect("Failed to initialize GTK.");
@@ -18,9 +19,23 @@ fn main() {
     let main_window: gtk::Window = builder.get_object("main_window").unwrap();
     main_window.show_all();
 
-    // Notepad Buttons
+    // Buttons State
+    let mut hashmap_buttons : HashMap<&str,bool> = Default::default();
+    let mut buttons_state : HashMap<&str,HashMap<&str,bool>> = Default::default();
+    for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
+        hashmap_buttons.insert(i,false);
+    }
 
-    // Buttons
+    for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
+        buttons_state.insert(i,hashmap_buttons.clone());
+    }
+       // buttons_state.insert(hashmap_buttons.clone());
+
+
+
+    // GUI Notepad Buttons
+
+    // GUI Buttons
     let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
     let buttons_stop: gtk::Button = builder.get_object("buttons_stop").unwrap();
     let buttons_resume: gtk::Button = builder.get_object("buttons_resume").unwrap();
@@ -99,10 +114,13 @@ fn main() {
                     let mut df = DuplicateFinder::new();
                     df.set_include_directory("/home/rafal/Pulpit".to_owned());
                     df.set_exclude_directory("/rafa/".to_owned());
+                    df.set_excluded_items("".to_owned());
                     df.set_allowed_extensions("".to_owned());
                     df.set_min_file_size(1000); // TODO Change to proper value
                     df.find_duplicates(&CheckingMethod::HASH, &DeleteMethod::None);
+                    //let infos = df.get_infos();
                     info_entry.set_text("Found TODO duplicates files in TODO groups which took TODO GB/MB/KB/B");
+                    buttons_delete.show();
                 }
                 "notebook_empty_folders_label" => {}
                 e => panic!("Not existent {}", e),

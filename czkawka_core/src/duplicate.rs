@@ -36,10 +36,11 @@ pub struct DuplicateFinder {
     infos: Info,
     files_with_identical_size: HashMap<u64, Vec<FileEntry>>,
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
-    allowed_extensions: Vec<String>, // jpg, jpeg, mp4
-    excluded_items: Vec<String>,     // TODO, support for e.g. */.git/*
+    allowed_extensions: Vec<String>,
+    excluded_items: Vec<String>,
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
+    recursive_search : bool,
     min_file_size: u64,
 }
 
@@ -92,6 +93,7 @@ impl DuplicateFinder {
             excluded_items: vec![],
             excluded_directories: vec![],
             included_directories: vec![],
+            recursive_search: true,
             min_file_size: 1024,
             allowed_extensions: vec![],
         }
@@ -116,6 +118,9 @@ impl DuplicateFinder {
         self.min_file_size = min_size;
     }
 
+    pub fn set_recursive_search(&mut self, reqursive_search : bool){
+        self.recursive_search = reqursive_search;
+    }
     pub fn set_excluded_items(&mut self, mut excluded_items: String) {
         // let start_time: SystemTime = SystemTime::now();
 
@@ -340,6 +345,10 @@ impl DuplicateFinder {
                     //     continue; // Permissions denied
                     // }
 
+                    if !self.recursive_search{
+                        continue;
+                    }
+
                     let mut is_excluded_dir = false;
                     next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
 
@@ -509,6 +518,7 @@ impl DuplicateFinder {
     /// Setting include directories, panics when there is not directories available
     fn debug_print(&self) {
         println!("---------------DEBUG PRINT---------------");
+        println!("Recursive search - {}", self.recursive_search.to_string());
         println!("Number of checked files - {}", self.infos.number_of_checked_files);
         println!("Number of checked folders - {}", self.infos.number_of_checked_folders);
         println!("Number of ignored files - {}", self.infos.number_of_ignored_files);
@@ -594,6 +604,7 @@ impl DuplicateFinder {
 
         let mut optimized_included: Vec<String> = Vec::<String>::new();
         let mut optimized_excluded: Vec<String> = Vec::<String>::new();
+
         // Remove duplicated entries like: "/", "/"
 
         self.excluded_directories.sort();
@@ -603,45 +614,47 @@ impl DuplicateFinder {
         self.included_directories.dedup();
 
         // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
-        let mut is_inside: bool;
-        for ed_checked in &self.excluded_directories {
-            is_inside = false;
-            for ed_help in &self.excluded_directories {
-                if ed_checked == ed_help {
-                    // We checking same element
-                    continue;
+        if self.recursive_search { // This is only point which can't be done when recursive search is disabled.
+            let mut is_inside: bool;
+            for ed_checked in &self.excluded_directories {
+                is_inside = false;
+                for ed_help in &self.excluded_directories {
+                    if ed_checked == ed_help {
+                        // We checking same element
+                        continue;
+                    }
+                    if ed_checked.starts_with(ed_help) {
+                        is_inside = true;
+                        break;
+                    }
                 }
-                if ed_checked.starts_with(ed_help) {
-                    is_inside = true;
-                    break;
+                if !is_inside {
+                    optimized_excluded.push(ed_checked.to_string());
                 }
             }
-            if !is_inside {
-                optimized_excluded.push(ed_checked.to_string());
-            }
-        }
 
-        for id_checked in &self.included_directories {
-            is_inside = false;
-            for id_help in &self.included_directories {
-                if id_checked == id_help {
-                    // We checking same element
-                    continue;
+            for id_checked in &self.included_directories {
+                is_inside = false;
+                for id_help in &self.included_directories {
+                    if id_checked == id_help {
+                        // We checking same element
+                        continue;
+                    }
+                    if id_checked.starts_with(id_help) {
+                        is_inside = true;
+                        break;
+                    }
                 }
-                if id_checked.starts_with(id_help) {
-                    is_inside = true;
-                    break;
+                if !is_inside {
+                    optimized_included.push(id_checked.to_string());
                 }
             }
-            if !is_inside {
-                optimized_included.push(id_checked.to_string());
-            }
-        }
 
-        self.included_directories = optimized_included;
-        optimized_included = Vec::<String>::new();
-        self.excluded_directories = optimized_excluded;
-        optimized_excluded = Vec::<String>::new();
+            self.included_directories = optimized_included;
+            optimized_included = Vec::<String>::new();
+            self.excluded_directories = optimized_excluded;
+            optimized_excluded = Vec::<String>::new();
+        }
 
         // Remove include directories which are inside any exclude directory
         for id in &self.included_directories {

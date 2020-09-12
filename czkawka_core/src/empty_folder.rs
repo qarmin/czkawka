@@ -189,7 +189,7 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "check_for_empty_folder".to_string());
     }
 
-    /// Deletes earlier finded empty folders
+    /// Deletes earlier found empty folders
     fn delete_empty_folders(&self) {
         let start_time: SystemTime = SystemTime::now();
         let mut errors: Vec<String> = Vec::new();

@@ -96,6 +96,9 @@ fn main() {
             if ArgumentsPair::has_command(&arguments, "-k") {
                 df.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
             }
+            if ArgumentsPair::has_command(&arguments, "-o") {
+                df.set_recursive_search(false);
+            }
             if ArgumentsPair::has_command(&arguments, "-l") {
                 let argument_name = ArgumentsPair::get_argument(&arguments, "-l", false).to_lowercase();
                 if argument_name == "size" {
@@ -176,17 +179,18 @@ Usage of Czkawka:
       czkawka --help
       czkawka
 
-  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-delete = "aeo"] - search for duplicates files
+  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-delete = "aeo"] - search for duplicates files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -k excluded_items - list of excluded items which contains * wildcard(may be slow)
+    -o non_recursive - this options prevents from recursive check of folders
     -s min_size - minimum size of checked files in bytes, assigning bigger value may speed up searching.
     -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
     -l type_of_search - allows to use fastest which takes into account only size, and more accurate which check if file contnet is same(hashes).
     -delete - delete found files, by default remove all except the most oldest one, it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
     Usage example:
       czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -delete
-      czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash"
+      czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash" -o
       czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
       czkawka --d -i "/etc/" -delete "aeo"
 
