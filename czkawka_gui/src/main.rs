@@ -20,15 +20,25 @@ fn main() {
     main_window.show_all();
 
     // Buttons State
+
     let mut hashmap_buttons : HashMap<&str,bool> = Default::default();
-    let mut buttons_state : HashMap<&str,HashMap<&str,bool>> = Default::default();
-    for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
+    for i in ["duplicate","empty_folder"].iter() {
         hashmap_buttons.insert(i,false);
     }
 
-    for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
-        buttons_state.insert(i,hashmap_buttons.clone());
-    }
+
+
+
+
+    // let mut hashmap_buttons : HashMap<&str,bool> = Default::default();
+    // let mut buttons_state : HashMap<&str,HashMap<&str,bool>> = Default::default();
+    // for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
+    //     hashmap_buttons.insert(i,false);
+    // }
+    //
+    // for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
+    //     buttons_state.insert(i,hashmap_buttons.clone());
+    // }
        // buttons_state.insert(hashmap_buttons.clone());
 
 
@@ -118,9 +128,21 @@ fn main() {
                     df.set_allowed_extensions("".to_owned());
                     df.set_min_file_size(1000); // TODO Change to proper value
                     df.find_duplicates(&CheckingMethod::HASH, &DeleteMethod::None);
-                    //let infos = df.get_infos();
+                    let infos = df.get_infos();
+
                     info_entry.set_text("Found TODO duplicates files in TODO groups which took TODO GB/MB/KB/B");
+
+                    // Buttons
+                    // TODO if found
+                    buttons_select.show();
                     buttons_delete.show();
+                    //
+
+                    buttons_search.show();
+                    buttons_stop.hide();
+                    buttons_resume.hide();
+                    buttons_pause.hide();
+                    buttons_save.hide();
                 }
                 "notebook_empty_folders_label" => {}
                 e => panic!("Not existent {}", e),
