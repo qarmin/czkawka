@@ -21,14 +21,10 @@ fn main() {
 
     // Buttons State
 
-    let mut hashmap_buttons : HashMap<&str,bool> = Default::default();
-    for i in ["duplicate","empty_folder"].iter() {
-        hashmap_buttons.insert(i,false);
+    let mut hashmap_buttons: HashMap<&str, bool> = Default::default();
+    for i in ["duplicate", "empty_folder"].iter() {
+        hashmap_buttons.insert(i, false);
     }
-
-
-
-
 
     // let mut hashmap_buttons : HashMap<&str,bool> = Default::default();
     // let mut buttons_state : HashMap<&str,HashMap<&str,bool>> = Default::default();
@@ -39,9 +35,7 @@ fn main() {
     // for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
     //     buttons_state.insert(i,hashmap_buttons.clone());
     // }
-       // buttons_state.insert(hashmap_buttons.clone());
-
-
+    // buttons_state.insert(hashmap_buttons.clone());
 
     // GUI Notepad Buttons
 
@@ -113,7 +107,7 @@ fn main() {
     {
         // Connect Buttons
 
-        // let buttons_search      = buttons_search.clone();
+        let buttons_search_clone = buttons_search.clone();
         // let info_entry = info_entry.clone();
 
         buttons_search.connect_clicked(move |_| {
@@ -128,7 +122,7 @@ fn main() {
                     df.set_allowed_extensions("".to_owned());
                     df.set_min_file_size(1000); // TODO Change to proper value
                     df.find_duplicates(&CheckingMethod::HASH, &DeleteMethod::None);
-                    let infos = df.get_infos();
+                    let _infos = df.get_infos();
 
                     info_entry.set_text("Found TODO duplicates files in TODO groups which took TODO GB/MB/KB/B");
 
@@ -138,7 +132,7 @@ fn main() {
                     buttons_delete.show();
                     //
 
-                    buttons_search.show();
+                    buttons_search_clone.show();
                     buttons_stop.hide();
                     buttons_resume.hide();
                     buttons_pause.hide();

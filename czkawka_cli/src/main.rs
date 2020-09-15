@@ -61,9 +61,7 @@ fn main() {
             let mut check_method: duplicate::CheckingMethod = duplicate::CheckingMethod::HASH;
 
             if ArgumentsPair::has_command(&arguments, "-i") {
-                if !df.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false)) {
-                    process::exit(1);
-                }
+                df.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
             } else {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
@@ -95,7 +93,10 @@ fn main() {
             }
             if ArgumentsPair::has_command(&arguments, "-k") {
                 df.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
+            } else {
+                df.set_excluded_items("DEFAULT".to_string());
             }
+
             if ArgumentsPair::has_command(&arguments, "-o") {
                 df.set_recursive_search(false);
             }
@@ -135,6 +136,10 @@ fn main() {
             }
 
             df.find_duplicates(&check_method, &delete_method);
+
+            if ArgumentsPair::has_command(&arguments, "-f") {
+                df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false));
+            }
 
             print_infos(df.get_infos());
         }
@@ -179,11 +184,12 @@ Usage of Czkawka:
       czkawka --help
       czkawka
 
-  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-delete = "aeo"] - search for duplicates files
+  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = "DEFAULT"] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -k excluded_items - list of excluded items which contains * wildcard(may be slow)
-    -o non_recursive - this options prevents from recursive check of folders
+    -o - this options prevents from recursive check of folders
+    -f file_to_save - saves results to file
     -s min_size - minimum size of checked files in bytes, assigning bigger value may speed up searching.
     -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
     -l type_of_search - allows to use fastest which takes into account only size, and more accurate which check if file contnet is same(hashes).

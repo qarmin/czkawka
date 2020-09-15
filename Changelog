@@ -1,4 +1,14 @@
-## Version 0.10
+## Version 0.1.1
+- Added images to readme
+- Better GTK buttons
+- Basic search in GTK
+- Cleaned core from println
+- Core functions doesn't use now process::exit(everything is done with help of messages/errors/warnings)
+- Added support for non recursive search
+- Improved finding number and size of duplicated files
+- Saving results to file
+
+## Version 0.1.0
 - Initial Version
 - Duplicate file finder
 - Empty folder finder

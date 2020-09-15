@@ -36,17 +36,16 @@ impl Common {
     pub fn delete_one_entry(entry: &str) -> String {
         let path: &Path = Path::new(entry);
         let mut warning: String = String::from("");
-            if path.is_dir() {
-                match fs::remove_dir_all(&entry) {
-                    Ok(_) => (),
-                    Err(_) => warning = "Failed to remove folder ".to_owned() + entry,
-                }
-            } else {
-                match fs::remove_file(&entry) {
-                    Ok(_) => (),
-                    Err(_) => warning = "Failed to remove file ".to_owned() + entry,
-                }
-
+        if path.is_dir() {
+            match fs::remove_dir_all(&entry) {
+                Ok(_) => (),
+                Err(_) => warning = "Failed to remove folder ".to_owned() + entry,
+            }
+        } else {
+            match fs::remove_file(&entry) {
+                Ok(_) => (),
+                Err(_) => warning = "Failed to remove file ".to_owned() + entry,
+            }
         }
         warning
     }
