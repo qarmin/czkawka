@@ -11,6 +11,7 @@ czkawka_core = { path = "../czkawka_core" }
 gdk = "0.13.2"
 gio = "0.9.1"
 glib = "0.10.1"
+humansize = "1"
 
 
 [dependencies.gtk]
