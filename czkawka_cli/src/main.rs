@@ -137,6 +137,8 @@ fn main() {
 
             df.find_duplicates();
 
+            df.print_duplicated_entries();
+
             if ArgumentsPair::has_command(&arguments, "-f") {
                 df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false));
             }

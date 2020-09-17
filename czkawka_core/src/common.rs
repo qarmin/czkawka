@@ -51,7 +51,10 @@ impl Common {
     /// Function to check if directory match expression
     pub fn regex_check(expression: &str, directory: &str) -> bool {
         if !expression.contains('*') {
-            println!("Expression should have *");
+            #[cfg(debug_assertions)]
+            {
+                println!("Invalid expression ERROR: Expression should have *");
+            }
             return false;
         }
 
@@ -116,6 +119,7 @@ mod test {
         assert!(!Common::regex_check("*home", "/homefasfasfasfasf/"));
         assert!(!Common::regex_check("*home", "/homefasfasfasfasf"));
         assert!(!Common::regex_check("rafal*afal*fal", "rafal"));
+        assert!(!Common::regex_check("rafal*a", "rafal"));
         assert!(!Common::regex_check("AAAAAAAA****", "/AAAAAAAAAAAAAAAAA"));
         assert!(!Common::regex_check("*.git/*", "/home/.git"));
         assert!(!Common::regex_check("*home/*koc", "/koc/home/"));

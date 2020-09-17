@@ -476,12 +476,22 @@ impl DuplicateFinder {
 
         if !self.files_with_identical_size.is_empty() {
             file.write_all(b"-------------------------------------------------Files with same size-------------------------------------------------\n").unwrap();
-            file.write_all(("Found ".to_string() + self.infos.number_of_duplicated_files_by_size.to_string().as_str() + " duplicated files which in " + self.infos.number_of_groups_by_size.to_string().as_str() + " groups.\n").as_bytes())
-                .unwrap();
+            file.write_all(
+                ("Found ".to_string()
+                    + self.infos.number_of_duplicated_files_by_size.to_string().as_str()
+                    + " duplicated files which in "
+                    + self.infos.number_of_groups_by_size.to_string().as_str()
+                    + " groups which takes "
+                    + &*self.infos.lost_space_by_size.file_size(options::BINARY).unwrap()
+                    + ".\n")
+                    .as_bytes(),
+            )
+            .unwrap();
             for (size, files) in self.files_with_identical_size.iter().rev() {
                 file.write_all(b"\n---- Size ").unwrap();
                 file.write_all(size.file_size(options::BINARY).unwrap().as_bytes()).unwrap();
                 file.write_all((" (".to_string() + size.to_string().as_str() + ")").as_bytes()).unwrap();
+                file.write_all((" - ".to_string() + files.len().to_string().as_str() + " files").as_bytes()).unwrap();
                 file.write_all(b"\n").unwrap();
                 for file_entry in files {
                     file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
@@ -491,13 +501,23 @@ impl DuplicateFinder {
 
         if !self.files_with_identical_hashes.is_empty() {
             file.write_all(b"-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
-            file.write_all(("Found ".to_string() + self.infos.number_of_duplicated_files_by_hash.to_string().as_str() + " duplicated files which in " + self.infos.number_of_groups_by_hash.to_string().as_str() + " groups.\n").as_bytes())
-                .unwrap();
+            file.write_all(
+                ("Found ".to_string()
+                    + self.infos.number_of_duplicated_files_by_hash.to_string().as_str()
+                    + " duplicated files which in "
+                    + self.infos.number_of_groups_by_hash.to_string().as_str()
+                    + " groups which takes "
+                    + &*self.infos.lost_space_by_hash.file_size(options::BINARY).unwrap()
+                    + ".\n")
+                    .as_bytes(),
+            )
+            .unwrap();
             for (size, files) in self.files_with_identical_hashes.iter().rev() {
                 for vector in files {
                     file.write_all(b"\n---- Size ").unwrap();
                     file.write_all(size.file_size(options::BINARY).unwrap().as_bytes()).unwrap();
                     file.write_all((" (".to_string() + size.to_string().as_str() + ")").as_bytes()).unwrap();
+                    file.write_all((" - ".to_string() + vector.len().to_string().as_str() + " files").as_bytes()).unwrap();
                     file.write_all(b"\n").unwrap();
                     for file_entry in vector {
                         file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
@@ -628,12 +648,12 @@ impl DuplicateFinder {
     }
 
     /// Print information about duplicated entries
-    pub fn print_duplicated_entries(&self, check_method: &CheckingMethod) {
+    pub fn print_duplicated_entries(&self) {
         let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
         let mut number_of_groups: u64 = 0;
 
-        match check_method {
+        match self.check_method {
             CheckingMethod::HASH => {
                 for (_size, vector) in self.files_with_identical_hashes.iter() {
                     for j in vector {
@@ -647,9 +667,9 @@ impl DuplicateFinder {
                     number_of_groups,
                     self.infos.lost_space_by_size.file_size(options::BINARY).unwrap()
                 );
-                for (key, vector) in self.files_with_identical_hashes.iter().rev() {
-                    println!("Size - {}", key.file_size(options::BINARY).unwrap());
+                for (size, vector) in self.files_with_identical_hashes.iter().rev() {
                     for j in vector {
+                        println!("Size - {} ({}) - {} files ", size.file_size(options::BINARY).unwrap(), size, j.len());
                         for k in j {
                             println!("{}", k.path);
                         }
@@ -669,9 +689,9 @@ impl DuplicateFinder {
                     number_of_groups,
                     self.infos.lost_space_by_size.file_size(options::BINARY).unwrap()
                 );
-                for i in &self.files_with_identical_size {
-                    println!("Size - {}", i.0);
-                    for j in i.1 {
+                for (size, vector) in &self.files_with_identical_size {
+                    println!("Size - {} ({}) - {} files ", size.file_size(options::BINARY).unwrap(), size, vector.len());
+                    for j in vector {
                         println!("{}", j.path);
                     }
                     println!();
