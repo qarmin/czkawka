@@ -476,7 +476,7 @@ impl DuplicateFinder {
 
         if !self.files_with_identical_size.is_empty() {
             file.write_all(b"-------------------------------------------------Files with same size-------------------------------------------------\n").unwrap();
-            file.write_all(("Found ".to_string() + self.infos.number_of_duplicated_files_by_size.to_string().as_str() + " duplicated files which in " + self.files_with_identical_size.len().to_string().as_str() + " groups.\n").as_bytes())
+            file.write_all(("Found ".to_string() + self.infos.number_of_duplicated_files_by_size.to_string().as_str() + " duplicated files which in " + self.infos.number_of_groups_by_size.to_string().as_str() + " groups.\n").as_bytes())
                 .unwrap();
             for (size, files) in self.files_with_identical_size.iter().rev() {
                 file.write_all(b"\n---- Size ").unwrap();
@@ -491,7 +491,7 @@ impl DuplicateFinder {
 
         if !self.files_with_identical_hashes.is_empty() {
             file.write_all(b"-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
-            file.write_all(("Found ".to_string() + self.infos.number_of_duplicated_files_by_size.to_string().as_str() + " duplicated files which in " + self.files_with_identical_hashes.len().to_string().as_str() + " groups.\n").as_bytes())
+            file.write_all(("Found ".to_string() + self.infos.number_of_duplicated_files_by_hash.to_string().as_str() + " duplicated files which in " + self.infos.number_of_groups_by_hash.to_string().as_str() + " groups.\n").as_bytes())
                 .unwrap();
             for (size, files) in self.files_with_identical_hashes.iter().rev() {
                 for vector in files {
