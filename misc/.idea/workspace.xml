@@ -14,8 +14,8 @@
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="language.rust" />
   </component>
-  <component name="RunManager" selected="Cargo Command.Build All">
-    <configuration name="Build All" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+  <component name="RunManager" selected="Cargo Command.Format Code">
+    <configuration name="Build All Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="build --all" />
       <option name="allFeatures" value="false" />
@@ -27,9 +27,33 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Build All Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="build --all --release" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Clippy" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="clippy" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Doc" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="doc --open" />
+      <option name="command" value="doc  --open" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -51,9 +75,21 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Run CLI" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <configuration name="Run CLI Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli" />
+      <option name="command" value="run --bin czkawka_cli -- --d  -i $USER_HOME$/Pulpit/AAA -f &quot;results.txt&quot;" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Run CLI Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run --bin czkawka_cli --release -- --d  -i $USER_HOME$/Pulpit/AAA -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -77,7 +113,19 @@
     </configuration>
     <configuration name="Run GUI Orbtk" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_gui_orbtk" />
+      <option name="command" value="run --bin czkawka_gui_orbtk --release" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -100,12 +148,16 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Cargo Command.Build All" />
-      <item itemvalue="Cargo Command.Run CLI" />
-      <item itemvalue="Cargo Command.Run GUI Orbtk" />
+      <item itemvalue="Cargo Command.Build All Debug" />
+      <item itemvalue="Cargo Command.Build All Release" />
+      <item itemvalue="Cargo Command.Run CLI Release" />
+      <item itemvalue="Cargo Command.Run CLI Debug" />
       <item itemvalue="Cargo Command.Run GUI GTK" />
+      <item itemvalue="Cargo Command.Run GUI Orbtk" />
       <item itemvalue="Cargo Command.Format Code" />
       <item itemvalue="Cargo Command.Doc" />
+      <item itemvalue="Cargo Command.Clippy" />
+      <item itemvalue="Cargo Command.Test" />
       <item itemvalue="Cargo Command.Update" />
     </list>
   </component>
