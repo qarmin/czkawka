@@ -163,7 +163,7 @@ impl DuplicateFinder {
                 continue;
             }
             if !expression.contains('*') {
-                self.infos.warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + &*expression);
+                self.infos.warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
                 continue;
             }
 
@@ -227,19 +227,19 @@ impl DuplicateFinder {
                 continue;
             }
             if directory.contains('*') {
-                self.infos.warnings.push("Include Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Include Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !directory.starts_with('/') {
-                self.infos.warnings.push("Include Directory Warning: Relative path are not supported, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Include Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).exists() {
-                self.infos.warnings.push("Include Directory Warning: Provided folder path must exits, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Include Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                self.infos.warnings.push("Include Directory Warning: Provided path must point at the directory, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Include Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
                 continue;
             }
 
@@ -283,19 +283,19 @@ impl DuplicateFinder {
                 break;
             }
             if directory.contains('*') {
-                self.infos.warnings.push("Exclude Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Exclude Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !directory.starts_with('/') {
-                self.infos.warnings.push("Exclude Directory Warning: Relative path are not supported, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Exclude Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).exists() {
-                self.infos.warnings.push("Exclude Directory Warning: Provided folder path must exits, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Exclude Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                self.infos.warnings.push("Exclude Directory Warning: Provided path must point at the directory, ignoring ".to_string() + &*directory);
+                self.infos.warnings.push("Exclude Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
                 continue;
             }
 
@@ -330,7 +330,7 @@ impl DuplicateFinder {
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_) => {
-                    self.infos.warnings.push("Cannot open dir ".to_string() + &*current_folder);
+                    self.infos.warnings.push("Cannot open dir ".to_string() + current_folder.as_str());
                     continue;
                 } // Permissions denied
             };
@@ -338,21 +338,21 @@ impl DuplicateFinder {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
-                        self.infos.warnings.push("Cannot read entry in dir ".to_string() + &*current_folder);
+                        self.infos.warnings.push("Cannot read entry in dir ".to_string() + current_folder.as_str());
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => {
-                        self.infos.warnings.push("Cannot read metadata in dir ".to_string() + &*current_folder);
+                        self.infos.warnings.push("Cannot read metadata in dir ".to_string() + current_folder.as_str());
                         continue;
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
                     self.infos.number_of_checked_folders += 1;
                     // if entry_data.file_name().into_string().is_err() { // Probably this can be removed, if crash still will be happens, then uncomment this line
-                    //     self.infos.warnings.push("Cannot read folder name in dir ".to_string() + &*current_folder);
+                    //     self.infos.warnings.push("Cannot read folder name in dir ".to_string() + current_folder.as_str());
                     //     continue; // Permissions denied
                     // }
 
@@ -390,7 +390,7 @@ impl DuplicateFinder {
                     if !self.allowed_extensions.is_empty() {
                         have_valid_extension = false;
                         for i in &self.allowed_extensions {
-                            if file_name_lowercase.ends_with(&(".".to_string() + &*i.to_lowercase().to_string())) {
+                            if file_name_lowercase.ends_with((".".to_string() + i.to_lowercase().as_str()).as_str()) {
                                 have_valid_extension = true;
                                 break;
                             }
@@ -422,14 +422,14 @@ impl DuplicateFinder {
                             created_date: match metadata.created() {
                                 Ok(t) => t,
                                 Err(_) => {
-                                    self.infos.warnings.push("Unable to get creation date from file ".to_string() + &*current_file_name);
+                                    self.infos.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
                                     SystemTime::now()
                                 } // Permissions Denied
                             },
                             modified_date: match metadata.modified() {
                                 Ok(t) => t,
                                 Err(_) => {
-                                    self.infos.warnings.push("Unable to get modification date from file ".to_string() + &*current_file_name);
+                                    self.infos.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
                                     SystemTime::now()
                                 } // Permissions Denied
                             },
@@ -497,7 +497,7 @@ impl DuplicateFinder {
                     + " duplicated files which in "
                     + self.infos.number_of_groups_by_size.to_string().as_str()
                     + " groups which takes "
-                    + &*self.infos.lost_space_by_size.file_size(options::BINARY).unwrap()
+                    + self.infos.lost_space_by_size.file_size(options::BINARY).unwrap().as_str()
                     + ".\n")
                     .as_bytes(),
             )
@@ -522,7 +522,7 @@ impl DuplicateFinder {
                     + " duplicated files which in "
                     + self.infos.number_of_groups_by_hash.to_string().as_str()
                     + " groups which takes "
-                    + &*self.infos.lost_space_by_hash.file_size(options::BINARY).unwrap()
+                    + self.infos.lost_space_by_hash.file_size(options::BINARY).unwrap().as_str()
                     + ".\n")
                     .as_bytes(),
             )
@@ -556,7 +556,7 @@ impl DuplicateFinder {
                 file_handler = match File::open(&file_entry.1.path) {
                     Ok(t) => t,
                     Err(_) => {
-                        self.infos.warnings.push("Unable to check hash of file ".to_string() + &*file_entry.1.path);
+                        self.infos.warnings.push("Unable to check hash of file ".to_string() + file_entry.1.path.as_str());
                         continue;
                     }
                 };
@@ -569,7 +569,7 @@ impl DuplicateFinder {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
                         Err(_) => {
-                            self.infos.warnings.push("Error happened when checking hash of file ".to_string() + &*file_entry.1.path);
+                            self.infos.warnings.push("Error happened when checking hash of file ".to_string() + file_entry.1.path.as_str());
                             error_reading_file = true;
                             break;
                         }
@@ -582,7 +582,7 @@ impl DuplicateFinder {
                 if !error_reading_file {
                     let hash_string: String = hasher.finalize().to_hex().to_string();
                     hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                    hashmap_with_hash.get_mut(&*hash_string).unwrap().push(file_entry.1.to_owned());
+                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.1.to_owned());
                 }
             }
             for hash_entry in hashmap_with_hash {
@@ -884,16 +884,16 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                 }
                 Err(_) => {
                     failed_to_remove_files += 1;
-                    warnings.push("Failed to delete".to_string() + &*vector[q_index].path);
+                    warnings.push("Failed to delete".to_string() + vector[q_index].path.as_str());
                 }
             };
         }
         DeleteMethod::OneNewest => {
-            for files in vector.iter().enumerate() {
-                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+            for (size,file) in vector.iter().enumerate() {
+                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
                 if q_time == 0 || q_time < time_since_epoch {
                     q_time = time_since_epoch;
-                    q_index = files.0;
+                    q_index = size;
                 }
             }
             match fs::remove_file(vector[q_index].path.clone()) {
@@ -903,7 +903,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                 }
                 Err(_) => {
                     failed_to_remove_files += 1;
-                    warnings.push("Failed to delete".to_string() + &*vector[q_index].path);
+                    warnings.push("Failed to delete".to_string() + vector[q_index].path.as_str());
                 }
             };
         }
@@ -924,7 +924,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                         }
                         Err(_) => {
                             failed_to_remove_files += 1;
-                            warnings.push("Failed to delete".to_string() + &*vector[files.0].path);
+                            warnings.push("Failed to delete".to_string() + vector[files.0].path.as_str());
                         }
                     };
                 }
@@ -947,7 +947,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                         }
                         Err(_) => {
                             failed_to_remove_files += 1;
-                            warnings.push("Failed to delete".to_string() + &*vector[files.0].path);
+                            warnings.push("Failed to delete".to_string() + vector[files.0].path.as_str());
                         }
                     };
                 }
