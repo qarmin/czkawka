@@ -118,7 +118,6 @@ impl DuplicateFinder {
     pub fn find_duplicates(&mut self) {
         self.optimize_directories();
         self.check_files_size();
-        self.remove_files_with_unique_size();
         if self.check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
@@ -449,6 +448,22 @@ impl DuplicateFinder {
                 }
             }
         }
+
+        // Remove files with unique size
+        let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+
+        self.infos.number_of_duplicated_files_by_size = 0;
+
+        for (size, vector) in &self.files_with_identical_size {
+            if vector.len() > 1 {
+                self.infos.number_of_duplicated_files_by_size += vector.len() - 1;
+                self.infos.number_of_groups_by_size += 1;
+                self.infos.lost_space_by_size += (vector.len() as u64 - 1) * size;
+                new_map.insert(*size, vector.clone());
+            }
+        }
+        self.files_with_identical_size = new_map;
+
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
     }
     pub fn save_results_to_file(&mut self, file_name: &str) {
@@ -526,26 +541,6 @@ impl DuplicateFinder {
             }
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
-    }
-
-    /// Remove files which have unique size
-    fn remove_files_with_unique_size(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
-        let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-
-        self.infos.number_of_duplicated_files_by_size = 0;
-
-        for (size, vector) in &self.files_with_identical_size {
-            if vector.len() > 1 {
-                self.infos.number_of_duplicated_files_by_size += vector.len() - 1;
-                self.infos.number_of_groups_by_size += 1;
-                self.infos.lost_space_by_size += (vector.len() as u64 - 1) * size;
-                new_map.insert(*size, vector.clone());
-            }
-        }
-        self.files_with_identical_size = new_map;
-
-        Common::print_time(start_time, SystemTime::now(), "remove_files_with_unique_size".to_string());
     }
 
     /// Should be slower than checking in different ways, but still needs to be checked
