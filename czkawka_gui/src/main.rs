@@ -2,7 +2,6 @@
 use czkawka_core::{duplicate, empty_folder};
 
 extern crate gtk;
-use czkawka_core::duplicate::{CheckingMethod, DeleteMethod};
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
 use gtk::{Builder, TreeView, TreeViewColumn};
@@ -115,13 +114,15 @@ fn main() {
             assert!(notebook_chooser_tool_children_names.contains(&"notebook_empty_folders_label".to_string()));
             match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                 "notebook_duplicate_finder_label" => {
+                    // TODO Change to proper value
                     let mut df = DuplicateFinder::new();
                     df.set_include_directory("/home/rafal/Pulpit".to_owned());
                     df.set_exclude_directory("/rafa/".to_owned());
                     df.set_excluded_items("".to_owned());
                     df.set_allowed_extensions("".to_owned());
-                    df.set_min_file_size(1000); // TODO Change to proper value
-                    df.find_duplicates(&CheckingMethod::HASH, &DeleteMethod::None);
+                    df.set_min_file_size(1000);
+                    df.set_delete_method(duplicate::DeleteMethod::AllExceptNewest);
+                    df.find_duplicates();
                     let _infos = df.get_infos();
 
                     info_entry.set_text("Found TODO duplicates files in TODO groups which took TODO GB/MB/KB/B");

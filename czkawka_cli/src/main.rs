@@ -46,7 +46,7 @@ fn main() {
     //         a.command,
     //         match &a.argument {
     //             Some(t) => t.clone(),
-    //             None => "MISSING_ARGUMENT".to_string(),
+    //             None => "NO_ARGUMENT".to_string(),
     //         }
     //     );
     // }
@@ -58,7 +58,6 @@ fn main() {
     match commands_arguments[0].as_ref() {
         "--d" => {
             let mut df = duplicate::DuplicateFinder::new();
-            let mut check_method: duplicate::CheckingMethod = duplicate::CheckingMethod::HASH;
 
             if ArgumentsPair::has_command(&arguments, "-i") {
                 df.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
@@ -100,32 +99,33 @@ fn main() {
             if ArgumentsPair::has_command(&arguments, "-o") {
                 df.set_recursive_search(false);
             }
+            df.set_check_method(duplicate::CheckingMethod::HASH); // Default
             if ArgumentsPair::has_command(&arguments, "-l") {
                 let argument_name = ArgumentsPair::get_argument(&arguments, "-l", false).to_lowercase();
                 if argument_name == "size" {
-                    check_method = duplicate::CheckingMethod::SIZE;
+                    df.set_check_method(duplicate::CheckingMethod::SIZE);
                 } else if argument_name == "hash" {
-                    check_method = duplicate::CheckingMethod::HASH;
+                    df.set_check_method(duplicate::CheckingMethod::HASH);
                 } else {
                     println!("-l can only have values hash or size");
                     process::exit(1);
                 }
             }
 
-            let mut delete_method: duplicate::DeleteMethod = duplicate::DeleteMethod::None;
+            df.set_delete_method(duplicate::DeleteMethod::None);
             if ArgumentsPair::has_command(&arguments, "-delete") {
-                delete_method = duplicate::DeleteMethod::AllExceptOldest;
                 let argument_name = ArgumentsPair::get_argument(&arguments, "-delete", true).to_lowercase();
                 if argument_name == "aen" {
-                    delete_method = duplicate::DeleteMethod::AllExceptNewest;
+                    df.set_delete_method(duplicate::DeleteMethod::AllExceptNewest);
                 } else if argument_name == "aeo" {
-                    delete_method = duplicate::DeleteMethod::AllExceptOldest;
+                    df.set_delete_method(duplicate::DeleteMethod::AllExceptOldest);
                 } else if argument_name == "on" {
-                    delete_method = duplicate::DeleteMethod::OneNewest;
+                    df.set_delete_method(duplicate::DeleteMethod::OneNewest);
                 } else if argument_name == "oo" {
-                    delete_method = duplicate::DeleteMethod::OneOldest;
+                    df.set_delete_method(duplicate::DeleteMethod::OneOldest);
                 } else if argument_name == "" {
-                    // Nothing to do choosing default one
+                    // Default
+                    df.set_delete_method(duplicate::DeleteMethod::AllExceptOldest);
                 } else {
                     println!(
                         "Invalid argument {} for command -delete, available arguments - aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)",
@@ -135,7 +135,7 @@ fn main() {
                 }
             }
 
-            df.find_duplicates(&check_method, &delete_method);
+            df.find_duplicates();
 
             if ArgumentsPair::has_command(&arguments, "-f") {
                 df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false));

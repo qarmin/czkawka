@@ -358,7 +358,7 @@ impl EmptyFolder {
 
     /// Set include dir which needs to be relative, exists,
     pub fn set_include_directory(&mut self, mut include_directory: String) {
-        // let start_time: SystemTime = SystemTime::now();
+        let start_time: SystemTime = SystemTime::now();
 
         if include_directory.is_empty() {
             println!("At least one directory must be provided");
@@ -413,11 +413,11 @@ impl EmptyFolder {
 
         self.included_directories = checked_directories;
 
-        //Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
     }
 
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
-        //let start_time: SystemTime = SystemTime::now();
+        let start_time: SystemTime = SystemTime::now();
         if exclude_directory.is_empty() {
             return;
         }
@@ -466,7 +466,7 @@ impl EmptyFolder {
         }
         self.excluded_directories = checked_directories;
 
-        //Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
 }
 impl Default for EmptyFolder {

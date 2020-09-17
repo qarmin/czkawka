@@ -10,6 +10,7 @@ use crate::common::Common;
 
 #[derive(PartialEq)]
 pub enum CheckingMethod {
+    NONE,
     SIZE,
     HASH,
 }
@@ -29,19 +30,6 @@ struct FileEntry {
     pub size: u64,
     pub created_date: SystemTime,
     pub modified_date: SystemTime,
-}
-
-/// Struct with required information's to work
-pub struct DuplicateFinder {
-    infos: Info,
-    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,
-    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
-    allowed_extensions: Vec<String>,
-    excluded_items: Vec<String>,
-    excluded_directories: Vec<String>,
-    included_directories: Vec<String>,
-    recursive_search: bool,
-    min_file_size: u64,
 }
 
 /// Info struck with helpful information's about results
@@ -92,6 +80,21 @@ impl Default for Info {
     }
 }
 
+/// Struct with required information's to work
+pub struct DuplicateFinder {
+    infos: Info,
+    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,
+    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
+    allowed_extensions: Vec<String>,
+    excluded_items: Vec<String>,
+    excluded_directories: Vec<String>,
+    included_directories: Vec<String>,
+    recursive_search: bool,
+    min_file_size: u64,
+    check_method: CheckingMethod,
+    delete_method: DeleteMethod,
+}
+
 impl DuplicateFinder {
     pub fn new() -> DuplicateFinder {
         DuplicateFinder {
@@ -104,21 +107,31 @@ impl DuplicateFinder {
             recursive_search: true,
             min_file_size: 1024,
             allowed_extensions: vec![],
+            check_method: CheckingMethod::NONE,
+            delete_method: DeleteMethod::None,
         }
     }
     pub fn get_infos(&self) -> &Info {
         &self.infos
     }
 
-    pub fn find_duplicates(&mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
+    pub fn find_duplicates(&mut self) {
         self.optimize_directories();
         self.check_files_size();
         self.remove_files_with_unique_size();
-        if *check_method == CheckingMethod::HASH {
+        if self.check_method == CheckingMethod::HASH {
             self.check_files_hash();
         }
-        self.delete_files(check_method, delete_method);
+        self.delete_files();
         self.debug_print();
+    }
+
+    pub fn set_check_method(&mut self, check_method: CheckingMethod) {
+        self.check_method = check_method;
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
     }
 
     pub fn set_min_file_size(&mut self, min_size: u64) {
@@ -129,7 +142,7 @@ impl DuplicateFinder {
         self.recursive_search = recursive_search;
     }
     pub fn set_excluded_items(&mut self, mut excluded_items: String) {
-        // let start_time: SystemTime = SystemTime::now();
+        let start_time: SystemTime = SystemTime::now();
 
         if excluded_items.is_empty() {
             return;
@@ -157,10 +170,11 @@ impl DuplicateFinder {
 
             checked_expressions.push(expression);
         }
-
         self.excluded_items = checked_expressions;
+        Common::print_time(start_time, SystemTime::now(), "set_excluded_items".to_string());
     }
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) {
+        let start_time: SystemTime = SystemTime::now();
         if allowed_extensions.is_empty() {
             self.infos.messages.push("No allowed extension was provided, so all are allowed".to_string());
             return;
@@ -172,17 +186,19 @@ impl DuplicateFinder {
 
         let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
         for mut extension in extensions {
-            if extension == "" {
+            if extension == "" || extension.replace('.', "").trim() == "" {
                 continue;
             }
 
-            if extension.contains('.') {
-                if !extension.starts_with('.') {
-                    self.infos.warnings.push(extension + " is not valid extension(valid extension doesn't have dot inside)");
-                    continue;
-                }
-                extension = extension.replace('.', "");
+            if extension.starts_with('.') {
+                extension = extension[1..].to_string();
             }
+
+            if extension[1..].contains('.') {
+                self.infos.warnings.push(".".to_string() + extension.as_str() + " is not valid extension(valid extension doesn't have dot inside)");
+                continue;
+            }
+
             if !self.allowed_extensions.contains(&extension.trim().to_string()) {
                 self.allowed_extensions.push(extension.trim().to_string());
             }
@@ -191,9 +207,10 @@ impl DuplicateFinder {
         if self.allowed_extensions.is_empty() {
             self.infos.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
+        Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
     }
     pub fn set_include_directory(&mut self, mut include_directory: String) -> bool {
-        // let start_time: SystemTime = SystemTime::now();
+        let start_time: SystemTime = SystemTime::now();
 
         if include_directory.is_empty() {
             self.infos.errors.push("At least one directory must be provided".to_string());
@@ -242,12 +259,12 @@ impl DuplicateFinder {
 
         self.included_directories = checked_directories;
 
-        //Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
         true
     }
 
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
-        //let start_time: SystemTime = SystemTime::now();
+        let start_time: SystemTime = SystemTime::now();
         if exclude_directory.is_empty() {
             return;
         }
@@ -292,7 +309,7 @@ impl DuplicateFinder {
         }
         self.excluded_directories = checked_directories;
 
-        //Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
 
     fn check_files_size(&mut self) {
@@ -433,9 +450,9 @@ impl DuplicateFinder {
             }
         }
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
-        //println!("Duration of finding duplicates {:?}", end_time.duration_since(start_time).expect("a"));
     }
     pub fn save_results_to_file(&mut self, file_name: &str) {
+        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -488,6 +505,7 @@ impl DuplicateFinder {
                 }
             }
         }
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
     }
 
     /// Remove files which have unique size
@@ -572,8 +590,13 @@ impl DuplicateFinder {
     }
 
     #[allow(dead_code)]
+    #[allow(unreachable_code)]
     /// Setting include directories, panics when there is not directories available
     fn debug_print(&self) {
+        #[cfg(not(debug_assertions))]
+        {
+            return;
+        }
         println!("---------------DEBUG PRINT---------------");
         println!("### Infos");
 
@@ -653,6 +676,9 @@ impl DuplicateFinder {
                     }
                     println!();
                 }
+            }
+            CheckingMethod::NONE => {
+                panic!("Checking Method shouldn't be ever set to NONE");
             }
         }
         Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
@@ -781,17 +807,14 @@ impl DuplicateFinder {
         true
     }
 
-    fn delete_files(&mut self, check_method: &CheckingMethod, delete_method: &DeleteMethod) {
-        if *delete_method == DeleteMethod::None {
-            return;
-        }
+    fn delete_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
 
-        match check_method {
+        match self.check_method {
             CheckingMethod::HASH => {
                 for entry in &self.files_with_identical_hashes {
                     for vector in entry.1 {
-                        let tuple: (u64, usize, usize) = delete_files(&vector, &delete_method, &mut self.infos.warnings);
+                        let tuple: (u64, usize, usize) = delete_files(&vector, &self.delete_method, &mut self.infos.warnings);
                         self.infos.gained_space += tuple.0;
                         self.infos.number_of_removed_files += tuple.1;
                         self.infos.number_of_failed_to_remove_files += tuple.2;
@@ -800,11 +823,15 @@ impl DuplicateFinder {
             }
             CheckingMethod::SIZE => {
                 for entry in &self.files_with_identical_size {
-                    let tuple: (u64, usize, usize) = delete_files(&entry.1, &delete_method, &mut self.infos.warnings);
+                    let tuple: (u64, usize, usize) = delete_files(&entry.1, &self.delete_method, &mut self.infos.warnings);
                     self.infos.gained_space += tuple.0;
                     self.infos.number_of_removed_files += tuple.1;
                     self.infos.number_of_failed_to_remove_files += tuple.2;
                 }
+            }
+            CheckingMethod::NONE => {
+                //Just do nothing
+                panic!("Checking method should never be none.");
             }
         }
 
@@ -912,9 +939,8 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
             }
         }
         DeleteMethod::None => {
-            panic!();
+            // Just don't remove files
         }
     };
-    println!("{}    {}    {}", gained_space, removed_files, failed_to_remove_files);
     (gained_space, removed_files, failed_to_remove_files)
 }

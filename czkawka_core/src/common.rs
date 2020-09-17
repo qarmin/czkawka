@@ -7,11 +7,9 @@ use std::time::SystemTime;
 pub struct Common();
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
-    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
-        if false {
-            return;
-        }
-        println!("Execution of function \"{}\" took {:?}", function_name, end_time.duration_since(start_time).expect("Time cannot go reverse."));
+    pub fn print_time(_start_time: SystemTime, _end_time: SystemTime, _function_name: String) {
+        #[cfg(debug_assertions)]
+        println!("Execution of function \"{}\" took {:?}", _function_name, _end_time.duration_since(_start_time).expect("Time cannot go reverse."));
     }
 
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
