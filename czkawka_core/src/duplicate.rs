@@ -481,7 +481,7 @@ impl DuplicateFinder {
             }
         };
 
-        match file.write_all(b"Results of searching\n\n") {
+        match file.write_all(format!("Results of searching in {:?}\n",self.included_directories).as_bytes()) {
             Ok(_) => (),
             Err(_) => {
                 self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());

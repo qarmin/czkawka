@@ -148,7 +148,6 @@ fn main() {
             }
 
             df.get_text_messages().print_messages();
-            //print_information(df.get_information());
         }
         "--h" | "--help" => {
             print_help();
@@ -162,6 +161,13 @@ fn main() {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
             }
+
+            if ArgumentsPair::has_command(&arguments, "-delete") {
+                ef.set_delete_folder(true);
+            }
+
+            ef.find_empty_folders();
+
             #[allow(clippy::collapsible_if)]
             if ArgumentsPair::has_command(&arguments, "-f") {
                 if !ef.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
@@ -169,12 +175,6 @@ fn main() {
                     process::exit(1);
                 }
             }
-
-            if ArgumentsPair::has_command(&arguments, "-delete") {
-                ef.set_delete_folder(true);
-            }
-
-            ef.find_empty_folders();
 
             ef.print_empty_folders();
         }

@@ -99,7 +99,7 @@ impl EmptyFolder {
             }
         };
 
-        match file.write_all(b"Results of searching\n") {
+        match file.write_all(format!("Results of searching in {:?}\n",self.included_directories).as_bytes()) {
             Ok(_) => (),
             Err(_) => {
                 self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
@@ -139,6 +139,7 @@ impl EmptyFolder {
             }
         }
         self.empty_folder_list = new_directory_folders;
+        self.information.number_of_empty_folders = self.empty_folder_list.len();
     }
 
     /// Function to check if folder are empty.
@@ -177,6 +178,7 @@ impl EmptyFolder {
         let mut current_folder: String;
         let mut next_folder: String;
         while !folders_to_check.is_empty() {
+            self.information.number_of_checked_folders += 1;
             current_folder = folders_to_check.pop().unwrap();
             // Checked folder may be deleted so we assume that cannot removed folder be empty
             let read_dir = match fs::read_dir(&current_folder) {
