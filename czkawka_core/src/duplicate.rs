@@ -76,7 +76,7 @@ impl Default for Info {
 
 /// Struct with required information's to work
 pub struct DuplicateFinder {
-    messages: Messages,
+    text_messages: Messages,
     information: Info,
     files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
@@ -93,7 +93,7 @@ pub struct DuplicateFinder {
 impl DuplicateFinder {
     pub fn new() -> DuplicateFinder {
         DuplicateFinder {
-            messages: Default::default(),
+            text_messages: Default::default(),
             information: Info::new(),
             files_with_identical_size: Default::default(),
             files_with_identical_hashes: Default::default(),
@@ -108,8 +108,8 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn get_messages(&self) -> &Messages {
-        &self.messages
+    pub fn get_text_messages(&self) -> &Messages {
+        &self.text_messages
     }
     pub fn get_information(&self) -> &Info {
         &self.information
@@ -163,7 +163,7 @@ impl DuplicateFinder {
                 continue;
             }
             if !expression.contains('*') {
-                self.messages.warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
+                self.text_messages.warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
                 continue;
             }
 
@@ -175,7 +175,7 @@ impl DuplicateFinder {
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) {
         let start_time: SystemTime = SystemTime::now();
         if allowed_extensions.is_empty() {
-            self.messages.messages.push("No allowed extension was provided, so all are allowed".to_string());
+            self.text_messages.messages.push("No allowed extension was provided, so all are allowed".to_string());
             return;
         }
         allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
@@ -194,7 +194,7 @@ impl DuplicateFinder {
             }
 
             if extension[1..].contains('.') {
-                self.messages.warnings.push(".".to_string() + extension.as_str() + " is not valid extension(valid extension doesn't have dot inside)");
+                self.text_messages.warnings.push(".".to_string() + extension.as_str() + " is not valid extension(valid extension doesn't have dot inside)");
                 continue;
             }
 
@@ -204,7 +204,7 @@ impl DuplicateFinder {
         }
 
         if self.allowed_extensions.is_empty() {
-            self.messages.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
+            self.text_messages.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
     }
@@ -212,7 +212,7 @@ impl DuplicateFinder {
         let start_time: SystemTime = SystemTime::now();
 
         if include_directory.is_empty() {
-            self.messages.errors.push("At least one directory must be provided".to_string());
+            self.text_messages.errors.push("At least one directory must be provided".to_string());
             return false;
         }
 
@@ -227,19 +227,19 @@ impl DuplicateFinder {
                 continue;
             }
             if directory.contains('*') {
-                self.messages.warnings.push("Include Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Include Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !directory.starts_with('/') {
-                self.messages.warnings.push("Include Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Include Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).exists() {
-                self.messages.warnings.push("Include Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Include Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                self.messages.warnings.push("Include Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Include Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
                 continue;
             }
 
@@ -252,7 +252,7 @@ impl DuplicateFinder {
         }
 
         if checked_directories.is_empty() {
-            self.messages.errors.push("Include Directory ERROR: Not found even one correct path to include which is required.".to_string());
+            self.text_messages.errors.push("Include Directory ERROR: Not found even one correct path to include which is required.".to_string());
             return false;
         }
 
@@ -279,23 +279,23 @@ impl DuplicateFinder {
                 continue;
             }
             if directory == "/" {
-                self.messages.errors.push("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
+                self.text_messages.errors.push("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
                 break;
             }
             if directory.contains('*') {
-                self.messages.warnings.push("Exclude Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Exclude Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !directory.starts_with('/') {
-                self.messages.warnings.push("Exclude Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Exclude Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).exists() {
-                self.messages.warnings.push("Exclude Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Exclude Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                self.messages.warnings.push("Exclude Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
+                self.text_messages.warnings.push("Exclude Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
                 continue;
             }
 
@@ -330,7 +330,7 @@ impl DuplicateFinder {
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_) => {
-                    self.messages.warnings.push("Cannot open dir ".to_string() + current_folder.as_str());
+                    self.text_messages.warnings.push("Cannot open dir ".to_string() + current_folder.as_str());
                     continue;
                 } // Permissions denied
             };
@@ -338,21 +338,21 @@ impl DuplicateFinder {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
-                        self.messages.warnings.push("Cannot read entry in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push("Cannot read entry in dir ".to_string() + current_folder.as_str());
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => {
-                        self.messages.warnings.push("Cannot read metadata in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push("Cannot read metadata in dir ".to_string() + current_folder.as_str());
                         continue;
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
                     self.information.number_of_checked_folders += 1;
                     // if entry_data.file_name().into_string().is_err() { // Probably this can be removed, if crash still will be happens, then uncomment this line
-                    //     self.messages.warnings.push("Cannot read folder name in dir ".to_string() + current_folder.as_str());
+                    //     self.text_messages.warnings.push("Cannot read folder name in dir ".to_string() + current_folder.as_str());
                     //     continue; // Permissions denied
                     // }
 
@@ -422,14 +422,14 @@ impl DuplicateFinder {
                             created_date: match metadata.created() {
                                 Ok(t) => t,
                                 Err(_) => {
-                                    self.messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
+                                    self.text_messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
                                     SystemTime::now()
                                 } // Permissions Denied
                             },
                             modified_date: match metadata.modified() {
                                 Ok(t) => t,
                                 Err(_) => {
-                                    self.messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
+                                    self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
                                     SystemTime::now()
                                 } // Permissions Denied
                             },
@@ -466,7 +466,7 @@ impl DuplicateFinder {
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
     }
-    pub fn save_results_to_file(&mut self, file_name: &str) {
+    pub fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -476,16 +476,16 @@ impl DuplicateFinder {
         let mut file = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
-                self.messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
-                return;
+                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+                return false;
             }
         };
 
         match file.write_all(b"Results of searching\n\n") {
             Ok(_) => (),
             Err(_) => {
-                self.messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
-                return;
+                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+                return false;
             }
         }
 
@@ -512,35 +512,38 @@ impl DuplicateFinder {
                     file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
                 }
             }
-        }
 
-        if !self.files_with_identical_hashes.is_empty() {
-            file.write_all(b"-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
-            file.write_all(
-                ("Found ".to_string()
-                    + self.information.number_of_duplicated_files_by_hash.to_string().as_str()
-                    + " duplicated files which in "
-                    + self.information.number_of_groups_by_hash.to_string().as_str()
-                    + " groups which takes "
-                    + self.information.lost_space_by_hash.file_size(options::BINARY).unwrap().as_str()
-                    + ".\n")
-                    .as_bytes(),
-            )
-            .unwrap();
-            for (size, files) in self.files_with_identical_hashes.iter().rev() {
-                for vector in files {
-                    file.write_all(b"\n---- Size ").unwrap();
-                    file.write_all(size.file_size(options::BINARY).unwrap().as_bytes()).unwrap();
-                    file.write_all((" (".to_string() + size.to_string().as_str() + ")").as_bytes()).unwrap();
-                    file.write_all((" - ".to_string() + vector.len().to_string().as_str() + " files").as_bytes()).unwrap();
-                    file.write_all(b"\n").unwrap();
-                    for file_entry in vector {
-                        file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
+            if !self.files_with_identical_hashes.is_empty() {
+                file.write_all(b"-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
+                file.write_all(
+                    ("Found ".to_string()
+                        + self.information.number_of_duplicated_files_by_hash.to_string().as_str()
+                        + " duplicated files which in "
+                        + self.information.number_of_groups_by_hash.to_string().as_str()
+                        + " groups which takes "
+                        + self.information.lost_space_by_hash.file_size(options::BINARY).unwrap().as_str()
+                        + ".\n")
+                        .as_bytes(),
+                )
+                .unwrap();
+                for (size, files) in self.files_with_identical_hashes.iter().rev() {
+                    for vector in files {
+                        file.write_all(b"\n---- Size ").unwrap();
+                        file.write_all(size.file_size(options::BINARY).unwrap().as_bytes()).unwrap();
+                        file.write_all((" (".to_string() + size.to_string().as_str() + ")").as_bytes()).unwrap();
+                        file.write_all((" - ".to_string() + vector.len().to_string().as_str() + " files").as_bytes()).unwrap();
+                        file.write_all(b"\n").unwrap();
+                        for file_entry in vector {
+                            file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
+                        }
                     }
                 }
             }
+        } else {
+            file.write_all(b"Not found any empty folders.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        true
     }
 
     /// Should be slower than checking in different ways, but still needs to be checked
@@ -556,7 +559,7 @@ impl DuplicateFinder {
                 file_handler = match File::open(&file_entry.1.path) {
                     Ok(t) => t,
                     Err(_) => {
-                        self.messages.warnings.push("Unable to check hash of file ".to_string() + file_entry.1.path.as_str());
+                        self.text_messages.warnings.push("Unable to check hash of file ".to_string() + file_entry.1.path.as_str());
                         continue;
                     }
                 };
@@ -569,7 +572,7 @@ impl DuplicateFinder {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
                         Err(_) => {
-                            self.messages.warnings.push("Error happened when checking hash of file ".to_string() + file_entry.1.path.as_str());
+                            self.text_messages.warnings.push("Error happened when checking hash of file ".to_string() + file_entry.1.path.as_str());
                             error_reading_file = true;
                             break;
                         }
@@ -615,18 +618,28 @@ impl DuplicateFinder {
         println!("---------------DEBUG PRINT---------------");
         println!("### Information's");
 
-        println!("Errors size - {}", self.messages.errors.len());
-        println!("Warnings size - {}", self.messages.warnings.len());
-        println!("Messages size - {}", self.messages.messages.len());
+        println!("Errors size - {}", self.text_messages.errors.len());
+        println!("Warnings size - {}", self.text_messages.warnings.len());
+        println!("Messages size - {}", self.text_messages.messages.len());
         println!("Number of checked files - {}", self.information.number_of_checked_files);
         println!("Number of checked folders - {}", self.information.number_of_checked_folders);
         println!("Number of ignored files - {}", self.information.number_of_ignored_files);
         println!("Number of ignored things(like symbolic links) - {}", self.information.number_of_ignored_things);
-        println!("Number of duplicated files by size(in groups) - {} ({})", self.information.number_of_duplicated_files_by_size, self.information.number_of_groups_by_size);
-        println!("Number of duplicated files by hash(in groups) - {} ({})", self.information.number_of_duplicated_files_by_hash, self.information.number_of_groups_by_hash);
+        println!(
+            "Number of duplicated files by size(in groups) - {} ({})",
+            self.information.number_of_duplicated_files_by_size, self.information.number_of_groups_by_size
+        );
+        println!(
+            "Number of duplicated files by hash(in groups) - {} ({})",
+            self.information.number_of_duplicated_files_by_hash, self.information.number_of_groups_by_hash
+        );
         println!("Lost space by size - {} ({} bytes)", self.information.lost_space_by_size.file_size(options::BINARY).unwrap(), self.information.lost_space_by_size);
         println!("Lost space by hash - {} ({} bytes)", self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(), self.information.lost_space_by_hash);
-        println!("Gained space by removing duplicated entries - {} ({} bytes)", self.information.gained_space.file_size(options::BINARY).unwrap(), self.information.gained_space);
+        println!(
+            "Gained space by removing duplicated entries - {} ({} bytes)",
+            self.information.gained_space.file_size(options::BINARY).unwrap(),
+            self.information.gained_space
+        );
         println!("Number of removed files - {}", self.information.number_of_removed_files);
         println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
 
@@ -811,7 +824,7 @@ impl DuplicateFinder {
         // optimized_excluded = Vec::<String>::new();
 
         if self.included_directories.is_empty() {
-            self.messages.errors.push("Optimize Directories ERROR: Excluded directories overlaps all included directories.".to_string());
+            self.text_messages.errors.push("Optimize Directories ERROR: Excluded directories overlaps all included directories.".to_string());
             return false;
         }
 
@@ -829,7 +842,7 @@ impl DuplicateFinder {
             CheckingMethod::HASH => {
                 for entry in &self.files_with_identical_hashes {
                     for vector in entry.1 {
-                        let tuple: (u64, usize, usize) = delete_files(&vector, &self.delete_method, &mut self.messages.warnings);
+                        let tuple: (u64, usize, usize) = delete_files(&vector, &self.delete_method, &mut self.text_messages.warnings);
                         self.information.gained_space += tuple.0;
                         self.information.number_of_removed_files += tuple.1;
                         self.information.number_of_failed_to_remove_files += tuple.2;
@@ -838,7 +851,7 @@ impl DuplicateFinder {
             }
             CheckingMethod::SIZE => {
                 for entry in &self.files_with_identical_size {
-                    let tuple: (u64, usize, usize) = delete_files(&entry.1, &self.delete_method, &mut self.messages.warnings);
+                    let tuple: (u64, usize, usize) = delete_files(&entry.1, &self.delete_method, &mut self.text_messages.warnings);
                     self.information.gained_space += tuple.0;
                     self.information.number_of_removed_files += tuple.1;
                     self.information.number_of_failed_to_remove_files += tuple.2;

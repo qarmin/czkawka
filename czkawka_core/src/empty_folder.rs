@@ -1,6 +1,7 @@
 use crate::common::{Common, Messages};
 use std::collections::HashMap;
-use std::fs::Metadata;
+use std::fs::{File, Metadata};
+use std::io::Write;
 use std::path::Path;
 use std::time::SystemTime;
 use std::{fs, process};
@@ -22,22 +23,23 @@ struct FolderEntry {
 
 /// Struct to store most basics info about  all folder
 pub struct EmptyFolder {
-    informations: Info,
+    information: Info,
     delete_folders: bool,
-    messages: Messages,
-    empty_folder_list: HashMap<String, FolderEntry>,
-    excluded_directories: Vec<String>,
+    text_messages: Messages,
+    empty_folder_list: HashMap<String, FolderEntry>, // Path, FolderEntry
     included_directories: Vec<String>,
 }
 
 /// Info struck with helpful information's about results
 pub struct Info {
+    #[cfg(debug_assertions)]
     number_of_checked_folders: usize,
     number_of_empty_folders: usize,
 }
 impl Info {
     pub fn new() -> Info {
         Info {
+            #[cfg(debug_assertions)]
             number_of_checked_folders: 0,
             number_of_empty_folders: 0,
         }
@@ -54,17 +56,16 @@ impl EmptyFolder {
     /// New function providing basics values
     pub fn new() -> EmptyFolder {
         EmptyFolder {
-            informations: Default::default(),
+            information: Default::default(),
             delete_folders: false,
-            messages: Default::default(),
+            text_messages: Default::default(),
             empty_folder_list: Default::default(),
-            excluded_directories: vec![],
             included_directories: vec![],
         }
     }
 
-    pub fn get_messages(&self) -> &Messages {
-        &self.messages
+    pub fn get_text_messages(&self) -> &Messages {
+        &self.text_messages
     }
 
     /// Public function used by CLI to search for empty folders
@@ -81,6 +82,43 @@ impl EmptyFolder {
 
     pub fn set_delete_folder(&mut self, delete_folder: bool) {
         self.delete_folders = delete_folder;
+    }
+
+    pub fn save_results_to_file(&mut self, file_name: &str) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+        let file_name: String = match file_name {
+            "" => "results.txt".to_string(),
+            k => k.to_string(),
+        };
+
+        let mut file = match File::create(&file_name) {
+            Ok(t) => t,
+            Err(_) => {
+                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+                return false;
+            }
+        };
+
+        match file.write_all(b"Results of searching\n") {
+            Ok(_) => (),
+            Err(_) => {
+                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+                return false;
+            }
+        }
+
+        if !self.empty_folder_list.is_empty() {
+            file.write_all(b"-------------------------------------------------Empty folder list-------------------------------------------------\n").unwrap();
+            file.write_all(("Found ".to_string() + self.information.number_of_empty_folders.to_string().as_str() + " empty folders which in " + ".\n").as_bytes())
+                .unwrap();
+            for name in self.empty_folder_list.keys() {
+                file.write_all((name.clone() + "\n").as_bytes()).unwrap();
+            }
+        } else {
+            file.write_all(b"Not found any empty folders.").unwrap();
+        }
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        true
     }
 
     /// Clean directory tree
@@ -160,25 +198,16 @@ impl EmptyFolder {
                 };
                 // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
-                    let mut is_excluded_dir = false;
                     next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
-                    for ed in &self.excluded_directories {
-                        if next_folder == *ed {
-                            is_excluded_dir = true;
-                            break;
-                        }
-                    }
-                    if !is_excluded_dir {
-                        folders_to_check.push(next_folder.clone());
+                    folders_to_check.push(next_folder.clone());
 
-                        folders_checked.insert(
-                            next_folder.clone(),
-                            FolderEntry {
-                                parent_path: Option::from(current_folder.clone()),
-                                is_empty: FolderEmptiness::Maybe,
-                            },
-                        );
-                    }
+                    folders_checked.insert(
+                        next_folder.clone(),
+                        FolderEntry {
+                            parent_path: Option::from(current_folder.clone()),
+                            is_empty: FolderEmptiness::Maybe,
+                        },
+                    );
                 } else {
                     // Not folder so it may be a file or symbolic link so it isn't empty
                     folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
@@ -254,9 +283,8 @@ impl EmptyFolder {
         #[cfg(debug_assertions)]
         {
             println!("---------------DEBUG PRINT---------------");
-            println!("Number of all checked folders - {}", self.informations.number_of_checked_folders);
-            println!("Number of empty folders - {}", self.informations.number_of_empty_folders);
-            println!("Excluded directories - {:?}", self.excluded_directories);
+            println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
+            println!("Number of empty folders - {}", self.information.number_of_empty_folders);
             println!("Included directories - {:?}", self.included_directories);
             println!("-----------------------------------------");
         }
@@ -268,34 +296,15 @@ impl EmptyFolder {
         let start_time: SystemTime = SystemTime::now();
 
         let mut optimized_included: Vec<String> = Vec::<String>::new();
-        let mut optimized_excluded: Vec<String> = Vec::<String>::new();
         // Remove duplicated entries like: "/", "/"
 
-        self.excluded_directories.sort();
         self.included_directories.sort();
 
-        self.excluded_directories.dedup();
         self.included_directories.dedup();
 
         // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
-        let mut is_inside: bool;
-        for ed_checked in &self.excluded_directories {
-            is_inside = false;
-            for ed_help in &self.excluded_directories {
-                if ed_checked == ed_help {
-                    // We checking same element
-                    continue;
-                }
-                if ed_checked.starts_with(ed_help) {
-                    is_inside = true;
-                    break;
-                }
-            }
-            if !is_inside {
-                optimized_excluded.push(ed_checked.to_string());
-            }
-        }
 
+        let mut is_inside: bool;
         for id_checked in &self.included_directories {
             is_inside = false;
             for id_help in &self.included_directories {
@@ -315,24 +324,6 @@ impl EmptyFolder {
 
         self.included_directories = optimized_included;
         optimized_included = Vec::<String>::new();
-        self.excluded_directories = optimized_excluded;
-        optimized_excluded = Vec::<String>::new();
-
-        // Remove include directories which are inside any exclude directory
-        for id in &self.included_directories {
-            let mut is_inside: bool = false;
-            for ed in &self.excluded_directories {
-                if id.starts_with(ed) {
-                    is_inside = true;
-                    break;
-                }
-            }
-            if !is_inside {
-                optimized_included.push(id.to_string());
-            }
-        }
-        self.included_directories = optimized_included;
-        optimized_included = Vec::<String>::new();
 
         // Remove non existed directories
         for id in &self.included_directories {
@@ -342,34 +333,8 @@ impl EmptyFolder {
             }
         }
 
-        for ed in &self.excluded_directories {
-            let path = Path::new(ed);
-            if path.exists() {
-                optimized_excluded.push(ed.to_string());
-            }
-        }
-
         self.included_directories = optimized_included;
-        // optimized_included = Vec::<String>::new();
-        self.excluded_directories = optimized_excluded;
-        optimized_excluded = Vec::<String>::new();
-
-        // Excluded paths must are inside include path, because
-        for ed in &self.excluded_directories {
-            let mut is_inside: bool = false;
-            for id in &self.included_directories {
-                if ed.starts_with(id) {
-                    is_inside = true;
-                    break;
-                }
-            }
-            if is_inside {
-                optimized_excluded.push(ed.to_string());
-            }
-        }
-
-        self.excluded_directories = optimized_excluded;
-        // optimized_excluded = Vec::<String>::new();
+        //optimized_included = Vec::<String>::new();
 
         if self.included_directories.is_empty() {
             println!("Optimize Directories ERROR: Excluded directories overlaps all included directories.");
@@ -377,7 +342,6 @@ impl EmptyFolder {
         }
 
         // Not needed, but better is to have sorted everything
-        self.excluded_directories.sort();
         self.included_directories.sort();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
@@ -440,59 +404,6 @@ impl EmptyFolder {
         self.included_directories = checked_directories;
 
         Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
-    }
-
-    pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
-        let start_time: SystemTime = SystemTime::now();
-        if exclude_directory.is_empty() {
-            return;
-        }
-
-        exclude_directory = exclude_directory.replace("\"", "");
-        let directories: Vec<String> = exclude_directory.split(',').map(String::from).collect();
-        let mut checked_directories: Vec<String> = Vec::new();
-
-        for directory in directories {
-            let directory: String = directory.trim().to_string();
-
-            if directory == "" {
-                continue;
-            }
-            if directory == "/" {
-                println!("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.");
-                break;
-            }
-            if directory.contains('*') {
-                println!("Exclude Directory ERROR: Wildcards are not supported, ignoring path {}.", directory);
-                continue;
-            }
-            if directory.starts_with('~') {
-                println!("Exclude Directory ERROR: ~ in path isn't supported, ignoring path {}.", directory);
-                continue;
-            }
-            if !directory.starts_with('/') {
-                println!("Exclude Directory ERROR: Relative path are not supported, ignoring path {}.", directory);
-                continue;
-            }
-            if !Path::new(&directory).exists() {
-                println!("Exclude Directory ERROR: Path {} doesn't exists.", directory);
-                continue;
-            }
-            if !Path::new(&directory).is_dir() {
-                println!("Exclude Directory ERROR: {} isn't folder.", directory);
-                continue;
-            }
-
-            // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
-            if !directory.ends_with('/') {
-                checked_directories.push(directory.trim().to_string() + "/");
-            } else {
-                checked_directories.push(directory.trim().to_string());
-            }
-        }
-        self.excluded_directories = checked_directories;
-
-        Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
 }
 impl Default for EmptyFolder {

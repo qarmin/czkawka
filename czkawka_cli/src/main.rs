@@ -139,11 +139,15 @@ fn main() {
 
             df.print_duplicated_entries();
 
+            #[allow(clippy::collapsible_if)]
             if ArgumentsPair::has_command(&arguments, "-f") {
-                df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false));
+                if !df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
+                    df.get_text_messages().print_messages();
+                    process::exit(1);
+                }
             }
 
-            df.get_messages().print_messages();
+            df.get_text_messages().print_messages();
             //print_information(df.get_information());
         }
         "--h" | "--help" => {
@@ -158,8 +162,12 @@ fn main() {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
             }
-            if ArgumentsPair::has_command(&arguments, "-e") {
-                ef.set_exclude_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+            #[allow(clippy::collapsible_if)]
+            if ArgumentsPair::has_command(&arguments, "-f") {
+                if !ef.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
+                    ef.get_text_messages().print_messages();
+                    process::exit(1);
+                }
             }
 
             if ArgumentsPair::has_command(&arguments, "-delete") {
@@ -206,9 +214,7 @@ Usage of Czkawka:
 
   --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save] [-delete] - option to find and delete empty folders
     -i directory_to_search - list of directories which should will be searched like /home/rafal
-    -o - this options prevents from recursive check of folders
     -e exclude_directories - list of directories which will be excluded from search.
-    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
     -f file_to_save - saves results to file
     -delete - delete found empty folders
       czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
