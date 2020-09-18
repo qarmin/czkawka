@@ -1,4 +1,3 @@
-use czkawka_core::duplicate::Info;
 use czkawka_core::{duplicate, empty_folder};
 use std::{env, process};
 
@@ -40,16 +39,17 @@ fn main() {
         }
     }
 
-    // for a in &arguments {
-    //     println!(
-    //         "Argument number {} - {}",
-    //         a.command,
-    //         match &a.argument {
-    //             Some(t) => t.clone(),
-    //             None => "NO_ARGUMENT".to_string(),
-    //         }
-    //     );
-    // }
+    #[cfg(debug_assertions)]
+    for a in &arguments {
+        println!(
+            "Argument number {} - {}",
+            a.command,
+            match &a.argument {
+                Some(t) => t.clone(),
+                None => "NO_ARGUMENT".to_string(),
+            }
+        );
+    }
 
     if commands_arguments.is_empty() {
         println! {"FATAL ERROR: Missing type of app which you want to run, please read help for more info."};
@@ -143,14 +143,14 @@ fn main() {
                 df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false));
             }
 
-            print_infos(df.get_infos());
+            df.get_messages().print_messages();
+            //print_information(df.get_information());
         }
         "--h" | "--help" => {
             print_help();
         }
         "--e" => {
             let mut ef = empty_folder::EmptyFolder::new();
-            let mut delete_folders: bool = false;
 
             if ArgumentsPair::has_command(&arguments, "-i") {
                 ef.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
@@ -163,10 +163,12 @@ fn main() {
             }
 
             if ArgumentsPair::has_command(&arguments, "-delete") {
-                delete_folders = true;
+                ef.set_delete_folder(true);
             }
 
-            ef.find_empty_folders(delete_folders);
+            ef.find_empty_folders();
+
+            ef.print_empty_folders();
         }
         argum => {
             println!("FATAL ERROR: \"{}\" argument is not supported, check help for more info.", argum);
@@ -202,45 +204,16 @@ Usage of Czkawka:
       czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
       czkawka --d -i "/etc/" -delete "aeo"
 
-  --e <-i directory_to_search> [-e exclude_directories = ""] [-delete] - option to find and delete empty folders
+  --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save] [-delete] - option to find and delete empty folders
     -i directory_to_search - list of directories which should will be searched like /home/rafal
+    -o - this options prevents from recursive check of folders
     -e exclude_directories - list of directories which will be excluded from search.
+    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
+    -f file_to_save - saves results to file
     -delete - delete found empty folders
       czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
     "###
     );
-}
-/// Printing infos about warnings, messages and errors
-fn print_infos(infos: &Info) {
-    if !infos.messages.is_empty() {
-        println!("-------------------------------MESSAGES--------------------------------");
-    }
-    for i in &infos.messages {
-        println!("{}", i);
-    }
-    if !infos.messages.is_empty() {
-        println!("---------------------------END OF MESSAGES-----------------------------");
-    }
-
-    if !infos.warnings.is_empty() {
-        println!("-------------------------------WARNINGS--------------------------------");
-    }
-    for i in &infos.warnings {
-        println!("{}", i);
-    }
-    if !infos.warnings.is_empty() {
-        println!("---------------------------END OF WARNINGS-----------------------------");
-    }
-
-    if !infos.errors.is_empty() {
-        println!("--------------------------------ERRORS---------------------------------");
-    }
-    for i in &infos.errors {
-        println!("{}", i);
-    }
-    if !infos.errors.is_empty() {
-        println!("----------------------------END OF ERRORS------------------------------");
-    }
 }
 
 struct ArgumentsPair {

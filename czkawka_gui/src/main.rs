@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use czkawka_core::{duplicate, empty_folder};
+use humansize::{file_size_opts as options, FileSize};
 
 extern crate gtk;
 use duplicate::DuplicateFinder;
@@ -20,21 +21,12 @@ fn main() {
 
     // Buttons State
 
+    // let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new( HashMap::<&str, bool>::new()));
+
     let mut hashmap_buttons: HashMap<&str, bool> = Default::default();
     for i in ["duplicate", "empty_folder"].iter() {
         hashmap_buttons.insert(i, false);
     }
-
-    // let mut hashmap_buttons : HashMap<&str,bool> = Default::default();
-    // let mut buttons_state : HashMap<&str,HashMap<&str,bool>> = Default::default();
-    // for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
-    //     hashmap_buttons.insert(i,false);
-    // }
-    //
-    // for i in ["buttons_search","buttons_stop","buttons_resume","buttons_pause","buttons_select","buttons_delete","buttons_save"].iter() {
-    //     buttons_state.insert(i,hashmap_buttons.clone());
-    // }
-    // buttons_state.insert(hashmap_buttons.clone());
 
     // GUI Notepad Buttons
 
@@ -107,7 +99,6 @@ fn main() {
         // Connect Buttons
 
         let buttons_search_clone = buttons_search.clone();
-        // let info_entry = info_entry.clone();
 
         buttons_search.connect_clicked(move |_| {
             assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
@@ -116,22 +107,45 @@ fn main() {
                 "notebook_duplicate_finder_label" => {
                     // TODO Change to proper value
                     let mut df = DuplicateFinder::new();
-                    df.set_include_directory("/home/rafal/Pulpit".to_owned());
+                    let check_method = duplicate::CheckingMethod::HASH;
+                    df.set_include_directory("/home/rafal/Pulpit/AAA".to_owned());
                     df.set_exclude_directory("/rafa/".to_owned());
                     df.set_excluded_items("".to_owned());
                     df.set_allowed_extensions("".to_owned());
                     df.set_min_file_size(1000);
-                    df.set_delete_method(duplicate::DeleteMethod::AllExceptNewest);
+                    df.set_check_method(check_method.clone());
+                    df.set_delete_method(duplicate::DeleteMethod::None);
                     df.find_duplicates();
-                    let _infos = df.get_infos();
+                    let information = df.get_information();
 
-                    info_entry.set_text("Found TODO duplicates files in TODO groups which took TODO GB/MB/KB/B");
+                    let duplicates_number: usize;
+                    let duplicates_size: u64;
+                    let duplicates_group: usize;
+
+                    if check_method == duplicate::CheckingMethod::HASH {
+                        duplicates_number = information.number_of_duplicated_files_by_hash;
+                        duplicates_size = information.lost_space_by_hash;
+                        duplicates_group = information.number_of_groups_by_hash;
+                    } else {
+                        duplicates_number = information.number_of_duplicated_files_by_size;
+                        duplicates_size = information.lost_space_by_size;
+                        duplicates_group = information.number_of_groups_by_size;
+                    }
+
+                    info_entry.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
 
                     // Buttons
-                    // TODO if found
                     buttons_select.show();
                     buttons_delete.show();
-                    //
+                    // TODO Add buttons
+                    // if *hashmap_buttons.get("duplicate").unwrap() {
+                    //     buttons_select.show();
+                    //     buttons_delete.show();
+                    // }
+                    // else{
+                    //     buttons_select.hide();
+                    //     buttons_delete.hide();
+                    // }
 
                     buttons_search_clone.show();
                     buttons_stop.hide();
@@ -139,7 +153,26 @@ fn main() {
                     buttons_pause.hide();
                     buttons_save.hide();
                 }
-                "notebook_empty_folders_label" => {}
+                "notebook_empty_folders_label" => {
+                    // let mut ef = empty_folder::EmptyFolder::new();
+                    // let mut delete_folders: bool = false;
+                    //
+                    //     ef.set_include_directory("/home/rafal/Pulpit".to_string());
+                    //
+                    // ef.find_empty_folders(false);
+                    //
+                    //
+                    // info_entry.set_text(format!("Found {} empty folders.",duplicates_number).as_str());
+                    //
+                    //
+                    // buttons_select.show();
+                    // buttons_delete.show();
+                    // buttons_search_clone.show();
+                    // buttons_stop.hide();
+                    // buttons_resume.hide();
+                    // buttons_pause.hide();
+                    // buttons_save.hide();
+                }
                 e => panic!("Not existent {}", e),
             }
         });

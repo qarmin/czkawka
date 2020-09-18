@@ -1,4 +1,4 @@
-use crate::common::Common;
+use crate::common::{Common, Messages};
 use std::collections::HashMap;
 use std::fs::Metadata;
 use std::path::Path;
@@ -22,37 +22,65 @@ struct FolderEntry {
 
 /// Struct to store most basics info about  all folder
 pub struct EmptyFolder {
-    number_of_checked_folders: usize,
-    number_of_empty_folders: usize,
+    informations: Info,
+    delete_folders: bool,
+    messages: Messages,
     empty_folder_list: HashMap<String, FolderEntry>,
     excluded_directories: Vec<String>,
     included_directories: Vec<String>,
 }
 
+/// Info struck with helpful information's about results
+pub struct Info {
+    number_of_checked_folders: usize,
+    number_of_empty_folders: usize,
+}
+impl Info {
+    pub fn new() -> Info {
+        Info {
+            number_of_checked_folders: 0,
+            number_of_empty_folders: 0,
+        }
+    }
+}
+
+impl Default for Info {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 /// Method implementation for EmptyFolder
 impl EmptyFolder {
     /// New function providing basics values
     pub fn new() -> EmptyFolder {
         EmptyFolder {
-            number_of_checked_folders: 0,
-            number_of_empty_folders: 0,
+            informations: Default::default(),
+            delete_folders: false,
+            messages: Default::default(),
             empty_folder_list: Default::default(),
             excluded_directories: vec![],
             included_directories: vec![],
         }
     }
 
+    pub fn get_messages(&self) -> &Messages {
+        &self.messages
+    }
+
     /// Public function used by CLI to search for empty folders
-    pub fn find_empty_folders(mut self, delete_folders: bool) {
+    pub fn find_empty_folders(&mut self) {
         self.optimize_directories();
-        self.debug_print();
         self.check_for_empty_folders(true);
         self.check_for_empty_folders(false); // Not needed for CLI, but it is better to check this
         self.optimize_folders();
-        self.print_empty_folders();
-        if delete_folders {
+        if self.delete_folders {
             self.delete_empty_folders();
         }
+        self.debug_print();
+    }
+
+    pub fn set_delete_folder(&mut self, delete_folder: bool) {
+        self.delete_folders = delete_folder;
     }
 
     /// Clean directory tree
@@ -211,8 +239,8 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 
-    /// Prints basic info about empty folders
-    fn print_empty_folders(&self) {
+    /// Prints basic info about empty folders // TODO print better
+    pub fn print_empty_folders(&self) {
         if !self.empty_folder_list.is_empty() {
             println!("Found {} empty folders", self.empty_folder_list.len());
         }
@@ -223,13 +251,11 @@ impl EmptyFolder {
 
     /// Debug print
     fn debug_print(&self) {
-        if false {
+        #[cfg(debug_assertions)]
+        {
             println!("---------------DEBUG PRINT---------------");
-            println!("Number of all checked folders - {}", self.number_of_checked_folders);
-            println!("Number of empty folders - {}", self.number_of_empty_folders);
-            for i in &self.empty_folder_list {
-                println!("# {} ", i.0.clone());
-            }
+            println!("Number of all checked folders - {}", self.informations.number_of_checked_folders);
+            println!("Number of empty folders - {}", self.informations.number_of_empty_folders);
             println!("Excluded directories - {:?}", self.excluded_directories);
             println!("Included directories - {:?}", self.included_directories);
             println!("-----------------------------------------");
