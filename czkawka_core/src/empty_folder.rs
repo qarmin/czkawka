@@ -32,14 +32,12 @@ pub struct EmptyFolder {
 
 /// Info struck with helpful information's about results
 pub struct Info {
-    #[cfg(debug_assertions)]
     number_of_checked_folders: usize,
     number_of_empty_folders: usize,
 }
 impl Info {
     pub fn new() -> Info {
         Info {
-            #[cfg(debug_assertions)]
             number_of_checked_folders: 0,
             number_of_empty_folders: 0,
         }
@@ -99,7 +97,7 @@ impl EmptyFolder {
             }
         };
 
-        match file.write_all(format!("Results of searching in {:?}\n",self.included_directories).as_bytes()) {
+        match file.write_all(format!("Results of searching in {:?}\n", self.included_directories).as_bytes()) {
             Ok(_) => (),
             Err(_) => {
                 self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
@@ -281,15 +279,19 @@ impl EmptyFolder {
     }
 
     /// Debug print
+    #[allow(dead_code)]
+    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(debug_assertions)]
+        #[cfg(not(debug_assertions))]
         {
-            println!("---------------DEBUG PRINT---------------");
-            println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
-            println!("Number of empty folders - {}", self.information.number_of_empty_folders);
-            println!("Included directories - {:?}", self.included_directories);
-            println!("-----------------------------------------");
+            return;
         }
+
+        println!("---------------DEBUG PRINT---------------");
+        println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
+        println!("Number of empty folders - {}", self.information.number_of_empty_folders);
+        println!("Included directories - {:?}", self.included_directories);
+        println!("-----------------------------------------");
     }
 
     // TODO maybe move this and one from duplicated finder to one common class to avoid duplicating code
