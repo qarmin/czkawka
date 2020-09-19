@@ -137,8 +137,6 @@ fn main() {
 
             df.find_duplicates();
 
-            df.print_duplicated_entries();
-
             #[allow(clippy::collapsible_if)]
             if ArgumentsPair::has_command(&arguments, "-f") {
                 if !df.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
@@ -146,6 +144,9 @@ fn main() {
                     process::exit(1);
                 }
             }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            df.print_duplicated_entries();
 
             df.get_text_messages().print_messages();
         }
@@ -176,6 +177,7 @@ fn main() {
                 }
             }
 
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             ef.print_empty_folders();
         }
         argum => {

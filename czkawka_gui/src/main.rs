@@ -8,6 +8,14 @@ use gtk::prelude::*;
 use gtk::{Builder, TreeView, TreeViewColumn};
 use std::collections::HashMap;
 
+#[derive(Debug)]
+#[repr(i32)]
+enum ColumnsDuplicate {
+    Name = 0,
+    Path,
+    Modification,
+}
+
 fn main() {
     gtk::init().expect("Failed to initialize GTK.");
 
@@ -57,32 +65,83 @@ fn main() {
         // Set starting intro
         // Duplicate Finder
 
-        let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
-        name_column.set_title("File Name");
-        name_column.set_resizable(true);
-        name_column.set_min_width(50);
-
-        let path_column: gtk::TreeViewColumn = TreeViewColumn::new();
-        path_column.set_title("Path");
-        path_column.set_resizable(true);
-        path_column.set_min_width(100);
-
-        let modification_date_column: gtk::TreeViewColumn = TreeViewColumn::new();
-        modification_date_column.set_title("Modification Date");
-        modification_date_column.set_resizable(true);
-        modification_date_column.set_min_width(100);
-
         let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
         let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
         let tree_view_duplicate_finder: gtk::TreeView = TreeView::with_model(&list_store);
 
+        let renderer = gtk::CellRendererText::new();
+        let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
+        name_column.pack_start(&renderer, true);
+        name_column.set_title("File Name");
+        name_column.set_resizable(true);
+        name_column.set_min_width(50);
+        name_column.add_attribute(&renderer, "text", ColumnsDuplicate::Name as i32);
         tree_view_duplicate_finder.append_column(&name_column);
+
+        let renderer = gtk::CellRendererText::new();
+        let path_column: gtk::TreeViewColumn = TreeViewColumn::new();
+        path_column.pack_start(&renderer, true);
+        path_column.set_title("Path");
+        path_column.set_resizable(true);
+        path_column.set_min_width(100);
+        path_column.add_attribute(&renderer, "text", ColumnsDuplicate::Path as i32);
         tree_view_duplicate_finder.append_column(&path_column);
+
+        let renderer = gtk::CellRendererText::new();
+        let modification_date_column: gtk::TreeViewColumn = TreeViewColumn::new();
+        modification_date_column.pack_start(&renderer, true);
+        modification_date_column.set_title("Modification Date");
+        modification_date_column.set_resizable(true);
+        modification_date_column.set_min_width(100);
+        modification_date_column.add_attribute(&renderer, "text", ColumnsDuplicate::Modification as i32);
         tree_view_duplicate_finder.append_column(&modification_date_column);
+
+        tree_view_duplicate_finder.set_vexpand(true);
+
+        let col_indices = [0, 1, 2];
+
+        for _i in 1..10 {
+            let values: [&dyn ToValue; 3] = [&"Roman".to_string(), &"Waq".to_string(), &"QQ".to_string()];
+            list_store.set(&list_store.append(), &col_indices, &values);
+        }
 
         scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
         scrolled_window_duplicate_finder.show_all();
+
+        // let model = Rc::new(create_duplicate_model());
+        // let treeview = gtk::TreeView::with_model(&*model);
+        //
+        //
+        // let data: [DataDuplicate; 2] = [
+        //     DataDuplicate {
+        //         name: "Roman".to_string(),
+        //         path: "/home/rr".to_string(),
+        //         modification: "2010-10-10".to_string(),
+        //     },
+        //     DataDuplicate {
+        //         name: "Herman".to_string(),
+        //         path: "/etc".to_string(),
+        //         modification: "2020-10-10".to_string(),
+        //     },
+        // ];
+        //
+        //
+        // let col_indices: [u32; 3] = [0, 1, 2];
+        //
+        // for d in data.iter() {
+        //     let values: [&dyn ToValue; 3] = [
+        //         &d.name,
+        //         &d.path,
+        //         &d.modification,
+        //     ];
+        //     model.set(&model.append(), &col_indices, &values);
+        // }
+        //
+        // scrolled_window_duplicate_finder.add(&treeview);
+        //
+        //
+        // add_columns_duplicate(&model, &treeview);
 
         info_entry.set_text("Duplicated Files");
 
