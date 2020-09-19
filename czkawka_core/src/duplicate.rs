@@ -44,6 +44,7 @@ pub struct Info {
     pub number_of_duplicated_files_by_hash: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
+    pub bytes_read_when_hashing: u64,
     pub number_of_removed_files: usize,
     pub number_of_failed_to_remove_files: usize,
     pub gained_space: u64,
@@ -61,6 +62,7 @@ impl Info {
             number_of_duplicated_files_by_hash: 0,
             lost_space_by_size: 0,
             lost_space_by_hash: 0,
+            bytes_read_when_hashing: 0,
             number_of_removed_files: 0,
             number_of_failed_to_remove_files: 0,
             gained_space: 0,
@@ -580,6 +582,7 @@ impl DuplicateFinder {
                     if n == 0 {
                         break;
                     }
+                    self.information.bytes_read_when_hashing += n as u64;
                     hasher.update(&buffer[..n]);
                 }
                 if !error_reading_file {
@@ -639,6 +642,11 @@ impl DuplicateFinder {
             "Gained space by removing duplicated entries - {} ({} bytes)",
             self.information.gained_space.file_size(options::BINARY).unwrap(),
             self.information.gained_space
+        );
+        println!(
+            "Bytes read when hashing - {} ({} bytes)",
+            self.information.bytes_read_when_hashing.file_size(options::BINARY).unwrap(),
+            self.information.bytes_read_when_hashing
         );
         println!("Number of removed files - {}", self.information.number_of_removed_files);
         println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
