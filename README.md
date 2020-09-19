@@ -7,28 +7,25 @@ This is my first ever project in Rust so probably a lot of things are written in
 - Rich instruction with examples - CLI(`cargo run --bin czkawka_cli`)
 - GTK Frontend(Still WIP) - (`cargo run --bin czkawka_gui`)
 - Orbtk Frontend(Still very early WIP) - (`cargo run --bin czkawka_gui_orbtk`)
+- Saving results to file
 - Duplicated file finding
   - Including and excluding directories(absolute paths)
   - Option to remove all except newest, oldest and one oldest or newest
   - Fast(by size) or accurate(by hash) file checking
+  - Support for * wildcard when excluding files and folders
+  - Checking only selected extensions(default macros like IMAGE, VIDEO, TEXT are available)
 - Empty folders finding
   - Advanced empty files finding(finds and remove folders which contains only empty folders)
   - Option to remove all files
 
 ## TODO
 - Comments - a lot of things should be described
-- Tests
-  - Github CI
-  - Unit tests(if available)
-- Duplicated file finding - CLI
-  - saving results to file
-  - support for * when excluding files and folders
+- Github CI
+- More unit tests
 - Finding files with debug symbols
-- Support for showing only duplicates with specific extension, name(Regex support needed)
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
 - Add support for fast searching based on checking only first ~1MB of file.
-- Selecting different objects in 
 
 ## Usage and requirements
 Rustc 1.46 works fine(not sure about a minimal version)  
