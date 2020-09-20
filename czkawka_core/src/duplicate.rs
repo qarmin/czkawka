@@ -25,7 +25,7 @@ pub enum DeleteMethod {
 }
 
 #[derive(Clone)]
-struct FileEntry {
+pub struct FileEntry {
     pub path: String,
     pub size: u64,
     pub created_date: SystemTime,
@@ -103,13 +103,61 @@ impl DuplicateFinder {
             excluded_directories: vec![],
             included_directories: vec![],
             recursive_search: true,
-            min_file_size: 1024,
             allowed_extensions: vec![],
             check_method: CheckingMethod::NONE,
             delete_method: DeleteMethod::None,
+            min_file_size: 0,
         }
     }
 
+    pub fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
+        &self.files_with_identical_size
+    }
+
+    pub fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
+        &self.files_with_identical_hashes
+    }
+
+    // pub fn get_string_from_files_hashes(&self) -> BTreeMap<u64, Vec<Vec<GtkRowData>>> {
+    //     let mut row_data: BTreeMap<u64, Vec<Vec<GtkRowData>>> = Default::default();
+    //     for (size, vector) in &self.files_with_identical_hashes {
+    //         let mut vector_of_vectors: Vec<Vec<GtkRowData>> = Vec::new();
+    //         for files in vector {
+    //             let mut data_vector: Vec<GtkRowData> = Vec::new();
+    //             for file in files {
+    //                 let name = file.path.clone();
+    //                 let index = name.rfind('/').unwrap();
+    //
+    //                 data_vector.push(GtkRowData {
+    //                     name: name[index + 1..].to_string(),
+    //                     directory: name[..index].to_string(),
+    //                     modification_date: NaiveDateTime::from_timestamp(file.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string(),
+    //                 });
+    //             }
+    //             vector_of_vectors.push(data_vector);
+    //         }
+    //         row_data.insert(*size, vector_of_vectors);
+    //     }
+    //     row_data
+    // }
+    // pub fn get_string_from_files_sizes(&self) -> BTreeMap<u64, Vec<GtkRowData>> {
+    //     let mut row_data: BTreeMap<u64, Vec<GtkRowData>> = Default::default();
+    //     for (size, vector) in &self.files_with_identical_size {
+    //         let mut data_vector: Vec<GtkRowData> = Vec::new();
+    //         for file in vector {
+    //             let name = file.path.clone();
+    //             let index = name.rfind('/').unwrap();
+    //
+    //             data_vector.push(GtkRowData {
+    //                 name: name[index + 1..].to_string(),
+    //                 directory: name[..index].to_string(),
+    //                 modification_date: NaiveDateTime::from_timestamp(file.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string(),
+    //             });
+    //         }
+    //         row_data.insert(*size, data_vector);
+    //     }
+    //     row_data
+    // }
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
