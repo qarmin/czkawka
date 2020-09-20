@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        toolchain: [stable, nightly]
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    needs: clean
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            target
+          key: ${{ runner.os }}-cargo-check-test-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Gtk
+        run: sudo apt-get update; sudo apt install -y libgtk-3-dev
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Build
+        run: cargo check --all
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+
+      - name: Run tests
+        run: cargo test
+        if: ${{ runner.os == 'Linux' }}
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+          
+      - name: Install Gtk
+        run: sudo apt install -y libgtk-3-dev
+
+      - name: Check the format
+        run: cargo fmt --all -- --check
+
+      # type complexity must be ignored because we use huge templates for queries
+      - name: Run clippy
+        run: >
+          cargo clippy
+          --all-targets
+          --all-features
+          --
+          -D warnings
