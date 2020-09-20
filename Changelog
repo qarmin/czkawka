@@ -1,17 +1,26 @@
-## Version 0.1.1
+## Version 0.1.2 dev
+
+## Version 0.1.1 - 20.09.2020r
 - Added images to readme
-- Better GTK buttons
+- Better GTK buttons and glade file
 - Basic search in GTK
 - Cleaned core from println
 - Core functions doesn't use now process::exit(everything is done with help of messages/errors/warnings)
 - Added support for non recursive search
 - Improved finding number and size of duplicated files
 - Saving results to file
+- Print how much data was readed by duplicate finder(debug only)
+- Added Github CI
+- Only debug build prints debug infos
+- Clean code
+- Add basic idea config to misc folder
 
-## Version 0.1.0
+## Version 0.1.0 - 07.09.2020r
 - Initial Version
 - Duplicate file finder
 - Empty folder finder
 - Very WIP Orbtk GUI frontend
 - Basic GTK Frontend(without any logic)
 - CLI
+
+## Initial commit - 26.08.2020r

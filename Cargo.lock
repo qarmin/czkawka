@@ -296,14 +296,14 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "czkawka_core",
 ]
 
 [[package]]
 name = "czkawka_core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "blake3",
  "humansize",
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "chrono",
  "czkawka_core",
@@ -324,7 +324,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui_orbtk"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "czkawka_core",
  "orbtk",
@@ -913,9 +913,9 @@ checksum = "3728d817d99e5ac407411fa471ff9800a778d88a24685968b36824eaf4bee400"
 
 [[package]]
 name = "memoffset"
-version = "0.5.5"
+version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c198b026e1bbf08a937e94c6c60f9ec4a2267f5b0d2eec9c1b21b061ce2be55f"
+checksum = "043175f069eda7b85febe4a74abbaeff828d9f8b448515d3151a14a3542811aa"
 dependencies = [
  "autocfg 1.0.1",
 ]
