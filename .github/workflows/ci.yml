@@ -42,7 +42,7 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
 
       - name: Run tests
-        run: cargo test
+        run: cargo test --workspace
         if: ${{ runner.os == 'Linux' }}
         env:
           CARGO_INCREMENTAL: 0
