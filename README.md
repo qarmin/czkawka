@@ -47,7 +47,7 @@ cd czkawka
 ```
 cargo run --bin czkawka_gui
 ```
-![GUI GTK](https://user-images.githubusercontent.com/41945903/92405256-80854600-f135-11ea-92db-b3dd3569d8fd.png)
+![GUI GTK](https://user-images.githubusercontent.com/41945903/93716818-0eb7ee00-fb72-11ea-8fdb-50b49a221868.png)
 - Run alternative Orbtk GUI(Still WIP)
 ```
 cargo run --bin czkawka_gui_orbtk
@@ -57,7 +57,7 @@ cargo run --bin czkawka_gui_orbtk
 ```
 cargo run --bin czkawka_cli
 ```
-![CLI](https://user-images.githubusercontent.com/41945903/92405265-824f0980-f135-11ea-8f9e-d2692c27a6be.png)
+![CLI](https://user-images.githubusercontent.com/41945903/93716816-0bbcfd80-fb72-11ea-8d31-4c87cc2abe6d.png)
 
 ## How it works?
 ### Duplicate Finder
