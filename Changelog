@@ -1,4 +1,6 @@
 ## Version 0.1.2 dev
+- Add basic search empty folders in GTK GUI
+- Remember place where button are placed
 
 ## Version 0.1.1 - 20.09.2020r
 - Added images to readme

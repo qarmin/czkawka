@@ -32,11 +32,6 @@ Author: Rafał Mikrut
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
-  <object class="GtkAdjustment" id="adjustment1">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkDialog" id="delete_confirmation_dialog">
     <property name="can_focus">False</property>
     <property name="icon_name">applications-engineering</property>
@@ -272,11 +267,13 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="duplicate_minimal_size">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="max_length">3</property>
                         <property name="text" translatable="yes">1</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="input_purpose">number</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -319,20 +316,12 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="notebook_empty_folders_label">
+              <object class="GtkScrolledWindow" id="scrolled_window_empty_folder_finder">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkTreeView">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection">
-                        <property name="mode">none</property>
-                      </object>
-                    </child>
-                  </object>
+                  <placeholder/>
                 </child>
               </object>
               <packing>

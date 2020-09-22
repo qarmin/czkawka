@@ -6,6 +6,8 @@ This is my first ever project in Rust so probably a lot of things are written in
 ## Done
 - Rich instruction with examples - CLI(`cargo run --bin czkawka_cli`)
 - GTK Frontend(Still WIP) - (`cargo run --bin czkawka_gui`)
+  - Basic layout
+  - Remembering of buttons between different tabs
 - Orbtk Frontend(Still very early WIP) - (`cargo run --bin czkawka_gui_orbtk`)
 - Saving results to file
 - Duplicated file finding
@@ -20,12 +22,15 @@ This is my first ever project in Rust so probably a lot of things are written in
 
 ## TODO
 - Comments - a lot of things should be described
-- Github CI
 - More unit tests
 - Finding files with debug symbols
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
 - Add support for fast searching based on checking only first ~1MB of file.
+- GTK Gui
+  - Selection of records(don't know how to do this)
+  - Popups
+  - Choosing directories(include, excluded)
 
 ## Usage and requirements
 Rustc 1.46 works fine(not sure about a minimal version)  
@@ -82,7 +87,7 @@ I checked my home directory without any folder exceptions(I removed all director
 
 First run reads file entry and save it to cache so this step is mostly limited by disk performance, and with second run cache helps it so searching is a lot of faster.
 
-Duplicate Checker(Version 0.1)
+Duplicate Checker(Version 0.1.0)
 
 | App| Executing Time |
 |:----------:|:-------------:|

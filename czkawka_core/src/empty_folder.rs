@@ -1,5 +1,5 @@
 use crate::common::{Common, Messages};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::path::Path;
@@ -16,9 +16,10 @@ enum FolderEmptiness {
 
 /// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
 #[derive(Clone)]
-struct FolderEntry {
-    parent_path: Option<String>,
+pub struct FolderEntry {
+    pub parent_path: Option<String>,
     is_empty: FolderEmptiness,
+    pub modified_date: SystemTime,
 }
 
 /// Struct to store most basics info about  all folder
@@ -26,14 +27,14 @@ pub struct EmptyFolder {
     information: Info,
     delete_folders: bool,
     text_messages: Messages,
-    empty_folder_list: HashMap<String, FolderEntry>, // Path, FolderEntry
+    empty_folder_list: BTreeMap<String, FolderEntry>, // Path, FolderEntry
     included_directories: Vec<String>,
 }
 
 /// Info struck with helpful information's about results
 pub struct Info {
     number_of_checked_folders: usize,
-    number_of_empty_folders: usize,
+    pub number_of_empty_folders: usize,
 }
 impl Info {
     pub fn new() -> Info {
@@ -62,8 +63,15 @@ impl EmptyFolder {
         }
     }
 
+    pub fn get_empty_folder_list(&self) -> &BTreeMap<String, FolderEntry> {
+        &self.empty_folder_list
+    }
+
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
+    }
+    pub fn get_information(&self) -> &Info {
+        &self.information
     }
 
     /// Public function used by CLI to search for empty folders
@@ -122,7 +130,7 @@ impl EmptyFolder {
     /// Clean directory tree
     /// If directory contains only 2 empty folders, then this directory should be removed instead two empty folders inside because it will produce another empty folder.
     fn optimize_folders(&mut self) {
-        let mut new_directory_folders: HashMap<String, FolderEntry> = Default::default();
+        let mut new_directory_folders: BTreeMap<String, FolderEntry> = Default::default();
 
         for entry in &self.empty_folder_list {
             match &entry.1.parent_path {
@@ -145,7 +153,7 @@ impl EmptyFolder {
     fn check_for_empty_folders(&mut self, initial_checking: bool) {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-        let mut folders_checked: HashMap<String, FolderEntry> = Default::default();
+        let mut folders_checked: BTreeMap<String, FolderEntry> = Default::default();
 
         if initial_checking {
             // Add root folders for finding
@@ -155,21 +163,23 @@ impl EmptyFolder {
                     FolderEntry {
                         parent_path: None,
                         is_empty: FolderEmptiness::Maybe,
+                        modified_date: SystemTime::now(),
                     },
                 );
                 folders_to_check.push(id.clone());
             }
         } else {
             // Add folders searched before
-            for id in &self.empty_folder_list {
+            for (name, entry) in &self.empty_folder_list {
                 folders_checked.insert(
-                    id.0.clone(),
+                    name.clone(),
                     FolderEntry {
                         parent_path: None,
                         is_empty: FolderEmptiness::Maybe,
+                        modified_date: entry.modified_date,
                     },
                 );
-                folders_to_check.push(id.0.clone());
+                folders_to_check.push(name.clone());
             }
         }
 
@@ -206,6 +216,13 @@ impl EmptyFolder {
                         FolderEntry {
                             parent_path: Option::from(current_folder.clone()),
                             is_empty: FolderEmptiness::Maybe,
+                            modified_date: match metadata.modified() {
+                                Ok(t) => t,
+                                Err(_) => {
+                                    self.text_messages.warnings.push(format!("Failed to read modification date of folder {}", current_folder));
+                                    SystemTime::now()
+                                }
+                            },
                         },
                     );
                 } else {
@@ -234,7 +251,7 @@ impl EmptyFolder {
             }
         } else {
             // We need to check if parent of folder isn't also empty, because we wan't to delete only parent with two empty folders except this folders and at the end parent folder
-            let mut new_folders_list: HashMap<String, FolderEntry> = Default::default();
+            let mut new_folders_list: BTreeMap<String, FolderEntry> = Default::default();
             for entry in folders_checked {
                 if entry.1.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&entry.0) {
                     new_folders_list.insert(entry.0, entry.1);

@@ -5,10 +5,13 @@ use humansize::{file_size_opts as options, FileSize};
 extern crate gtk;
 use chrono::NaiveDateTime;
 use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::empty_folder::EmptyFolder;
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
 use gtk::{Builder, TreeView, TreeViewColumn};
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 use std::time::UNIX_EPOCH;
 
 #[derive(Debug)]
@@ -17,10 +20,6 @@ enum ColumnsDuplicate {
     Name = 0,
     Path,
     Modification,
-}
-
-thread_local! {
-pub static CHECK_TYPE: duplicate::CheckingMethod = duplicate::CheckingMethod::NONE;
 }
 
 fn main() {
@@ -34,16 +33,35 @@ fn main() {
     let main_window: gtk::Window = builder.get_object("main_window").unwrap();
     main_window.show_all();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // State
+
     // Buttons State
 
-    // let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new( HashMap::<&str, bool>::new()));
+    let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<String, HashMap<String, bool>>::new()));
+    shared_buttons.borrow_mut().clear();
 
-    let mut hashmap_buttons: HashMap<&str, bool> = Default::default();
     for i in ["duplicate", "empty_folder"].iter() {
-        hashmap_buttons.insert(i, false);
+        let mut temp_hashmap: HashMap<String, bool> = Default::default();
+        for j in ["search", "stop", "resume", "pause", "select", "delete", "save"].iter() {
+            if *j == "search" {
+                temp_hashmap.insert(j.to_string(), true);
+            } else {
+                temp_hashmap.insert(j.to_string(), false);
+            }
+        }
+        shared_buttons.borrow_mut().insert(i.to_string(), temp_hashmap);
     }
+    // Duplicate Finder state
 
+    let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
+    let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // GUI Notepad Buttons
+
+    // GUI Duplicate Entry
+    let minimal_size_entry: gtk::Entry = builder.get_object("duplicate_minimal_size").unwrap();
 
     // GUI Buttons
     let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
@@ -66,6 +84,7 @@ fn main() {
 
     for i in notebook_chooser_tool.get_children() {
         notebook_chooser_tool_children_names.push(i.get_buildable_name().unwrap().to_string());
+        println!("{}", i.get_buildable_name().unwrap().to_string());
     }
 
     // Entry
@@ -73,28 +92,93 @@ fn main() {
 
     // Scrolled window
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
+    let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_folder_finder").unwrap();
 
     {
-        // Set starting intro
-        // Duplicate Finder
+        // Set starting information in bottom panel
 
         info_entry.set_text("Duplicated Files");
 
-        // // Disable all unused buttons
+        // Disable all unused buttons
         buttons_search.show();
         buttons_save.hide();
         buttons_delete.hide();
     }
     {
+        // Connect Notebook Tabs
+        {
+            let shared_buttons = shared_buttons.clone();
+
+            let buttons_search = buttons_search.clone();
+            let buttons_stop = buttons_stop.clone();
+            let buttons_resume = buttons_resume.clone();
+            let buttons_pause = buttons_pause.clone();
+            let buttons_select = buttons_select.clone();
+            let buttons_delete = buttons_delete.clone();
+            let buttons_save = buttons_save.clone();
+
+            let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
+
+            notebook_chooser_tool.connect_switch_page(move |_, _, number| {
+                let page: &str;
+                match notebook_chooser_tool_children_names.get(number as usize).unwrap().as_str() {
+                    "notebook_duplicate_finder_label" => {
+                        page = "duplicate";
+                    }
+                    "scrolled_window_empty_folder_finder" => {
+                        page = "empty_folder";
+                    }
+                    e => {
+                        panic!("Not existent page {}", e);
+                    }
+                };
+
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("search").unwrap() == true {
+                    buttons_search.show();
+                } else {
+                    buttons_search.hide();
+                }
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("stop").unwrap() == true {
+                    buttons_stop.show();
+                } else {
+                    buttons_stop.hide();
+                }
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("resume").unwrap() == true {
+                    buttons_resume.show();
+                } else {
+                    buttons_resume.hide();
+                }
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("pause").unwrap() == true {
+                    buttons_pause.show();
+                } else {
+                    buttons_pause.hide();
+                }
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("select").unwrap() == true {
+                    buttons_select.show();
+                } else {
+                    buttons_select.hide();
+                }
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("delete").unwrap() == true {
+                    buttons_delete.show();
+                } else {
+                    buttons_delete.hide();
+                }
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("save").unwrap() == true {
+                    buttons_save.show();
+                } else {
+                    buttons_save.hide();
+                }
+            });
+        }
+
         // Connect Buttons
 
-        let buttons_search_clone = buttons_search.clone();
-
+        assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
+        assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_folder_finder".to_string()));
         buttons_search.connect_clicked(move |_| {
-            assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
-            assert!(notebook_chooser_tool_children_names.contains(&"notebook_empty_folders_label".to_string()));
             match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                 "notebook_duplicate_finder_label" => {
+                    // Find duplicates
                     // TODO Change to proper value
                     let mut df = DuplicateFinder::new();
                     let check_method = duplicate::CheckingMethod::HASH;
@@ -130,29 +214,52 @@ fn main() {
 
                     info_entry.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
 
-                    // Set Scrolled window
+                    // Create GUI
+                    {
+                        // Remove scrolled window from before - BUG - when doing it when view is scrolled, then scroll button disappears
+                        for i in &scrolled_window_duplicate_finder.get_children() {
+                            scrolled_window_duplicate_finder.remove(i);
+                        }
 
-                    //let results =df.
+                        let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                        let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
-                    // Remove scrolled window from before - BUG - when doing it when view is scrolled, then scroll button disappears
-                    for i in &scrolled_window_duplicate_finder.get_children() {
-                        scrolled_window_duplicate_finder.remove(i);
-                    }
+                        let mut tree_view_duplicate_finder: gtk::TreeView = TreeView::with_model(&list_store);
 
-                    let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
-                    let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                        create_tree_view_duplicates(&mut tree_view_duplicate_finder);
 
-                    let mut tree_view_duplicate_finder: gtk::TreeView = TreeView::with_model(&list_store);
+                        let col_indices = [0, 1, 2];
 
-                    create_tree_view_duplicates(&mut tree_view_duplicate_finder);
+                        match check_method {
+                            CheckingMethod::HASH => {
+                                let hashmap = df.get_files_sorted_by_hash();
 
-                    let col_indices = [0, 1, 2];
-                    match check_method {
-                        CheckingMethod::HASH => {
-                            let hashmap = df.get_files_sorted_by_hash();
+                                for (size, vectors_vector) in hashmap {
+                                    for vector in vectors_vector {
+                                        let values: [&dyn ToValue; 3] = [
+                                            &(vector.len().to_string() + " x " + size.to_string().as_str()),
+                                            &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
+                                            &"Bytes lost".to_string(),
+                                        ];
+                                        list_store.set(&list_store.append(), &col_indices, &values);
+                                        for entry in vector {
+                                            let path = &entry.path;
+                                            let index = path.rfind('/').unwrap();
 
-                            for (size, vectors_vector) in hashmap {
-                                for vector in vectors_vector {
+                                            let values: [&dyn ToValue; 3] = [
+                                                &(path[index + 1..].to_string()),
+                                                &(path[..index].to_string()),
+                                                &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                            ];
+                                            list_store.set(&list_store.append(), &col_indices, &values);
+                                        }
+                                    }
+                                }
+                            }
+                            CheckingMethod::SIZE => {
+                                let hashmap = df.get_files_sorted_by_size();
+
+                                for (size, vector) in hashmap {
                                     let values: [&dyn ToValue; 3] = [
                                         &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                         &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
@@ -172,44 +279,97 @@ fn main() {
                                     }
                                 }
                             }
-                        }
-                        CheckingMethod::SIZE => {
-                            let hashmap = df.get_files_sorted_by_size();
-
-                            for (size, vector) in hashmap {
-                                let values: [&dyn ToValue; 3] = [
-                                    &(vector.len().to_string() + " x " + size.to_string().as_str()),
-                                    &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
-                                    &"Bytes lost".to_string(),
-                                ];
-                                list_store.set(&list_store.append(), &col_indices, &values);
-                                for entry in vector {
-                                    let path = &entry.path;
-                                    let index = path.rfind('/').unwrap();
-
-                                    let values: [&dyn ToValue; 3] = [
-                                        &(path[index + 1..].to_string()),
-                                        &(path[..index].to_string()),
-                                        &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
-                                    ];
-                                    list_store.set(&list_store.append(), &col_indices, &values);
-                                }
+                            CheckingMethod::NONE => {
+                                panic!();
                             }
                         }
-                        CheckingMethod::NONE => {
-                            panic!();
-                        }
+
+                        scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
+                        scrolled_window_duplicate_finder.show_all();
                     }
 
-                    scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
-                    scrolled_window_duplicate_finder.show_all();
+                    // Set state
+                    {
+                        *shared_duplication_state.borrow_mut() = df;
 
-                    // Buttons
-                    buttons_search_clone.show();
-                    buttons_save.hide();
-                    buttons_delete.hide();
+                        if duplicates_size > 0 {
+                            buttons_save.show();
+                            buttons_delete.show();
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            buttons_save.hide();
+                            buttons_delete.hide();
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                    }
                 }
-                "notebook_empty_folders_label" => {}
+                "scrolled_window_empty_folder_finder" => {
+                    // Find empty folders
+                    // TODO Change to proper value
+                    let mut ef = EmptyFolder::new();
+
+                    ef.set_include_directory("/home/rafal/Pulpit".to_string());
+                    ef.set_delete_folder(false);
+                    ef.find_empty_folders();
+
+                    let information = ef.get_information();
+
+                    let empty_folder_number: usize = information.number_of_empty_folders;
+
+                    info_entry.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
+
+                    // Create GUI
+                    {
+                        // Remove scrolled window from before - BUG - when doing it when view is scrolled, then scroll button disappears
+                        for i in &scrolled_window_empty_folder_finder.get_children() {
+                            scrolled_window_empty_folder_finder.remove(i);
+                        }
+
+                        let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                        let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                        let mut tree_view_empty_folder_finder: gtk::TreeView = TreeView::with_model(&list_store);
+
+                        create_tree_view_empty_folders(&mut tree_view_empty_folder_finder);
+
+                        let col_indices = [0, 1, 2];
+
+                        let hashmap = ef.get_empty_folder_list();
+
+                        for (name, entry) in hashmap {
+                            let name: String = name[..(name.len() - 1)].to_string();
+                            let index = name.rfind('/').unwrap();
+                            let values: [&dyn ToValue; 3] = [
+                                &(name[index + 1..].to_string()),
+                                &(name[..index].to_string()),
+                                &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                            ];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+
+                        scrolled_window_empty_folder_finder.add(&tree_view_empty_folder_finder);
+                        scrolled_window_empty_folder_finder.show_all();
+                    }
+
+                    // Set state
+                    {
+                        *shared_empty_folders_state.borrow_mut() = ef;
+
+                        if empty_folder_number > 0 {
+                            buttons_save.show();
+                            buttons_delete.show();
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            buttons_save.hide();
+                            buttons_delete.hide();
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                    }
+                }
                 e => panic!("Not existent {}", e),
             }
         });
@@ -253,4 +413,35 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     tree_view_duplicate_finder.append_column(&modification_date_column);
 
     tree_view_duplicate_finder.set_vexpand(true);
+}
+
+pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    name_column.pack_start(&renderer, true);
+    name_column.set_title("Folder Name");
+    name_column.set_resizable(true);
+    name_column.set_min_width(50);
+    name_column.add_attribute(&renderer, "text", ColumnsDuplicate::Name as i32);
+    tree_view_empty_folder_finder.append_column(&name_column);
+
+    let renderer = gtk::CellRendererText::new();
+    let path_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    path_column.pack_start(&renderer, true);
+    path_column.set_title("Path");
+    path_column.set_resizable(true);
+    path_column.set_min_width(100);
+    path_column.add_attribute(&renderer, "text", ColumnsDuplicate::Path as i32);
+    tree_view_empty_folder_finder.append_column(&path_column);
+
+    let renderer = gtk::CellRendererText::new();
+    let modification_date_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    modification_date_column.pack_start(&renderer, true);
+    modification_date_column.set_title("Modification Date");
+    modification_date_column.set_resizable(true);
+    modification_date_column.set_min_width(100);
+    modification_date_column.add_attribute(&renderer, "text", ColumnsDuplicate::Modification as i32);
+    tree_view_empty_folder_finder.append_column(&modification_date_column);
+
+    tree_view_empty_folder_finder.set_vexpand(true);
 }
