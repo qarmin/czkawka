@@ -31,6 +31,10 @@ This is my first ever project in Rust so probably a lot of things are written in
   - Selection of records(don't know how to do this)
   - Popups
   - Choosing directories(include, excluded)
+  - Popup with type type of deleted records
+- Orbtk GUI
+  - Basic selecting included and excluded folders
+  - 
 
 ## Usage and requirements
 Rustc 1.46 works fine(not sure about a minimal version)  

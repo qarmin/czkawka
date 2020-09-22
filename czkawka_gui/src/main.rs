@@ -41,6 +41,7 @@ fn main() {
     let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<String, HashMap<String, bool>>::new()));
     shared_buttons.borrow_mut().clear();
 
+    // Show by default only search button
     for i in ["duplicate", "empty_folder"].iter() {
         let mut temp_hashmap: HashMap<String, bool> = Default::default();
         for j in ["search", "stop", "resume", "pause", "select", "delete", "save"].iter() {
@@ -52,10 +53,12 @@ fn main() {
         }
         shared_buttons.borrow_mut().insert(i.to_string(), temp_hashmap);
     }
-    // Duplicate Finder state
+
+    // State of search results
 
     let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
     let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // GUI Notepad Buttons
@@ -94,8 +97,8 @@ fn main() {
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
     let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_folder_finder").unwrap();
 
+    // Set starting information in bottom panel
     {
-        // Set starting information in bottom panel
 
         info_entry.set_text("Duplicated Files");
 
@@ -104,17 +107,26 @@ fn main() {
         buttons_save.hide();
         buttons_delete.hide();
     }
+
+    // Connecting events
     {
         // Connect Notebook Tabs
         {
             let shared_buttons = shared_buttons.clone();
 
+            #[allow(clippy::redundant_clone)]
             let buttons_search = buttons_search.clone();
+            #[allow(clippy::redundant_clone)]
             let buttons_stop = buttons_stop.clone();
+            #[allow(clippy::redundant_clone)]
             let buttons_resume = buttons_resume.clone();
+            #[allow(clippy::redundant_clone)]
             let buttons_pause = buttons_pause.clone();
+            #[allow(clippy::redundant_clone)]
             let buttons_select = buttons_select.clone();
+            #[allow(clippy::redundant_clone)]
             let buttons_delete = buttons_delete.clone();
+            #[allow(clippy::redundant_clone)]
             let buttons_save = buttons_save.clone();
 
             let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
@@ -133,37 +145,37 @@ fn main() {
                     }
                 };
 
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("search").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("search").unwrap() {
                     buttons_search.show();
                 } else {
                     buttons_search.hide();
                 }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("stop").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("stop").unwrap() {
                     buttons_stop.show();
                 } else {
                     buttons_stop.hide();
                 }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("resume").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("resume").unwrap() {
                     buttons_resume.show();
                 } else {
                     buttons_resume.hide();
                 }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("pause").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("pause").unwrap() {
                     buttons_pause.show();
                 } else {
                     buttons_pause.hide();
                 }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("select").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("select").unwrap() {
                     buttons_select.show();
                 } else {
                     buttons_select.hide();
                 }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("delete").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("delete").unwrap() {
                     buttons_delete.show();
                 } else {
                     buttons_delete.hide();
                 }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("save").unwrap() == true {
+                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("save").unwrap() {
                     buttons_save.show();
                 } else {
                     buttons_save.hide();
@@ -182,14 +194,19 @@ fn main() {
                     // TODO Change to proper value
                     let mut df = DuplicateFinder::new();
                     let check_method = duplicate::CheckingMethod::HASH;
-                    df.set_include_directory("/home/rafal/Pulpit/AAA".to_owned());
-                    df.set_exclude_directory("/rafa/".to_owned());
-                    df.set_excluded_items("".to_owned());
-                    df.set_allowed_extensions("".to_owned());
-                    df.set_min_file_size(1000);
-                    df.set_check_method(check_method.clone());
-                    df.set_delete_method(duplicate::DeleteMethod::None);
-                    df.find_duplicates();
+                    {
+                        df.set_include_directory("/home/rafal/Pulpit/AAA".to_owned());
+                        df.set_exclude_directory("/rafa/".to_owned());
+                        df.set_excluded_items("".to_owned());
+                        df.set_allowed_extensions("".to_owned());
+                        df.set_min_file_size(match minimal_size_entry.get_text().as_str().parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => 1024 // By default
+                        });
+                        df.set_check_method(check_method.clone());
+                        df.set_delete_method(duplicate::DeleteMethod::None);
+                        df.find_duplicates();
+                    }
                     let information = df.get_information();
 
                     let duplicates_number: usize;
