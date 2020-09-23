@@ -7,7 +7,7 @@ use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::empty_folder::EmptyFolder;
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
-use gtk::{Builder, TreeView, TreeViewColumn};
+use gtk::{Builder, SelectionMode, TreeView, TreeViewColumn};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -42,6 +42,7 @@ fn main() {
     // Windows
     let main_window: gtk::Window = builder.get_object("main_window").unwrap();
     main_window.show_all();
+    main_window.set_title("Czkawka GTK GUI");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // State
@@ -199,10 +200,11 @@ fn main() {
                 "notebook_duplicate_finder_label" => {
                     // Find duplicates
                     // TODO Change to proper value
+
                     let mut df = DuplicateFinder::new();
                     let check_method = duplicate::CheckingMethod::HASH;
                     {
-                        df.set_include_directory("/home/rafal/Pulpit/AAA".to_owned());
+                        df.set_include_directory("/home/rafal/Pulpit".to_owned());
                         df.set_exclude_directory("/rafa/".to_owned());
                         df.set_excluded_items("".to_owned());
                         df.set_allowed_extensions("".to_owned());
@@ -249,6 +251,8 @@ fn main() {
                         let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                         let mut tree_view_duplicate_finder: gtk::TreeView = TreeView::with_model(&list_store);
+
+                        tree_view_duplicate_finder.get_selection().set_mode(SelectionMode::Multiple);
 
                         create_tree_view_duplicates(&mut tree_view_duplicate_finder);
 
@@ -355,6 +359,8 @@ fn main() {
                         let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                         let mut tree_view_empty_folder_finder: gtk::TreeView = TreeView::with_model(&list_store);
+
+                        tree_view_empty_folder_finder.get_selection().set_mode(SelectionMode::Multiple);
 
                         create_tree_view_empty_folders(&mut tree_view_empty_folder_finder);
 
