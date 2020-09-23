@@ -1,14 +1,13 @@
-use czkawka_core::{duplicate, empty_folder};
+use czkawka_core::*;
 use std::{env, process};
 
 fn main() {
     // Parse argument
-    let mut all_arguments: Vec<String> = env::args().collect();
+    let all_arguments: Vec<String> = env::args().skip(1).collect(); // Not need to check program name
     let mut commands_arguments: Vec<String> = Vec::new();
 
-    // println!("{:?}", all_arguments);
-
-    all_arguments.remove(0); // Removing program name from arguments
+    #[cfg(debug_assertions)]
+    println!("{:?}", all_arguments);
 
     // No arguments, so we print help to allow user to learn more about program
     if all_arguments.is_empty() {
@@ -180,6 +179,10 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             ef.print_empty_folders();
         }
+        "--version" | "v" => {
+            println!("Czkawka CLI {}", CZKAWKA_VERSION);
+            process::exit(0);
+        }
         argum => {
             println!("FATAL ERROR: \"{}\" argument is not supported, check help for more info.", argum);
             process::exit(1);
@@ -194,9 +197,11 @@ Usage of Czkawka:
 
 ## Main arguments:
   --h / --help - prints help, also works without any arguments
-    Usage example:
-      czkawka --help
-      czkawka
+
+  Usage example:
+    czkawka --help
+    czkawka
+
 
   --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = "DEFAULT"] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
@@ -208,18 +213,25 @@ Usage of Czkawka:
     -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
     -l type_of_search - allows to use fastest which takes into account only size, and more accurate which check if file contnet is same(hashes).
     -delete - delete found files, by default remove all except the most oldest one, it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
-    Usage example:
-      czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -delete
-      czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash" -o
-      czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
-      czkawka --d -i "/etc/" -delete "aeo"
+
+  Usage example:
+    czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -delete
+    czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash" -o
+    czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
+    czkawka --d -i "/etc/" -delete "aeo"
+
 
   --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save] [-delete] - option to find and delete empty folders
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -f file_to_save - saves results to file
     -delete - delete found empty folders
-      czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
+
+  Usage example:
+    czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
+
+  --version / --v - prints program name and version
+
     "###
     );
 }

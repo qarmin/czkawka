@@ -22,19 +22,23 @@ This is my first ever project in Rust so probably a lot of things are written in
 
 ## TODO
 - Comments - a lot of things should be described
+- Probably extern argument parser in czkawka-cli could be used 
 - More unit tests
+- Debian package
 - Finding files with debug symbols
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
-- Add support for fast searching based on checking only first ~1MB of file.
+- Add support for fast searching based on checking only first ~1 MB of file.
 - GTK Gui
   - Selection of records(don't know how to do this)
   - Popups
   - Choosing directories(include, excluded)
-  - Popup with type type of deleted records
+  - Popup with type of deleted records
+  - Add Czkawka name to main window(now is czkawka_gui)
 - Orbtk GUI
   - Basic selecting included and excluded folders
-  - 
+  - Text field to show informations about number of found folders/files
+  - Simple buttons to delete 
 
 ## Usage and requirements
 Rustc 1.46 works fine(not sure about a minimal version)  
@@ -103,10 +107,8 @@ Duplicate Checker(Version 0.1.0)
 | App| Idle Ram | Max Operational Ram Usage |
 |:----------:|:-------------:|:-------------:|
 | Fslint |  |  |
-| Czkawka CLI Debug |  |
 | Czkawka CLI Release |  |
-| Czkawka GUI Debug |  |
-| Czkawka GUI Release |  |
+| Czkawka GTK GUI Release |  |
 
 
 Empty folder finder
@@ -114,8 +116,8 @@ Empty folder finder
 | App| Executing Time |
 |:----------:|:-------------:|
 | Fslint |  |
-| Czkawka CLI Debug |  |
 | Czkawka CLI Release |  |
+| Czkawka GTK GUI Release |  |
 
 Differences should be more visible when using slower processor or faster disk.
 

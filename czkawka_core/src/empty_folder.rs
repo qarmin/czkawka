@@ -17,7 +17,7 @@ enum FolderEmptiness {
 /// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
 #[derive(Clone)]
 pub struct FolderEntry {
-    pub parent_path: Option<String>,
+    parent_path: Option<String>, // Usable only when finding
     is_empty: FolderEmptiness,
     pub modified_date: SystemTime,
 }
@@ -367,7 +367,7 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
     }
 
-    /// Set include dir which needs to be relative, exists,
+    /// Set include dir which needs to be relative, exists etc.
     pub fn set_include_directory(&mut self, mut include_directory: String) {
         let start_time: SystemTime = SystemTime::now();
 

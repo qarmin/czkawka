@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use czkawka_core::{duplicate, empty_folder};
+use czkawka_core::*;
 use humansize::{file_size_opts as options, FileSize};
 
 extern crate gtk;
@@ -13,8 +13,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::UNIX_EPOCH;
+use std::{env, process};
 
-#[derive(Debug)]
 #[repr(i32)]
 enum ColumnsDuplicate {
     Name = 0,
@@ -23,6 +23,18 @@ enum ColumnsDuplicate {
 }
 
 fn main() {
+    // Check for version check
+    {
+        let all_arguments: Vec<String> = env::args().skip(1).collect(); // Not need to check program name
+
+        for i in all_arguments {
+            if i == "--v" || i == "--version" {
+                println!("Czkawka CLI {}", CZKAWKA_VERSION);
+                process::exit(0);
+            }
+        }
+    }
+
     gtk::init().expect("Failed to initialize GTK.");
 
     // Loading glade file content and build with it help UI
@@ -59,7 +71,6 @@ fn main() {
     let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
     let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // GUI Notepad Buttons
 
@@ -87,7 +98,6 @@ fn main() {
 
     for i in notebook_chooser_tool.get_children() {
         notebook_chooser_tool_children_names.push(i.get_buildable_name().unwrap().to_string());
-        println!("{}", i.get_buildable_name().unwrap().to_string());
     }
 
     // Entry
@@ -99,7 +109,6 @@ fn main() {
 
     // Set starting information in bottom panel
     {
-
         info_entry.set_text("Duplicated Files");
 
         // Disable all unused buttons
@@ -201,7 +210,7 @@ fn main() {
                         df.set_allowed_extensions("".to_owned());
                         df.set_min_file_size(match minimal_size_entry.get_text().as_str().parse::<u64>() {
                             Ok(t) => t,
-                            Err(_) => 1024 // By default
+                            Err(_) => 1024, // By default
                         });
                         df.set_check_method(check_method.clone());
                         df.set_delete_method(duplicate::DeleteMethod::None);
