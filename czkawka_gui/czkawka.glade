@@ -181,6 +181,7 @@ Author: Rafał Mikrut
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">1</property>
+                    <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkButton">
                         <property name="visible">True</property>
@@ -342,6 +343,7 @@ Author: Rafał Mikrut
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">1</property>
+                    <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkButton">
                         <property name="visible">True</property>
@@ -545,6 +547,9 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
               </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
             </child>
             <child type="tab">
               <object class="GtkLabel">
