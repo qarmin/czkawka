@@ -1,4 +1,3 @@
-#[allow(unused_imports)]
 use czkawka_core::*;
 use humansize::{file_size_opts as options, FileSize};
 
@@ -15,8 +14,7 @@ use std::rc::Rc;
 use std::time::UNIX_EPOCH;
 use std::{env, process};
 
-#[repr(i32)]
-enum ColumnsDuplicate {
+enum ColumnsDefault {
     Name = 0,
     Path,
     Modification,
@@ -417,7 +415,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     name_column.set_title("File Name");
     name_column.set_resizable(true);
     name_column.set_min_width(50);
-    name_column.add_attribute(&renderer, "text", ColumnsDuplicate::Name as i32);
+    name_column.add_attribute(&renderer, "text", ColumnsDefault::Name as i32);
     tree_view_duplicate_finder.append_column(&name_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -426,7 +424,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     path_column.set_title("Path");
     path_column.set_resizable(true);
     path_column.set_min_width(100);
-    path_column.add_attribute(&renderer, "text", ColumnsDuplicate::Path as i32);
+    path_column.add_attribute(&renderer, "text", ColumnsDefault::Path as i32);
     tree_view_duplicate_finder.append_column(&path_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -435,7 +433,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     modification_date_column.set_title("Modification Date");
     modification_date_column.set_resizable(true);
     modification_date_column.set_min_width(100);
-    modification_date_column.add_attribute(&renderer, "text", ColumnsDuplicate::Modification as i32);
+    modification_date_column.add_attribute(&renderer, "text", ColumnsDefault::Modification as i32);
     tree_view_duplicate_finder.append_column(&modification_date_column);
 
     tree_view_duplicate_finder.set_vexpand(true);
@@ -448,7 +446,7 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     name_column.set_title("Folder Name");
     name_column.set_resizable(true);
     name_column.set_min_width(50);
-    name_column.add_attribute(&renderer, "text", ColumnsDuplicate::Name as i32);
+    name_column.add_attribute(&renderer, "text", ColumnsDefault::Name as i32);
     tree_view_empty_folder_finder.append_column(&name_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -457,7 +455,7 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     path_column.set_title("Path");
     path_column.set_resizable(true);
     path_column.set_min_width(100);
-    path_column.add_attribute(&renderer, "text", ColumnsDuplicate::Path as i32);
+    path_column.add_attribute(&renderer, "text", ColumnsDefault::Path as i32);
     tree_view_empty_folder_finder.append_column(&path_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -466,7 +464,7 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     modification_date_column.set_title("Modification Date");
     modification_date_column.set_resizable(true);
     modification_date_column.set_min_width(100);
-    modification_date_column.add_attribute(&renderer, "text", ColumnsDuplicate::Modification as i32);
+    modification_date_column.add_attribute(&renderer, "text", ColumnsDefault::Modification as i32);
     tree_view_empty_folder_finder.append_column(&modification_date_column);
 
     tree_view_empty_folder_finder.set_vexpand(true);
