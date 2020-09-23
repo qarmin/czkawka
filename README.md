@@ -35,6 +35,7 @@ This is my first ever project in Rust so probably a lot of things are written in
   - Choosing directories(include, excluded)
   - Popup with type of deleted records
   - Add Czkawka name to main window(now is czkawka_gui)
+  - Run in another thread searching to be able to pause
 - Orbtk GUI
   - Basic selecting included and excluded folders
   - Text field to show informations about number of found folders/files
