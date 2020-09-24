@@ -809,7 +809,7 @@ Author: Rafał Mikrut
             <property name="margin_start">5</property>
             <property name="margin_end">5</property>
             <property name="margin_top">2</property>
-            <property name="margin_bottom">2</property>
+            <property name="margin_bottom">5</property>
             <child>
               <object class="GtkBox" id="control_buttons">
                 <property name="visible">True</property>
@@ -1188,7 +1188,7 @@ Author: Rafał Mikrut
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="info_entry">
+          <object class="GtkEntry" id="entry_info">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="editable">False</property>
@@ -1208,7 +1208,7 @@ Author: Rafał Mikrut
             <property name="shadow_type">in</property>
             <property name="min_content_height">100</property>
             <child>
-              <object class="GtkTextView" id="errors">
+              <object class="GtkTextView" id="text_view_errors">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>

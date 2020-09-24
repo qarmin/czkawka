@@ -3,6 +3,7 @@ use humansize::{file_size_opts as options, FileSize};
 
 extern crate gtk;
 use chrono::NaiveDateTime;
+use czkawka_core::common::Messages;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::empty_folder::EmptyFolder;
 use duplicate::DuplicateFinder;
@@ -38,17 +39,17 @@ fn main() {
 
     gtk::init().expect("Failed to initialize GTK.");
 
-    // Loading glade file content and build with it help UI
+    //// Loading glade file content and build with it help UI
     let glade_src = include_str!("../czkawka.glade");
     let builder = Builder::from_string(glade_src);
 
-    // Windows
+    //// Windows
     let main_window: gtk::Window = builder.get_object("main_window").unwrap();
     main_window.show_all();
     main_window.set_title("Czkawka GTK GUI");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // States
+    //// States
 
     // Buttons State - to remember existence of different buttons on pages
 
@@ -75,12 +76,12 @@ fn main() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // GUI Entry
+    //// GUI Entry
     let entry_duplicate_minimal_size: gtk::Entry = builder.get_object("entry_duplicate_minimal_size").unwrap();
     let entry_allowed_extensions: gtk::Entry = builder.get_object("entry_allowed_extensions").unwrap();
     let entry_excluded_items: gtk::Entry = builder.get_object("entry_excluded_items").unwrap();
 
-    // GUI Buttons
+    //// GUI Buttons
     let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
     let buttons_stop: gtk::Button = builder.get_object("buttons_stop").unwrap();
     let buttons_resume: gtk::Button = builder.get_object("buttons_resume").unwrap();
@@ -95,7 +96,7 @@ fn main() {
     buttons_pause.hide();
     buttons_select.hide();
 
-    // Notebooks
+    //// Notebooks
     let notebook_chooser_tool: gtk::Notebook = builder.get_object("notebook_chooser_tool").unwrap();
     let mut notebook_chooser_tool_children_names: Vec<String> = Vec::new();
 
@@ -103,10 +104,13 @@ fn main() {
         notebook_chooser_tool_children_names.push(i.get_buildable_name().unwrap().to_string());
     }
 
-    // Entry
-    let info_entry: gtk::Entry = builder.get_object("info_entry").unwrap(); // To show default
+    //// Entry
+    let entry_info: gtk::Entry = builder.get_object("entry_info").unwrap(); // To show default
 
-    // // Scrolled windows
+    //// Text View
+    let text_view_errors: gtk::TextView = builder.get_object("text_view_errors").unwrap();
+
+    //// Scrolled windows
 
     // Main notebook
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
@@ -116,9 +120,9 @@ fn main() {
     let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
     let scrolled_window_excluded_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_excluded_directories").unwrap();
 
-    // Set starting information in bottom panel
+    //// Set starting information in bottom panel
     {
-        info_entry.set_text("Duplicated Files");
+        entry_info.set_text("Duplicated Files");
 
         // Disable and show buttons
         buttons_search.show();
@@ -138,7 +142,7 @@ fn main() {
 
             let col_indices = [0];
 
-            let values: [&dyn ToValue; 1] = [&("/home")];
+            let values: [&dyn ToValue; 1] = [&("/home/rafal/Pulpit")];
             list_store.set(&list_store.append(), &col_indices, &values);
 
             scrolled_window_included_directories.add(&tree_view_included_directory);
@@ -246,13 +250,11 @@ fn main() {
                     // TODO Change to proper value
 
                     let mut df = DuplicateFinder::new();
-                    let check_method = duplicate::CheckingMethod::HASH;
+                    let check_method = duplicate::CheckingMethod::HASH; // TODO
                     {
-                        df.set_include_directory("/home/rafal/Pulpit".to_owned()); // TODO
-                        df.set_exclude_directory("/rafa/".to_owned()); // TODO
-                                                                       // df.set_include_directory(get_string_from_list_store(&scrolled_window_included_directories)); // TODO
-                                                                       // df.set_exclude_directory(get_string_from_list_store(&scrolled_window_excluded_directories)); // TODO
-                        df.set_excluded_items(entry_allowed_extensions.get_text().as_str().to_string());
+                        df.set_include_directory(get_string_from_list_store(&scrolled_window_included_directories));
+                        df.set_exclude_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                        df.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
                         df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
                         df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
                             Ok(t) => t,
@@ -263,6 +265,7 @@ fn main() {
                         df.find_duplicates();
                     }
                     let information = df.get_information();
+                    let text_messages = df.get_text_messages();
 
                     let duplicates_number: usize;
                     let duplicates_size: u64;
@@ -284,7 +287,7 @@ fn main() {
                         }
                     }
 
-                    info_entry.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
+                    entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
 
                     // Create GUI
                     {
@@ -306,9 +309,9 @@ fn main() {
 
                         match check_method {
                             CheckingMethod::HASH => {
-                                let hashmap = df.get_files_sorted_by_hash();
+                                let btreemap = df.get_files_sorted_by_hash();
 
-                                for (size, vectors_vector) in hashmap {
+                                for (size, vectors_vector) in btreemap.iter().rev() {
                                     for vector in vectors_vector {
                                         let values: [&dyn ToValue; 3] = [
                                             &(vector.len().to_string() + " x " + size.to_string().as_str()),
@@ -331,9 +334,9 @@ fn main() {
                                 }
                             }
                             CheckingMethod::SIZE => {
-                                let hashmap = df.get_files_sorted_by_size();
+                                let btreemap = df.get_files_sorted_by_size();
 
-                                for (size, vector) in hashmap {
+                                for (size, vector) in btreemap.iter().rev() {
                                     let values: [&dyn ToValue; 3] = [
                                         &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                         &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
@@ -360,6 +363,8 @@ fn main() {
 
                         scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
                         scrolled_window_duplicate_finder.show_all();
+
+                        print_text_messages_to_text_view(&text_messages, &text_view_errors);
                     }
 
                     // Set state
@@ -389,10 +394,11 @@ fn main() {
                     ef.find_empty_folders();
 
                     let information = ef.get_information();
+                    let text_messages = ef.get_text_messages();
 
                     let empty_folder_number: usize = information.number_of_empty_folders;
 
-                    info_entry.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
+                    entry_info.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
 
                     // Create GUI
                     {
@@ -427,6 +433,8 @@ fn main() {
 
                         scrolled_window_empty_folder_finder.add(&tree_view_empty_folder_finder);
                         scrolled_window_empty_folder_finder.show_all();
+
+                        print_text_messages_to_text_view(&text_messages, &text_view_errors);
                     }
 
                     // Set state
@@ -532,7 +540,49 @@ pub fn create_tree_view_directories(tree_view_directories: &mut gtk::TreeView) {
     tree_view_directories.set_headers_visible(false);
 }
 
-pub fn get_string_from_list_store(_scrolled_window: &gtk::ScrolledWindow) -> String {
-    // TODO
-    return "".to_string();
+pub fn get_string_from_list_store(scrolled_window: &gtk::ScrolledWindow) -> String {
+    let tree_view: gtk::TreeView = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+    let list_store: gtk::ListStore = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+
+    let tree_iter = match list_store.get_iter_first() {
+        Some(t) => t,
+        None => return "".to_string(),
+    };
+
+    list_store.get_value(&tree_iter, 0).get::<String>().unwrap().unwrap()
+}
+pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk::TextView) {
+    let mut messages: String = String::from("");
+    if !text_messages.messages.is_empty() {
+        messages += "############### MESSAGES ###############\n";
+    }
+    for text in &text_messages.messages {
+        messages += text.as_str();
+        messages += "\n";
+    }
+    if !text_messages.messages.is_empty() {
+        messages += "\n";
+    }
+    if !text_messages.warnings.is_empty() {
+        messages += "############### WARNINGS ###############\n";
+    }
+    for text in &text_messages.warnings {
+        messages += text.as_str();
+        messages += "\n";
+    }
+    if !text_messages.warnings.is_empty() {
+        messages += "\n";
+    }
+    if !text_messages.errors.is_empty() {
+        messages += "############### ERRORS ###############\n";
+    }
+    for text in &text_messages.errors {
+        messages += text.as_str();
+        messages += "\n";
+    }
+    if !text_messages.errors.is_empty() {
+        messages += "\n";
+    }
+
+    text_view.get_buffer().unwrap().set_text(messages.as_str());
 }

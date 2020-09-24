@@ -185,7 +185,6 @@ impl DuplicateFinder {
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) {
         let start_time: SystemTime = SystemTime::now();
         if allowed_extensions.is_empty() {
-            self.text_messages.messages.push("No allowed extension was provided, so all are allowed".to_string());
             return;
         }
         allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
