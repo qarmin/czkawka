@@ -250,7 +250,7 @@ fn main() {
                     // TODO Change to proper value
 
                     let mut df = DuplicateFinder::new();
-                    let check_method = duplicate::CheckingMethod::HASH; // TODO
+                    let check_method = duplicate::CheckingMethod::Hash; // TODO
                     {
                         df.set_include_directory(get_string_from_list_store(&scrolled_window_included_directories));
                         df.set_exclude_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
@@ -272,17 +272,17 @@ fn main() {
                     let duplicates_group: usize;
 
                     match check_method {
-                        duplicate::CheckingMethod::HASH => {
+                        CheckingMethod::Hash => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
                         }
-                        duplicate::CheckingMethod::SIZE => {
+                        CheckingMethod::Size => {
                             duplicates_number = information.number_of_duplicated_files_by_size;
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
                         }
-                        duplicate::CheckingMethod::NONE => {
+                        CheckingMethod::None => {
                             panic!();
                         }
                     }
@@ -308,7 +308,7 @@ fn main() {
                         let col_indices = [0, 1, 2];
 
                         match check_method {
-                            CheckingMethod::HASH => {
+                            CheckingMethod::Hash => {
                                 let btreemap = df.get_files_sorted_by_hash();
 
                                 for (size, vectors_vector) in btreemap.iter().rev() {
@@ -333,7 +333,7 @@ fn main() {
                                     }
                                 }
                             }
-                            CheckingMethod::SIZE => {
+                            CheckingMethod::Size => {
                                 let btreemap = df.get_files_sorted_by_size();
 
                                 for (size, vector) in btreemap.iter().rev() {
@@ -356,7 +356,7 @@ fn main() {
                                     }
                                 }
                             }
-                            CheckingMethod::NONE => {
+                            CheckingMethod::None => {
                                 panic!();
                             }
                         }

@@ -1,6 +1,12 @@
 ## Version 0.1.2 dev
 - Add basic search empty folders in GTK GUI
 - Remember place where button are placed
+- Read and parse more values from GUI
+- Print errors/warnings/messages to text field in GUI
+- Add upper notebook with included, excluded directories, items and extensions
+- Improve a little GUI
+- Add version argument which print version e.g. `czkawka_gui --version`
+- Simple Empty folder support in GUI
 
 ## Version 0.1.1 - 20.09.2020r
 - Added images to readme
@@ -11,7 +17,7 @@
 - Added support for non recursive search
 - Improved finding number and size of duplicated files
 - Saving results to file
-- Print how much data was readed by duplicate finder(debug only)
+- Print how much data was read by duplicate finder(debug only)
 - Added Github CI
 - Only debug build prints debug infos
 - Clean code

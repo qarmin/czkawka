@@ -10,9 +10,9 @@ use crate::common::{Common, Messages};
 
 #[derive(PartialEq, Eq, Clone)]
 pub enum CheckingMethod {
-    NONE,
-    SIZE,
-    HASH,
+    None,
+    Size,
+    Hash,
 }
 
 #[derive(Eq, PartialEq, Clone)]
@@ -104,7 +104,7 @@ impl DuplicateFinder {
             included_directories: vec![],
             recursive_search: true,
             allowed_extensions: vec![],
-            check_method: CheckingMethod::NONE,
+            check_method: CheckingMethod::None,
             delete_method: DeleteMethod::None,
             min_file_size: 1024,
         }
@@ -121,18 +121,9 @@ impl DuplicateFinder {
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
+
     pub fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn find_duplicates(&mut self) {
-        self.optimize_directories();
-        self.check_files_size();
-        if self.check_method == CheckingMethod::HASH {
-            self.check_files_hash();
-        }
-        self.delete_files();
-        self.debug_print();
     }
 
     pub fn set_check_method(&mut self, check_method: CheckingMethod) {
@@ -150,6 +141,20 @@ impl DuplicateFinder {
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
         self.recursive_search = recursive_search;
     }
+
+    /// Finding duplicates, save results to internal struct variables
+    pub fn find_duplicates(&mut self) {
+        self.optimize_directories();
+        self.check_files_size();
+        if self.check_method == CheckingMethod::Hash {
+            self.check_files_hash();
+        }
+        self.delete_files();
+        self.debug_print();
+    }
+
+    /// Setting excluded items which needs to contains * wildcrard
+    /// Are a lot of slower than absolute path, so it should be used to heavy
     pub fn set_excluded_items(&mut self, mut excluded_items: String) {
         let start_time: SystemTime = SystemTime::now();
 
@@ -217,6 +222,8 @@ impl DuplicateFinder {
         }
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
     }
+
+    /// Setting include directories, at least one must be provided
     pub fn set_include_directory(&mut self, mut include_directory: String) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
@@ -271,6 +278,7 @@ impl DuplicateFinder {
         true
     }
 
+    /// Setting absolute path to exclude
     pub fn set_exclude_directory(&mut self, mut exclude_directory: String) {
         let start_time: SystemTime = SystemTime::now();
         if exclude_directory.is_empty() {
@@ -320,6 +328,8 @@ impl DuplicateFinder {
         Common::print_time(start_time, SystemTime::now(), "set_exclude_directory".to_string());
     }
 
+    /// Read file length and puts it to different boxes(each for different lengths)
+    /// If in box is only 1 result, then it is removed
     fn check_files_size(&mut self) {
         // TODO maybe add multithreading checking for file hash
         let start_time: SystemTime = SystemTime::now();
@@ -475,6 +485,8 @@ impl DuplicateFinder {
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
     }
+
+    /// Saving results to provided file
     pub fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
@@ -555,7 +567,7 @@ impl DuplicateFinder {
         true
     }
 
-    /// Should be slower than checking in different ways, but still needs to be checked
+    /// The slowest checking type, which must be applied after checking for size
     fn check_files_hash(&mut self) {
         let start_time: SystemTime = SystemTime::now();
         let mut file_handler: File;
@@ -619,7 +631,7 @@ impl DuplicateFinder {
 
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Setting include directories, panics when there is not directories available
+    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -671,13 +683,14 @@ impl DuplicateFinder {
     }
 
     /// Print information's about duplicated entries
+    /// Only needed for CLI
     pub fn print_duplicated_entries(&self) {
         let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
         let mut number_of_groups: u64 = 0;
 
         match self.check_method {
-            CheckingMethod::HASH => {
+            CheckingMethod::Hash => {
                 for (_size, vector) in self.files_with_identical_hashes.iter() {
                     for j in vector {
                         number_of_files += j.len() as u64;
@@ -701,7 +714,7 @@ impl DuplicateFinder {
                     println!();
                 }
             }
-            CheckingMethod::SIZE => {
+            CheckingMethod::Size => {
                 for i in &self.files_with_identical_size {
                     number_of_files += i.1.len() as u64;
                     number_of_groups += 1;
@@ -720,13 +733,14 @@ impl DuplicateFinder {
                     println!();
                 }
             }
-            CheckingMethod::NONE => {
-                panic!("Checking Method shouldn't be ever set to NONE");
+            CheckingMethod::None => {
+                panic!("Checking Method shouldn't be ever set to None");
             }
         }
         Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
     }
-    /// Remove unused entries when included or excluded overlaps with each other or are duplicated
+
+    /// Remove unused entries when included or excluded overlaps with each other or are duplicated etc.
     fn optimize_directories(&mut self) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
@@ -850,11 +864,13 @@ impl DuplicateFinder {
         true
     }
 
+    /// Function to delete files, from filed before BTreeMap
+    /// Using another function to delete files to avoid duplicates data
     fn delete_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
 
         match self.check_method {
-            CheckingMethod::HASH => {
+            CheckingMethod::Hash => {
                 for entry in &self.files_with_identical_hashes {
                     for vector in entry.1 {
                         let tuple: (u64, usize, usize) = delete_files(&vector, &self.delete_method, &mut self.text_messages.warnings);
@@ -864,7 +880,7 @@ impl DuplicateFinder {
                     }
                 }
             }
-            CheckingMethod::SIZE => {
+            CheckingMethod::Size => {
                 for entry in &self.files_with_identical_size {
                     let tuple: (u64, usize, usize) = delete_files(&entry.1, &self.delete_method, &mut self.text_messages.warnings);
                     self.information.gained_space += tuple.0;
@@ -872,7 +888,7 @@ impl DuplicateFinder {
                     self.information.number_of_failed_to_remove_files += tuple.2;
                 }
             }
-            CheckingMethod::NONE => {
+            CheckingMethod::None => {
                 //Just do nothing
                 panic!("Checking method should never be none.");
             }
@@ -887,6 +903,8 @@ impl Default for DuplicateFinder {
     }
 }
 
+/// Functions to remove slice(vector) of files with provided method
+/// Returns size of removed elements, number of deleted and failed to delete files and modified warning list
 fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &mut Vec<String>) -> (u64, usize, usize) {
     assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
     let mut q_index: usize = 0;

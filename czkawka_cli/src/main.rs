@@ -98,13 +98,13 @@ fn main() {
             if ArgumentsPair::has_command(&arguments, "-o") {
                 df.set_recursive_search(false);
             }
-            df.set_check_method(duplicate::CheckingMethod::HASH); // Default
+            df.set_check_method(duplicate::CheckingMethod::Hash); // Default
             if ArgumentsPair::has_command(&arguments, "-l") {
                 let argument_name = ArgumentsPair::get_argument(&arguments, "-l", false).to_lowercase();
                 if argument_name == "size" {
-                    df.set_check_method(duplicate::CheckingMethod::SIZE);
+                    df.set_check_method(duplicate::CheckingMethod::Size);
                 } else if argument_name == "hash" {
-                    df.set_check_method(duplicate::CheckingMethod::HASH);
+                    df.set_check_method(duplicate::CheckingMethod::Hash);
                 } else {
                     println!("-l can only have values hash or size");
                     process::exit(1);
