@@ -61,8 +61,8 @@ cd czkawka
 ```
 cargo run --bin czkawka_gui
 ```
-![GUI GTK](https://user-images.githubusercontent.com/41945903/93716818-0eb7ee00-fb72-11ea-8fdb-50b49a221868.png)
-- Run alternative Orbtk GUI(Still WIP)
+![GUI GTK](https://user-images.githubusercontent.com/41945903/94106023-d72f9700-fe3a-11ea-821d-48484afd74fb.png)
+- Run alternative Orbtk GUI(Still WIP, and currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
 ```
 cargo run --bin czkawka_gui_orbtk
 ```

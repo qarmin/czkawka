@@ -19,9 +19,12 @@ enum ColumnsDefault {
     Path,
     Modification,
 }
+enum ColumnsDirectory {
+    Path = 0,
+}
 
 fn main() {
-    // Check for version check
+    // Printing version
     {
         let all_arguments: Vec<String> = env::args().skip(1).collect(); // Not need to check program name
 
@@ -45,9 +48,9 @@ fn main() {
     main_window.set_title("Czkawka GTK GUI");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // State
+    // States
 
-    // Buttons State
+    // Buttons State - to remember existence of different buttons on pages
 
     let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<String, HashMap<String, bool>>::new()));
     shared_buttons.borrow_mut().clear();
@@ -65,16 +68,17 @@ fn main() {
         shared_buttons.borrow_mut().insert(i.to_string(), temp_hashmap);
     }
 
-    // State of search results
+    // State of search results - probably are not necessary due
 
     let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
     let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // GUI Notepad Buttons
 
-    // GUI Duplicate Entry
-    let minimal_size_entry: gtk::Entry = builder.get_object("duplicate_minimal_size").unwrap();
+    // GUI Entry
+    let entry_duplicate_minimal_size: gtk::Entry = builder.get_object("entry_duplicate_minimal_size").unwrap();
+    let entry_allowed_extensions: gtk::Entry = builder.get_object("entry_allowed_extensions").unwrap();
+    let entry_excluded_items: gtk::Entry = builder.get_object("entry_excluded_items").unwrap();
 
     // GUI Buttons
     let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
@@ -102,18 +106,58 @@ fn main() {
     // Entry
     let info_entry: gtk::Entry = builder.get_object("info_entry").unwrap(); // To show default
 
-    // Scrolled window
+    // // Scrolled windows
+
+    // Main notebook
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
     let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_folder_finder").unwrap();
+
+    // Upper notebook
+    let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
+    let scrolled_window_excluded_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_excluded_directories").unwrap();
 
     // Set starting information in bottom panel
     {
         info_entry.set_text("Duplicated Files");
 
-        // Disable all unused buttons
+        // Disable and show buttons
         buttons_search.show();
         buttons_save.hide();
         buttons_delete.hide();
+
+        // Set Include  Directory
+        {
+            let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+            let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+            let mut tree_view_included_directory: gtk::TreeView = TreeView::with_model(&list_store);
+
+            tree_view_included_directory.get_selection().set_mode(SelectionMode::Single);
+
+            create_tree_view_directories(&mut tree_view_included_directory);
+
+            let col_indices = [0];
+
+            let values: [&dyn ToValue; 1] = [&("/home")];
+            list_store.set(&list_store.append(), &col_indices, &values);
+
+            scrolled_window_included_directories.add(&tree_view_included_directory);
+            scrolled_window_included_directories.show_all();
+        }
+        // Set Excluded Directory
+        {
+            let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+            let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+            let mut tree_view_excluded_directory: gtk::TreeView = TreeView::with_model(&list_store);
+
+            tree_view_excluded_directory.get_selection().set_mode(SelectionMode::Single);
+
+            create_tree_view_directories(&mut tree_view_excluded_directory);
+
+            scrolled_window_excluded_directories.add(&tree_view_excluded_directory);
+            scrolled_window_excluded_directories.show_all();
+        }
     }
 
     // Connecting events
@@ -204,15 +248,17 @@ fn main() {
                     let mut df = DuplicateFinder::new();
                     let check_method = duplicate::CheckingMethod::HASH;
                     {
-                        df.set_include_directory("/home/rafal/Pulpit".to_owned());
-                        df.set_exclude_directory("/rafa/".to_owned());
-                        df.set_excluded_items("".to_owned());
-                        df.set_allowed_extensions("".to_owned());
-                        df.set_min_file_size(match minimal_size_entry.get_text().as_str().parse::<u64>() {
+                        df.set_include_directory("/home/rafal/Pulpit".to_owned()); // TODO
+                        df.set_exclude_directory("/rafa/".to_owned()); // TODO
+                                                                       // df.set_include_directory(get_string_from_list_store(&scrolled_window_included_directories)); // TODO
+                                                                       // df.set_exclude_directory(get_string_from_list_store(&scrolled_window_excluded_directories)); // TODO
+                        df.set_excluded_items(entry_allowed_extensions.get_text().as_str().to_string());
+                        df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
+                        df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
                             Ok(t) => t,
                             Err(_) => 1024, // By default
                         });
-                        df.set_check_method(check_method.clone());
+                        df.set_check_method(check_method.clone()); // TODO
                         df.set_delete_method(duplicate::DeleteMethod::None);
                         df.find_duplicates();
                     }
@@ -474,4 +520,19 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     tree_view_empty_folder_finder.append_column(&modification_date_column);
 
     tree_view_empty_folder_finder.set_vexpand(true);
+}
+
+pub fn create_tree_view_directories(tree_view_directories: &mut gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    name_column.pack_start(&renderer, true);
+    name_column.add_attribute(&renderer, "text", ColumnsDirectory::Path as i32);
+    tree_view_directories.append_column(&name_column);
+
+    tree_view_directories.set_headers_visible(false);
+}
+
+pub fn get_string_from_list_store(_scrolled_window: &gtk::ScrolledWindow) -> String {
+    // TODO
+    return "".to_string();
 }

@@ -174,7 +174,9 @@ Author: Rafał Mikrut
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="spacing">6</property>
+                <property name="margin_start">5</property>
+                <property name="margin_end">5</property>
+                <property name="spacing">5</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -312,6 +314,7 @@ Author: Rafał Mikrut
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
+                    <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
                   <packing>
@@ -336,6 +339,8 @@ Author: Rafał Mikrut
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_start">5</property>
+                <property name="margin_end">5</property>
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkBox">
@@ -454,7 +459,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolled_window_included_directories1">
+                  <object class="GtkScrolledWindow" id="scrolled_window_excluded_directories">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
@@ -528,7 +533,7 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="entry_excluded_items">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="text" translatable="yes">*/.git,*/node_modules,/proc/*,/dev/*,*/lost+found</property>
@@ -648,7 +653,7 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="entry_allowed_extensions">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -717,7 +722,7 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="duplicate_minimal_size">
+                      <object class="GtkEntry" id="entry_duplicate_minimal_size">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="max_length">15</property>
@@ -801,10 +806,15 @@ Author: Rafał Mikrut
           <object class="GtkBox" id="buttons">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_start">5</property>
+            <property name="margin_end">5</property>
+            <property name="margin_top">2</property>
+            <property name="margin_bottom">2</property>
             <child>
               <object class="GtkBox" id="control_buttons">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">2</property>
                 <child>
                   <object class="GtkButton" id="buttons_search">
                     <property name="visible">True</property>
@@ -1014,6 +1024,7 @@ Author: Rafał Mikrut
               <object class="GtkBox" id="action_buttons">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">2</property>
                 <child>
                   <object class="GtkButton" id="buttons_select">
                     <property name="visible">True</property>
@@ -1181,6 +1192,7 @@ Author: Rafał Mikrut
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="editable">False</property>
+            <property name="shadow_type">none</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1192,7 +1204,9 @@ Author: Rafał Mikrut
           <object class="GtkScrolledWindow">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="resize_mode">queue</property>
             <property name="shadow_type">in</property>
+            <property name="min_content_height">100</property>
             <child>
               <object class="GtkTextView" id="errors">
                 <property name="visible">True</property>
@@ -1204,6 +1218,7 @@ Author: Rafał Mikrut
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">4</property>
           </packing>
         </child>
