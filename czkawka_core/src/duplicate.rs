@@ -898,11 +898,11 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
 
     match delete_method {
         DeleteMethod::OneOldest => {
-            for files in vector.iter().enumerate() {
-                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+            for (index, file) in vector.iter().enumerate() {
+                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
                 if q_time == 0 || q_time > time_since_epoch {
                     q_time = time_since_epoch;
-                    q_index = files.0;
+                    q_index = index;
                 }
             }
             match fs::remove_file(vector[q_index].path.clone()) {
@@ -917,11 +917,11 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
             };
         }
         DeleteMethod::OneNewest => {
-            for (size, file) in vector.iter().enumerate() {
+            for (index, file) in vector.iter().enumerate() {
                 let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
                 if q_time == 0 || q_time < time_since_epoch {
                     q_time = time_since_epoch;
-                    q_index = size;
+                    q_index = index;
                 }
             }
             match fs::remove_file(vector[q_index].path.clone()) {
@@ -936,46 +936,46 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
             };
         }
         DeleteMethod::AllExceptOldest => {
-            for files in vector.iter().enumerate() {
-                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+            for (index, file) in vector.iter().enumerate() {
+                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
                 if q_time == 0 || q_time > time_since_epoch {
                     q_time = time_since_epoch;
-                    q_index = files.0;
+                    q_index = index;
                 }
             }
-            for files in vector.iter().enumerate() {
-                if q_index != files.0 {
-                    match fs::remove_file(vector[files.0].path.clone()) {
+            for (index, file) in vector.iter().enumerate() {
+                if q_index != index {
+                    match fs::remove_file(file.path.clone()) {
                         Ok(_) => {
                             removed_files += 1;
-                            gained_space += vector[files.0].size;
+                            gained_space += file.size;
                         }
                         Err(_) => {
                             failed_to_remove_files += 1;
-                            warnings.push("Failed to delete".to_string() + vector[files.0].path.as_str());
+                            warnings.push("Failed to delete".to_string() + file.path.as_str());
                         }
                     };
                 }
             }
         }
         DeleteMethod::AllExceptNewest => {
-            for files in vector.iter().enumerate() {
-                let time_since_epoch = files.1.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
+            for (index, file) in vector.iter().enumerate() {
+                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
                 if q_time == 0 || q_time < time_since_epoch {
                     q_time = time_since_epoch;
-                    q_index = files.0;
+                    q_index = index;
                 }
             }
-            for files in vector.iter().enumerate() {
-                if q_index != files.0 {
-                    match fs::remove_file(vector[files.0].path.clone()) {
+            for (index, file) in vector.iter().enumerate() {
+                if q_index != index {
+                    match fs::remove_file(file.path.clone()) {
                         Ok(_) => {
                             removed_files += 1;
-                            gained_space += vector[files.0].size;
+                            gained_space += file.size;
                         }
                         Err(_) => {
                             failed_to_remove_files += 1;
-                            warnings.push("Failed to delete".to_string() + vector[files.0].path.as_str());
+                            warnings.push("Failed to delete".to_string() + file.path.as_str());
                         }
                     };
                 }
