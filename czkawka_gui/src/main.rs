@@ -19,10 +19,17 @@ enum ColumnsDefault {
     Name = 0,
     Path,
     Modification,
+    Color,
 }
 enum ColumnsDirectory {
     Path = 0,
+    Color,
 }
+
+const MAIN_ROW_COLOR: &str = "#343434";
+const HEADER_ROW_COLOR: &str = "#272727";
+// const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
+// const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
 fn main() {
     // Printing version
@@ -131,7 +138,7 @@ fn main() {
 
         // Set Include  Directory
         {
-            let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+            let col_types: [glib::types::Type; 2] = [glib::types::Type::String, glib::types::Type::String];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             let mut tree_view_included_directory: gtk::TreeView = TreeView::with_model(&list_store);
@@ -140,9 +147,9 @@ fn main() {
 
             create_tree_view_directories(&mut tree_view_included_directory);
 
-            let col_indices = [0];
+            let col_indices = [0, 1];
 
-            let values: [&dyn ToValue; 1] = [&("/home/rafal/Pulpit")];
+            let values: [&dyn ToValue; 2] = [&("/home/rafal/Pulpit"), &(MAIN_ROW_COLOR.to_string())];
             list_store.set(&list_store.append(), &col_indices, &values);
 
             scrolled_window_included_directories.add(&tree_view_included_directory);
@@ -150,7 +157,7 @@ fn main() {
         }
         // Set Excluded Directory
         {
-            let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+            let col_types: [glib::types::Type; 2] = [glib::types::Type::String, glib::types::Type::String];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             let mut tree_view_excluded_directory: gtk::TreeView = TreeView::with_model(&list_store);
@@ -296,7 +303,7 @@ fn main() {
                             scrolled_window_duplicate_finder.remove(i);
                         }
 
-                        let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                        let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
                         let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                         let mut tree_view_duplicate_finder: gtk::TreeView = TreeView::with_model(&list_store);
@@ -305,7 +312,7 @@ fn main() {
 
                         create_tree_view_duplicates(&mut tree_view_duplicate_finder);
 
-                        let col_indices = [0, 1, 2];
+                        let col_indices = [0, 1, 2, 3];
 
                         match check_method {
                             CheckingMethod::Hash => {
@@ -313,20 +320,22 @@ fn main() {
 
                                 for (size, vectors_vector) in btreemap.iter().rev() {
                                     for vector in vectors_vector {
-                                        let values: [&dyn ToValue; 3] = [
+                                        let values: [&dyn ToValue; 4] = [
                                             &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                             &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
                                             &"Bytes lost".to_string(),
+                                            &(HEADER_ROW_COLOR.to_string()),
                                         ];
                                         list_store.set(&list_store.append(), &col_indices, &values);
                                         for entry in vector {
                                             let path = &entry.path;
                                             let index = path.rfind('/').unwrap();
 
-                                            let values: [&dyn ToValue; 3] = [
+                                            let values: [&dyn ToValue; 4] = [
                                                 &(path[index + 1..].to_string()),
                                                 &(path[..index].to_string()),
                                                 &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                                &(MAIN_ROW_COLOR.to_string()),
                                             ];
                                             list_store.set(&list_store.append(), &col_indices, &values);
                                         }
@@ -407,7 +416,7 @@ fn main() {
                             scrolled_window_empty_folder_finder.remove(i);
                         }
 
-                        let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                        let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
                         let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                         let mut tree_view_empty_folder_finder: gtk::TreeView = TreeView::with_model(&list_store);
@@ -416,17 +425,19 @@ fn main() {
 
                         create_tree_view_empty_folders(&mut tree_view_empty_folder_finder);
 
-                        let col_indices = [0, 1, 2];
+                        let col_indices = [0, 1, 2, 3];
 
                         let hashmap = ef.get_empty_folder_list();
 
                         for (name, entry) in hashmap {
                             let name: String = name[..(name.len() - 1)].to_string();
                             let index = name.rfind('/').unwrap();
-                            let values: [&dyn ToValue; 3] = [
+                            println!("{}", name);
+                            let values: [&dyn ToValue; 4] = [
                                 &(name[index + 1..].to_string()),
                                 &(name[..index].to_string()),
                                 &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                &(MAIN_ROW_COLOR.to_string()),
                             ];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
@@ -476,6 +487,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     name_column.set_resizable(true);
     name_column.set_min_width(50);
     name_column.add_attribute(&renderer, "text", ColumnsDefault::Name as i32);
+    name_column.add_attribute(&renderer, "background", ColumnsDefault::Color as i32);
     tree_view_duplicate_finder.append_column(&name_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -485,6 +497,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     path_column.set_resizable(true);
     path_column.set_min_width(100);
     path_column.add_attribute(&renderer, "text", ColumnsDefault::Path as i32);
+    path_column.add_attribute(&renderer, "background", ColumnsDefault::Color as i32);
     tree_view_duplicate_finder.append_column(&path_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -494,6 +507,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     modification_date_column.set_resizable(true);
     modification_date_column.set_min_width(100);
     modification_date_column.add_attribute(&renderer, "text", ColumnsDefault::Modification as i32);
+    modification_date_column.add_attribute(&renderer, "background", ColumnsDefault::Color as i32);
     tree_view_duplicate_finder.append_column(&modification_date_column);
 
     tree_view_duplicate_finder.set_vexpand(true);
@@ -507,6 +521,7 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     name_column.set_resizable(true);
     name_column.set_min_width(50);
     name_column.add_attribute(&renderer, "text", ColumnsDefault::Name as i32);
+    name_column.add_attribute(&renderer, "background", ColumnsDefault::Color as i32);
     tree_view_empty_folder_finder.append_column(&name_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -516,6 +531,7 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     path_column.set_resizable(true);
     path_column.set_min_width(100);
     path_column.add_attribute(&renderer, "text", ColumnsDefault::Path as i32);
+    path_column.add_attribute(&renderer, "background", ColumnsDefault::Color as i32);
     tree_view_empty_folder_finder.append_column(&path_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -525,6 +541,7 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     modification_date_column.set_resizable(true);
     modification_date_column.set_min_width(100);
     modification_date_column.add_attribute(&renderer, "text", ColumnsDefault::Modification as i32);
+    modification_date_column.add_attribute(&renderer, "background", ColumnsDefault::Color as i32);
     tree_view_empty_folder_finder.append_column(&modification_date_column);
 
     tree_view_empty_folder_finder.set_vexpand(true);
@@ -535,6 +552,7 @@ pub fn create_tree_view_directories(tree_view_directories: &mut gtk::TreeView) {
     let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
     name_column.pack_start(&renderer, true);
     name_column.add_attribute(&renderer, "text", ColumnsDirectory::Path as i32);
+    name_column.add_attribute(&renderer, "background", ColumnsDirectory::Color as i32);
     tree_view_directories.append_column(&name_column);
 
     tree_view_directories.set_headers_visible(false);
