@@ -187,6 +187,8 @@ impl DuplicateFinder {
         self.excluded_items = checked_expressions;
         Common::print_time(start_time, SystemTime::now(), "set_excluded_items".to_string());
     }
+
+    /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) {
         let start_time: SystemTime = SystemTime::now();
         if allowed_extensions.is_empty() {

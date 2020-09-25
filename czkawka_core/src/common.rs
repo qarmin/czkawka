@@ -109,6 +109,7 @@ pub struct Messages {
     pub warnings: Vec<String>,
     pub errors: Vec<String>,
 }
+
 impl Messages {
     pub fn new() -> Messages {
         Messages {
