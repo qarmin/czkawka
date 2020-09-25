@@ -370,6 +370,9 @@ fn main() {
                             }
                         }
 
+                        let tree_selection = tree_view_duplicate_finder.get_selection();
+                        tree_selection.set_select_function(Some(Box::new(select_function)));
+
                         scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
                         scrolled_window_duplicate_finder.show_all();
 
@@ -432,7 +435,6 @@ fn main() {
                         for (name, entry) in hashmap {
                             let name: String = name[..(name.len() - 1)].to_string();
                             let index = name.rfind('/').unwrap();
-                            println!("{}", name);
                             let values: [&dyn ToValue; 4] = [
                                 &(name[index + 1..].to_string()),
                                 &(name[..index].to_string()),
@@ -603,4 +605,9 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     }
 
     text_view.get_buffer().unwrap().set_text(messages.as_str());
+}
+
+fn select_function(_ts: &gtk::TreeSelection, _tm: &gtk::TreeModel, _tp: &gtk::TreePath, _b: bool) -> bool {
+    // TODO Create proper function to disable selecting header rows
+    false
 }
