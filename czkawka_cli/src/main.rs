@@ -1,3 +1,4 @@
+use czkawka_core::common_traits::*;
 use czkawka_core::*;
 use std::{env, process};
 
@@ -64,13 +65,13 @@ fn main() {
             let mut df = duplicate::DuplicateFinder::new();
 
             if ArgumentsPair::has_command(&arguments, "-i") {
-                df.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+                df.set_included_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
             } else {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
             }
             if ArgumentsPair::has_command(&arguments, "-e") {
-                df.set_exclude_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+                df.set_excluded_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
             }
 
             if ArgumentsPair::has_command(&arguments, "-s") {
@@ -148,7 +149,7 @@ fn main() {
             }
 
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-            df.print_duplicated_entries();
+            df.print_results();
 
             df.get_text_messages().print_messages();
         }
@@ -159,7 +160,7 @@ fn main() {
             let mut ef = empty_folder::EmptyFolder::new();
 
             if ArgumentsPair::has_command(&arguments, "-i") {
-                ef.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+                ef.set_included_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
             } else {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
@@ -180,19 +181,19 @@ fn main() {
             }
 
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-            ef.print_empty_folders();
+            ef.print_results();
         }
         "--b" => {
             let mut bf = big_file::BigFile::new();
 
             if ArgumentsPair::has_command(&arguments, "-i") {
-                bf.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+                bf.set_included_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
             } else {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
             }
             if ArgumentsPair::has_command(&arguments, "-e") {
-                bf.set_exclude_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+                bf.set_excluded_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
             }
 
             if ArgumentsPair::has_command(&arguments, "-s") {
@@ -235,7 +236,7 @@ fn main() {
             }
 
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-            bf.print_duplicated_entries();
+            bf.print_results();
 
             bf.get_text_messages().print_messages();
         }

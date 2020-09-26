@@ -3,7 +3,7 @@ use humansize::{file_size_opts as options, FileSize};
 
 extern crate gtk;
 use chrono::NaiveDateTime;
-use czkawka_core::common::Messages;
+use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::empty_folder::EmptyFolder;
 use duplicate::DuplicateFinder;
@@ -259,8 +259,8 @@ fn main() {
                     let mut df = DuplicateFinder::new();
                     let check_method = duplicate::CheckingMethod::Hash; // TODO
                     {
-                        df.set_include_directory(get_string_from_list_store(&scrolled_window_included_directories));
-                        df.set_exclude_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                        df.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
+                        df.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
                         df.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
                         df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
                         df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
@@ -401,7 +401,7 @@ fn main() {
                     // TODO Change to proper value
                     let mut ef = EmptyFolder::new();
 
-                    ef.set_include_directory("/home/rafal/Pulpit".to_string());
+                    ef.set_included_directory("/home/rafal/Pulpit".to_string());
                     ef.set_delete_folder(false);
                     ef.find_empty_folders();
 

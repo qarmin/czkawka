@@ -19,7 +19,7 @@ fn main() {
                                 .child(TextBlock::new().text("Include Directory:").v_align("center").h_align("start").attach(Grid::column(0)).attach(Grid::row(0)).build(ctx))
                                 .child(
                                     TextBox::new()
-                                        .id("include_directory")
+                                        .id("included_directory")
                                         .water_mark("Include Directory")
                                         .v_align("center")
                                         .h_align("start")
@@ -31,7 +31,7 @@ fn main() {
                                 .child(TextBlock::new().text("Exclude Directory:").v_align("center").h_align("start").attach(Grid::column(0)).attach(Grid::row(1)).build(ctx))
                                 .child(
                                     TextBox::new()
-                                        .id("exclude_directory")
+                                        .id("excluded_directory")
                                         .water_mark("Exclude Directory")
                                         .v_align("center")
                                         .h_align("start")

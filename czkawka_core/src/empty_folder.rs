@@ -1,10 +1,12 @@
-use crate::common::{Common, Messages};
+use crate::common::Common;
+use crate::common_directory::Directories;
+use crate::common_messages::Messages;
+use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use std::collections::BTreeMap;
+use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
-use std::path::Path;
 use std::time::SystemTime;
-use std::{fs, process};
 
 /// Enum with values which show if folder is empty.
 /// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessery to put it here
@@ -28,7 +30,7 @@ pub struct EmptyFolder {
     delete_folders: bool,
     text_messages: Messages,
     empty_folder_list: BTreeMap<String, FolderEntry>, // Path, FolderEntry
-    included_directories: Vec<String>,
+    directories: Directories,
 }
 
 /// Info struck with helpful information's about results
@@ -57,9 +59,9 @@ impl EmptyFolder {
         EmptyFolder {
             information: Default::default(),
             delete_folders: false,
-            text_messages: Default::default(),
+            text_messages: Messages::new(),
             empty_folder_list: Default::default(),
-            included_directories: vec![],
+            directories: Directories::new(),
         }
     }
 
@@ -76,9 +78,9 @@ impl EmptyFolder {
 
     /// Public function used by CLI to search for empty folders
     pub fn find_empty_folders(&mut self) {
-        self.optimize_directories();
+        self.directories.optimize_directories(true, &mut self.text_messages);
         self.check_for_empty_folders(true);
-        self.check_for_empty_folders(false); // Not needed for CLI, but it is better to check this
+        self.check_for_empty_folders(false); // Not needed for CLI, but it is better to check this again, because maybe empty folder stops to be empty
         self.optimize_folders();
         if self.delete_folders {
             self.delete_empty_folders();
@@ -88,43 +90,6 @@ impl EmptyFolder {
 
     pub fn set_delete_folder(&mut self, delete_folder: bool) {
         self.delete_folders = delete_folder;
-    }
-
-    pub fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let mut file = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(_) => {
-                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
-                return false;
-            }
-        };
-
-        match file.write_all(format!("Results of searching in {:?}\n", self.included_directories).as_bytes()) {
-            Ok(_) => (),
-            Err(_) => {
-                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
-                return false;
-            }
-        }
-
-        if !self.empty_folder_list.is_empty() {
-            file.write_all(b"-------------------------------------------------Empty folder list-------------------------------------------------\n").unwrap();
-            file.write_all(("Found ".to_string() + self.information.number_of_empty_folders.to_string().as_str() + " empty folders which in " + ".\n").as_bytes())
-                .unwrap();
-            for name in self.empty_folder_list.keys() {
-                file.write_all((name.clone() + "\n").as_bytes()).unwrap();
-            }
-        } else {
-            file.write_all(b"Not found any empty folders.").unwrap();
-        }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
-        true
     }
 
     /// Clean directory tree
@@ -157,7 +122,7 @@ impl EmptyFolder {
 
         if initial_checking {
             // Add root folders for finding
-            for id in &self.included_directories {
+            for id in &self.directories.included_directories {
                 folders_checked.insert(
                     id.clone(),
                     FolderEntry {
@@ -285,17 +250,18 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 
-    /// Prints basic info about empty folders // TODO print better
-    pub fn print_empty_folders(&self) {
-        if !self.empty_folder_list.is_empty() {
-            println!("Found {} empty folders", self.empty_folder_list.len());
-        }
-        for i in &self.empty_folder_list {
-            println!("{}", i.0);
-        }
+    /// Set include dir which needs to be relative, exists etc.
+    pub fn set_included_directory(&mut self, included_directory: String) {
+        self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
+}
+impl Default for EmptyFolder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
-    /// Debug print
+impl DebugPrint for EmptyFolder {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
     fn debug_print(&self) {
@@ -307,128 +273,56 @@ impl EmptyFolder {
         println!("---------------DEBUG PRINT---------------");
         println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
         println!("Number of empty folders - {}", self.information.number_of_empty_folders);
-        println!("Included directories - {:?}", self.included_directories);
+        println!("Included directories - {:?}", self.directories.included_directories);
         println!("-----------------------------------------");
     }
-
-    // TODO maybe move this and one from duplicated finder to one common class to avoid duplicating code
-    /// Optimize include and exclude directories by removing duplicates etc.
-    fn optimize_directories(&mut self) {
+}
+impl SaveResults for EmptyFolder {
+    fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
+        let file_name: String = match file_name {
+            "" => "results.txt".to_string(),
+            k => k.to_string(),
+        };
 
-        let mut optimized_included: Vec<String> = Vec::<String>::new();
-        // Remove duplicated entries like: "/", "/"
-
-        self.included_directories.sort();
-
-        self.included_directories.dedup();
-
-        // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
-
-        let mut is_inside: bool;
-        for id_checked in &self.included_directories {
-            is_inside = false;
-            for id_help in &self.included_directories {
-                if id_checked == id_help {
-                    // We checking same element
-                    continue;
-                }
-                if id_checked.starts_with(id_help) {
-                    is_inside = true;
-                    break;
-                }
+        let mut file = match File::create(&file_name) {
+            Ok(t) => t,
+            Err(_) => {
+                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+                return false;
             }
-            if !is_inside {
-                optimized_included.push(id_checked.to_string());
+        };
+
+        match file.write_all(format!("Results of searching in {:?}\n", self.directories.included_directories).as_bytes()) {
+            Ok(_) => (),
+            Err(_) => {
+                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+                return false;
             }
         }
 
-        self.included_directories = optimized_included;
-        optimized_included = Vec::<String>::new();
-
-        // Remove non existed directories
-        for id in &self.included_directories {
-            let path = Path::new(id);
-            if path.exists() {
-                optimized_included.push(id.to_string());
+        if !self.empty_folder_list.is_empty() {
+            file.write_all(b"-------------------------------------------------Empty folder list-------------------------------------------------\n").unwrap();
+            file.write_all(("Found ".to_string() + self.information.number_of_empty_folders.to_string().as_str() + " empty folders which in " + ".\n").as_bytes())
+                .unwrap();
+            for name in self.empty_folder_list.keys() {
+                file.write_all((name.clone() + "\n").as_bytes()).unwrap();
             }
+        } else {
+            file.write_all(b"Not found any empty folders.").unwrap();
         }
-
-        self.included_directories = optimized_included;
-        //optimized_included = Vec::<String>::new();
-
-        if self.included_directories.is_empty() {
-            println!("Optimize Directories ERROR: Excluded directories overlaps all included directories.");
-            process::exit(1);
-        }
-
-        // Not needed, but better is to have sorted everything
-        self.included_directories.sort();
-        Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
-    }
-
-    /// Set include dir which needs to be relative, exists etc.
-    pub fn set_include_directory(&mut self, mut include_directory: String) {
-        let start_time: SystemTime = SystemTime::now();
-
-        if include_directory.is_empty() {
-            println!("At least one directory must be provided");
-        }
-
-        include_directory = include_directory.replace("\"", "");
-        let directories: Vec<String> = include_directory.split(',').map(String::from).collect();
-        let mut checked_directories: Vec<String> = Vec::new();
-
-        for directory in directories {
-            let directory: String = directory.trim().to_string();
-
-            if directory == "" {
-                continue;
-            }
-            if directory == "/" {
-                println!("Using / is probably not good idea, you may go out of ram.");
-            }
-            if directory.contains('*') {
-                println!("Include Directory ERROR: Wildcards are not supported, ignoring path {}.", directory);
-                continue;
-            }
-            if directory.starts_with('~') {
-                println!("Include Directory ERROR: ~ in path isn't supported, ignoring path {}.", directory);
-                continue;
-            }
-            if !directory.starts_with('/') {
-                println!("Include Directory ERROR: Relative path are not supported, ignoring path {}.", directory);
-                continue;
-            }
-            if !Path::new(&directory).exists() {
-                println!("Include Directory ERROR: Path {} doesn't exists.", directory);
-                continue;
-            }
-            if !Path::new(&directory).is_dir() {
-                println!("Include Directory ERROR: {} isn't folder.", directory);
-                continue;
-            }
-
-            // directory must end with /, due to possiblity of incorrect assumption, that e.g. /home/rafal is top folder to /home/rafalinho
-            if !directory.ends_with('/') {
-                checked_directories.push(directory + "/");
-            } else {
-                checked_directories.push(directory);
-            }
-        }
-
-        if checked_directories.is_empty() {
-            println!("Not found even one correct path to include.");
-            process::exit(1);
-        }
-
-        self.included_directories = checked_directories;
-
-        Common::print_time(start_time, SystemTime::now(), "set_include_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        true
     }
 }
-impl Default for EmptyFolder {
-    fn default() -> Self {
-        Self::new()
+impl PrintResults for EmptyFolder {
+    /// Prints basic info about empty folders // TODO print better
+    fn print_results(&self) {
+        if !self.empty_folder_list.is_empty() {
+            println!("Found {} empty folders", self.empty_folder_list.len());
+        }
+        for i in &self.empty_folder_list {
+            println!("{}", i.0);
+        }
     }
 }
