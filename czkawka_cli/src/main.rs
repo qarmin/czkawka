@@ -198,8 +198,8 @@ fn main() {
                 bf.set_excluded_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
             }
 
-            if ArgumentsPair::has_command(&arguments, "-s") {
-                let number_of_files = match ArgumentsPair::get_argument(&arguments, "-s", false).parse::<usize>() {
+            if ArgumentsPair::has_command(&arguments, "-l") {
+                let number_of_files = match ArgumentsPair::get_argument(&arguments, "-l", false).parse::<usize>() {
                     Ok(t) => {
                         if t == 0 {
                             println!("ERROR: Minimum one biggest file must be showed..");
@@ -241,6 +241,45 @@ fn main() {
             bf.print_results();
 
             bf.get_text_messages().print_messages();
+        }
+        "--y" => {
+            let mut yf = empty_files::EmptyFiles::new();
+
+            if ArgumentsPair::has_command(&arguments, "-i") {
+                yf.set_included_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+            } else {
+                println!("FATAL ERROR: Parameter -i with set of included files is required.");
+                process::exit(1);
+            }
+            if ArgumentsPair::has_command(&arguments, "-e") {
+                yf.set_excluded_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+            }
+            if ArgumentsPair::has_command(&arguments, "-k") {
+                yf.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-o") {
+                yf.set_recursive_search(false);
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-delete") {
+                yf.set_delete_method(empty_files::DeleteMethod::Delete);
+            }
+
+            yf.find_empty_files();
+
+            #[allow(clippy::collapsible_if)]
+            if ArgumentsPair::has_command(&arguments, "-f") {
+                if !yf.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
+                    yf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            yf.print_results();
+
+            yf.get_text_messages().print_messages();
         }
         "--version" | "v" => {
             println!("Czkawka CLI {}", CZKAWKA_VERSION);
@@ -293,14 +332,22 @@ Usage of Czkawka:
   Usage example:
     czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
 
-  --b  <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s number_of_files = 50] [-x allowed_extension = ""] [-o] [-f file_to_save = "results.txt"]
+  --b  <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-l number_of_files = 50] [-x allowed_extension = ""] [-o] [-f file_to_save = "results.txt"]
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -k excluded_items - list of excluded items which contains * wildcard(may be slow)
     -o - this options prevents from recursive check of folders
     -f file_to_save - saves results to file
-    -s number_of_files - number of showed the biggest files.
+    -l number_of_files - number of showed the biggest files.
     -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
+
+  --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for duplicates files
+    -i directory_to_search - list of directories which should will be searched like /home/rafal
+    -e exclude_directories - list of directories which will be excluded from search.
+    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
+    -o - this options prevents from recursive check of folders
+    -f file_to_save - saves results to file
+    -delete - delete found files
 
   --version / --v - prints program name and version
 

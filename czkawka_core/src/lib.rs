@@ -1,5 +1,6 @@
 pub mod big_file;
 pub mod duplicate;
+pub mod empty_files;
 pub mod empty_folder;
 
 pub mod common;

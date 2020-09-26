@@ -516,7 +516,13 @@ impl SaveResults for DuplicateFinder {
             }
         };
 
-        match file.write_all(format!("Results of searching in {:?}\n", self.directories.included_directories).as_bytes()) {
+        match file.write_all(
+            format!(
+                "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
+                self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+            )
+            .as_bytes(),
+        ) {
             Ok(_) => (),
             Err(_) => {
                 self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
@@ -565,7 +571,7 @@ impl SaveResults for DuplicateFinder {
                 }
             }
         } else {
-            file.write_all(b"Not found any empty folders.").unwrap();
+            file.write_all(b"Not found any duplicates.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
@@ -627,7 +633,7 @@ impl PrintResults for DuplicateFinder {
                 panic!("Checking Method shouldn't be ever set to None");
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
     }
 }
 

@@ -288,7 +288,7 @@ impl SaveResults for EmptyFolder {
             }
         };
 
-        match file.write_all(format!("Results of searching in {:?}\n", self.directories.included_directories).as_bytes()) {
+        match file.write_all(format!("Results of searching {:?} with excluded directories {:?}\n", self.directories.included_directories, self.directories.excluded_directories).as_bytes()) {
             Ok(_) => (),
             Err(_) => {
                 self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
@@ -316,8 +316,8 @@ impl PrintResults for EmptyFolder {
         if !self.empty_folder_list.is_empty() {
             println!("Found {} empty folders", self.empty_folder_list.len());
         }
-        for i in &self.empty_folder_list {
-            println!("{}", i.0);
+        for name in self.empty_folder_list.keys() {
+            println!("{}", name);
         }
     }
 }
