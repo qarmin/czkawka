@@ -109,6 +109,8 @@ fn main() {
                     df.set_check_method(duplicate::CheckingMethod::Size);
                 } else if argument_name == "hash" {
                     df.set_check_method(duplicate::CheckingMethod::Hash);
+                } else if argument_name == "hashmb" {
+                    df.set_check_method(duplicate::CheckingMethod::HashMB);
                 } else {
                     println!("-l can only have values hash or size");
                     process::exit(1);
@@ -272,7 +274,7 @@ Usage of Czkawka:
     -f file_to_save - saves results to file
     -s min_size - minimum size of checked files in bytes, assigning bigger value may speed up searching.
     -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
-    -l type_of_search - allows to use fastest which takes into account only size, and more accurate which check if file contnet is same(hashes).
+    -l type_of_search - allows to use fastest which takes into account only size(SIZE), more accurate which takes into account hash of only first 1MB of file(HASHMB) or fully accurate(the slowest solution) which check hash of all file(HASH).
     -delete - delete found files, by default remove all except the most oldest one, it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
 
   Usage example:

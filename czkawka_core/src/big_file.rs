@@ -87,7 +87,6 @@ impl BigFile {
         &self.information
     }
 
-
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
         self.recursive_search = recursive_search;
     }
@@ -208,14 +207,14 @@ impl BigFile {
                                 Ok(t) => t,
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
-                                   continue
+                                    continue;
                                 } // Permissions Denied
                             },
                             modified_date: match metadata.modified() {
                                 Ok(t) => t,
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
-                                    continue
+                                    continue;
                                 } // Permissions Denied
                             },
                         };
@@ -233,8 +232,6 @@ impl BigFile {
                 }
             }
         }
-
-
 
         // Extract n biggest files to new TreeMap
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -376,7 +373,7 @@ impl PrintResults for BigFile {
         for (size, vector) in self.big_files.iter().rev() {
             // TODO Align all to same width
             for entry in vector {
-                println!("{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, entry.path);
+                println!("{} ({} bytes) - {}", size.file_size(options::BINARY).unwrap(), size, entry.path);
             }
         }
         Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());

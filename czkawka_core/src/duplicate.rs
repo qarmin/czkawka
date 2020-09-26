@@ -12,11 +12,14 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 
+const HASH_MB_LIMIT_BYTES: u64 = 1024 * 1024; // 1MB
+
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum CheckingMethod {
     None,
     Size,
     Hash,
+    HashMB,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -116,7 +119,7 @@ impl DuplicateFinder {
     pub fn find_duplicates(&mut self) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         self.check_files_size();
-        if self.check_method == CheckingMethod::Hash {
+        if self.check_method == CheckingMethod::Hash || self.check_method == CheckingMethod::HashMB {
             self.check_files_hash();
         }
         self.delete_files();
@@ -354,6 +357,7 @@ impl DuplicateFinder {
 
                 let mut hasher: blake3::Hasher = blake3::Hasher::new();
                 let mut buffer = [0u8; 16384];
+                let mut readed_bytes: u64 = 0;
                 loop {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
@@ -366,8 +370,14 @@ impl DuplicateFinder {
                     if n == 0 {
                         break;
                     }
+
+                    readed_bytes += n as u64;
                     self.information.bytes_read_when_hashing += n as u64;
                     hasher.update(&buffer[..n]);
+
+                    if self.check_method == CheckingMethod::HashMB && readed_bytes >= HASH_MB_LIMIT_BYTES {
+                        break;
+                    }
                 }
                 if !error_reading_file {
                     let hash_string: String = hasher.finalize().to_hex().to_string();
@@ -400,8 +410,8 @@ impl DuplicateFinder {
         let start_time: SystemTime = SystemTime::now();
 
         match self.check_method {
-            CheckingMethod::Hash => {
-                for (_size, vector_vectors) in &self.files_with_identical_hashes {
+            CheckingMethod::Hash | CheckingMethod::HashMB => {
+                for vector_vectors in self.files_with_identical_hashes.values() {
                     for vector in vector_vectors.iter() {
                         let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
                         self.information.gained_space += tuple.0;
@@ -411,7 +421,7 @@ impl DuplicateFinder {
                 }
             }
             CheckingMethod::Size => {
-                for (_size, vector) in &self.files_with_identical_size {
+                for vector in self.files_with_identical_size.values() {
                     let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
                     self.information.gained_space += tuple.0;
                     self.information.number_of_removed_files += tuple.1;
@@ -570,7 +580,7 @@ impl PrintResults for DuplicateFinder {
         let mut number_of_groups: u64 = 0;
 
         match self.check_method {
-            CheckingMethod::Hash => {
+            CheckingMethod::Hash | CheckingMethod::HashMB => {
                 for (_size, vector) in self.files_with_identical_hashes.iter() {
                     for j in vector {
                         number_of_files += j.len() as u64;

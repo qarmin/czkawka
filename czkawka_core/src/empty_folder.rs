@@ -97,7 +97,7 @@ impl EmptyFolder {
     fn optimize_folders(&mut self) {
         let mut new_directory_folders: BTreeMap<String, FolderEntry> = Default::default();
 
-        for (name,folder_entry) in &self.empty_folder_list {
+        for (name, folder_entry) in &self.empty_folder_list {
             match &folder_entry.parent_path {
                 Some(t) => {
                     if !self.empty_folder_list.contains_key(t) {
@@ -212,7 +212,7 @@ impl EmptyFolder {
         // Now we check if checked folders are really empty, and if are, then
         if initial_checking {
             // We need to set empty folder list
-            for (name,folder_entry) in folders_checked {
+            for (name, folder_entry) in folders_checked {
                 if folder_entry.is_empty != FolderEmptiness::No {
                     self.empty_folder_list.insert(name, folder_entry);
                 }
@@ -220,7 +220,7 @@ impl EmptyFolder {
         } else {
             // We need to check if parent of folder isn't also empty, because we wan't to delete only parent with two empty folders except this folders and at the end parent folder
             let mut new_folders_list: BTreeMap<String, FolderEntry> = Default::default();
-            for (name,folder_entry) in folders_checked {
+            for (name, folder_entry) in folders_checked {
                 if folder_entry.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&name) {
                     new_folders_list.insert(name, folder_entry);
                 }
@@ -235,10 +235,10 @@ impl EmptyFolder {
     fn delete_empty_folders(&mut self) {
         let start_time: SystemTime = SystemTime::now();
         // Folders may be deleted or require too big privileges
-        for (name,_folder_entry) in &self.empty_folder_list {
+        for name in self.empty_folder_list.keys() {
             match fs::remove_dir_all(name) {
                 Ok(_) => (),
-                Err(_) => self.text_messages.warnings.push(format!("Failed to remove folder {}",name)),
+                Err(_) => self.text_messages.warnings.push(format!("Failed to remove folder {}", name)),
             };
         }
 

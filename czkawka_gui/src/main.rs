@@ -279,7 +279,7 @@ fn main() {
                     let duplicates_group: usize;
 
                     match check_method {
-                        CheckingMethod::Hash => {
+                        CheckingMethod::Hash | CheckingMethod::HashMB => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
@@ -315,7 +315,7 @@ fn main() {
                         let col_indices = [0, 1, 2, 3];
 
                         match check_method {
-                            CheckingMethod::Hash => {
+                            CheckingMethod::Hash | CheckingMethod::HashMB => {
                                 let btreemap = df.get_files_sorted_by_hash();
 
                                 for (size, vectors_vector) in btreemap.iter().rev() {
