@@ -30,7 +30,12 @@ fn main() {
                 process::exit(1);
             }
             if arguments[arguments.len() - 1].argument != Option::None {
-                println!("FATAL ERROR: Trying set second parameter {}, but only one is supported", argument); // This may be changed in future to support 2 or more attributes with space
+                println!(
+                    "FATAL ERROR: Trying set second parameter \"{}\" for \"{}\" which already have this parameter \"{}\" ",
+                    argument,
+                    arguments[arguments.len() - 1].command,
+                    arguments[arguments.len() - 1].argument.as_ref().unwrap()
+                ); // This may be changed in future to support 2 or more attributes with space
                 process::exit(1);
             }
             let last_element = arguments.len() - 1;
@@ -91,8 +96,6 @@ fn main() {
             }
             if ArgumentsPair::has_command(&arguments, "-k") {
                 df.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
-            } else {
-                df.set_excluded_items("DEFAULT".to_string());
             }
 
             if ArgumentsPair::has_command(&arguments, "-o") {
@@ -179,6 +182,63 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             ef.print_empty_folders();
         }
+        "--b" => {
+            let mut bf = big_file::BigFile::new();
+
+            if ArgumentsPair::has_command(&arguments, "-i") {
+                bf.set_include_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+            } else {
+                println!("FATAL ERROR: Parameter -i with set of included files is required.");
+                process::exit(1);
+            }
+            if ArgumentsPair::has_command(&arguments, "-e") {
+                bf.set_exclude_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-s") {
+                let number_of_files = match ArgumentsPair::get_argument(&arguments, "-s", false).parse::<usize>() {
+                    Ok(t) => {
+                        if t == 0 {
+                            println!("ERROR: Minimum one biggest file must be showed..");
+                            1
+                        } else {
+                            t
+                        }
+                    }
+                    Err(_) => {
+                        println!("FATAL ERROR: \"{}\" is not valid number of files to show(allowed range <1,usize::max>)", ArgumentsPair::get_argument(&arguments, "-s", false));
+                        process::exit(1);
+                    }
+                };
+                bf.set_number_of_files_to_check(number_of_files);
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-x") {
+                bf.set_allowed_extensions(ArgumentsPair::get_argument(&arguments, "-x", false));
+            }
+            if ArgumentsPair::has_command(&arguments, "-k") {
+                bf.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-o") {
+                bf.set_recursive_search(false);
+            }
+
+            bf.find_big_files();
+
+            #[allow(clippy::collapsible_if)]
+            if ArgumentsPair::has_command(&arguments, "-f") {
+                if !bf.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
+                    bf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            bf.print_duplicated_entries();
+
+            bf.get_text_messages().print_messages();
+        }
         "--version" | "v" => {
             println!("Czkawka CLI {}", CZKAWKA_VERSION);
             process::exit(0);
@@ -203,7 +263,7 @@ Usage of Czkawka:
     czkawka
 
 
-  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = "DEFAULT"] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
+  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -k excluded_items - list of excluded items which contains * wildcard(may be slow)
@@ -229,6 +289,15 @@ Usage of Czkawka:
 
   Usage example:
     czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
+
+  --b  <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s number_of_files = 50] [-x allowed_extension = ""] [-o] [-f file_to_save = "results.txt"]
+    -i directory_to_search - list of directories which should will be searched like /home/rafal
+    -e exclude_directories - list of directories which will be excluded from search.
+    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
+    -o - this options prevents from recursive check of folders
+    -f file_to_save - saves results to file
+    -s number_of_files - number of showed the biggest files.
+    -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
 
   --version / --v - prints program name and version
 

@@ -1,7 +1,9 @@
 use crate::common::{Common, Messages};
+use humansize::{file_size_opts as options, FileSize};
 use std::collections::BTreeMap;
 use std::fs;
-use std::fs::Metadata;
+use std::fs::{File, Metadata};
+use std::io::Write;
 use std::path::Path;
 use std::time::SystemTime;
 
@@ -20,6 +22,7 @@ pub struct Info {
     pub number_of_ignored_files: usize,
     pub number_of_ignored_things: usize,
     pub taken_space: u64,
+    pub number_of_real_files: usize,
 }
 impl Info {
     pub fn new() -> Info {
@@ -29,6 +32,7 @@ impl Info {
             number_of_ignored_files: 0,
             number_of_ignored_things: 0,
             taken_space: 0,
+            number_of_real_files: 0,
         }
     }
 }
@@ -62,7 +66,7 @@ impl BigFile {
             excluded_directories: vec![],
             included_directories: vec![],
             allowed_extensions: vec![],
-            recursive_search: false,
+            recursive_search: true,
             number_of_files_to_check: 50,
         }
     }
@@ -76,7 +80,57 @@ impl BigFile {
 
     pub fn find_big_files(&mut self) {
         self.optimize_directories();
+        self.look_for_big_files();
         self.debug_print();
+    }
+
+    pub fn set_recursive_search(&mut self, recursive_search: bool) {
+        self.recursive_search = recursive_search;
+    }
+
+    /// Saving results to provided file
+    pub fn save_results_to_file(&mut self, file_name: &str) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+        let file_name: String = match file_name {
+            "" => "results.txt".to_string(),
+            k => k.to_string(),
+        };
+
+        let mut file = match File::create(&file_name) {
+            Ok(t) => t,
+            Err(_) => {
+                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+                return false;
+            }
+        };
+
+        match file.write_all(
+            format!(
+                "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
+                self.included_directories, self.excluded_directories, self.excluded_items
+            )
+            .as_bytes(),
+        ) {
+            Ok(_) => (),
+            Err(_) => {
+                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+                return false;
+            }
+        }
+
+        if self.information.number_of_real_files != 0 {
+            file.write_all(format!("{} the biggest files.\n\n", self.information.number_of_real_files).as_bytes()).unwrap();
+
+            for (size, files) in self.big_files.iter().rev() {
+                for file_entry in files {
+                    file.write_all(format!("{} ({}) -  {}\n", size.file_size(options::BINARY).unwrap(), size, file_entry.path.clone()).as_bytes()).unwrap();
+                }
+            }
+        } else {
+            file.write_all(b"Not found any empty folders.").unwrap();
+        }
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        true
     }
 
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
@@ -115,7 +169,6 @@ impl BigFile {
         }
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
     }
-
 
     fn look_for_big_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
@@ -256,15 +309,15 @@ impl BigFile {
 
         //
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-        let mut number_of_files: usize = 0;
 
-        for (size, vector) in &self.big_files {
-            if number_of_files < self.number_of_files_to_check {
+        for (size, vector) in self.big_files.iter().rev() {
+            if self.information.number_of_real_files < self.number_of_files_to_check {
                 for file in vector {
-                    if number_of_files < self.number_of_files_to_check {
+                    if self.information.number_of_real_files < self.number_of_files_to_check {
                         new_map.entry(*size).or_insert_with(Vec::new);
                         new_map.get_mut(size).unwrap().push(file.clone());
-                        number_of_files += 1;
+                        self.information.taken_space += size;
+                        self.information.number_of_real_files += 1;
                     } else {
                         break;
                     }
@@ -278,24 +331,52 @@ impl BigFile {
         Common::print_time(start_time, SystemTime::now(), "look_for_big_files".to_string());
     }
 
-    /// Debug print
     #[allow(dead_code)]
     #[allow(unreachable_code)]
+    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
             return;
         }
-
         println!("---------------DEBUG PRINT---------------");
-        // println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
-        // println!("Number of empty folders - {}", self.information.number_of_empty_folders);
-        // println!("Included directories - {:?}", self.included_directories);
+        println!("### Information's");
+
+        println!("Errors size - {}", self.text_messages.errors.len());
+        println!("Warnings size - {}", self.text_messages.warnings.len());
+        println!("Messages size - {}", self.text_messages.messages.len());
+        println!("Number of checked files - {}", self.information.number_of_checked_files);
+        println!("Number of checked folders - {}", self.information.number_of_checked_folders);
+        println!("Number of ignored files - {}", self.information.number_of_ignored_files);
+        println!("Number of ignored things(like symbolic links) - {}", self.information.number_of_ignored_things);
+
+        println!("### Other");
+        println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());
+        println!("Allowed extensions - {:?}", self.allowed_extensions);
+        println!("Excluded items - {:?}", self.excluded_items);
+        println!("Included directories - {:?}", self.included_directories);
+        println!("Excluded directories - {:?}", self.excluded_directories);
+        println!("Recursive search - {}", self.recursive_search.to_string());
+        println!("Number of files to check - {:?}", self.number_of_files_to_check);
         println!("-----------------------------------------");
     }
 
     pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {
         self.number_of_files_to_check = number_of_files_to_check;
+    }
+
+    /// Print information's about duplicated entries
+    /// Only needed for CLI
+    pub fn print_duplicated_entries(&self) {
+        let start_time: SystemTime = SystemTime::now();
+        println!("Found {} files which take {}:", self.information.number_of_real_files, self.information.taken_space.file_size(options::BINARY).unwrap());
+        for (size, vector) in self.big_files.iter().rev() {
+            // TODO Align all to same width
+            for entry in vector {
+                println!("{} ({}) -  {}", size.file_size(options::BINARY).unwrap(), size, entry.path);
+            }
+        }
+        Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());
     }
 
     /// Setting excluded items which needs to contains * wildcrard

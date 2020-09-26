@@ -8,14 +8,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::common::{Common, Messages};
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum CheckingMethod {
     None,
     Size,
     Hash,
 }
 
-#[derive(Eq, PartialEq, Clone)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
     None,
     AllExceptNewest,
@@ -678,9 +678,12 @@ impl DuplicateFinder {
         println!("Hashed Files list size - {}", self.files_with_identical_hashes.len());
         println!("Allowed extensions - {:?}", self.allowed_extensions);
         println!("Excluded items - {:?}", self.excluded_items);
+        println!("Included directories - {:?}", self.included_directories);
         println!("Excluded directories - {:?}", self.excluded_directories);
         println!("Recursive search - {}", self.recursive_search.to_string());
         println!("Minimum file size - {:?}", self.min_file_size);
+        println!("Checking Method - {:?}", self.check_method);
+        println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }
 
