@@ -1,4 +1,6 @@
-## Version 0.1.2 dev
+## Version 0.1.3
+
+## Version 0.1.2 - 26.09.2020r
 - Add basic search empty folders in GTK GUI
 - Remember place where button are placed
 - Read and parse more values from GUI
@@ -7,6 +9,7 @@
 - Improve a little GUI
 - Add version argument which print version e.g. `czkawka_gui --version`
 - Simple Empty folder support in GUI
+- Biggest files support in CLI
 
 ## Version 0.1.1 - 20.09.2020r
 - Added images to readme
