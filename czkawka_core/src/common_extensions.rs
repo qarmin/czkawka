@@ -11,6 +11,7 @@ impl Extensions {
         Extensions { file_extensions: vec![] }
     }
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
+    /// After, extensions cannot contains any dot, commas etc.
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String, text_messages: &mut Messages) {
         let start_time: SystemTime = SystemTime::now();
         if allowed_extensions.is_empty() {

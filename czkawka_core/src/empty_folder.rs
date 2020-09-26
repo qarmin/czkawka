@@ -9,7 +9,7 @@ use std::io::Write;
 use std::time::SystemTime;
 
 /// Enum with values which show if folder is empty.
-/// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessery to put it here
+/// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
 #[derive(Eq, PartialEq, Copy, Clone)]
 enum FolderEmptiness {
     No,
@@ -80,7 +80,7 @@ impl EmptyFolder {
     pub fn find_empty_folders(&mut self) {
         self.directories.optimize_directories(true, &mut self.text_messages);
         self.check_for_empty_folders(true);
-        self.check_for_empty_folders(false); // Not needed for CLI, but it is better to check this again, because maybe empty folder stops to be empty
+        //self.check_for_empty_folders(false); // Second check, should be done before deleting to be sure that empty folder is still empty
         self.optimize_folders();
         if self.delete_folders {
             self.delete_empty_folders();
@@ -97,15 +97,15 @@ impl EmptyFolder {
     fn optimize_folders(&mut self) {
         let mut new_directory_folders: BTreeMap<String, FolderEntry> = Default::default();
 
-        for entry in &self.empty_folder_list {
-            match &entry.1.parent_path {
+        for (name,folder_entry) in &self.empty_folder_list {
+            match &folder_entry.parent_path {
                 Some(t) => {
                     if !self.empty_folder_list.contains_key(t) {
-                        new_directory_folders.insert(entry.0.clone(), entry.1.clone());
+                        new_directory_folders.insert(name.clone(), folder_entry.clone());
                     }
                 }
                 None => {
-                    new_directory_folders.insert(entry.0.clone(), entry.1.clone());
+                    new_directory_folders.insert(name.clone(), folder_entry.clone());
                 }
             }
         }
@@ -135,13 +135,13 @@ impl EmptyFolder {
             }
         } else {
             // Add folders searched before
-            for (name, entry) in &self.empty_folder_list {
+            for (name, folder_entry) in &self.empty_folder_list {
                 folders_checked.insert(
                     name.clone(),
                     FolderEntry {
                         parent_path: None,
                         is_empty: FolderEmptiness::Maybe,
-                        modified_date: entry.modified_date,
+                        modified_date: folder_entry.modified_date,
                     },
                 );
                 folders_to_check.push(name.clone());
@@ -153,10 +153,10 @@ impl EmptyFolder {
         while !folders_to_check.is_empty() {
             self.information.number_of_checked_folders += 1;
             current_folder = folders_to_check.pop().unwrap();
-            // Checked folder may be deleted so we assume that cannot removed folder be empty
+            // Checked folder may be deleted or we may not have permissions to open it so we assume that this folder is not be empty
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                _ => {
+                Err(_) => {
                     folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
                     continue;
                 }
@@ -195,6 +195,7 @@ impl EmptyFolder {
                     folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
                     let mut d = folders_checked.get_mut(&current_folder).unwrap();
                     let mut cf: String;
+                    // Loop to recursively set as non empty this and all his parent folders
                     loop {
                         d.is_empty = FolderEmptiness::No;
                         if d.parent_path != None {
@@ -207,19 +208,21 @@ impl EmptyFolder {
                 }
             }
         }
+
+        // Now we check if checked folders are really empty, and if are, then
         if initial_checking {
             // We need to set empty folder list
-            for entry in folders_checked {
-                if entry.1.is_empty != FolderEmptiness::No {
-                    self.empty_folder_list.insert(entry.0, entry.1);
+            for (name,folder_entry) in folders_checked {
+                if folder_entry.is_empty != FolderEmptiness::No {
+                    self.empty_folder_list.insert(name, folder_entry);
                 }
             }
         } else {
             // We need to check if parent of folder isn't also empty, because we wan't to delete only parent with two empty folders except this folders and at the end parent folder
             let mut new_folders_list: BTreeMap<String, FolderEntry> = Default::default();
-            for entry in folders_checked {
-                if entry.1.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&entry.0) {
-                    new_folders_list.insert(entry.0, entry.1);
+            for (name,folder_entry) in folders_checked {
+                if folder_entry.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&name) {
+                    new_folders_list.insert(name, folder_entry);
                 }
             }
             self.empty_folder_list = new_folders_list;
@@ -229,24 +232,16 @@ impl EmptyFolder {
     }
 
     /// Deletes earlier found empty folders
-    fn delete_empty_folders(&self) {
+    fn delete_empty_folders(&mut self) {
         let start_time: SystemTime = SystemTime::now();
-        let mut errors: Vec<String> = Vec::new();
         // Folders may be deleted or require too big privileges
-        for entry in &self.empty_folder_list {
-            match fs::remove_dir_all(entry.0) {
+        for (name,_folder_entry) in &self.empty_folder_list {
+            match fs::remove_dir_all(name) {
                 Ok(_) => (),
-                Err(_) => errors.push(entry.0.clone()),
+                Err(_) => self.text_messages.warnings.push(format!("Failed to remove folder {}",name)),
             };
         }
 
-        if !errors.is_empty() {
-            println!("Failed to delete some files, because they have got deleted earlier or you have too low privileges - try run it as root.");
-            println!("List of files which wasn't deleted:");
-        }
-        for i in errors {
-            println!("{}", i);
-        }
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 

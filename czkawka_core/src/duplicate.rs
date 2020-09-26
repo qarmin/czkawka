@@ -84,8 +84,8 @@ impl Default for Info {
 pub struct DuplicateFinder {
     text_messages: Messages,
     information: Info,
-    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,
-    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
+    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,        // File Size, File Entry
+    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>, // File Size, File Entry
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
@@ -188,6 +188,7 @@ impl DuplicateFinder {
         while !folders_to_check.is_empty() {
             current_folder = folders_to_check.pop().unwrap();
 
+            // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_) => {
@@ -195,6 +196,8 @@ impl DuplicateFinder {
                     continue;
                 } // Permissions denied
             };
+
+            // Check every sub folder/file/link etc.
             for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
@@ -250,8 +253,8 @@ impl DuplicateFinder {
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
                         have_valid_extension = false;
-                        for i in &self.allowed_extensions.file_extensions {
-                            if file_name_lowercase.ends_with((".".to_string() + i.to_lowercase().as_str()).as_str()) {
+                        for extension in &self.allowed_extensions.file_extensions {
+                            if file_name_lowercase.ends_with((".".to_string() + extension.to_lowercase().as_str()).as_str()) {
                                 have_valid_extension = true;
                                 break;
                             }
@@ -284,18 +287,19 @@ impl DuplicateFinder {
                                 Ok(t) => t,
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
-                                    SystemTime::now()
+                                    continue;
                                 } // Permissions Denied
                             },
                             modified_date: match metadata.modified() {
                                 Ok(t) => t,
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
-                                    SystemTime::now()
+                                    continue;
                                 } // Permissions Denied
                             },
                         };
 
+                        // Adding files to BTreeMap
                         self.files_with_identical_size.entry(metadata.len()).or_insert_with(Vec::new);
                         self.files_with_identical_size.get_mut(&metadata.len()).unwrap().push(fe);
 
@@ -310,7 +314,7 @@ impl DuplicateFinder {
             }
         }
 
-        // Remove files with unique size
+        // Create new BTreeMap without single size entries(files have not duplicates)
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         self.information.number_of_duplicated_files_by_size = 0;
@@ -334,14 +338,14 @@ impl DuplicateFinder {
         let mut file_handler: File;
         let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>>;
 
-        for entry in &self.files_with_identical_size {
+        for (size, vector) in &self.files_with_identical_size {
             hashmap_with_hash = Default::default();
 
-            for file_entry in entry.1.iter().enumerate() {
-                file_handler = match File::open(&file_entry.1.path) {
+            for file_entry in vector {
+                file_handler = match File::open(&file_entry.path) {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Unable to check hash of file ".to_string() + file_entry.1.path.as_str());
+                        self.text_messages.warnings.push("Unable to check hash of file ".to_string() + file_entry.path.as_str());
                         continue;
                     }
                 };
@@ -354,7 +358,7 @@ impl DuplicateFinder {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
                         Err(_) => {
-                            self.text_messages.warnings.push("Error happened when checking hash of file ".to_string() + file_entry.1.path.as_str());
+                            self.text_messages.warnings.push("Error happened when checking hash of file ".to_string() + file_entry.path.as_str());
                             error_reading_file = true;
                             break;
                         }
@@ -368,22 +372,22 @@ impl DuplicateFinder {
                 if !error_reading_file {
                     let hash_string: String = hasher.finalize().to_hex().to_string();
                     hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.1.to_owned());
+                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
                 }
             }
-            for hash_entry in hashmap_with_hash {
-                if hash_entry.1.len() > 1 {
-                    self.files_with_identical_hashes.entry(*entry.0).or_insert_with(Vec::new);
-                    self.files_with_identical_hashes.get_mut(entry.0).unwrap().push(hash_entry.1);
+            for (_string, vector) in hashmap_with_hash {
+                if vector.len() > 1 {
+                    self.files_with_identical_hashes.entry(*size).or_insert_with(Vec::new);
+                    self.files_with_identical_hashes.get_mut(size).unwrap().push(vector);
                 }
             }
         }
 
-        for (size, vector) in &self.files_with_identical_hashes {
-            for vec_file_entry in vector {
-                self.information.number_of_duplicated_files_by_hash += vec_file_entry.len() - 1;
+        for (size, vector_vectors) in &self.files_with_identical_hashes {
+            for vector in vector_vectors {
+                self.information.number_of_duplicated_files_by_hash += vector.len() - 1;
                 self.information.number_of_groups_by_hash += 1;
-                self.information.lost_space_by_hash += (vec_file_entry.len() as u64 - 1) * size;
+                self.information.lost_space_by_hash += (vector.len() as u64 - 1) * size;
             }
         }
 
@@ -397,9 +401,9 @@ impl DuplicateFinder {
 
         match self.check_method {
             CheckingMethod::Hash => {
-                for entry in &self.files_with_identical_hashes {
-                    for vector in entry.1 {
-                        let tuple: (u64, usize, usize) = delete_files(&vector, &self.delete_method, &mut self.text_messages.warnings);
+                for (_size, vector_vectors) in &self.files_with_identical_hashes {
+                    for vector in vector_vectors.iter() {
+                        let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
                         self.information.gained_space += tuple.0;
                         self.information.number_of_removed_files += tuple.1;
                         self.information.number_of_failed_to_remove_files += tuple.2;
@@ -407,8 +411,8 @@ impl DuplicateFinder {
                 }
             }
             CheckingMethod::Size => {
-                for entry in &self.files_with_identical_size {
-                    let tuple: (u64, usize, usize) = delete_files(&entry.1, &self.delete_method, &mut self.text_messages.warnings);
+                for (_size, vector) in &self.files_with_identical_size {
+                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
                     self.information.gained_space += tuple.0;
                     self.information.number_of_removed_files += tuple.1;
                     self.information.number_of_failed_to_remove_files += tuple.2;
@@ -497,7 +501,7 @@ impl SaveResults for DuplicateFinder {
         let mut file = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
-                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+                self.text_messages.errors.push(format!("Failed to create file {}", file_name));
                 return false;
             }
         };
@@ -505,7 +509,7 @@ impl SaveResults for DuplicateFinder {
         match file.write_all(format!("Results of searching in {:?}\n", self.directories.included_directories).as_bytes()) {
             Ok(_) => (),
             Err(_) => {
-                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+                self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
                 return false;
             }
         }
@@ -513,49 +517,39 @@ impl SaveResults for DuplicateFinder {
         if !self.files_with_identical_size.is_empty() {
             file.write_all(b"-------------------------------------------------Files with same size-------------------------------------------------\n").unwrap();
             file.write_all(
-                ("Found ".to_string()
-                    + self.information.number_of_duplicated_files_by_size.to_string().as_str()
-                    + " duplicated files which in "
-                    + self.information.number_of_groups_by_size.to_string().as_str()
-                    + " groups which takes "
-                    + self.information.lost_space_by_size.file_size(options::BINARY).unwrap().as_str()
-                    + ".\n")
-                    .as_bytes(),
+                format!(
+                    "Found {} duplicated files which in {} groups which takes {}.\n",
+                    self.information.number_of_duplicated_files_by_size,
+                    self.information.number_of_groups_by_size,
+                    self.information.lost_space_by_size.file_size(options::BINARY).unwrap()
+                )
+                .as_bytes(),
             )
             .unwrap();
-            for (size, files) in self.files_with_identical_size.iter().rev() {
-                file.write_all(b"\n---- Size ").unwrap();
-                file.write_all(size.file_size(options::BINARY).unwrap().as_bytes()).unwrap();
-                file.write_all((" (".to_string() + size.to_string().as_str() + ")").as_bytes()).unwrap();
-                file.write_all((" - ".to_string() + files.len().to_string().as_str() + " files").as_bytes()).unwrap();
-                file.write_all(b"\n").unwrap();
-                for file_entry in files {
-                    file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
+            for (size, vector) in self.files_with_identical_size.iter().rev() {
+                file.write_all(format!("\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).as_bytes()).unwrap();
+                for file_entry in vector {
+                    file.write_all(format!("{} \n", file_entry.path).as_bytes()).unwrap();
                 }
             }
 
             if !self.files_with_identical_hashes.is_empty() {
                 file.write_all(b"-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
                 file.write_all(
-                    ("Found ".to_string()
-                        + self.information.number_of_duplicated_files_by_hash.to_string().as_str()
-                        + " duplicated files which in "
-                        + self.information.number_of_groups_by_hash.to_string().as_str()
-                        + " groups which takes "
-                        + self.information.lost_space_by_hash.file_size(options::BINARY).unwrap().as_str()
-                        + ".\n")
-                        .as_bytes(),
+                    format!(
+                        "Found {} duplicated files which in {} groups which takes {}.\n",
+                        self.information.number_of_duplicated_files_by_hash,
+                        self.information.number_of_groups_by_hash,
+                        self.information.lost_space_by_hash.file_size(options::BINARY).unwrap()
+                    )
+                    .as_bytes(),
                 )
                 .unwrap();
-                for (size, files) in self.files_with_identical_hashes.iter().rev() {
-                    for vector in files {
-                        file.write_all(b"\n---- Size ").unwrap();
-                        file.write_all(size.file_size(options::BINARY).unwrap().as_bytes()).unwrap();
-                        file.write_all((" (".to_string() + size.to_string().as_str() + ")").as_bytes()).unwrap();
-                        file.write_all((" - ".to_string() + vector.len().to_string().as_str() + " files").as_bytes()).unwrap();
-                        file.write_all(b"\n").unwrap();
+                for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
+                    for vector in vectors_vector {
+                        file.write_all(format!("\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).as_bytes()).unwrap();
                         for file_entry in vector {
-                            file.write_all((file_entry.path.clone() + "\n").as_bytes()).unwrap();
+                            file.write_all(format!("{} \n", file_entry.path).as_bytes()).unwrap();
                         }
                     }
                 }

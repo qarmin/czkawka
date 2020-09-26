@@ -72,6 +72,13 @@ impl BigFile {
             number_of_files_to_check: 50,
         }
     }
+
+    pub fn find_big_files(&mut self) {
+        self.optimize_directories();
+        self.look_for_big_files();
+        self.debug_print();
+    }
+
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
@@ -80,11 +87,6 @@ impl BigFile {
         &self.information
     }
 
-    pub fn find_big_files(&mut self) {
-        self.optimize_directories();
-        self.look_for_big_files();
-        self.debug_print();
-    }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
         self.recursive_search = recursive_search;
@@ -172,8 +174,8 @@ impl BigFile {
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
                         have_valid_extension = false;
-                        for i in &self.allowed_extensions.file_extensions {
-                            if file_name_lowercase.ends_with((".".to_string() + i.to_lowercase().as_str()).as_str()) {
+                        for extension in &self.allowed_extensions.file_extensions {
+                            if file_name_lowercase.ends_with((".".to_string() + extension.to_lowercase().as_str()).as_str()) {
                                 have_valid_extension = true;
                                 break;
                             }
@@ -206,14 +208,14 @@ impl BigFile {
                                 Ok(t) => t,
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
-                                    SystemTime::now()
+                                   continue
                                 } // Permissions Denied
                             },
                             modified_date: match metadata.modified() {
                                 Ok(t) => t,
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
-                                    SystemTime::now()
+                                    continue
                                 } // Permissions Denied
                             },
                         };
@@ -232,6 +234,9 @@ impl BigFile {
             }
         }
 
+
+
+        // Extract n biggest files to new TreeMap
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         for (size, vector) in self.big_files.iter().rev() {
