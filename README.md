@@ -32,7 +32,7 @@ This is my first ever project in Rust so probably a lot of things are written in
 - GTK Gui
   - Selection of records(don't know how to do this)
   - Popups
-  - Choosing directories(include, excluded)
+  - Choosing directories(included, excluded)
   - Popup with type of deleted records
   - Add Czkawka name to main window(now is czkawka_gui)
   - Run in another thread searching to be able to pause
@@ -81,8 +81,8 @@ Next, this included and excluded folders are optimized due to tree structure of 
 - Folders which contains another folders are combined(separately for included and excluded) - `/home/pulpet` and `/home/pulpet/a` are combined to `/home/pulpet`
 - Included folders which are located inside excluded ones are delete - Included folder `/etc/tomcat/` is deleted because excluded folder is `/etc/`
 - Non existed directories are being removed
-- Excluded path which are outside include path are deleted - Exclude path `/etc/` is removed if included path is `/home/`
-If after optimization there is no include folders, then program ends with non zero value(TODO, this should be handled by returning value).
+- Excluded path which are outside included path are deleted - Excluded path `/etc/` is removed if included path is `/home/`
+If after optimization there is no included folders, then program ends with non zero value(TODO, this should be handled by returning value).
 
 Next with provided by user minimal size of checked size `-s`, program checks recursively(TODO should be an option to turn off a recursion) included folders and checks files by sizes and put it files with same sizes to different boxes. 
 Next boxes which contains only one element are removed because files inside are not duplicated.

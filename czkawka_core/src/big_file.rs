@@ -270,7 +270,7 @@ impl BigFile {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
     }
 
-    /// Setting include directories, at least one must be provided
+    /// Setting included directories, at least one must be provided
     pub fn set_included_directory(&mut self, included_directory: String) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
@@ -354,7 +354,7 @@ impl SaveResults for BigFile {
 
             for (size, files) in self.big_files.iter().rev() {
                 for file_entry in files {
-                    file.write_all(format!("{} ({}) -  {}\n", size.file_size(options::BINARY).unwrap(), size, file_entry.path.clone()).as_bytes()).unwrap();
+                    file.write_all(format!("{} ({}) - {}\n", size.file_size(options::BINARY).unwrap(), size, file_entry.path.clone()).as_bytes()).unwrap();
                 }
             }
         } else {
@@ -371,7 +371,7 @@ impl PrintResults for BigFile {
         for (size, vector) in self.big_files.iter().rev() {
             // TODO Align all to same width
             for entry in vector {
-                println!("{} ({}) -  {}", size.file_size(options::BINARY).unwrap(), size, entry.path);
+                println!("{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, entry.path);
             }
         }
         Common::print_time(start_time, SystemTime::now(), "print_duplicated_entries".to_string());

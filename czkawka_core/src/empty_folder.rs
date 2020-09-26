@@ -24,7 +24,7 @@ pub struct FolderEntry {
     pub modified_date: SystemTime,
 }
 
-/// Struct to store most basics info about  all folder
+/// Struct to store most basics info about all folder
 pub struct EmptyFolder {
     information: Info,
     delete_folders: bool,
@@ -250,7 +250,7 @@ impl EmptyFolder {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 
-    /// Set include dir which needs to be relative, exists etc.
+    /// Set included dir which needs to be relative, exists etc.
     pub fn set_included_directory(&mut self, included_directory: String) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }

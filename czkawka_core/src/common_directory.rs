@@ -15,7 +15,7 @@ impl Directories {
         }
     }
 
-    /// Setting include directories, at least one must be provided
+    /// Setting included directories, at least one must be provided
     pub fn set_included_directory(&mut self, mut included_directory: String, text_messages: &mut Messages) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
@@ -35,19 +35,19 @@ impl Directories {
                 continue;
             }
             if directory.contains('*') {
-                text_messages.warnings.push("Include Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Included Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !directory.starts_with('/') {
-                text_messages.warnings.push("Include Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Included Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).exists() {
-                text_messages.warnings.push("Include Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Included Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                text_messages.warnings.push("Include Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Included Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
                 continue;
             }
 
@@ -60,7 +60,7 @@ impl Directories {
         }
 
         if checked_directories.is_empty() {
-            text_messages.errors.push("Include Directory ERROR: Not found even one correct path to include which is required.".to_string());
+            text_messages.errors.push("Included Directory ERROR: Not found even one correct path to included which is required.".to_string());
             return false;
         }
 
@@ -88,23 +88,23 @@ impl Directories {
                 continue;
             }
             if directory == "/" {
-                text_messages.errors.push("Exclude Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
+                text_messages.errors.push("Excluded Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
                 break;
             }
             if directory.contains('*') {
-                text_messages.warnings.push("Exclude Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Excluded Directory Warning: Wildcards in path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !directory.starts_with('/') {
-                text_messages.warnings.push("Exclude Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Excluded Directory Warning: Relative path are not supported, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).exists() {
-                text_messages.warnings.push("Exclude Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Excluded Directory Warning: Provided folder path must exits, ignoring ".to_string() + directory.as_str());
                 continue;
             }
             if !Path::new(&directory).is_dir() {
-                text_messages.warnings.push("Exclude Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
+                text_messages.warnings.push("Excluded Directory Warning: Provided path must point at the directory, ignoring ".to_string() + directory.as_str());
                 continue;
             }
 
@@ -179,7 +179,7 @@ impl Directories {
             optimized_excluded = Vec::<String>::new();
         }
 
-        // Remove include directories which are inside any exclude directory
+        // Remove included directories which are inside any excluded directory
         for id in &self.included_directories {
             let mut is_inside: bool = false;
             for ed in &self.excluded_directories {
@@ -215,7 +215,7 @@ impl Directories {
         self.excluded_directories = optimized_excluded;
         optimized_excluded = Vec::<String>::new();
 
-        // Excluded paths must are inside include path, because
+        // Excluded paths must are inside included path, because
         for ed in &self.excluded_directories {
             let mut is_inside: bool = false;
             for id in &self.included_directories {

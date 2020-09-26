@@ -136,7 +136,7 @@ fn main() {
         buttons_save.hide();
         buttons_delete.hide();
 
-        // Set Include  Directory
+        // Set Included Directory
         {
             let col_types: [glib::types::Type; 2] = [glib::types::Type::String, glib::types::Type::String];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
