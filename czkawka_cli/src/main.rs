@@ -283,6 +283,47 @@ fn main() {
 
             yf.get_text_messages().print_messages();
         }
+        "--t" => {
+            let mut tf = temporary::Temporary::new();
+
+            if ArgumentsPair::has_command(&arguments, "-i") {
+                tf.set_included_directory(ArgumentsPair::get_argument(&arguments, "-i", false));
+            } else {
+                println!("FATAL ERROR: Parameter -i with set of included files is required.");
+                process::exit(1);
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-e") {
+                tf.set_excluded_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-k") {
+                tf.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-o") {
+                tf.set_recursive_search(false);
+            }
+
+            if ArgumentsPair::has_command(&arguments, "-delete") {
+                tf.set_delete_method(temporary::DeleteMethod::Delete);
+            }
+
+            tf.find_temporary_files();
+
+            #[allow(clippy::collapsible_if)]
+            if ArgumentsPair::has_command(&arguments, "-f") {
+                if !tf.save_results_to_file(&ArgumentsPair::get_argument(&arguments, "-f", false)) {
+                    tf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            tf.print_results();
+
+            tf.get_text_messages().print_messages();
+        }
         "--version" | "v" => {
             println!("Czkawka CLI {}", CZKAWKA_VERSION);
             process::exit(0);
@@ -297,67 +338,35 @@ fn main() {
 fn print_help() {
     println!(
         r###"
-Usage of Czkawka:
 
-## Main arguments:
+  Main commands:
   --h / --help - prints help, also works without any arguments
-
-  Usage example:
-    czkawka --help
-    czkawka
-
   --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
-    -i directory_to_search - list of directories which should will be searched like /home/rafal
-    -e exclude_directories - list of directories which will be excluded from search.
-    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
-    -o - this options prevents from recursive check of folders
-    -f file_to_save - saves results to file
-    -s min_size - minimum size of checked files in bytes, assigning bigger value may speed up searching.
-    -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
-    -l type_of_search - allows to use fastest which takes into account only size(SIZE), more accurate which takes into account hash of only first 1MB of file(HASHMB) or fully accurate(the slowest solution) which check hash of all file(HASH).
-    -delete - delete found files, by default remove all except the most oldest one, it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
-
-  Usage example:
-    czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -delete
-    czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash" -o
-    czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
-    czkawka --d -i "/etc/" -delete "aeo"
-
   --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save] [-delete] - option to find and delete empty folders
-    -i directory_to_search - list of directories which should will be searched like /home/rafal
-    -e exclude_directories - list of directories which will be excluded from search.
+  --b <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-p number_of_files = 50] [-x allowed_extension = ""] [-o] [-f file_to_save = "results.txt"]
+  --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
+  --t <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
+  --version / --v - prints program name and version
+
+  Options:
+    -i directory_to_search - list of directories which should will be searched(absolute path)
+    -e exclude_directories - list of directories which will be excluded from search(absolute path)
+    -k excluded_items - list of excluded items which contains * wildcard(may be slow, so use exclude_directories where possible)
+    -o - this options prevents from recursive check of folders
+    -s min_size - minimum size of checked files in bytes, assigning bigger value may speed up searching.
+    -p number_of_files - number of showed the biggest files.
+    -x allowed_extension - list of checked files with provided extensions. There are also helpful macros which allow to easy use a typcal extensions like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg"), TEXT, VIDEO or MUSIC.
+    -l type_of_search - allows to use fastest method which takes into account only size(SIZE), more accurate which takes into account hash of only first 1MB of file(HASHMB) or fully accurate(but the slowest solution) which check hash of all file(HASH).
+    -delete - delete found files, in duplicate finder by default remove all except the most oldest one but it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
     -f file_to_save - saves results to file
-    -delete - delete found empty folders
 
   Usage example:
-    czkawka --e -i "/home/rafal/rr, /home/gateway" -e "/home/rafal/rr/2" -delete
-
-  --b  <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-l number_of_files = 50] [-x allowed_extension = ""] [-o] [-f file_to_save = "results.txt"]
-    -i directory_to_search - list of directories which should will be searched like /home/rafal
-    -e exclude_directories - list of directories which will be excluded from search.
-    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
-    -o - this options prevents from recursive check of folders
-    -f file_to_save - saves results to file
-    -l number_of_files - number of showed the biggest files.
-    -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
-
-  --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
-    -i directory_to_search - list of directories which should will be searched like /home/rafal
-    -e exclude_directories - list of directories which will be excluded from search.
-    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
-    -o - this options prevents from recursive check of folders
-    -f file_to_save - saves results to file
-    -delete - delete found files
-
-  --t <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
-    -i directory_to_search - list of directories which should will be searched like /home/rafal
-    -e exclude_directories - list of directories which will be excluded from search.
-    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
-    -o - this options prevents from recursive check of folders
-    -f file_to_save - saves results to file
-    -delete - delete found files
-
-  --version / --v - prints program name and version
+    czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -f "results.txt" -delete "aeo"
+    czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hashmb"
+    czkawka --e -i "/home/rafal/rr, /home/gateway" -f "results.txt"
+    czkawka --b -i "/home/rafal/,/home/piszczal" -e "/home/rafal/Roman" -p 25 -x "VIDEO" " -f "results.txt"
+    czkawka --y -i "/home/rafal/" -e "/etc/" -o -f "results.txt"
+    czkawka --t -i "/home/rafal/"  -p 25 -x "VIDEO" " -f "results.txt"
 
     "###
     );
