@@ -11,4 +11,4 @@ pub mod common_items;
 pub mod common_messages;
 pub mod common_traits;
 
-pub const CZKAWKA_VERSION: &str = "0.1.3";
+pub const CZKAWKA_VERSION: &str = "0.1.4";

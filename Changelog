@@ -1,7 +1,12 @@
-## Version 0.1.3
+## Version 0.1.4 dev
+
+## Version 0.1.3 - 27.09.2020r
 - Big code refactoring - now is a lot of easier create new modules and maintain old ones
 - Added finding empty files
 - Added new option to find duplicates by checking hash max 1MB of file
+- Added support for finding temporary folder finder
+- Improved README
+- Simplify CLI help and improve it
 
 ## Version 0.1.2 - 26.09.2020r
 - Add basic search empty folders in GTK GUI

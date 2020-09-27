@@ -298,14 +298,14 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "czkawka_core",
 ]
 
 [[package]]
 name = "czkawka_core"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "blake3",
  "humansize",
@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "chrono",
  "czkawka_core",
@@ -326,7 +326,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui_orbtk"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "czkawka_core",
  "orbtk",
