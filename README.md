@@ -10,11 +10,11 @@ This is my first ever project in Rust so probably a lot of things are not being 
 - Saving results to file - allows to easily read entries found by tool
 - Rich search option - allows setting absolute included and excluded directories, set of allowed files extensions or excluded items with * wildcard
 - Multiple tools to use:
-  - Duplicates - Finds duplicates basing on its size(fast) or hash(accurate)
+  - Duplicates - Finds duplicates basing on its size(fast), hash(accurate)
   - Empty Folders - Finds empty folders with help of advanced algorithm
   - Big Files - Finds provided number of the biggest files in given location
   - Empty Files - Looks for empty files across disk
-  - Temporary Files - Allows to find files 
+  - Temporary Files - Allows finding temporary files 
 
 ## TODO
 - Comments - a lot of things should be described
@@ -24,7 +24,6 @@ This is my first ever project in Rust so probably a lot of things are not being 
 - Finding files with debug symbols
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
-- Add support for fast searching based on checking only first ~1 MB of file.
 - GTK Gui
   - Selection of records(don't know how to do this)
   - Popups
@@ -114,10 +113,17 @@ Next, this included and excluded folders are optimized due to tree structure of 
 - Excluded path which are outside included path are deleted - Excluded path `/etc/` is removed if included path is `/home/`
 If after optimization there is no included folders, then program ends with non zero value(TODO, this should be handled by returning value).
 
-Next with provided by user minimal size of checked size `-s`, program checks recursively(TODO should be an option to turn off a recursion) included folders and checks files by sizes and put it files with same sizes to different boxes. 
-Next boxes which contains only one element are removed because files inside are not duplicated.
+Next with provided by user minimal size of checked size `-s`, program checks recursively or not included folders and checks files by sizes and put files with same sizes to different boxes. 
+Next boxes which contains only one element are removed because files inside that means that are not duplicated.
 
-Next by default also is checked hash to be sure that files with equal size are identical.
+Now if user select this, then provided is checking hash of file, because may happens that files have equal size, but differ in one or more bytes.
+
+There are two available methods to check hash:
+- full(default) - check hash of entire file so this method is slow especially with large files and but there is almost no chance that two different files will be treated like they were a duplicates.
+- partial - check hash only max first 1MB of file, so it is a lot of more accurate than only checking size of files, but still there is very small chance that files which were identified as duplicates they are not.
+
+At the end if user used `-delete` option, specified files are removed - All Except Oldest/Newest or Only Oldest/Newest
+ 
 
 ## License
 Code is distributed under MIT license.
