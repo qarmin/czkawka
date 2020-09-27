@@ -1,24 +1,20 @@
 # Czkawka
 Czkawka is simple, fast and easy to use alternative to Fslint, written in Rust.  
-It is in very early development, so most of the functions aren't added and doesn't work.  
-This is my first ever project in Rust so probably a lot of things are written in the most optimal way.
+This is my first ever project in Rust so probably a lot of things are not being written in the most optimal way.
 
-## Done
-- Rich instruction with examples - CLI(`cargo run --bin czkawka_cli`)
-- GTK Frontend(Still WIP) - (`cargo run --bin czkawka_gui`)
-  - Basic layout
-  - Remembering of buttons between different tabs
-- Orbtk Frontend(Still very early WIP) - (`cargo run --bin czkawka_gui_orbtk`)
-- Saving results to file
-- Duplicated file finding
-  - Including and excluding directories(absolute paths)
-  - Option to remove all except newest, oldest and one oldest or newest
-  - Fast(by size) or accurate(by hash) file checking
-  - Support for * wildcard when excluding files and folders
-  - Checking only selected extensions(default macros like IMAGE, VIDEO, TEXT are available)
-- Empty folders finding
-  - Advanced empty files finding(finds and remove folders which contains only empty folders)
-  - Option to remove all files
+## Features
+- Written in fast and memory safe Rust
+- CLI frontend, very fast and powerful with rich help
+- GUI GTK frontend(Still WIP) - use modern GTK 3 and looks similar to FSlint
+- GUI Orbtk frontend(Very early WIP) - alternative GUI with reduced functionality
+- Saving results to file - allows to easily read entries found by tool
+- Rich search option - allows setting absolute included and excluded directories, set of allowed files extensions or excluded items with * wildcard
+- Multiple tools to use:
+  - Duplicates - Finds duplicates basing on its size(fast) or hash(accurate)
+  - Empty Folders - Finds empty folders with help of advanced algorithm
+  - Big Files - Finds provided number of the biggest files in given location
+  - Empty Files - Looks for empty files across disk
+  - Temporary Files - Allows to find files 
 
 ## TODO
 - Comments - a lot of things should be described
@@ -34,7 +30,6 @@ This is my first ever project in Rust so probably a lot of things are written in
   - Popups
   - Choosing directories(included, excluded)
   - Popup with type of deleted records
-  - Add Czkawka name to main window(now is czkawka_gui)
   - Run in another thread searching to be able to pause
 - Orbtk GUI
   - Basic selecting included and excluded folders
@@ -42,10 +37,12 @@ This is my first ever project in Rust so probably a lot of things are written in
   - Simple buttons to delete 
 
 ## Usage and requirements
-Rustc 1.46 works fine(not sure about a minimal version)  
-GTK 3.18 - for GTK backend
+Rust 1.46 - probably lower also works fine  
+GTK 3.24 - for GTK backend
 
-For now only Linux(and probably also macOS) is supported
+Precompiled binaries are here(may not work in every Linux distro) - https://github.com/qarmin/czkawka/releases/
+
+For now only Linux(and maybe also macOS) is supported
 
 - Install requirements for GTK
 ```
@@ -67,27 +64,11 @@ cargo run --bin czkawka_gui
 cargo run --bin czkawka_gui_orbtk
 ```
 ![GUI Orbtk](https://user-images.githubusercontent.com/41945903/92405241-7b27fb80-f135-11ea-9fc4-5ebc2b76b011.png)
-- Run CLI
+- Run CLI(this will print help with a lot of examples)
 ```
 cargo run --bin czkawka_cli
 ```
 ![CLI](https://user-images.githubusercontent.com/41945903/93716816-0bbcfd80-fb72-11ea-8d31-4c87cc2abe6d.png)
-
-## How it works?
-### Duplicate Finder
-The only required parameter for checking duplicates is included folders `-i`. This parameter validates provided folders - which must have absolute path(without ~ and other similar symbols at the beginning), not contains *(wildcard), be dir(not file or symlink), exists. Later same things are done with excluded folders `-e`. 
-
-Next, this included and excluded folders are optimized due to tree structure of file system:
-- Folders which contains another folders are combined(separately for included and excluded) - `/home/pulpet` and `/home/pulpet/a` are combined to `/home/pulpet`
-- Included folders which are located inside excluded ones are delete - Included folder `/etc/tomcat/` is deleted because excluded folder is `/etc/`
-- Non existed directories are being removed
-- Excluded path which are outside included path are deleted - Excluded path `/etc/` is removed if included path is `/home/`
-If after optimization there is no included folders, then program ends with non zero value(TODO, this should be handled by returning value).
-
-Next with provided by user minimal size of checked size `-s`, program checks recursively(TODO should be an option to turn off a recursion) included folders and checks files by sizes and put it files with same sizes to different boxes. 
-Next boxes which contains only one element are removed because files inside are not duplicated.
-
-Next by default also is checked hash to be sure that files with equal size are identical.
 
 ## Speed
 Since Czkawka is written in Rust and aims to be a faster alternative for written in Python - FSlint we need to compare speed of this two tools.
@@ -121,6 +102,22 @@ Empty folder finder
 | Czkawka GTK GUI Release |  |
 
 Differences should be more visible when using slower processor or faster disk.
+
+## How it works?
+### Duplicate Finder
+The only required parameter for checking duplicates is included folders `-i`. This parameter validates provided folders - which must have absolute path(without ~ and other similar symbols at the beginning), not contains *(wildcard), be dir(not file or symlink), exists. Later same things are done with excluded folders `-e`. 
+
+Next, this included and excluded folders are optimized due to tree structure of file system:
+- Folders which contains another folders are combined(separately for included and excluded) - `/home/pulpet` and `/home/pulpet/a` are combined to `/home/pulpet`
+- Included folders which are located inside excluded ones are delete - Included folder `/etc/tomcat/` is deleted because excluded folder is `/etc/`
+- Non existed directories are being removed
+- Excluded path which are outside included path are deleted - Excluded path `/etc/` is removed if included path is `/home/`
+If after optimization there is no included folders, then program ends with non zero value(TODO, this should be handled by returning value).
+
+Next with provided by user minimal size of checked size `-s`, program checks recursively(TODO should be an option to turn off a recursion) included folders and checks files by sizes and put it files with same sizes to different boxes. 
+Next boxes which contains only one element are removed because files inside are not duplicated.
+
+Next by default also is checked hash to be sure that files with equal size are identical.
 
 ## License
 Code is distributed under MIT license.

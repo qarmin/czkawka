@@ -1,5 +1,7 @@
 ## Version 0.1.3
-- Big code refactoring
+- Big code refactoring - now is a lot of easier create new modules and maintain old ones
+- Added finding empty files
+- Added new option to find duplicates by checking hash max 1MB of file
 
 ## Version 0.1.2 - 26.09.2020r
 - Add basic search empty folders in GTK GUI
@@ -23,7 +25,7 @@
 - Saving results to file
 - Print how much data was read by duplicate finder(debug only)
 - Added Github CI
-- Only debug build prints debug infos
+- Only debug build prints debug information's
 - Clean code
 - Add basic idea config to misc folder
 

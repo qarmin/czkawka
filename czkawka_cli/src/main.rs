@@ -251,9 +251,11 @@ fn main() {
                 println!("FATAL ERROR: Parameter -i with set of included files is required.");
                 process::exit(1);
             }
+
             if ArgumentsPair::has_command(&arguments, "-e") {
                 yf.set_excluded_directory(ArgumentsPair::get_argument(&arguments, "-e", false));
             }
+
             if ArgumentsPair::has_command(&arguments, "-k") {
                 yf.set_excluded_items(ArgumentsPair::get_argument(&arguments, "-k", false));
             }
@@ -304,7 +306,6 @@ Usage of Czkawka:
     czkawka --help
     czkawka
 
-
   --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
@@ -321,7 +322,6 @@ Usage of Czkawka:
     czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hash" -o
     czkawka --d -i "/var/" -k "/var/l*b/,/var/lo*,*tmp"
     czkawka --d -i "/etc/" -delete "aeo"
-
 
   --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save] [-delete] - option to find and delete empty folders
     -i directory_to_search - list of directories which should will be searched like /home/rafal
@@ -341,7 +341,15 @@ Usage of Czkawka:
     -l number_of_files - number of showed the biggest files.
     -x allowed_extension - list of checked extension, e.g. "jpg,mp4" will allow to check "book.jpg" and "car.mp4" but not roman.png. There are also helpful macros which allow to easy use a typcal extension like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg") or TEXT("txt,doc,docx,odt,rtf")
 
-  --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for duplicates files
+  --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
+    -i directory_to_search - list of directories which should will be searched like /home/rafal
+    -e exclude_directories - list of directories which will be excluded from search.
+    -k excluded_items - list of excluded items which contains * wildcard(may be slow)
+    -o - this options prevents from recursive check of folders
+    -f file_to_save - saves results to file
+    -delete - delete found files
+
+  --t <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
     -i directory_to_search - list of directories which should will be searched like /home/rafal
     -e exclude_directories - list of directories which will be excluded from search.
     -k excluded_items - list of excluded items which contains * wildcard(may be slow)
