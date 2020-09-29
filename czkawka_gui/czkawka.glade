@@ -185,7 +185,7 @@ Author: Rafał Mikrut
                     <property name="spacing">1</property>
                     <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="buttons_add_included_directory">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -236,7 +236,7 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="buttons_remove_included_directory">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -350,7 +350,7 @@ Author: Rafał Mikrut
                     <property name="spacing">1</property>
                     <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="buttons_add_excluded_directory">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -401,7 +401,7 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="buttons_remove_excluded_directory">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -774,8 +774,8 @@ Author: Rafał Mikrut
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="active">True</property>
                         <property name="draw_indicator">True</property>
+                        <property name="group">radio_button_hash</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -789,9 +789,8 @@ Author: Rafał Mikrut
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radio_button_size</property>
+                        <property name="group">radio_button_hash</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -807,7 +806,6 @@ Author: Rafał Mikrut
                         <property name="receives_default">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radio_button_size</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

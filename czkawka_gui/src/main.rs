@@ -83,6 +83,11 @@ fn main() {
     let buttons_delete: gtk::Button = builder.get_object("buttons_delete").unwrap();
     let buttons_save: gtk::Button = builder.get_object("buttons_save").unwrap();
 
+    // let buttons_add_included_directory : gtk::Button  =builder.get_object("buttons_add_included_directory").unwrap();
+    // let buttons_remove_included_directory: gtk::Button =builder.get_object("buttons_remove_included_directory").unwrap();
+    // let buttons_add_excluded_directory: gtk::Button =builder.get_object("buttons_add_excluded_directory").unwrap();
+    // let buttons_remove_excluded_directory: gtk::Button =builder.get_object("buttons_remove_excluded_directory").unwrap();
+
     // Not used buttons for now
     buttons_stop.hide();
     buttons_resume.hide();
@@ -91,6 +96,11 @@ fn main() {
 
     //// Check Buttons
     let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
+
+    //// Radio Buttons
+    let radio_button_size: gtk::RadioButton = builder.get_object("radio_button_size").unwrap();
+    let radio_button_hashmb: gtk::RadioButton = builder.get_object("radio_button_hashmb").unwrap();
+    let radio_button_hash: gtk::RadioButton = builder.get_object("radio_button_hash").unwrap();
 
     //// Notebooks
     let notebook_chooser_tool: gtk::Notebook = builder.get_object("notebook_chooser_tool").unwrap();
@@ -275,88 +285,124 @@ fn main() {
             });
         }
 
-        // Connect Buttons
+        //// Connect Buttons
 
-        assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
-        assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_folder_finder".to_string()));
-        // Search button
+        // Down notepad
         {
-            let buttons_delete = buttons_delete.clone();
-            let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
-            let notebook_chooser_tool = notebook_chooser_tool.clone();
-            let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-            let scrolled_window_empty_folder_finder = scrolled_window_empty_folder_finder.clone();
-            let text_view_errors = text_view_errors.clone();
-            buttons_search.connect_clicked(move |_| {
-                match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                    "notebook_duplicate_finder_label" => {
-                        // Find duplicates
-                        // TODO Change to proper value
+            assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
+            assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_folder_finder".to_string()));
+            // Search button
+            {
+                let buttons_delete = buttons_delete.clone();
+                let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
+                let notebook_chooser_tool = notebook_chooser_tool.clone();
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let scrolled_window_empty_folder_finder = scrolled_window_empty_folder_finder.clone();
+                let text_view_errors = text_view_errors.clone();
+                buttons_search.connect_clicked(move |_| {
+                    match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                        "notebook_duplicate_finder_label" => {
+                            // Find duplicates
 
-                        let mut df = DuplicateFinder::new();
-                        let check_method = duplicate::CheckingMethod::Hash; // TODO
-                        {
-                            df.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
-                            df.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
-                            df.set_recursive_search(check_button_recursive.get_active());
-                            df.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
-                            df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
-                            df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
-                                Ok(t) => t,
-                                Err(_) => 1024, // By default
-                            });
-                            df.set_check_method(check_method.clone()); // TODO
-                            df.set_delete_method(duplicate::DeleteMethod::None);
-                            df.find_duplicates();
-                        }
-                        let information = df.get_information();
-                        let text_messages = df.get_text_messages();
-
-                        let duplicates_number: usize;
-                        let duplicates_size: u64;
-                        let duplicates_group: usize;
-
-                        match check_method {
-                            CheckingMethod::Hash | CheckingMethod::HashMB => {
-                                duplicates_number = information.number_of_duplicated_files_by_hash;
-                                duplicates_size = information.lost_space_by_hash;
-                                duplicates_group = information.number_of_groups_by_hash;
+                            let mut df = DuplicateFinder::new();
+                            let check_method;
+                            if radio_button_size.get_active() {
+                                check_method = duplicate::CheckingMethod::Size;
+                            } else if radio_button_hashmb.get_active() {
+                                check_method = duplicate::CheckingMethod::HashMB;
+                            } else if radio_button_hash.get_active() {
+                                check_method = duplicate::CheckingMethod::Hash;
+                            } else {
+                                panic!("No radio button is pressed");
                             }
-                            CheckingMethod::Size => {
-                                duplicates_number = information.number_of_duplicated_files_by_size;
-                                duplicates_size = information.lost_space_by_size;
-                                duplicates_group = information.number_of_groups_by_size;
+                            {
+                                df.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
+                                df.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                                df.set_recursive_search(check_button_recursive.get_active());
+                                df.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
+                                df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
+                                df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
+                                    Ok(t) => t,
+                                    Err(_) => 1024, // By default
+                                });
+                                df.set_check_method(check_method.clone());
+                                df.set_delete_method(duplicate::DeleteMethod::None);
+                                df.find_duplicates();
                             }
-                            CheckingMethod::None => {
-                                panic!();
-                            }
-                        }
+                            let information = df.get_information();
+                            let text_messages = df.get_text_messages();
 
-                        entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
-
-                        // Create GUI
-                        {
-                            let list_store = scrolled_window_duplicate_finder
-                                .get_children()
-                                .get(0)
-                                .unwrap()
-                                .clone()
-                                .downcast::<gtk::TreeView>()
-                                .unwrap()
-                                .get_model()
-                                .unwrap()
-                                .downcast::<gtk::ListStore>()
-                                .unwrap();
-                            list_store.clear();
-
-                            let col_indices = [0, 1, 2, 3];
+                            let duplicates_number: usize;
+                            let duplicates_size: u64;
+                            let duplicates_group: usize;
 
                             match check_method {
                                 CheckingMethod::Hash | CheckingMethod::HashMB => {
-                                    let btreemap = df.get_files_sorted_by_hash();
+                                    duplicates_number = information.number_of_duplicated_files_by_hash;
+                                    duplicates_size = information.lost_space_by_hash;
+                                    duplicates_group = information.number_of_groups_by_hash;
+                                }
+                                CheckingMethod::Size => {
+                                    duplicates_number = information.number_of_duplicated_files_by_size;
+                                    duplicates_size = information.lost_space_by_size;
+                                    duplicates_group = information.number_of_groups_by_size;
+                                }
+                                CheckingMethod::None => {
+                                    panic!();
+                                }
+                            }
 
-                                    for (size, vectors_vector) in btreemap.iter().rev() {
-                                        for vector in vectors_vector {
+                            entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
+
+                            // Create GUI
+                            {
+                                let list_store = scrolled_window_duplicate_finder
+                                    .get_children()
+                                    .get(0)
+                                    .unwrap()
+                                    .clone()
+                                    .downcast::<gtk::TreeView>()
+                                    .unwrap()
+                                    .get_model()
+                                    .unwrap()
+                                    .downcast::<gtk::ListStore>()
+                                    .unwrap();
+                                list_store.clear();
+
+                                let col_indices = [0, 1, 2, 3];
+
+                                match check_method {
+                                    CheckingMethod::Hash | CheckingMethod::HashMB => {
+                                        let btreemap = df.get_files_sorted_by_hash();
+
+                                        for (size, vectors_vector) in btreemap.iter().rev() {
+                                            for vector in vectors_vector {
+                                                let values: [&dyn ToValue; 4] = [
+                                                    &(vector.len().to_string() + " x " + size.to_string().as_str()),
+                                                    &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
+                                                    &"Bytes lost".to_string(),
+                                                    &(HEADER_ROW_COLOR.to_string()),
+                                                ];
+                                                list_store.set(&list_store.append(), &col_indices, &values);
+                                                for entry in vector {
+                                                    let path = &entry.path;
+                                                    let index = path.rfind('/').unwrap();
+
+                                                    let values: [&dyn ToValue; 4] = [
+                                                        &(path[index + 1..].to_string()),
+                                                        &(path[..index].to_string()),
+                                                        &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                                        &(MAIN_ROW_COLOR.to_string()),
+                                                    ];
+                                                    list_store.set(&list_store.append(), &col_indices, &values);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    CheckingMethod::Size => {
+                                        let btreemap = df.get_files_sorted_by_size();
+
+                                        for (size, vector) in btreemap.iter().rev() {
                                             let values: [&dyn ToValue; 4] = [
                                                 &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                                 &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
@@ -378,180 +424,162 @@ fn main() {
                                             }
                                         }
                                     }
-                                }
-                                CheckingMethod::Size => {
-                                    let btreemap = df.get_files_sorted_by_size();
-
-                                    for (size, vector) in btreemap.iter().rev() {
-                                        let values: [&dyn ToValue; 3] = [
-                                            &(vector.len().to_string() + " x " + size.to_string().as_str()),
-                                            &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
-                                            &"Bytes lost".to_string(),
-                                        ];
-                                        list_store.set(&list_store.append(), &col_indices, &values);
-                                        for entry in vector {
-                                            let path = &entry.path;
-                                            let index = path.rfind('/').unwrap();
-
-                                            let values: [&dyn ToValue; 3] = [
-                                                &(path[index + 1..].to_string()),
-                                                &(path[..index].to_string()),
-                                                &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
-                                            ];
-                                            list_store.set(&list_store.append(), &col_indices, &values);
-                                        }
+                                    CheckingMethod::None => {
+                                        panic!();
                                     }
                                 }
-                                CheckingMethod::None => {
-                                    panic!();
+
+                                print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                            }
+
+                            // Set state
+                            {
+                                *shared_duplication_state.borrow_mut() = df;
+
+                                if duplicates_size > 0 {
+                                    buttons_save.show();
+                                    buttons_delete.show();
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
+                                } else {
+                                    buttons_save.hide();
+                                    buttons_delete.hide();
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
                                 }
                             }
-
-                            print_text_messages_to_text_view(&text_messages, &text_view_errors);
                         }
+                        "scrolled_window_empty_folder_finder" => {
+                            // Find empty folders
+                            // TODO Change to proper value
+                            let mut ef = EmptyFolder::new();
 
-                        // Set state
-                        {
-                            *shared_duplication_state.borrow_mut() = df;
+                            ef.set_included_directory("/home/rafal/Pulpit".to_string());
+                            ef.set_delete_folder(false);
+                            ef.find_empty_folders();
 
-                            if duplicates_size > 0 {
-                                buttons_save.show();
-                                buttons_delete.show();
-                                *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
-                                *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
-                            } else {
-                                buttons_save.hide();
-                                buttons_delete.hide();
-                                *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
-                                *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
+                            let information = ef.get_information();
+                            let text_messages = ef.get_text_messages();
+
+                            let empty_folder_number: usize = information.number_of_empty_folders;
+
+                            entry_info.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
+
+                            // Create GUI
+                            {
+                                let list_store = scrolled_window_empty_folder_finder
+                                    .get_children()
+                                    .get(0)
+                                    .unwrap()
+                                    .clone()
+                                    .downcast::<gtk::TreeView>()
+                                    .unwrap()
+                                    .get_model()
+                                    .unwrap()
+                                    .downcast::<gtk::ListStore>()
+                                    .unwrap();
+                                list_store.clear();
+
+                                let col_indices = [0, 1, 2, 3];
+
+                                let hashmap = ef.get_empty_folder_list();
+
+                                for (name, entry) in hashmap {
+                                    let name: String = name[..(name.len() - 1)].to_string();
+                                    let index = name.rfind('/').unwrap();
+                                    let values: [&dyn ToValue; 4] = [
+                                        &(name[index + 1..].to_string()),
+                                        &(name[..index].to_string()),
+                                        &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                        &(MAIN_ROW_COLOR.to_string()),
+                                    ];
+                                    list_store.set(&list_store.append(), &col_indices, &values);
+                                }
+                                print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                            }
+
+                            // Set state
+                            {
+                                *shared_empty_folders_state.borrow_mut() = ef;
+
+                                if empty_folder_number > 0 {
+                                    buttons_save.show();
+                                    buttons_delete.show();
+                                    *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = true;
+                                } else {
+                                    buttons_save.hide();
+                                    buttons_delete.hide();
+                                    *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
+                                    *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = false;
+                                }
                             }
                         }
+                        e => panic!("Not existent {}", e),
+                    }
+                });
+            }
+            // Delete button
+            {
+                buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                    "notebook_duplicate_finder_label" => {
+                        let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let selection = tree_view.get_selection();
+
+                        let (selection_rows, tree_model) = selection.get_selected_rows();
+                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                        let mut messages: String = "".to_string();
+
+                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                        for tree_path in selection_rows.iter().rev() {
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Path as i32).get::<String>().unwrap().unwrap();
+
+                            if fs::remove_file(format!("{}/{}", path, name)).is_err() {
+                                messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str()
+                            }
+                            list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                        }
+
+                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                        selection.unselect_all();
                     }
                     "scrolled_window_empty_folder_finder" => {
-                        // Find empty folders
-                        // TODO Change to proper value
-                        let mut ef = EmptyFolder::new();
+                        let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let selection = tree_view.get_selection();
 
-                        ef.set_included_directory("/home/rafal/Pulpit".to_string());
-                        ef.set_delete_folder(false);
-                        ef.find_empty_folders();
+                        let (selection_rows, tree_model) = selection.get_selected_rows();
+                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
-                        let information = ef.get_information();
-                        let text_messages = ef.get_text_messages();
+                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
-                        let empty_folder_number: usize = information.number_of_empty_folders;
+                        let mut messages: String = "".to_string();
 
-                        entry_info.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
+                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                        for tree_path in selection_rows.iter().rev() {
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Path as i32).get::<String>().unwrap().unwrap();
 
-                        // Create GUI
-                        {
-                            let list_store = scrolled_window_empty_folder_finder
-                                .get_children()
-                                .get(0)
-                                .unwrap()
-                                .clone()
-                                .downcast::<gtk::TreeView>()
-                                .unwrap()
-                                .get_model()
-                                .unwrap()
-                                .downcast::<gtk::ListStore>()
-                                .unwrap();
-                            list_store.clear();
-
-                            let col_indices = [0, 1, 2, 3];
-
-                            let hashmap = ef.get_empty_folder_list();
-
-                            for (name, entry) in hashmap {
-                                let name: String = name[..(name.len() - 1)].to_string();
-                                let index = name.rfind('/').unwrap();
-                                let values: [&dyn ToValue; 4] = [
-                                    &(name[index + 1..].to_string()),
-                                    &(name[..index].to_string()),
-                                    &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
-                                    &(MAIN_ROW_COLOR.to_string()),
-                                ];
-                                list_store.set(&list_store.append(), &col_indices, &values);
+                            if fs::remove_dir(format!("{}/{}", path, name)).is_err() {
+                                messages += format!("Failed to folder {}/{} due lack of permissions, selected dir is not empty or doesn't exists.\n", path, name).as_str()
                             }
-                            print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                            list_store.remove(&list_store.get_iter(&tree_path).unwrap());
                         }
 
-                        // Set state
-                        {
-                            *shared_empty_folders_state.borrow_mut() = ef;
-
-                            if empty_folder_number > 0 {
-                                buttons_save.show();
-                                buttons_delete.show();
-                                *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = true;
-                                *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = true;
-                            } else {
-                                buttons_save.hide();
-                                buttons_delete.hide();
-                                *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
-                                *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = false;
-                            }
-                        }
+                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                        selection.unselect_all();
                     }
                     e => panic!("Not existent {}", e),
-                }
-            });
+                });
+            }
         }
-        // Delete button
+        // Upper Notepad
         {
-            buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                "notebook_duplicate_finder_label" => {
-                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                    let selection = tree_view.get_selection();
-
-                    let (selection_rows, tree_model) = selection.get_selected_rows();
-                    let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
-
-                    // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
-
-                    let mut messages: String = "".to_string();
-
-                    // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                    for tree_path in selection_rows.iter().rev() {
-                        let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Name as i32).get::<String>().unwrap().unwrap();
-                        let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Path as i32).get::<String>().unwrap().unwrap();
-
-                        if fs::remove_file(format!("{}/{}", path, name)).is_err() {
-                            messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str()
-                        }
-                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
-                    }
-
-                    text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                    selection.unselect_all();
-                }
-                "scrolled_window_empty_folder_finder" => {
-                    let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                    let selection = tree_view.get_selection();
-
-                    let (selection_rows, tree_model) = selection.get_selected_rows();
-                    let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
-
-                    // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
-
-                    let mut messages: String = "".to_string();
-
-                    // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                    for tree_path in selection_rows.iter().rev() {
-                        let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Name as i32).get::<String>().unwrap().unwrap();
-                        let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Path as i32).get::<String>().unwrap().unwrap();
-
-                        if fs::remove_dir(format!("{}/{}", path, name)).is_err() {
-                            messages += format!("Failed to folder {}/{} due lack of permissions, selected dir is not empty or doesn't exists.\n", path, name).as_str()
-                        }
-                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
-                    }
-
-                    text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                    selection.unselect_all();
-                }
-                e => panic!("Not existent {}", e),
-            });
+            // Add excluded directory
+            {}
         }
     }
 
