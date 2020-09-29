@@ -3,6 +3,10 @@ name = "czkawka_gui_orbtk"
 version = "0.1.4"
 authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
 edition = "2018"
+description = "Orbtk frontend of Czkawka"
+license = "MIT"
+homepage = "https://github.com/qarmin/czkawka"
+repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
 czkawka_core = { path = "../czkawka_core" }

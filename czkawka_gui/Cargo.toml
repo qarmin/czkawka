@@ -3,6 +3,10 @@ name = "czkawka_gui"
 version = "0.1.4"
 authors = ["Rafał Mikrut <mikrutrafal54@gmail.com>"]
 edition = "2018"
+description = "GTK frontend of Czkawka"
+license = "MIT"
+homepage = "https://github.com/qarmin/czkawka"
+repository = "https://github.com/qarmin/czkawka"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
