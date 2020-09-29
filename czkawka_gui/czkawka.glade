@@ -122,41 +122,6 @@ Author: Rafał Mikrut
       <placeholder/>
     </child>
   </object>
-  <object class="GtkFileChooserDialog" id="folder_chooser">
-    <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
-    <property name="action">select-folder</property>
-    <property name="create_folders">False</property>
-    <property name="select_multiple">True</property>
-    <property name="show_hidden">True</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
     <property name="default_width">800</property>
