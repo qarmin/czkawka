@@ -363,33 +363,32 @@ fn print_help() {
         r###"
 
   [Main commands]:
-    --h / --help - prints help, also works without any arguments
-    --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
-    --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - option to find and delete empty folders
-    --b <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"]
-    --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
-    --t <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
+    --help / --h - prints help, also works without any arguments
+    --d <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
+    --e <-i directories_to_search> [-e excluded_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - option to find and delete empty folders
+    --b <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"]
+    --y <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
+    --t <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
     --version / --v - prints program name and version
 
   [Options]:
-    -i directory_to_search - list of directories which should will be searched(absolute path)
-    -e exclude_directories - list of directories which will be excluded from search(absolute path)
-    -k excluded_items      - list of excluded items which contains * wildcard(may be slow, so use exclude_directories where possible)
-    -o                     - this options prevents from recursive check of folders
-    -s min_size            - minimum size of checked files in bytes, assigning bigger value may speed up searching.
-    -p number_of_files     - number of showed the biggest files.
-    -x allowed_extension   - list of checked files with provided extensions. There are also helpful macros which allow to easy use a typcal extensions like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg"), TEXT, VIDEO or MUSIC.
-    -l type_of_search      - allows to use fastest method which takes into account only size(SIZE), more accurate which takes into account hash of only first 1MB of file(HASHMB) or fully accurate(but the slowest solution) which check hash of all file(HASH).
-    -f file_to_save        - saves results to file
-    -delete                - delete found files, in duplicate finder by default remove all files in group except the most oldest one but it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
+    -i directories_to_search - list of directories which should will be searched(absolute path)
+    -e excluded_directories  - list of directories which will be excluded from search(absolute path)
+    -k excluded_items        - list of excluded items which contains * wildcard(may be slow, so use exclude_directories where possible)
+    -o                       - this options prevents from recursive check of folders
+    -s min_size              - minimum size of checked files in bytes, assigning bigger value may speed up searching.
+    -p number_of_files       - number of showed the biggest files.
+    -x allowed_extension     - list of checked files with provided extensions. There are also helpful macros which allow to easy use a typcal extensions like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg"), TEXT, VIDEO or MUSIC.
+    -l type_of_search        - allows to use fastest method which takes into account only size(SIZE), more accurate which takes into account hash of only first 1MB of file(HASHMB) or fully accurate(but the slowest solution) which check hash of all file(HASH).
+    -f file_to_save          - saves results to file
+    -delete                  - delete found files, in duplicate finder by default remove all files in group except the most oldest one but it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
 
   [Usage example]:
-    czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -f "results.txt" -delete "aeo"
-    czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hashmb"
+    czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "hashmb" -f "results.txt" -delete "aeo"
     czkawka --e -i "/home/rafal/rr, /home/gateway" -f "results.txt"
     czkawka --b -i "/home/rafal/,/home/piszczal" -e "/home/rafal/Roman" -p 25 -x "VIDEO" " -f "results.txt"
     czkawka --y -i "/home/rafal/" -e "/etc/" -o -f "results.txt"
-    czkawka --t -i "/home/rafal/"  -p 25 -x "VIDEO" " -f "results.txt"
+    czkawka --t -i "/home/rafal/" -k "*/.git/*,*/tmp*,*Pulpit" " -f "results.txt" -delete
 
     "###
     );
