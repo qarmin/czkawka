@@ -9,6 +9,7 @@ This is my first ever project in Rust so probably a lot of things are not being 
 - GUI Orbtk frontend(Very early WIP) - alternative GUI with reduced functionality
 - Saving results to file - allows to easily read entries found by tool
 - Rich search option - allows setting absolute included and excluded directories, set of allowed files extensions or excluded items with * wildcard
+- Clean Glade file in which UI can be easily modernized
 - Multiple tools to use:
   - Duplicates - Finds duplicates basing on its size(fast), hash(accurate)
   - Empty Folders - Finds empty folders with help of advanced algorithm
@@ -25,7 +26,6 @@ This is my first ever project in Rust so probably a lot of things are not being 
 - Maybe windows support, but this will need some refactoring in code
 - Translation support
 - GTK Gui
-  - Selection of records(don't know how to do this)
   - Popups
   - Choosing directories(included, excluded)
   - Popup with type of deleted records

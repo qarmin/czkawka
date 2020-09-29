@@ -83,10 +83,10 @@ fn main() {
     let buttons_delete: gtk::Button = builder.get_object("buttons_delete").unwrap();
     let buttons_save: gtk::Button = builder.get_object("buttons_save").unwrap();
 
-    // let buttons_add_included_directory : gtk::Button  =builder.get_object("buttons_add_included_directory").unwrap();
-    // let buttons_remove_included_directory: gtk::Button =builder.get_object("buttons_remove_included_directory").unwrap();
-    // let buttons_add_excluded_directory: gtk::Button =builder.get_object("buttons_add_excluded_directory").unwrap();
-    // let buttons_remove_excluded_directory: gtk::Button =builder.get_object("buttons_remove_excluded_directory").unwrap();
+    let buttons_add_included_directory: gtk::Button = builder.get_object("buttons_add_included_directory").unwrap();
+    let buttons_remove_included_directory: gtk::Button = builder.get_object("buttons_remove_included_directory").unwrap();
+    let buttons_add_excluded_directory: gtk::Button = builder.get_object("buttons_add_excluded_directory").unwrap();
+    let buttons_remove_excluded_directory: gtk::Button = builder.get_object("buttons_remove_excluded_directory").unwrap();
 
     // Not used buttons for now
     buttons_stop.hide();
@@ -298,6 +298,8 @@ fn main() {
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
                 let scrolled_window_empty_folder_finder = scrolled_window_empty_folder_finder.clone();
+                let scrolled_window_included_directories = scrolled_window_included_directories.clone();
+                let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
                 let text_view_errors = text_view_errors.clone();
                 buttons_search.connect_clicked(move |_| {
                     match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
@@ -578,8 +580,94 @@ fn main() {
         }
         // Upper Notepad
         {
+            // Add included directory
+            {
+                let scrolled_window_included_directories = scrolled_window_included_directories.clone();
+                let main_window = main_window.clone();
+                buttons_add_included_directory.connect_clicked(move |_| {
+                    let chooser = gtk::FileChooserDialog::with_buttons(
+                        Option::from("Folders to include"),
+                        Option::from(&main_window),
+                        gtk::FileChooserAction::SelectFolder,
+                        &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
+                    );
+                    chooser.show_all();
+                    let response_type = chooser.run();
+                    if response_type == gtk::ResponseType::Ok {
+                        let folder = chooser.get_filename().unwrap().to_str().unwrap().to_string();
+
+                        let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+
+                        let col_indices = [0, 1];
+
+                        let values: [&dyn ToValue; 2] = [&folder, &(MAIN_ROW_COLOR.to_string())];
+                        list_store.set(&list_store.append(), &col_indices, &values);
+                    }
+                    chooser.close();
+                });
+            }
             // Add excluded directory
-            {}
+            {
+                let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
+                let main_window = main_window.clone();
+                buttons_add_excluded_directory.connect_clicked(move |_| {
+                    let chooser = gtk::FileChooserDialog::with_buttons(
+                        Option::from("Folders to exclude"),
+                        Option::from(&main_window),
+                        gtk::FileChooserAction::SelectFolder,
+                        &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
+                    );
+                    chooser.show_all();
+                    let response_type = chooser.run();
+                    if response_type == gtk::ResponseType::Ok {
+                        let folder = chooser.get_filename().unwrap().to_str().unwrap().to_string();
+
+                        let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+
+                        let col_indices = [0, 1];
+
+                        let values: [&dyn ToValue; 2] = [&folder, &(MAIN_ROW_COLOR.to_string())];
+                        list_store.set(&list_store.append(), &col_indices, &values);
+                    }
+                    chooser.close();
+                });
+            }
+            // Remove Excluded Folder
+            {
+                //let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
+                buttons_remove_excluded_directory.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+                    let selection = tree_view.get_selection();
+
+                    let (_, tree_iter) = match selection.get_selected() {
+                        Some(t) => t,
+                        None => {
+                            return;
+                        }
+                    };
+                    list_store.remove(&tree_iter);
+                });
+            }
+            // Remove Included Folder
+            {
+                //let scrolled_window_included_directories = scrolled_window_included_directories.clone();
+                buttons_remove_included_directory.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+                    let selection = tree_view.get_selection();
+
+                    let (_, tree_iter) = match selection.get_selected() {
+                        Some(t) => t,
+                        None => {
+                            return;
+                        }
+                    };
+                    list_store.remove(&tree_iter);
+                });
+            }
         }
     }
 
