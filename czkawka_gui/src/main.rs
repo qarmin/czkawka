@@ -89,6 +89,9 @@ fn main() {
     buttons_pause.hide();
     buttons_select.hide();
 
+    //// Check Buttons
+    let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
+
     //// Notebooks
     let notebook_chooser_tool: gtk::Notebook = builder.get_object("notebook_chooser_tool").unwrap();
     let mut notebook_chooser_tool_children_names: Vec<String> = Vec::new();
@@ -122,8 +125,38 @@ fn main() {
         buttons_save.hide();
         buttons_delete.hide();
 
-        // Set treeview for
-        {}
+        // Set Main ScrolledWindow Treeviews
+        {
+            // Duplicate Files
+            {
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.get_selection().set_select_function(Some(Box::new(select_function_3column)));
+
+                create_tree_view_duplicates(&mut tree_view);
+
+                scrolled_window_duplicate_finder.add(&tree_view);
+                scrolled_window_duplicate_finder.show_all();
+            }
+            // Empty Folders
+            {
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_empty_folders(&mut tree_view);
+
+                scrolled_window_empty_folder_finder.add(&tree_view);
+                scrolled_window_empty_folder_finder.show_all();
+            }
+        }
 
         // Set Included Directory
         {
@@ -154,6 +187,13 @@ fn main() {
             tree_view_excluded_directory.get_selection().set_mode(SelectionMode::Single);
 
             create_tree_view_directories(&mut tree_view_excluded_directory);
+
+            let col_indices = [0, 1];
+
+            for i in ["/proc/", "/dev/"].iter() {
+                let values: [&dyn ToValue; 2] = [&i, &(MAIN_ROW_COLOR.to_string())];
+                list_store.set(&list_store.append(), &col_indices, &values);
+            }
 
             scrolled_window_excluded_directories.add(&tree_view_excluded_directory);
             scrolled_window_excluded_directories.show_all();
@@ -258,6 +298,7 @@ fn main() {
                         {
                             df.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
                             df.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                            df.set_recursive_search(check_button_recursive.get_active());
                             df.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
                             df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
                             df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
@@ -295,19 +336,18 @@ fn main() {
 
                         // Create GUI
                         {
-                            // Remove scrolled window from before - BUG - when doing it when view is scrolled, then scroll button disappears
-                            for i in &scrolled_window_duplicate_finder.get_children() {
-                                scrolled_window_duplicate_finder.remove(i);
-                            }
-
-                            let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
-                            let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
-
-                            let mut tree_view_duplicate_finder: gtk::TreeView = TreeView::with_model(&list_store);
-
-                            tree_view_duplicate_finder.get_selection().set_mode(SelectionMode::Multiple);
-
-                            create_tree_view_duplicates(&mut tree_view_duplicate_finder);
+                            let list_store = scrolled_window_duplicate_finder
+                                .get_children()
+                                .get(0)
+                                .unwrap()
+                                .clone()
+                                .downcast::<gtk::TreeView>()
+                                .unwrap()
+                                .get_model()
+                                .unwrap()
+                                .downcast::<gtk::ListStore>()
+                                .unwrap();
+                            list_store.clear();
 
                             let col_indices = [0, 1, 2, 3];
 
@@ -367,12 +407,6 @@ fn main() {
                                 }
                             }
 
-                            let tree_selection = tree_view_duplicate_finder.get_selection();
-                            tree_selection.set_select_function(Some(Box::new(select_function_3column)));
-
-                            scrolled_window_duplicate_finder.add(&tree_view_duplicate_finder);
-                            scrolled_window_duplicate_finder.show_all();
-
                             print_text_messages_to_text_view(&text_messages, &text_view_errors);
                         }
 
@@ -411,19 +445,18 @@ fn main() {
 
                         // Create GUI
                         {
-                            // Remove scrolled window from before - BUG - when doing it when view is scrolled, then scroll button disappears
-                            for i in &scrolled_window_empty_folder_finder.get_children() {
-                                scrolled_window_empty_folder_finder.remove(i);
-                            }
-
-                            let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
-                            let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
-
-                            let mut tree_view_empty_folder_finder: gtk::TreeView = TreeView::with_model(&list_store);
-
-                            tree_view_empty_folder_finder.get_selection().set_mode(SelectionMode::Multiple);
-
-                            create_tree_view_empty_folders(&mut tree_view_empty_folder_finder);
+                            let list_store = scrolled_window_empty_folder_finder
+                                .get_children()
+                                .get(0)
+                                .unwrap()
+                                .clone()
+                                .downcast::<gtk::TreeView>()
+                                .unwrap()
+                                .get_model()
+                                .unwrap()
+                                .downcast::<gtk::ListStore>()
+                                .unwrap();
+                            list_store.clear();
 
                             let col_indices = [0, 1, 2, 3];
 
@@ -440,10 +473,6 @@ fn main() {
                                 ];
                                 list_store.set(&list_store.append(), &col_indices, &values);
                             }
-
-                            scrolled_window_empty_folder_finder.add(&tree_view_empty_folder_finder);
-                            scrolled_window_empty_folder_finder.show_all();
-
                             print_text_messages_to_text_view(&text_messages, &text_view_errors);
                         }
 

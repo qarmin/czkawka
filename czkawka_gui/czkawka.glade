@@ -309,7 +309,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton">
+                  <object class="GtkCheckButton" id="check_button_recursive">
                     <property name="label" translatable="yes">Recursive</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -557,7 +557,7 @@ Author: Rafał Mikrut
                       <object class="GtkEntry" id="entry_excluded_items">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="text" translatable="yes">*/.git,*/node_modules,/proc/*,/dev/*,*/lost+found</property>
+                        <property name="text" translatable="yes">*/.git,*/node_modules,*/lost+found</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>

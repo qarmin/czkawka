@@ -102,13 +102,24 @@ pub fn create_tree_view_directories(tree_view_directories: &mut gtk::TreeView) {
 pub fn get_string_from_list_store(scrolled_window: &gtk::ScrolledWindow) -> String {
     let tree_view: gtk::TreeView = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
     let list_store: gtk::ListStore = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+    let mut first: bool = true;
 
+    let mut return_string: String = "".to_string();
     let tree_iter = match list_store.get_iter_first() {
         Some(t) => t,
-        None => return "".to_string(),
+        None => return return_string,
     };
-
-    list_store.get_value(&tree_iter, 0).get::<String>().unwrap().unwrap()
+    loop {
+        if !first {
+            return_string += ",";
+        } else {
+            first = false;
+        }
+        return_string += list_store.get_value(&tree_iter, 0).get::<String>().unwrap().unwrap().as_str();
+        if !list_store.iter_next(&tree_iter) {
+            return return_string;
+        }
+    }
 }
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk::TextView) {
     let mut messages: String = String::from("");
