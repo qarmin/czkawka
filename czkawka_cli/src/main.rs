@@ -359,16 +359,16 @@ fn print_help() {
     println!(
         r###"
 
-  Main commands:
-  --h / --help - prints help, also works without any arguments
-  --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
-  --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - option to find and delete empty folders
-  --b <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"]
-  --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
-  --t <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
-  --version / --v - prints program name and version
+  [Main commands]:
+    --h / --help - prints help, also works without any arguments
+    --d <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
+    --e <-i directory_to_search> [-e exclude_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - option to find and delete empty folders
+    --b <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"]
+    --y <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
+    --t <-i directory_to_search> [-e exclude_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
+    --version / --v - prints program name and version
 
-  Options:
+  [Options]:
     -i directory_to_search - list of directories which should will be searched(absolute path)
     -e exclude_directories - list of directories which will be excluded from search(absolute path)
     -k excluded_items      - list of excluded items which contains * wildcard(may be slow, so use exclude_directories where possible)
@@ -380,7 +380,7 @@ fn print_help() {
     -f file_to_save        - saves results to file
     -delete                - delete found files, in duplicate finder by default remove all files in group except the most oldest one but it can take arguments: aen(All except newest one), aeo(All except oldest one), on(Only one newest), oo(Only one oldest)
 
-  Usage example:
+  [Usage example]:
     czkawka --d -i "/home/rafal/,/home/szczekacz" -e "/home/rafal/Pulpit,/home/rafal/Obrazy" -s 25 -x "7z,rar,IMAGE" -l "size" -f "results.txt" -delete "aeo"
     czkawka --d -i "/etc/,/mnt/Miecz" -s 1000 -x "VIDEO" -l "hashmb"
     czkawka --e -i "/home/rafal/rr, /home/gateway" -f "results.txt"
