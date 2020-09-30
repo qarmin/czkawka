@@ -2,38 +2,25 @@
 Czkawka is simple, fast and easy to use alternative to Fslint, written in Rust.  
 This is my first ever project in Rust so probably a lot of things are not being written in the most optimal way.
 
+## Why?
+In internet exists a lot of tools to find duplicates, empty folders, temporary files etc. but in most cases there are only available on CLI, which is hard to use by users.  
+GUI FSlint allows to really easy select different files and folders, but is based on old and unsupported Python 2 and GTK 2.  
+Other tools are mostly written in C/C++ to provide big performance but still needs to be tested a lot if not contains memory leaks, invalid memory reads/write and double frees.
+
 ## Features
 - Written in fast and memory safe Rust
 - CLI frontend, very fast and powerful with rich help
-- GUI GTK frontend(Still WIP) - use modern GTK 3 and looks similar to FSlint
+- GUI GTK frontend - use modern GTK 3 and looks similar to FSlint
 - GUI Orbtk frontend(Very early WIP) - alternative GUI with reduced functionality
 - Saving results to file - allows to easily read entries found by tool
 - Rich search option - allows setting absolute included and excluded directories, set of allowed files extensions or excluded items with * wildcard
 - Clean Glade file in which UI can be easily modernized
 - Multiple tools to use:
-  - Duplicates - Finds duplicates basing on its size(fast), hash(accurate)
+  - Duplicates - Finds duplicates basing on its size(fast), hash(accurate), first 1MB of hash(moderate)
   - Empty Folders - Finds empty folders with help of advanced algorithm
   - Big Files - Finds provided number of the biggest files in given location
   - Empty Files - Looks for empty files across disk
-  - Temporary Files - Allows finding temporary files 
-
-## TODO
-- Comments - a lot of things should be described
-- Probably extern argument parser in czkawka-cli could be used 
-- More unit tests
-- Debian package
-- Finding files with debug symbols
-- Maybe windows support, but this will need some refactoring in code
-- Translation support
-- GTK Gui
-  - Popups
-  - Choosing directories(included, excluded)
-  - Popup with type of deleted records
-  - Run in another thread searching to be able to pause
-- Orbtk GUI
-  - Basic selecting included and excluded folders
-  - Text field to show informations about number of found folders/files
-  - Simple buttons to delete 
+  - Temporary Files - Allows finding temporary files
 
 ## Usage and requirements
 Rust 1.46 - probably lower also works fine  
@@ -124,6 +111,13 @@ There are two available methods to check hash:
 
 At the end if user used `-delete` option, specified files are removed - All Except Oldest/Newest or Only Oldest/Newest
  
+## Name
+Czkawka is a Polish word which means hiccup.  
+I chose this name because I wanted to hear people speaking other languages pronounce it.
 
 ## License
 Code is distributed under MIT license.
+
+Program is completely free to use.
+
+"Gratis to uczciwa cena" - "Free is a fair price"
