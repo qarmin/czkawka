@@ -1,4 +1,10 @@
 ## Version 0.1.4 dev
+- Fixes -f default argument
+- Added save button to GUI
+- Cleaned a little code
+- Deleting files and folders i GUI
+- Support for all notebooks items in GUI
+- Support for deleting and adding directories to search and to exclude
 
 ## Version 0.1.3 - 27.09.2020r
 - Big code refactoring - now is a lot of easier create new modules and maintain old ones
