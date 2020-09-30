@@ -298,7 +298,7 @@ impl SaveResults for EmptyFolder {
 
         if !self.empty_folder_list.is_empty() {
             file.write_all(b"-------------------------------------------------Empty folder list-------------------------------------------------\n").unwrap();
-            file.write_all(("Found ".to_string() + self.information.number_of_empty_folders.to_string().as_str() + " empty folders which in " + ".\n").as_bytes())
+            file.write_all(("Found ".to_string() + self.information.number_of_empty_folders.to_string().as_str() + " empty folders\n").as_bytes())
                 .unwrap();
             for name in self.empty_folder_list.keys() {
                 file.write_all((name.clone() + "\n").as_bytes()).unwrap();

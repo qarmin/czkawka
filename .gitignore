@@ -3,4 +3,4 @@
 *.iml
 *~
 *#
-results.txt
+results*.txt

@@ -16,6 +16,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::UNIX_EPOCH;
 use std::{env, fs, process};
+use czkawka_core::common_traits::SaveResults;
 
 fn main() {
     // Printing version
@@ -93,6 +94,10 @@ fn main() {
     buttons_resume.hide();
     buttons_pause.hide();
     buttons_select.hide();
+
+    //// Popovers
+    // let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
+    // let popover_select2: gtk::PopoverMenu = builder.get_object("popover_select2").unwrap();
 
     //// Check Buttons
     let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
@@ -200,7 +205,7 @@ fn main() {
 
             let col_indices = [0, 1];
 
-            for i in ["/proc/", "/dev/"].iter() {
+            for i in ["/proc", "/dev"].iter() {
                 let values: [&dyn ToValue; 2] = [&i, &(MAIN_ROW_COLOR.to_string())];
                 list_store.set(&list_store.append(), &col_indices, &values);
             }
@@ -294,6 +299,9 @@ fn main() {
             // Search button
             {
                 let buttons_delete = buttons_delete.clone();
+                let buttons_save = buttons_save.clone();
+                let buttons_select = buttons_select.clone();
+                let entry_info = entry_info.clone();
                 let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
@@ -301,6 +309,9 @@ fn main() {
                 let scrolled_window_included_directories = scrolled_window_included_directories.clone();
                 let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
                 let text_view_errors = text_view_errors.clone();
+                let shared_duplication_state = shared_duplication_state.clone();
+                let shared_empty_folders_state = shared_empty_folders_state.clone();
+                let shared_buttons = shared_buttons.clone();
                 buttons_search.connect_clicked(move |_| {
                     match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                         "notebook_duplicate_finder_label" => {
@@ -441,13 +452,17 @@ fn main() {
                                 if duplicates_size > 0 {
                                     buttons_save.show();
                                     buttons_delete.show();
+                                    buttons_select.show();
                                     *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
                                     *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
                                 } else {
                                     buttons_save.hide();
                                     buttons_delete.hide();
+                                    buttons_select.hide();
                                     *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
                                     *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
                                 }
                             }
                         }
@@ -523,6 +538,9 @@ fn main() {
             }
             // Delete button
             {
+                let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
+                let notebook_chooser_tool = notebook_chooser_tool.clone();
+                let text_view_errors = text_view_errors.clone();
                 buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_duplicate_finder_label" => {
                         let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -573,6 +591,69 @@ fn main() {
 
                         text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                         selection.unselect_all();
+                    }
+                    e => panic!("Not existent {}", e),
+                });
+            }
+            // Select button
+            {
+                let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
+                let notebook_chooser_tool = notebook_chooser_tool.clone();
+                buttons_select.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                    "notebook_duplicate_finder_label" => {
+                        // let popover_select = gtk::PopoverMenu::new();
+                        // // popover_select.popup();
+                        // popover_select.show_all();
+                        println!("Printed");
+                        // let popover_menu = gtk::PopoverMenu::new();
+                        // let button_all_except_newest = gtk::Button::with_label("All except newest");
+                        // let button_all_except_oldest = gtk::Button::with_label("All except oldest");
+                        // let button_only_newest  = gtk::Button::with_label("Only newest");
+                        // let button_only_oldest= gtk::Button::with_label("Only oldest");
+                        // popover_menu.set_child_position(&button_all_except_newest,0);
+                        // popover_menu.set_child_position(&button_all_except_oldest,1);
+                        // popover_menu.set_child_position(&button_only_newest,2);
+                        // popover_menu.set_child_position(&button_only_oldest,3);
+                        // popover_menu.popup();
+                    }
+                    "scrolled_window_empty_folder_finder" => {
+                        // Do nothing
+                    }
+                    e => panic!("Not existent {}", e),
+                });
+            }
+            // Save button
+            {
+                let buttons_save_clone = buttons_save.clone();
+                buttons_save_clone.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                    "notebook_duplicate_finder_label" => {
+                        let file_name = "results_duplicates.txt";
+
+                        let mut df = shared_duplication_state.borrow_mut();
+                        df.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
+
+                        }
+
+                    }
+                    "scrolled_window_empty_folder_finder" => {
+                        let file_name = "results_empty_folder.txt";
+
+                        let mut ef = shared_empty_folders_state.borrow_mut();
+                        ef.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                                buttons_save.hide();
+                                *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
+
+                        }
                     }
                     e => panic!("Not existent {}", e),
                 });
