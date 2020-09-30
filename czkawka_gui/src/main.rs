@@ -11,7 +11,7 @@ use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::empty_folder::EmptyFolder;
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
-use gtk::{Builder, SelectionMode, TreeView};
+use gtk::{Builder, SelectionMode, TreeIter, TreeView};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -92,7 +92,7 @@ fn main() {
     // Buttons search popover buttons
     let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
     let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();
-    // let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
+    let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
     // let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
     // let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
     // let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
@@ -468,7 +468,7 @@ fn main() {
                                     buttons_select.hide();
                                     *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
                                     *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
-                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
                                 }
                             }
                         }
@@ -547,7 +547,10 @@ fn main() {
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
                 let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
-                buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                let buttons_delete_clone = buttons_delete.clone();
+                let buttons_select = buttons_select.clone();
+                let shared_buttons = shared_buttons.clone();
+                buttons_delete_clone.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_duplicate_finder_label" => {
                         let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                         let selection = tree_view.get_selection();
@@ -572,6 +575,11 @@ fn main() {
 
                         text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                         selection.unselect_all();
+
+                        buttons_delete.hide();
+                        buttons_select.hide();
+                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
+                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
                     }
                     "scrolled_window_empty_folder_finder" => {
                         let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -670,13 +678,52 @@ fn main() {
 
             // Unselect all button
             {
-                // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-                // let popover_select = popover_select.clone();
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let popover_select = popover_select.clone();
                 buttons_popover_unselect_all.connect_clicked(move |_| {
                     let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                     let selection = tree_view.get_selection();
 
                     selection.unselect_all();
+                    popover_select.popdown();
+                });
+            }
+
+            // Reverse selection
+            {
+                // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                // let popover_select = popover_select.clone();
+                buttons_popover_reverse.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+
+                    let (vector_tree_path, tree_model) = selection.get_selected_rows();
+
+                    if vector_tree_path.is_empty() {
+                        selection.select_all();
+                    } else {
+                        let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+                                                                                  // let tree_iter_selection
+                        let mut current_path_index = 0;
+                        let mut tree_iter_selected: TreeIter;
+                        loop {
+                            if current_path_index >= vector_tree_path.len() {
+                                selection.select_iter(&tree_iter_all);
+                            } else {
+                                tree_iter_selected = tree_model.get_iter(vector_tree_path.get(current_path_index).unwrap()).unwrap();
+                                if tree_model.get_path(&tree_iter_all).unwrap() == tree_model.get_path(&tree_iter_selected).unwrap() {
+                                    selection.unselect_iter(&tree_iter_selected);
+                                    current_path_index += 1;
+                                } else {
+                                    selection.select_iter(&tree_iter_all);
+                                }
+                            }
+                            if !tree_model.iter_next(&tree_iter_all) {
+                                break;
+                            }
+                        }
+                    }
+
                     popover_select.popdown();
                 });
             }
