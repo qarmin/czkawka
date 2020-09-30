@@ -6,6 +6,7 @@ use humansize::{file_size_opts as options, FileSize};
 extern crate gtk;
 use crate::help_functions::*;
 use chrono::NaiveDateTime;
+use czkawka_core::common_traits::SaveResults;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::empty_folder::EmptyFolder;
 use duplicate::DuplicateFinder;
@@ -16,7 +17,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::UNIX_EPOCH;
 use std::{env, fs, process};
-use czkawka_core::common_traits::SaveResults;
 
 fn main() {
     // Printing version
@@ -89,15 +89,17 @@ fn main() {
     let buttons_add_excluded_directory: gtk::Button = builder.get_object("buttons_add_excluded_directory").unwrap();
     let buttons_remove_excluded_directory: gtk::Button = builder.get_object("buttons_remove_excluded_directory").unwrap();
 
-    // Not used buttons for now
-    buttons_stop.hide();
-    buttons_resume.hide();
-    buttons_pause.hide();
-    buttons_select.hide();
+    // Buttons search popover buttons
+    let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
+    let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();
+    // let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
+    // let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
+    // let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
+    // let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
+    // let buttons_popover_select_one_newest: gtk::Button = builder.get_object("buttons_popover_select_one_newest").unwrap();
 
     //// Popovers
-    // let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
-    // let popover_select2: gtk::PopoverMenu = builder.get_object("popover_select2").unwrap();
+    let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
 
     //// Check Buttons
     let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
@@ -139,6 +141,10 @@ fn main() {
         buttons_search.show();
         buttons_save.hide();
         buttons_delete.hide();
+        buttons_stop.hide();
+        buttons_resume.hide();
+        buttons_pause.hide();
+        buttons_select.hide();
 
         // Set Main ScrolledWindow Treeviews
         {
@@ -538,9 +544,9 @@ fn main() {
             }
             // Delete button
             {
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
                 let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
-                let text_view_errors = text_view_errors.clone();
                 buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_duplicate_finder_label" => {
                         let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -599,22 +605,13 @@ fn main() {
             {
                 let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
-                buttons_select.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                let buttons_select_clone = buttons_select.clone();
+                let popover_select = popover_select.clone();
+                buttons_select_clone.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_duplicate_finder_label" => {
-                        // let popover_select = gtk::PopoverMenu::new();
-                        // // popover_select.popup();
-                        // popover_select.show_all();
-                        println!("Printed");
-                        // let popover_menu = gtk::PopoverMenu::new();
-                        // let button_all_except_newest = gtk::Button::with_label("All except newest");
-                        // let button_all_except_oldest = gtk::Button::with_label("All except oldest");
-                        // let button_only_newest  = gtk::Button::with_label("Only newest");
-                        // let button_only_oldest= gtk::Button::with_label("Only oldest");
-                        // popover_menu.set_child_position(&button_all_except_newest,0);
-                        // popover_menu.set_child_position(&button_all_except_oldest,1);
-                        // popover_menu.set_child_position(&button_only_newest,2);
-                        // popover_menu.set_child_position(&button_only_oldest,3);
-                        // popover_menu.popup();
+                        // Only popup popup
+                        popover_select.set_relative_to(Some(&buttons_select));
+                        popover_select.popup();
                     }
                     "scrolled_window_empty_folder_finder" => {
                         // Do nothing
@@ -637,9 +634,7 @@ fn main() {
                         {
                             buttons_save.hide();
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
-
                         }
-
                     }
                     "scrolled_window_empty_folder_finder" => {
                         let file_name = "results_empty_folder.txt";
@@ -650,12 +645,39 @@ fn main() {
                         entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
                         // Set state
                         {
-                                buttons_save.hide();
-                                *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
-
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
                     e => panic!("Not existent {}", e),
+                });
+            }
+        }
+        // Popover Buttons
+        {
+            // Select all button
+            {
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let popover_select = popover_select.clone();
+                buttons_popover_select_all.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+
+                    selection.select_all();
+                    popover_select.popdown();
+                });
+            }
+
+            // Unselect all button
+            {
+                // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                // let popover_select = popover_select.clone();
+                buttons_popover_unselect_all.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+
+                    selection.unselect_all();
+                    popover_select.popdown();
                 });
             }
         }
