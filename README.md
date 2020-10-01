@@ -2,6 +2,8 @@
 Czkawka is simple, fast and easy to use alternative to Fslint, written in Rust.  
 This is my first ever project in Rust so probably a lot of things are not being written in the most optimal way.
 
+![Czkawka](https://user-images.githubusercontent.com/41945903/94850792-c200cc80-0427-11eb-99a7-23ab9cf39556.gif)
+
 ## Why?
 In internet exists a lot of tools to find duplicates, empty folders, temporary files etc. but in most cases there are only available on CLI, which is hard to use by users.
 
@@ -15,6 +17,7 @@ But the most important thing for me was to learn Rust and create a program usefu
 - Written in fast and memory safe Rust
 - CLI frontend, very fast and powerful with rich help
 - GUI GTK frontend - use modern GTK 3 and looks similar to FSlint
+- Light/Dark theme match the appearance of the system
 - GUI Orbtk frontend(Very early WIP) - alternative GUI with reduced functionality
 - Saving results to file - allows to easily read entries found by tool
 - Rich search option - allows setting absolute included and excluded directories, set of allowed files extensions or excluded items with * wildcard
@@ -28,7 +31,7 @@ But the most important thing for me was to learn Rust and create a program usefu
 
 ## Usage and requirements
 Rust 1.46 - probably lower also works fine  
-GTK 3.24 - for GTK backend
+GTK 3.22 - for GTK backend
 
 Precompiled binaries are here(may not work in every Linux distro) - https://github.com/qarmin/czkawka/releases/
 
@@ -44,12 +47,12 @@ apt install -y libgtk-3-dev
 git clone https://github.com/qarmin/czkawka.git
 cd czkawka
 ```
-- Run GTK GUI(Still WIP)
+- Run GTK GUI
 ```
 cargo run --bin czkawka_gui
 ```
-![GUI GTK](https://user-images.githubusercontent.com/41945903/94106023-d72f9700-fe3a-11ea-821d-48484afd74fb.png)
-- Run alternative Orbtk GUI(Still WIP, and currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
+![GUI GTK](https://user-images.githubusercontent.com/41945903/94850801-c5945380-0427-11eb-8d4c-af4946ab02d5.png)
+- Run alternative Orbtk GUI(Still WIP, currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
 ```
 cargo run --bin czkawka_gui_orbtk
 ```
@@ -63,33 +66,26 @@ cargo run --bin czkawka_cli
 ## Speed
 Since Czkawka is written in Rust and aims to be a faster alternative for written in Python - FSlint we need to compare speed of this two tools.
 
-I checked my home directory without any folder exceptions(I removed all directories from FSlint advanced tab) which contained 379359 files and 42445 folders and 50301 duplicated files in 29723 groups which took 450,4 MB.
+I checked prepared before directory, without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 176 056 files and 22194 folders and 88436 duplicated files in 52330 groups which took 6,2 GB.
 
-First run reads file entry and save it to cache so this step is mostly limited by disk performance, and with second run cache helps it so searching is a lot of faster.
+First run reads file entry and save it to cache so this step is mostly limited by disk performance, and with second run cache helps it so searching is sometimes faster(with a small amount of duplicates is even 10x faster).
 
-Duplicate Checker(Version 0.1.0)
-
-| App| Executing Time |
-|:----------:|:-------------:|
-| Fslint (First Run)| 140s |
-| Fslint (Second Run)| 23s |
-| Czkawka CLI Release(First Run) | 128s |
-| Czkawka CLI Release(Second Run) | 8s |
-
-| App| Idle Ram | Max Operational Ram Usage |
-|:----------:|:-------------:|:-------------:|
-| Fslint |  |  |
-| Czkawka CLI Release |  |
-| Czkawka GTK GUI Release |  |
-
-
-Empty folder finder
+Duplicate Checker(Version 0.1.4)
 
 | App| Executing Time |
 |:----------:|:-------------:|
-| Fslint |  |
-| Czkawka CLI Release |  |
-| Czkawka GTK GUI Release |  |
+| Fslint (First Run)| 284s |
+| Fslint (Second Run)| 247s |
+| Czkawka GUI Release(First Run) | 118s |
+| Czkawka GUI Release(Second Run) | 120s |
+
+For Fslint I used Mprof and for Czkawka Heaptrack
+
+| App| Idle Ram | Max Operational Ram Usage | Stabilized after search usage |
+|:----------:|:-------------:|:-------------:|:-------------:|
+| Fslint | 55 MB | 160 MB | 150 MB |
+| Czkawka GTK GUI Release | 8 MB | 76 MB | 75 MB |
+
 
 Differences should be more visible when using slower processor or faster disk.
 
@@ -98,42 +94,21 @@ Differences should be more visible when using slower processor or faster disk.
 |  | Czkawka | FSlint |
 |:----------:|:-------------:|:-----:|
 | Language | Rust| Python | 
-| Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) | 
-| Duplicate finder | Yes | Yes |
-| Empty files | Yes | Yes |
-| Empty folders | Yes | Yes |
-| Temporary files | Yes | Yes |
-| Big files | Yes | No |
-| Installed packages | No | Yes |
-| Invalid names | No | Yes |
-| Names conflict | No | Yes |
-| Invalid symlinks | No | Yes |
-| Bad ID | No | Yes |
-| Non stripped binaries | No | Yes |
-| Redundant whitespace | No | Yes |
+| Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) |
+| Ram Usage | Low | Medium |
+| Duplicate finder | X | X |
+| Empty files | X | X |
+| Empty folders | X | X |
+| Temporary files | X | X |
+| Big files | X |   |
+| Installed packages |  | X |
+| Invalid names |   | X |
+| Names conflict |   | X |
+| Invalid symlinks |   | X |
+| Bad ID |   | X |
+| Non stripped binaries |   | X |
+| Redundant whitespace |  | X |
 | Project Activity | High | Very Low | 
-
-## How it works?
-### Duplicate Finder
-The only required parameter for checking duplicates is included folders `-i`. This parameter validates provided folders - which must have absolute path(without ~ and other similar symbols at the beginning), not contains *(wildcard), be dir(not file or symlink), exists. Later same things are done with excluded folders `-e`. 
-
-Next, this included and excluded folders are optimized due to tree structure of file system:
-- Folders which contains another folders are combined(separately for included and excluded) - `/home/pulpet` and `/home/pulpet/a` are combined to `/home/pulpet`
-- Included folders which are located inside excluded ones are delete - Included folder `/etc/tomcat/` is deleted because excluded folder is `/etc/`
-- Non existed directories are being removed
-- Excluded path which are outside included path are deleted - Excluded path `/etc/` is removed if included path is `/home/`
-If after optimization there is no included folders, then program ends with non zero value(TODO, this should be handled by returning value).
-
-Next with provided by user minimal size of checked size `-s`, program checks recursively or not included folders and checks files by sizes and put files with same sizes to different boxes. 
-Next boxes which contains only one element are removed because files inside that means that are not duplicated.
-
-Now if user select this, then provided is checking hash of file, because may happens that files have equal size, but differ in one or more bytes.
-
-There are two available methods to check hash:
-- full(default) - check hash of entire file so this method is slow especially with large files and but there is almost no chance that two different files will be treated like they were a duplicates.
-- partial - check hash only max first 1MB of file, so it is a lot of more accurate than only checking size of files, but still there is very small chance that files which were identified as duplicates they are not.
-
-At the end if user used `-delete` option, specified files are removed - All Except Oldest/Newest or Only Oldest/Newest
  
 ## Name
 Czkawka is a Polish word which means hiccup.  

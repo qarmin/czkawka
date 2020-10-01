@@ -192,7 +192,7 @@ impl Temporary {
                     let mut is_temporary_file: bool = false;
 
                     // Temporary files which needs to have dot in name(not sure if exists without dot)
-                    let temporary_with_dot = ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download"];
+                    let temporary_with_dot = ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"];
 
                     if file_name_lowercase.contains('.') {
                         for temp in temporary_with_dot.iter() {
