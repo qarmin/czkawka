@@ -9,20 +9,21 @@ pub enum ColumnsDuplicates {
     Modification,
     ModificationAsSecs,
     Color,
+    TextColor,
 }
+
 pub enum ColumnsEmpty {
     // Columns for duplicate and empty folder treeview
     Name = 0,
     Path,
     Modification,
-    Color,
 }
 pub enum ColumnsDirectory {
     // Columns for Included and Excluded Directories in upper Notebook
     Path = 0,
-    Color,
 }
 
+pub const TEXT_COLOR: &str = "#ffffff";
 pub const MAIN_ROW_COLOR: &str = "#343434";
 pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
@@ -37,6 +38,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     name_column.set_min_width(50);
     name_column.add_attribute(&renderer, "text", ColumnsDuplicates::Name as i32);
     name_column.add_attribute(&renderer, "background", ColumnsDuplicates::Color as i32);
+    name_column.add_attribute(&renderer, "foreground", ColumnsDuplicates::TextColor as i32);
     tree_view_duplicate_finder.append_column(&name_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -47,6 +49,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     path_column.set_min_width(100);
     path_column.add_attribute(&renderer, "text", ColumnsDuplicates::Path as i32);
     path_column.add_attribute(&renderer, "background", ColumnsDuplicates::Color as i32);
+    path_column.add_attribute(&renderer, "foreground", ColumnsDuplicates::TextColor as i32);
     tree_view_duplicate_finder.append_column(&path_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -57,6 +60,7 @@ pub fn create_tree_view_duplicates(tree_view_duplicate_finder: &mut gtk::TreeVie
     modification_date_column.set_min_width(100);
     modification_date_column.add_attribute(&renderer, "text", ColumnsDuplicates::Modification as i32);
     modification_date_column.add_attribute(&renderer, "background", ColumnsDuplicates::Color as i32);
+    modification_date_column.add_attribute(&renderer, "foreground", ColumnsDuplicates::TextColor as i32);
     tree_view_duplicate_finder.append_column(&modification_date_column);
 
     tree_view_duplicate_finder.set_vexpand(true);
@@ -70,7 +74,6 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     name_column.set_resizable(true);
     name_column.set_min_width(50);
     name_column.add_attribute(&renderer, "text", ColumnsEmpty::Name as i32);
-    name_column.add_attribute(&renderer, "background", ColumnsEmpty::Color as i32);
     tree_view_empty_folder_finder.append_column(&name_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -80,7 +83,6 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     path_column.set_resizable(true);
     path_column.set_min_width(100);
     path_column.add_attribute(&renderer, "text", ColumnsEmpty::Path as i32);
-    path_column.add_attribute(&renderer, "background", ColumnsEmpty::Color as i32);
     tree_view_empty_folder_finder.append_column(&path_column);
 
     let renderer = gtk::CellRendererText::new();
@@ -90,7 +92,6 @@ pub fn create_tree_view_empty_folders(tree_view_empty_folder_finder: &mut gtk::T
     modification_date_column.set_resizable(true);
     modification_date_column.set_min_width(100);
     modification_date_column.add_attribute(&renderer, "text", ColumnsEmpty::Modification as i32);
-    modification_date_column.add_attribute(&renderer, "background", ColumnsEmpty::Color as i32);
     tree_view_empty_folder_finder.append_column(&modification_date_column);
 
     tree_view_empty_folder_finder.set_vexpand(true);
@@ -101,7 +102,6 @@ pub fn create_tree_view_directories(tree_view_directories: &mut gtk::TreeView) {
     let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
     name_column.pack_start(&renderer, true);
     name_column.add_attribute(&renderer, "text", ColumnsDirectory::Path as i32);
-    name_column.add_attribute(&renderer, "background", ColumnsDirectory::Color as i32);
     tree_view_directories.append_column(&name_column);
 
     tree_view_directories.set_headers_visible(false);

@@ -149,7 +149,14 @@ fn main() {
         {
             // Duplicate Files
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::U64, glib::types::Type::String];
+                let col_types: [glib::types::Type; 6] = [
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::U64,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -191,7 +198,15 @@ fn main() {
 
             let col_indices = [0, 1];
 
-            let values: [&dyn ToValue; 2] = [&("/home/rafal/Pulpit"), &(MAIN_ROW_COLOR.to_string())];
+            let current_dir: String = match env::current_dir() {
+                Ok(t) => t.to_str().unwrap().to_string(),
+                Err(_) => {
+                    println!("Failed to read current directory, setting /home instead");
+                    "/home".to_string()
+                }
+            };
+
+            let values: [&dyn ToValue; 2] = [&current_dir, &(MAIN_ROW_COLOR.to_string())];
             list_store.set(&list_store.append(), &col_indices, &values);
 
             scrolled_window_included_directories.add(&tree_view_included_directory);
@@ -210,7 +225,7 @@ fn main() {
 
             let col_indices = [0, 1];
 
-            for i in ["/proc", "/dev"].iter() {
+            for i in ["/proc", "/dev", "/sys"].iter() {
                 let values: [&dyn ToValue; 2] = [&i, &(MAIN_ROW_COLOR.to_string())];
                 list_store.set(&list_store.append(), &col_indices, &values);
             }
@@ -387,7 +402,7 @@ fn main() {
                                     .unwrap();
                                 list_store.clear();
 
-                                let col_indices = [0, 1, 2, 3, 4];
+                                let col_indices = [0, 1, 2, 3, 4, 5];
 
                                 match check_method {
                                     CheckingMethod::Hash | CheckingMethod::HashMB => {
@@ -395,24 +410,26 @@ fn main() {
 
                                         for (size, vectors_vector) in btreemap.iter().rev() {
                                             for vector in vectors_vector {
-                                                let values: [&dyn ToValue; 5] = [
+                                                let values: [&dyn ToValue; 6] = [
                                                     &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                                     &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
                                                     &"Bytes lost".to_string(),
-                                                    &(0), // Not used
+                                                    &(0), // Not used here
                                                     &(HEADER_ROW_COLOR.to_string()),
+                                                    &(TEXT_COLOR.to_string()),
                                                 ];
                                                 list_store.set(&list_store.append(), &col_indices, &values);
                                                 for entry in vector {
                                                     let path = &entry.path;
                                                     let index = path.rfind('/').unwrap();
 
-                                                    let values: [&dyn ToValue; 5] = [
+                                                    let values: [&dyn ToValue; 6] = [
                                                         &(path[index + 1..].to_string()),
                                                         &(path[..index].to_string()),
                                                         &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                                         &(entry.modified_date),
                                                         &(MAIN_ROW_COLOR.to_string()),
+                                                        &(TEXT_COLOR.to_string()),
                                                     ];
                                                     list_store.set(&list_store.append(), &col_indices, &values);
                                                 }
@@ -423,22 +440,26 @@ fn main() {
                                         let btreemap = df.get_files_sorted_by_size();
 
                                         for (size, vector) in btreemap.iter().rev() {
-                                            let values: [&dyn ToValue; 4] = [
+                                            let values: [&dyn ToValue; 6] = [
                                                 &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                                 &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
                                                 &"Bytes lost".to_string(),
+                                                &(0), // Not used here
                                                 &(HEADER_ROW_COLOR.to_string()),
+                                                &(TEXT_COLOR.to_string()),
                                             ];
                                             list_store.set(&list_store.append(), &col_indices, &values);
                                             for entry in vector {
                                                 let path = &entry.path;
                                                 let index = path.rfind('/').unwrap();
 
-                                                let values: [&dyn ToValue; 4] = [
+                                                let values: [&dyn ToValue; 6] = [
                                                     &(path[index + 1..].to_string()),
                                                     &(path[..index].to_string()),
                                                     &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    &(entry.modified_date),
                                                     &(MAIN_ROW_COLOR.to_string()),
+                                                    &(TEXT_COLOR.to_string()),
                                                 ];
                                                 list_store.set(&list_store.append(), &col_indices, &values);
                                             }
@@ -504,19 +525,14 @@ fn main() {
                                     .unwrap();
                                 list_store.clear();
 
-                                let col_indices = [0, 1, 2, 3];
+                                let col_indices = [0, 1, 2];
 
                                 let hashmap = ef.get_empty_folder_list();
 
                                 for (name, entry) in hashmap {
                                     let name: String = name[..(name.len() - 1)].to_string();
                                     let index = name.rfind('/').unwrap();
-                                    let values: [&dyn ToValue; 4] = [
-                                        &(name[index + 1..].to_string()),
-                                        &(name[..index].to_string()),
-                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
-                                        &(MAIN_ROW_COLOR.to_string()),
-                                    ];
+                                    let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
                                     list_store.set(&list_store.append(), &col_indices, &values);
                                 }
                                 print_text_messages_to_text_view(&text_messages, &text_view_errors);
@@ -993,9 +1009,9 @@ fn main() {
                         let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                         let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
 
-                        let col_indices = [0, 1];
+                        let col_indices = [0];
 
-                        let values: [&dyn ToValue; 2] = [&folder, &(MAIN_ROW_COLOR.to_string())];
+                        let values: [&dyn ToValue; 1] = [&folder];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
                     chooser.close();
@@ -1020,9 +1036,9 @@ fn main() {
                         let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                         let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
 
-                        let col_indices = [0, 1];
+                        let col_indices = [0];
 
-                        let values: [&dyn ToValue; 2] = [&folder, &(MAIN_ROW_COLOR.to_string())];
+                        let values: [&dyn ToValue; 1] = [&folder];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
                     chooser.close();
