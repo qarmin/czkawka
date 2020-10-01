@@ -412,9 +412,9 @@ fn main() {
                                             for vector in vectors_vector {
                                                 let values: [&dyn ToValue; 6] = [
                                                     &(vector.len().to_string() + " x " + size.to_string().as_str()),
-                                                    &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
-                                                    &"Bytes lost".to_string(),
-                                                    &(0), // Not used here
+                                                    &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                                    &"".to_string(), // No text in 3 column
+                                                    &(0),            // Not used here
                                                     &(HEADER_ROW_COLOR.to_string()),
                                                     &(TEXT_COLOR.to_string()),
                                                 ];
@@ -442,9 +442,9 @@ fn main() {
                                         for (size, vector) in btreemap.iter().rev() {
                                             let values: [&dyn ToValue; 6] = [
                                                 &(vector.len().to_string() + " x " + size.to_string().as_str()),
-                                                &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
-                                                &"Bytes lost".to_string(),
-                                                &(0), // Not used here
+                                                &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                                &"".to_string(), // No text in 3 column
+                                                &(0),            // Not used here
                                                 &(HEADER_ROW_COLOR.to_string()),
                                                 &(TEXT_COLOR.to_string()),
                                             ];
@@ -584,10 +584,12 @@ fn main() {
                             let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
                             let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
 
-                            if fs::remove_file(format!("{}/{}", path, name)).is_err() {
-                                messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str()
+                            match fs::remove_dir(format!("{}/{}", path, name)) {
+                                Ok(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                                Err(_) => {
+                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                }
                             }
-                            list_store.remove(&list_store.get_iter(&tree_path).unwrap());
                         }
 
                         text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
@@ -614,10 +616,12 @@ fn main() {
                             let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmpty::Name as i32).get::<String>().unwrap().unwrap();
                             let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmpty::Path as i32).get::<String>().unwrap().unwrap();
 
-                            if fs::remove_dir(format!("{}/{}", path, name)).is_err() {
-                                messages += format!("Failed to folder {}/{} due lack of permissions, selected dir is not empty or doesn't exists.\n", path, name).as_str()
+                            match fs::remove_dir(format!("{}/{}", path, name)) {
+                                Ok(_) => messages += format!("Failed to folder {}/{} due lack of permissions, selected dir is not empty or doesn't exists.\n", path, name).as_str(),
+                                Err(_) => {
+                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                }
                             }
-                            list_store.remove(&list_store.get_iter(&tree_path).unwrap());
                         }
 
                         text_view_errors.get_buffer().unwrap().set_text(messages.as_str());

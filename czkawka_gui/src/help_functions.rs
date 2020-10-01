@@ -3,7 +3,7 @@ use gtk::prelude::*;
 use gtk::TreeViewColumn;
 
 pub enum ColumnsDuplicates {
-    // Columns for duplicate and empty folder treeview
+    // Columns for duplicate treeview
     Name = 0,
     Path,
     Modification,
@@ -13,7 +13,7 @@ pub enum ColumnsDuplicates {
 }
 
 pub enum ColumnsEmpty {
-    // Columns for duplicate and empty folder treeview
+    // Columns for empty folder treeview
     Name = 0,
     Path,
     Modification,
