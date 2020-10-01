@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Enum with values which show if folder is empty.
 /// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
@@ -21,7 +21,7 @@ enum FolderEmptiness {
 pub struct FolderEntry {
     parent_path: Option<String>, // Usable only when finding
     is_empty: FolderEmptiness,
-    pub modified_date: SystemTime,
+    pub modified_date: u64,
 }
 
 /// Struct to store most basics info about all folder
@@ -128,7 +128,7 @@ impl EmptyFolder {
                     FolderEntry {
                         parent_path: None,
                         is_empty: FolderEmptiness::Maybe,
-                        modified_date: SystemTime::now(),
+                        modified_date: 0,
                     },
                 );
                 folders_to_check.push(id.clone());
@@ -182,10 +182,10 @@ impl EmptyFolder {
                             parent_path: Option::from(current_folder.clone()),
                             is_empty: FolderEmptiness::Maybe,
                             modified_date: match metadata.modified() {
-                                Ok(t) => t,
+                                Ok(t) => t.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs(),
                                 Err(_) => {
                                     self.text_messages.warnings.push(format!("Failed to read modification date of folder {}", current_folder));
-                                    SystemTime::now()
+                                    continue;
                                 }
                             },
                         },

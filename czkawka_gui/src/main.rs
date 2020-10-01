@@ -15,7 +15,6 @@ use gtk::{Builder, SelectionMode, TreeIter, TreeView};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::time::UNIX_EPOCH;
 use std::{env, fs, process};
 
 fn main() {
@@ -410,7 +409,7 @@ fn main() {
                                                     let values: [&dyn ToValue; 4] = [
                                                         &(path[index + 1..].to_string()),
                                                         &(path[..index].to_string()),
-                                                        &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                                         &(MAIN_ROW_COLOR.to_string()),
                                                     ];
                                                     list_store.set(&list_store.append(), &col_indices, &values);
@@ -436,7 +435,7 @@ fn main() {
                                                 let values: [&dyn ToValue; 4] = [
                                                     &(path[index + 1..].to_string()),
                                                     &(path[..index].to_string()),
-                                                    &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                                     &(MAIN_ROW_COLOR.to_string()),
                                                 ];
                                                 list_store.set(&list_store.append(), &col_indices, &values);
@@ -513,7 +512,7 @@ fn main() {
                                     let values: [&dyn ToValue; 4] = [
                                         &(name[index + 1..].to_string()),
                                         &(name[..index].to_string()),
-                                        &(NaiveDateTime::from_timestamp(entry.modified_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs() as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                         &(MAIN_ROW_COLOR.to_string()),
                                     ];
                                     list_store.set(&list_store.append(), &col_indices, &values);
@@ -703,7 +702,7 @@ fn main() {
                         selection.select_all();
                     } else {
                         let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
-                                                                                  // let tree_iter_selection
+
                         let mut current_path_index = 0;
                         let mut tree_iter_selected: TreeIter;
                         loop {
@@ -727,6 +726,58 @@ fn main() {
                     popover_select.popdown();
                 });
             }
+
+            // // All except oldest
+            // {
+            //     // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+            //     // let popover_select = popover_select.clone();
+            //     buttons_popover_reverse.connect_clicked(move |_| {
+            //         let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            //         let selection = tree_view.get_selection();
+            //
+            //         let (vector_tree_path, tree_model) = selection.get_selected_rows();
+            //
+            //         {
+            //             let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+            //
+            //             let mut current_path_index = 0;
+            //             let mut tree_iter_selected: TreeIter;
+            //
+            //             let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), Columns3Default::Color as i32).get::<String>().unwrap().unwrap();
+            //
+            //             loop {
+            //                 let array_to_have: Vec<SystemTime> = Vec::new();
+            //                 let oldest_index : Option<int> = None;
+            //
+            //                 loop {
+            //                     if color == HEADER_ROW_COLOR {
+            //                         break;
+            //                     }
+            //
+            //
+            //
+            //                     if current_path_index >= vector_tree_path.len() {
+            //                         selection.select_iter(&tree_iter_all);
+            //                     } else {
+            //                         tree_iter_selected = tree_model.get_iter(vector_tree_path.get(current_path_index).unwrap()).unwrap();
+            //                         if tree_model.get_path(&tree_iter_all).unwrap() == tree_model.get_path(&tree_iter_selected).unwrap() {
+            //                             selection.unselect_iter(&tree_iter_selected);
+            //                             current_path_index += 1;
+            //                         } else {
+            //                             selection.select_iter(&tree_iter_all);
+            //                         }
+            //                     }
+            //                     if !tree_model.iter_next(&tree_iter_all) {
+            //                         break;
+            //                     }
+            //                 }
+            //                 if arry
+            //             }
+            //         }
+            //
+            //         popover_select.popdown();
+            //     });
+            // }
         }
         // Upper Notepad
         {

@@ -35,8 +35,7 @@ pub enum DeleteMethod {
 pub struct FileEntry {
     pub path: String,
     pub size: u64,
-    pub created_date: SystemTime,
-    pub modified_date: SystemTime,
+    pub modified_date: u64,
 }
 
 /// Info struck with helpful information's about results
@@ -286,15 +285,8 @@ impl DuplicateFinder {
                         let fe: FileEntry = FileEntry {
                             path: current_file_name.clone(),
                             size: metadata.len(),
-                            created_date: match metadata.created() {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    self.text_messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
-                                    continue;
-                                } // Permissions Denied
-                            },
                             modified_date: match metadata.modified() {
-                                Ok(t) => t,
+                                Ok(t) => t.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs(),
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
                                     continue;
@@ -651,9 +643,8 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
     match delete_method {
         DeleteMethod::OneOldest => {
             for (index, file) in vector.iter().enumerate() {
-                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
-                if q_time == 0 || q_time > time_since_epoch {
-                    q_time = time_since_epoch;
+                if q_time == 0 || q_time > file.modified_date {
+                    q_time = file.modified_date;
                     q_index = index;
                 }
             }
@@ -670,9 +661,8 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
         }
         DeleteMethod::OneNewest => {
             for (index, file) in vector.iter().enumerate() {
-                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
-                if q_time == 0 || q_time < time_since_epoch {
-                    q_time = time_since_epoch;
+                if q_time == 0 || q_time < file.modified_date {
+                    q_time = file.modified_date;
                     q_index = index;
                 }
             }
@@ -689,9 +679,8 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
         }
         DeleteMethod::AllExceptOldest => {
             for (index, file) in vector.iter().enumerate() {
-                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
-                if q_time == 0 || q_time > time_since_epoch {
-                    q_time = time_since_epoch;
+                if q_time == 0 || q_time > file.modified_date {
+                    q_time = file.modified_date;
                     q_index = index;
                 }
             }
@@ -712,9 +701,8 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
         }
         DeleteMethod::AllExceptNewest => {
             for (index, file) in vector.iter().enumerate() {
-                let time_since_epoch = file.created_date.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs();
-                if q_time == 0 || q_time < time_since_epoch {
-                    q_time = time_since_epoch;
+                if q_time == 0 || q_time < file.modified_date {
+                    q_time = file.modified_date;
                     q_index = index;
                 }
             }

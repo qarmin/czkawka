@@ -1,7 +1,7 @@
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -18,8 +18,7 @@ pub enum DeleteMethod {
 #[derive(Clone)]
 pub struct FileEntry {
     pub path: String,
-    pub created_date: SystemTime,
-    pub modified_date: SystemTime,
+    pub modified_date: u64,
 }
 
 /// Info struck with helpful information's about results
@@ -219,15 +218,8 @@ impl Temporary {
                         // Creating new file entry
                         let fe: FileEntry = FileEntry {
                             path: current_file_name.clone(),
-                            created_date: match metadata.created() {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    self.text_messages.warnings.push("Unable to get creation date from file ".to_string() + current_file_name.as_str());
-                                    continue;
-                                } // Permissions Denied
-                            },
                             modified_date: match metadata.modified() {
-                                Ok(t) => t,
+                                Ok(t) => t.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs(),
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
                                     continue;
