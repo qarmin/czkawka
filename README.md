@@ -3,9 +3,13 @@ Czkawka is simple, fast and easy to use alternative to Fslint, written in Rust.
 This is my first ever project in Rust so probably a lot of things are not being written in the most optimal way.
 
 ## Why?
-In internet exists a lot of tools to find duplicates, empty folders, temporary files etc. but in most cases there are only available on CLI, which is hard to use by users.  
-GUI FSlint allows to really easy select different files and folders, but is based on old and unsupported Python 2 and GTK 2.  
+In internet exists a lot of tools to find duplicates, empty folders, temporary files etc. but in most cases there are only available on CLI, which is hard to use by users.
+
+GUI FSlint allows to really easy select different files and folders, but is based on old and unsupported Python 2 and GTK 2.
+
 Other tools are mostly written in C/C++ to provide big performance but still needs to be tested a lot if not contains memory leaks, invalid memory reads/write and double frees.
+
+But the most important thing for me was to learn Rust and create a program useful for the open source community.
 
 ## Features
 - Written in fast and memory safe Rust
@@ -88,6 +92,26 @@ Empty folder finder
 | Czkawka GTK GUI Release |  |
 
 Differences should be more visible when using slower processor or faster disk.
+
+## Comparsion with FSLint
+
+|  | Czkawka | FSlint |
+|:----------:|:-------------:|:-----:|
+| Language | Rust| Python | 
+| Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) | 
+| Duplicate finder | Yes | Yes |
+| Empty files | Yes | Yes |
+| Empty folders | Yes | Yes |
+| Temporary files | Yes | Yes |
+| Big files | Yes | No |
+| Installed packages | No | Yes |
+| Invalid names | No | Yes |
+| Names conflict | No | Yes |
+| Invalid symlinks | No | Yes |
+| Bad ID | No | Yes |
+| Non stripped binaries | No | Yes |
+| Redundant whitespace | No | Yes |
+| Project Activity | High | Very Low | 
 
 ## How it works?
 ### Duplicate Finder

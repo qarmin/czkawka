@@ -364,11 +364,11 @@ fn print_help() {
 
   [Main commands]:
     --help / --h - prints help, also works without any arguments
-    --d <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - search for duplicates files
-    --e <-i directories_to_search> [-e excluded_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - option to find and delete empty folders
-    --b <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"]
-    --y <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search and delete empty files
-    --t <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - search for temporary files
+    --d <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - finds duplicates files
+    --e <-i directories_to_search> [-e excluded_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - finds empty folders
+    --b <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"] - finds biggest files
+    --y <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - finds empty files
+    --t <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - finds temporary files
     --version / --v - prints program name and version
 
   [Options]:

@@ -24,7 +24,7 @@ fn main() {
 
         for i in all_arguments {
             if i == "--v" || i == "--version" {
-                println!("Czkawka CLI {}", CZKAWKA_VERSION);
+                println!("Czkawka GUI {}", CZKAWKA_VERSION);
                 process::exit(0);
             }
         }
@@ -39,7 +39,7 @@ fn main() {
     //// Windows
     let main_window: gtk::Window = builder.get_object("main_window").unwrap();
     main_window.show_all();
-    main_window.set_title("Czkawka GTK GUI");
+    main_window.set_title("Czkawka");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //// States
