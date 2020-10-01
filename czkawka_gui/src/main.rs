@@ -92,10 +92,10 @@ fn main() {
     let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
     let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();
     let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
-    // let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
-    // let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
-    // let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
-    // let buttons_popover_select_one_newest: gtk::Button = builder.get_object("buttons_popover_select_one_newest").unwrap();
+    let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
+    let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
+    let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
+    let buttons_popover_select_one_newest: gtk::Button = builder.get_object("buttons_popover_select_one_newest").unwrap();
 
     //// Popovers
     let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
@@ -149,7 +149,7 @@ fn main() {
         {
             // Duplicate Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::U64, glib::types::Type::String];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -387,7 +387,7 @@ fn main() {
                                     .unwrap();
                                 list_store.clear();
 
-                                let col_indices = [0, 1, 2, 3];
+                                let col_indices = [0, 1, 2, 3, 4];
 
                                 match check_method {
                                     CheckingMethod::Hash | CheckingMethod::HashMB => {
@@ -395,10 +395,11 @@ fn main() {
 
                                         for (size, vectors_vector) in btreemap.iter().rev() {
                                             for vector in vectors_vector {
-                                                let values: [&dyn ToValue; 4] = [
+                                                let values: [&dyn ToValue; 5] = [
                                                     &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                                     &("(".to_string() + ((vector.len() - 1) as u64 * *size as u64).to_string().as_str() + ")"),
                                                     &"Bytes lost".to_string(),
+                                                    &(0), // Not used
                                                     &(HEADER_ROW_COLOR.to_string()),
                                                 ];
                                                 list_store.set(&list_store.append(), &col_indices, &values);
@@ -406,10 +407,11 @@ fn main() {
                                                     let path = &entry.path;
                                                     let index = path.rfind('/').unwrap();
 
-                                                    let values: [&dyn ToValue; 4] = [
+                                                    let values: [&dyn ToValue; 5] = [
                                                         &(path[index + 1..].to_string()),
                                                         &(path[..index].to_string()),
                                                         &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                        &(entry.modified_date),
                                                         &(MAIN_ROW_COLOR.to_string()),
                                                     ];
                                                     list_store.set(&list_store.append(), &col_indices, &values);
@@ -563,8 +565,8 @@ fn main() {
 
                         // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                         for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Path as i32).get::<String>().unwrap().unwrap();
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
 
                             if fs::remove_file(format!("{}/{}", path, name)).is_err() {
                                 messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str()
@@ -593,8 +595,8 @@ fn main() {
 
                         // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                         for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), Columns3Default::Path as i32).get::<String>().unwrap().unwrap();
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmpty::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmpty::Path as i32).get::<String>().unwrap().unwrap();
 
                             if fs::remove_dir(format!("{}/{}", path, name)).is_err() {
                                 messages += format!("Failed to folder {}/{} due lack of permissions, selected dir is not empty or doesn't exists.\n", path, name).as_str()
@@ -690,8 +692,8 @@ fn main() {
 
             // Reverse selection
             {
-                // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-                // let popover_select = popover_select.clone();
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let popover_select = popover_select.clone();
                 buttons_popover_reverse.connect_clicked(move |_| {
                     let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                     let selection = tree_view.get_selection();
@@ -727,57 +729,248 @@ fn main() {
                 });
             }
 
-            // // All except oldest
-            // {
-            //     // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-            //     // let popover_select = popover_select.clone();
-            //     buttons_popover_reverse.connect_clicked(move |_| {
-            //         let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-            //         let selection = tree_view.get_selection();
-            //
-            //         let (vector_tree_path, tree_model) = selection.get_selected_rows();
-            //
-            //         {
-            //             let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
-            //
-            //             let mut current_path_index = 0;
-            //             let mut tree_iter_selected: TreeIter;
-            //
-            //             let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), Columns3Default::Color as i32).get::<String>().unwrap().unwrap();
-            //
-            //             loop {
-            //                 let array_to_have: Vec<SystemTime> = Vec::new();
-            //                 let oldest_index : Option<int> = None;
-            //
-            //                 loop {
-            //                     if color == HEADER_ROW_COLOR {
-            //                         break;
-            //                     }
-            //
-            //
-            //
-            //                     if current_path_index >= vector_tree_path.len() {
-            //                         selection.select_iter(&tree_iter_all);
-            //                     } else {
-            //                         tree_iter_selected = tree_model.get_iter(vector_tree_path.get(current_path_index).unwrap()).unwrap();
-            //                         if tree_model.get_path(&tree_iter_all).unwrap() == tree_model.get_path(&tree_iter_selected).unwrap() {
-            //                             selection.unselect_iter(&tree_iter_selected);
-            //                             current_path_index += 1;
-            //                         } else {
-            //                             selection.select_iter(&tree_iter_all);
-            //                         }
-            //                     }
-            //                     if !tree_model.iter_next(&tree_iter_all) {
-            //                         break;
-            //                     }
-            //                 }
-            //                 if arry
-            //             }
-            //         }
-            //
-            //         popover_select.popdown();
-            //     });
-            // }
+            // All except oldest
+            {
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let popover_select = popover_select.clone();
+                buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+                    let tree_model = tree_view.get_model().unwrap();
+
+                    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+
+                    let mut end: bool = false;
+
+                    loop {
+                        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+                        let mut oldest_index: Option<usize> = None;
+                        let mut current_index: usize = 0;
+                        let mut oldest_modification_time: u64 = u64::max_value();
+
+                        loop {
+                            let color = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
+                            if color == HEADER_ROW_COLOR {
+                                if !tree_model.iter_next(&tree_iter_all) {
+                                    end = true;
+                                }
+                                break;
+                            }
+                            tree_iter_array.push(tree_iter_all.clone());
+                            let modification = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::ModificationAsSecs as i32).get::<u64>().unwrap().unwrap();
+                            if modification < oldest_modification_time {
+                                oldest_modification_time = modification;
+                                oldest_index = Some(current_index);
+                            }
+
+                            current_index += 1;
+
+                            if !tree_model.iter_next(&tree_iter_all) {
+                                end = true;
+                                break;
+                            }
+                        }
+                        if oldest_index == None {
+                            continue;
+                        }
+                        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                            if index != oldest_index.unwrap() {
+                                selection.select_iter(tree_iter);
+                            } else {
+                                selection.unselect_iter(tree_iter);
+                            }
+                        }
+
+                        if end {
+                            break;
+                        }
+                    }
+
+                    popover_select.popdown();
+                });
+            }
+
+            // All except newest
+            {
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let popover_select = popover_select.clone();
+                buttons_popover_select_all_except_newest.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+                    let tree_model = tree_view.get_model().unwrap();
+
+                    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+
+                    let mut end: bool = false;
+
+                    loop {
+                        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+                        let mut newest_index: Option<usize> = None;
+                        let mut current_index: usize = 0;
+                        let mut newest_modification_time: u64 = 0;
+
+                        loop {
+                            let color = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
+                            if color == HEADER_ROW_COLOR {
+                                if !tree_model.iter_next(&tree_iter_all) {
+                                    end = true;
+                                }
+                                break;
+                            }
+                            tree_iter_array.push(tree_iter_all.clone());
+                            let modification = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::ModificationAsSecs as i32).get::<u64>().unwrap().unwrap();
+                            if modification > newest_modification_time {
+                                newest_modification_time = modification;
+                                newest_index = Some(current_index);
+                            }
+
+                            current_index += 1;
+
+                            if !tree_model.iter_next(&tree_iter_all) {
+                                end = true;
+                                break;
+                            }
+                        }
+                        if newest_index == None {
+                            continue;
+                        }
+                        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                            if index != newest_index.unwrap() {
+                                selection.select_iter(tree_iter);
+                            } else {
+                                selection.unselect_iter(tree_iter);
+                            }
+                        }
+
+                        if end {
+                            break;
+                        }
+                    }
+
+                    popover_select.popdown();
+                });
+            }
+
+            // All one oldest
+            {
+                let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                let popover_select = popover_select.clone();
+                buttons_popover_select_one_oldest.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+                    let tree_model = tree_view.get_model().unwrap();
+
+                    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+
+                    let mut end: bool = false;
+
+                    loop {
+                        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+                        let mut oldest_index: Option<usize> = None;
+                        let mut current_index: usize = 0;
+                        let mut oldest_modification_time: u64 = u64::max_value();
+
+                        loop {
+                            let color = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
+                            if color == HEADER_ROW_COLOR {
+                                if !tree_model.iter_next(&tree_iter_all) {
+                                    end = true;
+                                }
+                                break;
+                            }
+                            tree_iter_array.push(tree_iter_all.clone());
+                            let modification = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::ModificationAsSecs as i32).get::<u64>().unwrap().unwrap();
+                            if modification < oldest_modification_time {
+                                oldest_modification_time = modification;
+                                oldest_index = Some(current_index);
+                            }
+
+                            current_index += 1;
+
+                            if !tree_model.iter_next(&tree_iter_all) {
+                                end = true;
+                                break;
+                            }
+                        }
+                        if oldest_index == None {
+                            continue;
+                        }
+                        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                            if index == oldest_index.unwrap() {
+                                selection.select_iter(tree_iter);
+                            } else {
+                                selection.unselect_iter(tree_iter);
+                            }
+                        }
+
+                        if end {
+                            break;
+                        }
+                    }
+
+                    popover_select.popdown();
+                });
+            }
+            // All one newest
+            {
+                // let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
+                // let popover_select = popover_select.clone();
+                buttons_popover_select_one_newest.connect_clicked(move |_| {
+                    let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let selection = tree_view.get_selection();
+                    let tree_model = tree_view.get_model().unwrap();
+
+                    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+
+                    let mut end: bool = false;
+
+                    loop {
+                        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+                        let mut newest_index: Option<usize> = None;
+                        let mut current_index: usize = 0;
+                        let mut newest_modification_time: u64 = 0;
+
+                        loop {
+                            let color = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
+                            if color == HEADER_ROW_COLOR {
+                                if !tree_model.iter_next(&tree_iter_all) {
+                                    end = true;
+                                }
+                                break;
+                            }
+                            tree_iter_array.push(tree_iter_all.clone());
+                            let modification = tree_model.get_value(&tree_iter_all, ColumnsDuplicates::ModificationAsSecs as i32).get::<u64>().unwrap().unwrap();
+                            if modification > newest_modification_time {
+                                newest_modification_time = modification;
+                                newest_index = Some(current_index);
+                            }
+
+                            current_index += 1;
+
+                            if !tree_model.iter_next(&tree_iter_all) {
+                                end = true;
+                                break;
+                            }
+                        }
+                        if newest_index == None {
+                            continue;
+                        }
+                        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                            if index == newest_index.unwrap() {
+                                selection.select_iter(tree_iter);
+                            } else {
+                                selection.unselect_iter(tree_iter);
+                            }
+                        }
+
+                        if end {
+                            break;
+                        }
+                    }
+
+                    popover_select.popdown();
+                });
+            }
         }
         // Upper Notepad
         {
