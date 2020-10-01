@@ -83,6 +83,9 @@ impl Temporary {
         self.debug_print();
     }
 
+    pub fn get_temporary_files(&self) -> &Vec<FileEntry> {
+        &self.temporary_files
+    }
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
@@ -189,7 +192,7 @@ impl Temporary {
                     let mut is_temporary_file: bool = false;
 
                     // Temporary files which needs to have dot in name(not sure if exists without dot)
-                    let temporary_with_dot = ["#", "thumbs.db", ".bak", "~"];
+                    let temporary_with_dot = ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download"];
 
                     if file_name_lowercase.contains('.') {
                         for temp in temporary_with_dot.iter() {

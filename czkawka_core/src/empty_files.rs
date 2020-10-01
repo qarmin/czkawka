@@ -86,6 +86,10 @@ impl EmptyFiles {
         self.debug_print();
     }
 
+    pub fn get_empty_files(&self) -> &Vec<FileEntry> {
+        &self.empty_files
+    }
+
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }

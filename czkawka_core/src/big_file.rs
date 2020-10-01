@@ -78,6 +78,10 @@ impl BigFile {
         self.debug_print();
     }
 
+    pub fn get_big_files(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
+        &self.big_files
+    }
+
     pub fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }

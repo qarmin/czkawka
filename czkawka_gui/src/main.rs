@@ -6,9 +6,12 @@ use humansize::{file_size_opts as options, FileSize};
 extern crate gtk;
 use crate::help_functions::*;
 use chrono::NaiveDateTime;
+use czkawka_core::big_file::BigFile;
 use czkawka_core::common_traits::SaveResults;
 use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::temporary::Temporary;
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
 use gtk::{Builder, SelectionMode, TreeIter, TreeView};
@@ -50,7 +53,7 @@ fn main() {
     shared_buttons.borrow_mut().clear();
 
     // Show by default only search button
-    for i in ["duplicate", "empty_folder"].iter() {
+    for i in ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file"].iter() {
         let mut temp_hashmap: HashMap<String, bool> = Default::default();
         for j in ["search", "stop", "resume", "pause", "select", "delete", "save"].iter() {
             if *j == "search" {
@@ -66,6 +69,9 @@ fn main() {
 
     let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
     let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
+    let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFiles::new()));
+    let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(Temporary::new()));
+    let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +79,7 @@ fn main() {
     let entry_duplicate_minimal_size: gtk::Entry = builder.get_object("entry_duplicate_minimal_size").unwrap();
     let entry_allowed_extensions: gtk::Entry = builder.get_object("entry_allowed_extensions").unwrap();
     let entry_excluded_items: gtk::Entry = builder.get_object("entry_excluded_items").unwrap();
+    let entry_big_files_number: gtk::Entry = builder.get_object("entry_big_files_number").unwrap();
 
     //// GUI Buttons
     let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
@@ -127,6 +134,9 @@ fn main() {
     // Main notebook
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
     let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_folder_finder").unwrap();
+    let scrolled_window_empty_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_files_finder").unwrap();
+    let scrolled_window_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_temporary_files_finder").unwrap();
+    let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
 
     // Upper notebook
     let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
@@ -171,7 +181,7 @@ fn main() {
             }
             // Empty Folders
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -182,6 +192,48 @@ fn main() {
 
                 scrolled_window_empty_folder_finder.add(&tree_view);
                 scrolled_window_empty_folder_finder.show_all();
+            }
+            // Empty Files
+            {
+                let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_empty_files(&mut tree_view);
+
+                scrolled_window_empty_files_finder.add(&tree_view);
+                scrolled_window_empty_files_finder.show_all();
+            }
+            // Temporary Files
+            {
+                let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_temporary_files(&mut tree_view);
+
+                scrolled_window_temporary_files_finder.add(&tree_view);
+                scrolled_window_temporary_files_finder.show_all();
+            }
+            // Big Files
+            {
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_big_files(&mut tree_view);
+
+                scrolled_window_big_files_finder.add(&tree_view);
+                scrolled_window_big_files_finder.show_all();
             }
         }
 
@@ -267,6 +319,9 @@ fn main() {
                     "scrolled_window_empty_folder_finder" => {
                         page = "empty_folder";
                     }
+                    "scrolled_window_empty_files_finder" => page = "empty_file",
+                    "scrolled_window_temporary_files_finder" => page = "temporary_file",
+                    "notebook_big_file_finder" => page = "big_file",
                     e => {
                         panic!("Not existent page {}", e);
                     }
@@ -316,6 +371,9 @@ fn main() {
         {
             assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
             assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_folder_finder".to_string()));
+            assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_files_finder".to_string()));
+            assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_temporary_files_finder".to_string()));
+            assert!(notebook_chooser_tool_children_names.contains(&"notebook_big_file_finder".to_string()));
             // Search button
             {
                 let buttons_delete = buttons_delete.clone();
@@ -326,11 +384,17 @@ fn main() {
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
                 let scrolled_window_empty_folder_finder = scrolled_window_empty_folder_finder.clone();
+                let scrolled_window_empty_files_finder = scrolled_window_empty_files_finder.clone();
+                let scrolled_window_temporary_files_finder = scrolled_window_temporary_files_finder.clone();
+                let scrolled_window_big_files_finder = scrolled_window_big_files_finder.clone();
                 let scrolled_window_included_directories = scrolled_window_included_directories.clone();
                 let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
                 let text_view_errors = text_view_errors.clone();
                 let shared_duplication_state = shared_duplication_state.clone();
                 let shared_empty_folders_state = shared_empty_folders_state.clone();
+                let shared_empty_files_state = shared_empty_files_state.clone();
+                let shared_temporary_files_state = shared_temporary_files_state.clone();
+                let shared_big_files_state = shared_big_files_state.clone();
                 let shared_buttons = shared_buttons.clone();
                 buttons_search.connect_clicked(move |_| {
                     match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
@@ -496,10 +560,9 @@ fn main() {
                         }
                         "scrolled_window_empty_folder_finder" => {
                             // Find empty folders
-                            // TODO Change to proper value
                             let mut ef = EmptyFolder::new();
 
-                            ef.set_included_directory("/home/rafal/Pulpit".to_string());
+                            ef.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
                             ef.set_delete_folder(false);
                             ef.find_empty_folders();
 
@@ -555,6 +618,204 @@ fn main() {
                                 }
                             }
                         }
+                        "scrolled_window_empty_files_finder" => {
+                            // Find empty files
+                            let mut vf = EmptyFiles::new();
+
+                            vf.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
+                            vf.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                            vf.set_recursive_search(check_button_recursive.get_active());
+                            vf.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
+                            vf.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
+                            vf.find_empty_files();
+
+                            let information = vf.get_information();
+                            let text_messages = vf.get_text_messages();
+
+                            let empty_files_number: usize = information.number_of_empty_files;
+
+                            entry_info.set_text(format!("Found {} empty files.", empty_files_number).as_str());
+
+                            // Create GUI
+                            {
+                                let list_store = scrolled_window_empty_files_finder
+                                    .get_children()
+                                    .get(0)
+                                    .unwrap()
+                                    .clone()
+                                    .downcast::<gtk::TreeView>()
+                                    .unwrap()
+                                    .get_model()
+                                    .unwrap()
+                                    .downcast::<gtk::ListStore>()
+                                    .unwrap();
+                                list_store.clear();
+
+                                let col_indices = [0, 1, 2];
+
+                                let vector = vf.get_empty_files();
+
+                                for file_entry in vector {
+                                    let name: String = file_entry.path.to_string();
+                                    let index = name.rfind('/').unwrap();
+                                    let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                                    list_store.set(&list_store.append(), &col_indices, &values);
+                                }
+                                print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                            }
+
+                            // Set state
+                            {
+                                *shared_empty_files_state.borrow_mut() = vf;
+
+                                if empty_files_number > 0 {
+                                    buttons_save.show();
+                                    buttons_delete.show();
+                                    *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = true;
+                                } else {
+                                    buttons_save.hide();
+                                    buttons_delete.hide();
+                                    *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = false;
+                                    *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = false;
+                                }
+                            }
+                        }
+                        "scrolled_window_temporary_files_finder" => {
+                            // Find temporary files
+                            let mut tf = Temporary::new();
+
+                            tf.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
+                            tf.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                            tf.set_recursive_search(check_button_recursive.get_active());
+                            tf.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
+                            tf.find_temporary_files();
+
+                            let information = tf.get_information();
+                            let text_messages = tf.get_text_messages();
+
+                            let temporary_files_number: usize = information.number_of_temporary_files;
+
+                            entry_info.set_text(format!("Found {} temporary files.", temporary_files_number).as_str());
+
+                            // Create GUI
+                            {
+                                let list_store = scrolled_window_temporary_files_finder
+                                    .get_children()
+                                    .get(0)
+                                    .unwrap()
+                                    .clone()
+                                    .downcast::<gtk::TreeView>()
+                                    .unwrap()
+                                    .get_model()
+                                    .unwrap()
+                                    .downcast::<gtk::ListStore>()
+                                    .unwrap();
+                                list_store.clear();
+
+                                let col_indices = [0, 1, 2];
+
+                                let vector = tf.get_temporary_files();
+
+                                for file_entry in vector {
+                                    let name: String = file_entry.path.to_string();
+                                    let index = name.rfind('/').unwrap();
+                                    let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                                    list_store.set(&list_store.append(), &col_indices, &values);
+                                }
+                                print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                            }
+
+                            // Set state
+                            {
+                                *shared_temporary_files_state.borrow_mut() = tf;
+
+                                if temporary_files_number > 0 {
+                                    buttons_save.show();
+                                    buttons_delete.show();
+                                    *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = true;
+                                } else {
+                                    buttons_save.hide();
+                                    buttons_delete.hide();
+                                    *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = false;
+                                    *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = false;
+                                }
+                            }
+                        }
+                        "notebook_big_file_finder" => {
+                            // Find temporary files
+                            let mut bf = BigFile::new();
+
+                            bf.set_included_directory(get_string_from_list_store(&scrolled_window_included_directories));
+                            bf.set_excluded_directory(get_string_from_list_store(&scrolled_window_excluded_directories));
+                            bf.set_recursive_search(check_button_recursive.get_active());
+                            bf.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
+                            bf.set_number_of_files_to_check(match entry_big_files_number.get_text().as_str().parse::<usize>() {
+                                Ok(t) => t,
+                                Err(_) => 50, // By default
+                            });
+                            bf.find_big_files();
+
+                            let information = bf.get_information();
+                            let text_messages = bf.get_text_messages();
+
+                            let biggest_files_number: usize = information.number_of_real_files;
+
+                            entry_info.set_text(format!("Found {} biggest files.", biggest_files_number).as_str());
+
+                            // Create GUI
+                            {
+                                let list_store = scrolled_window_big_files_finder
+                                    .get_children()
+                                    .get(0)
+                                    .unwrap()
+                                    .clone()
+                                    .downcast::<gtk::TreeView>()
+                                    .unwrap()
+                                    .get_model()
+                                    .unwrap()
+                                    .downcast::<gtk::ListStore>()
+                                    .unwrap();
+                                list_store.clear();
+
+                                let col_indices = [0, 1, 2, 3];
+
+                                let btreemap = bf.get_big_files();
+
+                                for (size, vector) in btreemap.iter().rev() {
+                                    for file_entry in vector {
+                                        let name: String = file_entry.path.to_string();
+                                        let index = name.rfind('/').unwrap();
+                                        let values: [&dyn ToValue; 4] = [
+                                            &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size)),
+                                            &(name[index + 1..].to_string()),
+                                            &(name[..index].to_string()),
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ];
+                                        list_store.set(&list_store.append(), &col_indices, &values);
+                                    }
+                                }
+                                print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                            }
+
+                            // Set state
+                            {
+                                *shared_big_files_state.borrow_mut() = bf;
+
+                                if biggest_files_number > 0 {
+                                    buttons_save.show();
+                                    buttons_delete.show();
+                                    *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = true;
+                                    *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = true;
+                                } else {
+                                    buttons_save.hide();
+                                    buttons_delete.hide();
+                                    *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = false;
+                                    *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = false;
+                                }
+                            }
+                        }
                         e => panic!("Not existent {}", e),
                     }
                 });
@@ -564,10 +825,7 @@ fn main() {
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
                 let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
-                let buttons_delete_clone = buttons_delete.clone();
-                let buttons_select = buttons_select.clone();
-                let shared_buttons = shared_buttons.clone();
-                buttons_delete_clone.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_duplicate_finder_label" => {
                         let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                         let selection = tree_view.get_selection();
@@ -584,21 +842,16 @@ fn main() {
                             let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
                             let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
 
-                            match fs::remove_dir(format!("{}/{}", path, name)) {
-                                Ok(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
-                                Err(_) => {
+                            match fs::remove_file(format!("{}/{}", path, name)) {
+                                Ok(_) => {
                                     list_store.remove(&list_store.get_iter(&tree_path).unwrap());
                                 }
+                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                             }
                         }
 
                         text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                         selection.unselect_all();
-
-                        buttons_delete.hide();
-                        buttons_select.hide();
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
                     }
                     "scrolled_window_empty_folder_finder" => {
                         let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -613,14 +866,95 @@ fn main() {
 
                         // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                         for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmpty::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmpty::Path as i32).get::<String>().unwrap().unwrap();
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
 
                             match fs::remove_dir(format!("{}/{}", path, name)) {
-                                Ok(_) => messages += format!("Failed to folder {}/{} due lack of permissions, selected dir is not empty or doesn't exists.\n", path, name).as_str(),
-                                Err(_) => {
+                                Ok(_) => {
                                     list_store.remove(&list_store.get_iter(&tree_path).unwrap());
                                 }
+                                Err(_) => messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str(),
+                            }
+                        }
+
+                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                        selection.unselect_all();
+                    }
+                    "scrolled_window_empty_files_finder" => {
+                        let tree_view = scrolled_window_empty_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let selection = tree_view.get_selection();
+
+                        let (selection_rows, tree_model) = selection.get_selected_rows();
+                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                        let mut messages: String = "".to_string();
+
+                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                        for tree_path in selection_rows.iter().rev() {
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                            match fs::remove_file(format!("{}/{}", path, name)) {
+                                Ok(_) => {
+                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                }
+                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                            }
+                        }
+
+                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                        selection.unselect_all();
+                    }
+                    "scrolled_window_temporary_files_finder" => {
+                        let tree_view = scrolled_window_temporary_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let selection = tree_view.get_selection();
+
+                        let (selection_rows, tree_model) = selection.get_selected_rows();
+                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                        let mut messages: String = "".to_string();
+
+                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                        for tree_path in selection_rows.iter().rev() {
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                            match fs::remove_file(format!("{}/{}", path, name)) {
+                                Ok(_) => {
+                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                }
+                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                            }
+                        }
+
+                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                        selection.unselect_all();
+                    }
+                    "notebook_big_file_finder" => {
+                        let tree_view = scrolled_window_big_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        let selection = tree_view.get_selection();
+
+                        let (selection_rows, tree_model) = selection.get_selected_rows();
+                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                        let mut messages: String = "".to_string();
+
+                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                        for tree_path in selection_rows.iter().rev() {
+                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
+                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                            match fs::remove_file(format!("{}/{}", path, name)) {
+                                Ok(_) => {
+                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                }
+                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                             }
                         }
 
@@ -643,6 +977,15 @@ fn main() {
                         popover_select.popup();
                     }
                     "scrolled_window_empty_folder_finder" => {
+                        // Do nothing
+                    }
+                    "scrolled_window_empty_files_finder" => {
+                        // Do nothing
+                    }
+                    "scrolled_window_temporary_files_finder" => {
+                        // Do nothing
+                    }
+                    "notebook_big_file_finder" => {
                         // Do nothing
                     }
                     e => panic!("Not existent {}", e),
@@ -676,6 +1019,45 @@ fn main() {
                         {
                             buttons_save.hide();
                             *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
+                        }
+                    }
+                    "scrolled_window_empty_files_finder" => {
+                        let file_name = "results_empty_files.txt";
+
+                        let mut df = shared_empty_files_state.borrow_mut();
+                        df.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = false;
+                        }
+                    }
+                    "scrolled_window_temporary_files_finder" => {
+                        let file_name = "results_temporary_files.txt";
+
+                        let mut df = shared_temporary_files_state.borrow_mut();
+                        df.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = false;
+                        }
+                    }
+                    "notebook_big_file_finder" => {
+                        let file_name = "results_big_files.txt";
+
+                        let mut df = shared_big_files_state.borrow_mut();
+                        df.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
                     e => panic!("Not existent {}", e),
