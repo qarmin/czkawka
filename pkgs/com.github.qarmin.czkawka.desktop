@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0.0
+Type=Application
+Terminal=false
+Exec=czkawka_gui
+Name=Czkawka
+Comment=Multi functional app to find duplicates, empty folders etc.
+Icon=drive-multidisk
