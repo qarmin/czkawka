@@ -73,6 +73,9 @@ fn main() {
     let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(Temporary::new()));
     let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
 
+    // State of confirmation dialogs
+    let shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<_>> = Rc::new(RefCell::new(true));
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //// GUI Entry
@@ -825,143 +828,178 @@ fn main() {
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
                 let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
                 let notebook_chooser_tool = notebook_chooser_tool.clone();
-                buttons_delete.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                    "notebook_duplicate_finder_label" => {
-                        let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                        let selection = tree_view.get_selection();
+                let main_window = main_window.clone();
 
-                        let (selection_rows, tree_model) = selection.get_selected_rows();
-                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+                buttons_delete.connect_clicked(move |_| {
+                    if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
+                        let confirmation_dialog_delete = gtk::Dialog::with_buttons(
+                            Option::from("Delete confirmation"),
+                            Option::from(&main_window),
+                            gtk::DialogFlags::MODAL,
+                            &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
+                        );
+                        let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
+                        let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask in future");
+                        check_button.set_active(true);
 
-                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
-
-                        let mut messages: String = "".to_string();
-
-                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                        for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
-
-                            match fs::remove_file(format!("{}/{}", path, name)) {
-                                Ok(_) => {
-                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
-                                }
-                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
-                            }
+                        for widgets in confirmation_dialog_delete.get_children() {
+                            // By default GtkBox is child of dialog, so we can easily add other things to it
+                            widgets.clone().downcast::<gtk::Box>().unwrap().add(&label);
+                            widgets.downcast::<gtk::Box>().unwrap().add(&check_button);
                         }
 
-                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                        selection.unselect_all();
-                    }
-                    "scrolled_window_empty_folder_finder" => {
-                        let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                        let selection = tree_view.get_selection();
+                        confirmation_dialog_delete.show_all();
 
-                        let (selection_rows, tree_model) = selection.get_selected_rows();
-                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
-
-                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
-
-                        let mut messages: String = "".to_string();
-
-                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                        for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
-
-                            match fs::remove_dir(format!("{}/{}", path, name)) {
-                                Ok(_) => {
-                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
-                                }
-                                Err(_) => messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str(),
+                        let response_type = confirmation_dialog_delete.run();
+                        if response_type == gtk::ResponseType::Ok {
+                            if !check_button.get_active() {
+                                *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() = false;
                             }
+                        } else {
+                            confirmation_dialog_delete.close();
+                            return;
                         }
-
-                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                        selection.unselect_all();
+                        confirmation_dialog_delete.close();
                     }
-                    "scrolled_window_empty_files_finder" => {
-                        let tree_view = scrolled_window_empty_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                        let selection = tree_view.get_selection();
 
-                        let (selection_rows, tree_model) = selection.get_selected_rows();
-                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+                    match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
+                        "notebook_duplicate_finder_label" => {
+                            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
 
-                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
-                        let mut messages: String = "".to_string();
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
-                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                        for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Path as i32).get::<String>().unwrap().unwrap();
+                            let mut messages: String = "".to_string();
 
-                            match fs::remove_file(format!("{}/{}", path, name)) {
-                                Ok(_) => {
-                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
+
+                                match fs::remove_file(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                    }
+                                    Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                                 }
-                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                             }
+
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
                         }
+                        "scrolled_window_empty_folder_finder" => {
+                            let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
 
-                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                        selection.unselect_all();
-                    }
-                    "scrolled_window_temporary_files_finder" => {
-                        let tree_view = scrolled_window_temporary_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                        let selection = tree_view.get_selection();
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
-                        let (selection_rows, tree_model) = selection.get_selected_rows();
-                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
-                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+                            let mut messages: String = "".to_string();
 
-                        let mut messages: String = "".to_string();
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
 
-                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                        for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Path as i32).get::<String>().unwrap().unwrap();
-
-                            match fs::remove_file(format!("{}/{}", path, name)) {
-                                Ok(_) => {
-                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                match fs::remove_dir(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                    }
+                                    Err(_) => messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str(),
                                 }
-                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                             }
+
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
                         }
+                        "scrolled_window_empty_files_finder" => {
+                            let tree_view = scrolled_window_empty_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
 
-                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                        selection.unselect_all();
-                    }
-                    "notebook_big_file_finder" => {
-                        let tree_view = scrolled_window_big_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                        let selection = tree_view.get_selection();
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
-                        let (selection_rows, tree_model) = selection.get_selected_rows();
-                        let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
-                        // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+                            let mut messages: String = "".to_string();
 
-                        let mut messages: String = "".to_string();
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Path as i32).get::<String>().unwrap().unwrap();
 
-                        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                        for tree_path in selection_rows.iter().rev() {
-                            let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
-                            let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
-
-                            match fs::remove_file(format!("{}/{}", path, name)) {
-                                Ok(_) => {
-                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                match fs::remove_file(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                    }
+                                    Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                                 }
-                                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                             }
-                        }
 
-                        text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
-                        selection.unselect_all();
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
+                        }
+                        "scrolled_window_temporary_files_finder" => {
+                            let tree_view = scrolled_window_temporary_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
+
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                            let mut messages: String = "".to_string();
+
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                                match fs::remove_file(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                    }
+                                    Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                                }
+                            }
+
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
+                        }
+                        "notebook_big_file_finder" => {
+                            let tree_view = scrolled_window_big_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
+
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                            let mut messages: String = "".to_string();
+
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                                match fs::remove_file(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                    }
+                                    Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                                }
+                            }
+
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
+                        }
+                        e => panic!("Not existent {}", e),
                     }
-                    e => panic!("Not existent {}", e),
                 });
             }
             // Select button
