@@ -30,10 +30,16 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Temporary Files - Allows finding temporary files
 
 ## Usage and requirements
-Rust 1.46 - probably lower also works fine  
+For normal use of the program, there should be no major requirements for the system, except that it must be Linux.
+
+Precompiled binaries are here - https://github.com/qarmin/czkawka/releases/
+
+Don't know why, but you must run this apps from terminal(double-click not working).
+## Compilation
+### Requirements
+Rust 1.46 - probably lower also works fine(1.40 is needed by GTK)  
 GTK 3.22 - for GTK backend
 
-Precompiled binaries are here(may not work in every Linux distro) - https://github.com/qarmin/czkawka/releases/
 
 For now only Linux(and maybe also macOS) is supported
 
@@ -42,6 +48,7 @@ For now only Linux(and maybe also macOS) is supported
 apt install -y libgtk-3-dev
 ```
 
+### Compilation source
 - Download source
 ```
 git clone https://github.com/qarmin/czkawka.git
