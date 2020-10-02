@@ -11,4 +11,4 @@ pub mod common_items;
 pub mod common_messages;
 pub mod common_traits;
 
-pub const CZKAWKA_VERSION: &str = "1.0.0";
+pub const CZKAWKA_VERSION: &str = env!("CARGO_PKG_VERSION");
