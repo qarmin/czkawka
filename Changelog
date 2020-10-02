@@ -1,4 +1,9 @@
-## Version 0.1.4 dev
+## Version 1.0.0 - 02.10.2020r
+- Added confirmation button to delete button
+- Updated Readme
+- Tested a lot app, so I think that it version 1.0.0 can be freely released
+
+## Version 0.1.4 - 01.10.2020r
 - Fixes -f default argument
 - Added save button to GUI
 - Cleaned a little code
@@ -10,6 +15,7 @@
 - Selective selecting of rows duplicate finder in GUI
 - Changed minimum version of GTK to 3.22
 - Added save system to GUI
+- Added Big, Temporary and Empty folders finder to GUI
 
 ## Version 0.1.3 - 27.09.2020r
 - Big code refactoring - now is a lot of easier create new modules and maintain old ones

@@ -298,14 +298,14 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "czkawka_core",
 ]
 
 [[package]]
 name = "czkawka_core"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "blake3",
  "humansize",
@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "chrono",
  "czkawka_core",
@@ -326,7 +326,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui_orbtk"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "czkawka_core",
  "orbtk",
@@ -2145,9 +2145,9 @@ dependencies = [
 
 [[package]]
 name = "weezl"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3d2f24b6c3aa92fb33279566dbebf1cbe66b03a73f09aa69cf8cf14d2f9feb9"
+checksum = "e0e26e7a4d998e3d7949c69444b8b4916bac810da0d3a82ae612c89e952782f4"
 
 [[package]]
 name = "winapi"

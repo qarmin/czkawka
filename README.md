@@ -109,7 +109,21 @@ Differences should be more visible when using slower processor or faster disk.
 | Non stripped binaries |   | X |
 | Redundant whitespace |  | X |
 | Project Activity | High | Very Low | 
+
+## Contributions
+Contributions to this repository are welcome.  
+
+You can help by creating:
+- Bug report - memory leaks, unexpected behavior, crashes
+- Feature proposals - proposal to change/add/delete some features
+- Pull Requests - implementing by yourself a new feature or fixing bugs, but also important is code quality. You should follow the style in other parts of the program, or change it if you create it better.
+
+
+Code should be clean and pretty formatted (Clippy and fmt are required in each PR).
+
+Code should also be easy to read so please use as much simplest language as possible without magic numbers and variables with strange names, and try to write unit tests/tests if possible.
  
+
 ## Name
 Czkawka is a Polish word which means hiccup.  
 I chose this name because I wanted to hear people speaking other languages pronounce it.
