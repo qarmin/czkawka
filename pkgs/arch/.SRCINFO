@@ -5,6 +5,7 @@ pkgbase = czkawka-git
 	url = https://github.com/qarmin/czkawka
 	arch = any
 	license = MIT
+	makedepends = git
 	makedepends = rust
 	makedepends = cargo
 	depends = gtk3>=3.22
