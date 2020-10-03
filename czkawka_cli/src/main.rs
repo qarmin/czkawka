@@ -78,7 +78,7 @@ fn main() {
             }
 
             if ArgumentsPair::has_command(&arguments, "-s") {
-                let min_size = match ArgumentsPair::get_argument(&arguments, "-s", false).parse::<u64>() {
+                let minimal_file_size = match ArgumentsPair::get_argument(&arguments, "-s", false).parse::<u64>() {
                     Ok(t) => {
                         if t == 0 {
                             println!("ERROR: Minimum file size must be at least 1 byte.");
@@ -92,7 +92,7 @@ fn main() {
                         process::exit(1);
                     }
                 };
-                df.set_min_file_size(min_size);
+                df.set_minimal_file_size(minimal_file_size);
             }
 
             if ArgumentsPair::has_command(&arguments, "-x") {
@@ -364,7 +364,7 @@ fn print_help() {
 
   [Main commands]:
     --help / --h - prints help, also works without any arguments
-    --d <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-s min_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - finds duplicates files
+    --d <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-s minimal_file_size = 1024] [-x allowed_extension = ""] [-l type_of_search = "hash"] [-o] [-f file_to_save = "results.txt"] [-delete = "aeo"] - finds duplicates files
     --e <-i directories_to_search> [-e excluded_directories = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - finds empty folders
     --b <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-p number_of_files = 50] [-x allowed_extension = ""] [-f file_to_save = "results.txt"] - finds biggest files
     --y <-i directories_to_search> [-e excluded_directories = ""] [-k excluded_items = ""] [-o] [-f file_to_save = "results.txt"] [-delete] - finds empty files
@@ -376,7 +376,7 @@ fn print_help() {
     -e excluded_directories  - list of directories which will be excluded from search(absolute path)
     -k excluded_items        - list of excluded items which contains * wildcard(may be slow, so use exclude_directories where possible)
     -o                       - this options prevents from recursive check of folders
-    -s min_size              - minimum size of checked files in bytes, assigning bigger value may speed up searching.
+    -s minimal_file_size              - minimum size of checked files in bytes, assigning bigger value may speed up searching.
     -p number_of_files       - number of showed the biggest files.
     -x allowed_extension     - list of checked files with provided extensions. There are also helpful macros which allow to easy use a typcal extensions like IMAGE("jpg,kra,gif,png,bmp,tiff,webp,hdr,svg"), TEXT, VIDEO or MUSIC.
     -l type_of_search        - allows to use fastest method which takes into account only size(SIZE), more accurate which takes into account hash of only first 1MB of file(HASHMB) or fully accurate(but the slowest solution) which check hash of all file(HASH).

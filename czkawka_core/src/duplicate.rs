@@ -92,7 +92,7 @@ pub struct DuplicateFinder {
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
     recursive_search: bool,
-    min_file_size: u64,
+    minimal_file_size: u64,
     check_method: CheckingMethod,
     delete_method: DeleteMethod,
 }
@@ -108,7 +108,7 @@ impl DuplicateFinder {
             allowed_extensions: Extensions::new(),
             check_method: CheckingMethod::None,
             delete_method: DeleteMethod::None,
-            min_file_size: 1024,
+            minimal_file_size: 1024,
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
         }
@@ -149,8 +149,11 @@ impl DuplicateFinder {
         self.delete_method = delete_method;
     }
 
-    pub fn set_min_file_size(&mut self, min_size: u64) {
-        self.min_file_size = min_size;
+    pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
+        self.minimal_file_size = match minimal_file_size {
+            0 => 1,
+            t => t,
+        };
     }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
@@ -266,7 +269,7 @@ impl DuplicateFinder {
                     }
 
                     // Checking files
-                    if metadata.len() >= self.min_file_size && have_valid_extension {
+                    if metadata.len() >= self.minimal_file_size && have_valid_extension {
                         let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
 
                         // Checking expressions
@@ -492,7 +495,7 @@ impl DebugPrint for DuplicateFinder {
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search.to_string());
-        println!("Minimum file size - {:?}", self.min_file_size);
+        println!("Minimum file size - {:?}", self.minimal_file_size);
         println!("Checking Method - {:?}", self.check_method);
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");

@@ -421,7 +421,7 @@ fn main() {
                                 df.set_recursive_search(check_button_recursive.get_active());
                                 df.set_excluded_items(entry_excluded_items.get_text().as_str().to_string());
                                 df.set_allowed_extensions(entry_allowed_extensions.get_text().as_str().to_string());
-                                df.set_min_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
+                                df.set_minimal_file_size(match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
                                     Ok(t) => t,
                                     Err(_) => 1024, // By default
                                 });
