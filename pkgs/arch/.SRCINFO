@@ -1,6 +1,6 @@
 pkgbase = czkawka-git
 	pkgdesc = Multi functional app to find duplicates, empty folders etc.
-	pkgver = 1.0.0.a0c99ab
+	pkgver = 1.0.0.8d263fd
 	pkgrel = 1
 	url = https://github.com/qarmin/czkawka
 	arch = any
@@ -8,11 +8,11 @@ pkgbase = czkawka-git
 	makedepends = rust
 	makedepends = cargo
 	depends = gtk3>=3.22
-	provides = czkawa
+	provides = czkawka
 	source = czkawka::git+https://github.com/qarmin/czkawka.git
 	source = com.github.qarmin.czkawka.desktop
 	md5sums = SKIP
-	md5sums = beae920d0eb80a8a32832f6f384a3992
+	md5sums = bbc480c6106a7bd7dc73c3cc49a76961
 
 pkgname = czkawka-git
 
