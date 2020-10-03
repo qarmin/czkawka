@@ -182,7 +182,13 @@ impl EmptyFolder {
                             parent_path: Option::from(current_folder.clone()),
                             is_empty: FolderEmptiness::Maybe,
                             modified_date: match metadata.modified() {
-                                Ok(t) => t.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs(),
+                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                    Ok(d) => d.as_secs(),
+                                    Err(_) => {
+                                        self.text_messages.warnings.push(format!("Folder {} seems to be modified before Unix Epoch.", current_folder));
+                                        0
+                                    }
+                                },
                                 Err(_) => {
                                     self.text_messages.warnings.push(format!("Failed to read modification date of folder {}", current_folder));
                                     continue;

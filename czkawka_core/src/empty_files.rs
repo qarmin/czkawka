@@ -232,7 +232,13 @@ impl EmptyFiles {
                         let fe: FileEntry = FileEntry {
                             path: current_file_name.clone(),
                             modified_date: match metadata.modified() {
-                                Ok(t) => t.duration_since(UNIX_EPOCH).expect("Invalid file date").as_secs(),
+                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                    Ok(d) => d.as_secs(),
+                                    Err(_) => {
+                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
+                                        0
+                                    }
+                                },
                                 Err(_) => {
                                     self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
                                     continue;

@@ -46,7 +46,7 @@ fn main() {
             df.set_included_directory(path_list_to_str(directories.directories));
             df.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
             df.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
-            df.set_min_file_size(min_size);
+            df.set_minimal_file_size(min_size);
             df.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             df.set_check_method(search_method);
             df.set_delete_method(delete_method);
