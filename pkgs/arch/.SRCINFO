@@ -1,7 +1,7 @@
 pkgbase = czkawka-git
 	pkgdesc = Multi functional app to find duplicates, empty folders etc.
 	pkgver = 1.0.0.8d263fd
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/qarmin/czkawka
 	arch = any
 	license = MIT
