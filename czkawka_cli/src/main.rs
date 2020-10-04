@@ -1,9 +1,12 @@
 mod commands;
 
 use commands::Commands;
+
+#[allow(unused_imports)] // It is used in release.
+use czkawka_core::common_traits::*;
+
 use czkawka_core::{
     big_file::BigFile,
-    common_traits::*,
     duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
