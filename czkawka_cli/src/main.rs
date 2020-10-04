@@ -2,7 +2,7 @@ mod commands;
 
 use commands::Commands;
 
-#[allow(unused_imports)] // It is used in release.
+#[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 
 use czkawka_core::{
@@ -12,7 +12,7 @@ use czkawka_core::{
     empty_folder::EmptyFolder,
     temporary::{self, Temporary},
 };
-use std::path::PathBuf;
+use std::{path::PathBuf, process};
 use structopt::StructOpt;
 
 fn path_list_to_str(path_list: Vec<PathBuf>) -> String {
@@ -35,6 +35,7 @@ fn main() {
             allowed_extensions,
             search_method,
             delete_method,
+            file_to_save,
             not_recursive,
         } => {
             let mut df = DuplicateFinder::new();
@@ -50,17 +51,31 @@ fn main() {
 
             df.find_duplicates();
 
+            if let Some(file_name) = file_to_save.file_name() {
+                if !df.save_results_to_file(file_name) {
+                    df.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             df.print_results();
             df.get_text_messages().print_messages();
         }
-        Commands::EmptyFolders { directories, delete_folders } => {
+        Commands::EmptyFolders { directories, delete_folders, file_to_save } => {
             let mut ef = EmptyFolder::new();
 
             ef.set_included_directory(path_list_to_str(directories.directories));
             ef.set_delete_folder(delete_folders);
 
             ef.find_empty_folders();
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !ef.save_results_to_file(file_name) {
+                    ef.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
 
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             ef.print_results();
@@ -72,6 +87,7 @@ fn main() {
             excluded_items,
             allowed_extensions,
             number_of_files,
+            file_to_save,
             not_recursive,
         } => {
             let mut bf = BigFile::new();
@@ -85,6 +101,13 @@ fn main() {
 
             bf.find_big_files();
 
+            if let Some(file_name) = file_to_save.file_name() {
+                if !bf.save_results_to_file(file_name) {
+                    bf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             bf.print_results();
             bf.get_text_messages().print_messages();
@@ -95,6 +118,7 @@ fn main() {
             excluded_items,
             allowed_extensions,
             delete_files,
+            file_to_save,
             not_recursive,
         } => {
             let mut ef = EmptyFiles::new();
@@ -111,6 +135,13 @@ fn main() {
 
             ef.find_empty_files();
 
+            if let Some(file_name) = file_to_save.file_name() {
+                if !ef.save_results_to_file(file_name) {
+                    ef.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             ef.print_results();
             ef.get_text_messages().print_messages();
@@ -120,6 +151,7 @@ fn main() {
             excluded_directories,
             excluded_items,
             delete_files,
+            file_to_save,
             not_recursive,
         } => {
             let mut tf = Temporary::new();
@@ -134,6 +166,13 @@ fn main() {
             }
 
             tf.find_temporary_files();
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !tf.save_results_to_file(file_name) {
+                    tf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
 
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             tf.print_results();

@@ -1,11 +1,10 @@
 use czkawka_core::duplicate::{CheckingMethod, DeleteMethod};
 use std::path::PathBuf;
 use structopt::StructOpt;
-
 #[derive(Debug, StructOpt)]
-#[structopt(name = "czkawka")]
+#[structopt(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
 pub enum Commands {
-    #[structopt(name = "dup", about = "Finds duplicate files")]
+    #[structopt(name = "dup", about = "Finds duplicate files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hashmb -f results.txt -D aeo")]
     Duplicates {
         #[structopt(flatten)]
         directories: Directories,
@@ -22,16 +21,20 @@ pub enum Commands {
         #[structopt(short = "D", long, default_value = "AEO", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest")]
         delete_method: DeleteMethod,
         #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
-    #[structopt(name = "empty-folders", about = "Finds emtpty folders")]
+    #[structopt(name = "empty-folders", about = "Finds emtpty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
     EmptyFolders {
         #[structopt(flatten)]
         directories: Directories,
         #[structopt(short = "D", long, help = "Delete found folders")]
         delete_folders: bool,
+        #[structopt(flatten)]
+        file_to_save: FileToSave,
     },
-    #[structopt(name = "big", about = "Finds big files")]
+    #[structopt(name = "big", about = "Finds big files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt")]
     BiggestFiles {
         #[structopt(flatten)]
         directories: Directories,
@@ -44,9 +47,11 @@ pub enum Commands {
         #[structopt(short, long, default_value = "50", help = "Number of files to be shown")]
         number_of_files: usize,
         #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
-    #[structopt(name = "empty-files", about = "Finds emtpy files")]
+    #[structopt(name = "empty-files", about = "Finds emtpy files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt")]
     EmptyFiles {
         #[structopt(flatten)]
         directories: Directories,
@@ -59,9 +64,11 @@ pub enum Commands {
         #[structopt(short = "D", long, help = "Delete found files")]
         delete_files: bool,
         #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
-    #[structopt(name = "temp", about = "Finds temporary files")]
+    #[structopt(name = "temp", about = "Finds temporary files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D")]
     Temporary {
         #[structopt(flatten)]
         directories: Directories,
@@ -72,13 +79,15 @@ pub enum Commands {
         #[structopt(short = "D", long, help = "Delete found files")]
         delete_files: bool,
         #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
 }
 
 #[derive(Debug, StructOpt)]
 pub struct Directories {
-    #[structopt(short, long, parse(from_os_str), required(true), help = "Directorie(s) to search", long_help = "List of directorie(s) which will be searched(absolute path)")]
+    #[structopt(short, long, parse(from_os_str), required = true, help = "Directorie(s) to search", long_help = "List of directorie(s) which will be searched(absolute path)")]
     pub directories: Vec<PathBuf>,
 }
 
@@ -109,6 +118,22 @@ pub struct AllowedExtensions {
 pub struct NotRecursive {
     #[structopt(short = "R", long, help = "Prevents from recursive check of folders")]
     pub not_recursive: bool,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct FileToSave {
+    #[structopt(short, long, value_name = "file-name", help = "Saves the results into the file")]
+    pub file_to_save: Option<PathBuf>,
+}
+
+impl FileToSave {
+    pub fn file_name(&self) -> Option<&str> {
+        if let Some(file_name) = &self.file_to_save {
+            return file_name.to_str();
+        }
+
+        None
+    }
 }
 
 fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
@@ -142,3 +167,26 @@ fn parse_min_size(src: &str) -> Result<u64, String> {
         Err(e) => Err(e.to_string()),
     }
 }
+
+static HELP_MESSAGE: &str = "Prints help information (--help will give more information)";
+
+const HELP_TEMPLATE: &str = r#"
+{bin} {version}
+
+USAGE:
+    {usage} [SCFLAGS] [SCOPTIONS]
+
+FLAGS:
+{flags}
+
+SUBCOMMANDS:
+{subcommands}
+
+    use {usage} -h to get more info about a specific tool
+
+EXAMPLES:
+    {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hashmb -f results.txt -D aeo
+    {bin} empty-folders -d /home/rafal/rr /home/gateway -f results.txt
+    {bin} big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt
+    {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
+    {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D"#;
