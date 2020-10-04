@@ -21,14 +21,18 @@ use std::rc::Rc;
 use std::{env, fs, process};
 
 fn main() {
+    let mut exit_program_after_initialization: bool = false;
     // Printing version
     {
         let all_arguments: Vec<String> = env::args().skip(1).collect(); // Not need to check program name
 
         for i in all_arguments {
-            if i == "--v" || i == "--version" {
+            if i == "-v" || i == "--version" {
                 println!("Czkawka GUI {}", CZKAWKA_VERSION);
                 process::exit(0);
+            }
+            if i == "-q" || i == "--quit" {
+                exit_program_after_initialization = true;
             }
         }
     }
@@ -40,12 +44,15 @@ fn main() {
     let builder = Builder::from_string(glade_src);
 
     //// Windows
-    let main_window: gtk::Window = builder.get_object("main_window").unwrap();
-    main_window.show_all();
-    main_window.set_title("Czkawka");
+    let window_main: gtk::Window = builder.get_object("window_main").unwrap();
+    window_main.show_all();
+    window_main.set_title("Czkawka");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //// States
+    let main_notebooks_labels = ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file"];
+    let upper_notebooks_labels = [/*"general",*/ "included_directories", "excluded_directories", "excluded_items", "allowed_extensions"];
+    let buttons_labels = ["search", "stop", "resume", "pause", "select", "delete", "save"];
 
     // Buttons State - to remember existence of different buttons on pages
 
@@ -53,9 +60,9 @@ fn main() {
     shared_buttons.borrow_mut().clear();
 
     // Show by default only search button
-    for i in ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file"].iter() {
+    for i in main_notebooks_labels.iter() {
         let mut temp_hashmap: HashMap<String, bool> = Default::default();
-        for j in ["search", "stop", "resume", "pause", "select", "delete", "save"].iter() {
+        for j in buttons_labels.iter() {
             if *j == "search" {
                 temp_hashmap.insert(j.to_string(), true);
             } else {
@@ -65,7 +72,21 @@ fn main() {
         shared_buttons.borrow_mut().insert(i.to_string(), temp_hashmap);
     }
 
-    // State of search results - probably are not necessary due
+    // Upper Notebook state
+    let shared_upper_notebooks: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<String, HashMap<String, bool>>::new()));
+
+    for i in main_notebooks_labels.iter() {
+        let mut temp_hashmap: HashMap<String, bool> = Default::default();
+        for j in upper_notebooks_labels.iter() {
+            temp_hashmap.insert(j.to_string(), true);
+        }
+        shared_upper_notebooks.borrow_mut().insert(i.to_string(), temp_hashmap);
+    }
+    // Some upper notebook tabs are disabled
+    *shared_upper_notebooks.borrow_mut().get_mut("empty_file").unwrap().get_mut("allowed_extensions").unwrap() = false;
+    *shared_upper_notebooks.borrow_mut().get_mut("temporary_file").unwrap().get_mut("allowed_extensions").unwrap() = false;
+
+    // State of search results
 
     let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
     let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
@@ -119,11 +140,17 @@ fn main() {
     let radio_button_hash: gtk::RadioButton = builder.get_object("radio_button_hash").unwrap();
 
     //// Notebooks
-    let notebook_chooser_tool: gtk::Notebook = builder.get_object("notebook_chooser_tool").unwrap();
-    let mut notebook_chooser_tool_children_names: Vec<String> = Vec::new();
+    let notebook_main: gtk::Notebook = builder.get_object("notebook_main").unwrap();
+    let notebook_upper: gtk::Notebook = builder.get_object("notebook_upper").unwrap();
 
-    for i in notebook_chooser_tool.get_children() {
-        notebook_chooser_tool_children_names.push(i.get_buildable_name().unwrap().to_string());
+    let mut notebook_main_children_names: Vec<String> = Vec::new();
+    let mut notebook_upper_children_names: Vec<String> = Vec::new();
+
+    for i in notebook_main.get_children() {
+        notebook_main_children_names.push(i.get_buildable_name().unwrap().to_string());
+    }
+    for i in notebook_upper.get_children() {
+        notebook_upper_children_names.push(i.get_buildable_name().unwrap().to_string());
     }
 
     //// Entry
@@ -136,16 +163,16 @@ fn main() {
 
     // Main notebook
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
-    let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_folder_finder").unwrap();
-    let scrolled_window_empty_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_files_finder").unwrap();
-    let scrolled_window_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_temporary_files_finder").unwrap();
+    let scrolled_window_main_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_empty_folder_finder").unwrap();
+    let scrolled_window_main_empty_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_empty_files_finder").unwrap();
+    let scrolled_window_main_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_temporary_files_finder").unwrap();
     let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
 
     // Upper notebook
     let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
     let scrolled_window_excluded_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_excluded_directories").unwrap();
 
-    //// Set starting information in bottom panel
+    //// Setup default look for
     {
         entry_info.set_text("Duplicated Files");
 
@@ -158,7 +185,7 @@ fn main() {
         buttons_pause.hide();
         buttons_select.hide();
 
-        // Set Main ScrolledWindow Treeviews
+        // Set Main Scrolled Window Treeviews
         {
             // Duplicate Files
             {
@@ -193,8 +220,8 @@ fn main() {
 
                 create_tree_view_empty_folders(&mut tree_view);
 
-                scrolled_window_empty_folder_finder.add(&tree_view);
-                scrolled_window_empty_folder_finder.show_all();
+                scrolled_window_main_empty_folder_finder.add(&tree_view);
+                scrolled_window_main_empty_folder_finder.show_all();
             }
             // Empty Files
             {
@@ -207,8 +234,8 @@ fn main() {
 
                 create_tree_view_empty_files(&mut tree_view);
 
-                scrolled_window_empty_files_finder.add(&tree_view);
-                scrolled_window_empty_files_finder.show_all();
+                scrolled_window_main_empty_files_finder.add(&tree_view);
+                scrolled_window_main_empty_files_finder.show_all();
             }
             // Temporary Files
             {
@@ -221,8 +248,8 @@ fn main() {
 
                 create_tree_view_temporary_files(&mut tree_view);
 
-                scrolled_window_temporary_files_finder.add(&tree_view);
-                scrolled_window_temporary_files_finder.show_all();
+                scrolled_window_main_temporary_files_finder.add(&tree_view);
+                scrolled_window_main_temporary_files_finder.show_all();
             }
             // Big Files
             {
@@ -296,74 +323,88 @@ fn main() {
         {
             let shared_buttons = shared_buttons.clone();
 
-            #[allow(clippy::redundant_clone)]
             let buttons_search = buttons_search.clone();
-            #[allow(clippy::redundant_clone)]
-            let buttons_stop = buttons_stop.clone();
-            #[allow(clippy::redundant_clone)]
-            let buttons_resume = buttons_resume.clone();
-            #[allow(clippy::redundant_clone)]
-            let buttons_pause = buttons_pause.clone();
-            #[allow(clippy::redundant_clone)]
             let buttons_select = buttons_select.clone();
-            #[allow(clippy::redundant_clone)]
             let buttons_delete = buttons_delete.clone();
-            #[allow(clippy::redundant_clone)]
             let buttons_save = buttons_save.clone();
 
-            let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
+            let notebook_main_children_names = notebook_main_children_names.clone();
 
-            notebook_chooser_tool.connect_switch_page(move |_, _, number| {
+            let notebook_main_clone = notebook_main.clone();
+
+            notebook_main_clone.connect_switch_page(move |_, _, number| {
                 let page: &str;
-                match notebook_chooser_tool_children_names.get(number as usize).unwrap().as_str() {
-                    "notebook_duplicate_finder_label" => {
+                match notebook_main_children_names.get(number as usize).unwrap().as_str() {
+                    "notebook_main_duplicate_finder_label" => {
                         page = "duplicate";
                     }
-                    "scrolled_window_empty_folder_finder" => {
+                    "scrolled_window_main_empty_folder_finder" => {
                         page = "empty_folder";
                     }
-                    "scrolled_window_empty_files_finder" => page = "empty_file",
-                    "scrolled_window_temporary_files_finder" => page = "temporary_file",
-                    "notebook_big_file_finder" => page = "big_file",
+                    "scrolled_window_main_empty_files_finder" => page = "empty_file",
+                    "scrolled_window_main_temporary_files_finder" => page = "temporary_file",
+                    "notebook_big_main_file_finder" => page = "big_file",
                     e => {
                         panic!("Not existent page {}", e);
                     }
                 };
+                // Buttons
+                {
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("search").unwrap() {
+                        buttons_search.show();
+                    } else {
+                        buttons_search.hide();
+                    }
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("stop").unwrap() {
+                        buttons_stop.show();
+                    } else {
+                        buttons_stop.hide();
+                    }
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("resume").unwrap() {
+                        buttons_resume.show();
+                    } else {
+                        buttons_resume.hide();
+                    }
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("pause").unwrap() {
+                        buttons_pause.show();
+                    } else {
+                        buttons_pause.hide();
+                    }
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("select").unwrap() {
+                        buttons_select.show();
+                    } else {
+                        buttons_select.hide();
+                    }
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("delete").unwrap() {
+                        buttons_delete.show();
+                    } else {
+                        buttons_delete.hide();
+                    }
+                    if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("save").unwrap() {
+                        buttons_save.show();
+                    } else {
+                        buttons_save.hide();
+                    }
+                }
+                // Upper notebook
+                {
+                    //let upper_notebooks_labels = [/*"general",*/"included_directories","excluded_directories","excluded_items","allowed_extensions"];
+                    let mut hashmap: HashMap<&str, &str> = Default::default();
+                    //hashmap.insert("notebook_upper_general","general");
+                    hashmap.insert("notebook_upper_included_directories", "included_directories");
+                    hashmap.insert("notebook_upper_excluded_directories", "excluded_directories");
+                    hashmap.insert("notebook_upper_excluded_items", "excluded_items");
+                    hashmap.insert("notebook_upper_allowed_extensions", "allowed_extensions");
 
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("search").unwrap() {
-                    buttons_search.show();
-                } else {
-                    buttons_search.hide();
-                }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("stop").unwrap() {
-                    buttons_stop.show();
-                } else {
-                    buttons_stop.hide();
-                }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("resume").unwrap() {
-                    buttons_resume.show();
-                } else {
-                    buttons_resume.hide();
-                }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("pause").unwrap() {
-                    buttons_pause.show();
-                } else {
-                    buttons_pause.hide();
-                }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("select").unwrap() {
-                    buttons_select.show();
-                } else {
-                    buttons_select.hide();
-                }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("delete").unwrap() {
-                    buttons_delete.show();
-                } else {
-                    buttons_delete.hide();
-                }
-                if *shared_buttons.borrow_mut().get_mut(page).unwrap().get_mut("save").unwrap() {
-                    buttons_save.show();
-                } else {
-                    buttons_save.hide();
+                    for tab in &notebook_upper_children_names {
+                        let name = hashmap.get(tab.as_str()).unwrap().to_string();
+                        let index = upper_notebooks_labels.iter().position(|&x| x == name).unwrap();
+                        if *shared_upper_notebooks.borrow_mut().get_mut(page).unwrap().get_mut(&name).unwrap() {
+                            notebook_upper.get_children().get(index).unwrap().show();
+                        } else {
+                            notebook_upper.get_children().get(index).unwrap().hide();
+                        }
+                    }
                 }
             });
         }
@@ -372,23 +413,23 @@ fn main() {
 
         // Down notepad
         {
-            assert!(notebook_chooser_tool_children_names.contains(&"notebook_duplicate_finder_label".to_string()));
-            assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_folder_finder".to_string()));
-            assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_empty_files_finder".to_string()));
-            assert!(notebook_chooser_tool_children_names.contains(&"scrolled_window_temporary_files_finder".to_string()));
-            assert!(notebook_chooser_tool_children_names.contains(&"notebook_big_file_finder".to_string()));
+            assert!(notebook_main_children_names.contains(&"notebook_main_duplicate_finder_label".to_string()));
+            assert!(notebook_main_children_names.contains(&"scrolled_window_main_empty_folder_finder".to_string()));
+            assert!(notebook_main_children_names.contains(&"scrolled_window_main_empty_files_finder".to_string()));
+            assert!(notebook_main_children_names.contains(&"scrolled_window_main_temporary_files_finder".to_string()));
+            assert!(notebook_main_children_names.contains(&"notebook_big_main_file_finder".to_string()));
             // Search button
             {
                 let buttons_delete = buttons_delete.clone();
                 let buttons_save = buttons_save.clone();
                 let buttons_select = buttons_select.clone();
                 let entry_info = entry_info.clone();
-                let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
-                let notebook_chooser_tool = notebook_chooser_tool.clone();
+                let notebook_main_children_names = notebook_main_children_names.clone();
+                let notebook_main = notebook_main.clone();
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-                let scrolled_window_empty_folder_finder = scrolled_window_empty_folder_finder.clone();
-                let scrolled_window_empty_files_finder = scrolled_window_empty_files_finder.clone();
-                let scrolled_window_temporary_files_finder = scrolled_window_temporary_files_finder.clone();
+                let scrolled_window_main_empty_folder_finder = scrolled_window_main_empty_folder_finder.clone();
+                let scrolled_window_main_empty_files_finder = scrolled_window_main_empty_files_finder.clone();
+                let scrolled_window_main_temporary_files_finder = scrolled_window_main_temporary_files_finder.clone();
                 let scrolled_window_big_files_finder = scrolled_window_big_files_finder.clone();
                 let scrolled_window_included_directories = scrolled_window_included_directories.clone();
                 let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
@@ -400,8 +441,8 @@ fn main() {
                 let shared_big_files_state = shared_big_files_state.clone();
                 let shared_buttons = shared_buttons.clone();
                 buttons_search.connect_clicked(move |_| {
-                    match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                        "notebook_duplicate_finder_label" => {
+                    match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+                        "notebook_main_duplicate_finder_label" => {
                             // Find duplicates
 
                             let mut df = DuplicateFinder::new();
@@ -561,7 +602,7 @@ fn main() {
                                 }
                             }
                         }
-                        "scrolled_window_empty_folder_finder" => {
+                        "scrolled_window_main_empty_folder_finder" => {
                             // Find empty folders
                             let mut ef = EmptyFolder::new();
 
@@ -578,7 +619,7 @@ fn main() {
 
                             // Create GUI
                             {
-                                let list_store = scrolled_window_empty_folder_finder
+                                let list_store = scrolled_window_main_empty_folder_finder
                                     .get_children()
                                     .get(0)
                                     .unwrap()
@@ -621,7 +662,7 @@ fn main() {
                                 }
                             }
                         }
-                        "scrolled_window_empty_files_finder" => {
+                        "scrolled_window_main_empty_files_finder" => {
                             // Find empty files
                             let mut vf = EmptyFiles::new();
 
@@ -641,7 +682,7 @@ fn main() {
 
                             // Create GUI
                             {
-                                let list_store = scrolled_window_empty_files_finder
+                                let list_store = scrolled_window_main_empty_files_finder
                                     .get_children()
                                     .get(0)
                                     .unwrap()
@@ -684,7 +725,7 @@ fn main() {
                                 }
                             }
                         }
-                        "scrolled_window_temporary_files_finder" => {
+                        "scrolled_window_main_temporary_files_finder" => {
                             // Find temporary files
                             let mut tf = Temporary::new();
 
@@ -703,7 +744,7 @@ fn main() {
 
                             // Create GUI
                             {
-                                let list_store = scrolled_window_temporary_files_finder
+                                let list_store = scrolled_window_main_temporary_files_finder
                                     .get_children()
                                     .get(0)
                                     .unwrap()
@@ -746,7 +787,7 @@ fn main() {
                                 }
                             }
                         }
-                        "notebook_big_file_finder" => {
+                        "notebook_big_main_file_finder" => {
                             // Find temporary files
                             let mut bf = BigFile::new();
 
@@ -826,15 +867,15 @@ fn main() {
             // Delete button
             {
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-                let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
-                let notebook_chooser_tool = notebook_chooser_tool.clone();
-                let main_window = main_window.clone();
+                let notebook_main_children_names = notebook_main_children_names.clone();
+                let notebook_main = notebook_main.clone();
+                let window_main = window_main.clone();
 
                 buttons_delete.connect_clicked(move |_| {
                     if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
                         let confirmation_dialog_delete = gtk::Dialog::with_buttons(
                             Option::from("Delete confirmation"),
-                            Option::from(&main_window),
+                            Option::from(&window_main),
                             gtk::DialogFlags::MODAL,
                             &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
                         );
@@ -862,8 +903,8 @@ fn main() {
                         confirmation_dialog_delete.close();
                     }
 
-                    match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                        "notebook_duplicate_finder_label" => {
+                    match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+                        "notebook_main_duplicate_finder_label" => {
                             let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                             let selection = tree_view.get_selection();
 
@@ -890,8 +931,8 @@ fn main() {
                             text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                             selection.unselect_all();
                         }
-                        "scrolled_window_empty_folder_finder" => {
-                            let tree_view = scrolled_window_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        "scrolled_window_main_empty_folder_finder" => {
+                            let tree_view = scrolled_window_main_empty_folder_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
@@ -917,8 +958,8 @@ fn main() {
                             text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                             selection.unselect_all();
                         }
-                        "scrolled_window_empty_files_finder" => {
-                            let tree_view = scrolled_window_empty_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        "scrolled_window_main_empty_files_finder" => {
+                            let tree_view = scrolled_window_main_empty_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
@@ -944,8 +985,8 @@ fn main() {
                             text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                             selection.unselect_all();
                         }
-                        "scrolled_window_temporary_files_finder" => {
-                            let tree_view = scrolled_window_temporary_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                        "scrolled_window_main_temporary_files_finder" => {
+                            let tree_view = scrolled_window_main_temporary_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
@@ -971,7 +1012,7 @@ fn main() {
                             text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                             selection.unselect_all();
                         }
-                        "notebook_big_file_finder" => {
+                        "notebook_big_main_file_finder" => {
                             let tree_view = scrolled_window_big_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                             let selection = tree_view.get_selection();
 
@@ -1004,26 +1045,26 @@ fn main() {
             }
             // Select button
             {
-                let notebook_chooser_tool_children_names = notebook_chooser_tool_children_names.clone();
-                let notebook_chooser_tool = notebook_chooser_tool.clone();
+                let notebook_main_children_names = notebook_main_children_names.clone();
+                let notebook_main = notebook_main.clone();
                 let buttons_select_clone = buttons_select.clone();
                 let popover_select = popover_select.clone();
-                buttons_select_clone.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                    "notebook_duplicate_finder_label" => {
+                buttons_select_clone.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+                    "notebook_main_duplicate_finder_label" => {
                         // Only popup popup
                         popover_select.set_relative_to(Some(&buttons_select));
                         popover_select.popup();
                     }
-                    "scrolled_window_empty_folder_finder" => {
+                    "scrolled_window_main_empty_folder_finder" => {
                         // Do nothing
                     }
-                    "scrolled_window_empty_files_finder" => {
+                    "scrolled_window_main_empty_files_finder" => {
                         // Do nothing
                     }
-                    "scrolled_window_temporary_files_finder" => {
+                    "scrolled_window_main_temporary_files_finder" => {
                         // Do nothing
                     }
-                    "notebook_big_file_finder" => {
+                    "notebook_big_main_file_finder" => {
                         // Do nothing
                     }
                     e => panic!("Not existent {}", e),
@@ -1032,8 +1073,8 @@ fn main() {
             // Save button
             {
                 let buttons_save_clone = buttons_save.clone();
-                buttons_save_clone.connect_clicked(move |_| match notebook_chooser_tool_children_names.get(notebook_chooser_tool.get_current_page().unwrap() as usize).unwrap().as_str() {
-                    "notebook_duplicate_finder_label" => {
+                buttons_save_clone.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+                    "notebook_main_duplicate_finder_label" => {
                         let file_name = "results_duplicates.txt";
 
                         let mut df = shared_duplication_state.borrow_mut();
@@ -1046,7 +1087,7 @@ fn main() {
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
-                    "scrolled_window_empty_folder_finder" => {
+                    "scrolled_window_main_empty_folder_finder" => {
                         let file_name = "results_empty_folder.txt";
 
                         let mut ef = shared_empty_folders_state.borrow_mut();
@@ -1059,7 +1100,7 @@ fn main() {
                             *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
-                    "scrolled_window_empty_files_finder" => {
+                    "scrolled_window_main_empty_files_finder" => {
                         let file_name = "results_empty_files.txt";
 
                         let mut df = shared_empty_files_state.borrow_mut();
@@ -1072,7 +1113,7 @@ fn main() {
                             *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
-                    "scrolled_window_temporary_files_finder" => {
+                    "scrolled_window_main_temporary_files_finder" => {
                         let file_name = "results_temporary_files.txt";
 
                         let mut df = shared_temporary_files_state.borrow_mut();
@@ -1085,7 +1126,7 @@ fn main() {
                             *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
-                    "notebook_big_file_finder" => {
+                    "notebook_big_main_file_finder" => {
                         let file_name = "results_big_files.txt";
 
                         let mut df = shared_big_files_state.borrow_mut();
@@ -1417,11 +1458,11 @@ fn main() {
             // Add included directory
             {
                 let scrolled_window_included_directories = scrolled_window_included_directories.clone();
-                let main_window = main_window.clone();
+                let window_main = window_main.clone();
                 buttons_add_included_directory.connect_clicked(move |_| {
                     let chooser = gtk::FileChooserDialog::with_buttons(
                         Option::from("Folders to include"),
-                        Option::from(&main_window),
+                        Option::from(&window_main),
                         gtk::FileChooserAction::SelectFolder,
                         &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
                     );
@@ -1444,11 +1485,11 @@ fn main() {
             // Add excluded directory
             {
                 let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
-                let main_window = main_window.clone();
+                let window_main = window_main.clone();
                 buttons_add_excluded_directory.connect_clicked(move |_| {
                     let chooser = gtk::FileChooserDialog::with_buttons(
                         Option::from("Folders to exclude"),
-                        Option::from(&main_window),
+                        Option::from(&window_main),
                         gtk::FileChooserAction::SelectFolder,
                         &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
                     );
@@ -1506,11 +1547,16 @@ fn main() {
     }
 
     // Quit the program when X in main window was clicked
-    main_window.connect_delete_event(|_, _| {
+    window_main.connect_delete_event(|_, _| {
         gtk::main_quit();
         Inhibit(false)
     });
 
     // We start the gtk main loop.
     gtk::main();
+
+    // Quiting if quit flag was provided
+    if exit_program_after_initialization {
+        gtk::main_quit();
+    }
 }

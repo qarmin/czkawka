@@ -32,7 +32,108 @@ Author: Rafał Mikrut
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
-  <object class="GtkWindow" id="main_window">
+  <object class="GtkPopover" id="popover_select">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_all">
+            <property name="label" translatable="yes">Select All</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_unselect_all">
+            <property name="label" translatable="yes">Unselect All</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_reverse">
+            <property name="label" translatable="yes">Reverse Selection</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_all_except_oldest">
+            <property name="label" translatable="yes">Select all except oldest</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_all_except_newest">
+            <property name="label" translatable="yes">Select all except newest</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_oldest">
+            <property name="label" translatable="yes">Select one oldest</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_newest">
+            <property name="label" translatable="yes">Select one newest</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">7</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window_main">
     <property name="can_focus">False</property>
     <property name="default_width">1000</property>
     <property name="default_height">700</property>
@@ -42,11 +143,11 @@ Author: Rafał Mikrut
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkNotebook">
+          <object class="GtkNotebook" id="notebook_upper">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="notebook_upper_included_directories">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_start">5</property>
@@ -211,7 +312,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="notebook_upper_excluded_directories">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_start">5</property>
@@ -365,7 +466,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="notebook_upper_excluded_items">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -464,7 +565,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="notebook_upper_allowed_extensions">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -590,13 +691,13 @@ Author: Rafał Mikrut
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook" id="notebook_chooser_tool">
+          <object class="GtkNotebook" id="notebook_main">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="tab_pos">left</property>
             <property name="scrollable">True</property>
             <child>
-              <object class="GtkBox" id="notebook_duplicate_finder_label">
+              <object class="GtkBox" id="notebook_main_duplicate_finder_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -723,7 +824,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolled_window_empty_folder_finder">
+              <object class="GtkScrolledWindow" id="scrolled_window_main_empty_folder_finder">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -747,7 +848,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="notebook_big_file_finder">
+              <object class="GtkBox" id="notebook_big_main_file_finder">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -822,7 +923,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolled_window_empty_files_finder">
+              <object class="GtkScrolledWindow" id="scrolled_window_main_empty_files_finder">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -846,7 +947,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolled_window_temporary_files_finder">
+              <object class="GtkScrolledWindow" id="scrolled_window_main_temporary_files_finder">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -1301,107 +1402,6 @@ Author: Rafał Mikrut
     </child>
     <child type="titlebar">
       <placeholder/>
-    </child>
-  </object>
-  <object class="GtkPopover" id="popover_select">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkButton" id="buttons_popover_select_all">
-            <property name="label" translatable="yes">Select All</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="buttons_popover_unselect_all">
-            <property name="label" translatable="yes">Unselect All</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="buttons_popover_reverse">
-            <property name="label" translatable="yes">Reverse Selection</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="buttons_popover_select_all_except_oldest">
-            <property name="label" translatable="yes">Select all except oldest</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="buttons_popover_select_all_except_newest">
-            <property name="label" translatable="yes">Select all except newest</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="buttons_popover_select_one_oldest">
-            <property name="label" translatable="yes">Select one oldest</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">6</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="buttons_popover_select_one_newest">
-            <property name="label" translatable="yes">Select one newest</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">7</property>
-          </packing>
-        </child>
-      </object>
     </child>
   </object>
 </interface>
