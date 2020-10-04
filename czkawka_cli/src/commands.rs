@@ -109,7 +109,7 @@ pub struct AllowedExtensions {
         short = "x",
         long,
         help = "Allowed file extension(s)",
-        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typcal extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,webp,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")"
+        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typcal extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,webp,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
     )]
     pub allowed_extensions: Vec<String>,
 }
@@ -182,7 +182,7 @@ FLAGS:
 SUBCOMMANDS:
 {subcommands}
 
-    use {usage} -h to get more info about a specific tool
+    try "{usage} -h" to get more info about a specific tool
 
 EXAMPLES:
     {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hashmb -f results.txt -D aeo
