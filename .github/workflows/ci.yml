@@ -13,10 +13,12 @@ jobs:
   build:
     strategy:
       matrix:
-        toolchain: [stable, nightly]
-        os: [ubuntu-20.04]
+        #toolchain: [stable, nightly]
+        toolchain: [stable]
+        os: [ ubuntu-20.04, macos-latest, windows-latest ]
+        type: [release, debug]
     runs-on: ${{ matrix.os }}
-    needs: clean
+    #    needs: clean
     steps:
       - uses: actions/checkout@v2
 
@@ -29,24 +31,95 @@ jobs:
         with:
           path: |
             target
-          key: ${{ runner.os }}-cargo-check-test-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.os }}-cargo-check-test-${{ matrix.toolchain }}-${{ matrix.type }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Gtk
         run: sudo apt-get update; sudo apt install -y libgtk-3-dev
         if: ${{ runner.os == 'Linux' }}
 
-      - name: Build
-        run: cargo check --all
+      - name: Build Debug
+        run: cargo build --all
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os == 'Linux' && matrix.type == 'debug'}}
+
+      - name: Build Release
+        run: cargo build --all --release
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os == 'Linux' && matrix.type == 'release'}}
+
+      - name: Build CLI Alt Debug
+        run: cargo build --bin czkawka_cli
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os != 'Linux' && matrix.type == 'debug'}}
+
+      - name: Build CLI Alt Release
+        run: cargo build --release --bin czkawka_cli
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os != 'Linux' && matrix.type == 'release'}}
+
+      - name: Build GUI Orbtk Alt Debug
+        run: cargo build --bin czkawka_gui_orbtk
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os != 'Linux' && matrix.type == 'debug'}}
+
+      - name: Build GUI Orbtk Alt Release
+        run: cargo build --release --bin czkawka_gui_orbtk
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os != 'Linux' && matrix.type == 'release'}}
 
       - name: Run tests
         run: cargo test --workspace
-        if: ${{ runner.os == 'Linux' }}
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ runner.os == 'Linux'}}
+
+      - name: Store Czkawka CLI
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_cli
+        if: ${{ matrix.type == 'release' && runner.os != 'Windows'}}
+
+      - name: Store Czkawka CLI
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_cli.exe
+        if: ${{ matrix.type == 'release' && runner.os == 'Windows'}}
+
+      - name: Store Czkawka GUI
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_gui
+        if: ${{ runner.os == 'Linux' && matrix.type == 'release'}}
+
+      - name: Store Czkawka GUI Orbtk
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui_orbtk-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_gui_orbtk
+        if: ${{ matrix.type == 'release' && runner.os != 'Windows'}}
+
+      - name: Store Czkawka GUI Orbtk
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui_orbtk-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_gui_orbtk.exe
+        if: ${{ matrix.type == 'release' && runner.os == 'Windows'}}
 
   clean:
     runs-on: ubuntu-latest
@@ -58,7 +131,7 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
           override: true
-          
+
       - name: Install Gtk
         run: sudo apt install -y libgtk-3-dev
 
