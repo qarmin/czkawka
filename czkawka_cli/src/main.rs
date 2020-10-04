@@ -12,7 +12,7 @@ use czkawka_core::{
     empty_folder::EmptyFolder,
     temporary::{self, Temporary},
 };
-use std::{path::PathBuf, process};
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 fn path_list_to_str(path_list: Vec<PathBuf>) -> String {
@@ -37,13 +37,6 @@ fn main() {
             delete_method,
             not_recursive,
         } => {
-            directories.not_empty();
-
-            if min_size == 0 {
-                eprintln!("error: Minimum file size must be at least 1 byte.");
-                process::exit(1);
-            }
-
             let mut df = DuplicateFinder::new();
 
             df.set_included_directory(path_list_to_str(directories.directories));
@@ -62,8 +55,6 @@ fn main() {
             df.get_text_messages().print_messages();
         }
         Commands::EmptyFolders { directories, delete_folders } => {
-            directories.not_empty();
-
             let mut ef = EmptyFolder::new();
 
             ef.set_included_directory(path_list_to_str(directories.directories));
@@ -83,8 +74,6 @@ fn main() {
             number_of_files,
             not_recursive,
         } => {
-            directories.not_empty();
-
             let mut bf = BigFile::new();
 
             bf.set_included_directory(path_list_to_str(directories.directories));
@@ -108,8 +97,6 @@ fn main() {
             delete_files,
             not_recursive,
         } => {
-            directories.not_empty();
-
             let mut ef = EmptyFiles::new();
 
             ef.set_included_directory(path_list_to_str(directories.directories));
@@ -135,8 +122,6 @@ fn main() {
             delete_files,
             not_recursive,
         } => {
-            directories.not_empty();
-
             let mut tf = Temporary::new();
 
             tf.set_included_directory(path_list_to_str(directories.directories));

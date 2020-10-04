@@ -1,5 +1,5 @@
 use czkawka_core::duplicate::{CheckingMethod, DeleteMethod};
-use std::{path::PathBuf, process};
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -13,7 +13,7 @@ pub enum Commands {
         excluded_directories: ExludedDirectories,
         #[structopt(flatten)]
         excluded_items: ExludedItems,
-        #[structopt(short, long, default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        #[structopt(short, long, parse(try_from_str = parse_min_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         min_size: u64,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
@@ -78,17 +78,8 @@ pub enum Commands {
 
 #[derive(Debug, StructOpt)]
 pub struct Directories {
-    #[structopt(short, long, parse(from_os_str), help = "Directorie(s) to search", long_help = "List of directorie(s) which will be searched(absolute path)")]
+    #[structopt(short, long, parse(from_os_str), required(true), help = "Directorie(s) to search", long_help = "List of directorie(s) which will be searched(absolute path)")]
     pub directories: Vec<PathBuf>,
-}
-
-impl Directories {
-    pub fn not_empty(&self) {
-        if self.directories.is_empty() {
-            eprintln!("error: At least one directory should be provided.");
-            process::exit(1);
-        }
-    }
 }
 
 #[derive(Debug, StructOpt)]
@@ -136,5 +127,20 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "on" => Ok(DeleteMethod::OneNewest),
         "oo" => Ok(DeleteMethod::OneOldest),
         _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO)"),
+    }
+}
+
+fn parse_min_size(src: &str) -> Result<u64, String> {
+    match src.parse::<u64>() {
+        Ok(min_size) => {
+            if min_size > 0 {
+                Ok(min_size)
+            } else {
+                Err("Minimum file size must be at least 1 byte".to_string())
+            }
+        }
+        Err(e) => {
+            Err(e.to_string())
+        }
     }
 }
