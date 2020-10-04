@@ -139,8 +139,6 @@ fn parse_min_size(src: &str) -> Result<u64, String> {
                 Err("Minimum file size must be at least 1 byte".to_string())
             }
         }
-        Err(e) => {
-            Err(e.to_string())
-        }
+        Err(e) => Err(e.to_string()),
     }
 }
