@@ -30,11 +30,24 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Temporary Files - Allows finding temporary files
 
 ## Usage and requirements
-For normal use of the program, there should be no major requirements for the system, except that it must be Linux.
+### Requirements
+For normal use of the program, the only requirements for  is having GTK 3.22+.  
+For CLI, Orbtk on all OS and GTK GUI on Windows, there is no special requirements.
 
 Precompiled binaries are here - https://github.com/qarmin/czkawka/releases/
 
-Don't know why, but you must run this apps from terminal(double-click not working).
+You can also application with every single commit here - https://github.com/qarmin/czkawka/actions
+
+If app not working when clicking at it, run it by terminal.
+### Cargo
+You can really fast install Czkawka from Cargo by typing `cargo install czkawka_gui`
+
+### Snap,  Flatpak, Appimage
+Still WIP, but looking for help
+
+### AUR - Arch Linux Package
+Czkawka is also available in Arch Linux AUR from which it can be simple downloaded and installed on OS.
+
 ## Compilation
 ### Requirements
 Rust 1.46 - probably lower also works fine(1.40 is needed by GTK)  
@@ -48,7 +61,7 @@ For now only Linux(and maybe also macOS) is supported
 apt install -y libgtk-3-dev
 ```
 
-### Compilation source
+### Compilation from source
 - Download source
 ```
 git clone https://github.com/qarmin/czkawka.git
@@ -58,8 +71,10 @@ cd czkawka
 ```
 cargo run --bin czkawka_gui
 ```
+For Linux to Windows cross-building instruction look at the CI.
 ![GUI GTK](https://user-images.githubusercontent.com/41945903/94850801-c5945380-0427-11eb-8d4c-af4946ab02d5.png)
 - Run alternative Orbtk GUI(Still WIP, currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
+
 ```
 cargo run --bin czkawka_gui_orbtk
 ```
@@ -123,17 +138,16 @@ Contributions to this repository are welcome.
 You can help by creating:
 - Bug report - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
-- Pull Requests - implementing by yourself a new feature or fixing bugs, but also important is code quality. You should follow the style in other parts of the program, or change it if you create it better.
-
+- Pull Requests - implementing by yourself a new feature or fixing bugs, but also important is code quality. If change is bigger, then is good to open new issue to discuss changes.
 
 Code should be clean and pretty formatted (Clippy and fmt are required in each PR).
 
 Code should also be easy to read so please use as much simplest language as possible without magic numbers and variables with strange names, and try to write unit tests/tests if possible.
- 
 
 ## Name
 Czkawka is a Polish word which means hiccup.  
-I chose this name because I wanted to hear people speaking other languages pronounce it.
+I chose this name because I wanted to hear people speaking other languages pronounce it.  
+This name is not as bad as it seems, because I was also thinking about using words like żółć, gżegżółka czy żołądź, but I gave up these ideas because of having Polish characters, which would be a huge difficulty in searching for a project.
 
 ## License
 Code is distributed under MIT license.
