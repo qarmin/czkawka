@@ -1,9 +1,12 @@
-## Version ? -
-- Added all(except MacOS GTK build) to CI where can be freely downloaded [#41](https://github.com/qarmin/czkawka/pull/41) [#39](https://github.com/qarmin/czkawka/pull/39)
-- App can be downloaded also from Arch AUR and Cargo [#36](https://github.com/qarmin/czkawka/pull/36)
+
+
+## Version 1.0.1 - 06.10.2020r
 - Replaced default argument parser with StructOpt [#37](https://github.com/qarmin/czkawka/pull/37)
+- Added all(except MacOS GTK build) builds to CI where can be freely downloaded [#41](https://github.com/qarmin/czkawka/pull/41) [#39](https://github.com/qarmin/czkawka/pull/39)
+- App can be downloaded also from Arch AUR and Cargo [#36](https://github.com/qarmin/czkawka/pull/36)
 - Fixed crash with invalid file modification date [#33](https://github.com/qarmin/czkawka/issues/33)
-- Upper tabs can hide and show when this is necessery [#38](https://github.com/qarmin/czkawka/pull/38)
+- Upper tabs can hide and show when this is necessary [#38](https://github.com/qarmin/czkawka/pull/38)
+- Fixed crash when file/folder name have non Unicode character [#44](https://github.com/qarmin/czkawka/issues/44)
 
 ## Version 1.0.0 - 02.10.2020r
 - Added confirmation button to delete button
@@ -41,7 +44,7 @@
 - Improve a little GUI
 - Add version argument which print version e.g. `czkawka_gui --version`
 - Simple Empty folder support in GUI
-- Biggest files support in CLI
+- The biggest files support in CLI
 
 ## Version 0.1.1 - 20.09.2020r
 - Added images to readme
