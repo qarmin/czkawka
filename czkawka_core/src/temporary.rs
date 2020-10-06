@@ -166,7 +166,13 @@ impl Temporary {
                     }
 
                     let mut is_excluded_dir = false;
-                    next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
+                    next_folder = "".to_owned()
+                        + &current_folder
+                        + match &entry_data.file_name().into_string() {
+                            Ok(t) => t,
+                            Err(_) => continue,
+                        }
+                        + "/";
 
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
@@ -188,7 +194,11 @@ impl Temporary {
                         folders_to_check.push(next_folder);
                     }
                 } else if metadata.is_file() {
-                    let file_name_lowercase: String = entry_data.file_name().into_string().unwrap().to_lowercase();
+                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                        Ok(t) => t,
+                        Err(_) => continue,
+                    }
+                    .to_lowercase();
                     let mut is_temporary_file: bool = false;
 
                     // Temporary files which needs to have dot in name(not sure if exists without dot)
@@ -204,7 +214,12 @@ impl Temporary {
 
                     // Checking files
                     if is_temporary_file {
-                        let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
+                        let current_file_name = "".to_owned()
+                            + &current_folder
+                            + match &entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_) => continue,
+                            };
 
                         // Checking expressions
                         let mut found_expression: bool = false;

@@ -173,7 +173,13 @@ impl EmptyFolder {
                 };
                 // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
-                    next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
+                    next_folder = "".to_owned()
+                        + &current_folder
+                        + match &entry_data.file_name().into_string() {
+                            Ok(t) => t,
+                            Err(_) => continue,
+                        }
+                        + "/";
                     folders_to_check.push(next_folder.clone());
 
                     folders_checked.insert(

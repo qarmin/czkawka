@@ -148,7 +148,13 @@ impl BigFile {
                     }
 
                     let mut is_excluded_dir = false;
-                    next_folder = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap() + "/";
+                    next_folder = "".to_owned()
+                        + &current_folder
+                        + match &entry_data.file_name().into_string() {
+                            Ok(t) => t,
+                            Err(_) => continue,
+                        }
+                        + "/";
 
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
@@ -171,7 +177,11 @@ impl BigFile {
                     }
                 } else if metadata.is_file() {
                     let mut have_valid_extension: bool;
-                    let file_name_lowercase: String = entry_data.file_name().into_string().unwrap().to_lowercase();
+                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                        Ok(t) => t,
+                        Err(_) => continue,
+                    }
+                    .to_lowercase();
 
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
@@ -188,7 +198,12 @@ impl BigFile {
 
                     // Checking files
                     if have_valid_extension {
-                        let current_file_name = "".to_owned() + &current_folder + &entry_data.file_name().into_string().unwrap();
+                        let current_file_name = "".to_owned()
+                            + &current_folder
+                            + match &entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_) => continue,
+                            };
 
                         // Checking expressions
                         let mut found_expression: bool = false;
