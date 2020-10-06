@@ -307,7 +307,7 @@ fn main() {
 
             let col_indices = [0, 1];
 
-            for i in ["/proc", "/dev", "/sys"].iter() {
+            for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
                 let values: [&dyn ToValue; 2] = [&i, &(MAIN_ROW_COLOR.to_string())];
                 list_store.set(&list_store.append(), &col_indices, &values);
             }
