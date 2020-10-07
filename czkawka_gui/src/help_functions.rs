@@ -1,6 +1,7 @@
 use czkawka_core::common_messages::Messages;
 use gtk::prelude::*;
 use gtk::TreeViewColumn;
+use std::collections::HashMap;
 
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
@@ -298,4 +299,29 @@ pub fn select_function_3column(_tree_selection: &gtk::TreeSelection, tree_model:
     }
 
     true
+}
+
+pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[&str]) {
+    for (index, button) in buttons_array.iter().enumerate() {
+        if *hashmap.get_mut(button_names[index]).unwrap() {
+            button.show();
+        } else {
+            button.hide();
+        }
+    }
+}
+// pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
+//     for button in buttons_array {
+//         button.hide();
+//     }
+// }
+
+pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button], button_names: &[&str]) {
+    for (index, button) in buttons_array.iter().enumerate() {
+        if except_name == button_names[index] {
+            button.show();
+        } else {
+            button.hide();
+        }
+    }
 }
