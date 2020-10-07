@@ -110,7 +110,7 @@ impl BigFile {
                     continue;
                 } // Permissions denied
             };
-            for entry in read_dir {
+            'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
@@ -195,15 +195,10 @@ impl BigFile {
                             };
 
                         // Checking expressions
-                        let mut found_expression: bool = false;
                         for expression in &self.excluded_items.items {
                             if Common::regex_check(expression, &current_file_name) {
-                                found_expression = true;
-                                break;
+                                break 'dir;
                             }
-                        }
-                        if found_expression {
-                            break;
                         }
 
                         // Creating new file entry
