@@ -106,6 +106,10 @@ impl DuplicateFinder {
         self.debug_print();
     }
 
+    pub const fn get_check_method(&self) -> &CheckingMethod {
+        &self.check_method
+    }
+
     pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.files_with_identical_size
     }
