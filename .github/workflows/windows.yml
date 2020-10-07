@@ -1,0 +1,191 @@
+name: 🏁 Windows
+on: [push]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  windows-cli:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            target
+          key: windows-cli-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            windows-cli-${{github.ref}}-${{github.sha}}
+
+      - name: Build CLI Debug
+        run: cargo build --bin czkawka_cli
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'debug'}}
+
+      - name: Build CLI Release
+        run: cargo build --release --bin czkawka_cli
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'release'}}
+
+      - name: Store Windows CLI
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_cli.exe
+        if: ${{ matrix.type == 'release' }}
+
+  windows-gui-orbtk:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            target
+          key: windows-gui-orbtk-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            windows-gui-orbtk-${{github.ref}}-${{github.sha}}
+
+      - name: Build GUI Orbtk Debug
+        run: cargo build --bin czkawka_gui_orbtk
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'debug'}}
+
+      - name: Build GUI Orbtk Release
+        run: cargo build --release --bin czkawka_gui_orbtk
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'release'}}
+
+      - name: Store Windows GUI Orbtk
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui_orbtk-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_gui_orbtk.exe
+        if: ${{ matrix.type == 'release' }}
+
+
+  windows-gui:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            target
+          key: windows-gui-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            windows-gui-${{github.ref}}-${{github.sha}}
+
+      - name: Install Gtk, Mingw, unzip, zip and wget
+        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+
+      - name: Build GUI Debug Cross Compile
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+
+          echo "[target.x86_64-pc-windows-gnu]" > ~/.cargo/config
+          echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
+          echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
+
+          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_APP="$(pwd)/gtk_app"
+
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
+          unzip mingw64.zip -d $GTK_LIBRARY
+          GTK_LIBRARY="$GTK_LIBRARY/mingw64"
+
+          PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui
+
+          mkdir $GTK_APP
+          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe $GTK_APP
+          cp $GTK_LIBRARY/bin/*.dll $GTK_APP
+          mkdir -p $GTK_APP/share/glib-2.0/schemas
+          mkdir $GTK_APP/share/icons
+          cp $GTK_LIBRARY/share/glib-2.0/schemas/* $GTK_APP/share/glib-2.0/schemas
+          cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
+          mkdir $GTK_APP/lib
+          cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
+
+          zip -r gtk_app.zip $GTK_APP
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'debug'}}
+
+      - name: Build GUI Release Cross Compile
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+
+          echo "[target.x86_64-pc-windows-gnu]" > ~/.cargo/config
+          echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
+          echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
+
+          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_APP="$(pwd)/gtk_app"
+
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
+          unzip mingw64.zip -d $GTK_LIBRARY
+          GTK_LIBRARY="$GTK_LIBRARY/mingw64"
+
+          PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui --release
+
+          mkdir $GTK_APP
+          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe $GTK_APP
+          cp $GTK_LIBRARY/bin/*.dll $GTK_APP
+          mkdir -p $GTK_APP/share/glib-2.0/schemas
+          mkdir $GTK_APP/share/icons
+          cp $GTK_LIBRARY/share/glib-2.0/schemas/* $GTK_APP/share/glib-2.0/schemas
+          cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
+          mkdir $GTK_APP/lib
+          cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
+
+          zip -r gtk_app.zip $GTK_APP
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'release'}}
+
+      - name: Store Windows GUI CrossComplile
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-Windows-${{ matrix.toolchain }}
+          path: gtk_app.zip
+        if: ${{ matrix.type == 'release' }}
