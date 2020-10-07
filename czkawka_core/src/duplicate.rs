@@ -188,7 +188,7 @@ impl DuplicateFinder {
             };
 
             // Check every sub folder/file/link etc.
-            for entry in read_dir {
+            'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
@@ -214,7 +214,6 @@ impl DuplicateFinder {
                         continue;
                     }
 
-                    let mut is_excluded_dir = false;
                     next_folder = "".to_owned()
                         + &current_folder
                         + match &entry_data.file_name().into_string() {
@@ -225,25 +224,17 @@ impl DuplicateFinder {
 
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
-                            is_excluded_dir = true;
-                            break;
+                            continue 'dir;
                         }
                     }
-                    if !is_excluded_dir {
-                        let mut found_expression: bool = false;
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &next_folder) {
-                                found_expression = true;
-                                break;
-                            }
+                    for expression in &self.excluded_items.items {
+                        if Common::regex_check(expression, &next_folder) {
+                            continue 'dir;
                         }
-                        if found_expression {
-                            break;
-                        }
-                        folders_to_check.push(next_folder);
                     }
+                    folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
-                    let mut have_valid_extension: bool;
+                    // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
@@ -252,19 +243,17 @@ impl DuplicateFinder {
 
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
-                        have_valid_extension = false;
                         for extension in &self.allowed_extensions.file_extensions {
                             if file_name_lowercase.ends_with((".".to_string() + extension.to_lowercase().as_str()).as_str()) {
-                                have_valid_extension = true;
                                 break;
                             }
                         }
-                    } else {
-                        have_valid_extension = true;
+                        // Probably this is symbolic links so we are free to ignore this
+                        self.information.number_of_ignored_things += 1;
+                        continue 'dir
                     }
-
                     // Checking files
-                    if metadata.len() >= self.minimal_file_size && have_valid_extension {
+                    if metadata.len() >= self.minimal_file_size {
                         let current_file_name = "".to_owned()
                             + &current_folder
                             + match &entry_data.file_name().into_string() {
@@ -273,15 +262,10 @@ impl DuplicateFinder {
                             };
 
                         // Checking expressions
-                        let mut found_expression: bool = false;
                         for expression in &self.excluded_items.items {
                             if Common::regex_check(expression, &current_file_name) {
-                                found_expression = true;
-                                break;
+                                continue 'dir;
                             }
-                        }
-                        if found_expression {
-                            break;
                         }
 
                         // Creating new file entry
@@ -309,6 +293,7 @@ impl DuplicateFinder {
 
                         self.information.number_of_checked_files += 1;
                     } else {
+                        // Probably this is symbolic links so we are free to ignore this
                         self.information.number_of_ignored_files += 1;
                     }
                 } else {

@@ -1343,7 +1343,7 @@ fn main() {
                         }
                     }
 
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1395,7 +1395,7 @@ fn main() {
                         let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1445,7 +1445,7 @@ fn main() {
                         let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1502,7 +1502,7 @@ fn main() {
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1552,7 +1552,7 @@ fn main() {
                         let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
