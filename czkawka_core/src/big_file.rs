@@ -48,8 +48,8 @@ pub struct BigFile {
 }
 
 impl BigFile {
-    pub fn new() -> BigFile {
-        BigFile {
+    pub fn new() -> Self {
+        Self {
             text_messages: Default::default(),
             information: Info::new(),
             big_files: Default::default(),
@@ -67,15 +67,15 @@ impl BigFile {
         self.debug_print();
     }
 
-    pub fn get_big_files(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
+    pub const fn get_big_files(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.big_files
     }
 
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 

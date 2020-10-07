@@ -40,7 +40,7 @@ pub struct Info {
     pub number_of_empty_folders: usize,
 }
 impl Info {
-    pub fn new() -> Info {
+    pub fn new() -> Self {
         Default::default()
     }
 }
@@ -48,8 +48,8 @@ impl Info {
 /// Method implementation for EmptyFolder
 impl EmptyFolder {
     /// New function providing basics values
-    pub fn new() -> EmptyFolder {
-        EmptyFolder {
+    pub fn new() -> Self {
+        Self {
             information: Default::default(),
             delete_folders: false,
             text_messages: Messages::new(),
@@ -58,14 +58,14 @@ impl EmptyFolder {
         }
     }
 
-    pub fn get_empty_folder_list(&self) -> &BTreeMap<String, FolderEntry> {
+    pub const fn get_empty_folder_list(&self) -> &BTreeMap<String, FolderEntry> {
         &self.empty_folder_list
     }
 
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 

@@ -52,8 +52,8 @@ pub struct EmptyFiles {
 }
 
 impl EmptyFiles {
-    pub fn new() -> EmptyFiles {
-        EmptyFiles {
+    pub fn new() -> Self {
+        Self {
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,
@@ -73,15 +73,15 @@ impl EmptyFiles {
         self.debug_print();
     }
 
-    pub fn get_empty_files(&self) -> &Vec<FileEntry> {
+    pub const fn get_empty_files(&self) -> &Vec<FileEntry> {
         &self.empty_files
     }
 
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 

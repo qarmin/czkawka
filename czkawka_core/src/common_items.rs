@@ -8,7 +8,7 @@ pub struct ExcludedItems {
 }
 
 impl ExcludedItems {
-    pub fn new() -> ExcludedItems {
+    pub fn new() -> Self {
         Default::default()
     }
     /// Setting excluded items which needs to contains * wildcard

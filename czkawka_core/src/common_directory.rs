@@ -9,7 +9,7 @@ pub struct Directories {
     pub included_directories: Vec<String>,
 }
 impl Directories {
-    pub fn new() -> Directories {
+    pub fn new() -> Self {
         Default::default()
     }
 

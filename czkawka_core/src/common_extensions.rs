@@ -8,7 +8,7 @@ pub struct Extensions {
 }
 
 impl Extensions {
-    pub fn new() -> Extensions {
+    pub fn new() -> Self {
         Default::default()
     }
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates

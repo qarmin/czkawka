@@ -33,7 +33,7 @@ pub struct Info {
     pub number_of_failed_to_remove_files: usize,
 }
 impl Info {
-    pub fn new() -> Info {
+    pub fn new() -> Self {
         Default::default()
     }
 }
@@ -50,8 +50,8 @@ pub struct Temporary {
 }
 
 impl Temporary {
-    pub fn new() -> Temporary {
-        Temporary {
+    pub fn new() -> Self {
+        Self {
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,
@@ -70,14 +70,14 @@ impl Temporary {
         self.debug_print();
     }
 
-    pub fn get_temporary_files(&self) -> &Vec<FileEntry> {
+    pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
         &self.temporary_files
     }
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 

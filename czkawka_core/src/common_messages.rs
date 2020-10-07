@@ -6,7 +6,7 @@ pub struct Messages {
 }
 
 impl Messages {
-    pub fn new() -> Messages {
+    pub fn new() -> Self {
         Default::default()
     }
     pub fn print_messages(&self) {

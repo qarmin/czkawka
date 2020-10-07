@@ -79,8 +79,8 @@ pub struct DuplicateFinder {
 }
 
 impl DuplicateFinder {
-    pub fn new() -> DuplicateFinder {
-        DuplicateFinder {
+    pub fn new() -> Self {
+        Self {
             text_messages: Messages::new(),
             information: Info::new(),
             files_with_identical_size: Default::default(),
@@ -106,19 +106,19 @@ impl DuplicateFinder {
         self.debug_print();
     }
 
-    pub fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
+    pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.files_with_identical_size
     }
 
-    pub fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
+    pub const fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
         &self.files_with_identical_hashes
     }
 
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 
