@@ -508,6 +508,7 @@ fn main() {
                                 Ok(t) => t,
                                 Err(_) => 50, // By default
                             };
+
                             let sender = sender.clone();
 
                             // Find big files
