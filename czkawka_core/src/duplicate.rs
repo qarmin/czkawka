@@ -373,7 +373,7 @@ impl DuplicateFinder {
 
                 let mut hasher: blake3::Hasher = blake3::Hasher::new();
                 let mut buffer = [0u8; 16384];
-                let mut readed_bytes: u64 = 0;
+                let mut read_bytes: u64 = 0;
                 loop {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
@@ -387,11 +387,11 @@ impl DuplicateFinder {
                         break;
                     }
 
-                    readed_bytes += n as u64;
+                    read_bytes += n as u64;
                     self.information.bytes_read_when_hashing += n as u64;
                     hasher.update(&buffer[..n]);
 
-                    if self.check_method == CheckingMethod::HashMB && readed_bytes >= HASH_MB_LIMIT_BYTES {
+                    if self.check_method == CheckingMethod::HashMB && read_bytes >= HASH_MB_LIMIT_BYTES {
                         break;
                     }
                 }

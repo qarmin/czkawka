@@ -10,7 +10,7 @@ impl ExcludedItems {
     pub fn new() -> ExcludedItems {
         ExcludedItems { items: vec![] }
     }
-    /// Setting excluded items which needs to contains * wildcrard
+    /// Setting excluded items which needs to contains * wildcard
     /// Are a lot of slower than absolute path, so it should be used to heavy
     pub fn set_excluded_items(&mut self, mut excluded_items: String, text_messages: &mut Messages) {
         let start_time: SystemTime = SystemTime::now();

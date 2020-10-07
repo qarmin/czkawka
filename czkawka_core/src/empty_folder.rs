@@ -230,7 +230,7 @@ impl EmptyFolder {
                 }
             }
         } else {
-            // We need to check if parent of folder isn't also empty, because we wan't to delete only parent with two empty folders except this folders and at the end parent folder
+            // We need to check if parent of folder isn't also empty, because we want to delete only parent with two empty folders except this folders and at the end parent folder
             let mut new_folders_list: BTreeMap<String, FolderEntry> = Default::default();
             for (name, folder_entry) in folders_checked {
                 if folder_entry.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&name) {

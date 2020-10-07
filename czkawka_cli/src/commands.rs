@@ -9,10 +9,10 @@ pub enum Commands {
         #[structopt(flatten)]
         directories: Directories,
         #[structopt(flatten)]
-        excluded_directories: ExludedDirectories,
+        excluded_directories: ExcludedDirectories,
         #[structopt(flatten)]
-        excluded_items: ExludedItems,
-        #[structopt(short, long, parse(try_from_str = parse_min_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        excluded_items: ExcludedItems,
+        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         min_size: u64,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
@@ -25,7 +25,7 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
-    #[structopt(name = "empty-folders", about = "Finds emtpty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
+    #[structopt(name = "empty-folders", about = "Finds empty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
     EmptyFolders {
         #[structopt(flatten)]
         directories: Directories,
@@ -39,9 +39,9 @@ pub enum Commands {
         #[structopt(flatten)]
         directories: Directories,
         #[structopt(flatten)]
-        excluded_directories: ExludedDirectories,
+        excluded_directories: ExcludedDirectories,
         #[structopt(flatten)]
-        excluded_items: ExludedItems,
+        excluded_items: ExcludedItems,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
         #[structopt(short, long, default_value = "50", help = "Number of files to be shown")]
@@ -56,9 +56,9 @@ pub enum Commands {
         #[structopt(flatten)]
         directories: Directories,
         #[structopt(flatten)]
-        excluded_directories: ExludedDirectories,
+        excluded_directories: ExcludedDirectories,
         #[structopt(flatten)]
-        excluded_items: ExludedItems,
+        excluded_items: ExcludedItems,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
         #[structopt(short = "D", long, help = "Delete found files")]
@@ -73,9 +73,9 @@ pub enum Commands {
         #[structopt(flatten)]
         directories: Directories,
         #[structopt(flatten)]
-        excluded_directories: ExludedDirectories,
+        excluded_directories: ExcludedDirectories,
         #[structopt(flatten)]
-        excluded_items: ExludedItems,
+        excluded_items: ExcludedItems,
         #[structopt(short = "D", long, help = "Delete found files")]
         delete_files: bool,
         #[structopt(flatten)]
@@ -92,14 +92,14 @@ pub struct Directories {
 }
 
 #[derive(Debug, StructOpt)]
-pub struct ExludedDirectories {
-    #[structopt(short, long, parse(from_os_str), help = "Exluded directorie(s)", long_help = "List of directorie(s) which will be excluded from search(absolute path)")]
+pub struct ExcludedDirectories {
+    #[structopt(short, long, parse(from_os_str), help = "Excluded directorie(s)", long_help = "List of directorie(s) which will be excluded from search(absolute path)")]
     pub excluded_directories: Vec<PathBuf>,
 }
 
 #[derive(Debug, StructOpt)]
-pub struct ExludedItems {
-    #[structopt(short = "E", long, parse(from_os_str), help = "Exluded item(s)", long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)")]
+pub struct ExcludedItems {
+    #[structopt(short = "E", long, parse(from_os_str), help = "Excluded item(s)", long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)")]
     pub excluded_items: Vec<PathBuf>,
 }
 
@@ -155,7 +155,7 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
     }
 }
 
-fn parse_min_size(src: &str) -> Result<u64, String> {
+fn parse_minimal_file_size(src: &str) -> Result<u64, String> {
     match src.parse::<u64>() {
         Ok(min_size) => {
             if min_size > 0 {

@@ -278,7 +278,7 @@ impl BigFile {
         self.number_of_files_to_check = number_of_files_to_check;
     }
 
-    /// Setting excluded items which needs to contains * wildcrard
+    /// Setting excluded items which needs to contains * wildcard
     /// Are a lot of slower than absolute path, so it should be used to heavy
     pub fn set_excluded_items(&mut self, excluded_items: String) {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
