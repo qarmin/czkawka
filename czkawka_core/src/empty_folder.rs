@@ -34,24 +34,17 @@ pub struct EmptyFolder {
 }
 
 /// Info struck with helpful information's about results
+#[derive(Default)]
 pub struct Info {
     number_of_checked_folders: usize,
     pub number_of_empty_folders: usize,
 }
 impl Info {
     pub fn new() -> Info {
-        Info {
-            number_of_checked_folders: 0,
-            number_of_empty_folders: 0,
-        }
+        Default::default()
     }
 }
 
-impl Default for Info {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 /// Method implementation for EmptyFolder
 impl EmptyFolder {
     /// New function providing basics values

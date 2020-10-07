@@ -39,6 +39,7 @@ pub struct FileEntry {
 }
 
 /// Info struck with helpful information's about results
+#[derive(Default)]
 pub struct Info {
     pub number_of_checked_files: usize,
     pub number_of_checked_folders: usize,
@@ -55,30 +56,10 @@ pub struct Info {
     pub number_of_failed_to_remove_files: usize,
     pub gained_space: u64,
 }
-impl Info {
-    pub fn new() -> Info {
-        Info {
-            number_of_checked_files: 0,
-            number_of_ignored_files: 0,
-            number_of_checked_folders: 0,
-            number_of_ignored_things: 0,
-            number_of_groups_by_size: 0,
-            number_of_duplicated_files_by_size: 0,
-            number_of_groups_by_hash: 0,
-            number_of_duplicated_files_by_hash: 0,
-            lost_space_by_size: 0,
-            lost_space_by_hash: 0,
-            bytes_read_when_hashing: 0,
-            number_of_removed_files: 0,
-            number_of_failed_to_remove_files: 0,
-            gained_space: 0,
-        }
-    }
-}
 
-impl Default for Info {
-    fn default() -> Self {
-        Self::new()
+impl Info {
+    pub fn new() -> Self {
+        Default::default()
     }
 }
 

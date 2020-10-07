@@ -2,13 +2,14 @@ use crate::common::Common;
 use crate::common_messages::Messages;
 use std::time::SystemTime;
 
+#[derive(Default)]
 pub struct Extensions {
     pub file_extensions: Vec<String>,
 }
 
 impl Extensions {
     pub fn new() -> Extensions {
-        Extensions { file_extensions: vec![] }
+        Default::default()
     }
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     /// After, extensions cannot contains any dot, commas etc.
@@ -46,10 +47,5 @@ impl Extensions {
             text_messages.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
-    }
-}
-impl Default for Extensions {
-    fn default() -> Self {
-        Self::new()
     }
 }
