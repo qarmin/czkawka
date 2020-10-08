@@ -250,7 +250,7 @@ impl DuplicateFinder {
                         }
                         // Probably this is symbolic links so we are free to ignore this
                         self.information.number_of_ignored_things += 1;
-                        continue 'dir
+                        continue 'dir;
                     }
                     // Checking files
                     if metadata.len() >= self.minimal_file_size {
