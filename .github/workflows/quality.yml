@@ -1,10 +1,5 @@
 name: Quality
-
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: [ push, pull_request ]
 
 env:
   CARGO_TERM_COLOR: always
