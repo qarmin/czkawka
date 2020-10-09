@@ -2,13 +2,14 @@ use crate::common::Common;
 use crate::common_messages::Messages;
 use std::time::SystemTime;
 
+#[derive(Default)]
 pub struct ExcludedItems {
     pub items: Vec<String>,
 }
 
 impl ExcludedItems {
-    pub fn new() -> ExcludedItems {
-        ExcludedItems { items: vec![] }
+    pub fn new() -> Self {
+        Default::default()
     }
     /// Setting excluded items which needs to contains * wildcard
     /// Are a lot of slower than absolute path, so it should be used to heavy
@@ -43,10 +44,5 @@ impl ExcludedItems {
         }
         self.items = checked_expressions;
         Common::print_time(start_time, SystemTime::now(), "set_excluded_items".to_string());
-    }
-}
-impl Default for ExcludedItems {
-    fn default() -> Self {
-        Self::new()
     }
 }

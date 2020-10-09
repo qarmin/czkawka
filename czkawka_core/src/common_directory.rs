@@ -3,16 +3,14 @@ use crate::common_messages::Messages;
 use std::path::Path;
 use std::time::SystemTime;
 
+#[derive(Default)]
 pub struct Directories {
     pub excluded_directories: Vec<String>,
     pub included_directories: Vec<String>,
 }
 impl Directories {
-    pub fn new() -> Directories {
-        Directories {
-            excluded_directories: vec![],
-            included_directories: vec![],
-        }
+    pub fn new() -> Self {
+        Default::default()
     }
 
     /// Setting included directories, at least one must be provided
@@ -242,11 +240,5 @@ impl Directories {
         self.included_directories.sort();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
         true
-    }
-}
-
-impl Default for Directories {
-    fn default() -> Self {
-        Self::new()
     }
 }

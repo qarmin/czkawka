@@ -19,6 +19,7 @@ pub struct FileEntry {
 }
 
 /// Info struck with helpful information's about results
+#[derive(Default)]
 pub struct Info {
     pub number_of_checked_files: usize,
     pub number_of_checked_folders: usize,
@@ -27,22 +28,10 @@ pub struct Info {
     pub taken_space: u64,
     pub number_of_real_files: usize,
 }
-impl Info {
-    pub fn new() -> Info {
-        Info {
-            number_of_checked_files: 0,
-            number_of_checked_folders: 0,
-            number_of_ignored_files: 0,
-            number_of_ignored_things: 0,
-            taken_space: 0,
-            number_of_real_files: 0,
-        }
-    }
-}
 
-impl Default for Info {
-    fn default() -> Self {
-        Self::new()
+impl Info {
+    pub fn new() -> Self {
+        Default::default()
     }
 }
 
@@ -59,8 +48,8 @@ pub struct BigFile {
 }
 
 impl BigFile {
-    pub fn new() -> BigFile {
-        BigFile {
+    pub fn new() -> Self {
+        Self {
             text_messages: Default::default(),
             information: Info::new(),
             big_files: Default::default(),
@@ -78,15 +67,15 @@ impl BigFile {
         self.debug_print();
     }
 
-    pub fn get_big_files(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
+    pub const fn get_big_files(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.big_files
     }
 
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 
@@ -121,7 +110,7 @@ impl BigFile {
                     continue;
                 } // Permissions denied
             };
-            for entry in read_dir {
+            'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
@@ -147,7 +136,6 @@ impl BigFile {
                         continue;
                     }
 
-                    let mut is_excluded_dir = false;
                     next_folder = "".to_owned()
                         + &current_folder
                         + match &entry_data.file_name().into_string() {
@@ -158,25 +146,16 @@ impl BigFile {
 
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
-                            is_excluded_dir = true;
-                            break;
+                            continue 'dir;
                         }
                     }
-                    if !is_excluded_dir {
-                        let mut found_expression: bool = false;
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &next_folder) {
-                                found_expression = true;
-                                break;
-                            }
+                    for expression in &self.excluded_items.items {
+                        if Common::regex_check(expression, &next_folder) {
+                            continue 'dir;
                         }
-                        if found_expression {
-                            break;
-                        }
-                        folders_to_check.push(next_folder);
                     }
+                    folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
-                    let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
@@ -184,65 +163,50 @@ impl BigFile {
                     .to_lowercase();
 
                     // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        have_valid_extension = false;
-                        for extension in &self.allowed_extensions.file_extensions {
-                            if file_name_lowercase.ends_with((".".to_string() + extension.to_lowercase().as_str()).as_str()) {
-                                have_valid_extension = true;
-                                break;
-                            }
-                        }
-                    } else {
-                        have_valid_extension = true;
+                    let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                    if !allowed {
+                        // Not an allowed extension, ignore it.
+                        self.information.number_of_ignored_files += 1;
+                        continue 'dir;
                     }
-
                     // Checking files
-                    if have_valid_extension {
-                        let current_file_name = "".to_owned()
-                            + &current_folder
-                            + match &entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_) => continue,
-                            };
-
-                        // Checking expressions
-                        let mut found_expression: bool = false;
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &current_file_name) {
-                                found_expression = true;
-                                break;
-                            }
-                        }
-                        if found_expression {
-                            break;
-                        }
-
-                        // Creating new file entry
-                        let fe: FileEntry = FileEntry {
-                            path: current_file_name.clone(),
-                            size: metadata.len(),
-                            modified_date: match metadata.modified() {
-                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                    Ok(d) => d.as_secs(),
-                                    Err(_) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
-                                        0
-                                    }
-                                },
-                                Err(_) => {
-                                    self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
-                                    continue;
-                                } // Permissions Denied
-                            },
+                    let current_file_name = "".to_owned()
+                        + &current_folder
+                        + match &entry_data.file_name().into_string() {
+                            Ok(t) => t,
+                            Err(_) => continue,
                         };
 
-                        self.big_files.entry(metadata.len()).or_insert_with(Vec::new);
-                        self.big_files.get_mut(&metadata.len()).unwrap().push(fe);
-
-                        self.information.number_of_checked_files += 1;
-                    } else {
-                        self.information.number_of_ignored_files += 1;
+                    // Checking expressions
+                    for expression in &self.excluded_items.items {
+                        if Common::regex_check(expression, &current_file_name) {
+                            continue 'dir;
+                        }
                     }
+
+                    // Creating new file entry
+                    let fe: FileEntry = FileEntry {
+                        path: current_file_name.clone(),
+                        size: metadata.len(),
+                        modified_date: match metadata.modified() {
+                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                Ok(d) => d.as_secs(),
+                                Err(_) => {
+                                    self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
+                                    0
+                                }
+                            },
+                            Err(_) => {
+                                self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
+                                continue;
+                            } // Permissions Denied
+                        },
+                    };
+
+                    self.big_files.entry(metadata.len()).or_insert_with(Vec::new);
+                    self.big_files.get_mut(&metadata.len()).unwrap().push(fe);
+
+                    self.information.number_of_checked_files += 1;
                 } else {
                     // Probably this is symbolic links so we are free to ignore this
                     self.information.number_of_ignored_things += 1;

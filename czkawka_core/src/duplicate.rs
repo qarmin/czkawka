@@ -39,6 +39,7 @@ pub struct FileEntry {
 }
 
 /// Info struck with helpful information's about results
+#[derive(Default)]
 pub struct Info {
     pub number_of_checked_files: usize,
     pub number_of_checked_folders: usize,
@@ -55,30 +56,10 @@ pub struct Info {
     pub number_of_failed_to_remove_files: usize,
     pub gained_space: u64,
 }
-impl Info {
-    pub fn new() -> Info {
-        Info {
-            number_of_checked_files: 0,
-            number_of_ignored_files: 0,
-            number_of_checked_folders: 0,
-            number_of_ignored_things: 0,
-            number_of_groups_by_size: 0,
-            number_of_duplicated_files_by_size: 0,
-            number_of_groups_by_hash: 0,
-            number_of_duplicated_files_by_hash: 0,
-            lost_space_by_size: 0,
-            lost_space_by_hash: 0,
-            bytes_read_when_hashing: 0,
-            number_of_removed_files: 0,
-            number_of_failed_to_remove_files: 0,
-            gained_space: 0,
-        }
-    }
-}
 
-impl Default for Info {
-    fn default() -> Self {
-        Self::new()
+impl Info {
+    pub fn new() -> Self {
+        Default::default()
     }
 }
 
@@ -98,8 +79,8 @@ pub struct DuplicateFinder {
 }
 
 impl DuplicateFinder {
-    pub fn new() -> DuplicateFinder {
-        DuplicateFinder {
+    pub fn new() -> Self {
+        Self {
             text_messages: Messages::new(),
             information: Info::new(),
             files_with_identical_size: Default::default(),
@@ -125,23 +106,23 @@ impl DuplicateFinder {
         self.debug_print();
     }
 
-    pub fn get_check_method(&self) -> &CheckingMethod {
+    pub const fn get_check_method(&self) -> &CheckingMethod {
         &self.check_method
     }
 
-    pub fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
+    pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.files_with_identical_size
     }
 
-    pub fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
+    pub const fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
         &self.files_with_identical_hashes
     }
 
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 
@@ -207,7 +188,7 @@ impl DuplicateFinder {
             };
 
             // Check every sub folder/file/link etc.
-            for entry in read_dir {
+            'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
@@ -233,7 +214,6 @@ impl DuplicateFinder {
                         continue;
                     }
 
-                    let mut is_excluded_dir = false;
                     next_folder = "".to_owned()
                         + &current_folder
                         + match &entry_data.file_name().into_string() {
@@ -244,25 +224,17 @@ impl DuplicateFinder {
 
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
-                            is_excluded_dir = true;
-                            break;
+                            continue 'dir;
                         }
                     }
-                    if !is_excluded_dir {
-                        let mut found_expression: bool = false;
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &next_folder) {
-                                found_expression = true;
-                                break;
-                            }
+                    for expression in &self.excluded_items.items {
+                        if Common::regex_check(expression, &next_folder) {
+                            continue 'dir;
                         }
-                        if found_expression {
-                            break;
-                        }
-                        folders_to_check.push(next_folder);
                     }
+                    folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
-                    let mut have_valid_extension: bool;
+                    // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
@@ -270,20 +242,14 @@ impl DuplicateFinder {
                     .to_lowercase();
 
                     // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        have_valid_extension = false;
-                        for extension in &self.allowed_extensions.file_extensions {
-                            if file_name_lowercase.ends_with((".".to_string() + extension.to_lowercase().as_str()).as_str()) {
-                                have_valid_extension = true;
-                                break;
-                            }
-                        }
-                    } else {
-                        have_valid_extension = true;
+                    let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                    if !allowed {
+                        // Not an allowed extension, ignore it.
+                        self.information.number_of_ignored_files += 1;
+                        continue 'dir;
                     }
-
                     // Checking files
-                    if metadata.len() >= self.minimal_file_size && have_valid_extension {
+                    if metadata.len() >= self.minimal_file_size {
                         let current_file_name = "".to_owned()
                             + &current_folder
                             + match &entry_data.file_name().into_string() {
@@ -292,15 +258,10 @@ impl DuplicateFinder {
                             };
 
                         // Checking expressions
-                        let mut found_expression: bool = false;
                         for expression in &self.excluded_items.items {
                             if Common::regex_check(expression, &current_file_name) {
-                                found_expression = true;
-                                break;
+                                continue 'dir;
                             }
-                        }
-                        if found_expression {
-                            break;
                         }
 
                         // Creating new file entry
@@ -328,6 +289,7 @@ impl DuplicateFinder {
 
                         self.information.number_of_checked_files += 1;
                     } else {
+                        // Probably this is symbolic links so we are free to ignore this
                         self.information.number_of_ignored_files += 1;
                     }
                 } else {

@@ -22,6 +22,7 @@ pub struct FileEntry {
 }
 
 /// Info struck with helpful information's about results
+#[derive(Default)]
 pub struct Info {
     pub number_of_checked_files: usize,
     pub number_of_checked_folders: usize,
@@ -32,22 +33,8 @@ pub struct Info {
     pub number_of_failed_to_remove_files: usize,
 }
 impl Info {
-    pub fn new() -> Info {
-        Info {
-            number_of_checked_files: 0,
-            number_of_ignored_files: 0,
-            number_of_checked_folders: 0,
-            number_of_ignored_things: 0,
-            number_of_temporary_files: 0,
-            number_of_removed_files: 0,
-            number_of_failed_to_remove_files: 0,
-        }
-    }
-}
-
-impl Default for Info {
-    fn default() -> Self {
-        Self::new()
+    pub fn new() -> Self {
+        Default::default()
     }
 }
 
@@ -63,8 +50,8 @@ pub struct Temporary {
 }
 
 impl Temporary {
-    pub fn new() -> Temporary {
-        Temporary {
+    pub fn new() -> Self {
+        Self {
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,
@@ -83,14 +70,14 @@ impl Temporary {
         self.debug_print();
     }
 
-    pub fn get_temporary_files(&self) -> &Vec<FileEntry> {
+    pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
         &self.temporary_files
     }
-    pub fn get_text_messages(&self) -> &Messages {
+    pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
-    pub fn get_information(&self) -> &Info {
+    pub const fn get_information(&self) -> &Info {
         &self.information
     }
 
@@ -139,7 +126,7 @@ impl Temporary {
             };
 
             // Check every sub folder/file/link etc.
-            for entry in read_dir {
+            'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
@@ -165,7 +152,6 @@ impl Temporary {
                         continue;
                     }
 
-                    let mut is_excluded_dir = false;
                     next_folder = "".to_owned()
                         + &current_folder
                         + match &entry_data.file_name().into_string() {
@@ -176,88 +162,67 @@ impl Temporary {
 
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
-                            is_excluded_dir = true;
-                            break;
+                            continue 'dir;
                         }
                     }
-                    if !is_excluded_dir {
-                        let mut found_expression: bool = false;
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &next_folder) {
-                                found_expression = true;
-                                break;
-                            }
+                    for expression in &self.excluded_items.items {
+                        if Common::regex_check(expression, &next_folder) {
+                            continue 'dir;
                         }
-                        if found_expression {
-                            break;
-                        }
-                        folders_to_check.push(next_folder);
                     }
+                    folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
                     }
                     .to_lowercase();
-                    let mut is_temporary_file: bool = false;
 
                     // Temporary files which needs to have dot in name(not sure if exists without dot)
                     let temporary_with_dot = ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"];
 
-                    if file_name_lowercase.contains('.') {
-                        for temp in temporary_with_dot.iter() {
-                            if file_name_lowercase.ends_with(temp) {
-                                is_temporary_file = true;
-                            }
-                        }
+                    if !file_name_lowercase.contains('.') || !temporary_with_dot.iter().any(|f| file_name_lowercase.ends_with(f)) {
+                        self.information.number_of_ignored_files += 1;
+                        continue 'dir;
                     }
 
                     // Checking files
-                    if is_temporary_file {
-                        let current_file_name = "".to_owned()
-                            + &current_folder
-                            + match &entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_) => continue,
-                            };
-
-                        // Checking expressions
-                        let mut found_expression: bool = false;
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &current_file_name) {
-                                found_expression = true;
-                                break;
-                            }
-                        }
-                        if found_expression {
-                            break;
-                        }
-
-                        // Creating new file entry
-                        let fe: FileEntry = FileEntry {
-                            path: current_file_name.clone(),
-                            modified_date: match metadata.modified() {
-                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                    Ok(d) => d.as_secs(),
-                                    Err(_) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
-                                        0
-                                    }
-                                },
-                                Err(_) => {
-                                    self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
-                                    continue;
-                                } // Permissions Denied
-                            },
+                    let current_file_name = "".to_owned()
+                        + &current_folder
+                        + match &entry_data.file_name().into_string() {
+                            Ok(t) => t,
+                            Err(_) => continue,
                         };
 
-                        // Adding files to Vector
-                        self.temporary_files.push(fe);
-
-                        self.information.number_of_checked_files += 1;
-                    } else {
-                        self.information.number_of_ignored_files += 1;
+                    // Checking expressions
+                    for expression in &self.excluded_items.items {
+                        if Common::regex_check(expression, &current_file_name) {
+                            continue 'dir;
+                        }
                     }
+
+                    // Creating new file entry
+                    let fe: FileEntry = FileEntry {
+                        path: current_file_name.clone(),
+                        modified_date: match metadata.modified() {
+                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                Ok(d) => d.as_secs(),
+                                Err(_) => {
+                                    self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
+                                    0
+                                }
+                            },
+                            Err(_) => {
+                                self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
+                                continue;
+                            } // Permissions Denied
+                        },
+                    };
+
+                    // Adding files to Vector
+                    self.temporary_files.push(fe);
+
+                    self.information.number_of_checked_files += 1;
                 } else {
                     // Probably this is symbolic links so we are free to ignore this
                     self.information.number_of_ignored_things += 1;

@@ -1,3 +1,4 @@
+#[derive(Default)]
 pub struct Messages {
     pub messages: Vec<String>,
     pub warnings: Vec<String>,
@@ -5,12 +6,8 @@ pub struct Messages {
 }
 
 impl Messages {
-    pub fn new() -> Messages {
-        Messages {
-            messages: vec![],
-            warnings: vec![],
-            errors: vec![],
-        }
+    pub fn new() -> Self {
+        Default::default()
     }
     pub fn print_messages(&self) {
         if !self.messages.is_empty() {
@@ -38,10 +35,5 @@ impl Messages {
             }
             println!("----------------------------END OF ERRORS------------------------------");
         }
-    }
-}
-impl Default for Messages {
-    fn default() -> Self {
-        Self::new()
     }
 }

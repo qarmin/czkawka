@@ -586,12 +586,12 @@ fn main() {
 
                             // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                             for tree_path in selection_rows.iter().rev() {
-                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
-                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
 
                                 match fs::remove_file(format!("{}/{}", path, name)) {
                                     Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
                                     }
                                     Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                                 }
@@ -613,12 +613,12 @@ fn main() {
 
                             // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                             for tree_path in selection_rows.iter().rev() {
-                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
-                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
 
                                 match fs::remove_dir(format!("{}/{}", path, name)) {
                                     Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
                                     }
                                     Err(_) => messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str(),
                                 }
@@ -640,12 +640,12 @@ fn main() {
 
                             // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                             for tree_path in selection_rows.iter().rev() {
-                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Name as i32).get::<String>().unwrap().unwrap();
-                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsEmptyFiles::Path as i32).get::<String>().unwrap().unwrap();
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFiles::Path as i32).get::<String>().unwrap().unwrap();
 
                                 match fs::remove_file(format!("{}/{}", path, name)) {
                                     Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
                                     }
                                     Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                                 }
@@ -667,12 +667,12 @@ fn main() {
 
                             // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                             for tree_path in selection_rows.iter().rev() {
-                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Name as i32).get::<String>().unwrap().unwrap();
-                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsTemporaryFiles::Path as i32).get::<String>().unwrap().unwrap();
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsTemporaryFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsTemporaryFiles::Path as i32).get::<String>().unwrap().unwrap();
 
                                 match fs::remove_file(format!("{}/{}", path, name)) {
                                     Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
                                     }
                                     Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                                 }
@@ -694,12 +694,12 @@ fn main() {
 
                             // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
                             for tree_path in selection_rows.iter().rev() {
-                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
-                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
 
                                 match fs::remove_file(format!("{}/{}", path, name)) {
                                     Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
                                     }
                                     Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
                                 }
@@ -1343,7 +1343,7 @@ fn main() {
                         }
                     }
 
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1395,7 +1395,7 @@ fn main() {
                         let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1445,7 +1445,7 @@ fn main() {
                         let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1502,7 +1502,7 @@ fn main() {
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
@@ -1552,7 +1552,7 @@ fn main() {
                         let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                         list_store.set(&list_store.append(), &col_indices, &values);
                     }
-                    print_text_messages_to_text_view(&text_messages, &text_view_errors);
+                    print_text_messages_to_text_view(text_messages, &text_view_errors);
                 }
 
                 // Set state
