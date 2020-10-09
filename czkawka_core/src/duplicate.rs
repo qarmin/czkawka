@@ -242,14 +242,10 @@ impl DuplicateFinder {
                     .to_lowercase();
 
                     // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        for extension in &self.allowed_extensions.file_extensions {
-                            if file_name_lowercase.ends_with((".".to_string() + extension.to_lowercase().as_str()).as_str()) {
-                                break;
-                            }
-                        }
-                        // Probably this is symbolic links so we are free to ignore this
-                        self.information.number_of_ignored_things += 1;
+                    let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                    if !allowed {
+                        // Not an allowed extension, ignore it.
+                        self.information.number_of_ignored_files += 1;
                         continue 'dir;
                     }
                     // Checking files
