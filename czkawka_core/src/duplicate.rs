@@ -234,6 +234,7 @@ impl DuplicateFinder {
                     }
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
+                    // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
@@ -263,7 +264,7 @@ impl DuplicateFinder {
                         // Checking expressions
                         for expression in &self.excluded_items.items {
                             if Common::regex_check(expression, &current_file_name) {
-                                break 'dir;
+                                continue 'dir;
                             }
                         }
 
