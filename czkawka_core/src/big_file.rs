@@ -151,7 +151,7 @@ impl BigFile {
                     }
                     for expression in &self.excluded_items.items {
                         if Common::regex_check(expression, &next_folder) {
-                            break 'dir;
+                            continue 'dir;
                         }
                     }
                     folders_to_check.push(next_folder);
@@ -184,7 +184,7 @@ impl BigFile {
                     // Checking expressions
                     for expression in &self.excluded_items.items {
                         if Common::regex_check(expression, &current_file_name) {
-                            break 'dir;
+                            continue 'dir;
                         }
                     }
 
