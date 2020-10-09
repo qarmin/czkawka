@@ -181,12 +181,7 @@ impl Temporary {
                     // Temporary files which needs to have dot in name(not sure if exists without dot)
                     let temporary_with_dot = ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"];
 
-                    if file_name_lowercase.contains('.') {
-                        for temp in temporary_with_dot.iter() {
-                            if file_name_lowercase.ends_with(temp) {
-                                break;
-                            }
-                        }
+                    if !file_name_lowercase.contains('.') || !temporary_with_dot.iter().any(|f| file_name_lowercase.ends_with(f)) {
                         self.information.number_of_ignored_files += 1;
                         continue 'dir;
                     }
