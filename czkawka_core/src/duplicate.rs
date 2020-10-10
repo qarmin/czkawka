@@ -4,6 +4,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::common::Common;
@@ -34,7 +35,7 @@ pub enum DeleteMethod {
 
 #[derive(Clone)]
 pub struct FileEntry {
-    pub path: String,
+    pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
 }
@@ -178,27 +179,25 @@ impl DuplicateFinder {
     fn check_files_size(&mut self, rx: Option<&Receiver<()>>) -> bool {
         // TODO maybe add multithreading checking for file hash
         let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
-            folders_to_check.push(id.to_string());
+            folders_to_check.push(id.clone());
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
-        let mut current_folder: String;
-        let mut next_folder: String;
         while !folders_to_check.is_empty() {
             if rx.is_some() && rx.unwrap().try_recv().is_ok() {
                 return false;
             }
-            current_folder = folders_to_check.pop().unwrap();
+            let current_folder = folders_to_check.pop().unwrap();
 
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_) => {
-                    self.text_messages.warnings.push("Cannot open dir ".to_string() + current_folder.as_str());
+                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
                     continue;
                 } // Permissions denied
             };
@@ -208,14 +207,14 @@ impl DuplicateFinder {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Cannot read entry in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Cannot read metadata in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
                         continue;
                     } //Permissions denied
                 };
@@ -226,14 +225,7 @@ impl DuplicateFinder {
                         continue;
                     }
 
-                    next_folder = "".to_owned()
-                        + &current_folder
-                        + match &entry_data.file_name().into_string() {
-                            Ok(t) => t,
-                            Err(_) => continue,
-                        }
-                        + "/";
-
+                    let next_folder = current_folder.join(entry_data.file_name());
                     for ed in &self.directories.excluded_directories {
                         if next_folder == *ed {
                             continue 'dir;
@@ -264,24 +256,13 @@ impl DuplicateFinder {
                     }
                     // Checking files
                     if metadata.len() >= self.minimal_file_size {
-                        #[allow(unused_mut)] // Used is later by Windows build
-                        let mut current_file_name = "".to_owned()
-                            + &current_folder
-                            + match &entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_) => continue,
-                            };
+                        let current_file_name = current_folder.join(entry_data.file_name());
 
                         // Checking expressions
                         for expression in &self.excluded_items.items {
                             if Common::regex_check(expression, &current_file_name) {
                                 continue 'dir;
                             }
-                        }
-
-                        #[cfg(target_family = "windows")]
-                        {
-                            current_file_name = Common::prettier_windows_path(&current_file_name);
                         }
 
                         // Creating new file entry
@@ -292,12 +273,12 @@ impl DuplicateFinder {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
                                     Err(_) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
+                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                         0
                                     }
                                 },
                                 Err(_) => {
-                                    self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
+                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
                                     continue;
                                 } // Permissions Denied
                             },
@@ -354,7 +335,7 @@ impl DuplicateFinder {
                 file_handler = match File::open(&file_entry.path) {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Unable to check hash of file ".to_string() + file_entry.path.as_str());
+                        self.text_messages.warnings.push(format!("Unable to check hash of file {}", file_entry.path.display()));
                         continue;
                     }
                 };
@@ -368,7 +349,7 @@ impl DuplicateFinder {
                     let n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
                         Err(_) => {
-                            self.text_messages.warnings.push("Error happened when checking hash of file ".to_string() + file_entry.path.as_str());
+                            self.text_messages.warnings.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
                             error_reading_file = true;
                             break;
                         }
@@ -550,35 +531,31 @@ impl SaveResults for DuplicateFinder {
             )
             .unwrap();
             for (size, vector) in self.files_with_identical_size.iter().rev() {
-                file.write_all(format!("\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).as_bytes()).unwrap();
+                write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                 for file_entry in vector {
-                    file.write_all(format!("{} \n", file_entry.path).as_bytes()).unwrap();
+                    writeln!(file, "{} \n", file_entry.path.display()).unwrap();
                 }
             }
 
             if !self.files_with_identical_hashes.is_empty() {
-                file.write_all(b"-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
-                file.write_all(
-                    format!(
+                write!(file, "-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
+                write!(file,
                         "Found {} duplicated files which in {} groups which takes {}.\n",
                         self.information.number_of_duplicated_files_by_hash,
                         self.information.number_of_groups_by_hash,
                         self.information.lost_space_by_hash.file_size(options::BINARY).unwrap()
-                    )
-                    .as_bytes(),
-                )
-                .unwrap();
+                ).unwrap();
                 for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
                     for vector in vectors_vector {
-                        file.write_all(format!("\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).as_bytes()).unwrap();
+                        write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                         for file_entry in vector {
-                            file.write_all(format!("{} \n", file_entry.path).as_bytes()).unwrap();
+                            write!(file, "{} \n", file_entry.path.display()).unwrap();
                         }
                     }
                 }
             }
         } else {
-            file.write_all(b"Not found any duplicates.").unwrap();
+            write!(file, "Not found any duplicates.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
@@ -610,7 +587,7 @@ impl PrintResults for DuplicateFinder {
                     for j in vector {
                         println!("Size - {} ({}) - {} files ", size.file_size(options::BINARY).unwrap(), size, j.len());
                         for k in j {
-                            println!("{}", k.path);
+                            println!("{}", k.path.display());
                         }
                         println!("----");
                     }
@@ -631,7 +608,7 @@ impl PrintResults for DuplicateFinder {
                 for (size, vector) in &self.files_with_identical_size {
                     println!("Size - {} ({}) - {} files ", size.file_size(options::BINARY).unwrap(), size, vector.len());
                     for j in vector {
-                        println!("{}", j.path);
+                        println!("{}", j.path.display());
                     }
                     println!();
                 }
@@ -670,7 +647,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                 }
                 Err(_) => {
                     failed_to_remove_files += 1;
-                    warnings.push("Failed to delete".to_string() + vector[q_index].path.as_str());
+                    warnings.push(format!("Failed to delete {}", vector[q_index].path.display()));
                 }
             };
         }
@@ -688,7 +665,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                 }
                 Err(_) => {
                     failed_to_remove_files += 1;
-                    warnings.push("Failed to delete".to_string() + vector[q_index].path.as_str());
+                    warnings.push(format!("Failed to delete {}", vector[q_index].path.display()));
                 }
             };
         }
@@ -708,7 +685,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                         }
                         Err(_) => {
                             failed_to_remove_files += 1;
-                            warnings.push("Failed to delete".to_string() + file.path.as_str());
+                            warnings.push(format!("Failed to delete {}", file.path.display()));
                         }
                     };
                 }
@@ -730,7 +707,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                         }
                         Err(_) => {
                             failed_to_remove_files += 1;
-                            warnings.push("Failed to delete".to_string() + file.path.as_str());
+                            warnings.push(format!("Failed to delete {}", file.path.display()));
                         }
                     };
                 }

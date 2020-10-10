@@ -50,7 +50,7 @@ impl Common {
     }
 
     /// Function to check if directory match expression
-    pub fn regex_check(expression: &str, directory: &str) -> bool {
+    pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if !expression.contains('*') {
             #[cfg(debug_assertions)]
             {
@@ -69,6 +69,9 @@ impl Common {
         if splits.is_empty() {
             return false;
         }
+
+        // Get rid of non unicode characters
+        let directory = directory.as_ref().to_string_lossy();
 
         // Early checking if directory contains all parts needed by expression
         for split in &splits {

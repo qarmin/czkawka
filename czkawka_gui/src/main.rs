@@ -21,6 +21,15 @@ use std::collections::HashMap;
 use std::fs::Metadata;
 use std::rc::Rc;
 use std::{env, fs, process, thread};
+use std::path::Path;
+
+fn split_path(path: &Path) -> (String, String) {
+    match (path.parent(), path.file_name()) {
+        (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
+        (Some(dir), None) => (dir.display().to_string(), String::new()),
+        (None, _) => (String::new(), String::new()),
+    }
+}
 
 fn main() {
     let mut exit_program_after_initialization: bool = false;
@@ -1395,12 +1404,10 @@ fn main() {
                                         ];
                                         list_store.set(&list_store.append(), &col_indices, &values);
                                         for entry in vector {
-                                            let path = &entry.path;
-                                            let index = path.rfind('/').unwrap();
-
+                                            let (directory, file) = split_path(&entry.path);
                                             let values: [&dyn ToValue; 6] = [
-                                                &(path[index + 1..].to_string()),
-                                                &(path[..index].to_string()),
+                                                &file,
+                                                &directory,
                                                 &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                                 &(entry.modified_date),
                                                 &(MAIN_ROW_COLOR.to_string()),
@@ -1425,12 +1432,10 @@ fn main() {
                                     ];
                                     list_store.set(&list_store.append(), &col_indices, &values);
                                     for entry in vector {
-                                        let path = &entry.path;
-                                        let index = path.rfind('/').unwrap();
-
+                                        let (directory, file) = split_path(&entry.path);
                                         let values: [&dyn ToValue; 6] = [
-                                            &(path[index + 1..].to_string()),
-                                            &(path[..index].to_string()),
+                                            &file,
+                                            &directory,
                                             &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                             &(entry.modified_date),
                                             &(MAIN_ROW_COLOR.to_string()),
@@ -1509,10 +1514,13 @@ fn main() {
 
                         let hashmap = ef.get_empty_folder_list();
 
-                        for (name, entry) in hashmap {
-                            let name: String = name[..(name.len() - 1)].to_string();
-                            let index = name.rfind('/').unwrap();
-                            let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
+                        for (path, entry) in hashmap {
+                            let (directory, file) = split_path(path);
+                            let values: [&dyn ToValue; 3] = [
+                                &file,
+                                &directory,
+                                &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())
+                            ];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -1578,9 +1586,12 @@ fn main() {
                         let vector = vf.get_empty_files();
 
                         for file_entry in vector {
-                            let name: String = file_entry.path.to_string();
-                            let index = name.rfind('/').unwrap();
-                            let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [&dyn ToValue; 3] = [
+                                &file,
+                                &directory,
+                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())
+                            ];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -1647,12 +1658,11 @@ fn main() {
 
                         for (size, vector) in btreemap.iter().rev() {
                             for file_entry in vector {
-                                let name: String = file_entry.path.to_string();
-                                let index = name.rfind('/').unwrap();
+                                let (directory, file) = split_path(&file_entry.path);
                                 let values: [&dyn ToValue; 4] = [
                                     &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size)),
-                                    &(name[index + 1..].to_string()),
-                                    &(name[..index].to_string()),
+                                    &file,
+                                    &directory,
                                     &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
                                 ];
                                 list_store.set(&list_store.append(), &col_indices, &values);
@@ -1721,9 +1731,11 @@ fn main() {
                         let vector = tf.get_temporary_files();
 
                         for file_entry in vector {
-                            let name: String = file_entry.path.to_string();
-                            let index = name.rfind('/').unwrap();
-                            let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [&dyn ToValue; 3] = [
+                                &file,
+                                &directory,
+                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
