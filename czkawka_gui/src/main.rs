@@ -6,6 +6,7 @@ use humansize::{file_size_opts as options, FileSize};
 extern crate gtk;
 use crate::help_functions::*;
 use chrono::NaiveDateTime;
+use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::common_traits::SaveResults;
 use czkawka_core::duplicate::CheckingMethod;
@@ -184,7 +185,7 @@ fn main() {
     let scrolled_window_excluded_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_excluded_directories").unwrap();
 
     //// Threads
-    // Messages
+    // Types of messages to send to main thread where gui can be draw.
     enum Message {
         Duplicates(DuplicateFinder),
         EmptyFolders(EmptyFolder),
@@ -192,10 +193,14 @@ fn main() {
         BigFiles(BigFile),
         Temporary(Temporary),
     }
-    // Sender/Reciver
+
+    // Used for getting data from thread
     let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-    //// Setup default look for
+    // Used for sending stop signal to thread
+    let (sx, rx): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = unbounded();
+
+    //// Setup default look(duplicate finder)
     {
         entry_info.set_text("Duplicated Files");
 
@@ -395,7 +400,7 @@ fn main() {
 
         //// Connect Buttons
 
-        // Down notepad
+        // Main buttons
         {
             assert!(notebook_main_children_names.contains(&"notebook_main_duplicate_finder_label".to_string()));
             assert!(notebook_main_children_names.contains(&"scrolled_window_main_empty_folder_finder".to_string()));
@@ -444,7 +449,7 @@ fn main() {
                             let delete_method = duplicate::DeleteMethod::None;
 
                             let sender = sender.clone();
-
+                            let receiver_stop = rx.clone();
                             // Find duplicates
                             thread::spawn(move || {
                                 let mut df = DuplicateFinder::new();
@@ -456,24 +461,26 @@ fn main() {
                                 df.set_minimal_file_size(minimal_file_size);
                                 df.set_check_method(check_method);
                                 df.set_delete_method(delete_method);
-                                df.find_duplicates();
+                                df.find_duplicates(Option::from(&receiver_stop)); //&rc_stop_signal.borrow().1);
                                 let _ = sender.send(Message::Duplicates(df));
                             });
                         }
                         "scrolled_window_main_empty_folder_finder" => {
                             let sender = sender.clone();
+                            let receiver_stop = rx.clone();
 
                             // Find empty folders
                             thread::spawn(move || {
                                 let mut ef = EmptyFolder::new();
                                 ef.set_included_directory(included_directories);
                                 ef.set_delete_folder(false);
-                                ef.find_empty_folders();
+                                ef.find_empty_folders(Option::from(&receiver_stop));
                                 let _ = sender.send(Message::EmptyFolders(ef));
                             });
                         }
                         "scrolled_window_main_empty_files_finder" => {
                             let sender = sender.clone();
+                            let receiver_stop = rx.clone();
 
                             // Find empty files
                             thread::spawn(move || {
@@ -484,12 +491,13 @@ fn main() {
                                 vf.set_recursive_search(recursive_search);
                                 vf.set_excluded_items(excluded_items);
                                 vf.set_allowed_extensions(allowed_extensions);
-                                vf.find_empty_files();
+                                vf.find_empty_files(Option::from(&receiver_stop));
                                 let _ = sender.send(Message::EmptyFiles(vf));
                             });
                         }
                         "scrolled_window_main_temporary_files_finder" => {
                             let sender = sender.clone();
+                            let receiver_stop = rx.clone();
 
                             // Find temporary files
                             thread::spawn(move || {
@@ -499,7 +507,7 @@ fn main() {
                                 tf.set_excluded_directory(excluded_directories);
                                 tf.set_recursive_search(recursive_search);
                                 tf.set_excluded_items(excluded_items);
-                                tf.find_temporary_files();
+                                tf.find_temporary_files(Option::from(&receiver_stop));
                                 let _ = sender.send(Message::Temporary(tf));
                             });
                         }
@@ -510,6 +518,7 @@ fn main() {
                             };
 
                             let sender = sender.clone();
+                            let receiver_stop = rx.clone();
 
                             // Find big files
                             thread::spawn(move || {
@@ -520,7 +529,7 @@ fn main() {
                                 bf.set_recursive_search(recursive_search);
                                 bf.set_excluded_items(excluded_items);
                                 bf.set_number_of_files_to_check(numbers_of_files_to_check);
-                                bf.find_big_files();
+                                bf.find_big_files(Option::from(&receiver_stop));
                                 let _ = sender.send(Message::BigFiles(bf));
                             });
                         }
@@ -616,6 +625,7 @@ fn main() {
                                 let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
                                 let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
 
+                                // TODO this should be fs::remove_dir_all(), because it doesn't delete folders with empty folders inside
                                 match fs::remove_dir(format!("{}/{}", path, name)) {
                                     Ok(_) => {
                                         list_store.remove(&list_store.get_iter(tree_path).unwrap());
@@ -817,6 +827,12 @@ fn main() {
                         }
                     }
                     e => panic!("Not existent {}", e),
+                });
+            }
+            // Stop button
+            {
+                buttons_stop.connect_clicked(move |_| {
+                    sx.send(()).unwrap();
                 });
             }
         }
@@ -1072,7 +1088,6 @@ fn main() {
             // All one newest
             {
                 let scrolled_window_duplicate_finder = scrolled_window_duplicate_finder.clone();
-                // let popover_select = popover_select.clone();
                 buttons_popover_select_one_newest.connect_clicked(move |_| {
                     let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                     let selection = tree_view.get_selection();
@@ -1188,7 +1203,6 @@ fn main() {
             }
             // Remove Excluded Folder
             {
-                //let scrolled_window_excluded_directories = scrolled_window_excluded_directories.clone();
                 buttons_remove_excluded_directory.connect_clicked(move |_| {
                     let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                     let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
@@ -1205,7 +1219,6 @@ fn main() {
             }
             // Remove Included Folder
             {
-                //let scrolled_window_included_directories = scrolled_window_included_directories.clone();
                 buttons_remove_included_directory.connect_clicked(move |_| {
                     let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                     let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
@@ -1235,34 +1248,11 @@ fn main() {
 
         match msg {
             Message::Duplicates(df) => {
-                let information = df.get_information();
-                let text_messages = df.get_text_messages();
+                if df.get_stopped_search() {
+                    entry_info.set_text("Searching for duplicated was stopped by user");
 
-                let duplicates_number: usize;
-                let duplicates_size: u64;
-                let duplicates_group: usize;
-
-                match df.get_check_method() {
-                    CheckingMethod::Hash | CheckingMethod::HashMB => {
-                        duplicates_number = information.number_of_duplicated_files_by_hash;
-                        duplicates_size = information.lost_space_by_hash;
-                        duplicates_group = information.number_of_groups_by_hash;
-                    }
-                    CheckingMethod::Size => {
-                        duplicates_number = information.number_of_duplicated_files_by_size;
-                        duplicates_size = information.lost_space_by_size;
-                        duplicates_group = information.number_of_groups_by_size;
-                    }
-                    CheckingMethod::None => {
-                        panic!();
-                    }
-                }
-
-                entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
-
-                // Create GUI
-                {
-                    let list_store = scrolled_window_duplicate_finder
+                    //Also clear list
+                    scrolled_window_duplicate_finder
                         .get_children()
                         .get(0)
                         .unwrap()
@@ -1272,17 +1262,87 @@ fn main() {
                         .get_model()
                         .unwrap()
                         .downcast::<gtk::ListStore>()
-                        .unwrap();
-                    list_store.clear();
+                        .unwrap()
+                        .clear();
+                } else {
+                    let information = df.get_information();
+                    let text_messages = df.get_text_messages();
 
-                    let col_indices = [0, 1, 2, 3, 4, 5];
+                    let duplicates_number: usize;
+                    let duplicates_size: u64;
+                    let duplicates_group: usize;
 
                     match df.get_check_method() {
                         CheckingMethod::Hash | CheckingMethod::HashMB => {
-                            let btreemap = df.get_files_sorted_by_hash();
+                            duplicates_number = information.number_of_duplicated_files_by_hash;
+                            duplicates_size = information.lost_space_by_hash;
+                            duplicates_group = information.number_of_groups_by_hash;
+                        }
+                        CheckingMethod::Size => {
+                            duplicates_number = information.number_of_duplicated_files_by_size;
+                            duplicates_size = information.lost_space_by_size;
+                            duplicates_group = information.number_of_groups_by_size;
+                        }
+                        CheckingMethod::None => {
+                            panic!();
+                        }
+                    }
 
-                            for (size, vectors_vector) in btreemap.iter().rev() {
-                                for vector in vectors_vector {
+                    entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_duplicate_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2, 3, 4, 5];
+
+                        match df.get_check_method() {
+                            CheckingMethod::Hash | CheckingMethod::HashMB => {
+                                let btreemap = df.get_files_sorted_by_hash();
+
+                                for (size, vectors_vector) in btreemap.iter().rev() {
+                                    for vector in vectors_vector {
+                                        let values: [&dyn ToValue; 6] = [
+                                            &(vector.len().to_string() + " x " + size.to_string().as_str()),
+                                            &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                            &"".to_string(), // No text in 3 column
+                                            &(0),            // Not used here
+                                            &(HEADER_ROW_COLOR.to_string()),
+                                            &(TEXT_COLOR.to_string()),
+                                        ];
+                                        list_store.set(&list_store.append(), &col_indices, &values);
+                                        for entry in vector {
+                                            let path = &entry.path;
+                                            let index = path.rfind('/').unwrap();
+
+                                            let values: [&dyn ToValue; 6] = [
+                                                &(path[index + 1..].to_string()),
+                                                &(path[..index].to_string()),
+                                                &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                &(entry.modified_date),
+                                                &(MAIN_ROW_COLOR.to_string()),
+                                                &(TEXT_COLOR.to_string()),
+                                            ];
+                                            list_store.set(&list_store.append(), &col_indices, &values);
+                                        }
+                                    }
+                                }
+                            }
+                            CheckingMethod::Size => {
+                                let btreemap = df.get_files_sorted_by_size();
+
+                                for (size, vector) in btreemap.iter().rev() {
                                     let values: [&dyn ToValue; 6] = [
                                         &(vector.len().to_string() + " x " + size.to_string().as_str()),
                                         &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
@@ -1308,71 +1368,37 @@ fn main() {
                                     }
                                 }
                             }
-                        }
-                        CheckingMethod::Size => {
-                            let btreemap = df.get_files_sorted_by_size();
-
-                            for (size, vector) in btreemap.iter().rev() {
-                                let values: [&dyn ToValue; 6] = [
-                                    &(vector.len().to_string() + " x " + size.to_string().as_str()),
-                                    &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
-                                    &"".to_string(), // No text in 3 column
-                                    &(0),            // Not used here
-                                    &(HEADER_ROW_COLOR.to_string()),
-                                    &(TEXT_COLOR.to_string()),
-                                ];
-                                list_store.set(&list_store.append(), &col_indices, &values);
-                                for entry in vector {
-                                    let path = &entry.path;
-                                    let index = path.rfind('/').unwrap();
-
-                                    let values: [&dyn ToValue; 6] = [
-                                        &(path[index + 1..].to_string()),
-                                        &(path[..index].to_string()),
-                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
-                                        &(entry.modified_date),
-                                        &(MAIN_ROW_COLOR.to_string()),
-                                        &(TEXT_COLOR.to_string()),
-                                    ];
-                                    list_store.set(&list_store.append(), &col_indices, &values);
-                                }
+                            CheckingMethod::None => {
+                                panic!();
                             }
                         }
-                        CheckingMethod::None => {
-                            panic!();
+
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_duplication_state.borrow_mut() = df;
+
+                        if duplicates_size > 0 {
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
                         }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("duplicate").unwrap(), &buttons_array, &buttons_names);
                     }
-
-                    print_text_messages_to_text_view(text_messages, &text_view_errors);
-                }
-
-                // Set state
-                {
-                    *shared_duplication_state.borrow_mut() = df;
-
-                    if duplicates_size > 0 {
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
-                    } else {
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
-                    }
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("duplicate").unwrap(), &buttons_array, &buttons_names);
                 }
             }
             Message::EmptyFolders(ef) => {
-                let information = ef.get_information();
-                let text_messages = ef.get_text_messages();
+                if ef.get_stopped_search() {
+                    entry_info.set_text("Searching for empty folders was stopped by user");
 
-                let empty_folder_number: usize = information.number_of_empty_folders;
-
-                entry_info.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
-
-                // Create GUI
-                {
-                    let list_store = scrolled_window_main_empty_folder_finder
+                    //Also clear list
+                    scrolled_window_main_empty_folder_finder
                         .get_children()
                         .get(0)
                         .unwrap()
@@ -1382,47 +1408,65 @@ fn main() {
                         .get_model()
                         .unwrap()
                         .downcast::<gtk::ListStore>()
-                        .unwrap();
-                    list_store.clear();
+                        .unwrap()
+                        .clear();
+                } else {
+                    let information = ef.get_information();
+                    let text_messages = ef.get_text_messages();
 
-                    let col_indices = [0, 1, 2];
+                    let empty_folder_number: usize = information.number_of_empty_folders;
 
-                    let hashmap = ef.get_empty_folder_list();
+                    entry_info.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
 
-                    for (name, entry) in hashmap {
-                        let name: String = name[..(name.len() - 1)].to_string();
-                        let index = name.rfind('/').unwrap();
-                        let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
-                        list_store.set(&list_store.append(), &col_indices, &values);
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_main_empty_folder_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2];
+
+                        let hashmap = ef.get_empty_folder_list();
+
+                        for (name, entry) in hashmap {
+                            let name: String = name[..(name.len() - 1)].to_string();
+                            let index = name.rfind('/').unwrap();
+                            let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
-                    print_text_messages_to_text_view(text_messages, &text_view_errors);
-                }
 
-                // Set state
-                {
-                    *shared_empty_folders_state.borrow_mut() = ef;
+                    // Set state
+                    {
+                        *shared_empty_folders_state.borrow_mut() = ef;
 
-                    if empty_folder_number > 0 {
-                        *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = true;
-                        *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = true;
-                    } else {
-                        *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = false;
+                        if empty_folder_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap(), &buttons_array, &buttons_names);
                     }
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap(), &buttons_array, &buttons_names);
                 }
             }
             Message::EmptyFiles(vf) => {
-                let information = vf.get_information();
-                let text_messages = vf.get_text_messages();
+                if vf.get_stopped_search() {
+                    entry_info.set_text("Searching for empty files was stopped by user");
 
-                let empty_files_number: usize = information.number_of_empty_files;
-
-                entry_info.set_text(format!("Found {} empty files.", empty_files_number).as_str());
-
-                // Create GUI
-                {
-                    let list_store = scrolled_window_main_empty_files_finder
+                    //Also clear list
+                    scrolled_window_main_empty_files_finder
                         .get_children()
                         .get(0)
                         .unwrap()
@@ -1432,104 +1476,65 @@ fn main() {
                         .get_model()
                         .unwrap()
                         .downcast::<gtk::ListStore>()
-                        .unwrap();
-                    list_store.clear();
-
-                    let col_indices = [0, 1, 2];
-
-                    let vector = vf.get_empty_files();
-
-                    for file_entry in vector {
-                        let name: String = file_entry.path.to_string();
-                        let index = name.rfind('/').unwrap();
-                        let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
-                        list_store.set(&list_store.append(), &col_indices, &values);
-                    }
-                    print_text_messages_to_text_view(text_messages, &text_view_errors);
-                }
-
-                // Set state
-                {
-                    *shared_empty_files_state.borrow_mut() = vf;
-
-                    if empty_files_number > 0 {
-                        *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = true;
-                        *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = true;
-                    } else {
-                        *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = false;
-                    }
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("empty_file").unwrap(), &buttons_array, &buttons_names);
-                }
-            }
-            Message::BigFiles(bf) => {
-                let information = bf.get_information();
-                let text_messages = bf.get_text_messages();
-
-                let biggest_files_number: usize = information.number_of_real_files;
-
-                entry_info.set_text(format!("Found {} biggest files.", biggest_files_number).as_str());
-
-                // Create GUI
-                {
-                    let list_store = scrolled_window_big_files_finder
-                        .get_children()
-                        .get(0)
                         .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap();
-                    list_store.clear();
+                        .clear();
+                } else {
+                    let information = vf.get_information();
+                    let text_messages = vf.get_text_messages();
 
-                    let col_indices = [0, 1, 2, 3];
+                    let empty_files_number: usize = information.number_of_empty_files;
 
-                    let btreemap = bf.get_big_files();
+                    entry_info.set_text(format!("Found {} empty files.", empty_files_number).as_str());
 
-                    for (size, vector) in btreemap.iter().rev() {
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_main_empty_files_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2];
+
+                        let vector = vf.get_empty_files();
+
                         for file_entry in vector {
                             let name: String = file_entry.path.to_string();
                             let index = name.rfind('/').unwrap();
-                            let values: [&dyn ToValue; 4] = [
-                                &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size)),
-                                &(name[index + 1..].to_string()),
-                                &(name[..index].to_string()),
-                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
-                            ];
+                            let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
-                    print_text_messages_to_text_view(text_messages, &text_view_errors);
-                }
 
-                // Set state
-                {
-                    *shared_big_files_state.borrow_mut() = bf;
+                    // Set state
+                    {
+                        *shared_empty_files_state.borrow_mut() = vf;
 
-                    if biggest_files_number > 0 {
-                        *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = true;
-                        *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = true;
-                    } else {
-                        *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = false;
+                        if empty_files_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("empty_file").unwrap(), &buttons_array, &buttons_names);
                     }
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("big_file").unwrap(), &buttons_array, &buttons_names);
                 }
             }
-            Message::Temporary(tf) => {
-                let information = tf.get_information();
-                let text_messages = tf.get_text_messages();
+            Message::BigFiles(bf) => {
+                if bf.get_stopped_search() {
+                    entry_info.set_text("Searching for big files was stopped by user");
 
-                let temporary_files_number: usize = information.number_of_temporary_files;
-
-                entry_info.set_text(format!("Found {} temporary files.", temporary_files_number).as_str());
-
-                // Create GUI
-                {
-                    let list_store = scrolled_window_main_temporary_files_finder
+                    //Also clear list
+                    scrolled_window_duplicate_finder
                         .get_children()
                         .get(0)
                         .unwrap()
@@ -1539,39 +1544,136 @@ fn main() {
                         .get_model()
                         .unwrap()
                         .downcast::<gtk::ListStore>()
-                        .unwrap();
-                    list_store.clear();
+                        .unwrap()
+                        .clear();
+                } else {
+                    let information = bf.get_information();
+                    let text_messages = bf.get_text_messages();
 
-                    let col_indices = [0, 1, 2];
+                    let biggest_files_number: usize = information.number_of_real_files;
 
-                    let vector = tf.get_temporary_files();
+                    entry_info.set_text(format!("Found {} biggest files.", biggest_files_number).as_str());
 
-                    for file_entry in vector {
-                        let name: String = file_entry.path.to_string();
-                        let index = name.rfind('/').unwrap();
-                        let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
-                        list_store.set(&list_store.append(), &col_indices, &values);
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_big_files_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2, 3];
+
+                        let btreemap = bf.get_big_files();
+
+                        for (size, vector) in btreemap.iter().rev() {
+                            for file_entry in vector {
+                                let name: String = file_entry.path.to_string();
+                                let index = name.rfind('/').unwrap();
+                                let values: [&dyn ToValue; 4] = [
+                                    &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size)),
+                                    &(name[index + 1..].to_string()),
+                                    &(name[..index].to_string()),
+                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                ];
+                                list_store.set(&list_store.append(), &col_indices, &values);
+                            }
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
-                    print_text_messages_to_text_view(text_messages, &text_view_errors);
+
+                    // Set state
+                    {
+                        *shared_big_files_state.borrow_mut() = bf;
+
+                        if biggest_files_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("big_file").unwrap(), &buttons_array, &buttons_names);
+                    }
                 }
+            }
+            Message::Temporary(tf) => {
+                if tf.get_stopped_search() {
+                    entry_info.set_text("Searching for temporary files was stopped by user");
 
-                // Set state
-                {
-                    *shared_temporary_files_state.borrow_mut() = tf;
+                    //Also clear list
+                    scrolled_window_duplicate_finder
+                        .get_children()
+                        .get(0)
+                        .unwrap()
+                        .clone()
+                        .downcast::<gtk::TreeView>()
+                        .unwrap()
+                        .get_model()
+                        .unwrap()
+                        .downcast::<gtk::ListStore>()
+                        .unwrap()
+                        .clear();
+                } else {
+                    let information = tf.get_information();
+                    let text_messages = tf.get_text_messages();
 
-                    if temporary_files_number > 0 {
-                        *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = true;
-                        *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = true;
-                    } else {
-                        *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = false;
-                        *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = false;
+                    let temporary_files_number: usize = information.number_of_temporary_files;
+
+                    entry_info.set_text(format!("Found {} temporary files.", temporary_files_number).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_main_temporary_files_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2];
+
+                        let vector = tf.get_temporary_files();
+
+                        for file_entry in vector {
+                            let name: String = file_entry.path.to_string();
+                            let index = name.rfind('/').unwrap();
+                            let values: [&dyn ToValue; 3] = [&(name[index + 1..].to_string()), &(name[..index].to_string()), &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap(), &buttons_array, &buttons_names);
+
+                    // Set state
+                    {
+                        *shared_temporary_files_state.borrow_mut() = tf;
+
+                        if temporary_files_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap(), &buttons_array, &buttons_names);
+                    }
                 }
             }
         }
-        // Returning false here would close the receiver
-        // and have senders fail
+        // Returning false here would close the receiver and have senders fail
         glib::Continue(true)
     });
 

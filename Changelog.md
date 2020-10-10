@@ -1,4 +1,9 @@
-
+## Version 1.x
+- Improve code quality/Simplify codebase [#52](https://github.com/qarmin/czkawka/pull/52)
+- Fixed skipping some correct results in specific situations [#52](https://github.com/qarmin/czkawka/pull/52#discussion_r502613895)
+- Added support for searching in other thread [#51](https://github.com/qarmin/czkawka/pull/51)
+- Divide CI across files [#48](https://github.com/qarmin/czkawka/pull/48)
+- Added ability to stop task from GUI [#55](https://github.com/qarmin/czkawka/pull/55)
 
 ## Version 1.0.1 - 06.10.2020r
 - Replaced default argument parser with StructOpt [#37](https://github.com/qarmin/czkawka/pull/37)

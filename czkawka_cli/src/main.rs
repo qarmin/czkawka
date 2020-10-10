@@ -49,7 +49,7 @@ fn main() {
             df.set_delete_method(delete_method);
             df.set_recursive_search(!not_recursive.not_recursive);
 
-            df.find_duplicates();
+            df.find_duplicates(None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !df.save_results_to_file(file_name) {
@@ -68,7 +68,7 @@ fn main() {
             ef.set_included_directory(path_list_to_str(directories.directories));
             ef.set_delete_folder(delete_folders);
 
-            ef.find_empty_folders();
+            ef.find_empty_folders(None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !ef.save_results_to_file(file_name) {
@@ -99,7 +99,7 @@ fn main() {
             bf.set_number_of_files_to_check(number_of_files);
             bf.set_recursive_search(!not_recursive.not_recursive);
 
-            bf.find_big_files();
+            bf.find_big_files(None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !bf.save_results_to_file(file_name) {
@@ -133,7 +133,7 @@ fn main() {
                 ef.set_delete_method(empty_files::DeleteMethod::Delete);
             }
 
-            ef.find_empty_files();
+            ef.find_empty_files(None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !ef.save_results_to_file(file_name) {
@@ -165,7 +165,7 @@ fn main() {
                 tf.set_delete_method(temporary::DeleteMethod::Delete);
             }
 
-            tf.find_temporary_files();
+            tf.find_temporary_files(None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !tf.save_results_to_file(file_name) {

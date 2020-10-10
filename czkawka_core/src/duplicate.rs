@@ -1,3 +1,4 @@
+use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
@@ -76,6 +77,7 @@ pub struct DuplicateFinder {
     minimal_file_size: u64,
     check_method: CheckingMethod,
     delete_method: DeleteMethod,
+    stopped_search: bool,
 }
 
 impl DuplicateFinder {
@@ -92,15 +94,22 @@ impl DuplicateFinder {
             minimal_file_size: 1024,
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
+            stopped_search: false,
         }
     }
 
-    /// Finding duplicates, save results to internal struct variables
-    pub fn find_duplicates(&mut self) {
+    pub fn find_duplicates(&mut self, rx: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        self.check_files_size();
+        if !self.check_files_size(rx) {
+            self.stopped_search = true;
+            return;
+        }
+        #[allow(clippy::collapsible_if)]
         if self.check_method == CheckingMethod::Hash || self.check_method == CheckingMethod::HashMB {
-            self.check_files_hash();
+            if !self.check_files_hash(rx) {
+                self.stopped_search = true;
+                return;
+            }
         }
         self.delete_files();
         self.debug_print();
@@ -108,6 +117,10 @@ impl DuplicateFinder {
 
     pub const fn get_check_method(&self) -> &CheckingMethod {
         &self.check_method
+    }
+
+    pub fn get_stopped_search(&self) -> bool {
+        self.stopped_search
     }
 
     pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
@@ -162,7 +175,7 @@ impl DuplicateFinder {
 
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
-    fn check_files_size(&mut self) {
+    fn check_files_size(&mut self, rx: Option<&Receiver<()>>) -> bool {
         // TODO maybe add multithreading checking for file hash
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -176,6 +189,9 @@ impl DuplicateFinder {
         let mut current_folder: String;
         let mut next_folder: String;
         while !folders_to_check.is_empty() {
+            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                return false;
+            }
             current_folder = folders_to_check.pop().unwrap();
 
             // Read current dir, if permission are denied just go to next
@@ -205,10 +221,6 @@ impl DuplicateFinder {
                 };
                 if metadata.is_dir() {
                     self.information.number_of_checked_folders += 1;
-                    // if entry_data.file_name().into_string().is_err() { // Probably this can be removed, if crash still will be happens, then uncomment this line
-                    //     self.text_messages.warnings.push("Cannot read folder name in dir ".to_string() + current_folder.as_str());
-                    //     continue; // Permissions denied
-                    // }
 
                     if !self.recursive_search {
                         continue;
@@ -242,11 +254,13 @@ impl DuplicateFinder {
                     .to_lowercase();
 
                     // Checking allowed extensions
-                    let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                    if !allowed {
-                        // Not an allowed extension, ignore it.
-                        self.information.number_of_ignored_files += 1;
-                        continue 'dir;
+                    if !self.allowed_extensions.file_extensions.is_empty() {
+                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                        if !allowed {
+                            // Not an allowed extension, ignore it.
+                            self.information.number_of_ignored_files += 1;
+                            continue 'dir;
+                        }
                     }
                     // Checking files
                     if metadata.len() >= self.minimal_file_size {
@@ -315,10 +329,11 @@ impl DuplicateFinder {
         self.files_with_identical_size = new_map;
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+        true
     }
 
     /// The slowest checking type, which must be applied after checking for size
-    fn check_files_hash(&mut self) {
+    fn check_files_hash(&mut self, rx: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut file_handler: File;
         let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>>;
@@ -327,6 +342,9 @@ impl DuplicateFinder {
             hashmap_with_hash = Default::default();
 
             for file_entry in vector {
+                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                    return false;
+                }
                 file_handler = match File::open(&file_entry.path) {
                     Ok(t) => t,
                     Err(_) => {
@@ -384,6 +402,7 @@ impl DuplicateFinder {
         }
 
         Common::print_time(start_time, SystemTime::now(), "check_files_hash".to_string());
+        true
     }
 
     /// Function to delete files, from filed before BTreeMap

@@ -24,20 +24,17 @@ pub enum ColumnsDirectory {
     Path = 0,
 }
 pub enum ColumnsBigFiles {
-    // Columns for Big Files
     Size = 0,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsEmptyFiles {
-    // Columns for Big Files
     Name = 0,
     Path,
     Modification,
 }
 pub enum ColumnsTemporaryFiles {
-    // Columns for Big Files
     Name = 0,
     Path,
     Modification,

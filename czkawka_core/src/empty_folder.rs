@@ -2,6 +2,7 @@ use crate::common::Common;
 use crate::common_directory::Directories;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crossbeam_channel::Receiver;
 use std::collections::BTreeMap;
 use std::fs;
 use std::fs::{File, Metadata};
@@ -31,6 +32,7 @@ pub struct EmptyFolder {
     text_messages: Messages,
     empty_folder_list: BTreeMap<String, FolderEntry>, // Path, FolderEntry
     directories: Directories,
+    stopped_search: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -55,7 +57,12 @@ impl EmptyFolder {
             text_messages: Messages::new(),
             empty_folder_list: Default::default(),
             directories: Directories::new(),
+            stopped_search: false,
         }
+    }
+
+    pub fn get_stopped_search(&self) -> bool {
+        self.stopped_search
     }
 
     pub const fn get_empty_folder_list(&self) -> &BTreeMap<String, FolderEntry> {
@@ -70,10 +77,12 @@ impl EmptyFolder {
     }
 
     /// Public function used by CLI to search for empty folders
-    pub fn find_empty_folders(&mut self) {
+    pub fn find_empty_folders(&mut self, rx: Option<&Receiver<()>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
-        self.check_for_empty_folders(true);
-        //self.check_for_empty_folders(false); // Second check, should be done before deleting to be sure that empty folder is still empty
+        if !self.check_for_empty_folders(rx) {
+            self.stopped_search = true;
+            return;
+        }
         self.optimize_folders();
         if self.delete_folders {
             self.delete_empty_folders();
@@ -108,42 +117,30 @@ impl EmptyFolder {
 
     /// Function to check if folder are empty.
     /// Parameter initial_checking for second check before deleting to be sure that checked folder is still empty
-    fn check_for_empty_folders(&mut self, initial_checking: bool) {
+    fn check_for_empty_folders(&mut self, rx: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut folders_checked: BTreeMap<String, FolderEntry> = Default::default();
 
-        if initial_checking {
-            // Add root folders for finding
-            for id in &self.directories.included_directories {
-                folders_checked.insert(
-                    id.clone(),
-                    FolderEntry {
-                        parent_path: None,
-                        is_empty: FolderEmptiness::Maybe,
-                        modified_date: 0,
-                    },
-                );
-                folders_to_check.push(id.clone());
-            }
-        } else {
-            // Add folders searched before
-            for (name, folder_entry) in &self.empty_folder_list {
-                folders_checked.insert(
-                    name.clone(),
-                    FolderEntry {
-                        parent_path: None,
-                        is_empty: FolderEmptiness::Maybe,
-                        modified_date: folder_entry.modified_date,
-                    },
-                );
-                folders_to_check.push(name.clone());
-            }
+        // Add root folders for finding
+        for id in &self.directories.included_directories {
+            folders_checked.insert(
+                id.clone(),
+                FolderEntry {
+                    parent_path: None,
+                    is_empty: FolderEmptiness::Maybe,
+                    modified_date: 0,
+                },
+            );
+            folders_to_check.push(id.clone());
         }
 
         let mut current_folder: String;
         let mut next_folder: String;
         while !folders_to_check.is_empty() {
+            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                return false;
+            }
             self.information.number_of_checked_folders += 1;
             current_folder = folders_to_check.pop().unwrap();
             // Checked folder may be deleted or we may not have permissions to open it so we assume that this folder is not be empty
@@ -214,26 +211,15 @@ impl EmptyFolder {
             }
         }
 
-        // Now we check if checked folders are really empty, and if are, then
-        if initial_checking {
-            // We need to set empty folder list
-            for (name, folder_entry) in folders_checked {
-                if folder_entry.is_empty != FolderEmptiness::No {
-                    self.empty_folder_list.insert(name, folder_entry);
-                }
+        // We need to set empty folder list
+        for (name, folder_entry) in folders_checked {
+            if folder_entry.is_empty != FolderEmptiness::No {
+                self.empty_folder_list.insert(name, folder_entry);
             }
-        } else {
-            // We need to check if parent of folder isn't also empty, because we want to delete only parent with two empty folders except this folders and at the end parent folder
-            let mut new_folders_list: BTreeMap<String, FolderEntry> = Default::default();
-            for (name, folder_entry) in folders_checked {
-                if folder_entry.is_empty != FolderEmptiness::No && self.empty_folder_list.contains_key(&name) {
-                    new_folders_list.insert(name, folder_entry);
-                }
-            }
-            self.empty_folder_list = new_folders_list;
         }
 
         Common::print_time(start_time, SystemTime::now(), "check_for_empty_folder".to_string());
+        true
     }
 
     /// Deletes earlier found empty folders
