@@ -106,8 +106,8 @@ impl Directories {
         let mut optimized_excluded: Vec<PathBuf> = Vec::new();
 
         if cfg!(target_family = "windows") {
-            self.included_directories = self.included_directories.iter().map(|d| Common::prettier_windows_path(d)).collect();
-            self.excluded_directories = self.excluded_directories.iter().map(|d| Common::prettier_windows_path(d)).collect();
+            self.included_directories = self.included_directories.iter().map(Common::prettier_windows_path).collect();
+            self.excluded_directories = self.excluded_directories.iter().map(Common::prettier_windows_path).collect();
         }
 
         // Remove duplicated entries like: "/", "/"
