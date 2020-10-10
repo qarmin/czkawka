@@ -537,15 +537,15 @@ impl SaveResults for DuplicateFinder {
             for (size, vector) in self.files_with_identical_size.iter().rev() {
                 write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                 for file_entry in vector {
-                    write!(file, "{} \n", file_entry.path.display()).unwrap();
+                    writeln!(file, "{}", file_entry.path.display()).unwrap();
                 }
             }
 
             if !self.files_with_identical_hashes.is_empty() {
-                write!(file, "-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
-                write!(
+                writeln!(file, "-------------------------------------------------Files with same hashes-------------------------------------------------").unwrap();
+                writeln!(
                     file,
-                    "Found {} duplicated files which in {} groups which takes {}.\n",
+                    "Found {} duplicated files which in {} groups which takes {}.",
                     self.information.number_of_duplicated_files_by_hash,
                     self.information.number_of_groups_by_hash,
                     self.information.lost_space_by_hash.file_size(options::BINARY).unwrap()
@@ -553,9 +553,9 @@ impl SaveResults for DuplicateFinder {
                 .unwrap();
                 for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
                     for vector in vectors_vector {
-                        write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
+                        writeln!(file, "\n---- Size {} ({}) - {} files", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                         for file_entry in vector {
-                            write!(file, "{} \n", file_entry.path.display()).unwrap();
+                            writeln!(file, "{}", file_entry.path.display()).unwrap();
                         }
                     }
                 }

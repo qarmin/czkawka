@@ -284,10 +284,10 @@ impl SaveResults for EmptyFolder {
         }
 
         if !self.empty_folder_list.is_empty() {
-            write!(file, "-------------------------------------------------Empty folder list-------------------------------------------------\n").unwrap();
-            write!(file, "Found {} empty folders\n", self.information.number_of_empty_folders).unwrap();
+            writeln!(file, "-------------------------------------------------Empty folder list-------------------------------------------------").unwrap();
+            writeln!(file, "Found {} empty folders", self.information.number_of_empty_folders).unwrap();
             for name in self.empty_folder_list.keys() {
-                write!(file, "{}\n", name.display()).unwrap();
+                writeln!(file, "{}", name.display()).unwrap();
             }
         } else {
             write!(file, "Not found any empty folders.").unwrap();

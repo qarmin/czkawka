@@ -316,12 +316,14 @@ impl SaveResults for BigFile {
             }
         };
 
-        if let Err(_) = write!(
+        if writeln!(
             file,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-        ) {
-            self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+        )
+        .is_err()
+        {
+            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
             return false;
         }
 
@@ -330,7 +332,7 @@ impl SaveResults for BigFile {
 
             for (size, files) in self.big_files.iter().rev() {
                 for file_entry in files {
-                    write!(file, "{} ({}) - {}\n", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
+                    writeln!(file, "{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
                 }
             }
         } else {

@@ -340,9 +340,9 @@ impl SaveResults for EmptyFiles {
         }
 
         if !self.empty_files.is_empty() {
-            write!(file, "Found {} empty files.\n", self.information.number_of_empty_files).unwrap();
+            writeln!(file, "Found {} empty files.", self.information.number_of_empty_files).unwrap();
             for file_entry in self.empty_files.iter() {
-                write!(file, "{} \n", file_entry.path.display()).unwrap();
+                writeln!(file, "{}", file_entry.path.display()).unwrap();
             }
         } else {
             write!(file, "Not found any empty files.").unwrap();

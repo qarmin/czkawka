@@ -322,9 +322,9 @@ impl SaveResults for Temporary {
         }
 
         if !self.temporary_files.is_empty() {
-            write!(file, "Found {} temporary files.\n", self.information.number_of_temporary_files).unwrap();
+            writeln!(file, "Found {} temporary files.", self.information.number_of_temporary_files).unwrap();
             for file_entry in self.temporary_files.iter() {
-                write!(file, "{} \n", file_entry.path.display()).unwrap();
+                writeln!(file, "{}", file_entry.path.display()).unwrap();
             }
         } else {
             write!(file, "Not found any temporary files.").unwrap();

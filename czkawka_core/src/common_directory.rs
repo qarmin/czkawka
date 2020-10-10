@@ -72,7 +72,7 @@ impl Directories {
         for directory in directories {
             let directory_as_string = directory.to_string_lossy();
             if directory_as_string == "/" {
-                text_messages.errors.push(format!("Excluded Directory ERROR: Excluding / is pointless, because it means that no files will be scanned."));
+                text_messages.errors.push("Excluded Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
                 break;
             }
             if directory_as_string.contains('*') {
