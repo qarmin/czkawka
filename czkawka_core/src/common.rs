@@ -102,6 +102,10 @@ impl Common {
         }
         true
     }
+    #[allow(clippy::ptr_arg)]
+    pub fn prettier_windows_path(path_to_change: &String) -> String {
+        path_to_change[..1].to_uppercase() + path_to_change[1..].to_lowercase().replace("\\", "/").as_str()
+    }
 }
 
 #[cfg(test)]
@@ -127,5 +131,11 @@ mod test {
         assert!(!Common::regex_check("*home/", "/home"));
         assert!(!Common::regex_check("*TTT", "/GGG"));
         assert!(!Common::regex_check("AAA", "AAA"));
+    }
+    #[test]
+    fn test_windows_path() {
+        assert_eq!("C:/path.txt", Common::prettier_windows_path(&"c:/PATH.tXt".to_string()));
+        assert_eq!("H:/reka/weza/roman.txt", Common::prettier_windows_path(&"h:/RekA/Weza\\roMan.Txt".to_string()));
+        assert_eq!("T:/a", Common::prettier_windows_path(&"T:\\A".to_string()));
     }
 }
