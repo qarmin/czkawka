@@ -508,30 +508,25 @@ impl SaveResults for DuplicateFinder {
             }
         };
 
-        match file.write_all(
-            format!(
-                "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
-                self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-            )
-            .as_bytes(),
-        ) {
-            Ok(_) => (),
-            Err(_) => {
-                self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
-                return false;
-            }
+        if writeln!(
+            file,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+        )
+        .is_err()
+        {
+            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+            return false;
         }
 
         if !self.files_with_identical_size.is_empty() {
-            file.write_all(b"-------------------------------------------------Files with same size-------------------------------------------------\n").unwrap();
-            file.write_all(
-                format!(
-                    "Found {} duplicated files which in {} groups which takes {}.\n",
-                    self.information.number_of_duplicated_files_by_size,
-                    self.information.number_of_groups_by_size,
-                    self.information.lost_space_by_size.file_size(options::BINARY).unwrap()
-                )
-                .as_bytes(),
+            writeln!(file, "-------------------------------------------------Files with same size-------------------------------------------------").unwrap();
+            writeln!(
+                file,
+                "Found {} duplicated files which in {} groups which takes {}.",
+                self.information.number_of_duplicated_files_by_size,
+                self.information.number_of_groups_by_size,
+                self.information.lost_space_by_size.file_size(options::BINARY).unwrap()
             )
             .unwrap();
             for (size, vector) in self.files_with_identical_size.iter().rev() {

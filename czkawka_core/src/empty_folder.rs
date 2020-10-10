@@ -275,12 +275,9 @@ impl SaveResults for EmptyFolder {
             }
         };
 
-        match file.write_all(format!("Results of searching {:?} with excluded directories {:?}\n", self.directories.included_directories, self.directories.excluded_directories).as_bytes()) {
-            Ok(_) => (),
-            Err(_) => {
-                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
-                return false;
-            }
+        if writeln!(file, "Results of searching {:?} with excluded directories {:?}", self.directories.included_directories, self.directories.excluded_directories).is_err() {
+            self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+            return false;
         }
 
         if !self.empty_folder_list.is_empty() {

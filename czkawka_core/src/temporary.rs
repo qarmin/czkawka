@@ -307,18 +307,15 @@ impl SaveResults for Temporary {
             }
         };
 
-        match file.write_all(
-            format!(
-                "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
-                self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-            )
-            .as_bytes(),
-        ) {
-            Ok(_) => (),
-            Err(_) => {
-                self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
-                return false;
-            }
+        if writeln!(
+            file,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+        )
+        .is_err()
+        {
+            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+            return false;
         }
 
         if !self.temporary_files.is_empty() {
