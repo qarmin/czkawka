@@ -85,7 +85,6 @@ impl Common {
         }
         // `*home` shouldn't be true for `/homeowner`
         if !expression.ends_with('*') && !directory.ends_with(splits.last().unwrap()) {
-            // && !directory.ends_with(&(splits.last().unwrap().to_string() + "/")){
             return false;
         }
 

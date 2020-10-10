@@ -8,6 +8,7 @@ use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
+use crossbeam_channel::Receiver;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -47,6 +48,7 @@ pub struct Temporary {
     excluded_items: ExcludedItems,
     recursive_search: bool,
     delete_method: DeleteMethod,
+    stopped_search: bool,
 }
 
 impl Temporary {
@@ -59,15 +61,22 @@ impl Temporary {
             excluded_items: ExcludedItems::new(),
             delete_method: DeleteMethod::None,
             temporary_files: vec![],
+            stopped_search: false,
         }
     }
 
     /// Finding temporary files, save results to internal struct variables
-    pub fn find_temporary_files(&mut self) {
+    pub fn find_temporary_files(&mut self, rx: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        self.check_files();
+        if !self.check_files(rx) {
+            self.stopped_search = true;
+            return;
+        }
         self.delete_files();
         self.debug_print();
+    }
+    pub fn get_stopped_search(&self) -> bool {
+        self.stopped_search
     }
 
     pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
@@ -101,7 +110,7 @@ impl Temporary {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files(&mut self) {
+    fn check_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -114,6 +123,9 @@ impl Temporary {
         let mut current_folder: String;
         let mut next_folder: String;
         while !folders_to_check.is_empty() {
+            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                return false;
+            }
             current_folder = folders_to_check.pop().unwrap();
 
             // Read current dir, if permission are denied just go to next
@@ -143,10 +155,6 @@ impl Temporary {
                 };
                 if metadata.is_dir() {
                     self.information.number_of_checked_folders += 1;
-                    // if entry_data.file_name().into_string().is_err() { // Probably this can be removed, if crash still will be happens, then uncomment this line
-                    //     self.text_messages.warnings.push("Cannot read folder name in dir ".to_string() + current_folder.as_str());
-                    //     continue; // Permissions denied
-                    // }
 
                     if !self.recursive_search {
                         continue;
@@ -232,6 +240,7 @@ impl Temporary {
         self.information.number_of_temporary_files = self.temporary_files.len();
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+        true
     }
 
     /// Function to delete files, from filed Vector

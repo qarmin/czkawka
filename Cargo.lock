@@ -344,6 +344,7 @@ name = "czkawka_core"
 version = "1.0.1"
 dependencies = [
  "blake3",
+ "crossbeam-channel",
  "humansize",
 ]
 
@@ -352,6 +353,7 @@ name = "czkawka_gui"
 version = "1.0.1"
 dependencies = [
  "chrono",
+ "crossbeam-channel",
  "czkawka_core",
  "gdk",
  "gio",

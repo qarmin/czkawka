@@ -4,6 +4,7 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::BTreeMap;
 use std::fs;
@@ -45,6 +46,7 @@ pub struct BigFile {
     allowed_extensions: Extensions,
     recursive_search: bool,
     number_of_files_to_check: usize,
+    stopped_search: bool,
 }
 
 impl BigFile {
@@ -58,13 +60,20 @@ impl BigFile {
             allowed_extensions: Extensions::new(),
             recursive_search: true,
             number_of_files_to_check: 50,
+            stopped_search: false,
         }
     }
 
-    pub fn find_big_files(&mut self) {
+    pub fn find_big_files(&mut self, rx: Option<&Receiver<()>>) {
         self.optimize_directories();
-        self.look_for_big_files();
+        if !self.look_for_big_files(rx) {
+            self.stopped_search = true;
+            return;
+        }
         self.debug_print();
+    }
+    pub fn get_stopped_search(&self) -> bool {
+        self.stopped_search
     }
 
     pub const fn get_big_files(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
@@ -88,7 +97,7 @@ impl BigFile {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    fn look_for_big_files(&mut self) {
+    fn look_for_big_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -101,6 +110,9 @@ impl BigFile {
         let mut current_folder: String;
         let mut next_folder: String;
         while !folders_to_check.is_empty() {
+            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                return false;
+            }
             current_folder = folders_to_check.pop().unwrap();
 
             let read_dir = match fs::read_dir(&current_folder) {
@@ -127,10 +139,6 @@ impl BigFile {
                 };
                 if metadata.is_dir() {
                     self.information.number_of_checked_folders += 1;
-                    // if entry_data.file_name().into_string().is_err() { // Probably this can be removed, if crash still will be happens, then uncomment this line
-                    //     self.text_messages.warnings.push("Cannot read folder name in dir ".to_string() + current_folder.as_str());
-                    //     continue; // Permissions denied
-                    // }
 
                     if !self.recursive_search {
                         continue;
@@ -163,11 +171,13 @@ impl BigFile {
                     .to_lowercase();
 
                     // Checking allowed extensions
-                    let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                    if !allowed {
-                        // Not an allowed extension, ignore it.
-                        self.information.number_of_ignored_files += 1;
-                        continue 'dir;
+                    if !self.allowed_extensions.file_extensions.is_empty() {
+                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                        if !allowed {
+                            // Not an allowed extension, ignore it.
+                            self.information.number_of_ignored_files += 1;
+                            continue 'dir;
+                        }
                     }
                     // Checking files
                     let current_file_name = "".to_owned()
@@ -236,6 +246,7 @@ impl BigFile {
         self.big_files = new_map;
 
         Common::print_time(start_time, SystemTime::now(), "look_for_big_files".to_string());
+        true
     }
 
     pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {
