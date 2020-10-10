@@ -312,8 +312,16 @@ fn main() {
             let current_dir: String = match env::current_dir() {
                 Ok(t) => t.to_str().unwrap().to_string(),
                 Err(_) => {
-                    println!("Failed to read current directory, setting /home instead");
-                    "/home".to_string()
+                    #[cfg(target_family = "unix")]
+                    {
+                        println!("Failed to read current directory, setting /home instead");
+                        "/home".to_string()
+                    }
+                    #[cfg(target_family = "windows")]
+                    {
+                        println!("Failed to read current directory, setting C:\\ instead");
+                        "C:\\".to_string()
+                    }
                 }
             };
 
@@ -343,6 +351,17 @@ fn main() {
 
             scrolled_window_excluded_directories.add(&tree_view_excluded_directory);
             scrolled_window_excluded_directories.show_all();
+        }
+        // Set Excluded Items
+        {
+            #[cfg(target_family = "unix")]
+            {
+                entry_excluded_items.set_text("*/.git/,*/node_modules/,*/lost+found/");
+            }
+            #[cfg(target_family = "windows")]
+            {
+                entry_excluded_items.set_text("*\\.git\\,*\\node_modules\\,*:\\Windows\\,:/Windows/");
+            }
         }
     }
 

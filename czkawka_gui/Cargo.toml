@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "1.0.1"
+version = "1.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2018"
 description = "GTK frontend of Czkawka"

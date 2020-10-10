@@ -17,9 +17,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b602bfe940d21c130f3895acd65221e8a61270debe89d628b9cb4e3ccb8569b"
+checksum = "a1fd36ffbb1fb7c834eac128ea8d0e310c5aeb635548f9d58861e1308d46e71c"
 
 [[package]]
 name = "approx"
@@ -196,9 +196,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.60"
+version = "1.0.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef611cc68ff783f18535d77ddd080185275713d852c4f5cbb6122c462a7a825c"
+checksum = "ed67cbde08356238e75fc4656be4749481eeffb09e19f320a25237d5221c985d"
 
 [[package]]
 name = "cfg-if"
@@ -245,9 +245,9 @@ dependencies = [
 
 [[package]]
 name = "color_quant"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0dbbb57365263e881e805dc77d94697c9118fd94d8da011240555aa7b23445bd"
+checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
 name = "console_error_panic_hook"
@@ -333,7 +333,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "czkawka_core",
  "structopt",
@@ -341,7 +341,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "blake3",
  "crossbeam-channel",
@@ -350,7 +350,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",
@@ -364,7 +364,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui_orbtk"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "czkawka_core",
  "orbtk",
@@ -414,7 +414,7 @@ checksum = "41cb0e6161ad61ed084a36ba71fbba9e3ac5aee3606fb607fe08da6acbcf3d8c"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -545,7 +545,7 @@ dependencies = [
  "proc-macro-hack",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -745,7 +745,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -905,9 +905,9 @@ checksum = "2448f6066e80e3bfc792e9c98bf705b4b0fc6e8ef5b43e5889aff0eaa9c58743"
 
 [[package]]
 name = "libloading"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2443d8f0478b16759158b2f66d525991a05491138bc05814ef52a250148ef4f9"
+checksum = "3557c9384f7f757f6d139cd3a4c62ef4e850696c16bf27924a5538c8a09717a1"
 dependencies = [
  "cfg-if",
  "winapi",
@@ -1130,7 +1130,7 @@ dependencies = [
  "case",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1275,7 +1275,7 @@ checksum = "c82fb1329f632c3552cf352d14427d57a511b1cf41db93b3a7d77906a82dcc8e"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1338,7 +1338,7 @@ dependencies = [
  "proc-macro-error-attr",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
  "version_check",
 ]
 
@@ -1763,7 +1763,7 @@ checksum = "f630a6370fd8e457873b4bd2ffdae75408bc291ba72be773772a4c2a065d9ae8"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1840,7 +1840,7 @@ dependencies = [
  "quote 1.0.7",
  "serde",
  "serde_derive",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1856,7 +1856,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "sha1",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1873,9 +1873,9 @@ checksum = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 
 [[package]]
 name = "structopt"
-version = "0.3.18"
+version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a33f6461027d7f08a13715659b2948e1602c31a3756aeae9378bfe7518c72e82"
+checksum = "a7a7159e7d0dbcab6f9c980d7971ef50f3ff5753081461eeda120d5974a4ee95"
 dependencies = [
  "clap",
  "lazy_static",
@@ -1884,15 +1884,15 @@ dependencies = [
 
 [[package]]
 name = "structopt-derive"
-version = "0.4.11"
+version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c92e775028122a4b3dd55d58f14fc5120289c69bee99df1d117ae30f84b225c9"
+checksum = "8fc47de4dfba76248d1e9169ccff240eea2a4dc1e34e309b95b2393109b4b383"
 dependencies = [
  "heck",
  "proc-macro-error",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1910,7 +1910,7 @@ dependencies = [
  "heck",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -1938,9 +1938,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.42"
+version = "1.0.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c51d92969d209b54a98397e1b91c8ae82d8c87a7bb87df0b29aa2ad81454228"
+checksum = "1e2e59c50ed8f6b050b071aa7b6865293957a9af6b58b94f97c1c9434ad440ea"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
@@ -1987,22 +1987,22 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.20"
+version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dfdd070ccd8ccb78f4ad66bf1982dc37f620ef696c6b5028fe2ed83dd3d0d08"
+checksum = "318234ffa22e0920fe9a40d7b8369b5f649d490980cf7aadcf1eb91594869b42"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.20"
+version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd80fc12f73063ac132ac92aceea36734f04a1d93c1240c6944e23a3b8841793"
+checksum = "cae2447b6282786c3493999f40a9be2a6ad20cb8bd268b0a0dbf5a065535c0ab"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
 ]
 
 [[package]]
@@ -2129,7 +2129,7 @@ dependencies = [
  "log",
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
  "wasm-bindgen-shared",
 ]
 
@@ -2151,7 +2151,7 @@ checksum = "f249f06ef7ee334cc3b8ff031bfc11ec99d00f34d86da7498396dc1e3b1498fe"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
- "syn 1.0.42",
+ "syn 1.0.43",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
