@@ -206,8 +206,7 @@ impl EmptyFolder {
         #[allow(unused_mut)] // Used is later by Windows build
         for (mut name, folder_entry) in folders_checked {
             if folder_entry.is_empty != FolderEmptiness::No {
-                #[cfg(target_family = "windows")]
-                {
+                if cfg!(target_family = "windows") {
                     name = Common::prettier_windows_path(&name);
                 }
 

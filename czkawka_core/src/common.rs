@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 /// Class for common functions used across other class/functions
@@ -105,9 +105,29 @@ impl Common {
         }
         true
     }
-    #[allow(clippy::ptr_arg)]
-    pub fn prettier_windows_path(path_to_change: &String) -> String {
-        path_to_change[..1].to_uppercase() + path_to_change[1..].to_lowercase().replace("\\", "/").as_str()
+
+    pub fn prettier_windows_path(path_to_change: &Path) -> PathBuf {
+        use std::path::{Component, Prefix};
+
+        let mut new_path = PathBuf::new();
+        for component in path_to_change.components() {
+            match component {
+                Component::Prefix(prefix) => match prefix.kind() {
+                    Prefix::Disk(letter) => {
+                        let drive = format!("{}:", letter.to_ascii_uppercase() as char);
+                        new_path.push(drive);
+                    }
+                    _ => {
+                        new_path.push(component);
+                    }
+                },
+                other => {
+                    new_path.push(other);
+                }
+            }
+        }
+
+        new_path
     }
 }
 

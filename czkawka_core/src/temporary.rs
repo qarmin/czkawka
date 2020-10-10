@@ -125,7 +125,10 @@ impl Temporary {
             if rx.is_some() && rx.unwrap().try_recv().is_ok() {
                 return false;
             }
-            let current_folder = folders_to_check.pop().unwrap();
+            let mut current_folder = folders_to_check.pop().unwrap();
+            if cfg!(target_family = "windows") {
+                current_folder = Common::prettier_windows_path(&current_folder);
+            }
 
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
@@ -184,7 +187,10 @@ impl Temporary {
                         continue 'dir;
                     }
                     // Checking files
-                    let current_file_name = current_folder.join(entry_data.file_name());
+                    let mut current_file_name = current_folder.join(entry_data.file_name());
+                    if cfg!(target_family = "windows") {
+                        current_file_name = Common::prettier_windows_path(&current_file_name);
+                    }
 
                     // Checking expressions
                     for expression in &self.excluded_items.items {

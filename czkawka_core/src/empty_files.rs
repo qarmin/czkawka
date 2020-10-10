@@ -199,13 +199,17 @@ impl EmptyFiles {
                     }
                     // Checking files
                     if metadata.len() == 0 {
-                        let current_file_name = current_folder.join(entry_data.file_name());
+                        let mut current_file_name = current_folder.join(entry_data.file_name());
 
                         // Checking expressions
                         for expression in &self.excluded_items.items {
                             if Common::regex_check(expression, &current_file_name) {
                                 continue 'dir;
                             }
+                        }
+
+                        if cfg!(target_family = "windows") {
+                            current_file_name = Common::prettier_windows_path(&current_file_name);
                         }
 
                         // Creating new file entry
