@@ -18,6 +18,7 @@ use gtk::prelude::*;
 use gtk::{Builder, SelectionMode, TreeIter, TreeView};
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fs::Metadata;
 use std::rc::Rc;
 use std::{env, fs, process, thread};
 
@@ -423,7 +424,7 @@ fn main() {
                     let excluded_items = entry_excluded_items.get_text().as_str().to_string();
                     let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
 
-                    hide_all_buttons_except("stop", &buttons_array, &buttons_names); // TODO Stop should do something
+                    hide_all_buttons_except("stop", &buttons_array, &buttons_names);
 
                     // Disable main notebook from any iteraction until search will end
                     notebook_main.set_sensitive(false);
@@ -625,12 +626,64 @@ fn main() {
                                 let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFolders::Name as i32).get::<String>().unwrap().unwrap();
                                 let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsEmptyFolders::Path as i32).get::<String>().unwrap().unwrap();
 
-                                // TODO this should be fs::remove_dir_all(), because it doesn't delete folders with empty folders inside
-                                match fs::remove_dir(format!("{}/{}", path, name)) {
-                                    Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                                // We must check if folder is really empty or contains only other empty folders
+                                let mut error_happened = false;
+                                let mut folders_to_check: Vec<String> = vec![format!("{}/{}", path, name)];
+                                let mut current_folder: String;
+                                let mut next_folder: String;
+                                'dir: while !folders_to_check.is_empty() {
+                                    current_folder = folders_to_check.pop().unwrap();
+                                    let read_dir = match fs::read_dir(&current_folder) {
+                                        Ok(t) => t,
+                                        Err(_) => {
+                                            error_happened = true;
+                                            break 'dir;
+                                        }
+                                    };
+
+                                    for entry in read_dir {
+                                        let entry_data = match entry {
+                                            Ok(t) => t,
+                                            Err(_) => {
+                                                error_happened = true;
+                                                break 'dir;
+                                            }
+                                        };
+                                        let metadata: Metadata = match entry_data.metadata() {
+                                            Ok(t) => t,
+                                            Err(_) => {
+                                                error_happened = true;
+                                                break 'dir;
+                                            }
+                                        };
+                                        if metadata.is_dir() {
+                                            next_folder = "".to_owned()
+                                                + &current_folder
+                                                + "/"
+                                                + match &entry_data.file_name().into_string() {
+                                                    Ok(t) => t,
+                                                    Err(_) => {
+                                                        error_happened = true;
+                                                        break 'dir;
+                                                    }
+                                                };
+                                            folders_to_check.push(next_folder.clone());
+                                        } else {
+                                            error_happened = true;
+                                        }
                                     }
-                                    Err(_) => messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str(),
+                                }
+
+                                if !error_happened {
+                                    match fs::remove_dir_all(format!("{}/{}", path, name)) {
+                                        Ok(_) => {
+                                            list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                                        }
+                                        Err(_) => error_happened = true,
+                                    }
+                                }
+                                if error_happened {
+                                    messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str()
                                 }
                             }
 
