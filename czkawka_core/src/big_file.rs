@@ -180,7 +180,8 @@ impl BigFile {
                         }
                     }
                     // Checking files
-                    let current_file_name = "".to_owned()
+                    #[allow(unused_mut)] // Used is later by Windows build
+                    let mut current_file_name = "".to_owned()
                         + &current_folder
                         + match &entry_data.file_name().into_string() {
                             Ok(t) => t,
@@ -192,6 +193,11 @@ impl BigFile {
                         if Common::regex_check(expression, &current_file_name) {
                             continue 'dir;
                         }
+                    }
+
+                    #[cfg(target_family = "windows")]
+                    {
+                        current_file_name = Common::prettier_windows_path(&current_file_name);
                     }
 
                     // Creating new file entry
