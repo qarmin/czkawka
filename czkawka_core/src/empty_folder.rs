@@ -7,8 +7,8 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Enum with values which show if folder is empty.
 /// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here

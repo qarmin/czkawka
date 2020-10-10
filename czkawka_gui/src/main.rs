@@ -19,9 +19,9 @@ use gtk::{Builder, SelectionMode, TreeIter, TreeView};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs::Metadata;
+use std::path::Path;
 use std::rc::Rc;
 use std::{env, fs, process, thread};
-use std::path::Path;
 
 fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
@@ -1516,11 +1516,7 @@ fn main() {
 
                         for (path, entry) in hashmap {
                             let (directory, file) = split_path(path);
-                            let values: [&dyn ToValue; 3] = [
-                                &file,
-                                &directory,
-                                &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())
-                            ];
+                            let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -1587,11 +1583,7 @@ fn main() {
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 3] = [
-                                &file,
-                                &directory,
-                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())
-                            ];
+                            let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -1732,10 +1724,7 @@ fn main() {
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 3] = [
-                                &file,
-                                &directory,
-                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                            let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
                             list_store.set(&list_store.append(), &col_indices, &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);

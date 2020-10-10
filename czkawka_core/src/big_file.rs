@@ -11,8 +11,8 @@ use std::ffi::OsStr;
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Clone)]
 pub struct FileEntry {
@@ -156,18 +156,11 @@ impl BigFile {
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     // Extracting file extension
-                    let file_extension = entry_data
-                        .path()
-                        .extension()
-                        .and_then(OsStr::to_str)
-                        .map(str::to_lowercase);
+                    let file_extension = entry_data.path().extension().and_then(OsStr::to_str).map(str::to_lowercase);
 
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
-                        let allowed = self.allowed_extensions.file_extensions
-                            .iter()
-                            .map(|e| e.to_lowercase())
-                            .any(|e| file_extension == Some(e));
+                        let allowed = self.allowed_extensions.file_extensions.iter().map(|e| e.to_lowercase()).any(|e| file_extension == Some(e));
                         if !allowed {
                             // Not an allowed extension, ignore it.
                             self.information.number_of_ignored_files += 1;
@@ -319,8 +312,11 @@ impl SaveResults for BigFile {
             }
         };
 
-        if let Err(_) = write!(file, "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
-                               self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items) {
+        if let Err(_) = write!(
+            file,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
+            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+        ) {
             self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
             return false;
         }

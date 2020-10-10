@@ -23,12 +23,7 @@ impl Directories {
         }
 
         let included_directory = included_directory.replace("\"", "");
-        let directories: Vec<_> = included_directory
-            .split(',')
-            .map(|dir| dir.trim())
-            .filter(|dir| !dir.is_empty())
-            .map(PathBuf::from)
-            .collect();
+        let directories: Vec<_> = included_directory.split(',').map(|dir| dir.trim()).filter(|dir| !dir.is_empty()).map(PathBuf::from).collect();
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {
@@ -71,12 +66,7 @@ impl Directories {
 
         let excluded_directory = excluded_directory.replace("\"", "");
 
-        let directories: Vec<PathBuf> = excluded_directory
-            .split(',')
-            .map(|dir| dir.trim())
-            .filter(|dir| !dir.is_empty())
-            .map(PathBuf::from)
-            .collect();
+        let directories: Vec<PathBuf> = excluded_directory.split(',').map(|dir| dir.trim()).filter(|dir| !dir.is_empty()).map(PathBuf::from).collect();
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {

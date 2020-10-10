@@ -539,12 +539,14 @@ impl SaveResults for DuplicateFinder {
 
             if !self.files_with_identical_hashes.is_empty() {
                 write!(file, "-------------------------------------------------Files with same hashes-------------------------------------------------\n").unwrap();
-                write!(file,
-                        "Found {} duplicated files which in {} groups which takes {}.\n",
-                        self.information.number_of_duplicated_files_by_hash,
-                        self.information.number_of_groups_by_hash,
-                        self.information.lost_space_by_hash.file_size(options::BINARY).unwrap()
-                ).unwrap();
+                write!(
+                    file,
+                    "Found {} duplicated files which in {} groups which takes {}.\n",
+                    self.information.number_of_duplicated_files_by_hash,
+                    self.information.number_of_groups_by_hash,
+                    self.information.lost_space_by_hash.file_size(options::BINARY).unwrap()
+                )
+                .unwrap();
                 for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
                     for vector in vectors_vector {
                         write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
