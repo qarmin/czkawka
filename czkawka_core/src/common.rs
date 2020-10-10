@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
@@ -106,34 +107,29 @@ impl Common {
         true
     }
 
-    pub fn prettier_windows_path(path_to_change: &Path) -> PathBuf {
-        use std::path::{Component, Prefix};
-
-        let mut new_path = PathBuf::new();
-        for component in path_to_change.components() {
-            match component {
-                Component::Prefix(prefix) => match prefix.kind() {
-                    Prefix::Disk(letter) => {
-                        let drive = format!("{}:", letter.to_ascii_uppercase() as char);
-                        new_path.push(drive);
-                    }
-                    _ => {
-                        new_path.push(component);
-                    }
-                },
-                other => {
-                    new_path.push(other);
+    pub fn prettier_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
+        let path = path_to_change.as_ref();
+        match path.to_str() {
+            Some(path) if path.is_char_boundary(1) => {
+                let replaced = path.replace('\\', "/");
+                let mut new_path = OsString::new();
+                if replaced[1..].starts_with(':') {
+                    new_path.push(replaced[..1].to_ascii_uppercase());
+                    new_path.push(replaced[1..].to_ascii_lowercase());
+                } else {
+                    new_path.push(replaced);
                 }
+                PathBuf::from(new_path)
             }
+            _ => path.to_path_buf(),
         }
-
-        new_path
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::common::Common;
+    use std::path::PathBuf;
 
     #[test]
     fn test_regex() {
@@ -157,8 +153,8 @@ mod test {
     }
     #[test]
     fn test_windows_path() {
-        assert_eq!("C:/path.txt", Common::prettier_windows_path(&"c:/PATH.tXt".to_string()));
-        assert_eq!("H:/reka/weza/roman.txt", Common::prettier_windows_path(&"h:/RekA/Weza\\roMan.Txt".to_string()));
-        assert_eq!("T:/a", Common::prettier_windows_path(&"T:\\A".to_string()));
+        assert_eq!(PathBuf::from("C:/path.txt"), Common::prettier_windows_path("c:/PATH.tXt"));
+        assert_eq!(PathBuf::from("H:/reka/weza/roman.txt"), Common::prettier_windows_path("h:/RekA/Weza\\roMan.Txt"));
+        assert_eq!(PathBuf::from("T:/a"), Common::prettier_windows_path("T:\\A"));
     }
 }
