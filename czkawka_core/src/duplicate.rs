@@ -533,7 +533,7 @@ impl SaveResults for DuplicateFinder {
             for (size, vector) in self.files_with_identical_size.iter().rev() {
                 write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                 for file_entry in vector {
-                    writeln!(file, "{} \n", file_entry.path.display()).unwrap();
+                    write!(file, "{} \n", file_entry.path.display()).unwrap();
                 }
             }
 
