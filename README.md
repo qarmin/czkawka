@@ -1,17 +1,17 @@
 # Czkawka
-Czkawka is simple, fast and easy to use alternative to Fslint, written in Rust.  
-This is my first ever project in Rust so probably a lot of things are not being written in the most optimal way.
+Czkawka is a simple, fast, and easy to use alternative to Fslint, written in Rust.  
+This is my first project in Rust ever, so many things might not be written in the most optimal way.
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/94850792-c200cc80-0427-11eb-99a7-23ab9cf39556.gif)
 
 ## Why?
-In internet exists a lot of tools to find duplicates, empty folders, temporary files etc. but in most cases there are only available on CLI, which is hard to use by users.
+On the Internet there are many tools to find duplicates, empty folders, temporary files, etc. but in most cases, those are only available with CLI, which is hard to use by users.
 
-GUI FSlint allows to really easy select different files and folders, but is based on old and unsupported Python 2 and GTK 2.
+GUI FSlint allows easy selection of different files and folders but is based on old and unsupported Python 2 and GTK 2.
 
-Other tools are mostly written in C/C++ to provide big performance but still needs to be tested a lot if not contains memory leaks, invalid memory reads/write and double frees.
+Other tools are usually written in C/C++ to provide better performance but still need to be tested for memory leaks, invalid memory reads/write, and double frees.
 
-But the most important thing for me was to learn Rust and create a program useful for the open source community.
+But the most important thing for me was to learn Rust and create a useful program for the open-source community.
 
 ## Features
 - Written in fast and memory safe Rust
@@ -31,22 +31,22 @@ But the most important thing for me was to learn Rust and create a program usefu
 
 ## Usage and requirements
 ### Requirements
-For normal use of the program, the only requirements for  is having GTK 3.22+.  
-For CLI, Orbtk on all OS and GTK GUI on Windows, there is no special requirements.
+For normal use of the program, the only requirement is having GTK 3.22+.  
+For CLI, Orbtk on all OS and GTK GUI on Windows, there are no special requirements.
 
-Precompiled binaries are here - https://github.com/qarmin/czkawka/releases/
+Precompiled binaries are available here - https://github.com/qarmin/czkawka/releases/
 
-You can also application with every single commit here - https://github.com/qarmin/czkawka/actions
+You can also download the application with different commits here - https://github.com/qarmin/czkawka/actions
 
-If app not working when clicking at it, run it by terminal.
+If the app does not work after clicking, you can try running it through the terminal.
 ### Cargo
-You can really fast install Czkawka from Cargo by typing `cargo install czkawka_gui`
+You can easily install Czkawka from Cargo by typing `cargo install czkawka_gui`
 
 ### Snap,  Flatpak, Appimage
 Still WIP, but looking for help
 
 ### AUR - Arch Linux Package
-Czkawka is also available in Arch Linux AUR from which it can be simple downloaded and installed on OS.
+Czkawka is also available in Arch Linux's AUR from which it can be easily downloaded and installed on that OS.
 
 ## Compilation
 ### Requirements
@@ -54,7 +54,7 @@ Rust 1.46 - probably lower also works fine(1.40 is needed by GTK)
 GTK 3.22 - for GTK backend
 
 
-For now only Linux(and maybe also macOS) is supported
+For now, only Linux (and maybe also macOS) is supported
 
 - Install requirements for GTK
 ```
@@ -73,7 +73,7 @@ cargo run --bin czkawka_gui
 ```
 For Linux to Windows cross-building instruction look at the CI.
 ![GUI GTK](https://user-images.githubusercontent.com/41945903/94850801-c5945380-0427-11eb-8d4c-af4946ab02d5.png)
-- Run alternative Orbtk GUI(Still WIP, currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
+- Run alternative Orbtk GUI (Still WIP, currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
 
 ```
 cargo run --bin czkawka_gui_orbtk
@@ -86,11 +86,11 @@ cargo run --bin czkawka_cli
 ![CLI](https://user-images.githubusercontent.com/41945903/93716816-0bbcfd80-fb72-11ea-8d31-4c87cc2abe6d.png)
 
 ## Speed
-Since Czkawka is written in Rust and aims to be a faster alternative for written in Python - FSlint we need to compare speed of this two tools.
+Since Czkawka is written in Rust and aims to be a faster alternative for written in Python FSlint, we need to compare the speed of these two tools.
 
-I checked prepared before directory, without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 176 056 files and 22194 folders and 88436 duplicated files in 52330 groups which took 6,2 GB.
+I checked a previously created directory, without any folder exceptions (I removed all directories from FSlint and Czkawka from other tabs than Include Directory), which contained 176 056 files and 22194 folders and 88436 duplicate files in 52330 groups worth 6,2 GB.
 
-First run reads file entry and save it to cache so this step is mostly limited by disk performance, and with second run cache helps it so searching is sometimes faster(with a small amount of duplicates is even 10x faster).
+The first run reads every file entry and saves it to cache, so this step is limited mostly by disk performance, and with the second run, cache helps it, so searching is sometimes faster (with few duplicates even 10x faster).
 
 Duplicate Checker(Version 0.1.4)
 
@@ -138,17 +138,16 @@ Contributions to this repository are welcome.
 You can help by creating:
 - Bug report - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
-- Pull Requests - implementing by yourself a new feature or fixing bugs, but also important is code quality. If change is bigger, then is good to open new issue to discuss changes.
+- Pull Requests - implementing a new feature by yourself or fixing bugs, but you have to pay attention to code quality. If the change is bigger, then it is good to open a new issue to discuss changes.
 
-Code should be clean and pretty formatted (Clippy and fmt are required in each PR).
+The code should be clean and pretty formatted (Clippy and fmt are required in each PR).
 
-Code should also be easy to read so please use as much simplest language as possible without magic numbers and variables with strange names, and try to write unit tests/tests if possible.
+Code should also be easy to read so please use the simplest language possible without any magic numbers and variables with strange names. You should also try to write unit tests/tests if possible.
 
 ## Name
-Czkawka is a Polish word which means hiccup.  
+Czkawka is a Polish word that means hiccup.  
 I chose this name because I wanted to hear people speaking other languages pronounce it.  
-This name is not as bad as it seems, because I was also thinking about using words like żółć, gżegżółka czy żołądź, but I gave up these ideas because of having Polish characters, which would be a huge difficulty in searching for a project.
-
+This name is not as bad as it seems, because I was also thinking about using words like żółć, gżegżółka, or żołądź, but I gave up these ideas because they contained Polish characters, which would cause difficulty in searching for the project.
 ## License
 Code is distributed under MIT license.
 
