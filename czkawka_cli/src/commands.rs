@@ -18,7 +18,7 @@ pub enum Commands {
         allowed_extensions: AllowedExtensions,
         #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (SIZE, HASH, HASHMB)", long_help = "Methods to search files.\nSIZE - The fastest method, checking by the file's size,\nHASHMB - More accurate but slower, checking by the hash of the file's first mibibyte or\nHASH - The slowest method, checking by the hash of the entire file")]
         search_method: CheckingMethod,
-        #[structopt(short = "D", long, default_value = "AEO", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest")]
+        #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nNONE - not delete files")]
         delete_method: DeleteMethod,
         #[structopt(flatten)]
         file_to_save: FileToSave,
@@ -147,6 +147,7 @@ fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
 
 fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
+        "none" => Ok(DeleteMethod::None),
         "aen" => Ok(DeleteMethod::AllExceptNewest),
         "aeo" => Ok(DeleteMethod::AllExceptOldest),
         "on" => Ok(DeleteMethod::OneNewest),
