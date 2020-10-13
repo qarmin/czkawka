@@ -14,6 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: actions/setup-python@v1
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
@@ -47,6 +49,101 @@ jobs:
           name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_cli.exe
         if: ${{ matrix.type == 'release' }}
+
+# Duplicate finder checks included and excluded directories
+# Others are just check delete files number
+# Windows build have some elements changed like powershell before wget and unzip, python instead python3, rm -r  instead rm -r and one (at the top) additional test which check size of characyers
+      - name: test
+        run: |
+          powershell wget https://github.com/qarmin/czkawka/releases/download/1.1.0/TestSuite.zip -O TestSuite.zip
+          powershell unzip TestSuite.zip -d TestSuite
+          python misc/check_results.py TestSuite 15 8
+
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" "$(pwd)\testsuite" -e "$(pwd)/TestSuite/subFolder" -D aeo
+          python misc/check_results.py TestSuite 13 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" "$(pwd)/teStSuite" -D aen
+          python misc/check_results.py TestSuite 7 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)\TestSuite" "$(pwd)/TESTSUITE" -D aen
+          python misc/check_results.py TestSuite 7 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+
+
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen
+          python misc/check_results.py TestSuite 7 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen
+          python misc/check_results.py TestSuite 7 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -x TEXT -D aeo
+          python misc/check_results.py TestSuite 14 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -e "$(pwd)/TestSuite/SubFolder" -D aeo
+          python misc/check_results.py TestSuite 13 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -m 1500 -D aeo
+          python misc/check_results.py TestSuite 8 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R
+          python misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -D aeo
+          python misc/check_results.py TestSuite 13 8
+
+
+          target/release/czkawka_cli big -d "$(pwd)/TestSuite"
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli empty-files -d "$(pwd)/TestSuite"
+          python misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli empty-files -d "$(pwd)/TestSuite" -D
+          python misc/check_results.py TestSuite 13 8
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli empty-folders -d "$(pwd)/TestSuite"
+          python misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli empty-folders -d "$(pwd)/TestSuite" -D
+          python misc/check_results.py TestSuite 15 2
+
+          rm -r TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli temp -d "$(pwd)/TestSuite"
+          python misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli temp -d "$(pwd)/TestSuite" -D
+          python misc/check_results.py TestSuite 14 8
+        if: ${{ matrix.type == 'release' }}
+
 
   windows-gui-orbtk:
     strategy:

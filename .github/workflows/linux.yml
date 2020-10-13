@@ -51,6 +51,78 @@ jobs:
           path: target/release/czkawka_cli
         if: ${{ matrix.type == 'release' }}
 
+# Duplicate finder checks included and excluded directories
+# Others are just check delete files number
+      - name: Linux Regression Test
+        run: |
+          wget https://github.com/qarmin/czkawka/releases/download/1.1.0/TestSuite.zip
+          unzip TestSuite.zip -d TestSuite
+          python3 misc/check_results.py TestSuite 15 8
+
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen
+          python3 misc/check_results.py TestSuite 7 8
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen
+          python3 misc/check_results.py TestSuite 7 8
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -x TEXT -D aeo
+          python3 misc/check_results.py TestSuite 14 8
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -e "$(pwd)/TestSuite/SubFolder" -D aeo
+          python3 misc/check_results.py TestSuite 13 8
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -m 1500 -D aeo
+          python3 misc/check_results.py TestSuite 8 8
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R
+          python3 misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -D aeo
+          python3 misc/check_results.py TestSuite 13 8
+
+
+          target/release/czkawka_cli big -d "$(pwd)/TestSuite"
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli empty-files -d "$(pwd)/TestSuite"
+          python3 misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli empty-files -d "$(pwd)/TestSuite" -D
+          python3 misc/check_results.py TestSuite 13 8
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli empty-folders -d "$(pwd)/TestSuite"
+          python3 misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli empty-folders -d "$(pwd)/TestSuite" -D
+          python3 misc/check_results.py TestSuite 15 2
+
+          rm -rf TestSuite
+          unzip TestSuite.zip -d TestSuite
+
+          target/release/czkawka_cli temp -d "$(pwd)/TestSuite"
+          python3 misc/check_results.py TestSuite 15 8
+          target/release/czkawka_cli temp -d "$(pwd)/TestSuite" -D
+          python3 misc/check_results.py TestSuite 14 8
+        if: ${{ matrix.type == 'release' }}
+
   linux-gui:
     strategy:
       matrix:
