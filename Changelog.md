@@ -1,4 +1,9 @@
-## Version 1.1 - 10.10.2020r
+## Version 1.1.1 - 
+- Add test suite to PR
+
+
+
+## Version 1.1.0 - 10.10.2020r
 - Windows support [#58](https://github.com/qarmin/czkawka/pull/58)
 - Improve code quality/Simplify codebase [#52](https://github.com/qarmin/czkawka/pull/52)
 - Fixed skipping some correct results in specific situations [#52](https://github.com/qarmin/czkawka/pull/52#discussion_r502613895)
