@@ -7,14 +7,16 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::BTreeMap;
+use std::ffi::OsStr;
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Clone)]
 pub struct FileEntry {
-    pub path: String,
+    pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
 }
@@ -99,26 +101,23 @@ impl BigFile {
 
     fn look_for_big_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
-            folders_to_check.push(id.to_string());
+            folders_to_check.push(id.clone());
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
-        let mut current_folder: String;
-        let mut next_folder: String;
         while !folders_to_check.is_empty() {
             if rx.is_some() && rx.unwrap().try_recv().is_ok() {
                 return false;
             }
-            current_folder = folders_to_check.pop().unwrap();
-
+            let current_folder = folders_to_check.pop().unwrap();
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_) => {
-                    self.text_messages.warnings.push("Cannot open dir ".to_string() + current_folder.as_str());
+                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
                     continue;
                 } // Permissions denied
             };
@@ -126,14 +125,14 @@ impl BigFile {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Cannot read entry in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Cannot read metadata in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
                         continue;
                     } //Permissions denied
                 };
@@ -144,60 +143,30 @@ impl BigFile {
                         continue;
                     }
 
-                    next_folder = "".to_owned()
-                        + &current_folder
-                        + match &entry_data.file_name().into_string() {
-                            Ok(t) => t,
-                            Err(_) => continue,
-                        }
-                        + "/";
+                    let next_folder = current_folder.join(entry_data.file_name());
+                    if self.directories.is_excluded(&next_folder) || self.excluded_items.is_excluded(&next_folder) {
+                        continue 'dir;
+                    }
 
-                    for ed in &self.directories.excluded_directories {
-                        if next_folder == *ed {
-                            continue 'dir;
-                        }
-                    }
-                    for expression in &self.excluded_items.items {
-                        if Common::regex_check(expression, &next_folder) {
-                            continue 'dir;
-                        }
-                    }
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
-                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                        Ok(t) => t,
-                        Err(_) => continue,
-                    }
-                    .to_lowercase();
+                    // Extracting file extension
+                    let file_extension = entry_data.path().extension().and_then(OsStr::to_str).map(str::to_lowercase);
 
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
-                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                        let allowed = self.allowed_extensions.file_extensions.iter().map(|e| e.to_lowercase()).any(|e| file_extension == Some(e));
                         if !allowed {
                             // Not an allowed extension, ignore it.
                             self.information.number_of_ignored_files += 1;
                             continue 'dir;
                         }
                     }
-                    // Checking files
-                    #[allow(unused_mut)] // Used is later by Windows build
-                    let mut current_file_name = "".to_owned()
-                        + &current_folder
-                        + match &entry_data.file_name().into_string() {
-                            Ok(t) => t,
-                            Err(_) => continue,
-                        };
 
                     // Checking expressions
-                    for expression in &self.excluded_items.items {
-                        if Common::regex_check(expression, &current_file_name) {
-                            continue 'dir;
-                        }
-                    }
-
-                    #[cfg(target_family = "windows")]
-                    {
-                        current_file_name = Common::prettier_windows_path(&current_file_name);
+                    let current_file_name = current_folder.join(entry_data.file_name());
+                    if self.excluded_items.is_excluded(&current_file_name) {
+                        continue 'dir;
                     }
 
                     // Creating new file entry
@@ -208,12 +177,12 @@ impl BigFile {
                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                 Ok(d) => d.as_secs(),
                                 Err(_) => {
-                                    self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
+                                    self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                     0
                                 }
                             },
                             Err(_) => {
-                                self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
+                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
                                 continue;
                             } // Permissions Denied
                         },
@@ -318,6 +287,7 @@ impl DebugPrint for BigFile {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for BigFile {
     /// Saving results to provided file
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
@@ -335,35 +305,33 @@ impl SaveResults for BigFile {
             }
         };
 
-        match file.write_all(
-            format!(
-                "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
-                self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-            )
-            .as_bytes(),
-        ) {
-            Ok(_) => (),
-            Err(_) => {
-                self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
-                return false;
-            }
+        if writeln!(
+            file,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+        )
+        .is_err()
+        {
+            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+            return false;
         }
 
         if self.information.number_of_real_files != 0 {
-            file.write_all(format!("{} the biggest files.\n\n", self.information.number_of_real_files).as_bytes()).unwrap();
+            write!(file, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
 
             for (size, files) in self.big_files.iter().rev() {
                 for file_entry in files {
-                    file.write_all(format!("{} ({}) - {}\n", size.file_size(options::BINARY).unwrap(), size, file_entry.path.clone()).as_bytes()).unwrap();
+                    writeln!(file, "{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
                 }
             }
         } else {
-            file.write_all(b"Not found any empty folders.").unwrap();
+            write!(file, "Not found any empty folders.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
     }
 }
+
 impl PrintResults for BigFile {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
@@ -371,7 +339,7 @@ impl PrintResults for BigFile {
         for (size, vector) in self.big_files.iter().rev() {
             // TODO Align all to same width
             for entry in vector {
-                println!("{} ({} bytes) - {}", size.file_size(options::BINARY).unwrap(), size, entry.path);
+                println!("{} ({} bytes) - {}", size.file_size(options::BINARY).unwrap(), size, entry.path.display());
             }
         }
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());

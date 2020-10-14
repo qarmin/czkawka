@@ -1,6 +1,7 @@
 use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::common::Common;
@@ -19,7 +20,7 @@ pub enum DeleteMethod {
 
 #[derive(Clone)]
 pub struct FileEntry {
-    pub path: String,
+    pub path: PathBuf,
     pub modified_date: u64,
 }
 
@@ -121,27 +122,25 @@ impl EmptyFiles {
     /// Check files for any with size == 0
     fn check_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<String> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
-            folders_to_check.push(id.to_string());
+            folders_to_check.push(id.clone());
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
-        let mut current_folder: String;
-        let mut next_folder: String;
         while !folders_to_check.is_empty() {
             if rx.is_some() && rx.unwrap().try_recv().is_ok() {
                 return false;
             }
-            current_folder = folders_to_check.pop().unwrap();
+            let current_folder = folders_to_check.pop().unwrap();
 
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_) => {
-                    self.text_messages.warnings.push("Cannot open dir ".to_string() + current_folder.as_str());
+                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
                     continue;
                 } // Permissions denied
             };
@@ -151,14 +150,14 @@ impl EmptyFiles {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Cannot read entry in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => {
-                        self.text_messages.warnings.push("Cannot read metadata in dir ".to_string() + current_folder.as_str());
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
                         continue;
                     } //Permissions denied
                 };
@@ -169,24 +168,11 @@ impl EmptyFiles {
                         continue;
                     }
 
-                    next_folder = "".to_owned()
-                        + &current_folder
-                        + match &entry_data.file_name().into_string() {
-                            Ok(t) => t,
-                            Err(_) => continue,
-                        }
-                        + "/";
+                    let next_folder = current_folder.join(entry_data.file_name());
+                    if self.directories.is_excluded(&next_folder) || self.excluded_items.is_excluded(&next_folder) {
+                        continue 'dir;
+                    }
 
-                    for ed in &self.directories.excluded_directories {
-                        if next_folder == *ed {
-                            continue 'dir;
-                        }
-                    }
-                    for expression in &self.excluded_items.items {
-                        if Common::regex_check(expression, &next_folder) {
-                            continue 'dir;
-                        }
-                    }
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
@@ -206,23 +192,9 @@ impl EmptyFiles {
                     }
                     // Checking files
                     if metadata.len() == 0 {
-                        #[allow(unused_mut)] // Used is later by Windows build
-                        let mut current_file_name = "".to_owned()
-                            + &current_folder
-                            + match &entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_) => continue,
-                            };
-
-                        // Checking expressions
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &current_file_name) {
-                                continue 'dir;
-                            }
-                        }
-                        #[cfg(target_family = "windows")]
-                        {
-                            current_file_name = Common::prettier_windows_path(&current_file_name);
+                        let current_file_name = current_folder.join(entry_data.file_name());
+                        if self.excluded_items.is_excluded(&current_file_name) {
+                            continue 'dir;
                         }
 
                         // Creating new file entry
@@ -232,12 +204,12 @@ impl EmptyFiles {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
                                     Err(_) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name));
+                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                         0
                                     }
                                 },
                                 Err(_) => {
-                                    self.text_messages.warnings.push("Unable to get modification date from file ".to_string() + current_file_name.as_str());
+                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
                                     continue;
                                 } // Permissions Denied
                             },
@@ -270,7 +242,7 @@ impl EmptyFiles {
             DeleteMethod::Delete => {
                 for file_entry in &self.empty_files {
                     if fs::remove_file(file_entry.path.clone()).is_err() {
-                        self.text_messages.warnings.push(file_entry.path.clone());
+                        self.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
                 }
             }
@@ -338,27 +310,24 @@ impl SaveResults for EmptyFiles {
             }
         };
 
-        match file.write_all(
-            format!(
-                "Results of searching {:?} with excluded directories {:?} and excluded items {:?}\n",
-                self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-            )
-            .as_bytes(),
-        ) {
-            Ok(_) => (),
-            Err(_) => {
-                self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
-                return false;
-            }
+        if writeln!(
+            file,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+        )
+        .is_err()
+        {
+            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+            return false;
         }
 
         if !self.empty_files.is_empty() {
-            file.write_all(format!("Found {} empty files.\n", self.information.number_of_empty_files).as_bytes()).unwrap();
+            writeln!(file, "Found {} empty files.", self.information.number_of_empty_files).unwrap();
             for file_entry in self.empty_files.iter() {
-                file.write_all(format!("{} \n", file_entry.path).as_bytes()).unwrap();
+                writeln!(file, "{}", file_entry.path.display()).unwrap();
             }
         } else {
-            file.write_all(b"Not found any empty files.").unwrap();
+            write!(file, "Not found any empty files.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
@@ -371,7 +340,7 @@ impl PrintResults for EmptyFiles {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} empty files.\n", self.information.number_of_empty_files);
         for file_entry in self.empty_files.iter() {
-            println!("{}", file_entry.path);
+            println!("{}", file_entry.path.display());
         }
 
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());

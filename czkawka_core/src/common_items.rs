@@ -1,5 +1,6 @@
 use crate::common::Common;
 use crate::common_messages::Messages;
+use std::path::Path;
 use std::time::SystemTime;
 
 #[derive(Default)]
@@ -44,5 +45,18 @@ impl ExcludedItems {
         }
         self.items = checked_expressions;
         Common::print_time(start_time, SystemTime::now(), "set_excluded_items".to_string());
+    }
+
+    /// Checks whether a specified path is excluded from searching
+    pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
+        #[cfg(target_family = "windows")]
+        let path = Common::normalize_windows_path(path);
+
+        for expression in &self.items {
+            if Common::regex_check(expression, &path) {
+                return true;
+            }
+        }
+        false
     }
 }

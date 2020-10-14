@@ -1,5 +1,6 @@
+use std::ffi::OsString;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 /// Class for common functions used across other class/functions
@@ -50,7 +51,7 @@ impl Common {
     }
 
     /// Function to check if directory match expression
-    pub fn regex_check(expression: &str, directory: &str) -> bool {
+    pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if !expression.contains('*') {
             #[cfg(debug_assertions)]
             {
@@ -69,6 +70,9 @@ impl Common {
         if splits.is_empty() {
             return false;
         }
+
+        // Get rid of non unicode characters
+        let directory = directory.as_ref().to_string_lossy();
 
         // Early checking if directory contains all parts needed by expression
         for split in &splits {
@@ -102,15 +106,30 @@ impl Common {
         }
         true
     }
-    #[allow(clippy::ptr_arg)]
-    pub fn prettier_windows_path(path_to_change: &String) -> String {
-        path_to_change[..1].to_uppercase() + path_to_change[1..].to_lowercase().replace("\\", "/").as_str()
+
+    pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
+        let path = path_to_change.as_ref();
+        match path.to_str() {
+            Some(path) if path.is_char_boundary(1) => {
+                let replaced = path.replace('\\', "/");
+                let mut new_path = OsString::new();
+                if replaced[1..].starts_with(':') {
+                    new_path.push(replaced[..1].to_ascii_uppercase());
+                    new_path.push(replaced[1..].to_ascii_lowercase());
+                } else {
+                    new_path.push(replaced.to_ascii_lowercase());
+                }
+                PathBuf::from(new_path)
+            }
+            _ => path.to_path_buf(),
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::common::Common;
+    use std::path::PathBuf;
 
     #[test]
     fn test_regex() {
@@ -134,8 +153,8 @@ mod test {
     }
     #[test]
     fn test_windows_path() {
-        assert_eq!("C:/path.txt", Common::prettier_windows_path(&"c:/PATH.tXt".to_string()));
-        assert_eq!("H:/reka/weza/roman.txt", Common::prettier_windows_path(&"h:/RekA/Weza\\roMan.Txt".to_string()));
-        assert_eq!("T:/a", Common::prettier_windows_path(&"T:\\A".to_string()));
+        assert_eq!(PathBuf::from("C:/path.txt"), Common::normalize_windows_path("c:/PATH.tXt"));
+        assert_eq!(PathBuf::from("H:/reka/weza/roman.txt"), Common::normalize_windows_path("h:/RekA/Weza\\roMan.Txt"));
+        assert_eq!(PathBuf::from("T:/a"), Common::normalize_windows_path("T:\\A"));
     }
 }
