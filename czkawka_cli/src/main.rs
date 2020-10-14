@@ -10,6 +10,7 @@ use czkawka_core::{
     duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
+    similar_files::SimilarImages,
     temporary::{self, Temporary},
 };
 use std::{path::PathBuf, process};
@@ -31,7 +32,7 @@ fn main() {
             directories,
             excluded_directories,
             excluded_items,
-            min_size,
+            minimal_file_size,
             allowed_extensions,
             search_method,
             delete_method,
@@ -43,7 +44,7 @@ fn main() {
             df.set_included_directory(path_list_to_str(directories.directories));
             df.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
             df.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
-            df.set_minimal_file_size(min_size);
+            df.set_minimal_file_size(minimal_file_size);
             df.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             df.set_check_method(search_method);
             df.set_delete_method(delete_method);
@@ -177,6 +178,35 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             tf.print_results();
             tf.get_text_messages().print_messages();
+        }
+        Commands::SimilarImages {
+            directories,
+            excluded_directories,
+            excluded_items,
+            file_to_save,
+            minimal_file_size,
+            not_recursive,
+        } => {
+            let mut sf = SimilarImages::new();
+
+            sf.set_included_directory(path_list_to_str(directories.directories));
+            sf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
+            sf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            sf.set_minimal_file_size(minimal_file_size);
+            sf.set_recursive_search(!not_recursive.not_recursive);
+
+            sf.find_similar_images(None);
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !sf.save_results_to_file(file_name) {
+                    sf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            sf.print_results();
+            sf.get_text_messages().print_messages();
         }
     }
 }
