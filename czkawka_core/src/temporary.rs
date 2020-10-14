@@ -125,11 +125,8 @@ impl Temporary {
             if rx.is_some() && rx.unwrap().try_recv().is_ok() {
                 return false;
             }
-            let mut current_folder = folders_to_check.pop().unwrap();
-            if cfg!(target_family = "windows") {
-                current_folder = Common::prettier_windows_path(&current_folder);
-            }
 
+            let current_folder = folders_to_check.pop().unwrap();
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
@@ -163,14 +160,10 @@ impl Temporary {
                     }
 
                     let next_folder = current_folder.join(entry_data.file_name());
-                    if self.directories.excluded_directories.contains(&next_folder) {
+                    if self.directories.is_excluded(&next_folder) || self.excluded_items.is_excluded(&next_folder) {
                         continue 'dir;
                     }
-                    for expression in &self.excluded_items.items {
-                        if Common::regex_check(expression, &next_folder) {
-                            continue 'dir;
-                        }
-                    }
+
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
@@ -187,16 +180,9 @@ impl Temporary {
                         continue 'dir;
                     }
                     // Checking files
-                    let mut current_file_name = current_folder.join(entry_data.file_name());
-                    if cfg!(target_family = "windows") {
-                        current_file_name = Common::prettier_windows_path(&current_file_name);
-                    }
-
-                    // Checking expressions
-                    for expression in &self.excluded_items.items {
-                        if Common::regex_check(expression, &current_file_name) {
-                            continue 'dir;
-                        }
+                    let current_file_name = current_folder.join(entry_data.file_name());
+                    if self.excluded_items.is_excluded(&current_file_name) {
+                        continue 'dir;
                     }
 
                     // Creating new file entry

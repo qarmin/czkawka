@@ -107,7 +107,7 @@ impl Common {
         true
     }
 
-    pub fn prettier_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
+    pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
         let path = path_to_change.as_ref();
         match path.to_str() {
             Some(path) if path.is_char_boundary(1) => {
@@ -117,7 +117,7 @@ impl Common {
                     new_path.push(replaced[..1].to_ascii_uppercase());
                     new_path.push(replaced[1..].to_ascii_lowercase());
                 } else {
-                    new_path.push(replaced);
+                    new_path.push(replaced.to_ascii_lowercase());
                 }
                 PathBuf::from(new_path)
             }
@@ -153,8 +153,8 @@ mod test {
     }
     #[test]
     fn test_windows_path() {
-        assert_eq!(PathBuf::from("C:/path.txt"), Common::prettier_windows_path("c:/PATH.tXt"));
-        assert_eq!(PathBuf::from("H:/reka/weza/roman.txt"), Common::prettier_windows_path("h:/RekA/Weza\\roMan.Txt"));
-        assert_eq!(PathBuf::from("T:/a"), Common::prettier_windows_path("T:\\A"));
+        assert_eq!(PathBuf::from("C:/path.txt"), Common::normalize_windows_path("c:/PATH.tXt"));
+        assert_eq!(PathBuf::from("H:/reka/weza/roman.txt"), Common::normalize_windows_path("h:/RekA/Weza\\roMan.Txt"));
+        assert_eq!(PathBuf::from("T:/a"), Common::normalize_windows_path("T:\\A"));
     }
 }

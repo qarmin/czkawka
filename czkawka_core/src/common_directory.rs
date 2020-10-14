@@ -106,8 +106,8 @@ impl Directories {
         let mut optimized_excluded: Vec<PathBuf> = Vec::new();
 
         if cfg!(target_family = "windows") {
-            self.included_directories = self.included_directories.iter().map(Common::prettier_windows_path).collect();
-            self.excluded_directories = self.excluded_directories.iter().map(Common::prettier_windows_path).collect();
+            self.included_directories = self.included_directories.iter().map(Common::normalize_windows_path).collect();
+            self.excluded_directories = self.excluded_directories.iter().map(Common::normalize_windows_path).collect();
         }
 
         // Remove duplicated entries like: "/", "/"
@@ -223,5 +223,14 @@ impl Directories {
         self.included_directories.sort();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
         true
+    }
+
+    /// Checks whether a specified directory is excluded from searching
+    pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
+        let path = path.as_ref();
+        #[cfg(target_family = "windows")]
+        let path = Common::normalize_windows_path(path);
+        // We're assuming that `excluded_directories` are already normalized
+        self.excluded_directories.iter().any(|p| p.as_path() == path)
     }
 }

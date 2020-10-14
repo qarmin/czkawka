@@ -169,17 +169,10 @@ impl EmptyFiles {
                     }
 
                     let next_folder = current_folder.join(entry_data.file_name());
+                    if self.directories.is_excluded(&next_folder) || self.excluded_items.is_excluded(&next_folder) {
+                        continue 'dir;
+                    }
 
-                    for ed in &self.directories.excluded_directories {
-                        if next_folder == *ed {
-                            continue 'dir;
-                        }
-                    }
-                    for expression in &self.excluded_items.items {
-                        if Common::regex_check(expression, &next_folder) {
-                            continue 'dir;
-                        }
-                    }
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
@@ -199,17 +192,9 @@ impl EmptyFiles {
                     }
                     // Checking files
                     if metadata.len() == 0 {
-                        let mut current_file_name = current_folder.join(entry_data.file_name());
-
-                        // Checking expressions
-                        for expression in &self.excluded_items.items {
-                            if Common::regex_check(expression, &current_file_name) {
-                                continue 'dir;
-                            }
-                        }
-
-                        if cfg!(target_family = "windows") {
-                            current_file_name = Common::prettier_windows_path(&current_file_name);
+                        let current_file_name = current_folder.join(entry_data.file_name());
+                        if self.excluded_items.is_excluded(&current_file_name) {
+                            continue 'dir;
                         }
 
                         // Creating new file entry
