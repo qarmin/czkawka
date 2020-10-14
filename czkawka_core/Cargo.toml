@@ -14,3 +14,9 @@ humansize = "1"
 blake3 = "0.3"
 #rayon = "1"
 crossbeam-channel = "0.4.4"
+
+
+# Needed by similar images
+img_hash = "3.1"
+bk-tree = "0.3"
+image = "0.23"

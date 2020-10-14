@@ -325,7 +325,7 @@ impl SaveResults for BigFile {
                 }
             }
         } else {
-            write!(file, "Not found any empty folders.").unwrap();
+            write!(file, "Not found any files.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true

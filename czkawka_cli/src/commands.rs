@@ -13,7 +13,7 @@ pub enum Commands {
         #[structopt(flatten)]
         excluded_items: ExcludedItems,
         #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
-        min_size: u64,
+        minimal_file_size: u64,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
         #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (SIZE, HASH, HASHMB)", long_help = "Methods to search files.\nSIZE - The fastest method, checking by the file's size,\nHASHMB - More accurate but slower, checking by the hash of the file's first mibibyte or\nHASH - The slowest method, checking by the hash of the entire file")]
@@ -78,6 +78,21 @@ pub enum Commands {
         excluded_items: ExcludedItems,
         #[structopt(short = "D", long, help = "Delete found files")]
         delete_files: bool,
+        #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
+        not_recursive: NotRecursive,
+    },
+    #[structopt(name = "ima", about = "Finds similar images", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka ima -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt")]
+    SimilarImages {
+        #[structopt(flatten)]
+        directories: Directories,
+        #[structopt(flatten)]
+        excluded_directories: ExcludedDirectories,
+        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "16384", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        minimal_file_size: u64,
+        #[structopt(flatten)]
+        excluded_items: ExcludedItems,
         #[structopt(flatten)]
         file_to_save: FileToSave,
         #[structopt(flatten)]
@@ -158,9 +173,9 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
 
 fn parse_minimal_file_size(src: &str) -> Result<u64, String> {
     match src.parse::<u64>() {
-        Ok(min_size) => {
-            if min_size > 0 {
-                Ok(min_size)
+        Ok(minimal_file_size) => {
+            if minimal_file_size > 0 {
+                Ok(minimal_file_size)
             } else {
                 Err("Minimum file size must be at least 1 byte".to_string())
             }
