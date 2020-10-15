@@ -1,12 +1,14 @@
+mod create_tree_view;
 mod double_click_opening;
 mod help_functions;
 
 use czkawka_core::*;
 use humansize::{file_size_opts as options, FileSize};
 
-// TODO split it across mutliple files
+// TODO split it across multiple files
 
 extern crate gtk;
+use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::help_functions::*;
 use chrono::NaiveDateTime;
@@ -324,13 +326,21 @@ fn main() {
             // Similar Images
             {
                 // TODO create maybe open button to support opening multiple files at once
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 8] = [
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
                 tree_view.get_selection().set_mode(SelectionMode::Multiple);
-                tree_view.get_selection().set_select_function(Some(Box::new(select_function_similar_images)));
 
                 create_tree_view_similar_images(&mut tree_view);
 
@@ -491,7 +501,7 @@ fn main() {
                     // Disable main notebook from any iteraction until search will end
                     notebook_main.set_sensitive(false);
 
-                    entry_info.set_text("Searching data, it may take a while please wait...");
+                    entry_info.set_text("Searching data, it may take a while, please wait...");
 
                     match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
                         "notebook_main_duplicate_finder_label" => {
@@ -1856,7 +1866,7 @@ fn main() {
                         .unwrap()
                         .clear();
                 } else {
-                    // let information = sf.get_information();
+                    //let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
 
                     let base_images_size = sf.get_similar_images().len();
@@ -1878,34 +1888,37 @@ fn main() {
                             .unwrap();
                         list_store.clear();
 
-                        let col_indices = [0, 1, 2, 3];
+                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7];
 
                         let vec_struct_similar = sf.get_similar_images();
 
-                        for (index, struct_similar) in vec_struct_similar.iter().enumerate() {
-                            // Empty at the beginning
-                            if index != 0 {
-                                let values: [&dyn ToValue; 4] = [&"".to_string(), &"".to_string(), &"".to_string(), &"".to_string()];
-                                list_store.set(&list_store.append(), &col_indices, &values);
-                            }
+                        for struct_similar in vec_struct_similar.iter() {
                             // Header
                             let (directory, file) = split_path(&struct_similar.base_image.path);
-                            let values: [&dyn ToValue; 4] = [
+                            let values: [&dyn ToValue; 8] = [
                                 &(get_text_from_similarity(&struct_similar.base_image.similarity).to_string()),
+                                &struct_similar.base_image.size.file_size(options::BINARY).unwrap(),
+                                &struct_similar.base_image.dimensions,
                                 &file,
                                 &directory,
                                 &(NaiveDateTime::from_timestamp(struct_similar.base_image.modified_date as i64, 0).to_string()),
+                                &(HEADER_ROW_COLOR.to_string()),
+                                &(TEXT_COLOR.to_string()),
                             ];
                             list_store.set(&list_store.append(), &col_indices, &values);
 
                             // Meat
                             for similar_images in &struct_similar.similar_images {
                                 let (directory, file) = split_path(&similar_images.path);
-                                let values: [&dyn ToValue; 4] = [
+                                let values: [&dyn ToValue; 8] = [
                                     &(get_text_from_similarity(&similar_images.similarity).to_string()),
+                                    &similar_images.size.file_size(options::BINARY).unwrap(),
+                                    &similar_images.dimensions,
                                     &file,
                                     &directory,
                                     &(NaiveDateTime::from_timestamp(similar_images.modified_date as i64, 0).to_string()),
+                                    &(MAIN_ROW_COLOR.to_string()),
+                                    &(TEXT_COLOR.to_string()),
                                 ];
                                 list_store.set(&list_store.append(), &col_indices, &values);
                             }
