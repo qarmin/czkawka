@@ -3,7 +3,7 @@ use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-use bk_tree::{metrics, BKTree};
+use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use img_hash::HasherConfig;
@@ -36,17 +36,29 @@ pub struct StructSimilar {
     pub similar_images: Vec<FileEntry>,
 }
 
+/// Type to store for each entry in the similarity BK-tree.
+type Node = [u8; 8];
+
+/// Distance metric to use with the BK-tree.
+struct Hamming;
+
+impl bk_tree::Metric<Node> for Hamming {
+    fn distance(&self, a: &Node, b: &Node) -> u64 {
+        hamming::distance_fast(a, b).unwrap()
+    }
+}
+
 /// Struct to store most basics info about all folder
 pub struct SimilarImages {
     information: Info,
     text_messages: Messages,
     directories: Directories,
     excluded_items: ExcludedItems,
-    bktree: BKTree<String>,
+    bktree: BKTree<Node, Hamming>,
     similar_vectors: Vec<StructSimilar>,
     recursive_search: bool,
     minimal_file_size: u64,
-    image_hashes: HashMap<String, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
+    image_hashes: HashMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
 }
 
@@ -78,7 +90,7 @@ impl SimilarImages {
             text_messages: Messages::new(),
             directories: Directories::new(),
             excluded_items: Default::default(),
-            bktree: BKTree::new(metrics::Levenshtein),
+            bktree: BKTree::new(Hamming),
             similar_vectors: vec![],
             recursive_search: true,
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
@@ -233,18 +245,19 @@ impl SimilarImages {
 
                             similarity: Similarity::None,
                         };
-                        let hasher = HasherConfig::new().to_hasher();
+                        let hasher = HasherConfig::with_bytes_type::<[u8; 8]>().to_hasher();
                         let image = match image::open(current_file_name) {
                             Ok(t) => t,
                             Err(_) => continue 'dir, // Something is wrong with image
                         };
 
                         let hash = hasher.hash_image(&image);
-                        let string_hash = hash.to_base64();
+                        let mut buf = [0u8; 8];
+                        buf.copy_from_slice(&hash.as_bytes());
 
-                        self.bktree.add(string_hash.clone());
-                        self.image_hashes.entry(string_hash.clone()).or_insert_with(Vec::<FileEntry>::new);
-                        self.image_hashes.get_mut(&string_hash).unwrap().push(fe);
+                        self.bktree.add(buf);
+                        self.image_hashes.entry(buf).or_insert_with(Vec::<FileEntry>::new);
+                        self.image_hashes.get_mut(&buf).unwrap().push(fe);
 
                         self.information.size_of_checked_images += metadata.len();
                         self.information.number_of_checked_files += 1;
@@ -262,11 +275,11 @@ impl SimilarImages {
         let hash_map_modification = SystemTime::now();
 
         let mut new_vector: Vec<StructSimilar> = Vec::new();
-        for (string_hash, vec_file_entry) in &self.image_hashes {
+        for (hash, vec_file_entry) in &self.image_hashes {
             if rx.is_some() && rx.unwrap().try_recv().is_ok() {
                 return false;
             }
-            let vector_with_found_similar_hashes = self.bktree.find(string_hash.as_str(), 3).collect::<Vec<_>>();
+            let vector_with_found_similar_hashes = self.bktree.find(hash, 3).collect::<Vec<_>>();
             if vector_with_found_similar_hashes.len() == 1 && vec_file_entry.len() == 1 {
                 // Exists only 1 unique picture, so there is no need to use it
                 continue;
@@ -290,15 +303,15 @@ impl SimilarImages {
                 vec_similarity_struct.push(similar_struct);
             }
 
-            for (similarity, hash) in vector_with_found_similar_hashes.iter() {
-                if *similarity == 0 && string_hash == *hash {
+            for (similarity, similar_hash) in vector_with_found_similar_hashes.iter() {
+                if *similarity == 0 && hash == *similar_hash {
                     // This was already readed before
                     continue;
-                } else if string_hash == *hash {
+                } else if hash == *similar_hash {
                     panic!("I'm not sure if same hash can have distance > 0");
                 }
 
-                for file_entry in self.image_hashes.get(*hash).unwrap() {
+                for file_entry in self.image_hashes.get(*similar_hash).unwrap() {
                     let mut file_entry = file_entry.clone();
                     file_entry.similarity = match similarity {
                         0 => Similarity::VeryHigh,
