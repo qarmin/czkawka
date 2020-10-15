@@ -1,5 +1,9 @@
 ## Version 1.1.1 - 
-- Add test suite to PR
+- Replace String with PathBuf for paths [#59](https://github.com/qarmin/czkawka/pull/59)
+- Add test suite to PR [#65](https://github.com/qarmin/czkawka/pull/65)
+- Support for finding similar images to CLI [#66](https://github.com/qarmin/czkawka/pull/66)
+- Fix grammar-related errors and Ponglish expressions [#62](https://github.com/qarmin/czkawka/pull/62), [#63](https://github.com/qarmin/czkawka/pull/63)
+- Don't delete by default files in duplicate finder in CLI - [23f203](https://github.com/qarmin/czkawka/commit/23f203a061e254275c95ca23ca4f1a78bd941f02)
 
 
 
@@ -19,6 +23,7 @@
 - Fixed crash with invalid file modification date [#33](https://github.com/qarmin/czkawka/issues/33)
 - Upper tabs can hide and show when this is necessary [#38](https://github.com/qarmin/czkawka/pull/38)
 - Fixed crash when file/folder name have non Unicode character [#44](https://github.com/qarmin/czkawka/issues/44)
+- Added support for finding similar pictures in GUI [#69](https://github.com/qarmin/czkawka/issues/69)
 
 ## Version 1.0.0 - 02.10.2020r
 - Added confirmation button to delete button

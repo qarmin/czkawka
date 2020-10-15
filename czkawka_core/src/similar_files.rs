@@ -95,6 +95,10 @@ impl SimilarImages {
         &self.text_messages
     }
 
+    pub const fn get_similar_images(&self) -> &Vec<StructSimilar> {
+        &self.similar_vectors
+    }
+
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -259,6 +263,9 @@ impl SimilarImages {
 
         let mut new_vector: Vec<StructSimilar> = Vec::new();
         for (string_hash, vec_file_entry) in &self.image_hashes {
+            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                return false;
+            }
             let vector_with_found_similar_hashes = self.bktree.find(string_hash.as_str(), 3).collect::<Vec<_>>();
             if vector_with_found_similar_hashes.len() == 1 && vec_file_entry.len() == 1 {
                 // Exists only 1 unique picture, so there is no need to use it

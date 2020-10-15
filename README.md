@@ -126,6 +126,7 @@ Differences should be more visible when using slower CPU or faster disk.
 | Empty folders | X | X |
 | Temporary files | X | X |
 | Big files | X |   |
+| Similar images | X |   |
 | Installed packages |  | X |
 | Invalid names |   | X |
 | Names conflict |   | X |

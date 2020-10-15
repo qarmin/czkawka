@@ -1,4 +1,5 @@
 use czkawka_core::common_messages::Messages;
+use czkawka_core::similar_files::Similarity;
 use gtk::prelude::*;
 use gtk::TreeViewColumn;
 use std::collections::HashMap;
@@ -36,6 +37,12 @@ pub enum ColumnsEmptyFiles {
 }
 pub enum ColumnsTemporaryFiles {
     Name = 0,
+    Path,
+    Modification,
+}
+pub enum ColumnsSimilarImages {
+    Similarity = 0,
+    Name,
     Path,
     Modification,
 }
@@ -216,6 +223,46 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
+pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    name_column.pack_start(&renderer, true);
+    name_column.set_title("Similarity");
+    name_column.set_resizable(true);
+    name_column.set_min_width(50);
+    name_column.add_attribute(&renderer, "text", ColumnsSimilarImages::Similarity as i32);
+
+    tree_view.append_column(&name_column);
+    let renderer = gtk::CellRendererText::new();
+    let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    name_column.pack_start(&renderer, true);
+    name_column.set_title("File Name");
+    name_column.set_resizable(true);
+    name_column.set_min_width(50);
+    name_column.add_attribute(&renderer, "text", ColumnsSimilarImages::Name as i32);
+    tree_view.append_column(&name_column);
+
+    let renderer = gtk::CellRendererText::new();
+    let path_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    path_column.pack_start(&renderer, true);
+    path_column.set_title("Path");
+    path_column.set_resizable(true);
+    path_column.set_min_width(100);
+    path_column.add_attribute(&renderer, "text", ColumnsSimilarImages::Path as i32);
+    tree_view.append_column(&path_column);
+
+    let renderer = gtk::CellRendererText::new();
+    let modification_date_column: gtk::TreeViewColumn = TreeViewColumn::new();
+    modification_date_column.pack_start(&renderer, true);
+    modification_date_column.set_title("Modification Date");
+    modification_date_column.set_resizable(true);
+    modification_date_column.set_min_width(100);
+    modification_date_column.add_attribute(&renderer, "text", ColumnsSimilarImages::Modification as i32);
+    tree_view.append_column(&modification_date_column);
+
+    tree_view.set_vexpand(true);
+}
+
 pub fn create_tree_view_directories(tree_view: &mut gtk::TreeView) {
     let renderer = gtk::CellRendererText::new();
     let name_column: gtk::TreeViewColumn = TreeViewColumn::new();
@@ -285,13 +332,22 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     text_view.get_buffer().unwrap().set_text(messages.as_str());
 }
 
-pub fn select_function_3column(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
     // let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(),ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
     // let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
     // let modification = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(),ColumnsDuplicates::Modification as i32).get::<String>().unwrap().unwrap();
     let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
 
     if color == HEADER_ROW_COLOR {
+        return false;
+    }
+
+    true
+}
+pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+    let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
+
+    if path.trim() == "" {
         return false;
     }
 
@@ -320,5 +376,15 @@ pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button],
         } else {
             button.hide();
         }
+    }
+}
+
+pub fn get_text_from_similarity(similarity: &Similarity) -> &str {
+    match similarity {
+        Similarity::None => "Original",
+        Similarity::Small => "Small",
+        Similarity::Medium => "Medium",
+        Similarity::High => "High",
+        Similarity::VeryHigh => "Very High",
     }
 }

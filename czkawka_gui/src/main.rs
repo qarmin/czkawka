@@ -12,6 +12,7 @@ use czkawka_core::common_traits::SaveResults;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::similar_files::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use duplicate::DuplicateFinder;
 use gtk::prelude::*;
@@ -61,7 +62,7 @@ fn main() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //// States
-    let main_notebooks_labels = ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file"];
+    let main_notebooks_labels = ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file", "similar_images"];
     let upper_notebooks_labels = [/*"general",*/ "included_directories", "excluded_directories", "excluded_items", "allowed_extensions"];
     let buttons_labels = ["search", "stop", "resume", "pause", "select", "delete", "save"];
 
@@ -104,6 +105,7 @@ fn main() {
     let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFiles::new()));
     let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(Temporary::new()));
     let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
+    let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
 
     // State of confirmation dialogs
     let shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<_>> = Rc::new(RefCell::new(true));
@@ -111,6 +113,7 @@ fn main() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //// GUI Entry
+    let entry_similar_images_minimal_size: gtk::Entry = builder.get_object("entry_similar_images_minimal_size").unwrap();
     let entry_duplicate_minimal_size: gtk::Entry = builder.get_object("entry_duplicate_minimal_size").unwrap();
     let entry_allowed_extensions: gtk::Entry = builder.get_object("entry_allowed_extensions").unwrap();
     let entry_excluded_items: gtk::Entry = builder.get_object("entry_excluded_items").unwrap();
@@ -182,13 +185,13 @@ fn main() {
     let text_view_errors: gtk::TextView = builder.get_object("text_view_errors").unwrap();
 
     //// Scrolled windows
-
     // Main notebook
     let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
     let scrolled_window_main_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_empty_folder_finder").unwrap();
     let scrolled_window_main_empty_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_empty_files_finder").unwrap();
     let scrolled_window_main_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_temporary_files_finder").unwrap();
     let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
+    let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_similar_images_finder").unwrap();
 
     // Upper notebook
     let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
@@ -202,6 +205,7 @@ fn main() {
         EmptyFiles(EmptyFiles),
         BigFiles(BigFile),
         Temporary(Temporary),
+        SimilarImages(SimilarImages),
     }
 
     // Used for getting data from thread
@@ -240,7 +244,7 @@ fn main() {
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
                 tree_view.get_selection().set_mode(SelectionMode::Multiple);
-                tree_view.get_selection().set_select_function(Some(Box::new(select_function_3column)));
+                tree_view.get_selection().set_select_function(Some(Box::new(select_function_duplicates)));
 
                 create_tree_view_duplicates(&mut tree_view);
 
@@ -302,6 +306,22 @@ fn main() {
 
                 scrolled_window_big_files_finder.add(&tree_view);
                 scrolled_window_big_files_finder.show_all();
+            }
+            // Similar Images
+            {
+                // TODO create maybe open button to support opening multiple files at once
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.get_selection().set_select_function(Some(Box::new(select_function_similar_images)));
+
+                create_tree_view_similar_images(&mut tree_view);
+
+                scrolled_window_similar_images_finder.add(&tree_view);
+                scrolled_window_similar_images_finder.show_all();
             }
         }
 
@@ -398,6 +418,7 @@ fn main() {
                     "scrolled_window_main_empty_files_finder" => page = "empty_file",
                     "scrolled_window_main_temporary_files_finder" => page = "temporary_file",
                     "notebook_big_main_file_finder" => page = "big_file",
+                    "notebook_main_similar_images_finder_label" => page = "similar_images",
                     e => {
                         panic!("Not existent page {}", e);
                     }
@@ -431,11 +452,6 @@ fn main() {
 
         // Main buttons
         {
-            assert!(notebook_main_children_names.contains(&"notebook_main_duplicate_finder_label".to_string()));
-            assert!(notebook_main_children_names.contains(&"scrolled_window_main_empty_folder_finder".to_string()));
-            assert!(notebook_main_children_names.contains(&"scrolled_window_main_empty_files_finder".to_string()));
-            assert!(notebook_main_children_names.contains(&"scrolled_window_main_temporary_files_finder".to_string()));
-            assert!(notebook_main_children_names.contains(&"notebook_big_main_file_finder".to_string()));
             // Search button
             {
                 let entry_info = entry_info.clone();
@@ -457,7 +473,7 @@ fn main() {
                     // Disable main notebook from any iteraction until search will end
                     notebook_main.set_sensitive(false);
 
-                    entry_info.set_text("Searching data, please wait...");
+                    entry_info.set_text("Searching data, it may take a while please wait...");
 
                     match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
                         "notebook_main_duplicate_finder_label" => {
@@ -562,6 +578,29 @@ fn main() {
                                 let _ = sender.send(Message::BigFiles(bf));
                             });
                         }
+
+                        "notebook_main_similar_images_finder_label" => {
+                            let sender = sender.clone();
+                            let receiver_stop = rx.clone();
+
+                            let minimal_file_size = match entry_similar_images_minimal_size.get_text().as_str().parse::<u64>() {
+                                Ok(t) => t,
+                                Err(_) => 1024 * 16, // By default
+                            };
+
+                            // Find similar images
+                            thread::spawn(move || {
+                                let mut sf = SimilarImages::new();
+
+                                sf.set_included_directory(included_directories);
+                                sf.set_excluded_directory(excluded_directories);
+                                sf.set_recursive_search(recursive_search);
+                                sf.set_excluded_items(excluded_items);
+                                sf.set_minimal_file_size(minimal_file_size);
+                                sf.find_similar_images(Option::from(&receiver_stop));
+                                let _ = sender.send(Message::SimilarImages(sf));
+                            });
+                        }
                         e => panic!("Not existent {}", e),
                     }
                 });
@@ -577,6 +616,7 @@ fn main() {
                 let scrolled_window_big_files_finder = scrolled_window_big_files_finder.clone();
                 let scrolled_window_main_empty_files_finder = scrolled_window_main_empty_files_finder.clone();
                 let scrolled_window_main_temporary_files_finder = scrolled_window_main_temporary_files_finder.clone();
+                let scrolled_window_similar_images_finder = scrolled_window_similar_images_finder.clone();
 
                 buttons_delete.connect_clicked(move |_| {
                     if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
@@ -799,6 +839,39 @@ fn main() {
                             text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                             selection.unselect_all();
                         }
+                        "notebook_main_similar_images_finder_label" => {
+                            let tree_view = scrolled_window_similar_images_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
+
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                            let mut messages: String = "".to_string();
+
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                                match fs::remove_file(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                                    }
+                                    Err(_) => {
+                                        messages += format!(
+                                            "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
+                                            path, name
+                                        )
+                                        .as_str()
+                                    }
+                                }
+                            }
+
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
+                        }
                         e => panic!("Not existent {}", e),
                     }
                 });
@@ -815,18 +888,6 @@ fn main() {
                         popover_select.set_relative_to(Some(&buttons_select));
                         popover_select.popup();
                     }
-                    "scrolled_window_main_empty_folder_finder" => {
-                        // Do nothing
-                    }
-                    "scrolled_window_main_empty_files_finder" => {
-                        // Do nothing
-                    }
-                    "scrolled_window_main_temporary_files_finder" => {
-                        // Do nothing
-                    }
-                    "notebook_big_main_file_finder" => {
-                        // Do nothing
-                    }
                     e => panic!("Not existent {}", e),
                 });
             }
@@ -840,6 +901,7 @@ fn main() {
                 let shared_big_files_state = shared_big_files_state.clone();
                 let shared_temporary_files_state = shared_temporary_files_state.clone();
                 let shared_empty_files_state = shared_empty_files_state.clone();
+                let shared_similar_images_state = shared_similar_images_state.clone();
                 let notebook_main = notebook_main.clone();
                 buttons_save_clone.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_main_duplicate_finder_label" => {
@@ -905,6 +967,19 @@ fn main() {
                         {
                             buttons_save.hide();
                             *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = false;
+                        }
+                    }
+                    "notebook_main_similar_images_finder_label" => {
+                        let file_name = "results_similar_images.txt";
+
+                        let mut df = shared_similar_images_state.borrow_mut();
+                        df.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
                     e => panic!("Not existent {}", e),
@@ -1742,6 +1817,97 @@ fn main() {
                             *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+            Message::SimilarImages(sf) => {
+                if sf.get_stopped_search() {
+                    entry_info.set_text("Searching for duplicated was stopped by user");
+
+                    //Also clear list
+                    scrolled_window_duplicate_finder
+                        .get_children()
+                        .get(0)
+                        .unwrap()
+                        .clone()
+                        .downcast::<gtk::TreeView>()
+                        .unwrap()
+                        .get_model()
+                        .unwrap()
+                        .downcast::<gtk::ListStore>()
+                        .unwrap()
+                        .clear();
+                } else {
+                    // let information = sf.get_information();
+                    let text_messages = sf.get_text_messages();
+
+                    let base_images_size = sf.get_similar_images().len();
+
+                    entry_info.set_text(format!("Found similar pictures for {} images.", base_images_size).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_similar_images_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2, 3];
+
+                        let vec_struct_similar = sf.get_similar_images();
+
+                        for (index, struct_similar) in vec_struct_similar.iter().enumerate() {
+                            // Empty at the beginning
+                            if index != 0 {
+                                let values: [&dyn ToValue; 4] = [&"".to_string(), &"".to_string(), &"".to_string(), &"".to_string()];
+                                list_store.set(&list_store.append(), &col_indices, &values);
+                            }
+                            // Header
+                            let (directory, file) = split_path(&struct_similar.base_image.path);
+                            let values: [&dyn ToValue; 4] = [
+                                &(get_text_from_similarity(&struct_similar.base_image.similarity).to_string()),
+                                &file,
+                                &directory,
+                                &(NaiveDateTime::from_timestamp(struct_similar.base_image.modified_date as i64, 0).to_string()),
+                            ];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+
+                            // Meat
+                            for similar_images in &struct_similar.similar_images {
+                                let (directory, file) = split_path(&similar_images.path);
+                                let values: [&dyn ToValue; 4] = [
+                                    &(get_text_from_similarity(&similar_images.similarity).to_string()),
+                                    &file,
+                                    &directory,
+                                    &(NaiveDateTime::from_timestamp(similar_images.modified_date as i64, 0).to_string()),
+                                ];
+                                list_store.set(&list_store.append(), &col_indices, &values);
+                            }
+                        }
+
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_similar_images_state.borrow_mut() = sf;
+
+                        if base_images_size > 0 {
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("similar_images").unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
