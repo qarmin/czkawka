@@ -6,6 +6,7 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
+use image::GenericImageView;
 use img_hash::HasherConfig;
 use std::collections::HashMap;
 use std::fs;
@@ -14,7 +15,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Similarity {
     None,
     Small,
@@ -27,6 +28,7 @@ pub enum Similarity {
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
+    pub dimensions: String,
     pub modified_date: u64,
     pub similarity: Similarity,
 }
@@ -225,10 +227,16 @@ impl SimilarImages {
                             continue 'dir;
                         }
 
+                        let image = match image::open(&current_file_name) {
+                            Ok(t) => t,
+                            Err(_) => continue 'dir, // Something is wrong with image
+                        };
+                        let dimensions = image.dimensions();
                         // Creating new file entry
                         let fe: FileEntry = FileEntry {
                             path: current_file_name.clone(),
                             size: metadata.len(),
+                            dimensions: format!("{}x{}", dimensions.0, dimensions.1),
                             modified_date: match metadata.modified() {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
@@ -246,10 +254,6 @@ impl SimilarImages {
                             similarity: Similarity::None,
                         };
                         let hasher = HasherConfig::with_bytes_type::<[u8; 8]>().to_hasher();
-                        let image = match image::open(current_file_name) {
-                            Ok(t) => t,
-                            Err(_) => continue 'dir, // Something is wrong with image
-                        };
 
                         let hash = hasher.hash_image(&image);
                         let mut buf = [0u8; 8];
@@ -325,7 +329,9 @@ impl SimilarImages {
                     }
                 }
             }
-
+            for similarity_struct in vec_similarity_struct.iter_mut() {
+                similarity_struct.similar_images.sort_by(|x, y| y.similarity.cmp(&x.similarity));
+            }
             new_vector.append(&mut vec_similarity_struct);
         }
 
