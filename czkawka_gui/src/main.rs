@@ -1,9 +1,13 @@
+mod double_click_opening;
 mod help_functions;
 
 use czkawka_core::*;
 use humansize::{file_size_opts as options, FileSize};
 
+// TODO split it across mutliple files
+
 extern crate gtk;
+use crate::double_click_opening::*;
 use crate::help_functions::*;
 use chrono::NaiveDateTime;
 use crossbeam_channel::unbounded;
@@ -248,6 +252,8 @@ fn main() {
 
                 create_tree_view_duplicates(&mut tree_view);
 
+                tree_view.connect_button_press_event(opening_double_click_function_duplicates);
+
                 scrolled_window_duplicate_finder.add(&tree_view);
                 scrolled_window_duplicate_finder.show_all();
             }
@@ -261,6 +267,8 @@ fn main() {
                 tree_view.get_selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_empty_folders(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_empty_folders);
 
                 scrolled_window_main_empty_folder_finder.add(&tree_view);
                 scrolled_window_main_empty_folder_finder.show_all();
@@ -276,6 +284,8 @@ fn main() {
 
                 create_tree_view_empty_files(&mut tree_view);
 
+                tree_view.connect_button_press_event(opening_double_click_function_empty_files);
+
                 scrolled_window_main_empty_files_finder.add(&tree_view);
                 scrolled_window_main_empty_files_finder.show_all();
             }
@@ -290,6 +300,8 @@ fn main() {
 
                 create_tree_view_temporary_files(&mut tree_view);
 
+                tree_view.connect_button_press_event(opening_double_click_function_temporary_files);
+
                 scrolled_window_main_temporary_files_finder.add(&tree_view);
                 scrolled_window_main_temporary_files_finder.show_all();
             }
@@ -303,6 +315,8 @@ fn main() {
                 tree_view.get_selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_big_files(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_big_files);
 
                 scrolled_window_big_files_finder.add(&tree_view);
                 scrolled_window_big_files_finder.show_all();
@@ -319,6 +333,8 @@ fn main() {
                 tree_view.get_selection().set_select_function(Some(Box::new(select_function_similar_images)));
 
                 create_tree_view_similar_images(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_similar_images);
 
                 scrolled_window_similar_images_finder.add(&tree_view);
                 scrolled_window_similar_images_finder.show_all();
@@ -447,6 +463,8 @@ fn main() {
                 }
             });
         }
+
+        // Connect double click
 
         //// Connect Buttons
 
@@ -1301,7 +1319,7 @@ fn main() {
                 });
             }
         }
-        // Upper Notepad
+        // Upper Notebook
         {
             // Add included directory
             {
