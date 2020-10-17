@@ -1,3 +1,8 @@
+## Version 1.2.1 - 17.10.2020r
+- Make image similarity search significantly faster. [#72](https://github.com/qarmin/czkawka/pull/72)
+- Improve similar images GUI a little and add sorting to Similarity Enum [#73](https://github.com/qarmin/czkawka/pull/73)
+- Improve deleting files in Similar files in GUI [#75](https://github.com/qarmin/czkawka/pull/75)
+
 ## Version 1.2.0 - 15.10.2020r
 - Replace String with PathBuf for paths [#59](https://github.com/qarmin/czkawka/pull/59)
 - Add test suite to PR [#65](https://github.com/qarmin/czkawka/pull/65)

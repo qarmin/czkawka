@@ -28,6 +28,7 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Big Files - Finds provided number of the biggest files in given location
   - Empty Files - Looks for empty files across disk
   - Temporary Files - Allows finding temporary files
+  - Similar Files - Finds files which are not exactly the same
 
 ## Usage and requirements
 ### Requirements
