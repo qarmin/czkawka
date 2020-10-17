@@ -15,12 +15,11 @@ use chrono::NaiveDateTime;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::common_traits::SaveResults;
-use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::duplicate::{CheckingMethod, DuplicateFinder};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::similar_files::SimilarImages;
 use czkawka_core::temporary::Temporary;
-use duplicate::DuplicateFinder;
 use gtk::prelude::*;
 use gtk::{Builder, SelectionMode, TreeIter, TreeView};
 use std::cell::RefCell;
@@ -425,11 +424,8 @@ fn main() {
         // Connect Notebook Tabs
         {
             let shared_buttons = shared_buttons.clone();
-
             let buttons_array = buttons_array.clone();
-
             let notebook_main_children_names = notebook_main_children_names.clone();
-
             let notebook_main_clone = notebook_main.clone();
 
             notebook_main_clone.connect_switch_page(move |_, _, number| {
@@ -684,6 +680,9 @@ fn main() {
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
                             let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
                             // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
@@ -711,6 +710,9 @@ fn main() {
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
                             let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
                             // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
@@ -791,6 +793,9 @@ fn main() {
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
                             let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
                             // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
@@ -818,6 +823,9 @@ fn main() {
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
                             let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
                             // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
@@ -845,6 +853,9 @@ fn main() {
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
                             let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
                             // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
@@ -872,28 +883,102 @@ fn main() {
                             let selection = tree_view.get_selection();
 
                             let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
                             let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
 
                             // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
                             let mut messages: String = "".to_string();
 
-                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-                            for tree_path in selection_rows.iter().rev() {
-                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsBigFiles::Name as i32).get::<String>().unwrap().unwrap();
-                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsBigFiles::Path as i32).get::<String>().unwrap().unwrap();
+                            let mut vec_path_to_delete: Vec<(String, String)> = Vec::new();
 
-                                match fs::remove_file(format!("{}/{}", path, name)) {
-                                    Ok(_) => {
-                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                            // Just remove file, later must be deleted list entry with all occurencies
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
+
+                                if fs::remove_file(format!("{}/{}", path, name)).is_err() {
+                                    messages += format!(
+                                        "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
+                                        path, name
+                                    )
+                                    .as_str()
+                                }
+                                vec_path_to_delete.push((path, name));
+                            }
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for path_to_delete in vec_path_to_delete {
+                                let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
+
+                                let iter = list_store.get_iter_first().unwrap();
+                                let mut take_child_mode = false; // When original image is searched one, we must remove all occurences of its children
+                                let mut prepared_for_delete;
+                                loop {
+                                    prepared_for_delete = false;
+                                    if take_child_mode {
+                                        let color = tree_model.get_value(&iter, ColumnsSimilarImages::Color as i32).get::<String>().unwrap().unwrap();
+                                        if color == HEADER_ROW_COLOR {
+                                            take_child_mode = false;
+                                        } else {
+                                            prepared_for_delete = true;
+                                        }
+                                    } else {
+                                        let path = tree_model.get_value(&iter, ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
+                                        if path == path_to_delete.0 {
+                                            let name = tree_model.get_value(&iter, ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
+                                            if name == path_to_delete.1 {
+                                                let color = tree_model.get_value(&iter, ColumnsSimilarImages::Color as i32).get::<String>().unwrap().unwrap();
+                                                if color == HEADER_ROW_COLOR {
+                                                    take_child_mode = true;
+                                                }
+                                                prepared_for_delete = true;
+                                            }
+                                        }
                                     }
-                                    Err(_) => {
-                                        messages += format!(
-                                            "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
-                                            path, name
-                                        )
-                                        .as_str()
+
+                                    if prepared_for_delete {
+                                        vec_tree_path_to_delete.push(list_store.get_path(&iter).unwrap());
                                     }
+
+                                    if !list_store.iter_next(&iter) {
+                                        break;
+                                    }
+                                }
+
+                                for tree_path in vec_tree_path_to_delete.iter().rev() {
+                                    list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+                                }
+                            }
+                            // End run to remove single header rows(without duplicates)
+                            if let Some(next_iter) = list_store.get_iter_first() {
+                                let mut header_was_before = false;
+                                let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
+                                let mut current_iter = next_iter.clone();
+                                loop {
+                                    let color = tree_model.get_value(&next_iter, ColumnsSimilarImages::Color as i32).get::<String>().unwrap().unwrap();
+                                    if color == HEADER_ROW_COLOR {
+                                        if header_was_before {
+                                            vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                                        } else {
+                                            header_was_before = true;
+                                        }
+                                    } else {
+                                        header_was_before = false;
+                                    }
+
+                                    current_iter = next_iter.clone();
+                                    if !list_store.iter_next(&next_iter) {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Last step, remove orphan header if exists
+                            if let Some(iter) = list_store.get_iter_first() {
+                                if !list_store.iter_next(&iter) {
+                                    list_store.clear();
                                 }
                             }
 
