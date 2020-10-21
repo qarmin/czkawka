@@ -366,15 +366,14 @@ fn main() {
             let current_dir: String = match env::current_dir() {
                 Ok(t) => t.to_str().unwrap().to_string(),
                 Err(_) => {
-                    #[cfg(target_family = "unix")]
-                    {
+                    if cfg!(target_family = "unix") {
                         println!("Failed to read current directory, setting /home instead");
                         "/home".to_string()
-                    }
-                    #[cfg(target_family = "windows")]
-                    {
+                    } else if cfg!(target_family = "windows") {
                         println!("Failed to read current directory, setting C:\\ instead");
                         "C:\\".to_string()
+                    } else {
+                        "".to_string()
                     }
                 }
             };
@@ -408,13 +407,11 @@ fn main() {
         }
         // Set Excluded Items
         {
-            #[cfg(target_family = "unix")]
-            {
-                entry_excluded_items.set_text("*/.git/,*/node_modules/,*/lost+found/");
+            if cfg!(target_family = "unix") {
+                entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*");
             }
-            #[cfg(target_family = "windows")]
-            {
-                entry_excluded_items.set_text("*\\.git\\,*\\node_modules\\,*:\\Windows\\,:/Windows/");
+            if cfg!(target_family = "windows") {
+                entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*:/windows/*");
             }
         }
     }
@@ -912,7 +909,10 @@ fn main() {
                             for path_to_delete in vec_path_to_delete {
                                 let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
 
-                                let iter = list_store.get_iter_first().unwrap();
+                                let iter = match list_store.get_iter_first() {
+                                    Some(t) => t,
+                                    None => break,
+                                };
                                 let mut take_child_mode = false; // When original image is searched one, we must remove all occurences of its children
                                 let mut prepared_for_delete;
                                 loop {

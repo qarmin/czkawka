@@ -84,7 +84,7 @@ impl Directories {
                 continue;
             }
             if !directory.exists() {
-                text_messages.warnings.push(format!("Excluded Directory Warning: Provided folder path must exits, ignoring {}", directory.display()));
+                // text_messages.warnings.push(format!("Excluded Directory Warning: Provided folder path must exits, ignoring {}", directory.display()));
                 continue;
             }
             if !directory.is_dir() {
