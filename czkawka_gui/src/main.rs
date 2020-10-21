@@ -369,10 +369,11 @@ fn main() {
                     if cfg!(target_family = "unix") {
                         println!("Failed to read current directory, setting /home instead");
                         "/home".to_string()
-                    }
-                    if cfg!(target_family = "windows") {
+                    } else if cfg!(target_family = "windows") {
                         println!("Failed to read current directory, setting C:\\ instead");
                         "C:\\".to_string()
+                    } else {
+                        "".to_string()
                     }
                 }
             };
