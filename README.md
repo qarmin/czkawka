@@ -31,26 +31,43 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Similar Files - Finds files which are not exactly the same
 
 ## Usage and requirements
-### Requirements
-For normal use of the program, the only requirement is having GTK 3.22+.  
-For CLI, Orbtk on all OS and GTK GUI on Windows, there are no special requirements.
+
+
+### Precompiled binaries
+For Linux of the program, the only requirement is having GTK 3.22+ installed on system.  
 
 Precompiled binaries are available here - https://github.com/qarmin/czkawka/releases/
-
-You can also download the application with different commits here - https://github.com/qarmin/czkawka/actions
-
 If the app does not run when clicking at a launcher, run it through a terminal.
+
+### Appimage
+Appimage files are available in release page, same as native binaries and minimal required version of OS is Ubuntu 18.04 - https://github.com/qarmin/czkawka/releases/
+
 ### Cargo
-You can install Czkawka easily from Cargo by typing `cargo install czkawka_gui`
+Easier method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS) 
+```
+cargo install czkawka_gui
+```
+You can update package by typing same command.
 
-### Snap,  Flatpak, Appimage
-Still WIP, but looking for help
+### Snap,  Flatpak
+Maybe someday
 
-### AUR - Arch Linux Package
+### Debian/Ubuntu repository and PPA
+Tried to setup it, but for now I have problems described in this issue
+
+https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21
+
+
+### AUR - Arch Linux Package(unofficial)
 Czkawka is also available in Arch Linux's AUR from which it can be easily downloaded and installed on the system.
 ```
 yay -Syu czkawka-git
 ```
+
+This is unofficial package, so new versions will not be always available.
+
+### Devel versions
+Artifacts from each commit you can also download here - https://github.com/qarmin/czkawka/actions
 
 ## Compilation
 ### Requirements
@@ -90,52 +107,75 @@ cargo run --bin czkawka_cli
 ![CLI](https://user-images.githubusercontent.com/41945903/93716816-0bbcfd80-fb72-11ea-8d31-4c87cc2abe6d.png)
 
 ## Speed
-Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these two tools.
+Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these tools.
 
-I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 176 056 files and 22194 folders and 88436 duplicated files in 52330 groups worth 6,2 GB.
+I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 320004 files and 36902 folders and 108844 duplicated files in 34475 groups which took 4.53 GB.
+
+Minimum file size to check I set to 1KB on all programs
 
 The first run reads every file entry and saves it to cache, so this step is limited mostly by disk performance. In the second run the cache helps it, so searching is sometimes faster (with few duplicates even 10x faster).
 
-Duplicate Checker(Version 0.1.4)
+DupeGuru after selecting files, froze at 45% for ~15 minutes, so I just kill it.
 
 | App| Executing Time |
 |:----------:|:-------------:|
-| FSlint (First Run)| 284s |
-| FSlint (Second Run)| 247s |
-| Czkawka GUI Release(First Run) | 118s |
-| Czkawka GUI Release(Second Run) | 120s |
+| FSlint 2.4.7 (First Run)| 255s |
+| FSlint 2.4.7 (Second Run)| 126s |
+| Czkawka 1.2.2 (First Run) | 150s |
+| Czkawka 1.2.2 (Second Run) | 107s |
+| DupeGuru 4.0.4 (First Run) | - | 
+| DupeGuru 4.0.4 (Second Run) | - | 
 
-I used Mprof for FSlint and Heaptrack for Czkawka
+
+I used Mprof for checking memory usage FSlint and Dupeguru, for Czkawka I used Heaptrack.
+To not get Dupeguru crash I checked smaller directory with 217986 files and 41883 folders.
 
 | App| Idle Ram | Max Operational Ram Usage | Stabilized after search usage |
 |:----------:|:-------------:|:-------------:|:-------------:|
-| FSlint | 55 MB | 160 MB | 150 MB |
-| Czkawka GTK GUI Release | 8 MB | 76 MB | 75 MB |
+| FSlint 2.4.7 | 54 MB | 120 MB | 117 MB |
+| Czkawka 1.2.2 | 8 MB | 42 MB | 41 MB |
+| DupeGuru 4.0.4 | 110 MB | 637 MB | 602 MB |
 
+Similar Images which check 386 files which takes 1,9GB
 
-Differences should be more visible when using slower CPU or faster disk.
+| App| Scan time |
+|:----------:|:-------------:|
+| Czkawka 1.2.2 | 267s | 
+| DupeGuru 4.0.4 | 75s | 
 
-## Comparsion with FSLint
+Similar Images which check 5018 files which takes 389MB
 
-|  | Czkawka | FSlint |
-|:----------:|:-------------:|:-----:|
-| Language | Rust| Python | 
-| Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) |
-| Ram Usage | Low | Medium |
-| Duplicate finder | X | X |
-| Empty files | X | X |
-| Empty folders | X | X |
-| Temporary files | X | X |
-| Big files | X |   |
-| Similar images | X |   |
-| Installed packages |  | X |
-| Invalid names |   | X |
-| Names conflict |   | X |
-| Invalid symlinks |   | X |
-| Bad ID |   | X |
-| Non stripped binaries |   | X |
-| Redundant whitespace |  | X |
-| Project Activity | High | Very Low | 
+| App| Scan time |
+|:----------:|:-------------:|
+| Czkawka 1.2.2 | 45s | 
+| DupeGuru 4.0.4 | 87s | 
+
+So still is a big room for improvements.
+
+## Comparsion other tools
+
+|  | Czkawka | FSlint | DupeGuru |
+|:----------:|:-------------:|:-----:|:---:|
+| Language | Rust| Python | Python/Objective C | 
+| OS | Linux, Windows, Mac(only CLI) | Linux | Linux, Windows, Mac|
+| Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) | Qt 5 (PyQt)/Cocoa |
+| Ram Usage | Low | Medium | | 
+| Duplicate finder | X | X | X |
+| Empty files | X | X |  |
+| Empty folders | X | X |  |
+| Temporary files | X | X |  |
+| Big files | X |   |  |
+| Similar images | X |   | X |
+| Checking files EXIF| | | X |
+| Installed packages |  | X |  |
+| Invalid names |   | X |  |
+| Names conflict |   | X |  |
+| Invalid symlinks |   | X |  |
+| Bad ID |   | X |  |
+| Non stripped binaries |   | X |  |
+| Redundant whitespace |  | X |  |
+| Multiple languages(po) | | X | X |
+| Project Activity | High | Very Low | High |
 
 ## Contributions
 Contributions to this repository are welcome.  
@@ -153,6 +193,8 @@ The code should also be easy to read, so please use the simplest language possib
 Czkawka is a Polish word which means _hiccup_.  
 I chose this name because I wanted to hear people speaking other languages pronounce it.  
 This name is not as bad as it seems, because I was also thinking about using words like _żółć_, _gżegżółka_ or _żołądź_, but I gave up on these ideas because they contained Polish characters, which would cause difficulty in searching for the project.
+
+At the beginning of the program creation, if the response concerning the name was unanimously negative, I prepared myself for a possible change of the name of the program, but the opinions were extremely mixed.
 
 ## License
 Code is distributed under MIT license.
