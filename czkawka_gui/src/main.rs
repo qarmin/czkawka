@@ -1583,7 +1583,7 @@ fn main() {
                                 for (size, vectors_vector) in btreemap.iter().rev() {
                                     for vector in vectors_vector {
                                         let values: [&dyn ToValue; 6] = [
-                                            &(vector.len().to_string() + " x " + size.to_string().as_str()),
+                                            &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
                                             &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
                                             &"".to_string(), // No text in 3 column
                                             &(0),            // Not used here
@@ -1611,7 +1611,7 @@ fn main() {
 
                                 for (size, vector) in btreemap.iter().rev() {
                                     let values: [&dyn ToValue; 6] = [
-                                        &(vector.len().to_string() + " x " + size.to_string().as_str()),
+                                        &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
                                         &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
                                         &"".to_string(), // No text in 3 column
                                         &(0),            // Not used here

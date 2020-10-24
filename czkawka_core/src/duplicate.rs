@@ -33,7 +33,7 @@ pub enum DeleteMethod {
     OneNewest,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -51,7 +51,10 @@ pub struct Info {
     pub number_of_duplicated_files_by_size: usize,
     pub number_of_groups_by_hash: usize,
     pub number_of_duplicated_files_by_hash: usize,
+    pub number_of_duplicated_files_after_pre_hash: usize,
+    pub number_of_groups_after_pre_hash: usize,
     pub lost_space_by_size: u64,
+    pub lost_space_after_pre_hash: u64,
     pub lost_space_by_hash: u64,
     pub bytes_read_when_hashing: u64,
     pub number_of_removed_files: usize,
@@ -208,21 +211,21 @@ impl DuplicateFinder {
                     Ok(t) => t,
                     Err(_) => {
                         self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
-                        continue;
+                        continue 'dir;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(_) => {
                         self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
-                        continue;
+                        continue 'dir;
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
                     self.information.number_of_checked_folders += 1;
 
                     if !self.recursive_search {
-                        continue;
+                        continue 'dir;
                     }
 
                     let next_folder = current_folder.join(entry_data.file_name());
@@ -239,7 +242,7 @@ impl DuplicateFinder {
                     // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
-                        Err(_) => continue,
+                        Err(_) => continue 'dir,
                     }
                     .to_lowercase();
 
@@ -273,7 +276,7 @@ impl DuplicateFinder {
                                 },
                                 Err(_) => {
                                     self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                    continue;
+                                    continue 'dir;
                                 } // Permissions Denied
                             },
                         };
@@ -318,8 +321,56 @@ impl DuplicateFinder {
         let start_time: SystemTime = SystemTime::now();
         let mut file_handler: File;
         let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>>;
+        let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
+        // 1 step - check only small part of file hash
         for (size, vector) in &self.files_with_identical_size {
+            hashmap_with_hash = Default::default();
+
+            for file_entry in vector {
+                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                    return false;
+                }
+                file_handler = match File::open(&file_entry.path) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        self.text_messages.warnings.push(format!("Unable to check hash of file {}", file_entry.path.display()));
+                        continue;
+                    }
+                };
+
+                let mut hasher: blake3::Hasher = blake3::Hasher::new();
+                let mut buffer = [0u8; 1024 * 2];
+                let n = match file_handler.read(&mut buffer) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        self.text_messages.warnings.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                        continue;
+                    }
+                };
+
+                self.information.bytes_read_when_hashing += n as u64;
+                hasher.update(&buffer[..n]);
+
+                let hash_string: String = hasher.finalize().to_hex().to_string();
+                hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
+                hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
+            }
+            for (_string, mut vector) in hashmap_with_hash {
+                if vector.len() > 1 {
+                    pre_checked_map.entry(*size).or_insert_with(Vec::new);
+                    pre_checked_map.get_mut(size).unwrap().append(&mut vector);
+                }
+            }
+        }
+        for (size, vector) in pre_checked_map.iter() {
+            self.information.number_of_duplicated_files_after_pre_hash += vector.len() - 1;
+            self.information.number_of_groups_after_pre_hash += 1;
+            self.information.lost_space_after_pre_hash += (vector.len() as u64 - 1) * size;
+        }
+
+        // 2 step - Check full file hash
+        for (size, vector) in &pre_checked_map {
             hashmap_with_hash = Default::default();
 
             for file_entry in vector {
@@ -337,7 +388,7 @@ impl DuplicateFinder {
                 let mut error_reading_file: bool = false;
 
                 let mut hasher: blake3::Hasher = blake3::Hasher::new();
-                let mut buffer = [0u8; 16384];
+                let mut buffer = [0u8; 32 * 1024];
                 let mut read_bytes: u64 = 0;
                 loop {
                     let n = match file_handler.read(&mut buffer) {
@@ -449,10 +500,19 @@ impl DebugPrint for DuplicateFinder {
             self.information.number_of_duplicated_files_by_size, self.information.number_of_groups_by_size
         );
         println!(
+            "Number of duplicated files after pre hash(in groups) - {} ({})",
+            self.information.number_of_duplicated_files_after_pre_hash, self.information.number_of_groups_after_pre_hash
+        );
+        println!(
             "Number of duplicated files by hash(in groups) - {} ({})",
             self.information.number_of_duplicated_files_by_hash, self.information.number_of_groups_by_hash
         );
         println!("Lost space by size - {} ({} bytes)", self.information.lost_space_by_size.file_size(options::BINARY).unwrap(), self.information.lost_space_by_size);
+        println!(
+            "Lost space after pre hash - {} ({} bytes)",
+            self.information.lost_space_after_pre_hash.file_size(options::BINARY).unwrap(),
+            self.information.lost_space_after_pre_hash
+        );
         println!("Lost space by hash - {} ({} bytes)", self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(), self.information.lost_space_by_hash);
         println!(
             "Gained space by removing duplicated entries - {} ({} bytes)",
