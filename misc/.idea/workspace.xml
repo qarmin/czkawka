@@ -14,7 +14,19 @@
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="language.rust" />
   </component>
-  <component name="RunManager" selected="Cargo.Format Code">
+  <component name="RunManager" selected="Cargo.Audit">
+    <configuration name="Audit" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="audit" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Build All Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="build --all" />
@@ -77,7 +89,7 @@
     </configuration>
     <configuration name="Run CLI Big Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli -- --b  -i $USER_HOME$/ -f &quot;results.txt&quot; -p 37" />
+      <option name="command" value="run --bin czkawka_cli -- big  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -89,7 +101,7 @@
     </configuration>
     <configuration name="Run CLI Big Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli --release  -- --b  -i $USER_HOME$/ -f &quot;results.txt&quot; -p 37" />
+      <option name="command" value="run --bin czkawka_cli --release  -- big  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -101,7 +113,7 @@
     </configuration>
     <configuration name="Run CLI Duplicates Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli -- --d  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli -- dup  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -113,7 +125,7 @@
     </configuration>
     <configuration name="Run CLI Duplicates Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli --release -- --d  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli --release -- dup  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -125,7 +137,7 @@
     </configuration>
     <configuration name="Run CLI Empty Files Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli  -- --y  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli  -- empty-files  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -137,7 +149,7 @@
     </configuration>
     <configuration name="Run CLI Empty Files Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli --release  -- --y  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli --release  -- empty-files  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -149,7 +161,7 @@
     </configuration>
     <configuration name="Run CLI Empty Folders Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli -- --e  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli -- empty-folders  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -161,7 +173,7 @@
     </configuration>
     <configuration name="Run CLI Empty Folders Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli  --release -- --e  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli  --release -- empty-folders  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -183,9 +195,33 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Run CLI Similar Images Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run --bin czkawka_cli   -- image  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Run CLI Similar Images Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run --bin czkawka_cli --release  -- image  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Run CLI Temporary Files Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli  -- --y  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli  -- temp -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -197,7 +233,7 @@
     </configuration>
     <configuration name="Run CLI Temporary Files Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="run --bin czkawka_cli --release  -- --t  -i $USER_HOME$/ -f &quot;results.txt&quot;" />
+      <option name="command" value="run --bin czkawka_cli --release  -- temp  -d $USER_HOME$/ -f &quot;results.txt&quot;" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -207,7 +243,7 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Run GUI GTK" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <configuration name="Run GUI GTK Debug" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="run --bin czkawka_gui" />
       <option name="allFeatures" value="false" />
@@ -219,7 +255,19 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Run GUI Orbtk" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <configuration name="Run GUI GTK Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run --bin czkawka_gui --release" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Run GUI Orbtk Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="run --bin czkawka_gui_orbtk --release" />
       <option name="allFeatures" value="false" />
@@ -268,30 +316,35 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Cargo.Audit" />
       <item itemvalue="Cargo.Build All Debug" />
       <item itemvalue="Cargo.Build All Release" />
       <item itemvalue="Cargo.Clippy" />
       <item itemvalue="Cargo.Doc" />
       <item itemvalue="Cargo.Format Code" />
-      <item itemvalue="Cargo.Run CLI Duplicates Debug" />
-      <item itemvalue="Cargo.Run CLI Duplicates Release" />
-      <item itemvalue="Cargo.Run CLI Empty Folders Debug" />
-      <item itemvalue="Cargo.Run CLI Empty Folders Release" />
       <item itemvalue="Cargo.Run CLI Big Debug" />
       <item itemvalue="Cargo.Run CLI Big Release" />
+      <item itemvalue="Cargo.Run CLI Duplicates Debug" />
+      <item itemvalue="Cargo.Run CLI Duplicates Release" />
       <item itemvalue="Cargo.Run CLI Empty Files Debug" />
       <item itemvalue="Cargo.Run CLI Empty Files Release" />
+      <item itemvalue="Cargo.Run CLI Empty Folders Debug" />
+      <item itemvalue="Cargo.Run CLI Empty Folders Release" />
+      <item itemvalue="Cargo.Run CLI Info" />
+      <item itemvalue="Cargo.Run CLI Similar Images Debug" />
+      <item itemvalue="Cargo.Run CLI Similar Images Release" />
       <item itemvalue="Cargo.Run CLI Temporary Files Debug" />
       <item itemvalue="Cargo.Run CLI Temporary Files Release" />
-      <item itemvalue="Cargo.Run CLI Info" />
-      <item itemvalue="Cargo.Run GUI GTK" />
+      <item itemvalue="Cargo.Run GUI GTK Debug" />
+      <item itemvalue="Cargo.Run GUI GTK Release" />
+      <item itemvalue="Cargo.Run GUI Orbtk Release" />
       <item itemvalue="Cargo.Run GUI Version" />
-      <item itemvalue="Cargo.Run GUI Orbtk" />
       <item itemvalue="Cargo.Test" />
       <item itemvalue="Cargo.Update" />
     </list>
   </component>
   <component name="RustProjectSettings">
+    <option name="runRustfmtOnSave" value="true" />
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
     <option name="version" value="2" />
   </component>

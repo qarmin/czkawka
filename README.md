@@ -130,7 +130,7 @@ DupeGuru after selecting files, froze at 45% for ~15 minutes, so I just kill it.
 I used Mprof for checking memory usage FSlint and Dupeguru, for Czkawka I used Heaptrack.
 To not get Dupeguru crash I checked smaller directory with 217986 files and 41883 folders.
 
-| App| Idle Ram | Max Operational Ram Usage | Stabilized after search usage |
+| App| Idle Ram | Max Operational Ram Usage | Stabilized after search |
 |:----------:|:-------------:|:-------------:|:-------------:|
 | FSlint 2.4.7 | 54 MB | 120 MB | 117 MB |
 | Czkawka 1.2.2 | 8 MB | 42 MB | 41 MB |
@@ -159,7 +159,7 @@ So still is a big room for improvements.
 | Language | Rust| Python | Python/Objective C | 
 | OS | Linux, Windows, Mac(only CLI) | Linux | Linux, Windows, Mac|
 | Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) | Qt 5 (PyQt)/Cocoa |
-| Ram Usage | Low | Medium | | 
+| Ram Usage | Low | Medium | Very High | 
 | Duplicate finder | X | X | X |
 | Empty files | X | X |  |
 | Empty folders | X | X |  |

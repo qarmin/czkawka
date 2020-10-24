@@ -16,7 +16,7 @@ pub enum Commands {
         minimal_file_size: u64,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (SIZE, HASH, HASHMB)", long_help = "Methods to search files.\nSIZE - The fastest method, checking by the file's size,\nHASHMB - More accurate but slower, checking by the hash of the file's first mibibyte or\nHASH - The slowest method, checking by the hash of the entire file")]
+        #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (NAME, SIZE, HASH, HASHMB)", long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASHMB - More accurate but slower, checking by the hash of the file's first mebibyte or\nHASH - The slowest method, checking by the hash of the entire file")]
         search_method: CheckingMethod,
         #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nNONE - not delete files")]
         delete_method: DeleteMethod,
@@ -83,7 +83,7 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
-    #[structopt(name = "ima", about = "Finds similar images", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka ima -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt")]
+    #[structopt(name = "image", about = "Finds similar images", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka image -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt")]
     SimilarImages {
         #[structopt(flatten)]
         directories: Directories,
@@ -153,10 +153,11 @@ impl FileToSave {
 
 fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
+        "name" => Ok(CheckingMethod::Name),
         "size" => Ok(CheckingMethod::Size),
         "hash" => Ok(CheckingMethod::Hash),
         "hashmb" => Ok(CheckingMethod::HashMB),
-        _ => Err("Couldn't parse the search method (allowed: SIZE, HASH, HASHMB)"),
+        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH, HASHMB)"),
     }
 }
 
@@ -205,4 +206,5 @@ EXAMPLES:
     {bin} empty-folders -d /home/rafal/rr /home/gateway -f results.txt
     {bin} big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
-    {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D"#;
+    {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
+    {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt"#;
