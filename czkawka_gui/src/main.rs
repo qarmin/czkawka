@@ -165,6 +165,7 @@ fn main() {
     let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
 
     //// Radio Buttons
+    let radio_button_name: gtk::RadioButton = builder.get_object("radio_button_name").unwrap();
     let radio_button_size: gtk::RadioButton = builder.get_object("radio_button_size").unwrap();
     let radio_button_hashmb: gtk::RadioButton = builder.get_object("radio_button_hashmb").unwrap();
     let radio_button_hash: gtk::RadioButton = builder.get_object("radio_button_hash").unwrap();
@@ -499,7 +500,9 @@ fn main() {
                     match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
                         "notebook_main_duplicate_finder_label" => {
                             let check_method;
-                            if radio_button_size.get_active() {
+                            if radio_button_name.get_active() {
+                                check_method = duplicate::CheckingMethod::Name;
+                            } else if radio_button_size.get_active() {
                                 check_method = duplicate::CheckingMethod::Size;
                             } else if radio_button_hashmb.get_active() {
                                 check_method = duplicate::CheckingMethod::HashMB;
@@ -1542,15 +1545,23 @@ fn main() {
                     let duplicates_group: usize;
 
                     match df.get_check_method() {
+                        CheckingMethod::Name => {
+                            duplicates_number = information.number_of_duplicated_files_by_name;
+                            duplicates_size = 0;
+                            duplicates_group = information.number_of_groups_by_name;
+                            entry_info.set_text(format!("Found {} files in {} groups which have same names.", duplicates_number, duplicates_group).as_str());
+                        }
                         CheckingMethod::Hash | CheckingMethod::HashMB => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
+                            entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
                         }
                         CheckingMethod::Size => {
                             duplicates_number = information.number_of_duplicated_files_by_size;
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
+                            entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
                         }
                         CheckingMethod::None => {
                             panic!();
@@ -1577,6 +1588,33 @@ fn main() {
                         let col_indices = [0, 1, 2, 3, 4, 5];
 
                         match df.get_check_method() {
+                            CheckingMethod::Name => {
+                                let btreemap = df.get_files_sorted_by_names();
+
+                                for (name, vector) in btreemap.iter().rev() {
+                                    let values: [&dyn ToValue; 6] = [
+                                        &name,
+                                        &(format!("{} results", vector.len())),
+                                        &"".to_string(), // No text in 3 column
+                                        &(0),            // Not used here
+                                        &(HEADER_ROW_COLOR.to_string()),
+                                        &(TEXT_COLOR.to_string()),
+                                    ];
+                                    list_store.set(&list_store.append(), &col_indices, &values);
+                                    for entry in vector {
+                                        let (directory, file) = split_path(&entry.path);
+                                        let values: [&dyn ToValue; 6] = [
+                                            &file,
+                                            &directory,
+                                            &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap())),
+                                            &(entry.modified_date),
+                                            &(MAIN_ROW_COLOR.to_string()),
+                                            &(TEXT_COLOR.to_string()),
+                                        ];
+                                        list_store.set(&list_store.append(), &col_indices, &values);
+                                    }
+                                }
+                            }
                             CheckingMethod::Hash | CheckingMethod::HashMB => {
                                 let btreemap = df.get_files_sorted_by_hash();
 
@@ -1645,7 +1683,7 @@ fn main() {
                     {
                         *shared_duplication_state.borrow_mut() = df;
 
-                        if duplicates_size > 0 {
+                        if duplicates_number > 0 {
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
