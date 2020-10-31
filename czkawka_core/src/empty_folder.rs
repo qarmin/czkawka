@@ -1,5 +1,6 @@
 use crate::common::Common;
 use crate::common_directory::Directories;
+use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crossbeam_channel::Receiver;
@@ -31,6 +32,7 @@ pub struct EmptyFolder {
     information: Info,
     delete_folders: bool,
     text_messages: Messages,
+    excluded_items: ExcludedItems,
     empty_folder_list: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
     directories: Directories,
     stopped_search: bool,
@@ -56,6 +58,7 @@ impl EmptyFolder {
             information: Default::default(),
             delete_folders: false,
             text_messages: Messages::new(),
+            excluded_items: Default::default(),
             empty_folder_list: Default::default(),
             directories: Directories::new(),
             stopped_search: false,
@@ -77,6 +80,13 @@ impl EmptyFolder {
         &self.information
     }
 
+    pub fn set_excluded_items(&mut self, excluded_items: String) {
+        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
+    }
+
+    pub fn set_excluded_directory(&mut self, excluded_directory: String) {
+        self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
+    }
     /// Public function used by CLI to search for empty folders
     pub fn find_empty_folders(&mut self, rx: Option<&Receiver<()>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
@@ -151,18 +161,28 @@ impl EmptyFolder {
                 }
             };
 
-            for entry in read_dir {
+            'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => continue, //Permissions denied
+                    Err(_) => {
+                        set_as_not_empty_folder(&mut folders_checked, &current_folder);
+                        continue 'dir;
+                    } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => continue, //Permissions denied
+                    Err(_) => {
+                        set_as_not_empty_folder(&mut folders_checked, &current_folder);
+                        continue 'dir;
+                    } //Permissions denied
                 };
                 // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
                     let next_folder = current_folder.join(entry_data.file_name());
+                    if self.excluded_items.is_excluded(&next_folder) || self.directories.is_excluded(&next_folder) {
+                        set_as_not_empty_folder(&mut folders_checked, &current_folder);
+                        continue 'dir;
+                    }
                     folders_to_check.push(next_folder.clone());
                     folders_checked.insert(
                         next_folder.clone(),
@@ -179,25 +199,15 @@ impl EmptyFolder {
                                 },
                                 Err(_) => {
                                     self.text_messages.warnings.push(format!("Failed to read modification date of folder {}", current_folder.display()));
-                                    continue;
+                                    // Can't read data, so assuming that is not empty
+                                    set_as_not_empty_folder(&mut folders_checked, &current_folder);
+                                    continue 'dir;
                                 }
                             },
                         },
                     );
                 } else {
-                    // Not folder so it may be a file or symbolic link so it isn't empty
-                    folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
-                    let mut d = folders_checked.get_mut(&current_folder).unwrap();
-                    // Loop to recursively set as non empty this and all his parent folders
-                    loop {
-                        d.is_empty = FolderEmptiness::No;
-                        if d.parent_path != None {
-                            let cf = d.parent_path.clone().unwrap();
-                            d = folders_checked.get_mut(&cf).unwrap();
-                        } else {
-                            break;
-                        }
-                    }
+                    set_as_not_empty_folder(&mut folders_checked, &current_folder)
                 }
             }
         }
@@ -233,6 +243,23 @@ impl EmptyFolder {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
 }
+
+fn set_as_not_empty_folder(folders_checked: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &PathBuf) {
+    // Not folder so it may be a file or symbolic link so it isn't empty
+    folders_checked.get_mut(current_folder).unwrap().is_empty = FolderEmptiness::No;
+    let mut d = folders_checked.get_mut(current_folder).unwrap();
+    // Loop to recursively set as non empty this and all his parent folders
+    loop {
+        d.is_empty = FolderEmptiness::No;
+        if d.parent_path != None {
+            let cf = d.parent_path.clone().unwrap();
+            d = folders_checked.get_mut(&cf).unwrap();
+        } else {
+            break;
+        }
+    }
+}
+
 impl Default for EmptyFolder {
     fn default() -> Self {
         Self::new()

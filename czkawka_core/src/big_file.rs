@@ -21,6 +21,11 @@ pub struct FileEntry {
     pub modified_date: u64,
 }
 
+#[derive(Eq, PartialEq, Clone, Debug)]
+pub enum DeleteMethod {
+    None,
+    Delete,
+}
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
@@ -48,6 +53,7 @@ pub struct BigFile {
     allowed_extensions: Extensions,
     recursive_search: bool,
     number_of_files_to_check: usize,
+    delete_method: DeleteMethod,
     stopped_search: bool,
 }
 
@@ -62,6 +68,7 @@ impl BigFile {
             allowed_extensions: Extensions::new(),
             recursive_search: true,
             number_of_files_to_check: 50,
+            delete_method: DeleteMethod::None,
             stopped_search: false,
         }
     }
@@ -72,6 +79,7 @@ impl BigFile {
             self.stopped_search = true;
             return;
         }
+        self.delete_files();
         self.debug_print();
     }
     pub fn get_stopped_search(&self) -> bool {
@@ -88,6 +96,10 @@ impl BigFile {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
     }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
@@ -247,6 +259,28 @@ impl BigFile {
     /// Setting absolute path to exclude
     pub fn set_excluded_directory(&mut self, excluded_directory: String) {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
+    }
+
+    /// Function to delete files, from filed Vector
+    fn delete_files(&mut self) {
+        let start_time: SystemTime = SystemTime::now();
+
+        match self.delete_method {
+            DeleteMethod::Delete => {
+                for vec_file_entry in self.big_files.values() {
+                    for file_entry in vec_file_entry {
+                        if fs::remove_file(file_entry.path.clone()).is_err() {
+                            self.text_messages.warnings.push(file_entry.path.display().to_string());
+                        }
+                    }
+                }
+            }
+            DeleteMethod::None => {
+                //Just do nothing
+            }
+        }
+
+        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
 
