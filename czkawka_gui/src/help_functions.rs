@@ -1,7 +1,24 @@
+use czkawka_core::big_file::BigFile;
 use czkawka_core::common_messages::Messages;
-use czkawka_core::similar_files::Similarity;
+use czkawka_core::duplicate::DuplicateFinder;
+use czkawka_core::empty_files::EmptyFiles;
+use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::similar_files::{SimilarImages, Similarity};
+use czkawka_core::temporary::Temporary;
+use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
 use std::collections::HashMap;
+use std::path::Path;
+
+pub enum Message {
+    Duplicates(DuplicateFinder),
+    EmptyFolders(EmptyFolder),
+    EmptyFiles(EmptyFiles),
+    BigFiles(BigFile),
+    Temporary(Temporary),
+    SimilarImages(SimilarImages),
+    ZeroedFiles(ZeroedFiles),
+}
 
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
@@ -84,6 +101,13 @@ pub fn get_string_from_list_store(scrolled_window: &gtk::ScrolledWindow) -> Stri
         }
     }
 }
+pub fn split_path(path: &Path) -> (String, String) {
+    match (path.parent(), path.file_name()) {
+        (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
+        (Some(dir), None) => (dir.display().to_string(), String::new()),
+        (None, _) => (String::new(), String::new()),
+    }
+}
 
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk::TextView) {
     let mut messages: String = String::from("");
@@ -134,9 +158,9 @@ pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_mod
     true
 }
 
-pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[&str]) {
+pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
-        if *hashmap.get_mut(button_names[index]).unwrap() {
+        if *hashmap.get_mut(button_names[index].as_str()).unwrap() {
             button.show();
         } else {
             button.hide();
@@ -149,7 +173,7 @@ pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Bu
 //     }
 // }
 
-pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button], button_names: &[&str]) {
+pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if except_name == button_names[index] {
             button.show();
