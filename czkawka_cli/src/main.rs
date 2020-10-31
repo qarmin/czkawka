@@ -12,6 +12,7 @@ use czkawka_core::{
     empty_folder::EmptyFolder,
     similar_files::SimilarImages,
     temporary::{self, Temporary},
+    zeroed::{self, ZeroedFiles},
 };
 use std::{path::PathBuf, process};
 use structopt::StructOpt;
@@ -207,6 +208,43 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             sf.print_results();
             sf.get_text_messages().print_messages();
+        }
+
+        Commands::ZeroedFiles {
+            directories,
+            excluded_directories,
+            excluded_items,
+            allowed_extensions,
+            delete_files,
+            file_to_save,
+            not_recursive,
+            minimal_file_size,
+        } => {
+            let mut zf = ZeroedFiles::new();
+
+            zf.set_included_directory(path_list_to_str(directories.directories));
+            zf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
+            zf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            zf.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
+            zf.set_minimal_file_size(minimal_file_size);
+            zf.set_recursive_search(!not_recursive.not_recursive);
+
+            if delete_files {
+                zf.set_delete_method(zeroed::DeleteMethod::Delete);
+            }
+
+            zf.find_zeroed_files(None);
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !zf.save_results_to_file(file_name) {
+                    zf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            zf.print_results();
+            zf.get_text_messages().print_messages();
         }
     }
 }

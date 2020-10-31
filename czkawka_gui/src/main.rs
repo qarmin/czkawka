@@ -20,6 +20,7 @@ use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::similar_files::SimilarImages;
 use czkawka_core::temporary::Temporary;
+use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
 use gtk::{Builder, SelectionMode, TreeIter, TreeView};
 use std::cell::RefCell;
@@ -67,7 +68,7 @@ fn main() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //// States
-    let main_notebooks_labels = ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file", "similar_images"];
+    let main_notebooks_labels = ["duplicate", "empty_folder", "empty_file", "temporary_file", "big_file", "similar_images", "zeroed_files"];
     let upper_notebooks_labels = [/*"general",*/ "included_directories", "excluded_directories", "excluded_items", "allowed_extensions"];
     let buttons_labels = ["search", "stop", "resume", "pause", "select", "delete", "save"];
 
@@ -111,6 +112,7 @@ fn main() {
     let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(Temporary::new()));
     let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
     let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
+    let shared_zeroed_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(ZeroedFiles::new()));
 
     // State of confirmation dialogs
     let shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<_>> = Rc::new(RefCell::new(true));
@@ -198,6 +200,7 @@ fn main() {
     let scrolled_window_main_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_temporary_files_finder").unwrap();
     let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
     let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_similar_images_finder").unwrap();
+    let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_zeroed_files_finder").unwrap();
 
     // Upper notebook
     let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
@@ -212,6 +215,7 @@ fn main() {
         BigFiles(BigFile),
         Temporary(Temporary),
         SimilarImages(SimilarImages),
+        ZeroedFiles(ZeroedFiles),
     }
 
     // Used for getting data from thread
@@ -349,6 +353,22 @@ fn main() {
                 scrolled_window_similar_images_finder.add(&tree_view);
                 scrolled_window_similar_images_finder.show_all();
             }
+            // Zeroed Files
+            {
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_zeroed_files(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_zeroed_files);
+
+                scrolled_window_zeroed_files_finder.add(&tree_view);
+                scrolled_window_zeroed_files_finder.show_all();
+            }
         }
 
         // Set Included Directory
@@ -439,6 +459,7 @@ fn main() {
                     "scrolled_window_main_temporary_files_finder" => page = "temporary_file",
                     "notebook_big_main_file_finder" => page = "big_file",
                     "notebook_main_similar_images_finder_label" => page = "similar_images",
+                    "notebook_main_zeroed_files_finder" => page = "zeroed_files",
                     e => {
                         panic!("Not existent page {}", e);
                     }
@@ -625,6 +646,22 @@ fn main() {
                                 let _ = sender.send(Message::SimilarImages(sf));
                             });
                         }
+                        "notebook_main_zeroed_files_finder" => {
+                            let sender = sender.clone();
+                            let receiver_stop = rx.clone();
+
+                            // Find temporary files
+                            thread::spawn(move || {
+                                let mut zf = ZeroedFiles::new();
+
+                                zf.set_included_directory(included_directories);
+                                zf.set_excluded_directory(excluded_directories);
+                                zf.set_recursive_search(recursive_search);
+                                zf.set_excluded_items(excluded_items);
+                                zf.find_zeroed_files(Option::from(&receiver_stop));
+                                let _ = sender.send(Message::ZeroedFiles(zf));
+                            });
+                        }
                         e => panic!("Not existent {}", e),
                     }
                 });
@@ -641,6 +678,7 @@ fn main() {
                 let scrolled_window_main_empty_files_finder = scrolled_window_main_empty_files_finder.clone();
                 let scrolled_window_main_temporary_files_finder = scrolled_window_main_temporary_files_finder.clone();
                 let scrolled_window_similar_images_finder = scrolled_window_similar_images_finder.clone();
+                let scrolled_window_zeroed_files_finder = scrolled_window_zeroed_files_finder.clone();
 
                 buttons_delete.connect_clicked(move |_| {
                     if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
@@ -988,6 +1026,36 @@ fn main() {
                             text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                             selection.unselect_all();
                         }
+                        "notebook_main_zeroed_files_finder" => {
+                            let tree_view = scrolled_window_zeroed_files_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                            let selection = tree_view.get_selection();
+
+                            let (selection_rows, tree_model) = selection.get_selected_rows();
+                            if selection_rows.is_empty() {
+                                return;
+                            }
+                            let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                            // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                            let mut messages: String = "".to_string();
+
+                            // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                            for tree_path in selection_rows.iter().rev() {
+                                let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsZeroedFiles::Name as i32).get::<String>().unwrap().unwrap();
+                                let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsZeroedFiles::Path as i32).get::<String>().unwrap().unwrap();
+
+                                match fs::remove_file(format!("{}/{}", path, name)) {
+                                    Ok(_) => {
+                                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                                    }
+                                    Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                                }
+                            }
+
+                            text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                            selection.unselect_all();
+                        }
                         e => panic!("Not existent {}", e),
                     }
                 });
@@ -1018,6 +1086,7 @@ fn main() {
                 let shared_temporary_files_state = shared_temporary_files_state.clone();
                 let shared_empty_files_state = shared_empty_files_state.clone();
                 let shared_similar_images_state = shared_similar_images_state.clone();
+                let shared_zeroed_files_state = shared_zeroed_files_state.clone();
                 let notebook_main = notebook_main.clone();
                 buttons_save_clone.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
                     "notebook_main_duplicate_finder_label" => {
@@ -1096,6 +1165,19 @@ fn main() {
                         {
                             buttons_save.hide();
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = false;
+                        }
+                    }
+                    "notebook_main_zeroed_files_finder_label" => {
+                        let file_name = "results_zeroed_files.txt";
+
+                        let mut zf = shared_zeroed_files_state.borrow_mut();
+                        zf.save_results_to_file(file_name);
+
+                        entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+                        // Set state
+                        {
+                            buttons_save.hide();
+                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("save").unwrap() = false;
                         }
                     }
                     e => panic!("Not existent {}", e),
@@ -2062,6 +2144,79 @@ fn main() {
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("similar_images").unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+
+            Message::ZeroedFiles(zf) => {
+                if zf.get_stopped_search() {
+                    entry_info.set_text("Searching for zeroed files was stopped by user");
+
+                    //Also clear list
+                    scrolled_window_zeroed_files_finder
+                        .get_children()
+                        .get(0)
+                        .unwrap()
+                        .clone()
+                        .downcast::<gtk::TreeView>()
+                        .unwrap()
+                        .get_model()
+                        .unwrap()
+                        .downcast::<gtk::ListStore>()
+                        .unwrap()
+                        .clear();
+                } else {
+                    let information = zf.get_information();
+                    let text_messages = zf.get_text_messages();
+
+                    let zeroed_files_number: usize = information.number_of_zeroed_files;
+
+                    entry_info.set_text(format!("Found {} zeroed files.", zeroed_files_number).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_zeroed_files_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2, 3];
+
+                        let vector = zf.get_zeroed_files();
+
+                        for file_entry in vector {
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [&dyn ToValue; 4] = [
+                                &(file_entry.size.file_size(options::BINARY).unwrap()),
+                                &file,
+                                &directory,
+                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                            ];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_zeroed_files_state.borrow_mut() = zf;
+
+                        if zeroed_files_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

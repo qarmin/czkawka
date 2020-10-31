@@ -14,11 +14,11 @@ Other tools are usually written in C/C++ for high performance but still need to 
 But the most important thing for me was to learn Rust and create a program useful for the open source community.
 
 ## Features
-- Written in fast and memory safe Rust
+- Written in memory safe Rust
+- Amazingly fast - due using more or less advanced algorithms
 - CLI frontend, very fast and powerful with rich help
 - GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
 - Light/Dark theme match the appearance of the system
-- GUI Orbtk frontend(Very early WIP) - alternative GUI with reduced functionality
 - Saving results to a file - allows reading entries found by the tool easily
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions or excluded items with * wildcard
 - Clean Glade file in which UI can be easily modernized
@@ -29,6 +29,7 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Empty Files - Looks for empty files across disk
   - Temporary Files - Allows finding temporary files
   - Similar Files - Finds files which are not exactly the same
+  - Zeroed Files - Find files which are filled with zeros(usually corrupted)
 
 ## Usage and requirements
 
@@ -49,7 +50,7 @@ cargo install czkawka_gui
 ```
 You can update package by typing same command.
 
-### Snap,  Flatpak
+### Snap, Flatpak
 Maybe someday
 
 ### Debian/Ubuntu repository and PPA
@@ -58,7 +59,7 @@ Tried to setup it, but for now I have problems described in this issue
 https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21
 
 
-### AUR - Arch Linux Package(unofficial)
+### AUR - Arch Linux Package (unofficial)
 Czkawka is also available in Arch Linux's AUR from which it can be easily downloaded and installed on the system.
 ```
 yay -Syu czkawka-git
@@ -106,7 +107,7 @@ cargo run --bin czkawka_cli
 ```
 ![CLI](https://user-images.githubusercontent.com/41945903/93716816-0bbcfd80-fb72-11ea-8d31-4c87cc2abe6d.png)
 
-## Speed
+## Benchmarks
 Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these tools.
 
 I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 320004 files and 36902 folders and 108844 duplicated files in 34475 groups which took 4.53 GB.
@@ -121,8 +122,8 @@ DupeGuru after selecting files, froze at 45% for ~15 minutes, so I just kill it.
 |:----------:|:-------------:|
 | FSlint 2.4.7 (First Run)| 255s |
 | FSlint 2.4.7 (Second Run)| 126s |
-| Czkawka 1.2.2 (First Run) | 150s |
-| Czkawka 1.2.2 (Second Run) | 107s |
+| Czkawka 1.3.0 (First Run) | 150s |
+| Czkawka 1.3.0 (Second Run) | 107s |
 | DupeGuru 4.0.4 (First Run) | - | 
 | DupeGuru 4.0.4 (Second Run) | - | 
 
@@ -133,21 +134,21 @@ To not get Dupeguru crash I checked smaller directory with 217986 files and 4188
 | App| Idle Ram | Max Operational Ram Usage | Stabilized after search |
 |:----------:|:-------------:|:-------------:|:-------------:|
 | FSlint 2.4.7 | 54 MB | 120 MB | 117 MB |
-| Czkawka 1.2.2 | 8 MB | 42 MB | 41 MB |
+| Czkawka 1.3.0 | 8 MB | 42 MB | 41 MB |
 | DupeGuru 4.0.4 | 110 MB | 637 MB | 602 MB |
 
 Similar Images which check 386 files which takes 1,9GB
 
 | App| Scan time |
 |:----------:|:-------------:|
-| Czkawka 1.2.2 | 267s | 
+| Czkawka 1.3.0 | 267s | 
 | DupeGuru 4.0.4 | 75s | 
 
 Similar Images which check 5018 files which takes 389MB
 
 | App| Scan time |
 |:----------:|:-------------:|
-| Czkawka 1.2.2 | 45s | 
+| Czkawka 1.3.0 | 45s | 
 | DupeGuru 4.0.4 | 87s | 
 
 So still is a big room for improvements.
@@ -166,6 +167,7 @@ So still is a big room for improvements.
 | Temporary files | X | X |  |
 | Big files | X |   |  |
 | Similar images | X |   | X |
+| Zeroed Files| X | | |
 | Checking files EXIF| | | X |
 | Installed packages |  | X |  |
 | Invalid names |   | X |  |

@@ -49,6 +49,12 @@ pub enum ColumnsSimilarImages {
     Color,
     TextColor,
 }
+pub enum ColumnsZeroedFiles {
+    Size = 0,
+    Name,
+    Path,
+    Modification,
+}
 
 pub const TEXT_COLOR: &str = "#ffffff";
 pub const MAIN_ROW_COLOR: &str = "#343434";
