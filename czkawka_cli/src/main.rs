@@ -6,7 +6,7 @@ use commands::Commands;
 use czkawka_core::common_traits::*;
 
 use czkawka_core::{
-    big_file::BigFile,
+    big_file::{self, BigFile},
     duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
@@ -64,10 +64,18 @@ fn main() {
             df.print_results();
             df.get_text_messages().print_messages();
         }
-        Commands::EmptyFolders { directories, delete_folders, file_to_save } => {
+        Commands::EmptyFolders {
+            directories,
+            delete_folders,
+            file_to_save,
+            excluded_directories,
+            excluded_items,
+        } => {
             let mut ef = EmptyFolder::new();
 
             ef.set_included_directory(path_list_to_str(directories.directories));
+            ef.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
+            ef.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
             ef.set_delete_folder(delete_folders);
 
             ef.find_empty_folders(None);
@@ -91,6 +99,7 @@ fn main() {
             number_of_files,
             file_to_save,
             not_recursive,
+            delete_files,
         } => {
             let mut bf = BigFile::new();
 
@@ -100,6 +109,9 @@ fn main() {
             bf.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             bf.set_number_of_files_to_check(number_of_files);
             bf.set_recursive_search(!not_recursive.not_recursive);
+            if delete_files {
+                bf.set_delete_method(big_file::DeleteMethod::Delete);
+            }
 
             bf.find_big_files(None);
 

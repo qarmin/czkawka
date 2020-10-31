@@ -29,6 +29,10 @@ pub enum Commands {
     EmptyFolders {
         #[structopt(flatten)]
         directories: Directories,
+        #[structopt(flatten)]
+        excluded_directories: ExcludedDirectories,
+        #[structopt(flatten)]
+        excluded_items: ExcludedItems,
         #[structopt(short = "D", long, help = "Delete found folders")]
         delete_folders: bool,
         #[structopt(flatten)]
@@ -46,6 +50,8 @@ pub enum Commands {
         allowed_extensions: AllowedExtensions,
         #[structopt(short, long, default_value = "50", help = "Number of files to be shown")]
         number_of_files: usize,
+        #[structopt(short = "D", long, help = "Delete found files")]
+        delete_files: bool,
         #[structopt(flatten)]
         file_to_save: FileToSave,
         #[structopt(flatten)]
