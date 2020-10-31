@@ -98,6 +98,25 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
+    #[structopt(name = "zeroed", about = "Finds zeroed files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt")]
+    ZeroedFiles {
+        #[structopt(flatten)]
+        directories: Directories,
+        #[structopt(flatten)]
+        excluded_directories: ExcludedDirectories,
+        #[structopt(flatten)]
+        excluded_items: ExcludedItems,
+        #[structopt(flatten)]
+        allowed_extensions: AllowedExtensions,
+        #[structopt(short = "D", long, help = "Delete found files")]
+        delete_files: bool,
+        #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
+        not_recursive: NotRecursive,
+        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        minimal_file_size: u64,
+    },
 }
 
 #[derive(Debug, StructOpt)]
@@ -207,4 +226,5 @@ EXAMPLES:
     {bin} big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
     {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
-    {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt"#;
+    {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
+    {bin} zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt"#;

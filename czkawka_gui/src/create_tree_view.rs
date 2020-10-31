@@ -251,3 +251,43 @@ pub fn create_tree_view_directories(tree_view: &mut gtk::TreeView) {
 
     tree_view.set_headers_visible(false);
 }
+
+pub fn create_tree_view_zeroed_files(tree_view: &mut gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Size");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsZeroedFiles::Size as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("File Name");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsZeroedFiles::Name as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Path");
+    column.set_resizable(true);
+    column.set_min_width(100);
+    column.add_attribute(&renderer, "text", ColumnsZeroedFiles::Path as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Modification Date");
+    column.set_resizable(true);
+    column.set_min_width(100);
+    column.add_attribute(&renderer, "text", ColumnsZeroedFiles::Modification as i32);
+    tree_view.append_column(&column);
+
+    tree_view.set_vexpand(true);
+}
