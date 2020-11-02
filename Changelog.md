@@ -1,3 +1,14 @@
+## Version 1.3.0 - 02.11.2020r
+- Appimage support - [#77](https://github.com/qarmin/czkawka/pull/77)
+- Removed warnings about non existend excluded directories - [#79](https://github.com/qarmin/czkawka/pull/79)
+- Updated README - [8ec](https://github.com/qarmin/czkawka/commit/8ecde0fc9adb3e6cedf432c4ba749e698b645a7a)
+- Added pre hash support(speedup for searching big duplicates) - [#83](https://github.com/qarmin/czkawka/pull/83)
+- Support for searching duplicates by file name - [#84](https://github.com/qarmin/czkawka/pull/84)
+- Added support for checking for zeroed file - [#88](https://github.com/qarmin/czkawka/pull/88)
+- Refactored GUI code to faster and safer changing/adding code - [#89](https://github.com/qarmin/czkawka/pull/89)
+- Added some missing options to CLI in some modes - [#90](https://github.com/qarmin/czkawka/pull/90)
+- Implemented finding duplicates by music tags - [#95](https://github.com/qarmin/czkawka/pull/95)
+
 ## Version 1.2.1 - 17.10.2020r
 - Make image similarity search significantly faster. [#72](https://github.com/qarmin/czkawka/pull/72)
 - Improve similar images GUI a little and add sorting to Similarity Enum [#73](https://github.com/qarmin/czkawka/pull/73)

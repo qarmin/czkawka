@@ -30,7 +30,7 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Temporary Files - Allows finding temporary files
   - Similar Files - Finds files which are not exactly the same
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
-  - Same Musc - Search for music with same artist, album etc.
+  - Same Music - Search for music with same artist, album etc.
 
 ## Usage and requirements
 
@@ -55,7 +55,7 @@ You can update package by typing same command.
 Maybe someday
 
 ### Debian/Ubuntu repository and PPA
-Tried to setup it, but for now I have problems described in this issue
+Tried to set up it, but for now I have problems described in this issue
 
 https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21
 
@@ -111,9 +111,9 @@ cargo run --bin czkawka_cli
 ## Benchmarks
 Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these tools.
 
-I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 320004 files and 36902 folders and 108844 duplicated files in 34475 groups which took 4.53 GB.
+I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 320004 files and 36902 folders and 108844 duplicates files in 34475 groups which took 4.53 GB.
 
-Minimum file size to check I set to 1KB on all programs
+Minimum file size to check I set to 1 KB on all programs
 
 The first run reads every file entry and saves it to cache, so this step is limited mostly by disk performance. In the second run the cache helps it, so searching is sometimes faster (with few duplicates even 10x faster).
 
