@@ -19,7 +19,7 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsDuplicates::Path as i32);
     column.add_attribute(&renderer, "background", ColumnsDuplicates::Color as i32);
     column.add_attribute(&renderer, "foreground", ColumnsDuplicates::TextColor as i32);
@@ -30,7 +30,7 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsDuplicates::Modification as i32);
     column.add_attribute(&renderer, "background", ColumnsDuplicates::Color as i32);
     column.add_attribute(&renderer, "foreground", ColumnsDuplicates::TextColor as i32);
@@ -54,7 +54,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFolders::Path as i32);
     tree_view.append_column(&column);
 
@@ -63,7 +63,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFolders::Modification as i32);
     tree_view.append_column(&column);
 
@@ -94,7 +94,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBigFiles::Path as i32);
     tree_view.append_column(&column);
 
@@ -103,7 +103,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBigFiles::Modification as i32);
     tree_view.append_column(&column);
 
@@ -125,7 +125,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsTemporaryFiles::Path as i32);
     tree_view.append_column(&column);
 
@@ -134,7 +134,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsTemporaryFiles::Modification as i32);
     tree_view.append_column(&column);
 
@@ -156,7 +156,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFiles::Path as i32);
     tree_view.append_column(&column);
 
@@ -165,7 +165,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFiles::Modification as i32);
     tree_view.append_column(&column);
 
@@ -222,7 +222,7 @@ pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsSimilarImages::Path as i32);
     column.add_attribute(&renderer, "background", ColumnsSimilarImages::Color as i32);
     column.add_attribute(&renderer, "foreground", ColumnsSimilarImages::TextColor as i32);
@@ -233,7 +233,7 @@ pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsSimilarImages::Modification as i32);
     column.add_attribute(&renderer, "background", ColumnsSimilarImages::Color as i32);
     column.add_attribute(&renderer, "foreground", ColumnsSimilarImages::TextColor as i32);
@@ -276,7 +276,7 @@ pub fn create_tree_view_zeroed_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Path");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsZeroedFiles::Path as i32);
     tree_view.append_column(&column);
 
@@ -285,8 +285,111 @@ pub fn create_tree_view_zeroed_files(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_title("Modification Date");
     column.set_resizable(true);
-    column.set_min_width(100);
+    column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsZeroedFiles::Modification as i32);
+    tree_view.append_column(&column);
+
+    tree_view.set_vexpand(true);
+}
+
+pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Size");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Size as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("File Name");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Name as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Path");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Path as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Title");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Title as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Artist");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Artist as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Album Title");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::AlbumTitle as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Album Artist");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::AlbumArtist as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Year");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Year as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Modification Date");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Modification as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);

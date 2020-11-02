@@ -21,3 +21,7 @@ img_hash = "3.1"
 bk-tree = "0.3"
 image = "0.23"
 hamming = "0.1"
+
+# Needed by same music
+bitflags = "1.2.1"
+audiotags = "0.2.7182"

@@ -30,6 +30,7 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Temporary Files - Allows finding temporary files
   - Similar Files - Finds files which are not exactly the same
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
+  - Same Musc - Search for music with same artist, album etc.
 
 ## Usage and requirements
 
@@ -168,7 +169,7 @@ So still is a big room for improvements.
 | Big files | X |   |  |
 | Similar images | X |   | X |
 | Zeroed Files| X | | |
-| Checking files EXIF| | | X |
+| Music duplicates(EXIF) | X | | X |
 | Installed packages |  | X |  |
 | Invalid names |   | X |  |
 | Names conflict |   | X |  |
