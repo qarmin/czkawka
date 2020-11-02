@@ -5,6 +5,7 @@ use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use chrono::NaiveDateTime;
 use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::same_music::MusicSimilarity;
 use glib::Receiver;
 use gtk::prelude::*;
 
@@ -30,6 +31,8 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
+    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+    let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.buttons_names.clone();
 
     receiver.attach(None, move |msg| {
@@ -586,7 +589,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
                     }
                 }
             }
-
             Message::ZeroedFiles(zf) => {
                 if zf.get_stopped_search() {
                     entry_info.set_text("Searching for zeroed files was stopped by user");
@@ -656,6 +658,128 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
                             *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("delete").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+            Message::SameMusic(mf) => {
+                if mf.get_stopped_search() {
+                    entry_info.set_text("Searching for empty files was stopped by user");
+
+                    //Also clear list
+                    scrolled_window_same_music_finder
+                        .get_children()
+                        .get(0)
+                        .unwrap()
+                        .clone()
+                        .downcast::<gtk::TreeView>()
+                        .unwrap()
+                        .get_model()
+                        .unwrap()
+                        .downcast::<gtk::ListStore>()
+                        .unwrap()
+                        .clear();
+                } else {
+                    let information = mf.get_information();
+                    let text_messages = mf.get_text_messages();
+
+                    let same_music_number: usize = information.number_of_duplicates_music_files;
+
+                    entry_info.set_text(format!("Found {} duplicated music files.", same_music_number).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = scrolled_window_same_music_finder
+                            .get_children()
+                            .get(0)
+                            .unwrap()
+                            .clone()
+                            .downcast::<gtk::TreeView>()
+                            .unwrap()
+                            .get_model()
+                            .unwrap()
+                            .downcast::<gtk::ListStore>()
+                            .unwrap();
+                        list_store.clear();
+
+                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+                        let vector = mf.get_duplicated_music_entries();
+
+                        let music_similarity = *mf.get_music_similarity();
+
+                        let is_title = (MusicSimilarity::TITLE & music_similarity) != MusicSimilarity::NONE;
+                        let is_artist = (MusicSimilarity::ARTIST & music_similarity) != MusicSimilarity::NONE;
+                        let is_album_title = (MusicSimilarity::ALBUM_TITLE & music_similarity) != MusicSimilarity::NONE;
+                        let is_album_artist = (MusicSimilarity::ALBUM_ARTIST & music_similarity) != MusicSimilarity::NONE;
+                        let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
+
+                        let text: String = "-----".to_string();
+
+                        for vec_file_entry in vector {
+                            let values: [&dyn ToValue; 12] = [
+                                &"".to_string(),
+                                &"".to_string(),
+                                &"".to_string(),
+                                &(match is_title {
+                                    true => text.clone(),
+                                    false => "".to_string(),
+                                }),
+                                &(match is_artist {
+                                    true => text.clone(),
+                                    false => "".to_string(),
+                                }),
+                                &(match is_album_title {
+                                    true => text.clone(),
+                                    false => "".to_string(),
+                                }),
+                                &(match is_album_artist {
+                                    true => text.clone(),
+                                    false => "".to_string(),
+                                }),
+                                &(match is_year {
+                                    true => text.clone(),
+                                    false => "".to_string(),
+                                }),
+                                &"".to_string(),
+                                &"".to_string(),
+                                &(HEADER_ROW_COLOR.to_string()),
+                                &(TEXT_COLOR.to_string()),
+                            ];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                            for file_entry in vec_file_entry {
+                                let (directory, file) = split_path(&file_entry.path);
+                                let values: [&dyn ToValue; 12] = [
+                                    &file_entry.size.file_size(options::BINARY).unwrap(),
+                                    &file,
+                                    &directory,
+                                    &file_entry.title,
+                                    &file_entry.artist,
+                                    &file_entry.album_title,
+                                    &file_entry.album_artist,
+                                    &file_entry.year.to_string(),
+                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(file_entry.modified_date),
+                                    &(MAIN_ROW_COLOR.to_string()),
+                                    &(TEXT_COLOR.to_string()),
+                                ];
+                                list_store.set(&list_store.append(), &col_indices, &values);
+                            }
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_same_music_state.borrow_mut() = mf;
+
+                        if same_music_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("delete").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("delete").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

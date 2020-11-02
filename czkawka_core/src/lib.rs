@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate bitflags;
+
 pub mod big_file;
 pub mod duplicate;
 pub mod empty_files;
@@ -10,6 +13,7 @@ pub mod common_extensions;
 pub mod common_items;
 pub mod common_messages;
 pub mod common_traits;
+pub mod same_music;
 pub mod similar_files;
 pub mod zeroed;
 

@@ -23,6 +23,7 @@ pub fn startup_configuration(gui_data: &GuiData) {
         let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
         let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
         let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
+        let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
         let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
@@ -170,6 +171,36 @@ pub fn startup_configuration(gui_data: &GuiData) {
 
                 scrolled_window_zeroed_files_finder.add(&tree_view);
                 scrolled_window_zeroed_files_finder.show_all();
+            }
+            // Same Files
+            {
+                let col_types: [glib::types::Type; 12] = [
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                    glib::types::Type::String,
+                ];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_same_music(&mut tree_view);
+                tree_view.get_selection().set_select_function(Some(Box::new(select_function_same_music)));
+
+                tree_view.connect_button_press_event(opening_double_click_function_same_music);
+
+                scrolled_window_same_music_finder.add(&tree_view);
+                scrolled_window_same_music_finder.show_all();
             }
         }
 

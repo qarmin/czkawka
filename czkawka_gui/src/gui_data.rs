@@ -1,9 +1,11 @@
+extern crate gdk;
 extern crate gtk;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_files::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
@@ -15,12 +17,15 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct GuiData {
+    // Glade builder
     pub glade_src: String,
     pub builder: Builder,
+
     // Windows
     pub window_main: gtk::Window,
+
     // States
-    pub main_notebooks_labels: [String; 7],
+    pub main_notebooks_labels: [String; 8],
     pub upper_notebooks_labels: [String; 4],
     pub buttons_labels: [String; 7],
     // Buttons state
@@ -37,6 +42,7 @@ pub struct GuiData {
     pub shared_big_files_state: Rc<RefCell<BigFile>>,
     pub shared_similar_images_state: Rc<RefCell<SimilarImages>>,
     pub shared_zeroed_files_state: Rc<RefCell<ZeroedFiles>>,
+    pub shared_same_music_state: Rc<RefCell<SameMusic>>,
 
     // State of confirmation dialogs
     pub shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<bool>>,
@@ -47,6 +53,7 @@ pub struct GuiData {
     pub entry_allowed_extensions: gtk::Entry,
     pub entry_excluded_items: gtk::Entry,
     pub entry_big_files_number: gtk::Entry,
+    pub entry_same_music_minimal_size: gtk::Entry,
 
     //// GUI Buttons
     pub buttons_search: gtk::Button,
@@ -78,7 +85,14 @@ pub struct GuiData {
     //// Check Buttons
     pub check_button_recursive: gtk::CheckButton,
 
+    pub check_button_music_title: gtk::CheckButton,
+    pub check_button_music_artist: gtk::CheckButton,
+    pub check_button_music_album_title: gtk::CheckButton,
+    pub check_button_music_album_artist: gtk::CheckButton,
+    pub check_button_music_year: gtk::CheckButton,
+
     //// Radio Buttons
+    // Duplicates
     pub radio_button_name: gtk::RadioButton,
     pub radio_button_size: gtk::RadioButton,
     pub radio_button_hashmb: gtk::RadioButton,
@@ -106,6 +120,7 @@ pub struct GuiData {
     pub scrolled_window_big_files_finder: gtk::ScrolledWindow,
     pub scrolled_window_similar_images_finder: gtk::ScrolledWindow,
     pub scrolled_window_zeroed_files_finder: gtk::ScrolledWindow,
+    pub scrolled_window_same_music_finder: gtk::ScrolledWindow,
 
     // Upper notebook
     pub scrolled_window_included_directories: gtk::ScrolledWindow,
@@ -139,6 +154,7 @@ impl GuiData {
             "big_file".to_string(),
             "similar_images".to_string(),
             "zeroed_files".to_string(),
+            "same_music".to_string(),
         ];
         let upper_notebooks_labels = [
             /*"general",*/ "included_directories".to_string(),
@@ -189,6 +205,7 @@ impl GuiData {
         let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
         let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
         let shared_zeroed_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(ZeroedFiles::new()));
+        let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
 
         // State of confirmation dialogs
         let shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<_>> = Rc::new(RefCell::new(true));
@@ -201,6 +218,7 @@ impl GuiData {
         let entry_allowed_extensions: gtk::Entry = builder.get_object("entry_allowed_extensions").unwrap();
         let entry_excluded_items: gtk::Entry = builder.get_object("entry_excluded_items").unwrap();
         let entry_big_files_number: gtk::Entry = builder.get_object("entry_big_files_number").unwrap();
+        let entry_same_music_minimal_size: gtk::Entry = builder.get_object("entry_same_music_minimal_size").unwrap();
 
         //// GUI Buttons
         let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
@@ -241,6 +259,11 @@ impl GuiData {
 
         //// Check Buttons
         let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
+        let check_button_music_title: gtk::CheckButton = builder.get_object("check_button_music_title").unwrap();
+        let check_button_music_artist: gtk::CheckButton = builder.get_object("check_button_music_artist").unwrap();
+        let check_button_music_album_title: gtk::CheckButton = builder.get_object("check_button_music_album_title").unwrap();
+        let check_button_music_album_artist: gtk::CheckButton = builder.get_object("check_button_music_album_artist").unwrap();
+        let check_button_music_year: gtk::CheckButton = builder.get_object("check_button_music_year").unwrap();
 
         //// Radio Buttons
         let radio_button_name: gtk::RadioButton = builder.get_object("radio_button_name").unwrap();
@@ -277,6 +300,7 @@ impl GuiData {
         let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
         let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_similar_images_finder").unwrap();
         let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_zeroed_files_finder").unwrap();
+        let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_same_music_finder").unwrap();
 
         // Upper notebook
         let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
@@ -304,12 +328,14 @@ impl GuiData {
             shared_big_files_state,
             shared_similar_images_state,
             shared_zeroed_files_state,
+            shared_same_music_state,
             shared_confirmation_dialog_delete_dialog_showing_state,
             entry_similar_images_minimal_size,
             entry_duplicate_minimal_size,
             entry_allowed_extensions,
             entry_excluded_items,
             entry_big_files_number,
+            entry_same_music_minimal_size,
             buttons_search,
             buttons_stop,
             buttons_resume,
@@ -332,6 +358,11 @@ impl GuiData {
             buttons_popover_select_one_newest,
             popover_select,
             check_button_recursive,
+            check_button_music_title,
+            check_button_music_artist,
+            check_button_music_album_title,
+            check_button_music_album_artist,
+            check_button_music_year,
             radio_button_name,
             radio_button_size,
             radio_button_hashmb,
@@ -349,6 +380,7 @@ impl GuiData {
             scrolled_window_big_files_finder,
             scrolled_window_similar_images_finder,
             scrolled_window_zeroed_files_finder,
+            scrolled_window_same_music_finder,
             scrolled_window_included_directories,
             scrolled_window_excluded_directories,
             sx,

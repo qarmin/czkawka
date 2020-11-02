@@ -14,6 +14,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
+    let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
@@ -96,11 +97,24 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = false;
             }
         }
-        "notebook_main_zeroed_files_finder_label" => {
+        "notebook_main_zeroed_files_finder" => {
             let file_name = "results_zeroed_files.txt";
 
             let mut zf = shared_zeroed_files_state.borrow_mut();
             zf.save_results_to_file(file_name);
+
+            entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
+            // Set state
+            {
+                buttons_save.hide();
+                *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("save").unwrap() = false;
+            }
+        }
+        "notebook_main_same_music_finder" => {
+            let file_name = "results_same_music.txt";
+
+            let mut mf = shared_same_music_state.borrow_mut();
+            mf.save_results_to_file(file_name);
 
             entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
             // Set state

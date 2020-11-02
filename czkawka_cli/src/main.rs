@@ -10,6 +10,7 @@ use czkawka_core::{
     duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
+    same_music::SameMusic,
     similar_files::SimilarImages,
     temporary::{self, Temporary},
     zeroed::{self, ZeroedFiles},
@@ -209,7 +210,6 @@ fn main() {
             sf.print_results();
             sf.get_text_messages().print_messages();
         }
-
         Commands::ZeroedFiles {
             directories,
             excluded_directories,
@@ -245,6 +245,42 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             zf.print_results();
             zf.get_text_messages().print_messages();
+        }
+        Commands::SameMusic {
+            directories,
+            excluded_directories,
+            excluded_items,
+            // delete_files,
+            file_to_save,
+            not_recursive,
+            minimal_file_size,
+            music_similarity,
+        } => {
+            let mut mf = SameMusic::new();
+
+            mf.set_included_directory(path_list_to_str(directories.directories));
+            mf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
+            mf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            mf.set_minimal_file_size(minimal_file_size);
+            mf.set_recursive_search(!not_recursive.not_recursive);
+            mf.set_music_similarity(music_similarity);
+
+            // if delete_files {
+            //     // TODO mf.set_delete_method(same_music::DeleteMethod::Delete);
+            // }
+
+            mf.find_same_music(None);
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !mf.save_results_to_file(file_name) {
+                    mf.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            mf.print_results();
+            mf.get_text_messages().print_messages();
         }
     }
 }

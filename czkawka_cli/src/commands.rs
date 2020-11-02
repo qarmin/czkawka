@@ -1,6 +1,8 @@
 use czkawka_core::duplicate::{CheckingMethod, DeleteMethod};
+use czkawka_core::same_music::MusicSimilarity;
 use std::path::PathBuf;
 use structopt::StructOpt;
+
 #[derive(Debug, StructOpt)]
 #[structopt(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
 pub enum Commands {
@@ -117,6 +119,25 @@ pub enum Commands {
         #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
     },
+    #[structopt(name = "music", about = "Finds same music by tags", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka music -d /home/rafal -f results.txt")]
+    SameMusic {
+        #[structopt(flatten)]
+        directories: Directories,
+        #[structopt(flatten)]
+        excluded_directories: ExcludedDirectories,
+        #[structopt(flatten)]
+        excluded_items: ExcludedItems,
+        // #[structopt(short = "D", long, help = "Delete found files")]
+        // delete_files: bool, TODO
+        #[structopt(short = "z", long, default_value = "artist,title", parse(try_from_str = parse_music_duplicate_type), help = "Search method (title, artist, album_title, album_artist, year)", long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas).")]
+        music_similarity: MusicSimilarity,
+        #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
+        not_recursive: NotRecursive,
+        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "1024", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        minimal_file_size: u64,
+    },
 }
 
 #[derive(Debug, StructOpt)]
@@ -204,6 +225,38 @@ fn parse_minimal_file_size(src: &str) -> Result<u64, String> {
     }
 }
 
+fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
+    if src.is_empty() {
+        return Ok(MusicSimilarity::NONE);
+    }
+
+    let mut similarity: MusicSimilarity = MusicSimilarity::NONE;
+
+    let parts: Vec<&str> = src.split(',').collect();
+
+    if parts.iter().any(|e| e.to_lowercase().contains("title") && !e.to_lowercase().contains("album")) {
+        similarity |= MusicSimilarity::TITLE;
+    }
+    if parts.iter().any(|e| e.to_lowercase().contains("artist") && !e.to_lowercase().contains("album")) {
+        similarity |= MusicSimilarity::ARTIST;
+    }
+    if parts.iter().any(|e| e.to_lowercase().contains("title") && e.to_lowercase().contains("album")) {
+        similarity |= MusicSimilarity::ALBUM_TITLE;
+    }
+    if parts.iter().any(|e| e.to_lowercase().contains("artist") && e.to_lowercase().contains("album")) {
+        similarity |= MusicSimilarity::ALBUM_ARTIST;
+    }
+    if parts.iter().any(|e| e.to_lowercase().contains("year")) {
+        similarity |= MusicSimilarity::YEAR;
+    }
+
+    if similarity == MusicSimilarity::NONE {
+        return Err("Couldn't parse the music search method (allowed: title,artist,album_title,album_artist,year)".to_string());
+    }
+
+    Ok(similarity)
+}
+
 static HELP_MESSAGE: &str = "Prints help information (--help will give more information)";
 
 const HELP_TEMPLATE: &str = r#"
@@ -227,4 +280,5 @@ EXAMPLES:
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
     {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
     {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
-    {bin} zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt"#;
+    {bin} zeroed -d /home/rafal -e /home/krzak -f results.txt"
+    {bin} music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt"#;

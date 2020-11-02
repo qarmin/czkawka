@@ -19,6 +19,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
+    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
 
     buttons_delete.connect_clicked(move |_| {
         if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
@@ -396,7 +397,38 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                 text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
                 selection.unselect_all();
             }
+            "notebook_main_same_music_finder" => {
+                let tree_view = scrolled_window_same_music_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                let selection = tree_view.get_selection();
+
+                let (selection_rows, tree_model) = selection.get_selected_rows();
+                if selection_rows.is_empty() {
+                    return;
+                }
+                let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+                // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+                let mut messages: String = "".to_string();
+
+                // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+                for tree_path in selection_rows.iter().rev() {
+                    let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSameMusic::Name as i32).get::<String>().unwrap().unwrap();
+                    let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSameMusic::Path as i32).get::<String>().unwrap().unwrap();
+
+                    match fs::remove_file(format!("{}/{}", path, name)) {
+                        Ok(_) => {
+                            list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                        }
+                        Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                    }
+                }
+
+                text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+                selection.unselect_all();
+            }
             e => panic!("Not existent {}", e),
         }
     });
 }
+// fn basic_remove(tree_view: gtk::TreeView, column_name: i32, column_path: i32) {} // TODO, will replace simple remove of things

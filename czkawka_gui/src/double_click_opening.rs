@@ -117,3 +117,20 @@ pub fn opening_double_click_function_zeroed_files(tree_view: &gtk::TreeView, eve
     }
     gtk::Inhibit(false)
 }
+
+pub fn opening_double_click_function_same_music(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+    if event.get_event_type() == gdk::EventType::DoubleButtonPress {
+        let selection = tree_view.get_selection();
+        let (selection_rows, tree_model) = selection.get_selected_rows();
+
+        for tree_path in selection_rows.iter().rev() {
+            let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSameMusic::Name as i32).get::<String>().unwrap().unwrap();
+            let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSameMusic::Path as i32).get::<String>().unwrap().unwrap();
+
+            if open::that(format!("{}/{}", path, name)).is_err() {
+                println!("Failed to open {}/{}", path, name);
+            }
+        }
+    }
+    gtk::Inhibit(false)
+}

@@ -7,6 +7,7 @@ use czkawka_core::big_file::BigFile;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_files::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
@@ -24,6 +25,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let buttons_array = gui_data.buttons_array.clone();
     let check_button_recursive = gui_data.check_button_recursive.clone();
     let entry_excluded_items = gui_data.entry_excluded_items.clone();
+    let entry_same_music_minimal_size = gui_data.entry_same_music_minimal_size.clone();
     let entry_allowed_extensions = gui_data.entry_allowed_extensions.clone();
     let buttons_names = gui_data.buttons_names.clone();
     let radio_button_name = gui_data.radio_button_name.clone();
@@ -31,10 +33,16 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let radio_button_hashmb = gui_data.radio_button_hashmb.clone();
     let radio_button_hash = gui_data.radio_button_hash.clone();
     let entry_duplicate_minimal_size = gui_data.entry_duplicate_minimal_size.clone();
-    // let sender = gui_data.sender.clone();
     let rx = gui_data.rx.clone();
     let entry_big_files_number = gui_data.entry_big_files_number.clone();
     let entry_similar_images_minimal_size = gui_data.entry_similar_images_minimal_size.clone();
+    let check_button_music_title: gtk::CheckButton = gui_data.check_button_music_title.clone();
+    let check_button_music_artist: gtk::CheckButton = gui_data.check_button_music_artist.clone();
+    let check_button_music_album_title: gtk::CheckButton = gui_data.check_button_music_album_title.clone();
+    let check_button_music_album_artist: gtk::CheckButton = gui_data.check_button_music_album_artist.clone();
+    let check_button_music_year: gtk::CheckButton = gui_data.check_button_music_year.clone();
+    let shared_buttons = gui_data.shared_buttons.clone();
+
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
         let excluded_directories = get_string_from_list_store(&scrolled_window_excluded_directories);
@@ -82,7 +90,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     df.set_minimal_file_size(minimal_file_size);
                     df.set_check_method(check_method);
                     df.set_delete_method(delete_method);
-                    df.find_duplicates(Option::from(&receiver_stop)); //&rc_stop_signal.borrow().1);
+                    df.find_duplicates(Option::from(&receiver_stop));
                     let _ = sender.send(Message::Duplicates(df));
                 });
             }
@@ -94,7 +102,6 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 thread::spawn(move || {
                     let mut ef = EmptyFolder::new();
                     ef.set_included_directory(included_directories);
-                    ef.set_delete_folder(false);
                     ef.find_empty_folders(Option::from(&receiver_stop));
                     let _ = sender.send(Message::EmptyFolders(ef));
                 });
@@ -181,7 +188,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 let sender = sender.clone();
                 let receiver_stop = rx.clone();
 
-                // Find temporary files
+                // Find zeroed files
                 thread::spawn(move || {
                     let mut zf = ZeroedFiles::new();
 
@@ -189,9 +196,56 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     zf.set_excluded_directory(excluded_directories);
                     zf.set_recursive_search(recursive_search);
                     zf.set_excluded_items(excluded_items);
+                    zf.set_allowed_extensions(allowed_extensions);
                     zf.find_zeroed_files(Option::from(&receiver_stop));
                     let _ = sender.send(Message::ZeroedFiles(zf));
                 });
+            }
+            "notebook_main_same_music_finder" => {
+                let minimal_file_size = match entry_same_music_minimal_size.get_text().as_str().parse::<u64>() {
+                    Ok(t) => t,
+                    Err(_) => 1024, // By default
+                };
+                let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
+
+                if check_button_music_title.get_active() {
+                    music_similarity |= MusicSimilarity::TITLE;
+                }
+                if check_button_music_artist.get_active() {
+                    music_similarity |= MusicSimilarity::ARTIST;
+                }
+                if check_button_music_album_title.get_active() {
+                    music_similarity |= MusicSimilarity::ALBUM_TITLE;
+                }
+                if check_button_music_album_artist.get_active() {
+                    music_similarity |= MusicSimilarity::ALBUM_ARTIST;
+                }
+                if check_button_music_year.get_active() {
+                    music_similarity |= MusicSimilarity::YEAR;
+                }
+
+                if music_similarity != MusicSimilarity::NONE {
+                    let sender = sender.clone();
+                    let receiver_stop = rx.clone();
+
+                    // Find temporary files
+                    thread::spawn(move || {
+                        let mut mf = SameMusic::new();
+
+                        mf.set_included_directory(included_directories);
+                        mf.set_excluded_directory(excluded_directories);
+                        mf.set_excluded_items(excluded_items);
+                        mf.set_minimal_file_size(minimal_file_size);
+                        mf.set_recursive_search(recursive_search);
+                        mf.set_music_similarity(music_similarity);
+                        mf.find_same_music(Option::from(&receiver_stop));
+                        let _ = sender.send(Message::SameMusic(mf));
+                    });
+                } else {
+                    notebook_main.set_sensitive(true);
+                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
+                    entry_info.set_text("ERROR: You must select at least one checkbox with music searching types.");
+                }
             }
             e => panic!("Not existent {}", e),
         }

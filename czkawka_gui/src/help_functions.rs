@@ -3,6 +3,7 @@ use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_files::{SimilarImages, Similarity};
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
@@ -18,6 +19,7 @@ pub enum Message {
     Temporary(Temporary),
     SimilarImages(SimilarImages),
     ZeroedFiles(ZeroedFiles),
+    SameMusic(SameMusic),
 }
 
 pub enum ColumnsDuplicates {
@@ -71,6 +73,20 @@ pub enum ColumnsZeroedFiles {
     Name,
     Path,
     Modification,
+}
+pub enum ColumnsSameMusic {
+    Size = 0,
+    Name,
+    Path,
+    Title,
+    Artist,
+    AlbumTitle,
+    AlbumArtist,
+    Year,
+    Modification,
+    _ModificationAsSecs,
+    Color,
+    TextColor,
 }
 
 pub const TEXT_COLOR: &str = "#ffffff";
@@ -150,6 +166,15 @@ pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_mod
     // let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
     // let modification = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(),ColumnsDuplicates::Modification as i32).get::<String>().unwrap().unwrap();
     let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
+
+    if color == HEADER_ROW_COLOR {
+        return false;
+    }
+
+    true
+}
+pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+    let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap().unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
