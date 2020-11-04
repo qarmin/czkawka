@@ -101,13 +101,13 @@ impl SameMusic {
         }
     }
 
-    pub fn find_same_music(&mut self, rx: Option<&Receiver<()>>) {
+    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        if !self.check_files(rx) {
+        if !self.check_files(stop_receiver) {
             self.stopped_search = true;
             return;
         }
-        if !self.check_for_duplicates(rx) {
+        if !self.check_for_duplicates(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -159,7 +159,7 @@ impl SameMusic {
     }
 
     /// Check files for any with size == 0
-    fn check_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -170,7 +170,7 @@ impl SameMusic {
         self.information.number_of_checked_folders += folders_to_check.len();
 
         while !folders_to_check.is_empty() {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();
@@ -289,7 +289,7 @@ impl SameMusic {
         true
     }
 
-    fn check_for_duplicates(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         if MusicSimilarity::NONE == self.music_similarity {
             panic!("This can't be none");
         }
@@ -300,7 +300,7 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::TITLE) == MusicSimilarity::TITLE {
             for vec_file_entry in old_duplicates {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -323,7 +323,7 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::ARTIST) == MusicSimilarity::ARTIST {
             for vec_file_entry in old_duplicates {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -346,7 +346,7 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::ALBUM_TITLE) == MusicSimilarity::ALBUM_TITLE {
             for vec_file_entry in old_duplicates {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -369,7 +369,7 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::ALBUM_ARTIST) == MusicSimilarity::ALBUM_ARTIST {
             for vec_file_entry in old_duplicates {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -392,7 +392,7 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
             for vec_file_entry in old_duplicates {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 let mut hash_map: HashMap<i32, Vec<FileEntry>> = Default::default();

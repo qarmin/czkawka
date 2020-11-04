@@ -114,28 +114,28 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn find_duplicates(&mut self, rx: Option<&Receiver<()>>) {
+    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
 
         match self.check_method {
             CheckingMethod::Name => {
-                if !self.check_files_name(rx) {
+                if !self.check_files_name(stop_receiver) {
                     self.stopped_search = true;
                     return;
                 }
             }
             CheckingMethod::Size => {
-                if !self.check_files_size(rx) {
+                if !self.check_files_size(stop_receiver) {
                     self.stopped_search = true;
                     return;
                 }
             }
             CheckingMethod::HashMB | CheckingMethod::Hash => {
-                if !self.check_files_size(rx) {
+                if !self.check_files_size(stop_receiver) {
                     self.stopped_search = true;
                     return;
                 }
-                if !self.check_files_hash(rx) {
+                if !self.check_files_hash(stop_receiver) {
                     self.stopped_search = true;
                     return;
                 }
@@ -210,7 +210,7 @@ impl DuplicateFinder {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files_name(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         // TODO maybe add multithreading checking files
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -222,7 +222,7 @@ impl DuplicateFinder {
         self.information.number_of_checked_folders += folders_to_check.len();
 
         while !folders_to_check.is_empty() {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();
@@ -348,7 +348,7 @@ impl DuplicateFinder {
 
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
-    fn check_files_size(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         // TODO maybe add multithreading checking files
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -360,7 +360,7 @@ impl DuplicateFinder {
         self.information.number_of_checked_folders += folders_to_check.len();
 
         while !folders_to_check.is_empty() {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();
@@ -486,7 +486,7 @@ impl DuplicateFinder {
     }
 
     /// The slowest checking type, which must be applied after checking for size
-    fn check_files_hash(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         if self.hash_type != HashType::Blake3 {
             panic!(); // TODO Add more hash types
         }
@@ -501,7 +501,7 @@ impl DuplicateFinder {
             hashmap_with_hash = Default::default();
 
             for file_entry in vector {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 file_handler = match File::open(&file_entry.path) {
@@ -547,7 +547,7 @@ impl DuplicateFinder {
             hashmap_with_hash = Default::default();
 
             for file_entry in vector {
-                if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return false;
                 }
                 file_handler = match File::open(&file_entry.path) {

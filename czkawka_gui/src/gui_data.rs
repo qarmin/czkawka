@@ -129,8 +129,8 @@ pub struct GuiData {
     //// Threads
 
     // Used for sending stop signal to thread
-    pub sx: crossbeam_channel::Sender<()>,
-    pub rx: crossbeam_channel::Receiver<()>,
+    pub stop_sender: crossbeam_channel::Sender<()>,
+    pub stop_receiver: crossbeam_channel::Receiver<()>,
 }
 
 impl GuiData {
@@ -310,7 +310,7 @@ impl GuiData {
         // Types of messages to send to main thread where gui can be draw.
 
         // Used for sending stop signal to thread
-        let (sx, rx): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = unbounded();
+        let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = unbounded();
 
         Self {
             glade_src,
@@ -383,8 +383,8 @@ impl GuiData {
             scrolled_window_same_music_finder,
             scrolled_window_included_directories,
             scrolled_window_excluded_directories,
-            sx,
-            rx,
+            stop_sender,
+            stop_receiver,
         }
     }
 }

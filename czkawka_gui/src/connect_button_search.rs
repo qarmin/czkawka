@@ -33,7 +33,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let radio_button_hashmb = gui_data.radio_button_hashmb.clone();
     let radio_button_hash = gui_data.radio_button_hash.clone();
     let entry_duplicate_minimal_size = gui_data.entry_duplicate_minimal_size.clone();
-    let rx = gui_data.rx.clone();
+    let stop_receiver = gui_data.stop_receiver.clone();
     let entry_big_files_number = gui_data.entry_big_files_number.clone();
     let entry_similar_images_minimal_size = gui_data.entry_similar_images_minimal_size.clone();
     let check_button_music_title: gtk::CheckButton = gui_data.check_button_music_title.clone();
@@ -75,10 +75,9 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     Ok(t) => t,
                     Err(_) => 1024, // By default
                 };
-                let delete_method = duplicate::DeleteMethod::None;
 
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
                 // Find duplicates
                 thread::spawn(move || {
                     let mut df = DuplicateFinder::new();
@@ -89,26 +88,27 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     df.set_allowed_extensions(allowed_extensions);
                     df.set_minimal_file_size(minimal_file_size);
                     df.set_check_method(check_method);
-                    df.set_delete_method(delete_method);
                     df.find_duplicates(Option::from(&receiver_stop));
                     let _ = sender.send(Message::Duplicates(df));
                 });
             }
             "scrolled_window_main_empty_folder_finder" => {
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
 
                 // Find empty folders
                 thread::spawn(move || {
                     let mut ef = EmptyFolder::new();
                     ef.set_included_directory(included_directories);
+                    ef.set_excluded_directory(excluded_directories);
+                    ef.set_excluded_items(excluded_items);
                     ef.find_empty_folders(Option::from(&receiver_stop));
                     let _ = sender.send(Message::EmptyFolders(ef));
                 });
             }
             "scrolled_window_main_empty_files_finder" => {
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
 
                 // Find empty files
                 thread::spawn(move || {
@@ -125,7 +125,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
             }
             "scrolled_window_main_temporary_files_finder" => {
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
 
                 // Find temporary files
                 thread::spawn(move || {
@@ -146,7 +146,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 };
 
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
 
                 // Find big files
                 thread::spawn(move || {
@@ -164,7 +164,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
 
             "notebook_main_similar_images_finder_label" => {
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
 
                 let minimal_file_size = match entry_similar_images_minimal_size.get_text().as_str().parse::<u64>() {
                     Ok(t) => t,
@@ -186,7 +186,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
             }
             "notebook_main_zeroed_files_finder" => {
                 let sender = sender.clone();
-                let receiver_stop = rx.clone();
+                let receiver_stop = stop_receiver.clone();
 
                 // Find zeroed files
                 thread::spawn(move || {
@@ -226,7 +226,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
 
                 if music_similarity != MusicSimilarity::NONE {
                     let sender = sender.clone();
-                    let receiver_stop = rx.clone();
+                    let receiver_stop = stop_receiver.clone();
 
                     // Find temporary files
                     thread::spawn(move || {

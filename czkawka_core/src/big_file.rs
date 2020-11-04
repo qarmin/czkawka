@@ -73,9 +73,9 @@ impl BigFile {
         }
     }
 
-    pub fn find_big_files(&mut self, rx: Option<&Receiver<()>>) {
+    pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.optimize_directories();
-        if !self.look_for_big_files(rx) {
+        if !self.look_for_big_files(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -111,7 +111,7 @@ impl BigFile {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    fn look_for_big_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -122,7 +122,7 @@ impl BigFile {
         self.information.number_of_checked_folders += folders_to_check.len();
 
         while !folders_to_check.is_empty() {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();

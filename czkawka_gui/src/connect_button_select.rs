@@ -14,6 +14,7 @@ pub fn connect_button_select(gui_data: &GuiData) {
             popover_select.set_relative_to(Some(&buttons_select));
             popover_select.popup();
         }
+        // TODO add for all basic selection popup
         e => panic!("Not existent {}", e),
     });
 }

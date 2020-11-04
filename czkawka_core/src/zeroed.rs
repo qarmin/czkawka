@@ -72,9 +72,9 @@ impl ZeroedFiles {
         }
     }
 
-    pub fn find_zeroed_files(&mut self, rx: Option<&Receiver<()>>) {
+    pub fn find_zeroed_files(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        if !self.check_files(rx) {
+        if !self.check_files(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -129,7 +129,7 @@ impl ZeroedFiles {
     }
 
     /// Check files for files which have 0
-    fn check_files(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -140,7 +140,7 @@ impl ZeroedFiles {
         self.information.number_of_checked_folders += folders_to_check.len();
 
         while !folders_to_check.is_empty() {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();
