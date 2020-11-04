@@ -129,9 +129,9 @@ impl SimilarImages {
     }
 
     /// Public function used by CLI to search for empty folders
-    pub fn find_similar_images(&mut self, rx: Option<&Receiver<()>>) {
+    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
-        if !self.check_for_similar_images(rx) {
+        if !self.check_for_similar_images(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -147,7 +147,7 @@ impl SimilarImages {
 
     /// Function to check if folder are empty.
     /// Parameter initial_checking for second check before deleting to be sure that checked folder is still empty
-    fn check_for_similar_images(&mut self, rx: Option<&Receiver<()>>) -> bool {
+    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -158,7 +158,7 @@ impl SimilarImages {
         self.information.number_of_checked_folders += folders_to_check.len();
 
         while !folders_to_check.is_empty() {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();
@@ -280,7 +280,7 @@ impl SimilarImages {
 
         let mut new_vector: Vec<StructSimilar> = Vec::new();
         for (hash, vec_file_entry) in &self.image_hashes {
-            if rx.is_some() && rx.unwrap().try_recv().is_ok() {
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
             let vector_with_found_similar_hashes = self.bktree.find(hash, 3).collect::<Vec<_>>();

@@ -18,12 +18,8 @@ pub fn connect_notebook_tabs(gui_data: &GuiData) {
     notebook_main_clone.connect_switch_page(move |_, _, number| {
         let page: &str;
         match notebook_main_children_names.get(number as usize).unwrap().as_str() {
-            "notebook_main_duplicate_finder_label" => {
-                page = "duplicate";
-            }
-            "scrolled_window_main_empty_folder_finder" => {
-                page = "empty_folder";
-            }
+            "notebook_main_duplicate_finder_label" => page = "duplicate",
+            "scrolled_window_main_empty_folder_finder" => page = "empty_folder",
             "scrolled_window_main_empty_files_finder" => page = "empty_file",
             "scrolled_window_main_temporary_files_finder" => page = "temporary_file",
             "notebook_big_main_file_finder" => page = "big_file",

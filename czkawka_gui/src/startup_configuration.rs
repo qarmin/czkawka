@@ -251,9 +251,11 @@ pub fn startup_configuration(gui_data: &GuiData) {
 
             let col_indices = [0, 1];
 
-            for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
-                let values: [&dyn ToValue; 2] = [&i, &(MAIN_ROW_COLOR.to_string())];
-                list_store.set(&list_store.append(), &col_indices, &values);
+            if cfg!(target_family = "unix") {
+                for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
+                    let values: [&dyn ToValue; 2] = [&i, &(MAIN_ROW_COLOR.to_string())];
+                    list_store.set(&list_store.append(), &col_indices, &values);
+                }
             }
 
             scrolled_window_excluded_directories.add(&tree_view_excluded_directory);

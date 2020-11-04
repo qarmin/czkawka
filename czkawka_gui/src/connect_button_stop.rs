@@ -4,8 +4,8 @@ use gtk::prelude::*;
 
 pub fn connect_button_stop(gui_data: &GuiData) {
     let buttons_stop = gui_data.buttons_stop.clone();
-    let sx = gui_data.sx.clone();
+    let stop_sender = gui_data.stop_sender.clone();
     buttons_stop.connect_clicked(move |_| {
-        sx.send(()).unwrap();
+        stop_sender.send(()).unwrap();
     });
 }
