@@ -6,7 +6,7 @@ use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::same_music::SameMusic;
-use czkawka_core::similar_files::SimilarImages;
+use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;

@@ -135,8 +135,8 @@ Author: Rafał Mikrut
   </object>
   <object class="GtkWindow" id="window_main">
     <property name="can_focus">False</property>
-    <property name="default_width">1000</property>
-    <property name="default_height">700</property>
+    <property name="default_width">1100</property>
+    <property name="default_height">800</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>

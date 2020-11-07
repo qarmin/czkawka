@@ -32,11 +32,6 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub similarity: Similarity,
 }
-#[derive(Clone)]
-pub struct StructSimilar {
-    pub base_image: FileEntry,
-    pub similar_images: Vec<FileEntry>,
-}
 
 /// Type to store for each entry in the similarity BK-tree.
 type Node = [u8; 8];
@@ -57,11 +52,12 @@ pub struct SimilarImages {
     directories: Directories,
     excluded_items: ExcludedItems,
     bktree: BKTree<Node, Hamming>,
-    similar_vectors: Vec<StructSimilar>,
+    similar_vectors: Vec<Vec<FileEntry>>,
     recursive_search: bool,
     minimal_file_size: u64,
     image_hashes: HashMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
+    similarity: Similarity,
 }
 
 /// Info struck with helpful information's about results
@@ -98,6 +94,7 @@ impl SimilarImages {
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
             image_hashes: Default::default(),
             stopped_search: false,
+            similarity: Similarity::High,
         }
     }
 
@@ -109,7 +106,7 @@ impl SimilarImages {
         &self.text_messages
     }
 
-    pub const fn get_similar_images(&self) -> &Vec<StructSimilar> {
+    pub const fn get_similar_images(&self) -> &Vec<Vec<FileEntry>> {
         &self.similar_vectors
     }
 
@@ -127,11 +124,18 @@ impl SimilarImages {
             t => t,
         };
     }
+    pub fn set_similarity(&mut self, similarity: Similarity) {
+        self.similarity = similarity;
+    }
 
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
         if !self.check_for_similar_images(stop_receiver) {
+            self.stopped_search = true;
+            return;
+        }
+        if !self.sort_images(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -275,37 +279,51 @@ impl SimilarImages {
                 }
             }
         }
+        Common::print_time(start_time, SystemTime::now(), "check_for_similar_images".to_string());
+        true
+    }
 
+    fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
-        let mut new_vector: Vec<StructSimilar> = Vec::new();
+        //let hash_map_modification = SystemTime::now();
+        let similarity: u64 = match self.similarity {
+            Similarity::VeryHigh => 0,
+            Similarity::High => 1,
+            Similarity::Medium => 2,
+            Similarity::Small => 3,
+            _ => panic!("0-3 similarity levels are allowed, check if not added more."),
+        };
+
+        // TODO
+        // Now is A is similar to B with VeryHigh and C with Medium
+        // And D is similar with C with High
+        // And Similarity is set to Medium(or lower)
+        // And A is checked before D
+        // Then C is shown that is similar group A, not D
+
+        let mut new_vector: Vec<Vec<FileEntry>> = Vec::new();
+        let mut hashes_to_check = self.image_hashes.clone();
         for (hash, vec_file_entry) in &self.image_hashes {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
-            let vector_with_found_similar_hashes = self.bktree.find(hash, 3).collect::<Vec<_>>();
+            let vector_with_found_similar_hashes = self.bktree.find(hash, similarity).collect::<Vec<_>>();
             if vector_with_found_similar_hashes.len() == 1 && vec_file_entry.len() == 1 {
-                // Exists only 1 unique picture, so there is no need to use it
+                // This one picture doesn't have similar pictures, so there is no go
                 continue;
             }
 
-            let mut vec_similarity_struct: Vec<StructSimilar> = Vec::new();
-
-            for file_entry in vec_file_entry.iter() {
-                let similar_struct = StructSimilar {
-                    base_image: file_entry.clone(),
-                    similar_images: vec_file_entry
-                        .iter()
-                        .filter(|x| x.path != file_entry.path)
-                        .map(|x| {
-                            let mut y = x.clone();
-                            y.similarity = Similarity::VeryHigh;
-                            y
-                        })
-                        .collect::<Vec<FileEntry>>(),
-                };
-                vec_similarity_struct.push(similar_struct);
-            }
+            let mut vector_of_similar_images: Vec<FileEntry> = vec_file_entry
+                .iter()
+                .map(|fe| FileEntry {
+                    path: fe.path.clone(),
+                    size: fe.size,
+                    dimensions: fe.dimensions.clone(),
+                    modified_date: fe.modified_date,
+                    similarity: Similarity::VeryHigh,
+                })
+                .collect();
 
             for (similarity, similar_hash) in vector_with_found_similar_hashes.iter() {
                 if *similarity == 0 && hash == *similar_hash {
@@ -315,31 +333,34 @@ impl SimilarImages {
                     panic!("I'm not sure if same hash can have distance > 0");
                 }
 
-                for file_entry in self.image_hashes.get(*similar_hash).unwrap() {
-                    let mut file_entry = file_entry.clone();
-                    file_entry.similarity = match similarity {
-                        0 => Similarity::VeryHigh,
-                        1 => Similarity::High,
-                        2 => Similarity::Medium,
-                        3 => Similarity::Small,
-                        _ => panic!("0-3 similarity levels are allowed, check if not added more."),
-                    };
-                    for similarity_struct in vec_similarity_struct.iter_mut() {
-                        similarity_struct.similar_images.push(file_entry.clone());
-                    }
+                if let Some(vec_file_entry) = hashes_to_check.get(*similar_hash) {
+                    vector_of_similar_images.append(
+                        &mut (vec_file_entry
+                            .iter()
+                            .map(|fe| FileEntry {
+                                path: fe.path.clone(),
+                                size: fe.size,
+                                dimensions: fe.dimensions.clone(),
+                                modified_date: fe.modified_date,
+                                similarity: match similarity {
+                                    0 => Similarity::VeryHigh,
+                                    1 => Similarity::High,
+                                    2 => Similarity::Medium,
+                                    3 => Similarity::Small,
+                                    _ => panic!("0-3 similarity levels are allowed, check if not added more."),
+                                },
+                            })
+                            .collect::<Vec<_>>()),
+                    );
+                    hashes_to_check.remove(*similar_hash);
                 }
             }
-            for similarity_struct in vec_similarity_struct.iter_mut() {
-                similarity_struct.similar_images.sort_by(|x, y| y.similarity.cmp(&x.similarity));
-            }
-            new_vector.append(&mut vec_similarity_struct);
+            new_vector.push((*vector_of_similar_images).to_owned());
         }
 
         self.similar_vectors = new_vector;
 
-        #[allow(clippy::blocks_in_if_conditions)]
-        Common::print_time(hash_map_modification, SystemTime::now(), "hash_map_modification(internal)".to_string());
-        Common::print_time(start_time, SystemTime::now(), "check_for_similar_images".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images".to_string());
         true
     }
 
@@ -413,13 +434,13 @@ impl SaveResults for SimilarImages {
         if !self.similar_vectors.is_empty() {
             write!(file, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
 
-            for struct_similar in self.similar_vectors.iter() {
-                writeln!(file, "Image {:?} have {} similar images", struct_similar.base_image.path, struct_similar.similar_images.len()).unwrap();
-                for similar_picture in struct_similar.similar_images.iter() {
-                    writeln!(file, "{:?} - Similarity Level: {}", similar_picture.path, get_string_from_similarity(&similar_picture.similarity)).unwrap();
-                }
-                writeln!(file).unwrap();
-            }
+        // for struct_similar in self.similar_vectors.iter() {
+        //     writeln!(file, "Image {:?} have {} similar images", struct_similar.base_image.path, struct_similar.similar_images.len()).unwrap();
+        //     for similar_picture in struct_similar.similar_images.iter() {
+        //         writeln!(file, "{:?} - Similarity Level: {}", similar_picture.path, get_string_from_similarity(&similar_picture.similarity)).unwrap();
+        //     }
+        //     writeln!(file).unwrap();
+        // }
         } else {
             write!(file, "Not found any similar images.").unwrap();
         }
@@ -432,6 +453,19 @@ impl PrintResults for SimilarImages {
     fn print_results(&self) {
         if !self.similar_vectors.is_empty() {
             println!("Found {} images which have similar friends", self.similar_vectors.len());
+
+            for vec_file_entry in &self.similar_vectors {
+                for file_entry in vec_file_entry {
+                    println!(
+                        "{} - {} - {} - {}",
+                        file_entry.path.display(),
+                        file_entry.dimensions,
+                        file_entry.size.file_size(options::BINARY).unwrap(),
+                        get_string_from_similarity(&file_entry.similarity)
+                    );
+                }
+                println!();
+            }
         }
     }
 }

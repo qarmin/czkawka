@@ -46,20 +46,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::Duplicates(df) => {
                 if df.get_stopped_search() {
                     entry_info.set_text("Searching for duplicated was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_duplicate_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = df.get_information();
                     let text_messages = df.get_text_messages();
@@ -96,18 +82,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_duplicate_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_duplicate_finder);
 
                         let col_indices = [0, 1, 2, 3, 4, 5];
 
@@ -223,20 +198,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::EmptyFolders(ef) => {
                 if ef.get_stopped_search() {
                     entry_info.set_text("Searching for empty folders was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_main_empty_folder_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = ef.get_information();
                     let text_messages = ef.get_text_messages();
@@ -247,18 +208,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_main_empty_folder_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_main_empty_folder_finder);
 
                         let col_indices = [0, 1, 2];
 
@@ -290,20 +240,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::EmptyFiles(vf) => {
                 if vf.get_stopped_search() {
                     entry_info.set_text("Searching for empty files was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_main_empty_files_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = vf.get_information();
                     let text_messages = vf.get_text_messages();
@@ -314,18 +250,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_main_empty_files_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_main_empty_files_finder);
 
                         let col_indices = [0, 1, 2];
 
@@ -357,20 +282,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::BigFiles(bf) => {
                 if bf.get_stopped_search() {
                     entry_info.set_text("Searching for big files was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_duplicate_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = bf.get_information();
                     let text_messages = bf.get_text_messages();
@@ -381,18 +292,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_big_files_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_big_files_finder);
 
                         let col_indices = [0, 1, 2, 3];
 
@@ -431,20 +331,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::Temporary(tf) => {
                 if tf.get_stopped_search() {
                     entry_info.set_text("Searching for temporary files was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_duplicate_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = tf.get_information();
                     let text_messages = tf.get_text_messages();
@@ -455,18 +341,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_main_temporary_files_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_main_temporary_files_finder);
 
                         let col_indices = [0, 1, 2];
 
@@ -498,20 +373,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::SimilarImages(sf) => {
                 if sf.get_stopped_search() {
                     entry_info.set_text("Searching for duplicated was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_similar_images_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     //let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
@@ -522,48 +383,36 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_similar_images_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_similar_images_finder);
 
                         let col_indices = [0, 1, 2, 3, 4, 5, 6, 7];
 
                         let vec_struct_similar = sf.get_similar_images();
 
-                        for struct_similar in vec_struct_similar.iter() {
+                        for vec_file_entry in vec_struct_similar.iter() {
                             // Header
-                            let (directory, file) = split_path(&struct_similar.base_image.path);
                             let values: [&dyn ToValue; 8] = [
-                                &(get_text_from_similarity(&struct_similar.base_image.similarity).to_string()),
-                                &struct_similar.base_image.size.file_size(options::BINARY).unwrap(),
-                                &struct_similar.base_image.dimensions,
-                                &file,
-                                &directory,
-                                &(NaiveDateTime::from_timestamp(struct_similar.base_image.modified_date as i64, 0).to_string()),
+                                &"".to_string(),
+                                &"".to_string(),
+                                &"".to_string(),
+                                &"".to_string(),
+                                &"".to_string(),
+                                &"".to_string(),
                                 &(HEADER_ROW_COLOR.to_string()),
                                 &(TEXT_COLOR.to_string()),
                             ];
                             list_store.set(&list_store.append(), &col_indices, &values);
 
                             // Meat
-                            for similar_images in &struct_similar.similar_images {
-                                let (directory, file) = split_path(&similar_images.path);
+                            for file_entry in vec_file_entry.iter() {
+                                let (directory, file) = split_path(&file_entry.path);
                                 let values: [&dyn ToValue; 8] = [
-                                    &(get_text_from_similarity(&similar_images.similarity).to_string()),
-                                    &similar_images.size.file_size(options::BINARY).unwrap(),
-                                    &similar_images.dimensions,
+                                    &(get_text_from_similarity(&file_entry.similarity).to_string()),
+                                    &file_entry.size.file_size(options::BINARY).unwrap(),
+                                    &file_entry.dimensions,
                                     &file,
                                     &directory,
-                                    &(NaiveDateTime::from_timestamp(similar_images.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
                                     &(MAIN_ROW_COLOR.to_string()),
                                     &(TEXT_COLOR.to_string()),
                                 ];
@@ -592,20 +441,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::ZeroedFiles(zf) => {
                 if zf.get_stopped_search() {
                     entry_info.set_text("Searching for zeroed files was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_zeroed_files_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = zf.get_information();
                     let text_messages = zf.get_text_messages();
@@ -616,18 +451,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_zeroed_files_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_zeroed_files_finder);
 
                         let col_indices = [0, 1, 2, 3];
 
@@ -664,20 +488,6 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
             Message::SameMusic(mf) => {
                 if mf.get_stopped_search() {
                     entry_info.set_text("Searching for empty files was stopped by user");
-
-                    //Also clear list
-                    scrolled_window_same_music_finder
-                        .get_children()
-                        .get(0)
-                        .unwrap()
-                        .clone()
-                        .downcast::<gtk::TreeView>()
-                        .unwrap()
-                        .get_model()
-                        .unwrap()
-                        .downcast::<gtk::ListStore>()
-                        .unwrap()
-                        .clear();
                 } else {
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
@@ -688,18 +498,7 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
 
                     // Create GUI
                     {
-                        let list_store = scrolled_window_same_music_finder
-                            .get_children()
-                            .get(0)
-                            .unwrap()
-                            .clone()
-                            .downcast::<gtk::TreeView>()
-                            .unwrap()
-                            .get_model()
-                            .unwrap()
-                            .downcast::<gtk::ListStore>()
-                            .unwrap();
-                        list_store.clear();
+                        let list_store = get_list_store(&scrolled_window_same_music_finder);
 
                         let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
