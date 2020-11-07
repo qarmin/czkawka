@@ -8,7 +8,7 @@ use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
-use czkawka_core::similar_files::SimilarImages;
+use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
@@ -42,6 +42,14 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let check_button_music_album_artist: gtk::CheckButton = gui_data.check_button_music_album_artist.clone();
     let check_button_music_year: gtk::CheckButton = gui_data.check_button_music_year.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
+    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
+    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
+    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
+    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
+    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
+    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
+    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
@@ -59,6 +67,8 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
 
         match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
             "notebook_main_duplicate_finder_label" => {
+                get_list_store(&scrolled_window_duplicate_finder).clear();
+
                 let check_method;
                 if radio_button_name.get_active() {
                     check_method = duplicate::CheckingMethod::Name;
@@ -93,6 +103,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 });
             }
             "scrolled_window_main_empty_folder_finder" => {
+                get_list_store(&scrolled_window_main_empty_folder_finder).clear();
                 let sender = sender.clone();
                 let receiver_stop = stop_receiver.clone();
 
@@ -107,6 +118,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 });
             }
             "scrolled_window_main_empty_files_finder" => {
+                get_list_store(&scrolled_window_main_empty_files_finder).clear();
                 let sender = sender.clone();
                 let receiver_stop = stop_receiver.clone();
 
@@ -124,6 +136,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 });
             }
             "scrolled_window_main_temporary_files_finder" => {
+                get_list_store(&scrolled_window_main_temporary_files_finder).clear();
                 let sender = sender.clone();
                 let receiver_stop = stop_receiver.clone();
 
@@ -140,6 +153,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 });
             }
             "notebook_big_main_file_finder" => {
+                get_list_store(&scrolled_window_big_files_finder).clear();
                 let numbers_of_files_to_check = match entry_big_files_number.get_text().as_str().parse::<usize>() {
                     Ok(t) => t,
                     Err(_) => 50, // By default
@@ -163,6 +177,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
             }
 
             "notebook_main_similar_images_finder_label" => {
+                get_list_store(&scrolled_window_similar_images_finder).clear();
                 let sender = sender.clone();
                 let receiver_stop = stop_receiver.clone();
 
@@ -185,6 +200,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 });
             }
             "notebook_main_zeroed_files_finder" => {
+                get_list_store(&scrolled_window_zeroed_files_finder).clear();
                 let sender = sender.clone();
                 let receiver_stop = stop_receiver.clone();
 
@@ -202,6 +218,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 });
             }
             "notebook_main_same_music_finder" => {
+                get_list_store(&scrolled_window_same_music_finder).clear();
                 let minimal_file_size = match entry_same_music_minimal_size.get_text().as_str().parse::<u64>() {
                     Ok(t) => t,
                     Err(_) => 1024, // By default

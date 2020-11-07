@@ -11,7 +11,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
         let popover_select = gui_data.popover_select.clone();
         buttons_popover_select_all.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
 
             selection.select_all();
@@ -25,7 +25,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let buttons_popover_unselect_all = gui_data.buttons_popover_unselect_all.clone();
         let popover_select = gui_data.popover_select.clone();
         buttons_popover_unselect_all.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
 
             selection.unselect_all();
@@ -39,7 +39,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let popover_select = gui_data.popover_select.clone();
         let buttons_popover_reverse = gui_data.buttons_popover_reverse.clone();
         buttons_popover_reverse.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
 
             let (vector_tree_path, tree_model) = selection.get_selected_rows();
@@ -79,7 +79,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let popover_select = gui_data.popover_select.clone();
         let buttons_popover_select_all_except_oldest = gui_data.buttons_popover_select_all_except_oldest.clone();
         buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
             let tree_model = tree_view.get_model().unwrap();
 
@@ -141,7 +141,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let popover_select = gui_data.popover_select.clone();
         let buttons_popover_select_all_except_newest = gui_data.buttons_popover_select_all_except_newest.clone();
         buttons_popover_select_all_except_newest.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
             let tree_model = tree_view.get_model().unwrap();
 
@@ -203,7 +203,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let popover_select = gui_data.popover_select.clone();
         let buttons_popover_select_one_oldest = gui_data.buttons_popover_select_one_oldest.clone();
         buttons_popover_select_one_oldest.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
             let tree_model = tree_view.get_model().unwrap();
 
@@ -264,7 +264,7 @@ pub fn connect_popover_duplicate(gui_data: &GuiData) {
         let buttons_popover_select_one_newest = gui_data.buttons_popover_select_one_newest.clone();
         let popover_select = gui_data.popover_select.clone();
         buttons_popover_select_one_newest.connect_clicked(move |_| {
-            let tree_view = scrolled_window_duplicate_finder.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_duplicate_finder);
             let selection = tree_view.get_selection();
             let tree_model = tree_view.get_model().unwrap();
 

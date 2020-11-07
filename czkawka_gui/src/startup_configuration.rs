@@ -148,6 +148,7 @@ pub fn startup_configuration(gui_data: &GuiData) {
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
                 tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.get_selection().set_select_function(Some(Box::new(select_function_similar_images)));
 
                 create_tree_view_similar_images(&mut tree_view);
 

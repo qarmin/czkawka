@@ -4,10 +4,11 @@ use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::same_music::SameMusic;
-use czkawka_core::similar_files::{SimilarImages, Similarity};
+use czkawka_core::similar_images::{SimilarImages, Similarity};
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
+use gtk::{ListStore, TreeView};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -96,8 +97,7 @@ pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
 pub fn get_string_from_list_store(scrolled_window: &gtk::ScrolledWindow) -> String {
-    let tree_view: gtk::TreeView = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-    let list_store: gtk::ListStore = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+    let list_store: gtk::ListStore = get_list_store(&scrolled_window);
     let mut first: bool = true;
 
     let mut return_string: String = "".to_string();
@@ -182,6 +182,15 @@ pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_mod
 
     true
 }
+pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+    let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap().unwrap();
+
+    if color == HEADER_ROW_COLOR {
+        return false;
+    }
+
+    true
+}
 
 pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
@@ -216,4 +225,15 @@ pub fn get_text_from_similarity(similarity: &Similarity) -> &str {
         Similarity::High => "High",
         Similarity::VeryHigh => "Very High",
     }
+}
+
+pub fn get_list_store(scrolled_window: &gtk::ScrolledWindow) -> ListStore {
+    let list_store = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap().get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+
+    list_store
+}
+pub fn get_tree_view(scrolled_window: &gtk::ScrolledWindow) -> TreeView {
+    let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+
+    tree_view
 }

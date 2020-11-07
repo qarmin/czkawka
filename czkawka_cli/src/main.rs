@@ -11,7 +11,7 @@ use czkawka_core::{
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
     same_music::SameMusic,
-    similar_files::SimilarImages,
+    similar_images::SimilarImages,
     temporary::{self, Temporary},
     zeroed::{self, ZeroedFiles},
 };
