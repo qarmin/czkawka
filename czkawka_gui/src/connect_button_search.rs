@@ -28,10 +28,14 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let entry_same_music_minimal_size = gui_data.entry_same_music_minimal_size.clone();
     let entry_allowed_extensions = gui_data.entry_allowed_extensions.clone();
     let buttons_names = gui_data.buttons_names.clone();
-    let radio_button_name = gui_data.radio_button_name.clone();
-    let radio_button_size = gui_data.radio_button_size.clone();
-    let radio_button_hashmb = gui_data.radio_button_hashmb.clone();
-    let radio_button_hash = gui_data.radio_button_hash.clone();
+    let radio_button_duplicates_name = gui_data.radio_button_duplicates_name.clone();
+    let radio_button_duplicates_size = gui_data.radio_button_duplicates_size.clone();
+    let radio_button_duplicates_hashmb = gui_data.radio_button_duplicates_hashmb.clone();
+    let radio_button_duplicates_hash = gui_data.radio_button_duplicates_hash.clone();
+    let radio_button_similar_images_small = gui_data.radio_button_similar_images_small.clone();
+    let radio_button_similar_images_medium = gui_data.radio_button_similar_images_medium.clone();
+    let radio_button_similar_images_high = gui_data.radio_button_similar_images_high.clone();
+    let radio_button_similar_images_very_high = gui_data.radio_button_similar_images_very_high.clone();
     let entry_duplicate_minimal_size = gui_data.entry_duplicate_minimal_size.clone();
     let stop_receiver = gui_data.stop_receiver.clone();
     let entry_big_files_number = gui_data.entry_big_files_number.clone();
@@ -70,13 +74,13 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 get_list_store(&scrolled_window_duplicate_finder).clear();
 
                 let check_method;
-                if radio_button_name.get_active() {
+                if radio_button_duplicates_name.get_active() {
                     check_method = duplicate::CheckingMethod::Name;
-                } else if radio_button_size.get_active() {
+                } else if radio_button_duplicates_size.get_active() {
                     check_method = duplicate::CheckingMethod::Size;
-                } else if radio_button_hashmb.get_active() {
+                } else if radio_button_duplicates_hashmb.get_active() {
                     check_method = duplicate::CheckingMethod::HashMB;
-                } else if radio_button_hash.get_active() {
+                } else if radio_button_duplicates_hash.get_active() {
                     check_method = duplicate::CheckingMethod::Hash;
                 } else {
                     panic!("No radio button is pressed");
@@ -186,6 +190,19 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     Err(_) => 1024 * 16, // By default
                 };
 
+                let similarity;
+                if radio_button_similar_images_small.get_active() {
+                    similarity = similar_images::Similarity::Small;
+                } else if radio_button_similar_images_medium.get_active() {
+                    similarity = similar_images::Similarity::Medium;
+                } else if radio_button_similar_images_high.get_active() {
+                    similarity = similar_images::Similarity::High;
+                } else if radio_button_similar_images_very_high.get_active() {
+                    similarity = similar_images::Similarity::VeryHigh;
+                } else {
+                    panic!("No radio button is pressed");
+                }
+
                 // Find similar images
                 thread::spawn(move || {
                     let mut sf = SimilarImages::new();
@@ -195,6 +212,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     sf.set_recursive_search(recursive_search);
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
+                    sf.set_similarity(similarity);
                     sf.find_similar_images(Option::from(&receiver_stop));
                     let _ = sender.send(Message::SimilarImages(sf));
                 });

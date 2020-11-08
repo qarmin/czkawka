@@ -8,6 +8,7 @@ use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
 use img_hash::HasherConfig;
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::{File, Metadata};
@@ -58,6 +59,7 @@ pub struct SimilarImages {
     image_hashes: HashMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: Similarity,
+    images_to_check: Vec<FileEntry>,
 }
 
 /// Info struck with helpful information's about results
@@ -95,6 +97,7 @@ impl SimilarImages {
             image_hashes: Default::default(),
             stopped_search: false,
             similarity: Similarity::High,
+            images_to_check: vec![],
         }
     }
 
@@ -231,16 +234,10 @@ impl SimilarImages {
                             continue 'dir;
                         }
 
-                        let image = match image::open(&current_file_name) {
-                            Ok(t) => t,
-                            Err(_) => continue 'dir, // Something is wrong with image
-                        };
-                        let dimensions = image.dimensions();
-                        // Creating new file entry
                         let fe: FileEntry = FileEntry {
                             path: current_file_name.clone(),
                             size: metadata.len(),
-                            dimensions: format!("{}x{}", dimensions.0, dimensions.1),
+                            dimensions: "".to_string(),
                             modified_date: match metadata.modified() {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
@@ -257,15 +254,8 @@ impl SimilarImages {
 
                             similarity: Similarity::None,
                         };
-                        let hasher = HasherConfig::with_bytes_type::<[u8; 8]>().to_hasher();
 
-                        let hash = hasher.hash_image(&image);
-                        let mut buf = [0u8; 8];
-                        buf.copy_from_slice(&hash.as_bytes());
-
-                        self.bktree.add(buf);
-                        self.image_hashes.entry(buf).or_insert_with(Vec::<FileEntry>::new);
-                        self.image_hashes.get_mut(&buf).unwrap().push(fe);
+                        self.images_to_check.push(fe);
 
                         self.information.size_of_checked_images += metadata.len();
                         self.information.number_of_checked_files += 1;
@@ -285,6 +275,42 @@ impl SimilarImages {
 
     fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let hash_map_modification = SystemTime::now();
+
+        let vec_file_entry = self
+            .images_to_check
+            .par_iter()
+            .map(|file_entry| {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // This will not break
+                    return None;
+                }
+                let mut file_entry = file_entry.clone();
+
+                let image = match image::open(file_entry.path.clone()) {
+                    Ok(t) => t,
+                    Err(_) => return Option::from((file_entry, [0u8; 8], false)), // Something is wrong with image
+                };
+                let dimensions = image.dimensions();
+
+                file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
+                let hasher = HasherConfig::with_bytes_type::<[u8; 8]>().to_hasher();
+
+                let hash = hasher.hash_image(&image);
+                let mut buf = [0u8; 8];
+                buf.copy_from_slice(&hash.as_bytes());
+
+                Option::from((file_entry, buf, true))
+            })
+            .while_some()
+            .filter(|file_entry| file_entry.2)
+            .map(|file_entry| (file_entry.0, file_entry.1))
+            .collect::<Vec<(_, _)>>();
+
+        for (file_entry, buf) in vec_file_entry {
+            self.bktree.add(buf);
+            self.image_hashes.entry(buf).or_insert_with(Vec::<FileEntry>::new);
+            self.image_hashes.get_mut(&buf).unwrap().push(file_entry.clone());
+        }
 
         //let hash_map_modification = SystemTime::now();
         let similarity: u64 = match self.similarity {
@@ -327,7 +353,7 @@ impl SimilarImages {
 
             for (similarity, similar_hash) in vector_with_found_similar_hashes.iter() {
                 if *similarity == 0 && hash == *similar_hash {
-                    // This was already readed before
+                    // This was already read before
                     continue;
                 } else if hash == *similar_hash {
                     panic!("I'm not sure if same hash can have distance > 0");
@@ -355,7 +381,10 @@ impl SimilarImages {
                     hashes_to_check.remove(*similar_hash);
                 }
             }
-            new_vector.push((*vector_of_similar_images).to_owned());
+            if vector_of_similar_images.len() > 1 {
+                // Not sure why it may happens
+                new_vector.push((*vector_of_similar_images).to_owned());
+            }
         }
 
         self.similar_vectors = new_vector;

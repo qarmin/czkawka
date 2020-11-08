@@ -93,10 +93,15 @@ pub struct GuiData {
 
     //// Radio Buttons
     // Duplicates
-    pub radio_button_name: gtk::RadioButton,
-    pub radio_button_size: gtk::RadioButton,
-    pub radio_button_hashmb: gtk::RadioButton,
-    pub radio_button_hash: gtk::RadioButton,
+    pub radio_button_duplicates_name: gtk::RadioButton,
+    pub radio_button_duplicates_size: gtk::RadioButton,
+    pub radio_button_duplicates_hashmb: gtk::RadioButton,
+    pub radio_button_duplicates_hash: gtk::RadioButton,
+
+    pub radio_button_similar_images_small: gtk::RadioButton,
+    pub radio_button_similar_images_medium: gtk::RadioButton,
+    pub radio_button_similar_images_high: gtk::RadioButton,
+    pub radio_button_similar_images_very_high: gtk::RadioButton,
 
     //// Notebooks
     pub notebook_main: gtk::Notebook,
@@ -266,10 +271,15 @@ impl GuiData {
         let check_button_music_year: gtk::CheckButton = builder.get_object("check_button_music_year").unwrap();
 
         //// Radio Buttons
-        let radio_button_name: gtk::RadioButton = builder.get_object("radio_button_name").unwrap();
-        let radio_button_size: gtk::RadioButton = builder.get_object("radio_button_size").unwrap();
-        let radio_button_hashmb: gtk::RadioButton = builder.get_object("radio_button_hashmb").unwrap();
-        let radio_button_hash: gtk::RadioButton = builder.get_object("radio_button_hash").unwrap();
+        let radio_button_duplicates_name: gtk::RadioButton = builder.get_object("radio_button_duplicates_name").unwrap();
+        let radio_button_duplicates_size: gtk::RadioButton = builder.get_object("radio_button_duplicates_size").unwrap();
+        let radio_button_duplicates_hashmb: gtk::RadioButton = builder.get_object("radio_button_duplicates_hashmb").unwrap();
+        let radio_button_duplicates_hash: gtk::RadioButton = builder.get_object("radio_button_duplicates_hash").unwrap();
+
+        let radio_button_similar_images_small: gtk::RadioButton = builder.get_object("radio_button_similar_images_small").unwrap();
+        let radio_button_similar_images_medium: gtk::RadioButton = builder.get_object("radio_button_similar_images_medium").unwrap();
+        let radio_button_similar_images_high: gtk::RadioButton = builder.get_object("radio_button_similar_images_high").unwrap();
+        let radio_button_similar_images_very_high: gtk::RadioButton = builder.get_object("radio_button_similar_images_very_high").unwrap();
 
         //// Notebooks
         let notebook_main: gtk::Notebook = builder.get_object("notebook_main").unwrap();
@@ -363,10 +373,14 @@ impl GuiData {
             check_button_music_album_title,
             check_button_music_album_artist,
             check_button_music_year,
-            radio_button_name,
-            radio_button_size,
-            radio_button_hashmb,
-            radio_button_hash,
+            radio_button_duplicates_name,
+            radio_button_duplicates_size,
+            radio_button_duplicates_hashmb,
+            radio_button_duplicates_hash,
+            radio_button_similar_images_small,
+            radio_button_similar_images_medium,
+            radio_button_similar_images_high,
+            radio_button_similar_images_very_high,
             notebook_main,
             notebook_upper,
             notebook_main_children_names,

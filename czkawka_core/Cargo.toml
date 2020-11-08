@@ -12,7 +12,7 @@ repository = "https://github.com/qarmin/czkawka"
 [dependencies]
 humansize = "1"
 blake3 = "0.3"
-#rayon = "1"
+rayon = "1"
 crossbeam-channel = "0.4.4"
 
 
