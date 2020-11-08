@@ -111,6 +111,9 @@ cargo run --bin czkawka_cli
 ## Benchmarks
 Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these tools.
 
+Currently, I'm working on multithreading support in Czkawka so benchmarks should be updated in versions 1.4.0+.
+Also Dupeguru probably will have new 4.0.5 release soon.
+
 I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 320004 files and 36902 folders and 108844 duplicates files in 34475 groups which took 4.53 GB.
 
 Minimum file size to check I set to 1 KB on all programs
