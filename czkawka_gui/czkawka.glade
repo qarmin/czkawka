@@ -745,13 +745,13 @@ Author: Rafał Mikrut
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkRadioButton" id="radio_button_name">
+                      <object class="GtkRadioButton" id="radio_button_duplicates_name">
                         <property name="label" translatable="yes">Name(very fast)</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radio_button_hash</property>
+                        <property name="group">radio_button_duplicates_hash</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -760,13 +760,13 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="radio_button_size">
+                      <object class="GtkRadioButton" id="radio_button_duplicates_size">
                         <property name="label" translatable="yes">Size(very fast)</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radio_button_hash</property>
+                        <property name="group">radio_button_duplicates_hash</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -775,13 +775,13 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="radio_button_hashmb">
+                      <object class="GtkRadioButton" id="radio_button_duplicates_hashmb">
                         <property name="label" translatable="yes">HashMb(fast)</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radio_button_hash</property>
+                        <property name="group">radio_button_duplicates_hash</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -790,7 +790,7 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="radio_button_hash">
+                      <object class="GtkRadioButton" id="radio_button_duplicates_hash">
                         <property name="label" translatable="yes">Hash(slow but accurate)</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1064,6 +1064,90 @@ Author: Rafał Mikrut
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Similarity level </property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_button_similar_images_small">
+                        <property name="label" translatable="yes">Small</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_button_similar_images_very_high</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_button_similar_images_medium">
+                        <property name="label" translatable="yes">Medium</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_button_similar_images_very_high</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_button_similar_images_high">
+                        <property name="label" translatable="yes">High</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_button_similar_images_very_high</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_button_similar_images_very_high">
+                        <property name="label" translatable="yes">Very High</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>

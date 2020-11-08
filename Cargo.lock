@@ -422,6 +422,7 @@ dependencies = [
  "humansize",
  "image",
  "img_hash",
+ "rayon",
 ]
 
 [[package]]
