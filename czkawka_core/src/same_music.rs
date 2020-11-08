@@ -11,6 +11,7 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use audiotags::Tag;
 use crossbeam_channel::Receiver;
+use rayon::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -73,6 +74,7 @@ impl Info {
 pub struct SameMusic {
     text_messages: Messages,
     information: Info,
+    music_to_check: Vec<FileEntry>,
     music_entries: Vec<FileEntry>,
     duplicated_music_entries: Vec<Vec<FileEntry>>,
     directories: Directories,
@@ -92,18 +94,23 @@ impl SameMusic {
             recursive_search: true,
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
-            music_entries: vec![],
+            music_entries: Vec::with_capacity(2048),
             delete_method: DeleteMethod::None,
             music_similarity: MusicSimilarity::NONE,
             stopped_search: false,
             minimal_file_size: 1024,
             duplicated_music_entries: vec![],
+            music_to_check: Vec::with_capacity(2048),
         }
     }
 
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver) {
+            self.stopped_search = true;
+            return;
+        }
+        if !self.check_records_multithreaded(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -229,10 +236,8 @@ impl SameMusic {
                             continue 'dir;
                         }
 
-                        let tag = Tag::new().read_from_path(&current_file_name).unwrap();
-
                         // Creating new file entry
-                        let fe: FileEntry = FileEntry {
+                        let file_entry: FileEntry = FileEntry {
                             size: metadata.len(),
                             path: current_file_name.clone(),
                             modified_date: match metadata.modified() {
@@ -248,30 +253,16 @@ impl SameMusic {
                                     continue 'dir;
                                 } // Permissions Denied
                             },
-                            title: match tag.title() {
-                                Some(t) => t.to_string(),
-                                None => "".to_string(),
-                            },
-                            artist: match tag.artist() {
-                                Some(t) => t.to_string(),
-                                None => "".to_string(),
-                            },
-                            album_title: match tag.album_title() {
-                                Some(t) => t.to_string(),
-                                None => "".to_string(),
-                            },
-                            album_artist: match tag.album_artist() {
-                                Some(t) => t.to_string(),
-                                None => "".to_string(),
-                            },
-                            year: match tag.year() {
-                                Some(t) => t,
-                                None => 0,
-                            },
+                            title: "".to_string(),
+
+                            artist: "".to_string(),
+                            album_title: "".to_string(),
+                            album_artist: "".to_string(),
+                            year: 0,
                         };
 
                         // Adding files to Vector
-                        self.music_entries.push(fe);
+                        self.music_to_check.push(file_entry);
 
                         self.information.number_of_checked_files += 1;
                     } else {
@@ -285,10 +276,62 @@ impl SameMusic {
         }
         self.information.number_of_music_entries = self.music_entries.len();
 
-        Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
         true
     }
 
+    fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+
+        let vec_file_entry = self
+            .music_to_check
+            .par_iter()
+            .map(|file_entry| {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // This will not break
+                    return None;
+                }
+                let mut file_entry = file_entry.clone();
+
+                let tag = match Tag::new().read_from_path(&file_entry.path) {
+                    Ok(t) => t,
+                    Err(_) => return Option::from((file_entry, false)), // Data not in utf-8, etc.
+                };
+
+                file_entry.title = match tag.title() {
+                    Some(t) => t.to_string(),
+                    None => "".to_string(),
+                };
+                file_entry.artist = match tag.artist() {
+                    Some(t) => t.to_string(),
+                    None => "".to_string(),
+                };
+                file_entry.album_title = match tag.album_title() {
+                    Some(t) => t.to_string(),
+                    None => "".to_string(),
+                };
+                file_entry.album_artist = match tag.album_artist() {
+                    Some(t) => t.to_string(),
+                    None => "".to_string(),
+                };
+                file_entry.year = match tag.year() {
+                    Some(t) => t,
+                    None => 0,
+                };
+
+                Option::from((file_entry, true))
+            })
+            .while_some()
+            .filter(|file_entry| file_entry.1)
+            .map(|file_entry| file_entry.0)
+            .collect::<Vec<_>>();
+
+        // Adding files to Vector
+        self.music_entries = vec_file_entry;
+
+        Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());
+        true
+    }
     fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         if MusicSimilarity::NONE == self.music_similarity {
             panic!("This can't be none");
