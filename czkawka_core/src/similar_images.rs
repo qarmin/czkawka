@@ -276,7 +276,7 @@ impl SimilarImages {
     fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
-        let vec_file_entry = self
+        let vec_file_entry: Vec<(FileEntry, [u8; 8])> = self
             .images_to_check
             .par_iter()
             .map(|file_entry| {
@@ -288,7 +288,7 @@ impl SimilarImages {
 
                 let image = match image::open(file_entry.path.clone()) {
                     Ok(t) => t,
-                    Err(_) => return Option::from((file_entry, [0u8; 8], false)), // Something is wrong with image
+                    Err(_) => return Some(None), // Something is wrong with image
                 };
                 let dimensions = image.dimensions();
 
@@ -299,12 +299,12 @@ impl SimilarImages {
                 let mut buf = [0u8; 8];
                 buf.copy_from_slice(&hash.as_bytes());
 
-                Option::from((file_entry, buf, true))
+                Some(Some((file_entry, buf)))
             })
             .while_some()
-            .filter(|file_entry| file_entry.2)
-            .map(|file_entry| (file_entry.0, file_entry.1))
-            .collect::<Vec<(_, _)>>();
+            .filter(|file_entry| file_entry.is_some())
+            .map(|file_entry| file_entry.unwrap())
+            .collect::<Vec<(FileEntry, [u8; 8])>>();
 
         for (file_entry, buf) in vec_file_entry {
             self.bktree.add(buf);
@@ -312,7 +312,9 @@ impl SimilarImages {
             self.image_hashes.get_mut(&buf).unwrap().push(file_entry.clone());
         }
 
-        //let hash_map_modification = SystemTime::now();
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files".to_string());
+        let hash_map_modification = SystemTime::now();
+
         let similarity: u64 = match self.similarity {
             Similarity::VeryHigh => 0,
             Similarity::High => 1,
@@ -389,7 +391,7 @@ impl SimilarImages {
 
         self.similar_vectors = new_vector;
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
         true
     }
 

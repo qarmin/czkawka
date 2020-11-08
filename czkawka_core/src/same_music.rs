@@ -295,7 +295,7 @@ impl SameMusic {
 
                 let tag = match Tag::new().read_from_path(&file_entry.path) {
                     Ok(t) => t,
-                    Err(_) => return Option::from((file_entry, false)), // Data not in utf-8, etc.
+                    Err(_) => return Some(None), // Data not in utf-8, etc.
                 };
 
                 file_entry.title = match tag.title() {
@@ -319,11 +319,11 @@ impl SameMusic {
                     None => 0,
                 };
 
-                Option::from((file_entry, true))
+                Some(Some(file_entry))
             })
             .while_some()
-            .filter(|file_entry| file_entry.1)
-            .map(|file_entry| file_entry.0)
+            .filter(|file_entry| file_entry.is_some())
+            .map(|file_entry| file_entry.unwrap())
             .collect::<Vec<_>>();
 
         // Adding files to Vector
