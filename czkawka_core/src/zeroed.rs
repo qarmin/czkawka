@@ -11,6 +11,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crossbeam_channel::Receiver;
+use rayon::prelude::*;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -54,6 +55,7 @@ pub struct ZeroedFiles {
     delete_method: DeleteMethod,
     stopped_search: bool,
     minimal_file_size: u64,
+    files_to_check: Vec<FileEntry>,
 }
 
 impl ZeroedFiles {
@@ -69,12 +71,17 @@ impl ZeroedFiles {
             delete_method: DeleteMethod::None,
             stopped_search: false,
             minimal_file_size: 1024,
+            files_to_check: Vec::with_capacity(1024),
         }
     }
 
     pub fn find_zeroed_files(&mut self, stop_receiver: Option<&Receiver<()>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver) {
+            self.stopped_search = true;
+            return;
+        }
+        if !self.check_for_zeroed_files(stop_receiver) {
             self.stopped_search = true;
             return;
         }
@@ -210,49 +217,6 @@ impl ZeroedFiles {
                         continue 'dir;
                     }
 
-                    let mut file_handler: File = match File::open(&current_file_name) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            continue 'dir;
-                        }
-                    };
-
-                    let mut first_search: bool = true;
-                    let mut n;
-                    loop {
-                        if first_search {
-                            let mut buffer = [0u8; 64];
-                            n = match file_handler.read(&mut buffer) {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    continue 'dir;
-                                }
-                            };
-                            for i in buffer[0..n].iter() {
-                                if *i != 0 {
-                                    continue 'dir; // Not zeroed file
-                                }
-                            }
-                            first_search = false;
-                        } else {
-                            let mut buffer = [0u8; 1024 * 32];
-                            n = match file_handler.read(&mut buffer) {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    continue 'dir;
-                                }
-                            };
-                            for i in buffer[0..n].iter() {
-                                if *i != 0 {
-                                    continue 'dir; // Not zeroed file
-                                }
-                            }
-                        }
-                        if n == 0 {
-                            break;
-                        }
-                    }
-
                     // Creating new file entry
                     let fe: FileEntry = FileEntry {
                         path: current_file_name.clone(),
@@ -273,7 +237,7 @@ impl ZeroedFiles {
                     };
 
                     // Adding files to Vector
-                    self.zeroed_files.push(fe);
+                    self.files_to_check.push(fe);
 
                     self.information.number_of_checked_files += 1;
                 } else {
@@ -282,9 +246,75 @@ impl ZeroedFiles {
                 }
             }
         }
-        self.information.number_of_zeroed_files = self.zeroed_files.len();
 
         Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+        true
+    }
+
+    /// Check files for files which have 0
+    fn check_for_zeroed_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+
+        self.zeroed_files = self
+            .files_to_check
+            .par_iter()
+            .map(|file_entry| {
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // This will not break
+                    return None;
+                }
+
+                let file_entry = file_entry.clone();
+                let mut n;
+                let mut file_handler: File = match File::open(&file_entry.path) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        return Some(None);
+                    }
+                };
+
+                // First search
+                let mut buffer = [0u8; 64];
+                n = match file_handler.read(&mut buffer) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        return Some(None);
+                    }
+                };
+                for i in buffer[0..n].iter() {
+                    if *i != 0 {
+                        return Some(None);
+                    }
+                }
+                // Second search
+                loop {
+                    let mut buffer = [0u8; 1024 * 32];
+                    n = match file_handler.read(&mut buffer) {
+                        Ok(t) => t,
+                        Err(_) => {
+                            return Some(None);
+                        }
+                    };
+                    for i in buffer[0..n].iter() {
+                        if *i != 0 {
+                            return Some(None);
+                        }
+                    }
+                    if n == 0 {
+                        break;
+                    }
+                }
+
+                Some(Some(file_entry))
+            })
+            .while_some()
+            .filter(|file_entry| file_entry.is_some())
+            .map(|file_entry| file_entry.unwrap())
+            .collect::<Vec<_>>();
+
+        self.information.number_of_zeroed_files = self.zeroed_files.len();
+
+        Common::print_time(start_time, SystemTime::now(), "search for zeroed_files".to_string());
         true
     }
 

@@ -265,7 +265,7 @@ pub fn startup_configuration(gui_data: &GuiData) {
         // Set Excluded Items
         {
             if cfg!(target_family = "unix") {
-                entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*");
+                entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*");
             }
             if cfg!(target_family = "windows") {
                 entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*:/windows/*");
