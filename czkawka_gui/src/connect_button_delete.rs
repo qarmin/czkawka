@@ -56,15 +56,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
         match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
             "notebook_main_duplicate_finder_label" => {
-                tree_remove(
-                    scrolled_window_duplicate_finder.clone(),
-                    ColumnsDuplicates::Name as i32,
-                    ColumnsDuplicates::Path as i32,
-                    ColumnsDuplicates::Color as i32,
-                    &gui_data,
-                    false,
-                    false,
-                );
+                tree_remove(scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
             }
             "scrolled_window_main_empty_folder_finder" => {
                 empty_folder_remover(scrolled_window_main_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
@@ -85,23 +77,13 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     ColumnsSimilarImages::Path as i32,
                     ColumnsSimilarImages::Color as i32,
                     &gui_data,
-                    true,
-                    true,
                 );
             }
             "notebook_main_zeroed_files_finder" => {
                 basic_remove(scrolled_window_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
             }
             "notebook_main_same_music_finder" => {
-                tree_remove(
-                    scrolled_window_same_music_finder.clone(),
-                    ColumnsSameMusic::Name as i32,
-                    ColumnsSameMusic::Path as i32,
-                    ColumnsSameMusic::Color as i32,
-                    &gui_data,
-                    false,
-                    false,
-                );
+                tree_remove(scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
             }
             e => panic!("Not existent {}", e),
         }
@@ -229,7 +211,7 @@ fn basic_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, col
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
 //
-fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData, remove_all_occurrences: bool, header_can_have_one_child: bool) {
+fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
     let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -253,9 +235,8 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
         let file_name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap().unwrap();
         let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_path).get::<String>().unwrap().unwrap();
 
-        if !remove_all_occurrences {
-            list_store.remove(&list_store.get_iter(tree_path).unwrap());
-        }
+        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+
         map_with_path_to_delete.entry(path.clone()).or_insert_with(Vec::new);
         map_with_path_to_delete.get_mut(path.as_str()).unwrap().push(file_name);
         // vec_path_to_delete.push((path, file_name));
@@ -277,141 +258,63 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
         }
     }
 
-    if remove_all_occurrences {
-        // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-        for path_to_delete in vec_path_to_delete {
-            let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
-
-            let iter = match list_store.get_iter_first() {
-                Some(t) => t,
-                None => break,
-            };
-            let mut take_child_mode = false; // When original image is searched one, we must remove all occurrences of its children
-            let mut prepared_for_delete;
-            loop {
-                prepared_for_delete = false;
-                if take_child_mode {
-                    let color = tree_model.get_value(&iter, column_color).get::<String>().unwrap().unwrap();
-                    if color == HEADER_ROW_COLOR {
-                        take_child_mode = false;
-                    } else {
-                        prepared_for_delete = true;
-                    }
-                } else {
-                    let path = tree_model.get_value(&iter, column_path).get::<String>().unwrap().unwrap();
-                    if path == path_to_delete.0 {
-                        let name = tree_model.get_value(&iter, column_file_name).get::<String>().unwrap().unwrap();
-                        if name == path_to_delete.1 {
-                            let color = tree_model.get_value(&iter, column_color).get::<String>().unwrap().unwrap();
-                            if color == HEADER_ROW_COLOR {
-                                take_child_mode = true;
-                            }
-                            prepared_for_delete = true;
-                        }
-                    }
-                }
-
-                if prepared_for_delete {
-                    vec_tree_path_to_delete.push(list_store.get_path(&iter).unwrap());
-                }
-
-                if !list_store.iter_next(&iter) {
-                    break;
-                }
-            }
-
-            for tree_path in vec_tree_path_to_delete.iter().rev() {
-                list_store.remove(&list_store.get_iter(&tree_path).unwrap());
-            }
-        }
-    }
-
     // Remove only child from header
-    if !header_can_have_one_child {
-        if let Some(first_iter) = list_store.get_iter_first() {
-            let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
-            let mut current_iter = first_iter;
+    if let Some(first_iter) = list_store.get_iter_first() {
+        let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
+        let mut current_iter = first_iter;
+        if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+            panic!(); // First element should be header
+        };
+
+        let mut next_iter;
+        let mut next_next_iter;
+        'main: loop {
             if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
                 panic!(); // First element should be header
             };
 
-            let mut next_iter;
-            let mut next_next_iter;
-            'main: loop {
-                if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
-                    panic!(); // First element should be header
-                };
+            next_iter = current_iter.clone();
+            if !list_store.iter_next(&next_iter) {
+                // There is only single header
+                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                break 'main;
+            }
 
-                next_iter = current_iter.clone();
-                if !list_store.iter_next(&next_iter) {
-                    // There is only single header
-                    vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                    break 'main;
-                }
+            if tree_model.get_value(&next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+                // Only two headers
+                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                current_iter = next_iter.clone();
+                continue 'main;
+            }
 
-                if tree_model.get_value(&next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
-                    // Only two headers
-                    vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                    current_iter = next_iter.clone();
-                    continue 'main;
-                }
+            next_next_iter = next_iter.clone();
+            if !list_store.iter_next(&next_next_iter) {
+                // There is only one child or two headers
+                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
+                break 'main;
+            }
 
-                next_next_iter = next_iter.clone();
+            if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+                // Only one child or two headers - but still are later files
+                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
+                current_iter = next_next_iter.clone();
+                continue 'main;
+            }
+
+            loop {
                 if !list_store.iter_next(&next_next_iter) {
-                    // There is only one child or two headers
-                    vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                    vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
                     break 'main;
                 }
-
                 if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
-                    // Only one child or two headers - but still are later files
-                    vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                    vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
                     current_iter = next_next_iter.clone();
                     continue 'main;
                 }
-
-                loop {
-                    if !list_store.iter_next(&next_next_iter) {
-                        break 'main;
-                    }
-                    if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
-                        current_iter = next_next_iter.clone();
-                        continue 'main;
-                    }
-                }
-            }
-            for tree_path in vec_tree_path_to_delete.iter().rev() {
-                list_store.remove(&list_store.get_iter(&tree_path).unwrap());
             }
         }
-    } else {
-        // Remove header which doesn't have children
-        if let Some(next_iter) = list_store.get_iter_first() {
-            let mut header_was_before = false;
-            let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
-            let mut current_iter = next_iter.clone();
-            loop {
-                let color = tree_model.get_value(&next_iter, column_color).get::<String>().unwrap().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if header_was_before {
-                        vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                    } else {
-                        header_was_before = true;
-                    }
-                } else {
-                    header_was_before = false;
-                }
-
-                current_iter = next_iter.clone();
-                if !list_store.iter_next(&next_iter) {
-                    break;
-                }
-            }
-            for tree_path in vec_tree_path_to_delete.iter().rev() {
-                list_store.remove(&list_store.get_iter(&tree_path).unwrap());
-            }
+        for tree_path in vec_tree_path_to_delete.iter().rev() {
+            list_store.remove(&list_store.get_iter(&tree_path).unwrap());
         }
     }
 
