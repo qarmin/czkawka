@@ -225,11 +225,11 @@ fn basic_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, col
 
     text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
     selection.unselect_all();
-} // TODO, will replace simple remove of things
+}
 
-// Remove all ocurences - remove every element which have same path and name as even non selected ones
+// Remove all occurrences - remove every element which have same path and name as even non selected ones
 //
-fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData, remove_all_occurences: bool, header_can_have_one_child: bool) {
+fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData, remove_all_occurrences: bool, header_can_have_one_child: bool) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
     let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -248,12 +248,12 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
     let mut vec_path_to_delete: Vec<(String, String)> = Vec::new();
     let mut map_with_path_to_delete: BTreeMap<String, Vec<String>> = Default::default(); // BTreeMap<Path,Vec<FileName>>
 
-    // Save to variable paths of files, and remove it when not removing all ocureences.
+    // Save to variable paths of files, and remove it when not removing all occurrences.
     for tree_path in selection_rows.iter().rev() {
         let file_name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap().unwrap();
         let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_path).get::<String>().unwrap().unwrap();
 
-        if !remove_all_occurences {
+        if !remove_all_occurrences {
             list_store.remove(&list_store.get_iter(tree_path).unwrap());
         }
         map_with_path_to_delete.entry(path.clone()).or_insert_with(Vec::new);
@@ -277,7 +277,7 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
         }
     }
 
-    if remove_all_occurences {
+    if remove_all_occurrences {
         // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
         for path_to_delete in vec_path_to_delete {
             let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
@@ -286,7 +286,7 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
                 Some(t) => t,
                 None => break,
             };
-            let mut take_child_mode = false; // When original image is searched one, we must remove all occurences of its children
+            let mut take_child_mode = false; // When original image is searched one, we must remove all occurrences of its children
             let mut prepared_for_delete;
             loop {
                 prepared_for_delete = false;
