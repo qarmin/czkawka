@@ -275,13 +275,13 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
 
             next_iter = current_iter.clone();
             if !list_store.iter_next(&next_iter) {
-                // There is only single header
+                // There is only single header left (H1 -> END) -> (NOTHING)
                 vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
                 break 'main;
             }
 
             if tree_model.get_value(&next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
-                // Only two headers
+                // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                 vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
                 current_iter = next_iter.clone();
                 continue 'main;
@@ -289,14 +289,14 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
 
             next_next_iter = next_iter.clone();
             if !list_store.iter_next(&next_next_iter) {
-                // There is only one child or two headers
+                // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
                 vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
                 vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
                 break 'main;
             }
 
             if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
-                // Only one child or two headers - but still are later files
+                // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                 vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
                 vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
                 current_iter = next_next_iter.clone();
@@ -304,9 +304,11 @@ fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, colu
             }
 
             loop {
+                // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
                 if !list_store.iter_next(&next_next_iter) {
                     break 'main;
                 }
+                // Move to next header
                 if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
                     current_iter = next_next_iter.clone();
                     continue 'main;

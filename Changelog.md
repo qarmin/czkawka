@@ -1,3 +1,11 @@
+## Version 1.4.0 - 09.11.2020r
+- Multithreading Support to most modules - [#98](https://github.com/qarmin/czkawka/pull/98) [#99](https://github.com/qarmin/czkawka/pull/99) [#100](https://github.com/qarmin/czkawka/pull/100) [#101](https://github.com/qarmin/czkawka/pull/101)
+- Simplify GUI code [#96](https://github.com/qarmin/czkawka/pull/96)
+- Group similar images - [#97](https://github.com/qarmin/czkawka/pull/97)
+- Add select buttons to each type of mode - [#102](https://github.com/qarmin/czkawka/pull/102)
+- Fix GUI behavior in GUI when deleting similar image - [#103](https://github.com/qarmin/czkawka/pull/103)
+- Add new similarity level - [#104](https://github.com/qarmin/czkawka/pull/104)
+
 ## Version 1.3.0 - 02.11.2020r
 - Appimage support - [#77](https://github.com/qarmin/czkawka/pull/77)
 - Removed warnings about non existend excluded directories - [#79](https://github.com/qarmin/czkawka/pull/79)
