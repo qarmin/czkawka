@@ -71,16 +71,21 @@ pub struct GuiData {
     pub buttons_remove_excluded_directory: gtk::Button,
 
     // Buttons search popover buttons
-    pub buttons_popover_select_all: gtk::Button,
-    pub buttons_popover_unselect_all: gtk::Button,
-    pub buttons_popover_reverse: gtk::Button,
-    pub buttons_popover_select_all_except_oldest: gtk::Button,
-    pub buttons_popover_select_all_except_newest: gtk::Button,
-    pub buttons_popover_select_one_oldest: gtk::Button,
-    pub buttons_popover_select_one_newest: gtk::Button,
+    pub buttons_popover_duplicate_select_all: gtk::Button,
+    pub buttons_popover_duplicate_unselect_all: gtk::Button,
+    pub buttons_popover_duplicate_reverse: gtk::Button,
+    pub buttons_popover_duplicate_select_all_except_oldest: gtk::Button,
+    pub buttons_popover_duplicate_select_all_except_newest: gtk::Button,
+    pub buttons_popover_duplicate_select_one_oldest: gtk::Button,
+    pub buttons_popover_duplicate_select_one_newest: gtk::Button,
+
+    pub buttons_popover_simple_list_select_all: gtk::Button,
+    pub buttons_popover_simple_list_unselect_all: gtk::Button,
+    pub buttons_popover_simple_list_reverse: gtk::Button,
 
     //// Popovers
-    pub popover_select: gtk::Popover,
+    pub popover_select_duplicate: gtk::Popover,
+    pub popover_select_simple_list: gtk::Popover,
 
     //// Check Buttons
     pub check_button_recursive: gtk::CheckButton,
@@ -251,16 +256,21 @@ impl GuiData {
         let buttons_remove_excluded_directory: gtk::Button = builder.get_object("buttons_remove_excluded_directory").unwrap();
 
         // Buttons search popover buttons
-        let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
-        let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();
-        let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
-        let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
-        let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
-        let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
-        let buttons_popover_select_one_newest: gtk::Button = builder.get_object("buttons_popover_select_one_newest").unwrap();
+        let buttons_popover_duplicate_select_all: gtk::Button = builder.get_object("buttons_popover_duplicate_select_all").unwrap();
+        let buttons_popover_duplicate_unselect_all: gtk::Button = builder.get_object("buttons_popover_duplicate_unselect_all").unwrap();
+        let buttons_popover_duplicate_reverse: gtk::Button = builder.get_object("buttons_popover_duplicate_reverse").unwrap();
+        let buttons_popover_duplicate_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_all_except_oldest").unwrap();
+        let buttons_popover_duplicate_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_all_except_newest").unwrap();
+        let buttons_popover_duplicate_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_one_oldest").unwrap();
+        let buttons_popover_duplicate_select_one_newest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_one_newest").unwrap();
+
+        let buttons_popover_simple_list_select_all: gtk::Button = builder.get_object("buttons_popover_simple_list_select_all").unwrap();
+        let buttons_popover_simple_list_unselect_all: gtk::Button = builder.get_object("buttons_popover_simple_list_unselect_all").unwrap();
+        let buttons_popover_simple_list_reverse: gtk::Button = builder.get_object("buttons_popover_simple_list_reverse").unwrap();
 
         //// Popovers
-        let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
+        let popover_select_duplicate: gtk::Popover = builder.get_object("popover_select_duplicate").unwrap();
+        let popover_select_simple_list: gtk::Popover = builder.get_object("popover_select_simple_list").unwrap();
 
         //// Check Buttons
         let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
@@ -359,14 +369,18 @@ impl GuiData {
             buttons_remove_included_directory,
             buttons_add_excluded_directory,
             buttons_remove_excluded_directory,
-            buttons_popover_select_all,
-            buttons_popover_unselect_all,
-            buttons_popover_reverse,
-            buttons_popover_select_all_except_oldest,
-            buttons_popover_select_all_except_newest,
-            buttons_popover_select_one_oldest,
-            buttons_popover_select_one_newest,
-            popover_select,
+            buttons_popover_duplicate_select_all,
+            buttons_popover_duplicate_unselect_all,
+            buttons_popover_duplicate_reverse,
+            buttons_popover_duplicate_select_all_except_oldest,
+            buttons_popover_duplicate_select_all_except_newest,
+            buttons_popover_duplicate_select_one_oldest,
+            buttons_popover_duplicate_select_one_newest,
+            buttons_popover_simple_list_select_all,
+            buttons_popover_simple_list_unselect_all,
+            buttons_popover_simple_list_reverse,
+            popover_select_duplicate,
+            popover_select_simple_list,
             check_button_recursive,
             check_button_music_title,
             check_button_music_artist,

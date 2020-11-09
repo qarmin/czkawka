@@ -132,14 +132,14 @@ pub fn startup_configuration(gui_data: &GuiData) {
             }
             // Similar Images
             {
-                // TODO create maybe open button to support opening multiple files at once
-                let col_types: [glib::types::Type; 8] = [
+                let col_types: [glib::types::Type; 9] = [
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,
+                    glib::types::Type::U64,
                     glib::types::Type::String,
                     glib::types::Type::String,
                 ];
@@ -185,7 +185,7 @@ pub fn startup_configuration(gui_data: &GuiData) {
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::U64,
                     glib::types::Type::String,
                     glib::types::Type::String,
                 ];

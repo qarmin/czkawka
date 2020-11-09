@@ -213,7 +213,6 @@ impl DuplicateFinder {
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
-        // TODO maybe add multithreading checking files
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -351,7 +350,6 @@ impl DuplicateFinder {
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
     fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
-        // TODO maybe add multithreading checking files
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 

@@ -66,6 +66,7 @@ pub enum ColumnsSimilarImages {
     Name,
     Path,
     Modification,
+    ModificationAsSecs,
     Color,
     TextColor,
 }
@@ -85,7 +86,7 @@ pub enum ColumnsSameMusic {
     AlbumArtist,
     Year,
     Modification,
-    _ModificationAsSecs,
+    ModificationAsSecs,
     Color,
     TextColor,
 }
