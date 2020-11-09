@@ -32,6 +32,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let radio_button_duplicates_size = gui_data.radio_button_duplicates_size.clone();
     let radio_button_duplicates_hashmb = gui_data.radio_button_duplicates_hashmb.clone();
     let radio_button_duplicates_hash = gui_data.radio_button_duplicates_hash.clone();
+    let radio_button_similar_images_very_small = gui_data.radio_button_similar_images_very_small.clone();
     let radio_button_similar_images_small = gui_data.radio_button_similar_images_small.clone();
     let radio_button_similar_images_medium = gui_data.radio_button_similar_images_medium.clone();
     let radio_button_similar_images_high = gui_data.radio_button_similar_images_high.clone();
@@ -203,7 +204,9 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 };
 
                 let similarity;
-                if radio_button_similar_images_small.get_active() {
+                if radio_button_similar_images_very_small.get_active() {
+                    similarity = similar_images::Similarity::VerySmall;
+                } else if radio_button_similar_images_small.get_active() {
                     similarity = similar_images::Similarity::Small;
                 } else if radio_button_similar_images_medium.get_active() {
                     similarity = similar_images::Similarity::Medium;

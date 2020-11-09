@@ -199,6 +199,7 @@ fn main() {
             excluded_items,
             file_to_save,
             minimal_file_size,
+            similarity,
             not_recursive,
         } => {
             let mut sf = SimilarImages::new();
@@ -208,6 +209,7 @@ fn main() {
             sf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
             sf.set_minimal_file_size(minimal_file_size);
             sf.set_recursive_search(!not_recursive.not_recursive);
+            sf.set_similarity(similarity);
 
             sf.find_similar_images(None);
 
