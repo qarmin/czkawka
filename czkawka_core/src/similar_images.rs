@@ -16,9 +16,10 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub enum Similarity {
     None,
+    VerySmall,
     Small,
     Medium,
     High,
@@ -320,7 +321,8 @@ impl SimilarImages {
             Similarity::High => 1,
             Similarity::Medium => 2,
             Similarity::Small => 3,
-            _ => panic!("0-3 similarity levels are allowed, check if not added more."),
+            Similarity::VerySmall => 4,
+            _ => panic!("0-4 similarity levels are allowed, check if not added more."),
         };
 
         // TODO
@@ -336,6 +338,11 @@ impl SimilarImages {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
+            if !hashes_to_check.contains_key(hash) {
+                continue;
+            }
+            hashes_to_check.remove(hash);
+
             let vector_with_found_similar_hashes = self.bktree.find(hash, similarity).collect::<Vec<_>>();
             if vector_with_found_similar_hashes.len() == 1 && vec_file_entry.len() == 1 {
                 // This one picture doesn't have similar pictures, so there is no go
@@ -375,7 +382,8 @@ impl SimilarImages {
                                     1 => Similarity::High,
                                     2 => Similarity::Medium,
                                     3 => Similarity::Small,
-                                    _ => panic!("0-3 similarity levels are allowed, check if not added more."),
+                                    4 => Similarity::VerySmall,
+                                    _ => panic!("0-4 similarity levels are allowed, check if not added more."),
                                 },
                             })
                             .collect::<Vec<_>>()),
@@ -503,6 +511,7 @@ impl PrintResults for SimilarImages {
 
 fn get_string_from_similarity(similarity: &Similarity) -> &str {
     match similarity {
+        Similarity::VerySmall => "Very Small",
         Similarity::Small => "Small",
         Similarity::Medium => "Medium",
         Similarity::High => "High",
