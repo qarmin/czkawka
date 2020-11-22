@@ -28,21 +28,30 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Big Files - Finds provided number of the biggest files in given location
   - Empty Files - Looks for empty files across disk
   - Temporary Files - Allows finding temporary files
-  - Similar Files - Finds files which are not exactly the same
+  - Similar Images - Finds images which are not exactly the same(different resolution, watermarks)
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
   - Same Music - Search for music with same artist, album etc.
 
-## Usage and requirements
+## Requirements
+If you are using Windows or Mac binaries, there is no specific requirements.  
+Same with Appimage on Linux(except having system 18.04+ or similar).  
+But compiled binaries on Linux or compiling it on your own os require to install this packages:
+### Ubuntu/Debian
+```
+sudo apt install cargo libgtk-dev
+```
+### Fedora/CentOS
+```
+sudo yum install cargo gtk3-devel glib2-devel
+```
 
-
+## Usage
 ### Precompiled binaries
-For Linux of the program, the only requirement is having GTK 3.22+ installed on system.  
-
-Precompiled binaries are available here - https://github.com/qarmin/czkawka/releases/
+Precompiled binaries are available here - https://github.com/qarmin/czkawka/releases/.  
 If the app does not run when clicking at a launcher, run it through a terminal.
 
 ### Appimage
-Appimage files are available in release page, same as native binaries and minimal required version of OS is Ubuntu 18.04 - https://github.com/qarmin/czkawka/releases/
+Appimage files are available in release page - https://github.com/qarmin/czkawka/releases/
 
 ### Cargo
 Easier method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS) 
@@ -53,6 +62,7 @@ You can update package by typing same command.
 
 ### Snap, Flatpak
 Maybe someday
+
 
 ### Debian/Ubuntu repository and PPA
 Tried to set up it, but for now I have problems described in this issue
@@ -111,25 +121,17 @@ cargo run --bin czkawka_cli
 ## Benchmarks
 Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these tools.
 
-Currently, I'm working on multithreading support in Czkawka so benchmarks should be updated in versions 1.4.0+.
-Also Dupeguru probably will have new 4.0.5 release soon.
+I tested it on SSD Disk 256GB GoodRam and i7 4770 CPU.
 
-I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 320004 files and 36902 folders and 108844 duplicates files in 34475 groups which took 4.53 GB.
+I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 229868 files which took 203,7 GB and 13708 duplicates files in 9117 groups which took 7.90 GB.
 
 Minimum file size to check I set to 1 KB on all programs
 
-The first run reads every file entry and saves it to cache, so this step is limited mostly by disk performance. In the second run the cache helps it, so searching is sometimes faster (with few duplicates even 10x faster).
-
-DupeGuru after selecting files, froze at 45% for ~15 minutes, so I just kill it.
-
 | App| Executing Time |
 |:----------:|:-------------:|
-| FSlint 2.4.7 (First Run)| 255s |
-| FSlint 2.4.7 (Second Run)| 126s |
-| Czkawka 1.3.0 (First Run) | 150s |
-| Czkawka 1.3.0 (Second Run) | 107s |
-| DupeGuru 4.0.4 (First Run) | - | 
-| DupeGuru 4.0.4 (Second Run) | - | 
+| FSlint 2.4.7 (Second Run)| 86s |
+| Czkawka 1.4.0 (Second Run) | 12s |
+| DupeGuru 4.0.4 (Second Run) | 28s | 
 
 
 I used Mprof for checking memory usage FSlint and Dupeguru, for Czkawka I used Heaptrack.
@@ -137,23 +139,23 @@ To not get Dupeguru crash I checked smaller directory with 217986 files and 4188
 
 | App| Idle Ram | Max Operational Ram Usage | Stabilized after search |
 |:----------:|:-------------:|:-------------:|:-------------:|
-| FSlint 2.4.7 | 54 MB | 120 MB | 117 MB |
-| Czkawka 1.3.0 | 8 MB | 42 MB | 41 MB |
-| DupeGuru 4.0.4 | 110 MB | 637 MB | 602 MB |
+| FSlint 2.4.7 | 62 MB | 84 MB | 84 MB |
+| Czkawka 1.4.0 | 9 MB | 66 MB | 32 MB |
+| DupeGuru 4.0.4 | 80 MB | 210 MB | 155 MB |
 
-Similar Images which check 386 files which takes 1,9GB
-
-| App| Scan time |
-|:----------:|:-------------:|
-| Czkawka 1.3.0 | 267s | 
-| DupeGuru 4.0.4 | 75s | 
-
-Similar Images which check 5018 files which takes 389MB
+Similar Images which check 332 files which takes 1,7GB
 
 | App| Scan time |
 |:----------:|:-------------:|
-| Czkawka 1.3.0 | 45s | 
-| DupeGuru 4.0.4 | 87s | 
+| Czkawka 1.4.0 | 58s | 
+| DupeGuru 4.0.4 | 51s | 
+
+Similar Images which check 1421 image files which takes 110,1MB
+
+| App| Scan time |
+|:----------:|:-------------:|
+| Czkawka 1.4.0 | 25s | 
+| DupeGuru 4.0.4 | 92s | 
 
 So still is a big room for improvements.
 
@@ -172,7 +174,7 @@ So still is a big room for improvements.
 | Big files | X |   |  |
 | Similar images | X |   | X |
 | Zeroed Files| X | | |
-| Music duplicates(EXIF) | X | | X |
+| Music duplicates(tags) | X | | X |
 | Installed packages |  | X |  |
 | Invalid names |   | X |  |
 | Names conflict |   | X |  |

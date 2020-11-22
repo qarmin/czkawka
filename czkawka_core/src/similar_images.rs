@@ -277,7 +277,7 @@ impl SimilarImages {
     fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
-        let vec_file_entry: Vec<(FileEntry, [u8; 8])> = self
+        let vec_file_entry: Vec<(FileEntry, Node)> = self
             .images_to_check
             .par_iter()
             .map(|file_entry| {
@@ -305,7 +305,10 @@ impl SimilarImages {
             .while_some()
             .filter(|file_entry| file_entry.is_some())
             .map(|file_entry| file_entry.unwrap())
-            .collect::<Vec<(FileEntry, [u8; 8])>>();
+            .collect::<Vec<(FileEntry, Node)>>();
+
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parralell".to_string());
+        let hash_map_modification = SystemTime::now();
 
         for (file_entry, buf) in vec_file_entry {
             self.bktree.add(buf);
@@ -313,7 +316,7 @@ impl SimilarImages {
             self.image_hashes.get_mut(&buf).unwrap().push(file_entry.clone());
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
         let hash_map_modification = SystemTime::now();
 
         let similarity: u64 = match self.similarity {

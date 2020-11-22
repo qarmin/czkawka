@@ -229,7 +229,7 @@ impl SameMusic {
                             continue 'dir;
                         }
 
-                        let allowed_extensions = [".mp3", ".flac"];
+                        let allowed_extensions = [".mp3", ".flac", ".m4a"];
 
                         if !allowed_extensions.iter().any(|r| current_file_name.to_string_lossy().ends_with(r)) {
                             self.information.number_of_ignored_files += 1;
