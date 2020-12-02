@@ -15,10 +15,10 @@ But the most important thing for me was to learn Rust and create a program usefu
 
 ## Features
 - Written in memory safe Rust
-- Amazingly fast - due using more or less advanced algorithms
+- Amazingly fast - due using more or less advanced algorithms and multithreading support
 - CLI frontend, very fast and powerful with rich help
 - GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
-- Light/Dark theme match the appearance of the system
+- Light/Dark theme match the appearance of the system(Linux only)
 - Saving results to a file - allows reading entries found by the tool easily
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions or excluded items with * wildcard
 - Clean Glade file in which UI can be easily modernized

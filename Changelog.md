@@ -1,3 +1,7 @@
+## Version 1.5.0 - 02.12.2020r
+- Added progress bar - [#106](https://github.com/qarmin/czkawka/pull/106)
+- Removed unused buttons - [#107](https://github.com/qarmin/czkawka/pull/107)
+
 ## Version 1.4.0 - 09.11.2020r
 - Multithreading Support to most modules - [#98](https://github.com/qarmin/czkawka/pull/98) [#99](https://github.com/qarmin/czkawka/pull/99) [#100](https://github.com/qarmin/czkawka/pull/100) [#101](https://github.com/qarmin/czkawka/pull/101)
 - Simplify GUI code [#96](https://github.com/qarmin/czkawka/pull/96)
