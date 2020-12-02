@@ -19,6 +19,8 @@ chrono = "0.4"
 
 crossbeam-channel = "0.4.4"
 
+futures = "0.3.8"
+
 # For opening files
 open = "1.4.0"
 

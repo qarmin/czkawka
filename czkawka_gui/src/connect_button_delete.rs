@@ -24,12 +24,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
     buttons_delete.connect_clicked(move |_| {
         if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
-            let confirmation_dialog_delete = gtk::Dialog::with_buttons(
-                Option::from("Delete confirmation"),
-                Option::from(&window_main),
-                gtk::DialogFlags::MODAL,
-                &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
-            );
+            let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some("Delete confirmation"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
             let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
             let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask in future");
             check_button.set_active(true);

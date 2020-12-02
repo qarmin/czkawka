@@ -5,3 +5,5 @@ members = [
     "czkawka_gui",
     "czkawka_gui_orbtk",
 ]
+#[profile.release]
+#lto = true

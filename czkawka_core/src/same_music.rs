@@ -1,8 +1,8 @@
-use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{fs, thread};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -13,6 +13,17 @@ use audiotags::Tag;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::sleep;
+
+#[derive(Debug)]
+pub struct ProgressData {
+    pub current_stage: u8,
+    pub max_stage: u8,
+    pub music_checked: usize,
+    pub music_to_check: usize,
+}
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -104,17 +115,17 @@ impl SameMusic {
         }
     }
 
-    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>) {
+    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        if !self.check_files(stop_receiver) {
+        if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
-        if !self.check_records_multithreaded(stop_receiver) {
+        if !self.check_records_multithreaded(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
-        if !self.check_for_duplicates(stop_receiver) {
+        if !self.check_for_duplicates(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
@@ -166,7 +177,7 @@ impl SameMusic {
     }
 
     /// Check files for any with size == 0
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -176,8 +187,40 @@ impl SameMusic {
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        current_stage: 0,
+                        max_stage: 2,
+                        music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        music_to_check: 0,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+        //// PROGRESS THREAD END
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // End thread which send info to gui
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
             let current_folder = folders_to_check.pop().unwrap();
@@ -221,6 +264,7 @@ impl SameMusic {
 
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
+                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     // Checking files
                     if metadata.len() >= self.minimal_file_size {
                         let current_file_name = current_folder.join(entry_data.file_name());
@@ -274,21 +318,58 @@ impl SameMusic {
                 }
             }
         }
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
         self.information.number_of_music_entries = self.music_entries.len();
 
         Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
         true
     }
 
-    fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
+
+        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            let music_to_check = self.music_to_check.len();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        current_stage: 1,
+                        max_stage: 2,
+                        music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        music_to_check,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+        //// PROGRESS THREAD END
 
         let vec_file_entry = self
             .music_to_check
             .par_iter()
             .map(|file_entry| {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // This will not break
+                    check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
                 let mut file_entry = file_entry.clone();
@@ -326,24 +407,68 @@ impl SameMusic {
             .map(|file_entry| file_entry.unwrap())
             .collect::<Vec<_>>();
 
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
+
+        // Check if user aborted search(only from GUI)
+        if check_was_breaked.load(Ordering::Relaxed) {
+            return false;
+        }
+
         // Adding files to Vector
         self.music_entries = vec_file_entry;
 
         Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());
         true
     }
-    fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         if MusicSimilarity::NONE == self.music_similarity {
             panic!("This can't be none");
         }
         let start_time: SystemTime = SystemTime::now();
+
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            let music_to_check = self.music_to_check.len();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        current_stage: 2,
+                        max_stage: 2,
+                        music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        music_to_check,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+        //// PROGRESS THREAD END
 
         let mut old_duplicates: Vec<Vec<FileEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<FileEntry>> = Vec::new();
 
         if (self.music_similarity & MusicSimilarity::TITLE) == MusicSimilarity::TITLE {
             for vec_file_entry in old_duplicates {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -366,7 +491,11 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::ARTIST) == MusicSimilarity::ARTIST {
             for vec_file_entry in old_duplicates {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -389,7 +518,11 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::ALBUM_TITLE) == MusicSimilarity::ALBUM_TITLE {
             for vec_file_entry in old_duplicates {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -412,7 +545,11 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::ALBUM_ARTIST) == MusicSimilarity::ALBUM_ARTIST {
             for vec_file_entry in old_duplicates {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
                     return false;
                 }
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
@@ -435,7 +572,11 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
             for vec_file_entry in old_duplicates {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
                     return false;
                 }
                 let mut hash_map: HashMap<i32, Vec<FileEntry>> = Default::default();
@@ -461,6 +602,9 @@ impl SameMusic {
         for vec in &self.duplicated_music_entries {
             self.information.number_of_duplicates_music_files += vec.len() - 1;
         }
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
 
         Common::print_time(start_time, SystemTime::now(), "check_for_duplicates".to_string());
         true

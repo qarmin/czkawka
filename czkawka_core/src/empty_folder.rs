@@ -5,11 +5,21 @@ use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crossbeam_channel::Receiver;
 use std::collections::BTreeMap;
-use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::sleep;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{fs, thread};
+
+#[derive(Debug)]
+pub struct ProgressData {
+    pub current_stage: u8,
+    pub max_stage: u8,
+    pub folders_checked: usize,
+}
 
 /// Enum with values which show if folder is empty.
 /// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
@@ -88,9 +98,9 @@ impl EmptyFolder {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
     }
     /// Public function used by CLI to search for empty folders
-    pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>) {
+    pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
-        if !self.check_for_empty_folders(stop_receiver) {
+        if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
@@ -128,10 +138,39 @@ impl EmptyFolder {
 
     /// Function to check if folder are empty.
     /// Parameter initial_checking for second check before deleting to be sure that checked folder is still empty
-    fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut folders_checked: BTreeMap<PathBuf, FolderEntry> = Default::default();
+
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_folder_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_folder_counter = atomic_folder_counter.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        current_stage: 0,
+                        max_stage: 0,
+                        folders_checked: atomic_folder_counter.load(Ordering::Relaxed) as usize,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+        //// PROGRESS THREAD END
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -148,6 +187,9 @@ impl EmptyFolder {
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // End thread which send info to gui
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
             self.information.number_of_checked_folders += 1;
@@ -178,6 +220,7 @@ impl EmptyFolder {
                 };
                 // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
+                    atomic_folder_counter.fetch_add(1, Ordering::Relaxed);
                     let next_folder = current_folder.join(entry_data.file_name());
                     if self.excluded_items.is_excluded(&next_folder) || self.directories.is_excluded(&next_folder) {
                         set_as_not_empty_folder(&mut folders_checked, &current_folder);
@@ -187,7 +230,7 @@ impl EmptyFolder {
                     folders_checked.insert(
                         next_folder.clone(),
                         FolderEntry {
-                            parent_path: Option::from(current_folder.clone()),
+                            parent_path: Some(current_folder.clone()),
                             is_empty: FolderEmptiness::Maybe,
                             modified_date: match metadata.modified() {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
@@ -211,6 +254,9 @@ impl EmptyFolder {
                 }
             }
         }
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
 
         // We need to set empty folder list
         #[allow(unused_mut)] // Used is later by Windows build

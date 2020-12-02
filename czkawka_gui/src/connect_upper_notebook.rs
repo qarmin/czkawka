@@ -10,8 +10,8 @@ pub fn connect_upper_notebook(gui_data: &GuiData) {
         let buttons_add_included_directory = gui_data.buttons_add_included_directory.clone();
         buttons_add_included_directory.connect_clicked(move |_| {
             let chooser = gtk::FileChooserDialog::with_buttons(
-                Option::from("Folders to include"),
-                Option::from(&window_main),
+                Some("Folders to include"),
+                Some(&window_main),
                 gtk::FileChooserAction::SelectFolder,
                 &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
             );
@@ -38,8 +38,8 @@ pub fn connect_upper_notebook(gui_data: &GuiData) {
         let buttons_add_excluded_directory = gui_data.buttons_add_excluded_directory.clone();
         buttons_add_excluded_directory.connect_clicked(move |_| {
             let chooser = gtk::FileChooserDialog::with_buttons(
-                Option::from("Folders to exclude"),
-                Option::from(&window_main),
+                Some("Folders to exclude"),
+                Some(&window_main),
                 gtk::FileChooserAction::SelectFolder,
                 &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
             );

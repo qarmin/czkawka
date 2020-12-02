@@ -137,6 +137,17 @@ pub struct GuiData {
     pub scrolled_window_included_directories: gtk::ScrolledWindow,
     pub scrolled_window_excluded_directories: gtk::ScrolledWindow,
 
+    //// Dialog State - dialog with progress state, which allows to stop task
+    pub dialog_progress: gtk::Dialog,
+
+    pub progress_bar_current_stage: gtk::ProgressBar,
+    pub progress_bar_all_stages: gtk::ProgressBar,
+
+    pub label_stage: gtk::Label,
+
+    pub grid_progress_stages: gtk::Grid,
+
+    pub button_stop_in_dialog: gtk::Button,
     //// Threads
 
     // Used for sending stop signal to thread
@@ -328,6 +339,18 @@ impl GuiData {
         let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
         let scrolled_window_excluded_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_excluded_directories").unwrap();
 
+        //// Dialog State - dialog with progress state, which allows to stop task
+        let dialog_progress: gtk::Dialog = builder.get_object("dialog_progress").unwrap();
+
+        let progress_bar_current_stage: gtk::ProgressBar = builder.get_object("progress_bar_current_stage").unwrap();
+        let progress_bar_all_stages: gtk::ProgressBar = builder.get_object("progress_bar_all_stages").unwrap();
+
+        let label_stage: gtk::Label = builder.get_object("label_stage").unwrap();
+
+        let grid_progress_stages: gtk::Grid = builder.get_object("grid_progress_stages").unwrap();
+
+        let button_stop_in_dialog: gtk::Button = builder.get_object("button_stop_in_dialog").unwrap();
+
         //// Threads
         // Types of messages to send to main thread where gui can be draw.
 
@@ -414,6 +437,12 @@ impl GuiData {
             scrolled_window_same_music_finder,
             scrolled_window_included_directories,
             scrolled_window_excluded_directories,
+            dialog_progress,
+            progress_bar_current_stage,
+            progress_bar_all_stages,
+            label_stage,
+            grid_progress_stages,
+            button_stop_in_dialog,
             stop_sender,
             stop_receiver,
         }
