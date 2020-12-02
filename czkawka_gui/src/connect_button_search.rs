@@ -81,7 +81,7 @@ pub fn connect_button_search(
         let excluded_items = entry_excluded_items.get_text().as_str().to_string();
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
 
-        hide_all_buttons_except("stop", &buttons_array, &buttons_names);
+        hide_all_buttons(&buttons_array);
 
         // Disable main notebook from any iteration until search will end
         notebook_main.set_sensitive(false);

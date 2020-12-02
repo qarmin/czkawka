@@ -11,7 +11,6 @@ use gtk::prelude::*;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let buttons_search = gui_data.buttons_search.clone();
-    let buttons_stop = gui_data.buttons_stop.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
     let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
@@ -38,7 +37,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
-        buttons_stop.hide();
 
         dialog_progress.hide();
 

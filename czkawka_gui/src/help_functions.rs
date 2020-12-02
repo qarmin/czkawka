@@ -202,21 +202,21 @@ pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Bu
         }
     }
 }
-// pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
-//     for button in buttons_array {
-//         button.hide();
-//     }
-// }
-
-pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button], button_names: &[String]) {
-    for (index, button) in buttons_array.iter().enumerate() {
-        if except_name == button_names[index] {
-            button.show();
-        } else {
-            button.hide();
-        }
+pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
+    for button in buttons_array {
+        button.hide();
     }
 }
+
+// pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button], button_names: &[String]) {
+//     for (index, button) in buttons_array.iter().enumerate() {
+//         if except_name == button_names[index] {
+//             button.show();
+//         } else {
+//             button.hide();
+//         }
+//     }
+// }
 
 pub fn get_text_from_similarity(similarity: &Similarity) -> &str {
     match similarity {

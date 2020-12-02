@@ -13,9 +13,6 @@ pub fn startup_configuration(gui_data: &GuiData) {
         let buttons_search = gui_data.buttons_search.clone();
         let buttons_save = gui_data.buttons_save.clone();
         let buttons_delete = gui_data.buttons_delete.clone();
-        let buttons_stop = gui_data.buttons_stop.clone();
-        let buttons_resume = gui_data.buttons_resume.clone();
-        let buttons_pause = gui_data.buttons_pause.clone();
         let buttons_select = gui_data.buttons_select.clone();
         let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
         let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
@@ -35,9 +32,6 @@ pub fn startup_configuration(gui_data: &GuiData) {
         buttons_search.show();
         buttons_save.hide();
         buttons_delete.hide();
-        buttons_stop.hide();
-        buttons_resume.hide();
-        buttons_pause.hide();
         buttons_select.hide();
 
         // Set Main Scrolled Window Treeviews
