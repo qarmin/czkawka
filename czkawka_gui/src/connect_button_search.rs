@@ -13,6 +13,7 @@ use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
 use gtk::prelude::*;
+use gtk::WindowPosition;
 use std::thread;
 
 #[allow(clippy::too_many_arguments)]
@@ -87,6 +88,9 @@ pub fn connect_button_search(
         notebook_main.set_sensitive(false);
 
         entry_info.set_text("Searching data, it may take a while, please wait...");
+
+        // Set dialog to center to current screen(it is impossible to center it to main window)
+        dialog_progress.set_position(WindowPosition::CenterOnParent);
 
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);
