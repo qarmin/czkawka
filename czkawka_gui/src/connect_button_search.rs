@@ -15,7 +15,19 @@ use glib::Sender;
 use gtk::prelude::*;
 use std::thread;
 
-pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
+#[allow(clippy::too_many_arguments)]
+pub fn connect_button_search(
+    gui_data: &GuiData,
+    glib_stop_sender: Sender<Message>,
+    futures_sender_duplicate_files: futures::channel::mpsc::Sender<duplicate::ProgressData>,
+    futures_sender_empty_files: futures::channel::mpsc::Sender<empty_files::ProgressData>,
+    futures_sender_empty_folder: futures::channel::mpsc::Sender<empty_folder::ProgressData>,
+    futures_sender_big_file: futures::channel::mpsc::Sender<big_file::ProgressData>,
+    futures_sender_same_music: futures::channel::mpsc::Sender<same_music::ProgressData>,
+    futures_sender_similar_images: futures::channel::mpsc::Sender<similar_images::ProgressData>,
+    futures_sender_temporary: futures::channel::mpsc::Sender<temporary::ProgressData>,
+    futures_sender_zeroed: futures::channel::mpsc::Sender<zeroed::ProgressData>,
+) {
     let entry_info = gui_data.entry_info.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
@@ -56,6 +68,11 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
+    let dialog_progress = gui_data.dialog_progress.clone();
+    let label_stage = gui_data.label_stage.clone();
+    let grid_progress_stages = gui_data.grid_progress_stages.clone();
+    let progress_bar_current_stage = gui_data.progress_bar_current_stage.clone();
+    let progress_bar_all_stages = gui_data.progress_bar_all_stages.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
@@ -66,13 +83,21 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
 
         hide_all_buttons_except("stop", &buttons_array, &buttons_names);
 
-        // Disable main notebook from any iteraction until search will end
+        // Disable main notebook from any iteration until search will end
         notebook_main.set_sensitive(false);
 
         entry_info.set_text("Searching data, it may take a while, please wait...");
 
+        // Resets progress bars
+        progress_bar_all_stages.set_fraction(0 as f64);
+        progress_bar_current_stage.set_fraction(0 as f64);
+
         match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
             "notebook_main_duplicate_finder_label" => {
+                label_stage.show();
+                grid_progress_stages.show_all();
+                dialog_progress.resize(1, 1);
+
                 get_list_store(&scrolled_window_duplicate_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
@@ -93,8 +118,10 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     Err(_) => 1024, // By default
                 };
 
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
+
+                let futures_sender_duplicate_files = futures_sender_duplicate_files.clone();
                 // Find duplicates
                 thread::spawn(move || {
                     let mut df = DuplicateFinder::new();
@@ -105,34 +132,22 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     df.set_allowed_extensions(allowed_extensions);
                     df.set_minimal_file_size(minimal_file_size);
                     df.set_check_method(check_method);
-                    df.find_duplicates(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::Duplicates(df));
-                });
-            }
-            "scrolled_window_main_empty_folder_finder" => {
-                get_list_store(&scrolled_window_main_empty_folder_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
-
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
-
-                // Find empty folders
-                thread::spawn(move || {
-                    let mut ef = EmptyFolder::new();
-                    ef.set_included_directory(included_directories);
-                    ef.set_excluded_directory(excluded_directories);
-                    ef.set_excluded_items(excluded_items);
-                    ef.find_empty_folders(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::EmptyFolders(ef));
+                    df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
+                    let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });
             }
             "scrolled_window_main_empty_files_finder" => {
+                label_stage.show();
+                grid_progress_stages.hide();
+                dialog_progress.resize(1, 1);
+
                 get_list_store(&scrolled_window_main_empty_files_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
 
+                let futures_sender_empty_files = futures_sender_empty_files.clone();
                 // Find empty files
                 thread::spawn(move || {
                     let mut vf = EmptyFiles::new();
@@ -142,30 +157,37 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     vf.set_recursive_search(recursive_search);
                     vf.set_excluded_items(excluded_items);
                     vf.set_allowed_extensions(allowed_extensions);
-                    vf.find_empty_files(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::EmptyFiles(vf));
+                    vf.find_empty_files(Some(&stop_receiver), Some(&futures_sender_empty_files));
+                    let _ = glib_stop_sender.send(Message::EmptyFiles(vf));
                 });
             }
-            "scrolled_window_main_temporary_files_finder" => {
-                get_list_store(&scrolled_window_main_temporary_files_finder).clear();
+            "scrolled_window_main_empty_folder_finder" => {
+                label_stage.show();
+                grid_progress_stages.hide();
+                dialog_progress.resize(1, 1);
+
+                get_list_store(&scrolled_window_main_empty_folder_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
 
-                // Find temporary files
+                let futures_sender_empty_folder = futures_sender_empty_folder.clone();
+                // Find empty folders
                 thread::spawn(move || {
-                    let mut tf = Temporary::new();
-
-                    tf.set_included_directory(included_directories);
-                    tf.set_excluded_directory(excluded_directories);
-                    tf.set_recursive_search(recursive_search);
-                    tf.set_excluded_items(excluded_items);
-                    tf.find_temporary_files(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::Temporary(tf));
+                    let mut ef = EmptyFolder::new();
+                    ef.set_included_directory(included_directories);
+                    ef.set_excluded_directory(excluded_directories);
+                    ef.set_excluded_items(excluded_items);
+                    ef.find_empty_folders(Some(&stop_receiver), Some(&futures_sender_empty_folder));
+                    let _ = glib_stop_sender.send(Message::EmptyFolders(ef));
                 });
             }
             "notebook_big_main_file_finder" => {
+                label_stage.show();
+                grid_progress_stages.hide();
+                dialog_progress.resize(1, 1);
+
                 get_list_store(&scrolled_window_big_files_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
@@ -174,9 +196,9 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     Err(_) => 50, // By default
                 };
 
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
-
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
+                let futures_sender_big_file = futures_sender_big_file.clone();
                 // Find big files
                 thread::spawn(move || {
                     let mut bf = BigFile::new();
@@ -186,17 +208,44 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     bf.set_recursive_search(recursive_search);
                     bf.set_excluded_items(excluded_items);
                     bf.set_number_of_files_to_check(numbers_of_files_to_check);
-                    bf.find_big_files(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::BigFiles(bf));
+                    bf.find_big_files(Some(&stop_receiver), Some(&futures_sender_big_file));
+                    let _ = glib_stop_sender.send(Message::BigFiles(bf));
                 });
             }
+            "scrolled_window_main_temporary_files_finder" => {
+                label_stage.show();
+                grid_progress_stages.hide();
+                dialog_progress.resize(1, 1);
 
+                get_list_store(&scrolled_window_main_temporary_files_finder).clear();
+                text_view_errors.get_buffer().unwrap().set_text("");
+
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
+
+                let futures_sender_temporary = futures_sender_temporary.clone();
+                // Find temporary files
+                thread::spawn(move || {
+                    let mut tf = Temporary::new();
+
+                    tf.set_included_directory(included_directories);
+                    tf.set_excluded_directory(excluded_directories);
+                    tf.set_recursive_search(recursive_search);
+                    tf.set_excluded_items(excluded_items);
+                    tf.find_temporary_files(Some(&stop_receiver), Some(&futures_sender_temporary));
+                    let _ = glib_stop_sender.send(Message::Temporary(tf));
+                });
+            }
             "notebook_main_similar_images_finder_label" => {
+                label_stage.show();
+                grid_progress_stages.show_all();
+                dialog_progress.resize(1, 1);
+
                 get_list_store(&scrolled_window_similar_images_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
 
                 let minimal_file_size = match entry_similar_images_minimal_size.get_text().as_str().parse::<u64>() {
                     Ok(t) => t,
@@ -218,6 +267,7 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     panic!("No radio button is pressed");
                 }
 
+                let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
                 thread::spawn(move || {
                     let mut sf = SimilarImages::new();
@@ -228,17 +278,22 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
                     sf.set_similarity(similarity);
-                    sf.find_similar_images(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::SimilarImages(sf));
+                    sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
+                    let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });
             }
             "notebook_main_zeroed_files_finder" => {
+                label_stage.show();
+                grid_progress_stages.show_all();
+                dialog_progress.resize(1, 1);
+
                 get_list_store(&scrolled_window_zeroed_files_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
-                let sender = sender.clone();
-                let receiver_stop = stop_receiver.clone();
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
 
+                let futures_sender_zeroed = futures_sender_zeroed.clone();
                 // Find zeroed files
                 thread::spawn(move || {
                     let mut zf = ZeroedFiles::new();
@@ -248,11 +303,15 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                     zf.set_recursive_search(recursive_search);
                     zf.set_excluded_items(excluded_items);
                     zf.set_allowed_extensions(allowed_extensions);
-                    zf.find_zeroed_files(Option::from(&receiver_stop));
-                    let _ = sender.send(Message::ZeroedFiles(zf));
+                    zf.find_zeroed_files(Some(&stop_receiver), Some(&futures_sender_zeroed));
+                    let _ = glib_stop_sender.send(Message::ZeroedFiles(zf));
                 });
             }
             "notebook_main_same_music_finder" => {
+                label_stage.show();
+                grid_progress_stages.show_all();
+                dialog_progress.resize(1, 1);
+
                 get_list_store(&scrolled_window_same_music_finder).clear();
                 text_view_errors.get_buffer().unwrap().set_text("");
 
@@ -279,10 +338,11 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                 }
 
                 if music_similarity != MusicSimilarity::NONE {
-                    let sender = sender.clone();
-                    let receiver_stop = stop_receiver.clone();
+                    let glib_stop_sender = glib_stop_sender.clone();
+                    let stop_receiver = stop_receiver.clone();
 
-                    // Find temporary files
+                    let futures_sender_same_music = futures_sender_same_music.clone();
+                    // Find Similar music
                     thread::spawn(move || {
                         let mut mf = SameMusic::new();
 
@@ -292,8 +352,8 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
                         mf.set_minimal_file_size(minimal_file_size);
                         mf.set_recursive_search(recursive_search);
                         mf.set_music_similarity(music_similarity);
-                        mf.find_same_music(Option::from(&receiver_stop));
-                        let _ = sender.send(Message::SameMusic(mf));
+                        mf.find_same_music(Some(&stop_receiver), Some(&futures_sender_same_music));
+                        let _ = glib_stop_sender.send(Message::SameMusic(mf));
                     });
                 } else {
                     notebook_main.set_sensitive(true);
@@ -303,5 +363,8 @@ pub fn connect_button_search(gui_data: &GuiData, sender: Sender<Message>) {
             }
             e => panic!("Not existent {}", e),
         }
+
+        // Show progress dialog
+        dialog_progress.show();
     });
 }

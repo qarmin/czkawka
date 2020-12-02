@@ -1,8 +1,8 @@
-use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{fs, thread};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -10,6 +10,16 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crossbeam_channel::Receiver;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::sleep;
+
+#[derive(Debug)]
+pub struct ProgressData {
+    pub current_stage: u8,
+    pub max_stage: u8,
+    pub files_checked: usize,
+}
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -67,9 +77,9 @@ impl Temporary {
     }
 
     /// Finding temporary files, save results to internal struct variables
-    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>) {
+    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        if !self.check_files(stop_receiver) {
+        if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
@@ -111,7 +121,7 @@ impl Temporary {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -121,8 +131,40 @@ impl Temporary {
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        current_stage: 0,
+                        max_stage: 0,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+        //// PROGRESS THREAD END
+
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // End thread which send info to gui
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
 
@@ -166,6 +208,7 @@ impl Temporary {
 
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
+                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
@@ -213,6 +256,9 @@ impl Temporary {
                 }
             }
         }
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
         self.information.number_of_temporary_files = self.temporary_files.len();
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());

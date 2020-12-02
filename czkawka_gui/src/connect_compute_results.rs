@@ -9,7 +9,7 @@ use czkawka_core::same_music::MusicSimilarity;
 use glib::Receiver;
 use gtk::prelude::*;
 
-pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) {
+pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let buttons_search = gui_data.buttons_search.clone();
     let buttons_stop = gui_data.buttons_stop.clone();
     let notebook_main = gui_data.notebook_main.clone();
@@ -34,10 +34,13 @@ pub fn connect_compute_results(gui_data: &GuiData, receiver: Receiver<Message>) 
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.buttons_names.clone();
+    let dialog_progress = gui_data.dialog_progress.clone();
 
-    receiver.attach(None, move |msg| {
+    glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
         buttons_stop.hide();
+
+        dialog_progress.hide();
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);

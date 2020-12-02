@@ -8,11 +8,21 @@ use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::BTreeMap;
 use std::ffi::OsStr;
-use std::fs;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicBool, AtomicU64};
+use std::sync::Arc;
+use std::thread::sleep;
+use std::time::Duration;
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::{fs, thread};
+
+#[derive(Debug)]
+pub struct ProgressData {
+    pub files_checked: usize,
+}
 
 #[derive(Clone)]
 pub struct FileEntry {
@@ -73,9 +83,9 @@ impl BigFile {
         }
     }
 
-    pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>) {
+    pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
         self.optimize_directories();
-        if !self.look_for_big_files(stop_receiver) {
+        if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
@@ -111,7 +121,7 @@ impl BigFile {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -121,10 +131,42 @@ impl BigFile {
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicU64::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+
+        //// PROGRESS THREAD END
+
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // Be sure that every thread is closed
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
+
             let current_folder = folders_to_check.pop().unwrap();
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
@@ -162,6 +204,7 @@ impl BigFile {
 
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
+                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     // Extracting file extension
                     let file_extension = entry_data.path().extension().and_then(OsStr::to_str).map(str::to_lowercase);
 
@@ -210,6 +253,10 @@ impl BigFile {
                 }
             }
         }
+
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
 
         // Extract n biggest files to new TreeMap
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();

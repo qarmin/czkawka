@@ -52,7 +52,7 @@ fn main() {
             df.set_delete_method(delete_method);
             df.set_recursive_search(!not_recursive.not_recursive);
 
-            df.find_duplicates(None);
+            df.find_duplicates(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !df.save_results_to_file(file_name) {
@@ -79,7 +79,7 @@ fn main() {
             ef.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
             ef.set_delete_folder(delete_folders);
 
-            ef.find_empty_folders(None);
+            ef.find_empty_folders(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !ef.save_results_to_file(file_name) {
@@ -114,7 +114,7 @@ fn main() {
                 bf.set_delete_method(big_file::DeleteMethod::Delete);
             }
 
-            bf.find_big_files(None);
+            bf.find_big_files(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !bf.save_results_to_file(file_name) {
@@ -148,7 +148,7 @@ fn main() {
                 ef.set_delete_method(empty_files::DeleteMethod::Delete);
             }
 
-            ef.find_empty_files(None);
+            ef.find_empty_files(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !ef.save_results_to_file(file_name) {
@@ -180,7 +180,7 @@ fn main() {
                 tf.set_delete_method(temporary::DeleteMethod::Delete);
             }
 
-            tf.find_temporary_files(None);
+            tf.find_temporary_files(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !tf.save_results_to_file(file_name) {
@@ -211,7 +211,7 @@ fn main() {
             sf.set_recursive_search(!not_recursive.not_recursive);
             sf.set_similarity(similarity);
 
-            sf.find_similar_images(None);
+            sf.find_similar_images(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !sf.save_results_to_file(file_name) {
@@ -247,7 +247,7 @@ fn main() {
                 zf.set_delete_method(zeroed::DeleteMethod::Delete);
             }
 
-            zf.find_zeroed_files(None);
+            zf.find_zeroed_files(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !zf.save_results_to_file(file_name) {
@@ -283,7 +283,7 @@ fn main() {
             //     // TODO mf.set_delete_method(same_music::DeleteMethod::Delete);
             // }
 
-            mf.find_same_music(None);
+            mf.find_same_music(None, None);
 
             if let Some(file_name) = file_to_save.file_name() {
                 if !mf.save_results_to_file(file_name) {

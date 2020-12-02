@@ -1,11 +1,11 @@
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
-use std::fs;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{fs, thread};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -14,9 +14,20 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use rayon::prelude::*;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::sleep;
 
 const HASH_MB_LIMIT_BYTES: u64 = 1024 * 1024; // 1MB
+
+#[derive(Debug)]
+pub struct ProgressData {
+    pub checking_method: CheckingMethod,
+    pub current_stage: u8,
+    pub max_stage: u8,
+    pub files_checked: usize,
+    pub files_to_check: usize,
+}
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum CheckingMethod {
@@ -116,28 +127,28 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>) {
+    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
 
         match self.check_method {
             CheckingMethod::Name => {
-                if !self.check_files_name(stop_receiver) {
+                if !self.check_files_name(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
             }
             CheckingMethod::Size => {
-                if !self.check_files_size(stop_receiver) {
+                if !self.check_files_size(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
             }
             CheckingMethod::HashMB | CheckingMethod::Hash => {
-                if !self.check_files_size(stop_receiver) {
+                if !self.check_files_size(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
-                if !self.check_files_hash(stop_receiver) {
+                if !self.check_files_hash(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
@@ -212,7 +223,7 @@ impl DuplicateFinder {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -222,10 +233,46 @@ impl DuplicateFinder {
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        checking_method: CheckingMethod::Name,
+                        current_stage: 0,
+                        max_stage: 0,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_to_check: 0,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+
+        //// PROGRESS THREAD END
+
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // End thread which send info to gui
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
+
             let current_folder = folders_to_check.pop().unwrap();
 
             // Read current dir, if permission are denied just go to next
@@ -271,6 +318,7 @@ impl DuplicateFinder {
 
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
+                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
@@ -329,6 +377,10 @@ impl DuplicateFinder {
             }
         }
 
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
+
         // Create new BTreeMap without single size entries(files have not duplicates)
         let mut new_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
 
@@ -349,7 +401,7 @@ impl DuplicateFinder {
 
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
-    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -359,10 +411,52 @@ impl DuplicateFinder {
         }
         self.information.number_of_checked_folders += folders_to_check.len();
 
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            let checking_method = self.check_method.clone();
+            let max_stage = match self.check_method {
+                CheckingMethod::Size => 0,
+                CheckingMethod::HashMB | CheckingMethod::Hash => 2,
+                _ => 255,
+            };
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        checking_method: checking_method.clone(),
+                        current_stage: 0,
+                        max_stage,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_to_check: 0,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+
+        //// PROGRESS THREAD END
+
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // End thread which send info to gui
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
+
             let current_folder = folders_to_check.pop().unwrap();
 
             // Read current dir, if permission are denied just go to next
@@ -408,6 +502,7 @@ impl DuplicateFinder {
 
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
+                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
@@ -465,6 +560,9 @@ impl DuplicateFinder {
                 }
             }
         }
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
 
         // Create new BTreeMap without single size entries(files have not duplicates)
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -484,14 +582,48 @@ impl DuplicateFinder {
     }
 
     /// The slowest checking type, which must be applied after checking for size
-    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>) -> bool {
+    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         if self.hash_type != HashType::Blake3 {
             panic!(); // TODO Add more hash types
         }
 
         let start_time: SystemTime = SystemTime::now();
-        let check_was_breaked = AtomicBool::new(false);
+        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+
+        //// PROGRESS THREAD START
+        const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            let files_to_check = self.files_with_identical_size.iter().map(|e| e.1.len()).sum();
+            let checking_method = self.check_method.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        checking_method: checking_method.clone(),
+                        current_stage: 1,
+                        max_stage: 2,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_to_check,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+
+        //// PROGRESS THREAD END
 
         #[allow(clippy::type_complexity)]
         let pre_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)> = self
@@ -502,6 +634,7 @@ impl DuplicateFinder {
                 let mut errors: Vec<String> = Vec::new();
                 let mut file_handler: File;
                 let mut bytes_read: u64 = 0;
+                atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 'fe: for file_entry in vec_file_entry {
                     if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                         check_was_breaked.store(true, Ordering::Relaxed);
@@ -537,6 +670,10 @@ impl DuplicateFinder {
             .while_some()
             .collect();
 
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
+
         // Check if user aborted search(only from GUI)
         if check_was_breaked.load(Ordering::Relaxed) {
             return false;
@@ -562,6 +699,40 @@ impl DuplicateFinder {
 
         /////////////////////////
 
+        //// PROGRESS THREAD START
+        // const LOOP_DURATION: u32 = 200; //in ms
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle;
+        if let Some(progress_sender) = progress_sender {
+            let mut progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            let files_to_check = pre_checked_map.iter().map(|e| e.1.len()).sum();
+            let checking_method = self.check_method.clone();
+            progress_thread_handle = thread::spawn(move || loop {
+                progress_send
+                    .try_send(ProgressData {
+                        checking_method: checking_method.clone(),
+                        current_stage: 2,
+                        max_stage: 2,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_to_check,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            });
+        } else {
+            progress_thread_handle = thread::spawn(|| {});
+        }
+
+        //// PROGRESS THREAD END
+
         #[allow(clippy::type_complexity)]
         let full_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)> = pre_checked_map
             .par_iter()
@@ -570,6 +741,7 @@ impl DuplicateFinder {
                 let mut errors: Vec<String> = Vec::new();
                 let mut file_handler: File;
                 let mut bytes_read: u64 = 0;
+                atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 'fe: for file_entry in vec_file_entry {
                     if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                         check_was_breaked.store(true, Ordering::Relaxed);
@@ -616,6 +788,10 @@ impl DuplicateFinder {
             })
             .while_some()
             .collect();
+
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
 
         // Check if user aborted search(only from GUI)
         if check_was_breaked.load(Ordering::Relaxed) {
