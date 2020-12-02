@@ -2,7 +2,7 @@
 Czkawka is a simple, fast and easy to use alternative to FSlint, written in Rust.  
 This is my first ever project in Rust so many things might not be written in the most optimal way.
 
-![Czkawka](https://user-images.githubusercontent.com/41945903/94850792-c200cc80-0427-11eb-99a7-23ab9cf39556.gif)
+![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
 
 ## Why?
 There's a lot of tools for finding duplicates, empty folders, temporary files etc. on the Internet, but in most cases these are only available as CLI, which is hard to use by users.
