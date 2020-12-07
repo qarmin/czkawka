@@ -42,14 +42,24 @@ pub fn connect_progress_window(
                             1 => {
                                 progress_bar_current_stage.show();
                                 // progress_bar_all_stages.show();
-                                progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
-                                progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                                if item.files_to_check != 0 {
+                                    progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                                } else {
+                                    progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction(0f64);
+                                }
                                 label_stage.set_text(format!("Analyzed partial hash of {}/{} files", item.files_checked, item.files_to_check).as_str());
                             }
                             // Hash - first 1MB of file or normal hash
                             2 => {
-                                progress_bar_all_stages.set_fraction((2f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
-                                progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                                if item.files_to_check != 0 {
+                                    progress_bar_all_stages.set_fraction((2f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                                } else {
+                                    progress_bar_all_stages.set_fraction((2f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction(0f64);
+                                }
                                 label_stage.set_text(format!("Analyzed full hash of {}/{} files", item.files_checked, item.files_to_check).as_str());
                             }
                             _ => {
@@ -121,13 +131,23 @@ pub fn connect_progress_window(
                     }
                     1 => {
                         progress_bar_current_stage.show();
-                        progress_bar_all_stages.set_fraction((1f64 + (item.music_checked) as f64 / item.music_to_check as f64) / (item.max_stage + 1) as f64);
-                        progress_bar_current_stage.set_fraction((item.music_checked) as f64 / item.music_to_check as f64);
+                        if item.music_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((1f64 + (item.music_checked) as f64 / item.music_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.music_checked) as f64 / item.music_to_check as f64);
+                        } else {
+                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                        }
                         label_stage.set_text(format!("Reading tags of {}/{} music files", item.music_checked, item.music_to_check).as_str());
                     }
                     2 => {
-                        progress_bar_all_stages.set_fraction((2f64 + (item.music_checked) as f64 / item.music_to_check as f64) / (item.max_stage + 1) as f64);
-                        progress_bar_current_stage.set_fraction((item.music_checked) as f64 / item.music_to_check as f64);
+                        if item.music_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((2f64 + (item.music_checked) as f64 / item.music_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.music_checked) as f64 / item.music_to_check as f64);
+                        } else {
+                            progress_bar_all_stages.set_fraction((2f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                        }
                         label_stage.set_text(format!("Checking for duplicates of {}/{} music files", item.music_checked, item.music_to_check).as_str());
                     }
                     _ => {
@@ -152,8 +172,13 @@ pub fn connect_progress_window(
                     }
                     1 => {
                         progress_bar_current_stage.show();
-                        progress_bar_all_stages.set_fraction((1f64 + (item.images_checked) as f64 / item.images_to_check as f64) / (item.max_stage + 1) as f64);
-                        progress_bar_current_stage.set_fraction((item.images_checked) as f64 / item.images_to_check as f64);
+                        if item.images_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((1f64 + (item.images_checked) as f64 / item.images_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.images_checked) as f64 / item.images_to_check as f64);
+                        } else {
+                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                        }
                         label_stage.set_text(format!("Hashing {}/{} image", item.images_checked, item.images_to_check).as_str());
                     }
                     _ => {
@@ -188,8 +213,13 @@ pub fn connect_progress_window(
                     }
                     1 => {
                         progress_bar_current_stage.show();
-                        progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
-                        progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                        if item.files_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                        } else {
+                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                        }
                         label_stage.set_text(format!("Checking {}/{} file", item.files_checked, item.files_to_check).as_str());
                     }
                     _ => {
