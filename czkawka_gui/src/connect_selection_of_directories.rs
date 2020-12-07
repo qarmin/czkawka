@@ -2,7 +2,7 @@ extern crate gtk;
 use crate::gui_data::GuiData;
 use gtk::prelude::*;
 
-pub fn connect_upper_notebook(gui_data: &GuiData) {
+pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add included directory
     {
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();

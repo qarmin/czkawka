@@ -26,7 +26,7 @@ pub struct GuiData {
 
     // States
     pub main_notebooks_labels: [String; 8],
-    pub upper_notebooks_labels: [String; 4],
+    pub upper_notebooks_labels: [String; 5],
     pub buttons_labels: [String; 4],
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<String, HashMap<String, bool>>>>,
@@ -145,6 +145,14 @@ pub struct GuiData {
     pub grid_progress_stages: gtk::Grid,
 
     pub button_stop_in_dialog: gtk::Button,
+
+    //// Settings
+    pub check_button_settings_save_at_exit: gtk::CheckButton,
+    pub check_button_settings_load_at_start: gtk::CheckButton,
+
+    pub button_settings_save_configuration: gtk::Button,
+    pub button_settings_load_configuration: gtk::Button,
+    pub button_settings_reset_configuration: gtk::Button,
     //// Threads
 
     // Used for sending stop signal to thread
@@ -176,10 +184,11 @@ impl GuiData {
             "same_music".to_string(),
         ];
         let upper_notebooks_labels = [
-            /*"general",*/ "included_directories".to_string(),
+            "included_directories".to_string(),
             "excluded_directories".to_string(),
             "excluded_items".to_string(),
             "allowed_extensions".to_string(),
+            "settings".to_string(),
         ];
         let buttons_labels = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string()];
 
@@ -337,6 +346,14 @@ impl GuiData {
 
         let button_stop_in_dialog: gtk::Button = builder.get_object("button_stop_in_dialog").unwrap();
 
+        //// Settings
+        let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
+        let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
+
+        let button_settings_save_configuration: gtk::Button = builder.get_object("button_settings_save_configuration").unwrap();
+        let button_settings_load_configuration: gtk::Button = builder.get_object("button_settings_load_configuration").unwrap();
+        let button_settings_reset_configuration: gtk::Button = builder.get_object("button_settings_reset_configuration").unwrap();
+
         //// Threads
         // Types of messages to send to main thread where gui can be draw.
 
@@ -426,6 +443,11 @@ impl GuiData {
             label_stage,
             grid_progress_stages,
             button_stop_in_dialog,
+            check_button_settings_save_at_exit,
+            check_button_settings_load_at_start,
+            button_settings_save_configuration,
+            button_settings_load_configuration,
+            button_settings_reset_configuration,
             stop_sender,
             stop_receiver,
         }

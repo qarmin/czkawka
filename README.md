@@ -16,6 +16,7 @@ But the most important thing for me was to learn Rust and create a program usefu
 ## Features
 - Written in memory safe Rust
 - Amazingly fast - due using more or less advanced algorithms and multithreading support
+- Free, Open Source without ads
 - CLI frontend, very fast and powerful with rich help
 - GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
 - Light/Dark theme match the appearance of the system(Linux only)
