@@ -17,9 +17,14 @@ glib = "0.10.1"
 humansize = "1"
 chrono = "0.4"
 
+# Used for sending stop signal across threads
 crossbeam-channel = "0.4.4"
 
+# To get informations about progress
 futures = "0.3.8"
+
+# For saving/loading config files to specific directories
+directories-next = "2.0.0"
 
 # For opening files
 open = "1.4.0"

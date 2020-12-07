@@ -34,13 +34,12 @@ pub fn connect_notebook_tabs(gui_data: &GuiData) {
         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(page).unwrap(), &buttons_array, &buttons_names);
         // Upper notebook
         {
-            //let upper_notebooks_labels = [/*"general",*/"included_directories","excluded_directories","excluded_items","allowed_extensions"];
             let mut hashmap: HashMap<&str, &str> = Default::default();
-            //hashmap.insert("notebook_upper_general","general");
             hashmap.insert("notebook_upper_included_directories", "included_directories");
             hashmap.insert("notebook_upper_excluded_directories", "excluded_directories");
             hashmap.insert("notebook_upper_excluded_items", "excluded_items");
             hashmap.insert("notebook_upper_allowed_extensions", "allowed_extensions");
+            hashmap.insert("notebook_upper_settings", "settings");
 
             for tab in &notebook_upper_children_names {
                 let name = hashmap.get(tab.as_str()).unwrap().to_string();

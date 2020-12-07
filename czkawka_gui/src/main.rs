@@ -7,12 +7,14 @@ mod connect_compute_results;
 mod connect_notebook_tabs;
 mod connect_popovers;
 mod connect_progress_window;
-mod connect_upper_notebook;
+mod connect_selection_of_directories;
+mod connect_settings;
 mod create_tree_view;
 mod double_click_opening;
 mod gui_data;
 mod help_functions;
-mod startup_configuration;
+mod initialize_gui;
+mod saving_loading;
 
 use czkawka_core::*;
 
@@ -26,9 +28,11 @@ use crate::connect_compute_results::*;
 use crate::connect_notebook_tabs::*;
 use crate::connect_popovers::*;
 use crate::connect_progress_window::*;
-use crate::connect_upper_notebook::*;
+use crate::connect_selection_of_directories::*;
+use crate::connect_settings::*;
 use crate::gui_data::*;
-use crate::startup_configuration::*;
+use crate::initialize_gui::*;
+use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 use gtk::prelude::*;
 use std::{env, process};
 
@@ -66,7 +70,10 @@ fn main() {
     let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::Sender<temporary::ProgressData>, futures::channel::mpsc::Receiver<temporary::ProgressData>) = futures::channel::mpsc::channel(20);
     let (futures_sender_zeroed, futures_receiver_zeroed): (futures::channel::mpsc::Sender<zeroed::ProgressData>, futures::channel::mpsc::Receiver<zeroed::ProgressData>) = futures::channel::mpsc::channel(20);
 
-    startup_configuration(&gui_data);
+    initialize_gui(&gui_data);
+    reset_configuration(&gui_data, false); // Fallback for invalid loading setting project
+    load_configuration(&gui_data, false);
+
     connect_button_delete(&gui_data);
     connect_button_save(&gui_data);
     connect_button_search(
@@ -84,7 +91,7 @@ fn main() {
     connect_button_select(&gui_data);
     connect_button_stop(&gui_data);
     connect_notebook_tabs(&gui_data);
-    connect_upper_notebook(&gui_data);
+    connect_selection_of_directories(&gui_data);
     connect_popovers(&gui_data);
     connect_compute_results(&gui_data, glib_stop_receiver);
     connect_progress_window(
@@ -98,12 +105,17 @@ fn main() {
         futures_receiver_temporary,
         futures_receiver_zeroed,
     );
+    connect_settings(&gui_data);
 
     // Quit the program when X in main window was clicked
-    gui_data.window_main.connect_delete_event(|_, _| {
-        gtk::main_quit();
-        Inhibit(false)
-    });
+    {
+        let window_main = gui_data.window_main.clone();
+        window_main.connect_delete_event(move |_, _| {
+            save_configuration(&gui_data, false); // Save configuration at exit
+            gtk::main_quit();
+            Inhibit(false)
+        });
+    }
 
     // We start the gtk main loop.
     gtk::main();
