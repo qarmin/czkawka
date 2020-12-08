@@ -408,7 +408,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "1.5.0"
+version = "1.5.1"
 dependencies = [
  "czkawka_core",
  "structopt",
@@ -416,7 +416,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "1.5.0"
+version = "1.5.1"
 dependencies = [
  "audiotags",
  "bitflags",
@@ -433,7 +433,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "1.5.0"
+version = "1.5.1"
 dependencies = [
  "chrono",
  "crossbeam-channel 0.4.4",
@@ -450,7 +450,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui_orbtk"
-version = "1.5.0"
+version = "1.5.1"
 dependencies = [
  "czkawka_core",
  "orbtk",

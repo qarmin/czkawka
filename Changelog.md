@@ -1,3 +1,8 @@
+## Version 1.5.1 - 08.12.2020r
+- Fix errors in progress bar caused by dividing by 0  - [#109](https://github.com/qarmin/czkawka/pull/109)
+- Add option to save file, store settings and load them - [#108](https://github.com/qarmin/czkawka/pull/108)
+- Center dialog to current window - [a04](https://github.com/qarmin/czkawka/commit/a047380dbe8aa4d04f9c482364469e21d231fab2)
+
 ## Version 1.5.0 - 02.12.2020r
 - Added progress bar - [#106](https://github.com/qarmin/czkawka/pull/106)
 - Removed unused buttons - [#107](https://github.com/qarmin/czkawka/pull/107)
