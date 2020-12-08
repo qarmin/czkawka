@@ -55,13 +55,19 @@ If the app does not run when clicking at a launcher, run it through a terminal.
 Appimage files are available in release page - https://github.com/qarmin/czkawka/releases/
 
 ### Cargo
-Easier method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS) 
+Easier method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS)
 ```
 cargo install czkawka_gui
 ```
 You can update package by typing same command.
 
-### Snap, Flatpak
+### Snap
+Sadly some features are not available like mounted drives
+```
+sudo snap install czkawka
+```
+
+## Flatpak
 Maybe someday
 
 
@@ -132,7 +138,7 @@ Minimum file size to check I set to 1 KB on all programs
 |:----------:|:-------------:|
 | FSlint 2.4.7 (Second Run)| 86s |
 | Czkawka 1.4.0 (Second Run) | 12s |
-| DupeGuru 4.0.4 (Second Run) | 28s | 
+| DupeGuru 4.0.4 (Second Run) | 28s |
 
 
 I used Mprof for checking memory usage FSlint and Dupeguru, for Czkawka I used Heaptrack.
@@ -148,15 +154,15 @@ Similar Images which check 332 files which takes 1,7GB
 
 | App| Scan time |
 |:----------:|:-------------:|
-| Czkawka 1.4.0 | 58s | 
-| DupeGuru 4.0.4 | 51s | 
+| Czkawka 1.4.0 | 58s |
+| DupeGuru 4.0.4 | 51s |
 
 Similar Images which check 1421 image files which takes 110,1MB
 
 | App| Scan time |
 |:----------:|:-------------:|
-| Czkawka 1.4.0 | 25s | 
-| DupeGuru 4.0.4 | 92s | 
+| Czkawka 1.4.0 | 25s |
+| DupeGuru 4.0.4 | 92s |
 
 So still is a big room for improvements.
 
@@ -164,10 +170,10 @@ So still is a big room for improvements.
 
 |  | Czkawka | FSlint | DupeGuru |
 |:----------:|:-------------:|:-----:|:---:|
-| Language | Rust| Python | Python/Objective C | 
+| Language | Rust| Python | Python/Objective C |
 | OS | Linux, Windows, Mac(only CLI) | Linux | Linux, Windows, Mac|
 | Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) | Qt 5 (PyQt)/Cocoa |
-| Ram Usage | Low | Medium | Very High | 
+| Ram Usage | Low | Medium | Very High |
 | Duplicate finder | X | X | X |
 | Empty files | X | X |  |
 | Empty folders | X | X |  |
