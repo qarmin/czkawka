@@ -9,7 +9,6 @@ use std::fs::Metadata;
 pub fn connect_button_delete(gui_data: &GuiData) {
     let gui_data = gui_data.clone();
     let buttons_delete = gui_data.buttons_delete.clone();
-    let shared_confirmation_dialog_delete_dialog_showing_state = gui_data.shared_confirmation_dialog_delete_dialog_showing_state.clone();
     let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
@@ -21,9 +20,10 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+    let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
 
     buttons_delete.connect_clicked(move |_| {
-        if *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() {
+        if check_button_settings_confirm_deletion.get_active() {
             let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some("Delete confirmation"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
             let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
             let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask in future");
@@ -40,7 +40,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
             let response_type = confirmation_dialog_delete.run();
             if response_type == gtk::ResponseType::Ok {
                 if !check_button.get_active() {
-                    *shared_confirmation_dialog_delete_dialog_showing_state.borrow_mut() = false;
+                    check_button_settings_confirm_deletion.set_active(false);
                 }
             } else {
                 confirmation_dialog_delete.close();
