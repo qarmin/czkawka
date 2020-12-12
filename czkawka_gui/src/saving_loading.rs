@@ -95,6 +95,11 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let check_button_settings_load_at_start = gui_data.check_button_settings_load_at_start.clone();
         data_to_save.push(check_button_settings_load_at_start.get_active().to_string());
 
+        //// Load at start
+        data_to_save.push("--confirm_deletion:".to_string());
+        let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
+        data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
+
         // Creating/Opening config file
 
         let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));
@@ -131,6 +136,7 @@ enum TypeOfLoadedData {
     AllowedExtensions,
     LoadingAtStart,
     SavingAtExit,
+    ConfirmDeletion,
 }
 
 pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
@@ -167,6 +173,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut allowed_extensions: Vec<String> = Vec::new();
         let mut loading_at_start: bool = true;
         let mut saving_at_exit: bool = true;
+        let mut confirm_deletion: bool = true;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -186,6 +193,13 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::LoadingAtStart;
             } else if line.starts_with("--save_at_exit") {
                 current_type = TypeOfLoadedData::SavingAtExit;
+            } else if line.starts_with("--confirm_deletion") {
+                current_type = TypeOfLoadedData::ConfirmDeletion;
+            } else if line.starts_with("--") {
+                text_view_errors
+                    .get_buffer()
+                    .unwrap()
+                    .set_text(format!("Found invalid header in line {} \"\"\"{}\"\"\" when loading file {:?}", line_number, line, config_file).as_str());
             } else {
                 match current_type {
                     TypeOfLoadedData::None => {
@@ -226,6 +240,19 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             saving_at_exit = true;
                         } else if line == "0" || line == "false" {
                             saving_at_exit = false;
+                        } else {
+                            text_view_errors
+                                .get_buffer()
+                                .unwrap()
+                                .set_text(format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str());
+                        }
+                    }
+                    TypeOfLoadedData::ConfirmDeletion => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            confirm_deletion = true;
+                        } else if line == "0" || line == "false" {
+                            confirm_deletion = false;
                         } else {
                             text_view_errors
                                 .get_buffer()
@@ -274,6 +301,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             //// Buttons
             gui_data.check_button_settings_load_at_start.set_active(loading_at_start);
             gui_data.check_button_settings_save_at_exit.set_active(saving_at_exit);
+            gui_data.check_button_settings_confirm_deletion.set_active(confirm_deletion);
         } else {
             gui_data.check_button_settings_load_at_start.set_active(false);
         }
@@ -347,6 +375,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     {
         gui_data.check_button_settings_save_at_exit.set_active(true);
         gui_data.check_button_settings_load_at_start.set_active(true);
+        gui_data.check_button_settings_confirm_deletion.set_active(true);
     }
     if manual_clearing {
         text_view_errors.get_buffer().unwrap().set_text("Current configuration was cleared.");

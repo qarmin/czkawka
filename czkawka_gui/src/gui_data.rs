@@ -44,9 +44,6 @@ pub struct GuiData {
     pub shared_zeroed_files_state: Rc<RefCell<ZeroedFiles>>,
     pub shared_same_music_state: Rc<RefCell<SameMusic>>,
 
-    // State of confirmation dialogs
-    pub shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<bool>>,
-
     //// GUI Entry
     pub entry_similar_images_minimal_size: gtk::Entry,
     pub entry_duplicate_minimal_size: gtk::Entry,
@@ -149,6 +146,7 @@ pub struct GuiData {
     //// Settings
     pub check_button_settings_save_at_exit: gtk::CheckButton,
     pub check_button_settings_load_at_start: gtk::CheckButton,
+    pub check_button_settings_confirm_deletion: gtk::CheckButton,
 
     pub button_settings_save_configuration: gtk::Button,
     pub button_settings_load_configuration: gtk::Button,
@@ -234,9 +232,6 @@ impl GuiData {
         let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
         let shared_zeroed_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(ZeroedFiles::new()));
         let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
-
-        // State of confirmation dialogs
-        let shared_confirmation_dialog_delete_dialog_showing_state: Rc<RefCell<_>> = Rc::new(RefCell::new(true));
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -349,6 +344,7 @@ impl GuiData {
         //// Settings
         let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
         let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
+        let check_button_settings_confirm_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_deletion").unwrap();
 
         let button_settings_save_configuration: gtk::Button = builder.get_object("button_settings_save_configuration").unwrap();
         let button_settings_load_configuration: gtk::Button = builder.get_object("button_settings_load_configuration").unwrap();
@@ -377,7 +373,6 @@ impl GuiData {
             shared_similar_images_state,
             shared_zeroed_files_state,
             shared_same_music_state,
-            shared_confirmation_dialog_delete_dialog_showing_state,
             entry_similar_images_minimal_size,
             entry_duplicate_minimal_size,
             entry_allowed_extensions,
@@ -445,6 +440,7 @@ impl GuiData {
             button_stop_in_dialog,
             check_button_settings_save_at_exit,
             check_button_settings_load_at_start,
+            check_button_settings_confirm_deletion,
             button_settings_save_configuration,
             button_settings_load_configuration,
             button_settings_reset_configuration,
