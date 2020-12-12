@@ -1815,6 +1815,34 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="buttons_show_errors">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkAlignment">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="top_padding">4</property>
+                    <property name="bottom_padding">4</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">format-justify-fill</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkBox" id="action_buttons">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -1971,7 +1999,7 @@ Author: Rafał Mikrut
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -1995,7 +2023,7 @@ Author: Rafał Mikrut
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkScrolledWindow" id="scrolled_window_errors">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="resize_mode">queue</property>

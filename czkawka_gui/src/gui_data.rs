@@ -57,6 +57,7 @@ pub struct GuiData {
     pub buttons_select: gtk::Button,
     pub buttons_delete: gtk::Button,
     pub buttons_save: gtk::Button,
+    pub buttons_show_errors: gtk::Button,
     pub buttons_names: [String; 4],
     pub buttons_array: [Button; 4],
     pub buttons_add_included_directory: gtk::Button,
@@ -113,8 +114,9 @@ pub struct GuiData {
     //// Entry
     pub entry_info: gtk::Entry, // To show default
 
-    //// Text View
+    //// Bottom
     pub text_view_errors: gtk::TextView,
+    pub scrolled_window_errors: gtk::ScrolledWindow,
 
     //// Scrolled windows
     // Main notebook
@@ -249,6 +251,8 @@ impl GuiData {
         let buttons_delete: gtk::Button = builder.get_object("buttons_delete").unwrap();
         let buttons_save: gtk::Button = builder.get_object("buttons_save").unwrap();
 
+        let buttons_show_errors: gtk::Button = builder.get_object("buttons_show_errors").unwrap();
+
         let buttons_names = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string()];
         let buttons_array = [buttons_search.clone(), buttons_select.clone(), buttons_delete.clone(), buttons_save.clone()];
 
@@ -311,8 +315,9 @@ impl GuiData {
         //// Entry
         let entry_info: gtk::Entry = builder.get_object("entry_info").unwrap(); // To show default
 
-        //// Text View
+        //// Bottom
         let text_view_errors: gtk::TextView = builder.get_object("text_view_errors").unwrap();
+        let scrolled_window_errors: gtk::ScrolledWindow = builder.get_object("scrolled_window_errors").unwrap();
 
         //// Scrolled windows
         // Main notebook
@@ -383,6 +388,7 @@ impl GuiData {
             buttons_select,
             buttons_delete,
             buttons_save,
+            buttons_show_errors,
             buttons_names,
             buttons_array,
             buttons_add_included_directory,
@@ -422,6 +428,7 @@ impl GuiData {
             notebook_upper_children_names,
             entry_info,
             text_view_errors,
+            scrolled_window_errors,
             scrolled_window_duplicate_finder,
             scrolled_window_main_empty_folder_finder,
             scrolled_window_main_empty_files_finder,

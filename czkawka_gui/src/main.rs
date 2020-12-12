@@ -4,6 +4,7 @@ mod connect_button_search;
 mod connect_button_select;
 mod connect_button_stop;
 mod connect_compute_results;
+mod connect_hide_text_view_errors;
 mod connect_notebook_tabs;
 mod connect_popovers;
 mod connect_progress_window;
@@ -25,6 +26,7 @@ use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
 use crate::connect_compute_results::*;
+use crate::connect_hide_text_view_errors::*;
 use crate::connect_notebook_tabs::*;
 use crate::connect_popovers::*;
 use crate::connect_progress_window::*;
@@ -32,7 +34,7 @@ use crate::connect_selection_of_directories::*;
 use crate::connect_settings::*;
 use crate::gui_data::*;
 use crate::initialize_gui::*;
-use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
+use crate::saving_loading::*;
 use gtk::prelude::*;
 use std::{env, process};
 
@@ -105,6 +107,7 @@ fn main() {
         futures_receiver_temporary,
         futures_receiver_zeroed,
     );
+    connect_hide_text_view_errors(&gui_data);
     connect_settings(&gui_data);
 
     // Quit the program when X in main window was clicked

@@ -178,7 +178,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
             let line: String = line.trim().to_string();
-            if line.trim().is_empty() {
+            if line.is_empty() {
                 continue; // Empty line, so we just skip it
             }
             if line.starts_with("--included_directories") {

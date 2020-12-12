@@ -8,7 +8,6 @@ use gtk::{SelectionMode, TreeView};
 pub fn initialize_gui(gui_data: &GuiData) {
     //// Setup default look(duplicate finder)
     {
-        let entry_info = gui_data.entry_info.clone();
         let buttons_search = gui_data.buttons_search.clone();
         let buttons_save = gui_data.buttons_save.clone();
         let buttons_delete = gui_data.buttons_delete.clone();
@@ -23,8 +22,6 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
-
-        entry_info.set_text("Duplicated Files");
 
         // Disable and show buttons
         buttons_search.show();
