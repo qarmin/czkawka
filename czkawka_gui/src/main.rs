@@ -1,3 +1,6 @@
+// Remove console window in Windows OS
+#![windows_subsystem = "windows"]
+
 mod connect_button_delete;
 mod connect_button_save;
 mod connect_button_search;
