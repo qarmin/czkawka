@@ -52,13 +52,13 @@ impl Common {
 
     /// Function to check if directory match expression
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
-        if !expression.contains('*') {
-            #[cfg(debug_assertions)]
-            {
-                println!("Invalid expression ERROR: Expression should have *");
-            }
-            return false;
-        }
+        // if !expression.contains('*') {
+        //     #[cfg(debug_assertions)]
+        //     {
+        //         println!("Invalid expression Warning: Expression should have *,");
+        //     }
+        //     //return false;
+        // }
 
         let temp_splits: Vec<&str> = expression.split('*').collect();
         let mut splits: Vec<&str> = Vec::new();
@@ -139,6 +139,8 @@ mod test {
         assert!(Common::regex_check("*home/*", "/home/"));
         assert!(Common::regex_check("*.git*", "/home/.git"));
         assert!(Common::regex_check("*/home/rafal*rafal*rafal*rafal*", "/home/rafal/rafalrafalrafal"));
+        assert!(Common::regex_check("AAA", "AAA"));
+        assert!(Common::regex_check("AAA*", "AAABDGG/QQPW*"));
         assert!(!Common::regex_check("*home", "/home/"));
         assert!(!Common::regex_check("*home", "/homefasfasfasfasf/"));
         assert!(!Common::regex_check("*home", "/homefasfasfasfasf"));
@@ -149,7 +151,6 @@ mod test {
         assert!(!Common::regex_check("*home/*koc", "/koc/home/"));
         assert!(!Common::regex_check("*home/", "/home"));
         assert!(!Common::regex_check("*TTT", "/GGG"));
-        assert!(!Common::regex_check("AAA", "AAA"));
     }
     #[test]
     fn test_windows_path() {
