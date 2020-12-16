@@ -2,8 +2,14 @@ use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
+use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{SelectionMode, TreeView};
+use image::imageops::FilterType;
+use image::GenericImageView;
+use std::cmp::Ordering;
+use std::fs;
+use std::path::Path;
 
 pub fn initialize_gui(gui_data: &GuiData) {
     //// Setup default look(duplicate finder)
@@ -22,6 +28,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
+        let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
         // Disable and show buttons
         buttons_search.show();
@@ -121,6 +128,8 @@ pub fn initialize_gui(gui_data: &GuiData) {
             }
             // Similar Images
             {
+                image_preview_similar_images.hide();
+
                 let col_types: [glib::types::Type; 9] = [
                     glib::types::Type::String,
                     glib::types::Type::String,
@@ -142,6 +151,79 @@ pub fn initialize_gui(gui_data: &GuiData) {
                 create_tree_view_similar_images(&mut tree_view);
 
                 tree_view.connect_button_press_event(opening_double_click_function_similar_images);
+                tree_view.connect_button_release_event(move |tree_view, event| {
+                    if event.get_event_type() == gdk::EventType::DoubleButtonPress {
+                        common_open_function(tree_view, ColumnsSimilarImages::Name as i32, ColumnsSimilarImages::Path as i32);
+                    }
+
+                    let (selected_rows, tree_model) = tree_view.get_selection().get_selected_rows();
+
+                    let mut created_image = false;
+
+                    if !selected_rows.is_empty() {
+                        let tree_path = selected_rows[0].clone();
+                        if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+                            // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
+                            #[allow(clippy::never_loop)]
+                            'dir: loop {
+                                let cache_dir = proj_dirs.cache_dir();
+                                if cache_dir.exists() {
+                                    if !cache_dir.is_dir() {
+                                        break 'dir;
+                                    }
+                                } else if fs::create_dir(cache_dir).is_err() {
+                                    break 'dir;
+                                }
+                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
+                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
+
+                                let file_name = format!("{}/{}", path, name); //"/home/rafal/Pulpit/karl-fitzgerald-4.jpg";
+                                let file_name = file_name.as_str();
+
+                                if let Some(extension) = Path::new(file_name).extension() {
+                                    let img = match image::open(&file_name) {
+                                        Ok(t) => t,
+                                        Err(_) => {
+                                            break 'dir;
+                                        }
+                                    };
+                                    let ratio = img.width() / img.height();
+                                    let requested_dimensions = (400, 400);
+                                    let new_size;
+                                    match ratio.cmp(&(requested_dimensions.0 / requested_dimensions.1)) {
+                                        Ordering::Greater => {
+                                            new_size = (requested_dimensions.0, (img.height() * requested_dimensions.0) / img.width());
+                                        }
+                                        Ordering::Less => {
+                                            new_size = ((img.width() * requested_dimensions.1) / img.height(), requested_dimensions.1);
+                                        }
+                                        Ordering::Equal => {
+                                            new_size = requested_dimensions;
+                                        }
+                                    }
+                                    let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
+                                    let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
+                                    if img.save(&file_dir).is_err() {
+                                        break 'dir;
+                                    }
+                                    let string_dir = file_dir.to_string_lossy().to_string();
+                                    image_preview_similar_images.set_from_file(string_dir);
+                                    created_image = true;
+                                }
+                                break 'dir;
+                            }
+                        }
+                    }
+                    if created_image {
+                        image_preview_similar_images.show();
+                    } else {
+                        image_preview_similar_images.hide();
+                    }
+
+                    gtk::Inhibit(false)
+                });
+
+                // tree_view.connect_button_press_event(opening_double_click_function_similar_images);
 
                 scrolled_window_similar_images_finder.add(&tree_view);
                 scrolled_window_similar_images_finder.show_all();

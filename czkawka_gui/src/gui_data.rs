@@ -1,4 +1,3 @@
-extern crate gdk;
 extern crate gtk;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
@@ -148,6 +147,9 @@ pub struct GuiData {
     pub grid_progress_stages: gtk::Grid,
 
     pub button_stop_in_dialog: gtk::Button,
+
+    //// Similar Images
+    pub image_preview_similar_images: gtk::Image,
 
     //// Settings
     pub check_button_settings_save_at_exit: gtk::CheckButton,
@@ -354,6 +356,9 @@ impl GuiData {
 
         let button_stop_in_dialog: gtk::Button = builder.get_object("button_stop_in_dialog").unwrap();
 
+        //// Similar Images
+        let image_preview_similar_images: gtk::Image = builder.get_object("image_preview_similar_images").unwrap();
+
         //// Settings
         let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
         let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
@@ -457,6 +462,7 @@ impl GuiData {
             label_stage,
             grid_progress_stages,
             button_stop_in_dialog,
+            image_preview_similar_images,
             check_button_settings_save_at_exit,
             check_button_settings_load_at_start,
             check_button_settings_confirm_deletion,

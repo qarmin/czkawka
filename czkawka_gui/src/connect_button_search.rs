@@ -74,6 +74,7 @@ pub fn connect_button_search(
     let grid_progress_stages = gui_data.grid_progress_stages.clone();
     let progress_bar_current_stage = gui_data.progress_bar_current_stage.clone();
     let progress_bar_all_stages = gui_data.progress_bar_all_stages.clone();
+    let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
@@ -241,6 +242,8 @@ pub fn connect_button_search(
                 });
             }
             "notebook_main_similar_images_finder_label" => {
+                image_preview_similar_images.hide();
+
                 label_stage.show();
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
