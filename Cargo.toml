@@ -3,7 +3,6 @@ members = [
     "czkawka_core",
     "czkawka_cli",
     "czkawka_gui",
-    "czkawka_gui_orbtk",
 ]
 #[profile.release]
 #lto = true

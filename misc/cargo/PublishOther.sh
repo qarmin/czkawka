@@ -31,15 +31,6 @@ then
 fi
 git reset --hard
 
-cd "$CZKAWKA_PATH/czkawka_gui_orbtk"
-sed -i "s/{ path = \"..\/czkawka_core\" }/\"=$NUMBER\"/g" "$CZKAWKA_PATH/czkawka_gui_orbtk/Cargo.toml"
-cargo package --allow-dirty
-if [ $(echo $?) != "0"  ]
-then
-  echo "Cargo package failed GUI ORBTK"
-  exit 1
-fi
-git reset --hard
 
 
 
@@ -50,10 +41,5 @@ git reset --hard
 
 cd "$CZKAWKA_PATH/czkawka_gui"
 sed -i "s/{ path = \"..\/czkawka_core\" }/\"=$NUMBER\"/g" "$CZKAWKA_PATH/czkawka_gui/Cargo.toml"
-cargo publish --allow-dirty
-git reset --hard
-
-cd "$CZKAWKA_PATH/czkawka_gui_orbtk"
-sed -i "s/{ path = \"..\/czkawka_core\" }/\"=$NUMBER\"/g" "$CZKAWKA_PATH/czkawka_gui_orbtk/Cargo.toml"
 cargo publish --allow-dirty
 git reset --hard
