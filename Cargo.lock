@@ -441,10 +441,10 @@ dependencies = [
  "directories-next",
  "futures",
  "gdk",
- "gio",
  "glib",
  "gtk",
  "humansize",
+ "image",
  "open",
 ]
 
