@@ -169,53 +169,6 @@ jobs:
           path: target/release/czkawka_gui
         if: ${{ matrix.type == 'release' }}
 
-  linux-gui-orbtk:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ release ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: linux-gui-orbtk-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            linux-gui-orbtk-${{github.ref}}-${{github.sha}}
-
-      - name: Install basic libraries
-        run: sudo apt-get update; sudo apt install libgtk-3-dev -y
-
-      - name: Build GUI Orbtk Debug
-        run: cargo build --bin czkawka_gui_orbtk
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'debug'}}
-
-      - name: Build GUI Orbtk Release
-        run: cargo build --release --bin czkawka_gui_orbtk
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
-
-      - name: Store Linux GUI Orbtk
-        uses: actions/upload-artifact@v2
-        with:
-          name: czkawka_gui_orbtk-${{ runner.os }}-${{ matrix.toolchain }}
-          path: target/release/czkawka_gui_orbtk
-        if: ${{ matrix.type == 'release' }}
-
-
   linux-appimage-gui:
     strategy:
       matrix:

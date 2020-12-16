@@ -144,51 +144,6 @@ jobs:
           python misc/check_results.py TestSuite 14 8
         if: ${{ matrix.type == 'release' }}
 
-
-  windows-gui-orbtk:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ release ]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: windows-gui-orbtk-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            windows-gui-orbtk-${{github.ref}}-${{github.sha}}
-
-      - name: Build GUI Orbtk Debug
-        run: cargo build --bin czkawka_gui_orbtk
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'debug'}}
-
-      - name: Build GUI Orbtk Release
-        run: cargo build --release --bin czkawka_gui_orbtk
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
-
-      - name: Store Windows GUI Orbtk
-        uses: actions/upload-artifact@v2
-        with:
-          name: czkawka_gui_orbtk-${{ runner.os }}-${{ matrix.toolchain }}
-          path: target/release/czkawka_gui_orbtk.exe
-        if: ${{ matrix.type == 'release' }}
-
-
   windows-gui:
     strategy:
       matrix:

@@ -67,7 +67,7 @@ Sadly some features are not available like mounted drives
 sudo snap install czkawka
 ```
 
-## Flatpak
+### Flatpak
 Maybe someday
 
 
@@ -113,12 +113,6 @@ cargo run --bin czkawka_gui
 ```
 For Linux-to-Windows cross-building instruction look at the CI.
 ![GUI GTK](https://user-images.githubusercontent.com/41945903/94850801-c5945380-0427-11eb-8d4c-af4946ab02d5.png)
-- Run alternative Orbtk GUI (Still WIP, currently stopped due https://github.com/intellij-rust/intellij-rust/issues/5943)
-
-```
-cargo run --bin czkawka_gui_orbtk
-```
-![GUI Orbtk](https://user-images.githubusercontent.com/41945903/92405241-7b27fb80-f135-11ea-9fc4-5ebc2b76b011.png)
 - Run CLI(this will print help with a lot of examples)
 ```
 cargo run --bin czkawka_cli
