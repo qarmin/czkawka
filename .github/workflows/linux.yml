@@ -208,7 +208,7 @@ jobs:
           chmod +x linuxdeploy-x86_64.AppImage
           mkdir -p AppDir/usr/bin
           cp target/release/czkawka_gui AppDir/usr/bin
-          ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage --icon-file data/icons/com.github.quarmin.czawka.svg --desktop-file pkgs/com.github.qarmin.czkawka.desktop
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage --icon-file data/icons/com.github.quarmin.czkawka.svg --desktop-file pkgs/com.github.qarmin.czkawka.desktop
 
       - name: Store Linux Appimage GUI
         uses: actions/upload-artifact@v2
