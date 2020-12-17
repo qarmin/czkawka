@@ -61,4 +61,6 @@ package() {
 
 	install -Dm644 LICENSE $pkgdir/usr/share/licenses/${_basename}/LICENSE
 	install -Dm644 $srcdir/com.github.qarmin.czkawka.desktop -t $pkgdir/usr/share/applications/
+	install -Dm664 $srcdir/data/icons/com.github.qarmin.czkawka.svg $pkgdir/usr/share/icons/hicolor/scalable/apps/
+	install -Dm664 $srcdir/data/icons/com.github.qarmin.czkawka-symbolic.svg $pkgdir/usr/share/icons/hicolor/symbolic/apps
 }

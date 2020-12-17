@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg height="16px" viewBox="0 0 16 16" width="16px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <filter id="a" height="100%" width="100%" x="0%" y="0%">
+        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+    </filter>
+    <mask id="b">
+        <g filter="url(#a)">
+            <rect fill-opacity="0.104" height="16" width="16"/>
+        </g>
+    </mask>
+    <linearGradient id="c" gradientUnits="userSpaceOnUse">
+        <stop offset="0"/>
+        <stop offset="1" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="d" cx="448.010223" cy="51.543747" gradientTransform="matrix(0.112144 0.00038317 -0.00021629 0.0633011 26.761475 154.313576)" r="224" xlink:href="#c"/>
+    <clipPath id="e">
+        <rect height="152" width="192"/>
+    </clipPath>
+    <mask id="f">
+        <g filter="url(#a)">
+            <rect fill-opacity="0.4" height="16" width="16"/>
+        </g>
+    </mask>
+    <mask id="g">
+        <g filter="url(#a)">
+            <rect fill-opacity="0.104" height="16" width="16"/>
+        </g>
+    </mask>
+    <radialGradient id="h" cx="70" cy="295.183136" gradientTransform="matrix(1.312499 -0.0312501 0.00967013 0.406135 -16.729404 5.303345)" r="32.000004" xlink:href="#c"/>
+    <clipPath id="i">
+        <rect height="152" width="192"/>
+    </clipPath>
+    <mask id="j">
+        <g filter="url(#a)">
+            <rect fill-opacity="0.104" height="16" width="16"/>
+        </g>
+    </mask>
+    <radialGradient id="k" cx="70" cy="295.183136" gradientTransform="matrix(1.312499 -0.0312501 0.00967013 0.406135 -16.729404 9.303345)" r="32.000004" xlink:href="#c"/>
+    <clipPath id="l">
+        <rect height="152" width="192"/>
+    </clipPath>
+    <g clip-path="url(#e)" mask="url(#b)" transform="matrix(1 0 0 1 -168 -16)">
+        <path d="m -29 150 v 2 c 0 4.433594 3.566406 8 8 8 h 96 c 4.433594 0 8 -3.566406 8 -8 v -2 c 0 4.433594 -3.566406 8 -8 8 h -96 c -4.433594 0 -8 -3.566406 -8 -8 z m 0 4 v 2 c 0 4.433594 3.566406 8 8 8 h 96 c 4.433594 0 8 -3.566406 8 -8 v -2 c 0 4.433594 -3.566406 8 -8 8 h -96 c -4.433594 0 -8 -3.566406 -8 -8 z m 0 4 v 2 c 0 4.433594 3.566406 8 8 8 h 96 c 4.433594 0 8 -3.566406 8 -8 v -2 c 0 4.433594 -3.566406 8 -8 8 h -96 c -4.433594 0 -8 -3.566406 -8 -8 z m 0 4 v 2 c 0 4.433594 3.566406 8 8 8 h 96 c 4.433594 0 8 -3.566406 8 -8 v -2 c 0 4.433594 -3.566406 8 -8 8 h -96 c -4.433594 0 -8 -3.566406 -8 -8 z m 0 4 v 2 c 0 4.433594 3.566406 8 8 8 h 96 c 4.433594 0 8 -3.566406 8 -8 v -2 c 0 4.433594 -3.566406 8 -8 8 h -96 c -4.433594 0 -8 -3.566406 -8 -8 z m 0 0" fill="url(#d)"/>
+    </g>
+    <image height="152" mask="url(#f)" transform="matrix(1 0 0 1 -168 -16)" width="192" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAACYCAYAAACyAeadAAAABmJLR0QA/wD/AP+gvaeTAAAAiElEQVR4nO3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAPIpwABWLk4FQAAAABJRU5ErkJggg=="/>
+    <g fill="#474747" fill-rule="evenodd">
+        <path d="m 3 0 c -0.550781 0 -1 0.449219 -1 1 v 7 h 2 v -6 h 5.085938 l 2.914062 2.914062 v 3.085938 h 2 v -3.5 c 0 -0.265625 -0.105469 -0.519531 -0.292969 -0.707031 l -3.5 -3.5 c -0.1875 -0.1875 -0.441406 -0.292969 -0.707031 -0.292969 z m 0 0"/>
+        <path d="m 9 1 v 4 h 4 z m 0 0"/>
+        <path d="m 2 10 h 2 v 6 h -2 z m 0 0"/>
+        <path d="m 6 10 h 2 v 4 h -2 z m 0 0"/>
+        <path d="m 12 10 h 2 v 6 h -2 z m 0 0"/>
+        <path d="m 8 10 h 2 v 6 h -2 z m 0 0"/>
+    </g>
+    <g clip-path="url(#i)" mask="url(#g)" transform="matrix(1 0 0 1 -168 -16)">
+        <path d="m 27.398438 123.054688 c -1.988282 -0.410157 -4.296876 -0.3125 -4.859376 -2.179688 c -0.175781 -0.589844 -0.539062 -1.238281 -0.539062 -4.105469 l 0.003906 -1.300781 l 0.714844 2.339844 c 0.402344 1.324218 2.058594 2.28125 3.480469 2.664062 c 1.449219 0.390625 54.734375 0.378906 55.902343 -0.011718 c 1.371094 -0.460938 2.375 -1.363282 3.089844 -2.773438 l 0.808594 -3.6875 v 5 c -0.636719 2.582031 -1.746094 3.355469 -3.476562 4.160156 l -27.125 0.035156 c -14.410157 0.019532 -26.660157 -0.039062 -27.90625 -0.132812 c -0.046876 -0.003906 -0.074219 -0.007812 -0.09375 -0.007812 z m 0 0" fill="url(#h)"/>
+    </g>
+    <g clip-path="url(#l)" mask="url(#j)" transform="matrix(1 0 0 1 -168 -16)">
+        <path d="m 27.398438 127.054688 c -1.988282 -0.410157 -4.296876 -0.3125 -4.859376 -2.179688 c -0.175781 -0.589844 -0.539062 -1.238281 -0.539062 -4.105469 l 0.003906 -1.300781 l 0.714844 2.339844 c 0.402344 1.324218 2.058594 2.28125 3.480469 2.664062 c 1.449219 0.390625 53.574219 0.632813 54.800781 0.527344 c 1.855469 -0.15625 3.730469 -1.214844 4.191406 -3.3125 l 0.808594 -3.6875 v 5 c -0.636719 2.582031 -1.746094 3.355469 -3.476562 4.160156 l -27.125 0.035156 c -14.410157 0.019532 -26.660157 -0.039062 -27.90625 -0.132812 c -0.046876 -0.003906 -0.074219 -0.007812 -0.09375 -0.007812 z m 0 0" fill="url(#k)"/>
+    </g>
+</svg>
