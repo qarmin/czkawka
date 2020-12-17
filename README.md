@@ -208,6 +208,8 @@ At the beginning of the program creation, if the response concerning the name wa
 ## License
 Code is distributed under MIT license.
 
+Icon is created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
+
 Program is completely free to use.
 
 "Gratis to uczciwa cena" - "Free is a fair price"
