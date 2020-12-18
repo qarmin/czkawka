@@ -1,16 +1,6 @@
 ![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
-Czkawka is a simple, fast and easy to use alternative to FSlint, written in Rust.  
 
-![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
-
-## Why?
-There's a lot of tools for finding duplicates, empty folders, temporary files etc. on the Internet, but in most cases these are only available as CLI, which is hard to use by users.
-
-GUI FSlint allows selecting different files and folders easily, but is based on old and unsupported Python 2 and GTK 2.
-
-Other tools are usually written in C/C++ for high performance but still need to be tested a lot for memory leaks, invalid memory reads/writes and double frees.
-
-But the most important thing for me was to learn Rust and create a program useful for the open source community.
+**Czkawka** is a simple, fast, written in Rust and easy to use app to remove unnecessary files from your computer.
 
 ## Features
 - Written in memory safe Rust
@@ -32,6 +22,7 @@ But the most important thing for me was to learn Rust and create a program usefu
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
   - Same Music - Search for music with same artist, album etc.
 
+![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
 ## Requirements
 If you are using Windows or Mac binaries, there is no specific requirements.  
 Same with Appimage on Linux(except having system 18.04+ or similar).  
