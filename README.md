@@ -1,6 +1,5 @@
-# Czkawka
+![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 Czkawka is a simple, fast and easy to use alternative to FSlint, written in Rust.  
-This is my first ever project in Rust so many things might not be written in the most optimal way.
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
 
