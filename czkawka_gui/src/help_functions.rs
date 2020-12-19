@@ -209,7 +209,13 @@ pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree
 pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(button_names[index].as_str()).unwrap() {
-            button.show();
+            if cfg!(target_family = "windows") {
+                if button_names[index] != "symlink" {
+                    button.show();
+                }
+            } else {
+                button.show();
+            }
         } else {
             button.hide();
         }

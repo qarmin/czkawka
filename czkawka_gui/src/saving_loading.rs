@@ -229,18 +229,14 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
                     &text_view_errors,
-                    format!(
-                        "Found invalid header in line {} \"\"\"{}\"\"\" when loading file {:?} (save file may be from different Czkawka version)",
-                        line_number, line, config_file
-                    )
-                    .as_str(),
+                    format!("Found invalid header in line {} \"{}\" when loading file {:?} (save file may be from different Czkawka version)", line_number, line, config_file).as_str(),
                 );
             } else {
                 match current_type {
                     TypeOfLoadedData::None => {
                         add_text_to_text_view(
                             &text_view_errors,
-                            format!("Found orphan data in line {} \"\"\"{}\"\"\" when loading file {:?} (save file may be from different Czkawka version)", line_number, line, config_file).as_str(),
+                            format!("Found orphan data in line {} \"{}\" when loading file {:?} (save file may be from different Czkawka version)", line_number, line, config_file).as_str(),
                         );
                     }
                     TypeOfLoadedData::IncludedDirectories => {
@@ -264,7 +260,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
                             );
                         }
                     }
@@ -277,7 +273,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
                             );
                         }
                     }
@@ -290,7 +286,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
                             );
                         }
                     }
@@ -303,7 +299,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
                             );
                         }
                     }
@@ -316,7 +312,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
                             );
                         }
                     }
@@ -367,6 +363,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             gui_data.check_button_settings_show_text_view.set_active(bottom_text_panel);
             if !bottom_text_panel {
                 gui_data.scrolled_window_errors.hide();
+            } else {
+                gui_data.scrolled_window_errors.show();
             }
         } else {
             gui_data.check_button_settings_load_at_start.set_active(false);
