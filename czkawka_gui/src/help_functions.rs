@@ -8,7 +8,7 @@ use czkawka_core::similar_images::{SimilarImages, Similarity};
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
-use gtk::{ListStore, TreeView};
+use gtk::{ListStore, TextView, TreeView};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -160,6 +160,19 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     }
 
     text_view.get_buffer().unwrap().set_text(messages.as_str());
+}
+
+pub fn reset_text_view(text_view: &TextView) {
+    text_view.get_buffer().unwrap().set_text("");
+}
+
+pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
+    let buffer = text_view.get_buffer().unwrap();
+    let current_text = match buffer.get_text(&buffer.get_start_iter(), &buffer.get_end_iter(), true) {
+        Some(t) => t.to_string(),
+        None => "".to_string(),
+    };
+    buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {

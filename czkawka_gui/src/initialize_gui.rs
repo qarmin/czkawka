@@ -29,6 +29,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
         let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
+        let check_button_settings_show_preview_similar_images = gui_data.check_button_settings_show_preview_similar_images.clone();
 
         // Disable and show buttons
         buttons_search.show();
@@ -160,7 +161,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                     let mut created_image = false;
 
-                    if !selected_rows.is_empty() {
+                    if !selected_rows.is_empty() && check_button_settings_show_preview_similar_images.get_active() {
                         let tree_path = selected_rows[0].clone();
                         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
                             // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
