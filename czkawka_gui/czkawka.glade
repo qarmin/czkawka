@@ -650,7 +650,7 @@ Author: Rafał Mikrut
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="stock">gtk-add</property>
+                                    <property name="icon_name">list-add</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -701,7 +701,7 @@ Author: Rafał Mikrut
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="stock">gtk-remove</property>
+                                    <property name="icon_name">list-remove</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1089,6 +1089,29 @@ Author: Rafał Mikrut
                     <property name="left_attach">3</property>
                     <property name="top_attach">1</property>
                   </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="check_button_settings_show_text_view">
+                    <property name="label" translatable="yes">Show bottom text panel</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>

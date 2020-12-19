@@ -66,45 +66,52 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
         }
 
-        //// Excluded Items
-        data_to_save.push("--excluded_items:".to_string());
-        let entry_excluded_items = gui_data.entry_excluded_items.clone();
-        for item in entry_excluded_items.get_text().split(',') {
-            if item.trim().is_empty() {
-                continue;
+        {
+            //// Excluded Items
+            data_to_save.push("--excluded_items:".to_string());
+            let entry_excluded_items = gui_data.entry_excluded_items.clone();
+            for item in entry_excluded_items.get_text().split(',') {
+                if item.trim().is_empty() {
+                    continue;
+                }
+                data_to_save.push(item.to_string());
             }
-            data_to_save.push(item.to_string());
-        }
 
-        //// Allowed extensions
-        data_to_save.push("--allowed_extensions:".to_string());
-        let entry_allowed_extensions = gui_data.entry_allowed_extensions.clone();
-        for extension in entry_allowed_extensions.get_text().split(',') {
-            if extension.trim().is_empty() {
-                continue;
+            //// Allowed extensions
+            data_to_save.push("--allowed_extensions:".to_string());
+            let entry_allowed_extensions = gui_data.entry_allowed_extensions.clone();
+            for extension in entry_allowed_extensions.get_text().split(',') {
+                if extension.trim().is_empty() {
+                    continue;
+                }
+                data_to_save.push(extension.to_string());
             }
-            data_to_save.push(extension.to_string());
+
+            //// Save at exit
+            data_to_save.push("--save_at_exit:".to_string());
+            let check_button_settings_save_at_exit = gui_data.check_button_settings_save_at_exit.clone();
+            data_to_save.push(check_button_settings_save_at_exit.get_active().to_string());
+
+            //// Load at start
+            data_to_save.push("--load_at_start:".to_string());
+            let check_button_settings_load_at_start = gui_data.check_button_settings_load_at_start.clone();
+            data_to_save.push(check_button_settings_load_at_start.get_active().to_string());
+
+            //// Confirm deletion of files
+            data_to_save.push("--confirm_deletion:".to_string());
+            let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
+            data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
+
+            //// Show image previews in similar images
+            data_to_save.push("--show_previews:".to_string());
+            let check_button_settings_show_preview_similar_images = gui_data.check_button_settings_show_preview_similar_images.clone();
+            data_to_save.push(check_button_settings_show_preview_similar_images.get_active().to_string());
+
+            //// Show bottom text panel with errors
+            data_to_save.push("--bottom_text_panel:".to_string());
+            let check_button_settings_show_text_view = gui_data.check_button_settings_show_text_view.clone();
+            data_to_save.push(check_button_settings_show_text_view.get_active().to_string());
         }
-
-        //// Save at exit
-        data_to_save.push("--save_at_exit:".to_string());
-        let check_button_settings_save_at_exit = gui_data.check_button_settings_save_at_exit.clone();
-        data_to_save.push(check_button_settings_save_at_exit.get_active().to_string());
-
-        //// Load at start
-        data_to_save.push("--load_at_start:".to_string());
-        let check_button_settings_load_at_start = gui_data.check_button_settings_load_at_start.clone();
-        data_to_save.push(check_button_settings_load_at_start.get_active().to_string());
-
-        //// Confirm deletion of files
-        data_to_save.push("--confirm_deletion:".to_string());
-        let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
-        data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
-
-        //// Show image previews in similar images
-        data_to_save.push("--show_previews:".to_string());
-        let check_button_settings_show_preview_similar_images = gui_data.check_button_settings_show_preview_similar_images.clone();
-        data_to_save.push(check_button_settings_show_preview_similar_images.get_active().to_string());
 
         // Creating/Opening config file
 
@@ -118,16 +125,22 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
         };
 
+        let mut data_saved: bool = false;
         for data in data_to_save {
             match writeln!(config_file_handler, "{}", data) {
                 Ok(_) => {
-                    add_text_to_text_view(&text_view_errors, format!("Saved configuration to file {}", config_dir.display()).as_str());
+                    data_saved = true;
                 }
                 Err(_) => {
-                    add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_dir.display()).as_str());
-                    return;
+                    data_saved = false;
+                    break;
                 }
             }
+        }
+        if data_saved {
+            add_text_to_text_view(&text_view_errors, format!("Saved configuration to file {}", config_dir.display()).as_str());
+        } else {
+            add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_dir.display()).as_str());
         }
     } else {
         add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't save file.");
@@ -144,6 +157,7 @@ enum TypeOfLoadedData {
     SavingAtExit,
     ConfirmDeletion,
     ShowPreviews,
+    BottomTextPanel,
 }
 
 pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
@@ -185,6 +199,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut saving_at_exit: bool = true;
         let mut confirm_deletion: bool = true;
         let mut show_previews: bool = true;
+        let mut bottom_text_panel: bool = true;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -208,6 +223,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::ConfirmDeletion;
             } else if line.starts_with("--show_previews") {
                 current_type = TypeOfLoadedData::ShowPreviews;
+            } else if line.starts_with("--bottom_text_panel") {
+                current_type = TypeOfLoadedData::BottomTextPanel;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -290,6 +307,19 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             );
                         }
                     }
+                    TypeOfLoadedData::BottomTextPanel => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            bottom_text_panel = true;
+                        } else if line == "0" || line == "false" {
+                            bottom_text_panel = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -333,6 +363,11 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             gui_data.check_button_settings_save_at_exit.set_active(saving_at_exit);
             gui_data.check_button_settings_confirm_deletion.set_active(confirm_deletion);
             gui_data.check_button_settings_show_preview_similar_images.set_active(show_previews);
+
+            gui_data.check_button_settings_show_text_view.set_active(bottom_text_panel);
+            if !bottom_text_panel {
+                gui_data.scrolled_window_errors.hide();
+            }
         } else {
             gui_data.check_button_settings_load_at_start.set_active(false);
         }
@@ -410,6 +445,8 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         gui_data.check_button_settings_save_at_exit.set_active(true);
         gui_data.check_button_settings_load_at_start.set_active(true);
         gui_data.check_button_settings_confirm_deletion.set_active(true);
+        gui_data.check_button_settings_show_preview_similar_images.set_active(true);
+        gui_data.check_button_settings_show_text_view.set_active(true);
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");
