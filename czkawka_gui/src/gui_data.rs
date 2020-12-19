@@ -26,7 +26,7 @@ pub struct GuiData {
     // States
     pub main_notebooks_labels: [String; 8],
     pub upper_notebooks_labels: [String; 5],
-    pub buttons_labels: [String; 4],
+    pub buttons_labels: [String; 5],
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<String, HashMap<String, bool>>>>,
 
@@ -56,9 +56,10 @@ pub struct GuiData {
     pub buttons_select: gtk::Button,
     pub buttons_delete: gtk::Button,
     pub buttons_save: gtk::Button,
+    pub buttons_symlink: gtk::Button,
     pub buttons_show_errors: gtk::Button,
-    pub buttons_names: [String; 4],
-    pub buttons_array: [Button; 4],
+    pub buttons_names: [String; 5],
+    pub buttons_array: [Button; 5],
     pub buttons_add_included_directory: gtk::Button,
     pub buttons_remove_included_directory: gtk::Button,
     pub buttons_add_excluded_directory: gtk::Button,
@@ -198,7 +199,7 @@ impl GuiData {
             "allowed_extensions".to_string(),
             "settings".to_string(),
         ];
-        let buttons_labels = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string()];
+        let buttons_labels = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string(), "symlink".to_string()];
 
         // Buttons State - to remember existence of different buttons on pages
 
@@ -229,7 +230,6 @@ impl GuiData {
             shared_upper_notebooks.borrow_mut().insert(i.to_string(), temp_hashmap);
         }
         // Some upper notebook tabs are disabled
-        *shared_upper_notebooks.borrow_mut().get_mut("empty_file").unwrap().get_mut("allowed_extensions").unwrap() = false;
         *shared_upper_notebooks.borrow_mut().get_mut("temporary_file").unwrap().get_mut("allowed_extensions").unwrap() = false;
 
         // State of search results
@@ -258,11 +258,12 @@ impl GuiData {
         let buttons_select: gtk::Button = builder.get_object("buttons_select").unwrap();
         let buttons_delete: gtk::Button = builder.get_object("buttons_delete").unwrap();
         let buttons_save: gtk::Button = builder.get_object("buttons_save").unwrap();
+        let buttons_symlink: gtk::Button = builder.get_object("buttons_symlink").unwrap();
 
         let buttons_show_errors: gtk::Button = builder.get_object("buttons_show_errors").unwrap();
 
-        let buttons_names = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string()];
-        let buttons_array = [buttons_search.clone(), buttons_select.clone(), buttons_delete.clone(), buttons_save.clone()];
+        let buttons_names = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string(), "symlink".to_string()];
+        let buttons_array = [buttons_search.clone(), buttons_select.clone(), buttons_delete.clone(), buttons_save.clone(), buttons_symlink.clone()];
 
         let buttons_add_included_directory: gtk::Button = builder.get_object("buttons_add_included_directory").unwrap();
         let buttons_remove_included_directory: gtk::Button = builder.get_object("buttons_remove_included_directory").unwrap();
@@ -405,6 +406,7 @@ impl GuiData {
             buttons_select,
             buttons_delete,
             buttons_save,
+            buttons_symlink,
             buttons_show_errors,
             buttons_names,
             buttons_array,

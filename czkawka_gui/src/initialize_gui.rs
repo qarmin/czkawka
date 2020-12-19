@@ -18,6 +18,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let buttons_save = gui_data.buttons_save.clone();
         let buttons_delete = gui_data.buttons_delete.clone();
         let buttons_select = gui_data.buttons_select.clone();
+        let buttons_symlink = gui_data.buttons_symlink.clone();
         let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
         let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
         let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
@@ -36,6 +37,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         buttons_save.hide();
         buttons_delete.hide();
         buttons_select.hide();
+        buttons_symlink.hide();
 
         // Set Main Scrolled Window Treeviews
         {

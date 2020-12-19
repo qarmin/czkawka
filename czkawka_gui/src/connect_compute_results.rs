@@ -187,10 +187,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("symlink").unwrap() = true;
                         } else {
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
                             *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("symlink").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("duplicate").unwrap(), &buttons_array, &buttons_names);
                     }
@@ -442,10 +444,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("symlink").unwrap() = true;
                         } else {
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = false;
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = false;
                             *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("symlink").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("similar_images").unwrap(), &buttons_array, &buttons_names);
                     }
@@ -590,10 +594,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("save").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("delete").unwrap() = true;
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("symlink").unwrap() = true;
                         } else {
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("save").unwrap() = false;
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("delete").unwrap() = false;
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("symlink").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
                     }
