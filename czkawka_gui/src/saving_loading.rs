@@ -1,5 +1,5 @@
 use crate::gui_data::*;
-use crate::help_functions::{get_list_store, ColumnsDirectory};
+use crate::help_functions::*;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{EntryExt, GtkListStoreExt, ToggleButtonExt};
@@ -8,11 +8,15 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, fs};
 
+// TODO add more settings, maybe to different dialog window
+
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";
 
 pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
     let check_button_settings_save_at_exit = gui_data.check_button_settings_save_at_exit.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
+
+    reset_text_view(&text_view_errors);
 
     if !manual_execution && !check_button_settings_save_at_exit.get_active() {
         // When check button is deselected, not save configuration at exit
@@ -26,14 +30,11 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let config_dir = proj_dirs.config_dir();
         if config_dir.exists() {
             if !config_dir.is_dir() {
-                text_view_errors
-                    .get_buffer()
-                    .unwrap()
-                    .set_text(format!("Cannot create save file inside {} because this isn't a folder.", config_dir.display()).as_str());
+                add_text_to_text_view(&text_view_errors, format!("Cannot create save file inside {} because this isn't a folder.", config_dir.display()).as_str());
                 return;
             }
         } else if fs::create_dir(config_dir).is_err() {
-            text_view_errors.get_buffer().unwrap().set_text(format!("Failed configuration to create configuration folder {}", config_dir.display()).as_str());
+            add_text_to_text_view(&text_view_errors, format!("Failed configuration to create configuration folder {}", config_dir.display()).as_str());
             return;
         }
 
@@ -95,10 +96,15 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let check_button_settings_load_at_start = gui_data.check_button_settings_load_at_start.clone();
         data_to_save.push(check_button_settings_load_at_start.get_active().to_string());
 
-        //// Load at start
+        //// Confirm deletion of files
         data_to_save.push("--confirm_deletion:".to_string());
         let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
         data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
+
+        //// Show image previews in similar images
+        data_to_save.push("--show_previews:".to_string());
+        let check_button_settings_show_preview_similar_images = gui_data.check_button_settings_show_preview_similar_images.clone();
+        data_to_save.push(check_button_settings_show_preview_similar_images.get_active().to_string());
 
         // Creating/Opening config file
 
@@ -107,7 +113,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut config_file_handler = match File::create(&config_file) {
             Ok(t) => t,
             Err(_) => {
-                text_view_errors.get_buffer().unwrap().set_text(format!("Failed to create config file {}", config_file.display()).as_str());
+                add_text_to_text_view(&text_view_errors, format!("Failed to create config file {}", config_dir.display()).as_str());
                 return;
             }
         };
@@ -115,16 +121,16 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         for data in data_to_save {
             match writeln!(config_file_handler, "{}", data) {
                 Ok(_) => {
-                    text_view_errors.get_buffer().unwrap().set_text(format!("Saved configuration to file {}", config_file.display()).as_str());
+                    add_text_to_text_view(&text_view_errors, format!("Saved configuration to file {}", config_dir.display()).as_str());
                 }
                 Err(_) => {
-                    text_view_errors.get_buffer().unwrap().set_text(format!("Failed to save configuration data to file {}", config_file.display()).as_str());
+                    add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_dir.display()).as_str());
                     return;
                 }
             }
         }
     } else {
-        text_view_errors.get_buffer().unwrap().set_text("Failed to get home directory, so can't save file.");
+        add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't save file.");
     }
 }
 
@@ -137,10 +143,14 @@ enum TypeOfLoadedData {
     LoadingAtStart,
     SavingAtExit,
     ConfirmDeletion,
+    ShowPreviews,
 }
 
 pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
     let text_view_errors = gui_data.text_view_errors.clone();
+
+    reset_text_view(&text_view_errors);
+
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/alice/.config/barapp
         // Win: C:\Users\Alice\AppData\Roaming\Foo Corp\Bar App\config
@@ -151,7 +161,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         if !config_file.exists() || !config_file.is_file() {
             if manual_execution {
                 // Don't show errors when there is no configuration file when starting app
-                text_view_errors.get_buffer().unwrap().set_text(format!("Cannot load configuration from file {:?}.", config_file.display()).as_str());
+                add_text_to_text_view(&text_view_errors, format!("Cannot load configuration from file {:?}.", config_file.display()).as_str());
             }
             return;
         }
@@ -160,7 +170,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let loaded_data: String = match fs::read_to_string(&config_file) {
             Ok(t) => t,
             Err(_) => {
-                text_view_errors.get_buffer().unwrap().set_text(format!("Failed to read data from file {:?}.", config_file).as_str());
+                add_text_to_text_view(&text_view_errors, format!("Failed to read data from file {:?}.", config_file).as_str());
                 return;
             }
         };
@@ -174,6 +184,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut loading_at_start: bool = true;
         let mut saving_at_exit: bool = true;
         let mut confirm_deletion: bool = true;
+        let mut show_previews: bool = true;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -195,19 +206,25 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::SavingAtExit;
             } else if line.starts_with("--confirm_deletion") {
                 current_type = TypeOfLoadedData::ConfirmDeletion;
+            } else if line.starts_with("--show_previews") {
+                current_type = TypeOfLoadedData::ShowPreviews;
             } else if line.starts_with("--") {
-                text_view_errors
-                    .get_buffer()
-                    .unwrap()
-                    .set_text(format!("Found invalid header in line {} \"\"\"{}\"\"\" when loading file {:?}", line_number, line, config_file).as_str());
+                current_type = TypeOfLoadedData::None;
+                add_text_to_text_view(
+                    &text_view_errors,
+                    format!(
+                        "Found invalid header in line {} \"\"\"{}\"\"\" when loading file {:?} (save file may be from different Czkawka version)",
+                        line_number, line, config_file
+                    )
+                    .as_str(),
+                );
             } else {
                 match current_type {
                     TypeOfLoadedData::None => {
-                        text_view_errors
-                            .get_buffer()
-                            .unwrap()
-                            .set_text(format!("Found orphan data in line {} \"\"\"{}\"\"\" when loading file {:?}", line_number, line, config_file).as_str());
-                        return;
+                        add_text_to_text_view(
+                            &text_view_errors,
+                            format!("Found orphan data in line {} \"\"\"{}\"\"\" when loading file {:?} (save file may be from different Czkawka version)", line_number, line, config_file).as_str(),
+                        );
                     }
                     TypeOfLoadedData::IncludedDirectories => {
                         included_directories.push(line);
@@ -228,10 +245,10 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else if line == "0" || line == "false" {
                             loading_at_start = false;
                         } else {
-                            text_view_errors
-                                .get_buffer()
-                                .unwrap()
-                                .set_text(format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str());
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
                         }
                     }
                     TypeOfLoadedData::SavingAtExit => {
@@ -241,10 +258,10 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else if line == "0" || line == "false" {
                             saving_at_exit = false;
                         } else {
-                            text_view_errors
-                                .get_buffer()
-                                .unwrap()
-                                .set_text(format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str());
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
                         }
                     }
                     TypeOfLoadedData::ConfirmDeletion => {
@@ -254,10 +271,23 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                         } else if line == "0" || line == "false" {
                             confirm_deletion = false;
                         } else {
-                            text_view_errors
-                                .get_buffer()
-                                .unwrap()
-                                .set_text(format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str());
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
+                    TypeOfLoadedData::ShowPreviews => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            show_previews = true;
+                        } else if line == "0" || line == "false" {
+                            show_previews = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"\"\"{}\"\"\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
                         }
                     }
                 }
@@ -302,21 +332,25 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             gui_data.check_button_settings_load_at_start.set_active(loading_at_start);
             gui_data.check_button_settings_save_at_exit.set_active(saving_at_exit);
             gui_data.check_button_settings_confirm_deletion.set_active(confirm_deletion);
+            gui_data.check_button_settings_show_preview_similar_images.set_active(show_previews);
         } else {
             gui_data.check_button_settings_load_at_start.set_active(false);
         }
 
         if manual_execution {
-            text_view_errors.get_buffer().unwrap().set_text(format!("Properly loaded configuration from file {:?}", config_file).as_str());
+            add_text_to_text_view(&text_view_errors, format!("Properly loaded configuration from file {:?}", config_file).as_str());
         }
     } else {
-        text_view_errors.get_buffer().unwrap().set_text("Failed to get home directory, so can't load file.");
+        add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't load file.");
     }
 }
 
 pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     // TODO Maybe add popup dialog to confirm resetting
     let text_view_errors = gui_data.text_view_errors.clone();
+
+    reset_text_view(&text_view_errors);
+
     // Resetting included directories
     {
         let col_indices = [0];
@@ -328,10 +362,10 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
             Ok(t) => t.to_str().unwrap().to_string(),
             Err(_) => {
                 if cfg!(target_family = "unix") {
-                    println!("Failed to read current directory, setting /home instead");
+                    add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting /home instead");
                     "/home".to_string()
                 } else if cfg!(target_family = "windows") {
-                    println!("Failed to read current directory, setting C:\\ instead");
+                    add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting C:\\ instead");
                     "C:\\".to_string()
                 } else {
                     "".to_string()
@@ -378,6 +412,6 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         gui_data.check_button_settings_confirm_deletion.set_active(true);
     }
     if manual_clearing {
-        text_view_errors.get_buffer().unwrap().set_text("Current configuration was cleared.");
+        add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");
     }
 }

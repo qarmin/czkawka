@@ -1077,7 +1077,18 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkCheckButton" id="check_button_settings_show_preview_similar_images">
+                    <property name="label" translatable="yes">Show image preview</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="top_attach">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>
