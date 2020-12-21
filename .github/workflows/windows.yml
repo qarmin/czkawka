@@ -212,12 +212,18 @@ jobs:
 
           GTK_LIBRARY="$(pwd)/gtk_library"
           GTK_APP="$(pwd)/gtk_app"
+          GTK_THEME="$(pwd)/gtk_theme"
 
           wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
           unzip mingw64.zip -d $GTK_LIBRARY
           GTK_LIBRARY="$GTK_LIBRARY/mingw64"
 
+          wget https://github.com/nrhodes91/AdMin/archive/master.zip
+          unzip master.zip -d $GTK_THEME
+
           PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui --release
+
+          strip target/x86_64-pc-windows-gnu/release/czkawka_gui.exe
 
           mkdir $GTK_APP
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe $GTK_APP
@@ -228,6 +234,14 @@ jobs:
           cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
           mkdir $GTK_APP/lib
           cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
+
+          mkdir -p $GTK_APP/share/themes
+          mkdir -p $GTK_APP/share/gtk-3.0
+          echo "[Settings]" > $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-theme-name = admin-gtk3-dark-osx" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-font-name = Segoe UI 10" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
+          cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r
 
           zip -r gtk_app.zip $GTK_APP
         env:
