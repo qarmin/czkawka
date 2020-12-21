@@ -21,6 +21,7 @@
   - Similar Images - Finds images which are not exactly the same(different resolution, watermarks)
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
   - Same Music - Search for music with same artist, album etc.
+  - Invalid Symbolic Links - Shows symbolic links which points to non-existent files/directories
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
 ## Requirements
@@ -166,10 +167,10 @@ So still is a big room for improvements.
 | Similar images | X |   | X |
 | Zeroed Files| X | | |
 | Music duplicates(tags) | X | | X |
+| Invalid symlinks | X | X |  |
 | Installed packages |  | X |  |
 | Invalid names |   | X |  |
 | Names conflict |   | X |  |
-| Invalid symlinks |   | X |  |
 | Bad ID |   | X |  |
 | Non stripped binaries |   | X |  |
 | Redundant whitespace |  | X |  |
@@ -190,7 +191,9 @@ The code should also be easy to read, so please use the simplest language possib
 
 ## Name
 Czkawka is a Polish word which means _hiccup_.  
-I chose this name because I wanted to hear people speaking other languages pronounce it.  
+
+I chose this name because I wanted to hear people speaking other languages pronounce it. 
+
 This name is not as bad as it seems, because I was also thinking about using words like _żółć_, _gżegżółka_ or _żołądź_, but I gave up on these ideas because they contained Polish characters, which would cause difficulty in searching for the project.
 
 At the beginning of the program creation, if the response concerning the name was unanimously negative, I prepared myself for a possible change of the name of the program, but the opinions were extremely mixed.
@@ -199,6 +202,8 @@ At the beginning of the program creation, if the response concerning the name wa
 Code is distributed under MIT license.
 
 Icon is created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
+
+Windows dark theme is used from AdMin repo - https://github.com/nrhodes91/AdMin with MIT license
 
 Program is completely free to use.
 
