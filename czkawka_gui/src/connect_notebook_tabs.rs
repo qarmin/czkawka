@@ -15,6 +15,16 @@ pub fn connect_notebook_tabs(gui_data: &GuiData) {
     let notebook_upper = gui_data.notebook_upper.clone();
     let notebook_upper_children_names = gui_data.notebook_upper_children_names.clone();
 
+    // TODO Remove this because disabling it doesn't works
+    // Remove on Windows last tab(Invalid symlinks) because is not available
+    // if cfg!(target_family = "windows") {
+    //     for (index, widget) in notebook_main_clone.get_children().iter().enumerate() {
+    //         if widget.get_buildable_name() == Some("scrolled_window_invalid_symlinks".to_string()) {
+    //             notebook_main_clone.remove_page(Some(index as u32));
+    //         }
+    //     }
+    // }
+
     notebook_main_clone.connect_switch_page(move |_, _, number| {
         let page: &str;
         match notebook_main_children_names.get(number as usize).unwrap().as_str() {
@@ -26,6 +36,7 @@ pub fn connect_notebook_tabs(gui_data: &GuiData) {
             "notebook_main_similar_images_finder_label" => page = "similar_images",
             "notebook_main_zeroed_files_finder" => page = "zeroed_files",
             "notebook_main_same_music_finder" => page = "same_music",
+            "scrolled_window_invalid_symlinks" => page = "invalid_symlinks",
             e => {
                 panic!("Not existent page {}", e);
             }

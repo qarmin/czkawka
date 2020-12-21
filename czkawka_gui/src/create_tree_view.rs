@@ -394,3 +394,43 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
 
     tree_view.set_vexpand(true);
 }
+
+pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Symlink Path");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::SymlinkPath as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Destination Path");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::DestinationPath as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Type of Error");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::TypeOfError as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Modification Date");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::Modification as i32);
+    tree_view.append_column(&column);
+
+    tree_view.set_vexpand(true);
+}

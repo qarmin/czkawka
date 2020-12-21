@@ -3,6 +3,8 @@ use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::invalid_symlinks;
+use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::{SimilarImages, Similarity};
 use czkawka_core::temporary::Temporary;
@@ -21,6 +23,7 @@ pub enum Message {
     SimilarImages(SimilarImages),
     ZeroedFiles(ZeroedFiles),
     SameMusic(SameMusic),
+    InvalidSymlinks(InvalidSymlinks),
 }
 
 pub enum ColumnsDuplicates {
@@ -89,6 +92,12 @@ pub enum ColumnsSameMusic {
     ModificationAsSecs,
     Color,
     TextColor,
+}
+pub enum ColumnsInvalidSymlinks {
+    SymlinkPath = 0,
+    DestinationPath,
+    TypeOfError,
+    Modification,
 }
 
 pub const TEXT_COLOR: &str = "#ffffff";
@@ -245,6 +254,13 @@ pub fn get_text_from_similarity(similarity: &Similarity) -> &str {
         Similarity::Medium => "Medium",
         Similarity::High => "High",
         Similarity::VeryHigh => "Very High",
+    }
+}
+
+pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) -> &str {
+    match error {
+        invalid_symlinks::ErrorType::InfiniteRecursion => "Infinite recursion",
+        invalid_symlinks::ErrorType::NonExistentFile => "Non existent destination file",
     }
 }
 

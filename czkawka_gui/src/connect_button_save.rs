@@ -14,6 +14,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
+    let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
     buttons_save.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
@@ -72,6 +73,13 @@ pub fn connect_button_save(gui_data: &GuiData) {
             shared_same_music_state.borrow_mut().save_results_to_file(file_name);
 
             post_save_things(file_name, "same_music", &gui_data);
+        }
+        "scrolled_window_invalid_symlinks" => {
+            let file_name = "results_invalid_symlinks.txt";
+
+            shared_same_invalid_symlinks.borrow_mut().save_results_to_file(file_name);
+
+            post_save_things(file_name, "invalid_symlinks", &gui_data);
         }
         e => panic!("Not existent {}", e),
     });
