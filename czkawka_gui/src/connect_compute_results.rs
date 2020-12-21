@@ -622,13 +622,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&scrolled_window_invalid_symlinks);
 
-                        let col_indices = [0, 1, 2, 3];
+                        let col_indices = [0, 1, 2, 3, 4];
 
                         let vector = ifs.get_invalid_symlinks();
 
                         for file_entry in vector {
-                            let values: [&dyn ToValue; 4] = [
-                                &file_entry.symlink_path.to_string_lossy().to_string(),
+                            let (directory, file) = split_path(&file_entry.symlink_path);
+                            let values: [&dyn ToValue; 5] = [
+                                &file,
+                                &directory,
                                 &file_entry.destination_path.to_string_lossy().to_string(),
                                 &get_text_from_invalid_symlink_cause(&file_entry.type_of_error),
                                 &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),

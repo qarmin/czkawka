@@ -280,7 +280,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
             }
             // Invalid Symlinks
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -288,6 +288,8 @@ pub fn initialize_gui(gui_data: &GuiData) {
                 tree_view.get_selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_invalid_symlinks(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_invalid_symlinks);
 
                 scrolled_window_invalid_symlinks.add(&tree_view);
                 scrolled_window_invalid_symlinks.show_all();

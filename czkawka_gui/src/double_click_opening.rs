@@ -55,6 +55,13 @@ pub fn opening_double_click_function_similar_images(tree_view: &gtk::TreeView, e
     gtk::Inhibit(false)
 }
 
+pub fn opening_double_click_function_invalid_symlinks(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+    if event.get_event_type() == gdk::EventType::DoubleButtonPress {
+        common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32);
+    }
+    gtk::Inhibit(false)
+}
+
 pub fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path: i32) {
     let selection = tree_view.get_selection();
     let (selection_rows, tree_model) = selection.get_selected_rows();

@@ -399,10 +399,19 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
-    column.set_title("Symlink Path");
+    column.set_title("Symlink File Name");
     column.set_resizable(true);
     column.set_min_width(50);
-    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::SymlinkPath as i32);
+    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::Name as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Symlink Folder");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();

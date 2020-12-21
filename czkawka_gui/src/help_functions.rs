@@ -94,7 +94,8 @@ pub enum ColumnsSameMusic {
     TextColor,
 }
 pub enum ColumnsInvalidSymlinks {
-    SymlinkPath = 0,
+    Name = 0,
+    Path,
     DestinationPath,
     TypeOfError,
     Modification,
