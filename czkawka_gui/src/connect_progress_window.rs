@@ -1,6 +1,6 @@
 use crate::gui_data::GuiData;
 
-use czkawka_core::{big_file, duplicate, empty_files, empty_folder, same_music, similar_images, temporary, zeroed};
+use czkawka_core::{big_file, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, temporary, zeroed};
 
 use futures::StreamExt;
 use gtk::{LabelExt, ProgressBarExt, WidgetExt};
@@ -16,6 +16,7 @@ pub fn connect_progress_window(
     mut futures_receiver_similar_images: futures::channel::mpsc::Receiver<similar_images::ProgressData>,
     mut futures_receiver_temporary: futures::channel::mpsc::Receiver<temporary::ProgressData>,
     mut futures_receiver_zeroed: futures::channel::mpsc::Receiver<zeroed::ProgressData>,
+    mut futures_receiver_invalid_symlinks: futures::channel::mpsc::Receiver<invalid_symlinks::ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
 
@@ -226,6 +227,16 @@ pub fn connect_progress_window(
                         panic!();
                     }
                 }
+            }
+        };
+        main_context.spawn_local(future);
+    }
+    {
+        // Invalid Symlinks
+        let label_stage = gui_data.label_stage.clone();
+        let future = async move {
+            while let Some(item) = futures_receiver_invalid_symlinks.next().await {
+                label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
             }
         };
         main_context.spawn_local(future);

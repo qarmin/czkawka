@@ -7,6 +7,7 @@ use czkawka_core::big_file::BigFile;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
@@ -14,6 +15,8 @@ use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
 use gtk::prelude::*;
 use gtk::WindowPosition;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 
 #[allow(clippy::too_many_arguments)]
@@ -28,6 +31,7 @@ pub fn connect_button_search(
     futures_sender_similar_images: futures::channel::mpsc::Sender<similar_images::ProgressData>,
     futures_sender_temporary: futures::channel::mpsc::Sender<temporary::ProgressData>,
     futures_sender_zeroed: futures::channel::mpsc::Sender<zeroed::ProgressData>,
+    futures_sender_invalid_symlinks: futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>,
 ) {
     let entry_info = gui_data.entry_info.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
@@ -68,6 +72,7 @@ pub fn connect_button_search(
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
+    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let dialog_progress = gui_data.dialog_progress.clone();
     let label_stage = gui_data.label_stage.clone();
@@ -75,6 +80,8 @@ pub fn connect_button_search(
     let progress_bar_current_stage = gui_data.progress_bar_current_stage.clone();
     let progress_bar_all_stages = gui_data.progress_bar_all_stages.clone();
     let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
+
+    let show_dialog = Arc::new(AtomicBool::new(true));
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
@@ -91,11 +98,13 @@ pub fn connect_button_search(
         entry_info.set_text("Searching data, it may take a while, please wait...");
 
         // Set dialog to center to current screen(it is impossible to center it to main window)
-        dialog_progress.set_position(WindowPosition::CenterOnParent);
+        dialog_progress.set_position(WindowPosition::CenterAlways);
 
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);
         progress_bar_current_stage.set_fraction(0 as f64);
+
+        reset_text_view(&text_view_errors);
 
         match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
             "notebook_main_duplicate_finder_label" => {
@@ -104,7 +113,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_duplicate_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let check_method;
                 if radio_button_duplicates_name.get_active() {
@@ -147,7 +155,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_main_empty_files_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -172,7 +179,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_main_empty_folder_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -194,7 +200,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_big_files_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let numbers_of_files_to_check = match entry_big_files_number.get_text().as_str().parse::<usize>() {
                     Ok(t) => t,
@@ -223,7 +228,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_main_temporary_files_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -249,7 +253,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_similar_images_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -295,7 +298,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_zeroed_files_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -320,7 +322,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&scrolled_window_same_music_finder).clear();
-                text_view_errors.get_buffer().unwrap().set_text("");
 
                 let minimal_file_size = match entry_same_music_minimal_size.get_text().as_str().parse::<u64>() {
                     Ok(t) => t,
@@ -366,12 +367,37 @@ pub fn connect_button_search(
                     notebook_main.set_sensitive(true);
                     set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
                     entry_info.set_text("ERROR: You must select at least one checkbox with music searching types.");
+                    show_dialog.store(false, Ordering::Relaxed);
                 }
+            }
+            "scrolled_window_invalid_symlinks" => {
+                label_stage.show();
+                grid_progress_stages.hide();
+                dialog_progress.resize(1, 1);
+
+                get_list_store(&scrolled_window_invalid_symlinks).clear();
+
+                let glib_stop_sender = glib_stop_sender.clone();
+                let stop_receiver = stop_receiver.clone();
+                let futures_sender_invalid_symlinks = futures_sender_invalid_symlinks.clone();
+
+                thread::spawn(move || {
+                    let mut isf = InvalidSymlinks::new();
+
+                    isf.set_included_directory(included_directories);
+                    isf.set_excluded_directory(excluded_directories);
+                    isf.set_recursive_search(recursive_search);
+                    isf.set_excluded_items(excluded_items);
+                    isf.find_invalid_links(Some(&stop_receiver), Some(&futures_sender_invalid_symlinks));
+                    let _ = glib_stop_sender.send(Message::InvalidSymlinks(isf));
+                });
             }
             e => panic!("Not existent {}", e),
         }
 
         // Show progress dialog
-        dialog_progress.show();
+        if show_dialog.load(Ordering::Relaxed) {
+            dialog_progress.show();
+        }
     });
 }

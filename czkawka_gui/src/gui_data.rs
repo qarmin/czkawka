@@ -4,6 +4,7 @@ use czkawka_core::big_file::BigFile;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
@@ -24,9 +25,10 @@ pub struct GuiData {
     pub window_main: gtk::Window,
 
     // States
-    pub main_notebooks_labels: [String; 8],
+    pub main_notebooks_labels: [String; 9],
     pub upper_notebooks_labels: [String; 5],
     pub buttons_labels: [String; 5],
+
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<String, HashMap<String, bool>>>>,
 
@@ -42,6 +44,7 @@ pub struct GuiData {
     pub shared_similar_images_state: Rc<RefCell<SimilarImages>>,
     pub shared_zeroed_files_state: Rc<RefCell<ZeroedFiles>>,
     pub shared_same_music_state: Rc<RefCell<SameMusic>>,
+    pub shared_same_invalid_symlinks: Rc<RefCell<InvalidSymlinks>>,
 
     //// GUI Entry
     pub entry_similar_images_minimal_size: gtk::Entry,
@@ -82,9 +85,14 @@ pub struct GuiData {
     pub buttons_popover_simple_list_select_custom: gtk::Button,
     pub buttons_popover_simple_list_unselect_custom: gtk::Button,
 
+    pub buttons_popover_very_simple_list_select_all: gtk::Button,
+    pub buttons_popover_very_simple_list_unselect_all: gtk::Button,
+    pub buttons_popover_very_simple_list_reverse: gtk::Button,
+
     //// Popovers
     pub popover_select_duplicate: gtk::Popover,
     pub popover_select_simple_list: gtk::Popover,
+    pub popover_select_very_simple_list: gtk::Popover,
 
     //// Check Buttons
     pub check_button_recursive: gtk::CheckButton,
@@ -132,6 +140,7 @@ pub struct GuiData {
     pub scrolled_window_similar_images_finder: gtk::ScrolledWindow,
     pub scrolled_window_zeroed_files_finder: gtk::ScrolledWindow,
     pub scrolled_window_same_music_finder: gtk::ScrolledWindow,
+    pub scrolled_window_invalid_symlinks: gtk::ScrolledWindow,
 
     // Upper notebook
     pub scrolled_window_included_directories: gtk::ScrolledWindow,
@@ -191,6 +200,7 @@ impl GuiData {
             "similar_images".to_string(),
             "zeroed_files".to_string(),
             "same_music".to_string(),
+            "invalid_symlinks".to_string(),
         ];
         let upper_notebooks_labels = [
             "included_directories".to_string(),
@@ -242,6 +252,7 @@ impl GuiData {
         let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
         let shared_zeroed_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(ZeroedFiles::new()));
         let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
+        let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(InvalidSymlinks::new()));
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -287,9 +298,14 @@ impl GuiData {
         let buttons_popover_simple_list_select_custom: gtk::Button = builder.get_object("buttons_popover_simple_list_select_custom").unwrap();
         let buttons_popover_simple_list_unselect_custom: gtk::Button = builder.get_object("buttons_popover_simple_list_unselect_custom").unwrap();
 
+        let buttons_popover_very_simple_list_select_all: gtk::Button = builder.get_object("buttons_popover_very_simple_list_select_all").unwrap();
+        let buttons_popover_very_simple_list_unselect_all: gtk::Button = builder.get_object("buttons_popover_very_simple_list_unselect_all").unwrap();
+        let buttons_popover_very_simple_list_reverse: gtk::Button = builder.get_object("buttons_popover_very_simple_list_reverse").unwrap();
+
         //// Popovers
         let popover_select_duplicate: gtk::Popover = builder.get_object("popover_select_duplicate").unwrap();
         let popover_select_simple_list: gtk::Popover = builder.get_object("popover_select_simple_list").unwrap();
+        let popover_select_very_simple_list: gtk::Popover = builder.get_object("popover_select_very_simple_list").unwrap();
 
         //// Check Buttons
         let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
@@ -342,6 +358,7 @@ impl GuiData {
         let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_similar_images_finder").unwrap();
         let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_zeroed_files_finder").unwrap();
         let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_same_music_finder").unwrap();
+        let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.get_object("scrolled_window_invalid_symlinks").unwrap();
 
         // Upper notebook
         let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
@@ -396,6 +413,7 @@ impl GuiData {
             shared_similar_images_state,
             shared_zeroed_files_state,
             shared_same_music_state,
+            shared_same_invalid_symlinks,
             entry_similar_images_minimal_size,
             entry_duplicate_minimal_size,
             entry_allowed_extensions,
@@ -428,8 +446,12 @@ impl GuiData {
             buttons_popover_simple_list_reverse,
             buttons_popover_simple_list_select_custom,
             buttons_popover_simple_list_unselect_custom,
+            buttons_popover_very_simple_list_select_all,
+            buttons_popover_very_simple_list_unselect_all,
+            buttons_popover_very_simple_list_reverse,
             popover_select_duplicate,
             popover_select_simple_list,
+            popover_select_very_simple_list,
             check_button_recursive,
             check_button_music_title,
             check_button_music_artist,
@@ -460,6 +482,7 @@ impl GuiData {
             scrolled_window_similar_images_finder,
             scrolled_window_zeroed_files_finder,
             scrolled_window_same_music_finder,
+            scrolled_window_invalid_symlinks,
             scrolled_window_included_directories,
             scrolled_window_excluded_directories,
             dialog_progress,

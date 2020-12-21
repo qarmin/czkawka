@@ -6,6 +6,8 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
 
+// TODO add support for checking if really symlink doesn't point to correct directory/file
+
 pub fn connect_button_delete(gui_data: &GuiData) {
     let gui_data = gui_data.clone();
     let buttons_delete = gui_data.buttons_delete.clone();
@@ -20,6 +22,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
 
     buttons_delete.connect_clicked(move |_| {
@@ -79,6 +82,9 @@ pub fn connect_button_delete(gui_data: &GuiData) {
             }
             "notebook_main_same_music_finder" => {
                 tree_remove(scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+            }
+            "scrolled_window_invalid_symlinks" => {
+                basic_remove_invalid_symlinks(scrolled_window_invalid_symlinks.clone(), ColumnsInvalidSymlinks::SymlinkPath as i32, &gui_data);
             }
             e => panic!("Not existent {}", e),
         }
@@ -164,6 +170,38 @@ fn empty_folder_remover(scrolled_window: gtk::ScrolledWindow, column_file_name: 
         }
         if error_happened {
             messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str()
+        }
+    }
+
+    text_view_errors.get_buffer().unwrap().set_text(messages.as_str());
+    selection.unselect_all();
+}
+
+fn basic_remove_invalid_symlinks(scrolled_window: gtk::ScrolledWindow, column_symlink_path: i32, gui_data: &GuiData) {
+    let text_view_errors = gui_data.text_view_errors.clone();
+
+    let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+    let selection = tree_view.get_selection();
+
+    let (selection_rows, tree_model) = selection.get_selected_rows();
+    if selection_rows.is_empty() {
+        return;
+    }
+    let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+
+    // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
+
+    let mut messages: String = "".to_string();
+
+    // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
+    for tree_path in selection_rows.iter().rev() {
+        let symlink_path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_symlink_path).get::<String>().unwrap().unwrap();
+
+        match fs::remove_file(&symlink_path) {
+            Ok(_) => {
+                list_store.remove(&list_store.get_iter(tree_path).unwrap());
+            }
+            Err(_) => messages += format!("Failed to remove file {} because file doesn't exists or you don't have permissions.\n", symlink_path).as_str(),
         }
     }
 

@@ -25,7 +25,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
     let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
+    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
+    let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
     let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
@@ -602,6 +604,54 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("symlink").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+            Message::InvalidSymlinks(ifs) => {
+                if ifs.get_stopped_search() {
+                    entry_info.set_text("Searching for invalid symlink was stopped by user");
+                } else {
+                    let information = ifs.get_information();
+                    let text_messages = ifs.get_text_messages();
+
+                    let invalid_symlinks: usize = information.number_of_invalid_symlinks;
+
+                    entry_info.set_text(format!("Found {} invalid symlinks.", invalid_symlinks).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = get_list_store(&scrolled_window_invalid_symlinks);
+
+                        let col_indices = [0, 1, 2, 3];
+
+                        let vector = ifs.get_invalid_symlinks();
+
+                        for file_entry in vector {
+                            let values: [&dyn ToValue; 4] = [
+                                &file_entry.symlink_path.to_string_lossy().to_string(),
+                                &file_entry.destination_path.to_string_lossy().to_string(),
+                                &get_text_from_invalid_symlink_cause(&file_entry.type_of_error),
+                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                            ];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_same_invalid_symlinks.borrow_mut() = ifs;
+
+                        if invalid_symlinks > 0 {
+                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("select").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("select").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

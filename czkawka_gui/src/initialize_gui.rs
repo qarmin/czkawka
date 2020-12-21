@@ -26,6 +26,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
         let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
         let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+        let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
         let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
@@ -276,6 +277,20 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_same_music_finder.add(&tree_view);
                 scrolled_window_same_music_finder.show_all();
+            }
+            // Invalid Symlinks
+            {
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_invalid_symlinks(&mut tree_view);
+
+                scrolled_window_invalid_symlinks.add(&tree_view);
+                scrolled_window_invalid_symlinks.show_all();
             }
         }
 

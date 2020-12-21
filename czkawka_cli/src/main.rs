@@ -10,6 +10,8 @@ use czkawka_core::{
     duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
+    invalid_symlinks,
+    invalid_symlinks::InvalidSymlinks,
     same_music::SameMusic,
     similar_images::SimilarImages,
     temporary::{self, Temporary},
@@ -295,6 +297,39 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             mf.print_results();
             mf.get_text_messages().print_messages();
+        }
+        Commands::InvalidSymlinks {
+            directories,
+            excluded_directories,
+            excluded_items,
+            allowed_extensions,
+            file_to_save,
+            not_recursive,
+            delete_files,
+        } => {
+            let mut ifs = InvalidSymlinks::new();
+
+            ifs.set_included_directory(path_list_to_str(directories.directories));
+            ifs.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
+            ifs.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            ifs.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
+            ifs.set_recursive_search(!not_recursive.not_recursive);
+            if delete_files {
+                ifs.set_delete_method(invalid_symlinks::DeleteMethod::Delete);
+            }
+
+            ifs.find_invalid_links(None, None);
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !ifs.save_results_to_file(file_name) {
+                    ifs.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            ifs.print_results();
+            ifs.get_text_messages().print_messages();
         }
     }
 }

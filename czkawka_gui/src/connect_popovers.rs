@@ -552,9 +552,12 @@ pub fn connect_select_all(gui_data: &GuiData) {
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
     let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
+    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
     let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
+    let popover_select_very_simple_list = gui_data.popover_select_very_simple_list.clone();
     let buttons_popover_simple_list_select_all = gui_data.buttons_popover_simple_list_select_all.clone();
+    let buttons_popover_very_simple_list_select_all = gui_data.buttons_popover_very_simple_list_select_all.clone();
     let buttons_popover_duplicate_select_all = gui_data.buttons_popover_duplicate_select_all.clone();
     buttons_popover_duplicate_select_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
         "notebook_main_duplicate_finder_label" => {
@@ -589,6 +592,15 @@ pub fn connect_select_all(gui_data: &GuiData) {
         }
         e => panic!("Not existent {}", e),
     });
+
+    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let notebook_main = gui_data.notebook_main.clone();
+    buttons_popover_very_simple_list_select_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+        "scrolled_window_invalid_symlinks" => {
+            popover_select_all(&popover_select_very_simple_list, &scrolled_window_invalid_symlinks);
+        }
+        e => panic!("Not existent {}", e),
+    });
 }
 pub fn connect_unselect_all(gui_data: &GuiData) {
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
@@ -602,9 +614,12 @@ pub fn connect_unselect_all(gui_data: &GuiData) {
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
     let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
+    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
     let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
+    let popover_select_very_simple_list = gui_data.popover_select_very_simple_list.clone();
     let buttons_popover_simple_list_unselect_all = gui_data.buttons_popover_simple_list_unselect_all.clone();
+    let buttons_popover_very_simple_list_unselect_all = gui_data.buttons_popover_very_simple_list_unselect_all.clone();
     let buttons_popover_duplicate_unselect_all = gui_data.buttons_popover_duplicate_unselect_all.clone();
     buttons_popover_duplicate_unselect_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
         "notebook_main_duplicate_finder_label" => {
@@ -639,6 +654,15 @@ pub fn connect_unselect_all(gui_data: &GuiData) {
         }
         e => panic!("Not existent {}", e),
     });
+
+    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let notebook_main = gui_data.notebook_main.clone();
+    buttons_popover_very_simple_list_unselect_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+        "scrolled_window_invalid_symlinks" => {
+            popover_unselect_all(&popover_select_very_simple_list, &scrolled_window_invalid_symlinks);
+        }
+        e => panic!("Not existent {}", e),
+    });
 }
 pub fn connect_reverse(gui_data: &GuiData) {
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
@@ -652,9 +676,12 @@ pub fn connect_reverse(gui_data: &GuiData) {
     let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
     let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
+    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
     let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
+    let popover_select_very_simple_list = gui_data.popover_select_very_simple_list.clone();
     let buttons_popover_simple_list_reverse = gui_data.buttons_popover_simple_list_reverse.clone();
+    let buttons_popover_very_simple_list_reverse = gui_data.buttons_popover_very_simple_list_reverse.clone();
     let buttons_popover_duplicate_reverse = gui_data.buttons_popover_duplicate_reverse.clone();
     buttons_popover_duplicate_reverse.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
         "notebook_main_duplicate_finder_label" => {
@@ -686,6 +713,15 @@ pub fn connect_reverse(gui_data: &GuiData) {
         }
         "notebook_big_main_file_finder" => {
             popover_reverse(&popover_select_simple_list, &scrolled_window_big_files_finder);
+        }
+        e => panic!("Not existent {}", e),
+    });
+
+    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let notebook_main = gui_data.notebook_main.clone();
+    buttons_popover_very_simple_list_reverse.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
+        "scrolled_window_invalid_symlinks" => {
+            popover_reverse(&popover_select_very_simple_list, &scrolled_window_invalid_symlinks);
         }
         e => panic!("Not existent {}", e),
     });

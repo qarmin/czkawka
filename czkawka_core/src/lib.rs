@@ -13,6 +13,7 @@ pub mod common_extensions;
 pub mod common_items;
 pub mod common_messages;
 pub mod common_traits;
+pub mod invalid_symlinks;
 pub mod same_music;
 pub mod similar_images;
 pub mod zeroed;
