@@ -81,14 +81,14 @@ pub fn connect_button_search(
     let progress_bar_all_stages = gui_data.progress_bar_all_stages.clone();
     let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
-    let show_dialog = Arc::new(AtomicBool::new(true));
-
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
         let excluded_directories = get_string_from_list_store(&scrolled_window_excluded_directories);
         let recursive_search = check_button_recursive.get_active();
         let excluded_items = entry_excluded_items.get_text().as_str().to_string();
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
+
+        let show_dialog = Arc::new(AtomicBool::new(true));
 
         hide_all_buttons(&buttons_array);
 

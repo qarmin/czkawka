@@ -155,11 +155,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                 create_tree_view_similar_images(&mut tree_view);
 
                 tree_view.connect_button_press_event(opening_double_click_function_similar_images);
-                tree_view.connect_button_release_event(move |tree_view, event| {
-                    if event.get_event_type() == gdk::EventType::DoubleButtonPress {
-                        common_open_function(tree_view, ColumnsSimilarImages::Name as i32, ColumnsSimilarImages::Path as i32);
-                    }
-
+                tree_view.connect_button_release_event(move |tree_view, _event| {
                     let (selected_rows, tree_model) = tree_view.get_selection().get_selected_rows();
 
                     let mut created_image = false;
