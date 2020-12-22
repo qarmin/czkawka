@@ -89,10 +89,14 @@ pub struct GuiData {
     pub buttons_popover_very_simple_list_unselect_all: gtk::Button,
     pub buttons_popover_very_simple_list_reverse: gtk::Button,
 
+    pub buttons_popover_right_click_open_file: gtk::Button,
+    pub buttons_popover_right_click_open_folder: gtk::Button,
+
     //// Popovers
     pub popover_select_duplicate: gtk::Popover,
     pub popover_select_simple_list: gtk::Popover,
     pub popover_select_very_simple_list: gtk::Popover,
+    pub popover_right_click: gtk::Popover,
 
     //// Check Buttons
     pub check_button_recursive: gtk::CheckButton,
@@ -302,10 +306,14 @@ impl GuiData {
         let buttons_popover_very_simple_list_unselect_all: gtk::Button = builder.get_object("buttons_popover_very_simple_list_unselect_all").unwrap();
         let buttons_popover_very_simple_list_reverse: gtk::Button = builder.get_object("buttons_popover_very_simple_list_reverse").unwrap();
 
+        let buttons_popover_right_click_open_file: gtk::Button = builder.get_object("buttons_popover_right_click_open_file").unwrap();
+        let buttons_popover_right_click_open_folder: gtk::Button = builder.get_object("buttons_popover_right_click_open_folder").unwrap();
+
         //// Popovers
         let popover_select_duplicate: gtk::Popover = builder.get_object("popover_select_duplicate").unwrap();
         let popover_select_simple_list: gtk::Popover = builder.get_object("popover_select_simple_list").unwrap();
         let popover_select_very_simple_list: gtk::Popover = builder.get_object("popover_select_very_simple_list").unwrap();
+        let popover_right_click: gtk::Popover = builder.get_object("popover_right_click").unwrap();
 
         //// Check Buttons
         let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
@@ -449,9 +457,12 @@ impl GuiData {
             buttons_popover_very_simple_list_select_all,
             buttons_popover_very_simple_list_unselect_all,
             buttons_popover_very_simple_list_reverse,
+            buttons_popover_right_click_open_file,
+            buttons_popover_right_click_open_folder,
             popover_select_duplicate,
             popover_select_simple_list,
             popover_select_very_simple_list,
+            popover_right_click,
             check_button_recursive,
             check_button_music_title,
             check_button_music_artist,
