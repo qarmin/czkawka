@@ -1,7 +1,6 @@
 # Instruction
 ## Basic Informations
-Czkawka for now contains two independent frontends - Console and Graphical interface which share the core module which contains basic and common functions used by each frontend. 
-
+Czkawka for now contains two independent frontends - Console and Graphical interface which share the core module which contains basic and common functions used by each frontend.
 
 Using Rust language without unsafe code, helps to create safe, fast with small resource requirements.
 
@@ -127,6 +126,13 @@ The GUI are built from different pieces:
 There is also an option to see image previews in Similar Images tool.
 
 <img src="https://user-images.githubusercontent.com/41945903/103025544-50ca4480-4552-11eb-9a54-f1b1f6f725b1.png" width="800" />
+
+### Opening/Manipulating files
+It is possible to open selected files by double clicking at them.
+
+To open multiple file just select desired files with CTRL key pressed and still when clicking this key, double click at selected items with left mouse button.
+
+To open folder containing selected file, just click twice at it with right mouse button.
 
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
