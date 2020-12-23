@@ -35,6 +35,7 @@ pub enum Similarity {
     Medium,
     High,
     VeryHigh,
+    Minimal,
 }
 
 #[derive(Clone)]
@@ -409,7 +410,8 @@ impl SimilarImages {
             Similarity::Medium => 2,
             Similarity::Small => 3,
             Similarity::VerySmall => 4,
-            _ => panic!("0-4 similarity levels are allowed, check if not added more."),
+            Similarity::Minimal => 5,
+            _ => panic!("0-5 similarity levels are allowed, check if not added more."),
         };
 
         // TODO
@@ -473,7 +475,8 @@ impl SimilarImages {
                                     2 => Similarity::Medium,
                                     3 => Similarity::Small,
                                     4 => Similarity::VerySmall,
-                                    _ => panic!("0-4 similarity levels are allowed, check if not added more."),
+                                    5 => Similarity::Minimal,
+                                    _ => panic!("0-5 similarity levels are allowed, check if not added more."),
                                 },
                             })
                             .collect::<Vec<_>>()),
@@ -601,6 +604,7 @@ impl PrintResults for SimilarImages {
 
 fn get_string_from_similarity(similarity: &Similarity) -> &str {
     match similarity {
+        Similarity::Minimal => "Minimal",
         Similarity::VerySmall => "Very Small",
         Similarity::Small => "Small",
         Similarity::Medium => "Medium",

@@ -114,6 +114,7 @@ pub struct GuiData {
     pub radio_button_duplicates_hashmb: gtk::RadioButton,
     pub radio_button_duplicates_hash: gtk::RadioButton,
 
+    pub radio_button_similar_images_minimal: gtk::RadioButton,
     pub radio_button_similar_images_very_small: gtk::RadioButton,
     pub radio_button_similar_images_small: gtk::RadioButton,
     pub radio_button_similar_images_medium: gtk::RadioButton,
@@ -329,6 +330,7 @@ impl GuiData {
         let radio_button_duplicates_hashmb: gtk::RadioButton = builder.get_object("radio_button_duplicates_hashmb").unwrap();
         let radio_button_duplicates_hash: gtk::RadioButton = builder.get_object("radio_button_duplicates_hash").unwrap();
 
+        let radio_button_similar_images_minimal: gtk::RadioButton = builder.get_object("radio_button_similar_images_minimal").unwrap();
         let radio_button_similar_images_very_small: gtk::RadioButton = builder.get_object("radio_button_similar_images_very_small").unwrap();
         let radio_button_similar_images_small: gtk::RadioButton = builder.get_object("radio_button_similar_images_small").unwrap();
         let radio_button_similar_images_medium: gtk::RadioButton = builder.get_object("radio_button_similar_images_medium").unwrap();
@@ -473,6 +475,7 @@ impl GuiData {
             radio_button_duplicates_size,
             radio_button_duplicates_hashmb,
             radio_button_duplicates_hash,
+            radio_button_similar_images_minimal,
             radio_button_similar_images_very_small,
             radio_button_similar_images_small,
             radio_button_similar_images_medium,

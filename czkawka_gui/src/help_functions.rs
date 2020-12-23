@@ -250,6 +250,7 @@ pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
 pub fn get_text_from_similarity(similarity: &Similarity) -> &str {
     match similarity {
         Similarity::None => "Original",
+        Similarity::Minimal => "Original",
         Similarity::VerySmall => "Very Small",
         Similarity::Small => "Small",
         Similarity::Medium => "Medium",
