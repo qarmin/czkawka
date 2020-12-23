@@ -32,6 +32,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
         let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
         let check_button_settings_show_preview_similar_images = gui_data.check_button_settings_show_preview_similar_images.clone();
+        let text_view_errors = gui_data.text_view_errors.clone();
 
         // Disable and show buttons
         buttons_search.show();
@@ -169,21 +170,24 @@ pub fn initialize_gui(gui_data: &GuiData) {
                                 let cache_dir = proj_dirs.cache_dir();
                                 if cache_dir.exists() {
                                     if !cache_dir.is_dir() {
+                                        add_text_to_text_view(&text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
                                         break 'dir;
                                     }
-                                } else if fs::create_dir(cache_dir).is_err() {
+                                } else if fs::create_dir_all(cache_dir).is_err() {
+                                    add_text_to_text_view(&text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
                                     break 'dir;
                                 }
                                 let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
                                 let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
 
-                                let file_name = format!("{}/{}", path, name); //"/home/rafal/Pulpit/karl-fitzgerald-4.jpg";
+                                let file_name = format!("{}/{}", path, name);
                                 let file_name = file_name.as_str();
 
                                 if let Some(extension) = Path::new(file_name).extension() {
                                     let img = match image::open(&file_name) {
                                         Ok(t) => t,
                                         Err(_) => {
+                                            add_text_to_text_view(&text_view_errors, format!("Failed to open temporary image file {}", file_name).as_str());
                                             break 'dir;
                                         }
                                     };
@@ -204,6 +208,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
                                     let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
                                     if img.save(&file_dir).is_err() {
+                                        add_text_to_text_view(&text_view_errors, format!("Failed to save temporary image file to {}", file_dir.display()).as_str());
                                         break 'dir;
                                     }
                                     let string_dir = file_dir.to_string_lossy().to_string();
