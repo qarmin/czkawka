@@ -32,8 +32,12 @@ impl ExcludedItems {
                 continue;
             }
             if expression == "DEFAULT" {
-                // TODO add more files by default
-                checked_expressions.push("*/.git/*".to_string());
+                if cfg!(target_family = "unix") {
+                    checked_expressions.push("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*".to_string());
+                }
+                if cfg!(target_family = "windows") {
+                    checked_expressions.push("*/.git/*,*/node_modules/*,*/lost+found/*,*:/windows/*".to_string());
+                }
                 continue;
             }
             if !expression.contains('*') {
