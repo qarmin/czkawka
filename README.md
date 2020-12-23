@@ -1,17 +1,17 @@
 ![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
-**Czkawka** is a simple, fast, written in Rust and easy to use app to remove unnecessary files from your computer.
+**Czkawka** is written in Rust, simple, fast and easy to use app to remove unnecessary files from your computer.
 
 ## Features
 - Written in memory safe Rust
 - Amazingly fast - due using more or less advanced algorithms and multithreading support
 - Free, Open Source without ads
-- CLI frontend, very fast and powerful with rich help
+- CLI frontend, very fast to automate tasks
 - GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
 - Light/Dark theme match the appearance of the system(Linux only)
 - Saving results to a file - allows reading entries found by the tool easily
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions or excluded items with * wildcard
-- Clean Glade file in which UI can be easily modernized
+- Image previews to get quick view at the compared photos
 - Multiple tools to use:
   - Duplicates - Finds duplicates basing on size(fast), hash(accurate), first 1MB of hash(moderate)
   - Empty Folders - Finds empty folders with the help of advanced algorithm
@@ -27,7 +27,7 @@
 ## Requirements
 If you are using Windows or Mac binaries, there is no specific requirements.  
 Same with Appimage on Linux(except having system 18.04+ or similar).  
-But compiled binaries on Linux or compiling it on your own os require to install this packages:
+But compiled GUI binaries on Linux or compiling it on your own os require to install this packages:
 ### Ubuntu/Debian
 ```
 sudo apt install cargo libgtk-dev
@@ -45,15 +45,18 @@ If the app does not run when clicking at a launcher, run it through a terminal.
 ### Appimage
 Appimage files are available in release page - https://github.com/qarmin/czkawka/releases/
 
+For now looks that there is a bug with this format, because it doesn't allow to open two images/files at once.
+
 ### Cargo
-Easier method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS)
+The easiest method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS)
 ```
 cargo install czkawka_gui
+cargo install czkawka_cli
 ```
 You can update package by typing same command.
 
 ### Snap
-Sadly some features are not available like mounted drives
+Snap also are available, but there is no access to 
 ```
 sudo snap install czkawka
 ```
@@ -184,10 +187,9 @@ You can help by creating:
 - Bug report - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
 - Pull Requests - implementing a new feature yourself or fixing bugs, but you have to pay attention to code quality. If the change is bigger, then it's a good idea to open a new issue to discuss changes.
+- Documentation - There is [insruction](instructions/Instruction.md) which you can improve.
 
 The code should be clean and well formatted (Clippy and fmt are required in each PR).
-
-The code should also be easy to read, so please use the simplest language possible without any magic numbers and variables with strange names. You should also try to write unit tests if possible.
 
 ## Name
 Czkawka is a Polish word which means _hiccup_.  

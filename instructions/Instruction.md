@@ -1,8 +1,7 @@
 # Instruction
 ## Basic Informations
-As I write before, Czkawka is fast, powerful and EASY to use.
-
 Czkawka for now contains two independent frontends - Console and Graphical interface which share the core module which contains basic and common functions used by each frontend. 
+
 
 Using Rust language without unsafe code, helps to create safe, fast with small resource requirements.
 
@@ -32,7 +31,7 @@ Duplicate Finder allows you to search for files and group them according to a pr
 Searching for empty files is rather easy, because we only need to read file metadata and check if its length is 0.
 
 ### Empty Directories
-Puste katalogi to takie katalogi, które nie zawierają żadnych innych plików, linków symbolicznych itp. chyba że są to inne puste katalogi.
+Empty directories are those that do not contain any other files, symbolic links, etc. unless they are other empty directories.
 
 At the beginning, a special entry is created for each directory containing - the parent path (only if it is not a folder directly selected by the user) and a flag to indicate whether the given directory is empty(at the beginning each one is potentially empty).
 
@@ -66,7 +65,7 @@ Zeroed files very often are results of e.g. incorrect file downloads.
 Their search consists of 3 parts:
 - Collecting a list of all files with a size greater than 0
 - At start, 64 bytes of each file are checked to discard the vast majority of non-zero files without major performance losses.
-- The next step is to check the rest of the file
+- The next step is to check the rest of the file with bigger parts(32KB)
 
 ### Invalid Symlinks
 To find invalid symlinks we must to find first a symlnks.
@@ -106,7 +105,7 @@ Cryptographic hash (used for example in ciphers) for similar inputs gives comple
 Perceptual hash at similar inputs, gives similar outputs  
 11110 ==>  AAAAAB  
 11111 ==>  AABABB  
-01110 ==>  ACAAAB
+01110 ==>  AAAACB
 
 The hash data is then thrown into a special tree that allows to compare hashes using [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance).
 
@@ -114,11 +113,34 @@ Finally, each hash is compared with the others and if the distance between them 
 
 
 ## GUI GTK
-**TODO**
+<img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
+
+The GUI are built from different pieces:
+- Red - Program settings, contains info about included/excluded directories which user may want to check. Also there is a tab with allowed extensions, which allow user to choose which type of files want to check. Next category is Excluded items, which allow to discard specific path with use of `*` wildcard - `/home/*` means that e.g. `/home/rafal/` will be ignored but no `/home/czkawka/`. The last one is settings tab which allow to save configuration of program, reset it and load it when needed.
+- Green - This allow to choose which tool we want to use.
+- Blue - Here are settings to current tool, which we want/need to configure
+- Pink - Window in which result of searching are printed
+- Yellow - Box with buttons like `Search`(starts searching with current selected tool), `Hide Text View`(hide text box at the bottom with white overlay), `Symlink`(create symlink to selected file), `Select`(shows options to select specific rows), `Delete`(deletes selected records), `Save`(save to file result of searching) - some buttons are only visible when at least one result is visible.
+- Brown - Small informative field to show informations e.g. about number of found duplicates files
+- White - Text window to show possible errors/warnings e.g. when failed to delete folder due no permissions etc.
+
+There is also an option to see image previews in Similar Images tool.
+
+<img src="https://user-images.githubusercontent.com/41945903/103025544-50ca4480-4552-11eb-9a54-f1b1f6f725b1.png" width="800" />
 
 ## CLI
-**TODO**
+Czkawka CLI frontend is great to automate some tasks like removing empty directories.
 
+To get general info how to use it just try to open czkawka_cli in console `czkawka_cli`
 
+<img src="https://user-images.githubusercontent.com/41945903/103018271-3d64ac80-4545-11eb-975c-2132f2ccf66f.png" width="800" />
+
+You should see a lot of examples how to use this app.
+
+If you want to get more detailed info about certain tool, after its name just write at the end `-h` or `--help` to get more details about tool.
+
+<img src="https://user-images.githubusercontent.com/41945903/103018151-0a221d80-4545-11eb-97b2-d7d77b49c735.png" width="800" />
+
+By default all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
 
