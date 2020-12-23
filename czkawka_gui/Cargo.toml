@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "1.5.1"
+version = "2.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2018"
 description = "GTK frontend of Czkawka"
@@ -17,7 +17,7 @@ humansize = "1"
 chrono = "0.4"
 
 # Used for sending stop signal across threads
-crossbeam-channel = "0.4.4"
+crossbeam-channel = "0.5"
 
 # To get informations about progress
 futures = "0.3.8"
@@ -29,7 +29,7 @@ directories-next = "2.0.0"
 open = "1.4.0"
 
 # To get image preview
-image = "0.23"
+image = "0.23.12"
 
 [dependencies.gtk]
 version = "0.9.2"

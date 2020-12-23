@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_core"
-version = "1.5.1"
+version = "2.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2018"
 description = "Core of Czkawka app"
@@ -13,13 +13,13 @@ repository = "https://github.com/qarmin/czkawka"
 humansize = "1"
 blake3 = "0.3"
 rayon = "1"
-crossbeam-channel = "0.4.4"
+crossbeam-channel = "0.5.0"
 
 
 # Needed by similar images
 img_hash = "3.1"
 bk-tree = "0.3"
-image = "0.23"
+image = "0.23.12"
 hamming = "0.1"
 
 # Needed by same music
