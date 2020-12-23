@@ -30,12 +30,12 @@ pub struct ProgressData {
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub enum Similarity {
     None,
+    Minimal,
     VerySmall,
     Small,
     Medium,
     High,
     VeryHigh,
-    Minimal,
 }
 
 #[derive(Clone)]

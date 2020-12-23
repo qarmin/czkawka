@@ -33,7 +33,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
                 add_text_to_text_view(&text_view_errors, format!("Cannot create save file inside {} because this isn't a folder.", config_dir.display()).as_str());
                 return;
             }
-        } else if fs::create_dir(config_dir).is_err() {
+        } else if fs::create_dir_all(config_dir).is_err() {
             add_text_to_text_view(&text_view_errors, format!("Failed configuration to create configuration folder {}", config_dir.display()).as_str());
             return;
         }
