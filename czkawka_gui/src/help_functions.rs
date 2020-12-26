@@ -279,3 +279,12 @@ pub fn get_tree_view(scrolled_window: &gtk::ScrolledWindow) -> TreeView {
 
     tree_view
 }
+
+pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
+    #[allow(clippy::single_char_pattern)]
+    let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
+    assert!(vec.len() == 2); // 400x400 - should only have two elements, if have more, then something is not good
+    let number1 = vec[0].parse::<u64>().expect("Invalid data in image dimension in position 0");
+    let number2 = vec[1].parse::<u64>().expect("Invalid data in image dimension in position 1");
+    (number1, number2)
+}
