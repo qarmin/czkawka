@@ -527,6 +527,131 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_
     }
 }
 
+fn popover_all_except_biggest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
+    let tree_view = get_tree_view(&scrolled_window);
+    let selection = tree_view.get_selection();
+    let tree_model = tree_view.get_model().unwrap();
+
+    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+
+    let mut end: bool = false;
+
+    loop {
+        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+        let mut biggest_index: Option<usize> = None;
+        let mut current_index: usize = 0;
+        let mut biggest_size_as_bytes: u64 = 0;
+        let mut biggest_number_of_pixels: u64 = 0;
+
+        loop {
+            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            if color == HEADER_ROW_COLOR {
+                if !tree_model.iter_next(&tree_iter_all) {
+                    end = true;
+                }
+                break;
+            }
+            tree_iter_array.push(tree_iter_all.clone());
+            let size_as_bytes = tree_model.get_value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
+            let dimensions_string = tree_model.get_value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
+
+            let dimensions = change_dimension_to_krotka(dimensions_string);
+            let number_of_pixels = dimensions.0 * dimensions.1;
+
+            if number_of_pixels > biggest_number_of_pixels || (number_of_pixels == biggest_number_of_pixels && size_as_bytes > biggest_size_as_bytes) {
+                biggest_number_of_pixels = number_of_pixels;
+                biggest_size_as_bytes = size_as_bytes;
+                biggest_index = Some(current_index);
+            }
+
+            current_index += 1;
+
+            if !tree_model.iter_next(&tree_iter_all) {
+                end = true;
+                break;
+            }
+        }
+        if biggest_index == None {
+            continue;
+        }
+        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+            if index != biggest_index.unwrap() {
+                selection.select_iter(tree_iter);
+            } else {
+                selection.unselect_iter(tree_iter);
+            }
+        }
+
+        if end {
+            break;
+        }
+    }
+
+    popover.popdown();
+}
+fn popover_all_except_smallest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
+    let tree_view = get_tree_view(&scrolled_window);
+    let selection = tree_view.get_selection();
+    let tree_model = tree_view.get_model().unwrap();
+
+    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+
+    let mut end: bool = false;
+
+    loop {
+        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+        let mut smallest_index: Option<usize> = None;
+        let mut current_index: usize = 0;
+        let mut smallest_size_as_bytes: u64 = u64::max_value();
+        let mut smallest_number_of_pixels: u64 = u64::max_value();
+
+        loop {
+            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            if color == HEADER_ROW_COLOR {
+                if !tree_model.iter_next(&tree_iter_all) {
+                    end = true;
+                }
+                break;
+            }
+            tree_iter_array.push(tree_iter_all.clone());
+            let size_as_bytes = tree_model.get_value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
+            let dimensions_string = tree_model.get_value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
+
+            let dimensions = change_dimension_to_krotka(dimensions_string);
+            let number_of_pixels = dimensions.0 * dimensions.1;
+
+            if number_of_pixels < smallest_number_of_pixels || (number_of_pixels == smallest_number_of_pixels && size_as_bytes < smallest_size_as_bytes) {
+                smallest_number_of_pixels = number_of_pixels;
+                smallest_size_as_bytes = size_as_bytes;
+                smallest_index = Some(current_index);
+            }
+
+            current_index += 1;
+
+            if !tree_model.iter_next(&tree_iter_all) {
+                end = true;
+                break;
+            }
+        }
+        if smallest_index == None {
+            continue;
+        }
+        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+            if index != smallest_index.unwrap() {
+                selection.select_iter(tree_iter);
+            } else {
+                selection.unselect_iter(tree_iter);
+            }
+        }
+
+        if end {
+            break;
+        }
+    }
+
+    popover.popdown();
+}
+
 #[derive(Clone)]
 pub struct PopoverObject {
     pub name: String,
@@ -766,7 +891,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_unselect_custom = gui_data.buttons_popover_unselect_custom.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    let vec_popover_objects = popover_objects; //.clone();
+    let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
         let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
@@ -777,6 +902,38 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color,
             object_popover.column_name.unwrap(),
             object_popover.column_path.unwrap(),
+        );
+    });
+
+    let popover_select = gui_data.popover_select.clone();
+    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_all_images_except_biggest = gui_data.buttons_popover_select_all_images_except_biggest.clone();
+    let notebook_main = gui_data.notebook_main.clone();
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_all_except_biggest(
+            &popover_select,
+            &object_popover.scrolled_windows,
+            object_popover.column_color.unwrap(),
+            object_popover.column_size_as_bytes.unwrap(),
+            object_popover.column_dimensions.unwrap(),
+        );
+    });
+
+    let popover_select = gui_data.popover_select.clone();
+    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_all_images_except_smallest = gui_data.buttons_popover_select_all_images_except_smallest.clone();
+    let notebook_main = gui_data.notebook_main.clone();
+    let vec_popover_objects = popover_objects; //.clone();
+    buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_all_except_smallest(
+            &popover_select,
+            &object_popover.scrolled_windows,
+            object_popover.column_color.unwrap(),
+            object_popover.column_size_as_bytes.unwrap(),
+            object_popover.column_dimensions.unwrap(),
         );
     });
 }
