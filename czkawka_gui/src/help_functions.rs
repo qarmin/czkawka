@@ -65,6 +65,7 @@ pub enum ColumnsTemporaryFiles {
 pub enum ColumnsSimilarImages {
     Similarity = 0,
     Size,
+    SizeAsBytes,
     Dimensions,
     Name,
     Path,
@@ -75,12 +76,14 @@ pub enum ColumnsSimilarImages {
 }
 pub enum ColumnsZeroedFiles {
     Size = 0,
+    SizeAsBytes,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsSameMusic {
     Size = 0,
+    SizeAsBytes,
     Name,
     Path,
     Title,

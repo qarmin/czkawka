@@ -527,540 +527,256 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_
     }
 }
 
+#[derive(Clone)]
+pub struct PopoverObject {
+    pub name: String,
+    pub available_modes: Vec<String>,
+    pub scrolled_windows: gtk::ScrolledWindow,
+    pub column_path: Option<i32>,
+    pub column_name: Option<i32>,
+    pub column_color: Option<i32>,
+    pub column_dimensions: Option<i32>,
+    pub column_size: Option<i32>,
+    pub column_size_as_bytes: Option<i32>,
+    pub column_modification_as_secs: Option<i32>,
+}
+
+pub fn find_name(name: &str, vec: &[PopoverObject]) -> Option<PopoverObject> {
+    for e in vec {
+        if e.name == *name {
+            return Some(e.clone());
+        }
+    }
+    None
+}
+
 pub fn connect_popovers(gui_data: &GuiData) {
-    connect_select_all(&gui_data);
-    connect_unselect_all(&gui_data);
-    connect_reverse(&gui_data);
+    let popover_objects = vec![
+        PopoverObject {
+            name: "notebook_main_duplicate_finder_label".to_string(),
+            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_duplicate_finder.clone(),
+            column_path: Some(ColumnsDuplicates::Path as i32),
+            column_name: Some(ColumnsDuplicates::Name as i32),
+            column_color: Some(ColumnsDuplicates::Color as i32),
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: None,
+            column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
+        },
+        PopoverObject {
+            name: "notebook_main_same_music_finder".to_string(),
+            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_same_music_finder.clone(),
+            column_path: Some(ColumnsSameMusic::Path as i32),
+            column_name: Some(ColumnsSameMusic::Name as i32),
+            column_color: Some(ColumnsSameMusic::Color as i32),
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
+            column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
+        },
+        PopoverObject {
+            name: "notebook_main_similar_images_finder_label".to_string(),
+            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_similar_images_finder.clone(),
+            column_path: Some(ColumnsSimilarImages::Path as i32),
+            column_name: Some(ColumnsSimilarImages::Name as i32),
+            column_color: Some(ColumnsSimilarImages::Color as i32),
+            column_dimensions: Some(ColumnsSimilarImages::Dimensions as i32),
+            column_size: Some(ColumnsSimilarImages::Size as i32),
+            column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
+            column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
+        },
+        PopoverObject {
+            name: "scrolled_window_main_empty_folder_finder".to_string(),
+            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_main_empty_folder_finder.clone(),
+            column_path: Some(ColumnsEmptyFolders::Path as i32),
+            column_name: Some(ColumnsEmptyFolders::Name as i32),
+            column_color: None,
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: None,
+            column_modification_as_secs: None,
+        },
+        PopoverObject {
+            name: "scrolled_window_main_empty_files_finder".to_string(),
+            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_main_empty_files_finder.clone(),
+            column_path: Some(ColumnsEmptyFiles::Path as i32),
+            column_name: Some(ColumnsEmptyFiles::Name as i32),
+            column_color: None,
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: None,
+            column_modification_as_secs: None,
+        },
+        PopoverObject {
+            name: "scrolled_window_main_temporary_files_finder".to_string(),
+            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_main_temporary_files_finder.clone(),
+            column_path: Some(ColumnsTemporaryFiles::Path as i32),
+            column_name: Some(ColumnsTemporaryFiles::Name as i32),
+            column_color: None,
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: None,
+            column_modification_as_secs: None,
+        },
+        PopoverObject {
+            name: "notebook_big_main_file_finder".to_string(),
+            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_big_files_finder.clone(),
+            column_path: Some(ColumnsBigFiles::Path as i32),
+            column_name: Some(ColumnsBigFiles::Name as i32),
+            column_color: None,
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: None,
+            column_modification_as_secs: None,
+        },
+        PopoverObject {
+            name: "notebook_main_zeroed_files_finder".to_string(),
+            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
+            scrolled_windows: gui_data.scrolled_window_zeroed_files_finder.clone(),
+            column_path: Some(ColumnsZeroedFiles::Path as i32),
+            column_name: Some(ColumnsZeroedFiles::Name as i32),
+            column_color: None,
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: Some(ColumnsZeroedFiles::SizeAsBytes as i32),
+            column_modification_as_secs: None,
+        },
+    ];
 
-    connect_all_except_oldest(&gui_data);
-    connect_all_except_newest(&gui_data);
-    connect_one_oldest(&gui_data);
-    connect_one_newest(&gui_data);
-
-    connect_select_custom(&gui_data);
-    connect_unselect_custom(&gui_data);
-}
-pub fn connect_select_all(gui_data: &GuiData) {
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_all = gui_data.buttons_popover_select_all.clone();
     let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
-    let popover_select_very_simple_list = gui_data.popover_select_very_simple_list.clone();
-    let buttons_popover_simple_list_select_all = gui_data.buttons_popover_simple_list_select_all.clone();
-    let buttons_popover_very_simple_list_select_all = gui_data.buttons_popover_very_simple_list_select_all.clone();
-    let buttons_popover_duplicate_select_all = gui_data.buttons_popover_duplicate_select_all.clone();
-    buttons_popover_duplicate_select_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_select_all(&popover_select_duplicate, &scrolled_window_duplicate_finder);
-        }
-        "notebook_main_same_music_finder" => {
-            popover_select_all(&popover_select_duplicate, &scrolled_window_same_music_finder);
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_select_all(&popover_select_duplicate, &scrolled_window_similar_images_finder);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_select_all.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_select_all(&popover_select, &object_popover.scrolled_windows);
     });
 
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_unselect_all = gui_data.buttons_popover_unselect_all.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_simple_list_select_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_main_empty_folder_finder" => {
-            popover_select_all(&popover_select_simple_list, &scrolled_window_main_empty_folder_finder);
-        }
-        "scrolled_window_main_empty_files_finder" => {
-            popover_select_all(&popover_select_simple_list, &scrolled_window_main_empty_files_finder);
-        }
-        "scrolled_window_main_temporary_files_finder" => {
-            popover_select_all(&popover_select_simple_list, &scrolled_window_main_temporary_files_finder);
-        }
-        "notebook_main_zeroed_files_finder" => {
-            popover_select_all(&popover_select_simple_list, &scrolled_window_zeroed_files_finder);
-        }
-        "notebook_big_main_file_finder" => {
-            popover_select_all(&popover_select_simple_list, &scrolled_window_big_files_finder);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_unselect_all.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_unselect_all(&popover_select, &object_popover.scrolled_windows);
     });
 
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_reverse = gui_data.buttons_popover_reverse.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_very_simple_list_select_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_invalid_symlinks" => {
-            popover_select_all(&popover_select_very_simple_list, &scrolled_window_invalid_symlinks);
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-pub fn connect_unselect_all(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
-    let popover_select_very_simple_list = gui_data.popover_select_very_simple_list.clone();
-    let buttons_popover_simple_list_unselect_all = gui_data.buttons_popover_simple_list_unselect_all.clone();
-    let buttons_popover_very_simple_list_unselect_all = gui_data.buttons_popover_very_simple_list_unselect_all.clone();
-    let buttons_popover_duplicate_unselect_all = gui_data.buttons_popover_duplicate_unselect_all.clone();
-    buttons_popover_duplicate_unselect_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_unselect_all(&popover_select_duplicate, &scrolled_window_duplicate_finder);
-        }
-        "notebook_main_same_music_finder" => {
-            popover_unselect_all(&popover_select_duplicate, &scrolled_window_same_music_finder);
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_unselect_all(&popover_select_duplicate, &scrolled_window_similar_images_finder);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_reverse.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_reverse(&popover_select, &object_popover.scrolled_windows);
     });
 
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_all_except_oldest = gui_data.buttons_popover_select_all_except_oldest.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_simple_list_unselect_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_main_empty_folder_finder" => {
-            popover_unselect_all(&popover_select_simple_list, &scrolled_window_main_empty_folder_finder);
-        }
-        "scrolled_window_main_empty_files_finder" => {
-            popover_unselect_all(&popover_select_simple_list, &scrolled_window_main_empty_files_finder);
-        }
-        "scrolled_window_main_temporary_files_finder" => {
-            popover_unselect_all(&popover_select_simple_list, &scrolled_window_main_temporary_files_finder);
-        }
-        "notebook_main_zeroed_files_finder" => {
-            popover_unselect_all(&popover_select_simple_list, &scrolled_window_zeroed_files_finder);
-        }
-        "notebook_big_main_file_finder" => {
-            popover_unselect_all(&popover_select_simple_list, &scrolled_window_big_files_finder);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_all_except_oldest(
+            &popover_select,
+            &object_popover.scrolled_windows,
+            object_popover.column_color.unwrap(),
+            object_popover.column_modification_as_secs.unwrap(),
+            object_popover.column_name.unwrap(),
+        );
     });
 
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_all_except_newest = gui_data.buttons_popover_select_all_except_newest.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_very_simple_list_unselect_all.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_invalid_symlinks" => {
-            popover_unselect_all(&popover_select_very_simple_list, &scrolled_window_invalid_symlinks);
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-pub fn connect_reverse(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
-    let popover_select_very_simple_list = gui_data.popover_select_very_simple_list.clone();
-    let buttons_popover_simple_list_reverse = gui_data.buttons_popover_simple_list_reverse.clone();
-    let buttons_popover_very_simple_list_reverse = gui_data.buttons_popover_very_simple_list_reverse.clone();
-    let buttons_popover_duplicate_reverse = gui_data.buttons_popover_duplicate_reverse.clone();
-    buttons_popover_duplicate_reverse.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_reverse(&popover_select_duplicate, &scrolled_window_duplicate_finder);
-        }
-        "notebook_main_same_music_finder" => {
-            popover_reverse(&popover_select_duplicate, &scrolled_window_same_music_finder);
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_reverse(&popover_select_duplicate, &scrolled_window_similar_images_finder);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_select_all_except_newest.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_all_except_newest(
+            &popover_select,
+            &object_popover.scrolled_windows,
+            object_popover.column_color.unwrap(),
+            object_popover.column_modification_as_secs.unwrap(),
+            object_popover.column_name.unwrap(),
+        );
     });
 
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_one_oldest = gui_data.buttons_popover_select_one_oldest.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_simple_list_reverse.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_main_empty_folder_finder" => {
-            popover_reverse(&popover_select_simple_list, &scrolled_window_main_empty_folder_finder);
-        }
-        "scrolled_window_main_empty_files_finder" => {
-            popover_reverse(&popover_select_simple_list, &scrolled_window_main_empty_files_finder);
-        }
-        "scrolled_window_main_temporary_files_finder" => {
-            popover_reverse(&popover_select_simple_list, &scrolled_window_main_temporary_files_finder);
-        }
-        "notebook_main_zeroed_files_finder" => {
-            popover_reverse(&popover_select_simple_list, &scrolled_window_zeroed_files_finder);
-        }
-        "notebook_big_main_file_finder" => {
-            popover_reverse(&popover_select_simple_list, &scrolled_window_big_files_finder);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_select_one_oldest.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_one_oldest(
+            &popover_select,
+            &object_popover.scrolled_windows,
+            object_popover.column_color.unwrap(),
+            object_popover.column_modification_as_secs.unwrap(),
+            object_popover.column_name.unwrap(),
+        );
     });
 
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_one_newest = gui_data.buttons_popover_select_one_newest.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_very_simple_list_reverse.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_invalid_symlinks" => {
-            popover_reverse(&popover_select_very_simple_list, &scrolled_window_invalid_symlinks);
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-
-pub fn connect_all_except_oldest(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let buttons_popover_duplicate_select_all_except_oldest = gui_data.buttons_popover_duplicate_select_all_except_oldest.clone();
-    buttons_popover_duplicate_select_all_except_oldest.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_all_except_oldest(
-                &popover_select_duplicate,
-                &scrolled_window_duplicate_finder,
-                ColumnsDuplicates::Color as i32,
-                ColumnsDuplicates::ModificationAsSecs as i32,
-                ColumnsDuplicates::Name as i32,
-            );
-        }
-        "notebook_main_same_music_finder" => {
-            popover_all_except_oldest(
-                &popover_select_duplicate,
-                &scrolled_window_same_music_finder,
-                ColumnsSameMusic::Color as i32,
-                ColumnsSameMusic::ModificationAsSecs as i32,
-                ColumnsSameMusic::Name as i32,
-            );
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_all_except_oldest(
-                &popover_select_duplicate,
-                &scrolled_window_similar_images_finder,
-                ColumnsSimilarImages::Color as i32,
-                ColumnsSimilarImages::ModificationAsSecs as i32,
-                ColumnsSimilarImages::Name as i32,
-            );
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-pub fn connect_all_except_newest(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let buttons_popover_duplicate_select_all_except_newest = gui_data.buttons_popover_duplicate_select_all_except_newest.clone();
-    buttons_popover_duplicate_select_all_except_newest.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_all_except_newest(
-                &popover_select_duplicate,
-                &scrolled_window_duplicate_finder,
-                ColumnsDuplicates::Color as i32,
-                ColumnsDuplicates::ModificationAsSecs as i32,
-                ColumnsDuplicates::Name as i32,
-            );
-        }
-        "notebook_main_same_music_finder" => {
-            popover_all_except_newest(
-                &popover_select_duplicate,
-                &scrolled_window_same_music_finder,
-                ColumnsSameMusic::Color as i32,
-                ColumnsSameMusic::ModificationAsSecs as i32,
-                ColumnsSameMusic::Name as i32,
-            );
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_all_except_newest(
-                &popover_select_duplicate,
-                &scrolled_window_similar_images_finder,
-                ColumnsSimilarImages::Color as i32,
-                ColumnsSimilarImages::ModificationAsSecs as i32,
-                ColumnsSimilarImages::Name as i32,
-            );
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-pub fn connect_one_newest(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let buttons_popover_duplicate_select_one_newest = gui_data.buttons_popover_duplicate_select_one_newest.clone();
-    buttons_popover_duplicate_select_one_newest.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_one_newest(
-                &popover_select_duplicate,
-                &scrolled_window_duplicate_finder,
-                ColumnsDuplicates::Color as i32,
-                ColumnsDuplicates::ModificationAsSecs as i32,
-                ColumnsDuplicates::Name as i32,
-            );
-        }
-        "notebook_main_same_music_finder" => {
-            popover_one_newest(
-                &popover_select_duplicate,
-                &scrolled_window_same_music_finder,
-                ColumnsSameMusic::Color as i32,
-                ColumnsSameMusic::ModificationAsSecs as i32,
-                ColumnsSameMusic::Name as i32,
-            );
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_one_newest(
-                &popover_select_duplicate,
-                &scrolled_window_similar_images_finder,
-                ColumnsSimilarImages::Color as i32,
-                ColumnsSimilarImages::ModificationAsSecs as i32,
-                ColumnsSimilarImages::Name as i32,
-            );
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-pub fn connect_one_oldest(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let buttons_popover_duplicate_select_one_oldest = gui_data.buttons_popover_duplicate_select_one_oldest.clone();
-    buttons_popover_duplicate_select_one_oldest.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_one_oldest(
-                &popover_select_duplicate,
-                &scrolled_window_duplicate_finder,
-                ColumnsDuplicates::Color as i32,
-                ColumnsDuplicates::ModificationAsSecs as i32,
-                ColumnsDuplicates::Name as i32,
-            );
-        }
-        "notebook_main_same_music_finder" => {
-            popover_one_oldest(
-                &popover_select_duplicate,
-                &scrolled_window_same_music_finder,
-                ColumnsSameMusic::Color as i32,
-                ColumnsSameMusic::ModificationAsSecs as i32,
-                ColumnsSameMusic::Name as i32,
-            );
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_one_oldest(
-                &popover_select_duplicate,
-                &scrolled_window_similar_images_finder,
-                ColumnsSimilarImages::Color as i32,
-                ColumnsSimilarImages::ModificationAsSecs as i32,
-                ColumnsSimilarImages::Name as i32,
-            );
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-
-pub fn connect_select_custom(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let gui_data = gui_data.clone();
-    let second_gui_data = gui_data.clone();
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
-    let buttons_popover_simple_list_select_custom = gui_data.buttons_popover_simple_list_select_custom.clone();
-    let buttons_popover_duplicate_select_custom = gui_data.buttons_popover_duplicate_select_custom.clone();
-    buttons_popover_duplicate_select_custom.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_select_custom(
-                &popover_select_duplicate,
-                &gui_data,
-                &scrolled_window_duplicate_finder,
-                Some(ColumnsDuplicates::Color as i32),
-                ColumnsDuplicates::Name as i32,
-                ColumnsDuplicates::Path as i32,
-            );
-        }
-        "notebook_main_same_music_finder" => {
-            popover_select_custom(
-                &popover_select_duplicate,
-                &gui_data,
-                &scrolled_window_same_music_finder,
-                Some(ColumnsSameMusic::Color as i32),
-                ColumnsSameMusic::Name as i32,
-                ColumnsSameMusic::Path as i32,
-            );
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_select_custom(
-                &popover_select_duplicate,
-                &gui_data,
-                &scrolled_window_similar_images_finder,
-                Some(ColumnsSimilarImages::Color as i32),
-                ColumnsSimilarImages::Name as i32,
-                ColumnsSimilarImages::Path as i32,
-            );
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    buttons_popover_select_one_newest.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_one_newest(
+            &popover_select,
+            &object_popover.scrolled_windows,
+            object_popover.column_color.unwrap(),
+            object_popover.column_modification_as_secs.unwrap(),
+            object_popover.column_name.unwrap(),
+        );
     });
 
-    let gui_data = second_gui_data;
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_select_custom = gui_data.buttons_popover_select_custom.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_simple_list_select_custom.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_main_empty_folder_finder" => {
-            popover_select_custom(
-                &popover_select_simple_list,
-                &gui_data,
-                &scrolled_window_main_empty_folder_finder,
-                None,
-                ColumnsEmptyFolders::Name as i32,
-                ColumnsEmptyFolders::Path as i32,
-            );
-        }
-        "scrolled_window_main_empty_files_finder" => {
-            popover_select_custom(&popover_select_simple_list, &gui_data, &scrolled_window_main_empty_files_finder, None, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32);
-        }
-        "scrolled_window_main_temporary_files_finder" => {
-            popover_select_custom(
-                &popover_select_simple_list,
-                &gui_data,
-                &scrolled_window_main_temporary_files_finder,
-                None,
-                ColumnsTemporaryFiles::Name as i32,
-                ColumnsTemporaryFiles::Path as i32,
-            );
-        }
-        "notebook_main_zeroed_files_finder" => {
-            popover_select_custom(&popover_select_simple_list, &gui_data, &scrolled_window_zeroed_files_finder, None, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32);
-        }
-        "notebook_big_main_file_finder" => {
-            popover_select_custom(&popover_select_simple_list, &gui_data, &scrolled_window_big_files_finder, None, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32);
-        }
-        e => panic!("Not existent {}", e),
-    });
-}
-pub fn connect_unselect_custom(gui_data: &GuiData) {
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-
-    let gui_data = gui_data.clone();
-    let second_gui_data = gui_data.clone();
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let popover_select_duplicate = gui_data.popover_select_duplicate.clone();
-    let popover_select_simple_list = gui_data.popover_select_simple_list.clone();
-    let buttons_popover_simple_list_unselect_custom = gui_data.buttons_popover_simple_list_unselect_custom.clone();
-    let buttons_popover_duplicate_unselect_custom = gui_data.buttons_popover_duplicate_unselect_custom.clone();
-    buttons_popover_duplicate_unselect_custom.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
-            popover_unselect_custom(
-                &popover_select_duplicate,
-                &gui_data,
-                &scrolled_window_duplicate_finder,
-                Some(ColumnsDuplicates::Color as i32),
-                ColumnsDuplicates::Name as i32,
-                ColumnsDuplicates::Path as i32,
-            );
-        }
-        "notebook_main_same_music_finder" => {
-            popover_unselect_custom(
-                &popover_select_duplicate,
-                &gui_data,
-                &scrolled_window_same_music_finder,
-                Some(ColumnsSameMusic::Color as i32),
-                ColumnsSameMusic::Name as i32,
-                ColumnsSameMusic::Path as i32,
-            );
-        }
-        "notebook_main_similar_images_finder_label" => {
-            popover_unselect_custom(
-                &popover_select_duplicate,
-                &gui_data,
-                &scrolled_window_similar_images_finder,
-                Some(ColumnsSimilarImages::Color as i32),
-                ColumnsSimilarImages::Name as i32,
-                ColumnsSimilarImages::Path as i32,
-            );
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects.clone();
+    let gui_data_clone = gui_data.clone();
+    buttons_popover_select_custom.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_select_custom(
+            &popover_select,
+            &gui_data_clone,
+            &object_popover.scrolled_windows,
+            object_popover.column_color,
+            object_popover.column_name.unwrap(),
+            object_popover.column_path.unwrap(),
+        );
     });
 
-    let gui_data = second_gui_data;
+    let popover_select = gui_data.popover_select.clone();
     let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
+    let buttons_popover_unselect_custom = gui_data.buttons_popover_unselect_custom.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    buttons_popover_simple_list_unselect_custom.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "scrolled_window_main_empty_folder_finder" => {
-            popover_unselect_custom(
-                &popover_select_simple_list,
-                &gui_data,
-                &scrolled_window_main_empty_folder_finder,
-                None,
-                ColumnsEmptyFolders::Name as i32,
-                ColumnsEmptyFolders::Path as i32,
-            );
-        }
-        "scrolled_window_main_empty_files_finder" => {
-            popover_unselect_custom(&popover_select_simple_list, &gui_data, &scrolled_window_main_empty_files_finder, None, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32);
-        }
-        "scrolled_window_main_temporary_files_finder" => {
-            popover_unselect_custom(
-                &popover_select_simple_list,
-                &gui_data,
-                &scrolled_window_main_temporary_files_finder,
-                None,
-                ColumnsTemporaryFiles::Name as i32,
-                ColumnsTemporaryFiles::Path as i32,
-            );
-        }
-        "notebook_main_zeroed_files_finder" => {
-            popover_unselect_custom(&popover_select_simple_list, &gui_data, &scrolled_window_zeroed_files_finder, None, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32);
-        }
-        "notebook_big_main_file_finder" => {
-            popover_unselect_custom(&popover_select_simple_list, &gui_data, &scrolled_window_big_files_finder, None, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32);
-        }
-        e => panic!("Not existent {}", e),
+    let vec_popover_objects = popover_objects; //.clone();
+    let gui_data_clone = gui_data.clone();
+    buttons_popover_unselect_custom.connect_clicked(move |_| {
+        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        popover_unselect_custom(
+            &popover_select,
+            &gui_data_clone,
+            &object_popover.scrolled_windows,
+            object_popover.column_color,
+            object_popover.column_name.unwrap(),
+            object_popover.column_path.unwrap(),
+        );
     });
 }
