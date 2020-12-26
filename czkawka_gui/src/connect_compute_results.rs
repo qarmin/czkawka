@@ -398,15 +398,16 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&scrolled_window_similar_images_finder);
 
-                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
                         let vec_struct_similar = sf.get_similar_images();
 
                         for vec_file_entry in vec_struct_similar.iter() {
                             // Header
-                            let values: [&dyn ToValue; 9] = [
+                            let values: [&dyn ToValue; 10] = [
                                 &"".to_string(),
                                 &"".to_string(),
+                                &(0),
                                 &"".to_string(),
                                 &"".to_string(),
                                 &"".to_string(),
@@ -420,9 +421,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             // Meat
                             for file_entry in vec_file_entry.iter() {
                                 let (directory, file) = split_path(&file_entry.path);
-                                let values: [&dyn ToValue; 9] = [
+                                let values: [&dyn ToValue; 10] = [
                                     &(get_text_from_similarity(&file_entry.similarity).to_string()),
                                     &file_entry.size.file_size(options::BINARY).unwrap(),
+                                    &file_entry.size,
                                     &file_entry.dimensions,
                                     &file,
                                     &directory,
@@ -472,14 +474,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&scrolled_window_zeroed_files_finder);
 
-                        let col_indices = [0, 1, 2, 3];
+                        let col_indices = [0, 1, 2, 3, 4];
 
                         let vector = zf.get_zeroed_files();
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 4] = [
+                            let values: [&dyn ToValue; 5] = [
                                 &(file_entry.size.file_size(options::BINARY).unwrap()),
+                                &(file_entry.size),
                                 &file,
                                 &directory,
                                 &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
@@ -521,7 +524,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&scrolled_window_same_music_finder);
 
-                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
                         let vector = mf.get_duplicated_music_entries();
 
@@ -536,8 +539,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let text: String = "-----".to_string();
 
                         for vec_file_entry in vector {
-                            let values: [&dyn ToValue; 12] = [
+                            let values: [&dyn ToValue; 13] = [
                                 &"".to_string(),
+                                &(0),
                                 &"".to_string(),
                                 &"".to_string(),
                                 &(match is_title {
@@ -568,8 +572,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             list_store.set(&list_store.append(), &col_indices, &values);
                             for file_entry in vec_file_entry {
                                 let (directory, file) = split_path(&file_entry.path);
-                                let values: [&dyn ToValue; 12] = [
+                                let values: [&dyn ToValue; 13] = [
                                     &file_entry.size.file_size(options::BINARY).unwrap(),
+                                    &file_entry.size,
                                     &file,
                                     &directory,
                                     &file_entry.title,

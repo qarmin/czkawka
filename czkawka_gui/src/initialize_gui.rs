@@ -135,9 +135,10 @@ pub fn initialize_gui(gui_data: &GuiData) {
             {
                 image_preview_similar_images.hide();
 
-                let col_types: [glib::types::Type; 9] = [
+                let col_types: [glib::types::Type; 10] = [
                     glib::types::Type::String,
                     glib::types::Type::String,
+                    glib::types::Type::U64,
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,
@@ -235,7 +236,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
             }
             // Zeroed Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::String, glib::types::Type::U64, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -249,10 +250,11 @@ pub fn initialize_gui(gui_data: &GuiData) {
                 scrolled_window_zeroed_files_finder.add(&tree_view);
                 scrolled_window_zeroed_files_finder.show_all();
             }
-            // Same Files
+            // Same Music
             {
-                let col_types: [glib::types::Type; 12] = [
+                let col_types: [glib::types::Type; 13] = [
                     glib::types::Type::String,
+                    glib::types::Type::U64,
                     glib::types::Type::String,
                     glib::types::Type::String,
                     glib::types::Type::String,

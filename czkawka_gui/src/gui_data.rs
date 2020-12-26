@@ -69,33 +69,28 @@ pub struct GuiData {
     pub buttons_remove_excluded_directory: gtk::Button,
 
     // Buttons search popover buttons
-    pub buttons_popover_duplicate_select_all: gtk::Button,
-    pub buttons_popover_duplicate_unselect_all: gtk::Button,
-    pub buttons_popover_duplicate_reverse: gtk::Button,
-    pub buttons_popover_duplicate_select_all_except_oldest: gtk::Button,
-    pub buttons_popover_duplicate_select_all_except_newest: gtk::Button,
-    pub buttons_popover_duplicate_select_one_oldest: gtk::Button,
-    pub buttons_popover_duplicate_select_one_newest: gtk::Button,
-    pub buttons_popover_duplicate_select_custom: gtk::Button,
-    pub buttons_popover_duplicate_unselect_custom: gtk::Button,
+    pub buttons_popover_select_all: gtk::Button,
+    pub buttons_popover_unselect_all: gtk::Button,
+    pub buttons_popover_reverse: gtk::Button,
+    pub buttons_popover_select_all_except_oldest: gtk::Button,
+    pub buttons_popover_select_all_except_newest: gtk::Button,
+    pub buttons_popover_select_one_oldest: gtk::Button,
+    pub buttons_popover_select_one_newest: gtk::Button,
+    pub buttons_popover_select_custom: gtk::Button,
+    pub buttons_popover_unselect_custom: gtk::Button,
+    pub buttons_popover_select_all_images_except_biggest: gtk::Button,
+    pub buttons_popover_select_all_images_except_smallest: gtk::Button,
 
-    pub buttons_popover_simple_list_select_all: gtk::Button,
-    pub buttons_popover_simple_list_unselect_all: gtk::Button,
-    pub buttons_popover_simple_list_reverse: gtk::Button,
-    pub buttons_popover_simple_list_select_custom: gtk::Button,
-    pub buttons_popover_simple_list_unselect_custom: gtk::Button,
-
-    pub buttons_popover_very_simple_list_select_all: gtk::Button,
-    pub buttons_popover_very_simple_list_unselect_all: gtk::Button,
-    pub buttons_popover_very_simple_list_reverse: gtk::Button,
+    pub separator_select_image_size: gtk::Separator,
+    pub separator_select_reverse: gtk::Separator,
+    pub separator_select_date: gtk::Separator,
+    pub separator_select_custom: gtk::Separator,
 
     pub buttons_popover_right_click_open_file: gtk::Button,
     pub buttons_popover_right_click_open_folder: gtk::Button,
 
     //// Popovers
-    pub popover_select_duplicate: gtk::Popover,
-    pub popover_select_simple_list: gtk::Popover,
-    pub popover_select_very_simple_list: gtk::Popover,
+    pub popover_select: gtk::Popover,
     pub popover_right_click: gtk::Popover,
 
     //// Check Buttons
@@ -287,33 +282,28 @@ impl GuiData {
         let buttons_remove_excluded_directory: gtk::Button = builder.get_object("buttons_remove_excluded_directory").unwrap();
 
         // Buttons search popover buttons
-        let buttons_popover_duplicate_select_all: gtk::Button = builder.get_object("buttons_popover_duplicate_select_all").unwrap();
-        let buttons_popover_duplicate_unselect_all: gtk::Button = builder.get_object("buttons_popover_duplicate_unselect_all").unwrap();
-        let buttons_popover_duplicate_reverse: gtk::Button = builder.get_object("buttons_popover_duplicate_reverse").unwrap();
-        let buttons_popover_duplicate_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_all_except_oldest").unwrap();
-        let buttons_popover_duplicate_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_all_except_newest").unwrap();
-        let buttons_popover_duplicate_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_one_oldest").unwrap();
-        let buttons_popover_duplicate_select_one_newest: gtk::Button = builder.get_object("buttons_popover_duplicate_select_one_newest").unwrap();
-        let buttons_popover_duplicate_select_custom: gtk::Button = builder.get_object("buttons_popover_duplicate_select_custom").unwrap();
-        let buttons_popover_duplicate_unselect_custom: gtk::Button = builder.get_object("buttons_popover_duplicate_unselect_custom").unwrap();
+        let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
+        let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();
+        let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
+        let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
+        let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
+        let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
+        let buttons_popover_select_one_newest: gtk::Button = builder.get_object("buttons_popover_select_one_newest").unwrap();
+        let buttons_popover_select_custom: gtk::Button = builder.get_object("buttons_popover_select_custom").unwrap();
+        let buttons_popover_unselect_custom: gtk::Button = builder.get_object("buttons_popover_unselect_custom").unwrap();
+        let buttons_popover_select_all_images_except_biggest: gtk::Button = builder.get_object("buttons_popover_select_all_images_except_biggest").unwrap();
+        let buttons_popover_select_all_images_except_smallest: gtk::Button = builder.get_object("buttons_popover_select_all_images_except_smallest").unwrap();
 
-        let buttons_popover_simple_list_select_all: gtk::Button = builder.get_object("buttons_popover_simple_list_select_all").unwrap();
-        let buttons_popover_simple_list_unselect_all: gtk::Button = builder.get_object("buttons_popover_simple_list_unselect_all").unwrap();
-        let buttons_popover_simple_list_reverse: gtk::Button = builder.get_object("buttons_popover_simple_list_reverse").unwrap();
-        let buttons_popover_simple_list_select_custom: gtk::Button = builder.get_object("buttons_popover_simple_list_select_custom").unwrap();
-        let buttons_popover_simple_list_unselect_custom: gtk::Button = builder.get_object("buttons_popover_simple_list_unselect_custom").unwrap();
-
-        let buttons_popover_very_simple_list_select_all: gtk::Button = builder.get_object("buttons_popover_very_simple_list_select_all").unwrap();
-        let buttons_popover_very_simple_list_unselect_all: gtk::Button = builder.get_object("buttons_popover_very_simple_list_unselect_all").unwrap();
-        let buttons_popover_very_simple_list_reverse: gtk::Button = builder.get_object("buttons_popover_very_simple_list_reverse").unwrap();
+        let separator_select_image_size: gtk::Separator = builder.get_object("separator_select_image_size").unwrap();
+        let separator_select_reverse: gtk::Separator = builder.get_object("separator_select_reverse").unwrap();
+        let separator_select_date: gtk::Separator = builder.get_object("separator_select_date").unwrap();
+        let separator_select_custom: gtk::Separator = builder.get_object("separator_select_custom").unwrap();
 
         let buttons_popover_right_click_open_file: gtk::Button = builder.get_object("buttons_popover_right_click_open_file").unwrap();
         let buttons_popover_right_click_open_folder: gtk::Button = builder.get_object("buttons_popover_right_click_open_folder").unwrap();
 
         //// Popovers
-        let popover_select_duplicate: gtk::Popover = builder.get_object("popover_select_duplicate").unwrap();
-        let popover_select_simple_list: gtk::Popover = builder.get_object("popover_select_simple_list").unwrap();
-        let popover_select_very_simple_list: gtk::Popover = builder.get_object("popover_select_very_simple_list").unwrap();
+        let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
         let popover_right_click: gtk::Popover = builder.get_object("popover_right_click").unwrap();
 
         //// Check Buttons
@@ -442,28 +432,24 @@ impl GuiData {
             buttons_remove_included_directory,
             buttons_add_excluded_directory,
             buttons_remove_excluded_directory,
-            buttons_popover_duplicate_select_all,
-            buttons_popover_duplicate_unselect_all,
-            buttons_popover_duplicate_reverse,
-            buttons_popover_duplicate_select_all_except_oldest,
-            buttons_popover_duplicate_select_all_except_newest,
-            buttons_popover_duplicate_select_one_oldest,
-            buttons_popover_duplicate_select_one_newest,
-            buttons_popover_duplicate_select_custom,
-            buttons_popover_duplicate_unselect_custom,
-            buttons_popover_simple_list_select_all,
-            buttons_popover_simple_list_unselect_all,
-            buttons_popover_simple_list_reverse,
-            buttons_popover_simple_list_select_custom,
-            buttons_popover_simple_list_unselect_custom,
-            buttons_popover_very_simple_list_select_all,
-            buttons_popover_very_simple_list_unselect_all,
-            buttons_popover_very_simple_list_reverse,
+            buttons_popover_select_all,
+            buttons_popover_unselect_all,
+            buttons_popover_reverse,
+            buttons_popover_select_all_except_oldest,
+            buttons_popover_select_all_except_newest,
+            buttons_popover_select_one_oldest,
+            buttons_popover_select_one_newest,
+            buttons_popover_select_custom,
+            buttons_popover_unselect_custom,
+            buttons_popover_select_all_images_except_biggest,
+            buttons_popover_select_all_images_except_smallest,
+            separator_select_image_size,
+            separator_select_reverse,
+            separator_select_date,
+            separator_select_custom,
             buttons_popover_right_click_open_file,
             buttons_popover_right_click_open_folder,
-            popover_select_duplicate,
-            popover_select_simple_list,
-            popover_select_very_simple_list,
+            popover_select,
             popover_right_click,
             check_button_recursive,
             check_button_music_title,
