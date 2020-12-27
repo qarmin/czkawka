@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bashmisc
 NUMBER="2.0.0"
 CZKAWKA_PATH="/home/rafal"
 
@@ -9,7 +9,7 @@ git clone https://github.com/qarmin/czkawka.git "$CZKAWKA_PATH"
 cd $CZKAWKA_PATH
 git checkout "$NUMBER"
 
-cd "$CZKAWKA_PATH/misc/snap"
+cd "$CZKAWKA_PATH/snap"
 snapcraft
 
 snapcraft login
