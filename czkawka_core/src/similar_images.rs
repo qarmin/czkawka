@@ -5,19 +5,27 @@ use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
+use directories_next::ProjectDirs;
 use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
 use img_hash::HasherConfig;
 use rayon::prelude::*;
 use std::collections::HashMap;
+use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
-use std::path::PathBuf;
+use std::io::*;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
+
+/// Type to store for each entry in the similarity BK-tree.
+type Node = [u8; 8];
+
+const CACHE_FILE_NAME: &str = "cache_similar_image.txt";
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -38,17 +46,15 @@ pub enum Similarity {
     VeryHigh,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
     pub dimensions: String,
     pub modified_date: u64,
+    pub hash: Node,
     pub similarity: Similarity,
 }
-
-/// Type to store for each entry in the similarity BK-tree.
-type Node = [u8; 8];
 
 /// Distance metric to use with the BK-tree.
 struct Hamming;
@@ -72,7 +78,7 @@ pub struct SimilarImages {
     image_hashes: HashMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: Similarity,
-    images_to_check: Vec<FileEntry>,
+    images_to_check: HashMap<String, FileEntry>,
 }
 
 /// Info struck with helpful information's about results
@@ -110,7 +116,7 @@ impl SimilarImages {
             image_hashes: Default::default(),
             stopped_search: false,
             similarity: Similarity::High,
-            images_to_check: vec![],
+            images_to_check: Default::default(),
         }
     }
 
@@ -299,10 +305,11 @@ impl SimilarImages {
                                 } // Permissions Denied
                             },
 
+                            hash: [0; 8],
                             similarity: Similarity::None,
                         };
 
-                        self.images_to_check.push(fe);
+                        self.images_to_check.insert(current_file_name.to_string_lossy().to_string(), fe);
 
                         self.information.size_of_checked_images += metadata.len();
                         self.information.number_of_checked_files += 1;
@@ -323,7 +330,40 @@ impl SimilarImages {
         true
     }
 
+    // Cache algorithm:
+    // - Load data from file
+    // - Remove from data to search this already loaded entries(size of image must match)
+    // - Check hash of files which doesn't have saved entry
+    // - Join already read hashes with hashes which were read from file
+    // - Join all hashes and save it to file
+
     fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+        let hash_map_modification = SystemTime::now();
+
+        let loaded_hash_map = match load_hashes_from_file(&mut self.text_messages) {
+            Some(t) => t,
+            None => Default::default(),
+        };
+
+        let mut hashes_already_counted: HashMap<String, FileEntry> = Default::default();
+        let mut hashes_to_check: HashMap<String, FileEntry> = Default::default();
+        for (name, file_entry) in &self.images_to_check {
+            #[allow(clippy::collapsible_if)]
+            if !loaded_hash_map.contains_key(name) {
+                // If loaded data doesn't contains current image info
+                hashes_to_check.insert(name.clone(), file_entry.clone());
+            } else {
+                if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                    // When size or modification date of image changed, then it is clear that is different image
+                    hashes_to_check.insert(name.clone(), file_entry.clone());
+                } else {
+                    // Checking may be omitted when already there is entry with same size and modification date
+                    hashes_already_counted.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                }
+            }
+        }
+
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from cache and preparing them".to_string());
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
@@ -337,7 +377,7 @@ impl SimilarImages {
             let mut progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let images_to_check = self.images_to_check.len();
+            let images_to_check = hashes_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .try_send(ProgressData {
@@ -356,9 +396,7 @@ impl SimilarImages {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
-
-        let vec_file_entry: Vec<(FileEntry, Node)> = self
-            .images_to_check
+        let mut vec_file_entry: Vec<(FileEntry, Node)> = hashes_to_check
             .par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
@@ -366,7 +404,7 @@ impl SimilarImages {
                     // This will not break
                     return None;
                 }
-                let mut file_entry = file_entry.clone();
+                let mut file_entry = file_entry.1.clone();
 
                 let image = match image::open(file_entry.path.clone()) {
                     Ok(t) => t,
@@ -375,7 +413,7 @@ impl SimilarImages {
                 let dimensions = image.dimensions();
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
-                let hasher = HasherConfig::with_bytes_type::<[u8; 8]>().to_hasher();
+                let hasher = HasherConfig::with_bytes_type::<Node>().to_hasher();
 
                 let hash = hasher.hash_image(&image);
                 let mut buf = [0u8; 8];
@@ -392,14 +430,26 @@ impl SimilarImages {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parralell".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
         let hash_map_modification = SystemTime::now();
 
-        for (file_entry, buf) in vec_file_entry {
-            self.bktree.add(buf);
-            self.image_hashes.entry(buf).or_insert_with(Vec::<FileEntry>::new);
-            self.image_hashes.get_mut(&buf).unwrap().push(file_entry.clone());
+        // Just connect loaded results with already calculated hashes
+        for (_name, file_entry) in hashes_already_counted {
+            vec_file_entry.push((file_entry.clone(), file_entry.hash));
         }
+
+        for (file_entry, buf) in &vec_file_entry {
+            self.bktree.add(*buf);
+            self.image_hashes.entry(*buf).or_insert_with(Vec::<FileEntry>::new);
+            self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
+        }
+
+        // Must save all results to file, old loaded from file with all currently counted results
+        let mut all_results: HashMap<String, FileEntry> = loaded_hash_map;
+        for (file_entry, _hash) in vec_file_entry {
+            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+        }
+        save_hashes_to_file(&all_results, &mut self.text_messages);
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
         let hash_map_modification = SystemTime::now();
@@ -448,6 +498,7 @@ impl SimilarImages {
                     size: fe.size,
                     dimensions: fe.dimensions.clone(),
                     modified_date: fe.modified_date,
+                    hash: fe.hash,
                     similarity: Similarity::VeryHigh,
                 })
                 .collect();
@@ -469,6 +520,7 @@ impl SimilarImages {
                                 size: fe.size,
                                 dimensions: fe.dimensions.clone(),
                                 modified_date: fe.modified_date,
+                                hash: [0; 8],
                                 similarity: match similarity {
                                     0 => Similarity::VeryHigh,
                                     1 => Similarity::High,
@@ -576,6 +628,8 @@ impl SaveResults for SimilarImages {
         } else {
             write!(file, "Not found any similar images.").unwrap();
         }
+        let _ = file.flush();
+
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
     }
@@ -612,4 +666,104 @@ fn get_string_from_similarity(similarity: &Similarity) -> &str {
         Similarity::VeryHigh => "Very High",
         Similarity::None => panic!(),
     }
+}
+
+fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        // Lin: /home/alice/.config/barapp
+        // Win: C:\Users\Alice\AppData\Roaming\Foo Corp\Bar App\config
+        // Mac: /Users/Alice/Library/Application Support/com.Foo-Corp.Bar-App
+
+        let config_dir = PathBuf::from(proj_dirs.config_dir());
+        if config_dir.exists() {
+            if !config_dir.is_dir() {
+                text_messages.messages.push(format!("Config dir {} is a file!", config_dir.display()));
+                return;
+            }
+        } else if fs::create_dir_all(&config_dir).is_err() {
+            text_messages.messages.push(format!("Cannot create config dir {}", config_dir.display()));
+            return;
+        }
+        let config_file = config_dir.join(CACHE_FILE_NAME);
+        let mut file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&config_file) {
+            Ok(t) => t,
+            Err(_) => {
+                text_messages.messages.push(format!("Cannot create or open cache file {}", config_file.display()));
+                return;
+            }
+        };
+
+        for file_entry in hashmap.values() {
+            let mut string: String = "".to_string();
+
+            string += format!("{}//{}//{}//{}//", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
+
+            for i in 0..file_entry.hash.len() - 1 {
+                string += format!("{}//", file_entry.hash[i]).as_str();
+            }
+            string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
+
+            if writeln!(file_handler, "{}", string).is_err() {
+                text_messages.messages.push(format!("Failed to save some data to cache file {}", config_file.display()));
+                return;
+            };
+        }
+    }
+}
+fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let config_dir = PathBuf::from(proj_dirs.config_dir());
+        let config_file = config_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().read(true).open(&config_file) {
+            Ok(t) => t,
+            Err(_) => {
+                text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
+                return None;
+            }
+        };
+
+        let reader = BufReader::new(file_handler);
+
+        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = Default::default();
+
+        // Read the file line by line using the lines() iterator from std::io::BufRead.
+        for (index, line) in reader.lines().enumerate() {
+            let line = match line {
+                Ok(t) => t,
+                Err(_) => {
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, config_file.display()));
+                    return None;
+                }
+            };
+            let uuu = line.split("//").collect::<Vec<&str>>();
+            if uuu.len() != 12 {
+                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, config_file.display()));
+                return None;
+            }
+            // Don't load cache data if destination file not exists
+            if Path::new(uuu[0]).exists() {
+                let mut hash: Node = [0u8; 8];
+                for i in 0..hash.len() {
+                    hash[i] = uuu[4 + i].parse::<u8>().unwrap();
+                }
+
+                hashmap_loaded_entries.insert(
+                    uuu[0].to_string(),
+                    FileEntry {
+                        path: PathBuf::from(uuu[0]),
+                        size: uuu[1].parse::<u64>().unwrap(),
+                        dimensions: uuu[2].to_string(),
+                        modified_date: uuu[3].parse::<u64>().unwrap(),
+                        hash,
+                        similarity: Similarity::None,
+                    },
+                );
+            }
+        }
+
+        return Some(hashmap_loaded_entries);
+    }
+
+    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
+    None
 }

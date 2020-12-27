@@ -318,6 +318,7 @@ dependencies = [
  "bk-tree",
  "blake3",
  "crossbeam-channel",
+ "directories-next",
  "futures",
  "hamming",
  "humansize",

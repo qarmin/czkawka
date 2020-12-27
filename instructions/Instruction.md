@@ -94,7 +94,10 @@ It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
 The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "webp", "tiff", "dds"]`.
 
-Then a perceptual hash is created for each image.
+Next cached data are loaded from file to prevent hashing twice same file.  
+Automatically cache which points to non existing data is deleted.
+
+Then a perceptual hash is created for each image which isn't availavle in cache.
 
 Cryptographic hash (used for example in ciphers) for similar inputs gives completely different outputs  
 11110 ==>  AAAAAB  
@@ -106,11 +109,24 @@ Perceptual hash at similar inputs, gives similar outputs
 11111 ==>  AABABB  
 01110 ==>  AAAACB
 
-The hash data is then thrown into a special tree that allows to compare hashes using [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance).
+
+Computed hash data is then thrown into a special tree that allows to compare hashes using [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance).
+
+Next this hashes are saved to file, to be able to opens images without needing to hash it more times.
 
 Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.
 
+## Config/Cache files
+For now Czkawka store only 2 files on disk:
+- `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
+- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again
 
+
+This files are located in this path
+
+Linux - `/home/username/.config/czkawka`  
+Mac - `/Users/username/Library/Application Support/pl.Qarmin.Czkawka`  
+Windows - `C:\Users\Alice\AppData\Roaming\Qarmin\Czkawka\config`
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
 
