@@ -418,6 +418,7 @@ impl SimilarImages {
                 let hash = hasher.hash_image(&image);
                 let mut buf = [0u8; 8];
                 buf.copy_from_slice(&hash.as_bytes());
+                file_entry.hash = buf;
 
                 Some(Some((file_entry, buf)))
             })
