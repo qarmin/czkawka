@@ -1,3 +1,4 @@
+use crate::connect_button_delete::{basic_remove, empty_folder_remover, tree_remove};
 use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::gui_data::*;
@@ -64,8 +65,24 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 tree_view.connect_button_press_event(opening_double_click_function_duplicates);
 
+                tree_view.connect_button_release_event(move |_tree_view, _e| {
+                    // println!("{}", e.get_button());
+                    gtk::Inhibit(false)
+                });
                 scrolled_window_duplicate_finder.add(&tree_view);
                 scrolled_window_duplicate_finder.show_all();
+
+                let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            tree_remove(&scrolled_window_duplicate_finder, ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Empty Folders
             {
@@ -82,6 +99,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_main_empty_folder_finder.add(&tree_view);
                 scrolled_window_main_empty_folder_finder.show_all();
+
+                let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            empty_folder_remover(&scrolled_window_main_empty_folder_finder, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Empty Files
             {
@@ -98,6 +127,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_main_empty_files_finder.add(&tree_view);
                 scrolled_window_main_empty_files_finder.show_all();
+
+                let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            basic_remove(&scrolled_window_main_empty_files_finder, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Temporary Files
             {
@@ -114,6 +155,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_main_temporary_files_finder.add(&tree_view);
                 scrolled_window_main_temporary_files_finder.show_all();
+
+                let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            basic_remove(&scrolled_window_main_temporary_files_finder, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Big Files
             {
@@ -130,6 +183,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_big_files_finder.add(&tree_view);
                 scrolled_window_big_files_finder.show_all();
+
+                let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            basic_remove(&scrolled_window_big_files_finder, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Similar Images
             {
@@ -229,10 +294,26 @@ pub fn initialize_gui(gui_data: &GuiData) {
                     gtk::Inhibit(false)
                 });
 
-                // tree_view.connect_button_press_event(opening_double_click_function_similar_images);
-
                 scrolled_window_similar_images_finder.add(&tree_view);
                 scrolled_window_similar_images_finder.show_all();
+
+                let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            tree_remove(
+                                &scrolled_window_similar_images_finder,
+                                ColumnsSimilarImages::Name as i32,
+                                ColumnsSimilarImages::Path as i32,
+                                ColumnsSimilarImages::Color as i32,
+                                &gui_data,
+                            );
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Zeroed Files
             {
@@ -249,6 +330,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_zeroed_files_finder.add(&tree_view);
                 scrolled_window_zeroed_files_finder.show_all();
+
+                let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            basic_remove(&scrolled_window_zeroed_files_finder, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Same Music
             {
@@ -280,6 +373,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_same_music_finder.add(&tree_view);
                 scrolled_window_same_music_finder.show_all();
+
+                let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            tree_remove(&scrolled_window_same_music_finder, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
             // Invalid Symlinks
             {
@@ -296,6 +401,18 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                 scrolled_window_invalid_symlinks.add(&tree_view);
                 scrolled_window_invalid_symlinks.show_all();
+
+                let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |_tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            basic_remove(&scrolled_window_invalid_symlinks, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
             }
         }
 
@@ -304,28 +421,64 @@ pub fn initialize_gui(gui_data: &GuiData) {
             let col_types: [glib::types::Type; 1] = [glib::types::Type::String];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
-            let mut tree_view_included_directory: gtk::TreeView = TreeView::with_model(&list_store);
+            let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-            tree_view_included_directory.get_selection().set_mode(SelectionMode::Single);
+            tree_view.get_selection().set_mode(SelectionMode::Multiple);
 
-            create_tree_view_directories(&mut tree_view_included_directory);
+            create_tree_view_directories(&mut tree_view);
 
-            scrolled_window_included_directories.add(&tree_view_included_directory);
+            scrolled_window_included_directories.add(&tree_view);
             scrolled_window_included_directories.show_all();
+
+            tree_view.connect_key_release_event(move |_tree_view, e| {
+                if let Some(button_number) = e.get_keycode() {
+                    // Handle delete button
+                    if button_number == 119 {
+                        let tree_view = get_tree_view(&scrolled_window_included_directories);
+                        let list_store = get_list_store(&scrolled_window_included_directories);
+                        let selection = tree_view.get_selection();
+
+                        let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+
+                        for tree_path in vec_tree_path.iter().rev() {
+                            list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                        }
+                    }
+                }
+                gtk::Inhibit(false)
+            });
         }
         // Set Excluded Directory
         {
             let col_types: [glib::types::Type; 1] = [glib::types::Type::String];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
-            let mut tree_view_excluded_directory: gtk::TreeView = TreeView::with_model(&list_store);
+            let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-            tree_view_excluded_directory.get_selection().set_mode(SelectionMode::Single);
+            tree_view.get_selection().set_mode(SelectionMode::Multiple);
 
-            create_tree_view_directories(&mut tree_view_excluded_directory);
+            create_tree_view_directories(&mut tree_view);
 
-            scrolled_window_excluded_directories.add(&tree_view_excluded_directory);
+            scrolled_window_excluded_directories.add(&tree_view);
             scrolled_window_excluded_directories.show_all();
+
+            tree_view.connect_key_release_event(move |_tree_view, e| {
+                if let Some(button_number) = e.get_keycode() {
+                    // Handle delete button
+                    if button_number == 119 {
+                        let tree_view = get_tree_view(&scrolled_window_excluded_directories);
+                        let list_store = get_list_store(&scrolled_window_excluded_directories);
+                        let selection = tree_view.get_selection();
+
+                        let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+
+                        for tree_path in vec_tree_path.iter().rev() {
+                            list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                        }
+                    }
+                }
+                gtk::Inhibit(false)
+            });
         }
     }
 }

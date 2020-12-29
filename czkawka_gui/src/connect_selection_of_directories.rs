@@ -1,5 +1,6 @@
 extern crate gtk;
 use crate::gui_data::GuiData;
+use crate::help_functions::{get_list_store, get_tree_view};
 use gtk::prelude::*;
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
@@ -69,17 +70,15 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
         let buttons_remove_excluded_directory = gui_data.buttons_remove_excluded_directory.clone();
         let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
         buttons_remove_excluded_directory.connect_clicked(move |_| {
-            let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-            let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_excluded_directories);
+            let list_store = get_list_store(&scrolled_window_excluded_directories);
             let selection = tree_view.get_selection();
 
-            let (_, tree_iter) = match selection.get_selected() {
-                Some(t) => t,
-                None => {
-                    return;
-                }
-            };
-            list_store.remove(&tree_iter);
+            let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+
+            for tree_path in vec_tree_path.iter().rev() {
+                list_store.remove(&list_store.get_iter(tree_path).unwrap());
+            }
         });
     }
     // Remove Included Folder
@@ -87,17 +86,15 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
         let buttons_remove_included_directory = gui_data.buttons_remove_included_directory.clone();
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
         buttons_remove_included_directory.connect_clicked(move |_| {
-            let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-            let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+            let tree_view = get_tree_view(&scrolled_window_included_directories);
+            let list_store = get_list_store(&scrolled_window_included_directories);
             let selection = tree_view.get_selection();
 
-            let (_, tree_iter) = match selection.get_selected() {
-                Some(t) => t,
-                None => {
-                    return;
-                }
-            };
-            list_store.remove(&tree_iter);
+            let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+
+            for tree_path in vec_tree_path.iter().rev() {
+                list_store.remove(&list_store.get_iter(tree_path).unwrap());
+            }
         });
     }
 }
