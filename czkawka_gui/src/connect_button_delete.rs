@@ -54,23 +54,23 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
         match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
             "notebook_main_duplicate_finder_label" => {
-                tree_remove(scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+                tree_remove(&scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
             }
             "scrolled_window_main_empty_folder_finder" => {
-                empty_folder_remover(scrolled_window_main_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
+                empty_folder_remover(&scrolled_window_main_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
             }
             "scrolled_window_main_empty_files_finder" => {
-                basic_remove(scrolled_window_main_empty_files_finder.clone(), ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
+                basic_remove(&scrolled_window_main_empty_files_finder.clone(), ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
             }
             "scrolled_window_main_temporary_files_finder" => {
-                basic_remove(scrolled_window_main_temporary_files_finder.clone(), ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
+                basic_remove(&scrolled_window_main_temporary_files_finder.clone(), ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
             }
             "notebook_big_main_file_finder" => {
-                basic_remove(scrolled_window_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
+                basic_remove(&scrolled_window_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
             }
             "notebook_main_similar_images_finder_label" => {
                 tree_remove(
-                    scrolled_window_similar_images_finder.clone(),
+                    &scrolled_window_similar_images_finder.clone(),
                     ColumnsSimilarImages::Name as i32,
                     ColumnsSimilarImages::Path as i32,
                     ColumnsSimilarImages::Color as i32,
@@ -78,20 +78,20 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                 );
             }
             "notebook_main_zeroed_files_finder" => {
-                basic_remove(scrolled_window_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
+                basic_remove(&scrolled_window_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
             }
             "notebook_main_same_music_finder" => {
-                tree_remove(scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+                tree_remove(&scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
             }
             "scrolled_window_invalid_symlinks" => {
-                basic_remove(scrolled_window_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
+                basic_remove(&scrolled_window_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
             }
             e => panic!("Not existent {}", e),
         }
     });
 }
 
-fn empty_folder_remover(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
+pub fn empty_folder_remover(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
     let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -177,7 +177,7 @@ fn empty_folder_remover(scrolled_window: gtk::ScrolledWindow, column_file_name: 
     selection.unselect_all();
 }
 
-fn basic_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
+pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
     let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
@@ -212,7 +212,7 @@ fn basic_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, col
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
 //
-fn tree_remove(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
+pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
     let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();

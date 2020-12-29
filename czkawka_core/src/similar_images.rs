@@ -748,6 +748,17 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
                     hash[i] = uuu[4 + i].parse::<u8>().unwrap();
                 }
 
+                #[cfg(debug_assertions)]
+                {
+                    let mut have_at_least: u8 = 0;
+                    for i in hash.iter() {
+                        if *i == 0 {
+                            have_at_least += 1;
+                        }
+                    }
+                    assert!(have_at_least != hash.len() as u8);
+                }
+
                 hashmap_loaded_entries.insert(
                     uuu[0].to_string(),
                     FileEntry {
