@@ -15,18 +15,20 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 gtk::FileChooserAction::SelectFolder,
                 &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
             );
+            chooser.set_select_multiple(true);
             chooser.show_all();
             let response_type = chooser.run();
             if response_type == gtk::ResponseType::Ok {
-                let folder = chooser.get_filename().unwrap().to_str().unwrap().to_string();
+                let folder = chooser.get_filenames();
 
                 let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                 let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
 
                 let col_indices = [0];
-
-                let values: [&dyn ToValue; 1] = [&folder];
-                list_store.set(&list_store.append(), &col_indices, &values);
+                for file_entry in &folder {
+                    let values: [&dyn ToValue; 1] = [&file_entry.to_string_lossy().to_string()];
+                    list_store.set(&list_store.append(), &col_indices, &values);
+                }
             }
             chooser.close();
         });
@@ -43,18 +45,21 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 gtk::FileChooserAction::SelectFolder,
                 &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
             );
+            chooser.set_select_multiple(true);
             chooser.show_all();
             let response_type = chooser.run();
             if response_type == gtk::ResponseType::Ok {
-                let folder = chooser.get_filename().unwrap().to_str().unwrap().to_string();
+                let folder = chooser.get_filenames();
 
                 let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
                 let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
 
                 let col_indices = [0];
 
-                let values: [&dyn ToValue; 1] = [&folder];
-                list_store.set(&list_store.append(), &col_indices, &values);
+                for file_entry in &folder {
+                    let values: [&dyn ToValue; 1] = [&file_entry.to_string_lossy().to_string()];
+                    list_store.set(&list_store.append(), &col_indices, &values);
+                }
             }
             chooser.close();
         });
