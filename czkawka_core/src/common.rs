@@ -109,6 +109,12 @@ impl Common {
 
     pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
         let path = path_to_change.as_ref();
+
+        // Don't do anything, because network path may be case intensive
+        if path.to_string_lossy().starts_with('\\') {
+            return path.to_path_buf();
+        }
+
         match path.to_str() {
             Some(path) if path.is_char_boundary(1) => {
                 let replaced = path.replace("/", "\\");
@@ -157,5 +163,8 @@ mod test {
         assert_eq!(PathBuf::from("C:\\path.txt"), Common::normalize_windows_path("c:/PATH.tXt"));
         assert_eq!(PathBuf::from("H:\\reka\\weza\\roman.txt"), Common::normalize_windows_path("h:/RekA/Weza\\roMan.Txt"));
         assert_eq!(PathBuf::from("T:\\a"), Common::normalize_windows_path("T:\\A"));
+        assert_eq!(PathBuf::from("\\\\aBBa"), Common::normalize_windows_path("\\\\aBBa"));
+        assert_eq!(PathBuf::from("a"), Common::normalize_windows_path("a"));
+        assert_eq!(PathBuf::from(""), Common::normalize_windows_path(""));
     }
 }

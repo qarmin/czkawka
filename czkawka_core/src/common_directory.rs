@@ -31,10 +31,18 @@ impl Directories {
                 text_messages.warnings.push(format!("Included Directory Warning: Wildcards in path are not supported, ignoring {}", directory.display()));
                 continue;
             }
+
+            #[cfg(not(target_family = "windows"))]
             if directory.is_relative() {
                 text_messages.warnings.push(format!("Included Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
                 continue;
             }
+            #[cfg(target_family = "windows")]
+            if directory.is_relative() && !directory.starts_with("\\") {
+                text_messages.warnings.push(format!("Included Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
+                continue;
+            }
+
             if !directory.exists() {
                 text_messages.warnings.push(format!("Included Directory Warning: Provided folder path must exits, ignoring {}", directory.display()));
                 continue;
@@ -79,10 +87,17 @@ impl Directories {
                 text_messages.warnings.push(format!("Excluded Directory Warning: Wildcards in path are not supported, ignoring {}", directory.display()));
                 continue;
             }
+            #[cfg(not(target_family = "windows"))]
             if directory.is_relative() {
                 text_messages.warnings.push(format!("Excluded Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
                 continue;
             }
+            #[cfg(target_family = "windows")]
+            if directory.is_relative() && !directory.starts_with("\\") {
+                text_messages.warnings.push(format!("Excluded Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
+                continue;
+            }
+
             if !directory.exists() {
                 // text_messages.warnings.push(format!("Excluded Directory Warning: Provided folder path must exits, ignoring {}", directory.display()));
                 continue;

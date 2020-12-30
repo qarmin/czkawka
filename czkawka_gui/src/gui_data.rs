@@ -63,6 +63,8 @@ pub struct GuiData {
     pub buttons_show_errors: gtk::Button,
     pub buttons_names: [String; 5],
     pub buttons_array: [Button; 5],
+
+    pub buttons_manual_add_directory: gtk::Button,
     pub buttons_add_included_directory: gtk::Button,
     pub buttons_remove_included_directory: gtk::Button,
     pub buttons_add_excluded_directory: gtk::Button,
@@ -276,6 +278,7 @@ impl GuiData {
         let buttons_names = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string(), "symlink".to_string()];
         let buttons_array = [buttons_search.clone(), buttons_select.clone(), buttons_delete.clone(), buttons_save.clone(), buttons_symlink.clone()];
 
+        let buttons_manual_add_directory: gtk::Button = builder.get_object("buttons_manual_add_directory").unwrap();
         let buttons_add_included_directory: gtk::Button = builder.get_object("buttons_add_included_directory").unwrap();
         let buttons_remove_included_directory: gtk::Button = builder.get_object("buttons_remove_included_directory").unwrap();
         let buttons_add_excluded_directory: gtk::Button = builder.get_object("buttons_add_excluded_directory").unwrap();
@@ -428,6 +431,7 @@ impl GuiData {
             buttons_show_errors,
             buttons_names,
             buttons_array,
+            buttons_manual_add_directory,
             buttons_add_included_directory,
             buttons_remove_included_directory,
             buttons_add_excluded_directory,
