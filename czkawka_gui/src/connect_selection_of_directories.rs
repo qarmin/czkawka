@@ -3,7 +3,49 @@ use crate::gui_data::GuiData;
 use crate::help_functions::{get_list_store, get_tree_view};
 use gtk::prelude::*;
 
+#[cfg(target_family = "windows")]
+use czkawka_core::common::Common;
+
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
+    // Add manually directory
+    {
+        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
+        let window_main = gui_data.window_main.clone();
+        let buttons_manual_add_directory = gui_data.buttons_manual_add_directory.clone();
+        buttons_manual_add_directory.connect_clicked(move |_| {
+            let dialog_manual_add_directory = gtk::Dialog::with_buttons(Some("Add directory manually"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
+            let entry: gtk::Entry = gtk::Entry::new();
+
+            for widgets in dialog_manual_add_directory.get_children() {
+                // By default GtkBox is child of dialog, so we can easily add other things to it
+                widgets.clone().downcast::<gtk::Box>().unwrap().add(&entry);
+            }
+
+            dialog_manual_add_directory.show_all();
+
+            let response_type = dialog_manual_add_directory.run();
+            if response_type == gtk::ResponseType::Ok {
+                let text = entry.get_text().to_string().trim().to_string();
+
+                #[cfg(target_family = "windows")]
+                let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
+
+                if !text.is_empty() {
+                    let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+                    let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+
+                    let col_indices = [0];
+
+                    let values: [&dyn ToValue; 1] = [&text];
+                    list_store.set(&list_store.append(), &col_indices, &values);
+                }
+            } else {
+                dialog_manual_add_directory.close();
+                return;
+            }
+            dialog_manual_add_directory.close();
+        });
+    }
     // Add included directory
     {
         let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
