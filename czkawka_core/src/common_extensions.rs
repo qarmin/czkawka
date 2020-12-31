@@ -25,7 +25,7 @@ impl Extensions {
 
         let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
         for mut extension in extensions {
-            if extension == "" || extension.replace('.', "").trim() == "" {
+            if extension.is_empty() || extension.replace('.', "").trim() == "" {
                 continue;
             }
 

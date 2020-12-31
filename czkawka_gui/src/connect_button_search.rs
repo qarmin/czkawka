@@ -127,10 +127,7 @@ pub fn connect_button_search(
                 } else {
                     panic!("No radio button is pressed");
                 }
-                let minimal_file_size = match entry_duplicate_minimal_size.get_text().as_str().parse::<u64>() {
-                    Ok(t) => t,
-                    Err(_) => 1024, // By default
-                };
+                let minimal_file_size = entry_duplicate_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -202,10 +199,7 @@ pub fn connect_button_search(
 
                 get_list_store(&scrolled_window_big_files_finder).clear();
 
-                let numbers_of_files_to_check = match entry_big_files_number.get_text().as_str().parse::<usize>() {
-                    Ok(t) => t,
-                    Err(_) => 50, // By default
-                };
+                let numbers_of_files_to_check = entry_big_files_number.get_text().as_str().parse::<usize>().unwrap_or(50);
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -258,10 +252,7 @@ pub fn connect_button_search(
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
 
-                let minimal_file_size = match entry_similar_images_minimal_size.get_text().as_str().parse::<u64>() {
-                    Ok(t) => t,
-                    Err(_) => 1024 * 16, // By default
-                };
+                let minimal_file_size = entry_similar_images_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024 * 16);
 
                 let similarity;
                 if radio_button_similar_images_minimal.get_active() {
@@ -326,10 +317,8 @@ pub fn connect_button_search(
 
                 get_list_store(&scrolled_window_same_music_finder).clear();
 
-                let minimal_file_size = match entry_same_music_minimal_size.get_text().as_str().parse::<u64>() {
-                    Ok(t) => t,
-                    Err(_) => 1024, // By default
-                };
+                let minimal_file_size = entry_same_music_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
+
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
 
                 if check_button_music_title.get_active() {

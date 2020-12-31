@@ -50,7 +50,30 @@ After that the latest GTK 3 runtime must be installed from https://github.com/ts
 ## Usage
 ### Precompiled binaries
 Precompiled binaries are available here - https://github.com/qarmin/czkawka/releases/.  
-If the app does not run when clicking at a launcher, run it through a terminal.
+If the app does not run when clicking at a launcher, run it through a terminal.  
+You don't need to have any additional libraries for CLI Czkawka
+#### GUI Requirements
+##### Linux
+For Czkawka GUI you need to have at least GTK 3.22.  
+It should be installed by default on all the most popular distros.
+##### Windows
+`czkawka_gui.exe` extracted from zip file `windows_czkawka_gui.zip` needs to have all files inside around, because use them.
+If you want to move somewhere else exe binary and open it, you need to install GTK 3 runtime from site https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
+##### MacOS
+For now you need to install manually GTK 3 libraries, because are dynamically loaded from OS(Help needed to use static linking).  
+To install it you need to type this commands in terminal
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install gtk+3
+```
+Next you need to go to place where you downloaded app and add executable bit
+```shell
+chmod +x mac_czkawka_gui
+```
+At the end you can open this app
+```shell
+./mac_czkawka_gui
+```
 
 ### Appimage
 Appimage files are available in release page - https://github.com/qarmin/czkawka/releases/
@@ -111,6 +134,12 @@ sudo apt install -y libgtk-3-dev
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
 sudo yum install gtk3-devel glib2-devel
+```
+#### MacOS
+You need to install Homebrew and GTK Libraries
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install rust gtk+3
 ```
 
 ### Compilation from source
@@ -228,3 +257,6 @@ Windows dark theme is used from AdMin repo - https://github.com/nrhodes91/AdMin 
 Program is completely free to use.
 
 "Gratis to uczciwa cena" - "Free is a fair price"
+
+## Dotations
+If you are using the app, I would appreciate a donation for its further development - https://github.com/sponsors/qarmin.

@@ -63,7 +63,7 @@ impl Common {
         let temp_splits: Vec<&str> = expression.split('*').collect();
         let mut splits: Vec<&str> = Vec::new();
         for i in temp_splits {
-            if i != "" {
+            if !i.is_empty() {
                 splits.push(i);
             }
         }

@@ -47,3 +47,47 @@ jobs:
           name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_cli
         if: ${{ matrix.type == 'release' }}
+
+  macos-gui:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Install Homebrew
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Override link[WORKAROUND] # Looks that this is a bug with current homebrew or Github CI
+        run: rm '/usr/local/bin/2to3'
+
+      - name: Install GTK3
+        run: brew install rust gtk+3
+
+      - name: Build GUI Debug
+        run: cargo build --bin czkawka_gui
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'debug'}}
+
+      - name: Build GUI Release
+        run: cargo build --release --bin czkawka_gui
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+        if: ${{ matrix.type == 'release'}}
+
+      - name: Store MacOS GUI
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_gui
+        if: ${{ matrix.type == 'release' }}

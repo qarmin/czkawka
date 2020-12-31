@@ -395,10 +395,7 @@ impl SameMusic {
                     Some(t) => t.to_string(),
                     None => "".to_string(),
                 };
-                file_entry.year = match tag.year() {
-                    Some(t) => t,
-                    None => 0,
-                };
+                file_entry.year = tag.year().unwrap_or(0);
 
                 Some(Some(file_entry))
             })
@@ -474,7 +471,7 @@ impl SameMusic {
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let title = file_entry.title.to_lowercase().trim().to_string();
-                    if title != "" {
+                    if !title.is_empty() {
                         hash_map.entry(title.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(title.as_str()).unwrap().push(file_entry);
                     }
@@ -501,7 +498,7 @@ impl SameMusic {
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let artist = file_entry.artist.to_lowercase().trim().to_string();
-                    if artist != "" {
+                    if !artist.is_empty() {
                         hash_map.entry(artist.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(artist.as_str()).unwrap().push(file_entry);
                     }
@@ -528,7 +525,7 @@ impl SameMusic {
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let album_title = file_entry.album_title.to_lowercase().trim().to_string();
-                    if album_title != "" {
+                    if !album_title.is_empty() {
                         hash_map.entry(album_title.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(album_title.as_str()).unwrap().push(file_entry);
                     }
@@ -555,7 +552,7 @@ impl SameMusic {
                 let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let album_artist = file_entry.album_artist.to_lowercase().trim().to_string();
-                    if album_artist != "" {
+                    if !album_artist.is_empty() {
                         hash_map.entry(album_artist.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(album_artist.as_str()).unwrap().push(file_entry);
                     }
