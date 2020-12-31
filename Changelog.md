@@ -1,3 +1,13 @@
+## Version 2.1.0 - 31.12.2020r
+- Hide preview when deleting images or symlinking it - [#167](https://github.com/qarmin/czkawka/pull/167)
+- Add manual adding of directories - [#165](https://github.com/qarmin/czkawka/pull/165), [#168](https://github.com/qarmin/czkawka/pull/168)
+- Add resizable top panel - [#164](https://github.com/qarmin/czkawka/pull/164)
+- Add support for delete button - [#159](https://github.com/qarmin/czkawka/pull/159)
+- Allow to select multiple entries in File Chooser - [#154](https://github.com/qarmin/czkawka/pull/154)
+- Add cache support for similar images - [#139](https://github.com/qarmin/czkawka/pull/139)
+- Add selecting images with it's size - [#138](https://github.com/qarmin/czkawka/pull/138)
+- Modernize popovers code and simplify later changes - [#137](https://github.com/qarmin/czkawka/pull/137)
+
 ## Version 2.0.0 - 23.12.2020r
 - Add Snap support - [ee3d4](https://github.com/qarmin/czkawka/commit/ee3d450552cd0c37a114b05c557ff9381ef92466)
 - Select longer names by default - [#113](https://github.com/qarmin/czkawka/pull/113)

@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "czkawka_core",
  "structopt",
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "audiotags",
  "bitflags",
@@ -329,7 +329,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",

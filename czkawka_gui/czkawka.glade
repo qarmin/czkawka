@@ -2387,7 +2387,7 @@ Author: Rafał Mikrut
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
                 <property name="has_frame">False</property>
-                <property name="text" translatable="yes">Czkawka 2.0.0</property>
+                <property name="text" translatable="yes">Czkawka 2.1.0</property>
                 <property name="xalign">1</property>
                 <property name="shadow_type">none</property>
                 <property name="caps_lock_warning">False</property>
