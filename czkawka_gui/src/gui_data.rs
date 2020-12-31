@@ -67,6 +67,7 @@ pub struct GuiData {
     pub buttons_manual_add_directory: gtk::Button,
     pub buttons_add_included_directory: gtk::Button,
     pub buttons_remove_included_directory: gtk::Button,
+    pub buttons_manual_add_excluded_directory: gtk::Button,
     pub buttons_add_excluded_directory: gtk::Button,
     pub buttons_remove_excluded_directory: gtk::Button,
 
@@ -281,6 +282,7 @@ impl GuiData {
         let buttons_manual_add_directory: gtk::Button = builder.get_object("buttons_manual_add_directory").unwrap();
         let buttons_add_included_directory: gtk::Button = builder.get_object("buttons_add_included_directory").unwrap();
         let buttons_remove_included_directory: gtk::Button = builder.get_object("buttons_remove_included_directory").unwrap();
+        let buttons_manual_add_excluded_directory: gtk::Button = builder.get_object("buttons_manual_add_excluded_directory").unwrap();
         let buttons_add_excluded_directory: gtk::Button = builder.get_object("buttons_add_excluded_directory").unwrap();
         let buttons_remove_excluded_directory: gtk::Button = builder.get_object("buttons_remove_excluded_directory").unwrap();
 
@@ -434,6 +436,7 @@ impl GuiData {
             buttons_manual_add_directory,
             buttons_add_included_directory,
             buttons_remove_included_directory,
+            buttons_manual_add_excluded_directory,
             buttons_add_excluded_directory,
             buttons_remove_excluded_directory,
             buttons_popover_select_all,
