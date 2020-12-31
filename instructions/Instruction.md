@@ -1,4 +1,12 @@
 # Instruction
+
+- [Basic information](#basic-informations)
+- [Tools - How works?](#tools---how-works)
+- [Config/Cache files](#configcache-files)
+- [GUI](#gui-gtk)
+- [CLI](#cli)
+- [Tips and tricks](#tips-and-tricks)
+
 ## Basic Informations
 Czkawka for now contains two independent frontends - Console and Graphical interface which share the core module which contains basic and common functions used by each frontend.
 
@@ -6,18 +14,18 @@ Using Rust language without unsafe code, helps to create safe, fast with small r
 
 The code has very good support for multithreading, so the better processor/disk the performance should increase exponentially.
 
-## Tools
+## Tools - How works?
 ### Duplicate Finder
 
 Duplicate Finder allows you to search for files and group them according to a predefined criterion:
 - **By name** - Groups files by name e.g. `/home/rafal/plik.txt` will be treat like duplicate of file `/home/romb/plik.txt`. This is the fastest method, but it is very unreliable and should not be used unless you know what you are doing.
 - **By size** - Groups files by its size(in bytes), which must be exactly the same. It is as fast as the previous mode and usually gives much more correct results with duplicates, but I also do not recommend using it if you do not know what you are doing.
 - **By hash** - A mode containing a check of the hash (cryptographic hash) of a given file which determines with great probability whether the files are identical.
-  
+
   This is the slowest, but almost 100% sure way to check the files.
-  
+
   Because the hash is only checked inside groups of files of the same size, it is practically impossible for two different files to be considered identical.
-  
+
   It consists of 3 parts:
   - Grouping files of identical size - allows you to throw away files of unique size, which are already known to have no duplicates at this stage.
   - PreHash check - Each group of files of identical size is placed in a queue using all processor threads (each action in the group is independent of the others).
@@ -119,7 +127,7 @@ Finally, each hash is compared with the others and if the distance between them 
 ## Config/Cache files
 For now Czkawka store only 2 files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again
+- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - DO NOT TRY TO EDIT THIS FILE MANUALLY! - editing this file may cause app crashes.
 
 
 This files are located in this path
@@ -127,9 +135,12 @@ This files are located in this path
 Linux - `/home/username/.config/czkawka`  
 Mac - `/Users/username/Library/Application Support/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Alice\AppData\Roaming\Qarmin\Czkawka\config`
+
+  
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
 
+### GUI overview
 The GUI are built from different pieces:
 - Red - Program settings, contains info about included/excluded directories which user may want to check. Also there is a tab with allowed extensions, which allow user to choose which type of files want to check. Next category is Excluded items, which allow to discard specific path with use of `*` wildcard - `/home/*` means that e.g. `/home/rafal/` will be ignored but no `/home/czkawka/`. The last one is settings tab which allow to save configuration of program, reset it and load it when needed.
 - Green - This allow to choose which tool we want to use.
@@ -143,12 +154,28 @@ There is also an option to see image previews in Similar Images tool.
 
 <img src="https://user-images.githubusercontent.com/41945903/103025544-50ca4480-4552-11eb-9a54-f1b1f6f725b1.png" width="800" />
 
+### Action Buttons
+There are several buttons which do different actions:
+- Search - starts searching and shows progress dialog
+- Stop - button in progress dialog, allows to easily stop current task. Sometimes it may take a few seconds until all atomic operations ends and GUI will be able to use again
+- Select - allows selecting multiple entries at once
+- Delete - delete entirely all selected entries
+- Save - save initial state of results
+- Hamburger(parallel lines) - used to show/hide bottom text panel which shows warnings/errors
+- Add (directories) - adds directories to include or exclude
+- Remove (directories) - remove directories to search or to exclude
+- Manual Add (directories) - allows to write by hand directories(may be used to write non visible in file manager directories)
+- Save current configuration - saves current GUI configuration to configuration file 
+- Load configuration - loads configuration of file and override current GUI config
+- Reset configuration - reset current GUI configuration to default
+
 ### Opening/Manipulating files
 It is possible to open selected files by double clicking at them.
 
 To open multiple file just select desired files with CTRL key pressed and still when clicking this key, double click at selected items with left mouse button.
 
 To open folder containing selected file, just click twice at it with right mouse button.
+
 
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
@@ -165,4 +192,8 @@ If you want to get more detailed info about certain tool, after its name just wr
 
 By default all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
-
+## Tips and Tricks
+- **Manually adding multiple directories**  
+  You can manually edit config file `czkawka_gui_config.txt` and add required directories. After that load configuration.
+- **Slow checking of little number similar images**  
+  If you checked before a big amount of images(several tens of thousands) and them still exists on disk, then information's about it are loaded from cache and save to it, even if you have check now only a few images. You can rename cache file `cache_similar_image.txt`(to be able to use it again) or delete it - cache will regenerate but with lower amount of entries it should load and save a lot of faster.

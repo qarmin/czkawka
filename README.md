@@ -13,7 +13,7 @@
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions or excluded items with * wildcard
 - Image previews to get quick view at the compared photos
 - Multiple tools to use:
-  - Duplicates - Finds duplicates basing on size(fast), hash(accurate), first 1MB of hash(moderate)
+  - Duplicates - Finds duplicates basing on file name, size, hash, first 1 MB of hash
   - Empty Folders - Finds empty folders with the help of advanced algorithm
   - Big Files - Finds provided number of the biggest files in given location
   - Empty Files - Looks for empty files across disk
@@ -24,18 +24,28 @@
   - Invalid Symbolic Links - Shows symbolic links which points to non-existent files/directories
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
+
+## Instruction
+You can find instruction how to use Czkawka [here](instructions/Instruction.md)
+
 ## Requirements
 If you are using Windows or Mac binaries, there is no specific requirements.  
 Same with Appimage on Linux(except having system 18.04+ or similar).  
 But compiled GUI binaries on Linux or compiling it on your own os require to install this packages:
 ### Ubuntu/Debian
 ```
-sudo apt install cargo libgtk-dev
+sudo apt install cargo libgtk-3-dev
 ```
 ### Fedora/CentOS
 ```
-sudo yum install cargo gtk3-devel glib2-devel
+sudo yum install gtk3-devel glib2-devel
 ```
+### Windows(Not working yet)
+First you need to install Visual C++ components from Visual Studio installer - https://visualstudio.microsoft.com/downloads/
+
+Next install Rust from site https://rustup.rs/  
+
+After that the latest GTK 3 runtime must be installed from https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
 
 ## Usage
 ### Precompiled binaries
@@ -45,10 +55,10 @@ If the app does not run when clicking at a launcher, run it through a terminal.
 ### Appimage
 Appimage files are available in release page - https://github.com/qarmin/czkawka/releases/
 
-For now looks that there is a bug with this format, because it doesn't allow to open two images/files at once.
+For now looks that there is a bug with this format, because it doesn't allow opening two images/files at once.
 
 ### Cargo
-The easiest method to install Czkawka is to use Cargo command(you must have installed GTK libraries in OS)
+The easiest method to install Czkawka is to use Cargo command, since it basically compile an entire app, you need to install required packages from `Compilation` section
 ```
 cargo install czkawka_gui
 cargo install czkawka_cli
@@ -56,10 +66,13 @@ cargo install czkawka_cli
 You can update package by typing same command.
 
 ### Snap
-Snap also are available, but there is no access to 
+Snap also are available, but there is no access to external drives.
 ```
 sudo snap install czkawka
 ```
+Snap store entry - https://snapcraft.io/czkawka
+
+Edgy builds are build for every commit, but it may be a little unstable(very rarely, because I'm not pushing untested code).
 
 ### Flatpak
 Maybe someday
@@ -84,15 +97,20 @@ Artifacts from each commit you can also download here - https://github.com/qarmi
 
 ## Compilation
 ### Requirements
-Rust 1.46 - probably lower also works fine(1.40 is needed by GTK)  
-GTK 3.22 - for GTK backend
+Rust 1.48 - Czkawka aims to support only the latest stable Rust version  
+GTK 3.22 - only for GTK backend
 
-
-For now only Linux (and maybe also macOS) is supported
-
-- Install requirements for GTK
+If you want to compile CLI frontend, then just skip lines which contains `gtk` word.
+#### Debian/Ubuntu
+```shell
+sudo apt install -y curl  # Needed by Rust update tool
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
+sudo apt install -y libgtk-3-dev
 ```
-apt install -y libgtk-3-dev
+#### Fedora/CentOS/Rocky Linux
+```shell
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
+sudo yum install gtk3-devel glib2-devel
 ```
 
 ### Compilation from source
@@ -106,7 +124,7 @@ cd czkawka
 cargo run --bin czkawka_gui
 ```
 For Linux-to-Windows cross-building instruction look at the CI.
-![GUI GTK](https://user-images.githubusercontent.com/41945903/94850801-c5945380-0427-11eb-8d4c-af4946ab02d5.png)
+![GUI](https://user-images.githubusercontent.com/41945903/103371136-fb9cae80-4ace-11eb-8d72-7b4c8ac44260.png)
 - Run CLI(this will print help with a lot of examples)
 ```
 cargo run --bin czkawka_cli
@@ -116,7 +134,7 @@ cargo run --bin czkawka_cli
 ## Benchmarks
 Since Czkawka is written in Rust and aims to be a faster alternative to FSlint (written in Python), we need to compare the speed of these tools.
 
-I tested it on SSD Disk 256GB GoodRam and i7 4770 CPU.
+I tested it on SSD Disk 256 GB GoodRam and i7 4770 CPU.
 
 I prepared a directory and performed a test without any folder exceptions(I removed all directories from FSlint and Czkawka from other tabs than Include Directory) which contained 229868 files which took 203,7 GB and 13708 duplicates files in 9117 groups which took 7.90 GB.
 
@@ -138,14 +156,14 @@ To not get Dupeguru crash I checked smaller directory with 217986 files and 4188
 | Czkawka 1.4.0 | 9 MB | 66 MB | 32 MB |
 | DupeGuru 4.0.4 | 80 MB | 210 MB | 155 MB |
 
-Similar Images which check 332 files which takes 1,7GB
+Similar Images which check 332 files which takes 1,7 GB
 
 | App| Scan time |
 |:----------:|:-------------:|
 | Czkawka 1.4.0 | 58s |
 | DupeGuru 4.0.4 | 51s |
 
-Similar Images which check 1421 image files which takes 110,1MB
+Similar Images which check 1421 image files which takes 110,1 MB
 
 | App| Scan time |
 |:----------:|:-------------:|
@@ -187,14 +205,14 @@ You can help by creating:
 - Bug report - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
 - Pull Requests - implementing a new feature yourself or fixing bugs, but you have to pay attention to code quality. If the change is bigger, then it's a good idea to open a new issue to discuss changes.
-- Documentation - There is [insruction](instructions/Instruction.md) which you can improve.
+- Documentation - There is [instruction](instructions/Instruction.md) which you can improve.
 
 The code should be clean and well formatted (Clippy and fmt are required in each PR).
 
 ## Name
 Czkawka is a Polish word which means _hiccup_.  
 
-I chose this name because I wanted to hear people speaking other languages pronounce it. 
+I chose this name because I wanted to hear people speaking other languages pronounce it.
 
 This name is not as bad as it seems, because I was also thinking about using words like _żółć_, _gżegżółka_ or _żołądź_, but I gave up on these ideas because they contained Polish characters, which would cause difficulty in searching for the project.
 
