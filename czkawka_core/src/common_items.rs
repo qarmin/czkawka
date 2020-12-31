@@ -28,7 +28,7 @@ impl ExcludedItems {
         for expression in expressions {
             let expression: String = expression.trim().to_string();
 
-            if expression == "" {
+            if expression.is_empty() {
                 continue;
             }
             if expression == "DEFAULT" {
