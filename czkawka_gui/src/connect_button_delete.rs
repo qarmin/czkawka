@@ -24,6 +24,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
     let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
     let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
+    let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
     buttons_delete.connect_clicked(move |_| {
         if check_button_settings_confirm_deletion.get_active() {
@@ -76,6 +77,8 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     ColumnsSimilarImages::Color as i32,
                     &gui_data,
                 );
+                // let list_store = get_list_store(&scrolled_window_similar_images_finder);
+                image_preview_similar_images.hide();
             }
             "notebook_main_zeroed_files_finder" => {
                 basic_remove(&scrolled_window_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);

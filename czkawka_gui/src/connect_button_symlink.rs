@@ -16,6 +16,8 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
     let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
 
+    let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
+
     buttons_symlink.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
         "notebook_main_duplicate_finder_label" => {
             symlink(scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
@@ -31,6 +33,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
                 ColumnsSimilarImages::Color as i32,
                 &gui_data,
             );
+            image_preview_similar_images.hide();
         }
         e => panic!("Not existent {}", e),
     });

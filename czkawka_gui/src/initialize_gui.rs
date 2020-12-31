@@ -198,6 +198,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
             }
             // Similar Images
             {
+                let image_preview_similar_images_clone = image_preview_similar_images.clone();
                 image_preview_similar_images.hide();
 
                 let col_types: [glib::types::Type; 10] = [
@@ -310,6 +311,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                                 ColumnsSimilarImages::Color as i32,
                                 &gui_data,
                             );
+                            image_preview_similar_images_clone.hide();
                         }
                     }
                     gtk::Inhibit(false)
