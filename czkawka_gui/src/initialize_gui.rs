@@ -258,18 +258,25 @@ pub fn initialize_gui(gui_data: &GuiData) {
                                             break 'dir;
                                         }
                                     };
+                                    if img.width() == 0 || img.height() == 0 {
+                                        add_text_to_text_view(&text_view_errors, format!("Cannot create preview of image {}, with 0 width or height", file_name).as_str());
+                                        break 'dir;
+                                    }
                                     let ratio = img.width() / img.height();
                                     let requested_dimensions = (400, 400);
-                                    let new_size;
+                                    let mut new_size;
                                     match ratio.cmp(&(requested_dimensions.0 / requested_dimensions.1)) {
                                         Ordering::Greater => {
                                             new_size = (requested_dimensions.0, (img.height() * requested_dimensions.0) / img.width());
+                                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
                                         }
                                         Ordering::Less => {
                                             new_size = ((img.width() * requested_dimensions.1) / img.height(), requested_dimensions.1);
+                                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
                                         }
                                         Ordering::Equal => {
                                             new_size = requested_dimensions;
+                                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
                                         }
                                     }
                                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);

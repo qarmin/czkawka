@@ -202,7 +202,7 @@ jobs:
 
       - name: Download appimage dependiences
         run: |
-          wget -c "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/c008df652946408f357f502bab67bfcf6f303b4e/linuxdeploy-plugin-gtk.sh"
+          wget -c "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
           wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           chmod +x linuxdeploy-plugin-gtk.sh
           chmod +x linuxdeploy-x86_64.AppImage
