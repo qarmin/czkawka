@@ -13,7 +13,6 @@ parts:
   czkawka:
     plugin: nil
     source: https://github.com/qarmin/czkawka.git
-    source-tag: 2.1.0
     build-packages:
       - libgtk-3-dev
       - curl
