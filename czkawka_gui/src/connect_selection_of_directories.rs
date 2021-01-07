@@ -31,8 +31,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
                 if !text.is_empty() {
-                    let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                    let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+                    let list_store = get_list_store(&scrolled_window_included_directories);
 
                     let col_indices = [0];
 
@@ -75,8 +74,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
                 if !text.is_empty() {
-                    let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                    let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+                    let list_store = get_list_store(&scrolled_window_excluded_directories);
 
                     let col_indices = [0];
 
@@ -108,8 +106,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             if response_type == gtk::ResponseType::Ok {
                 let folder = chooser.get_filenames();
 
-                let tree_view = scrolled_window_included_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+                let list_store = get_list_store(&scrolled_window_included_directories);
 
                 let col_indices = [0];
                 for file_entry in &folder {
@@ -138,8 +135,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             if response_type == gtk::ResponseType::Ok {
                 let folder = chooser.get_filenames();
 
-                let tree_view = scrolled_window_excluded_directories.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-                let list_store = tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
+                let list_store = get_list_store(&scrolled_window_excluded_directories);
 
                 let col_indices = [0];
 

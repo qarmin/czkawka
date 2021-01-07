@@ -453,10 +453,8 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_
         grid.attach(&entry_name, 1, 2, 1, 1);
         grid.attach(&entry_name_path, 1, 3, 1, 1);
 
-        for widgets in confirmation_dialog_delete.get_children() {
-            // By default GtkBox is child of dialog, so we can easily add other things to it
-            widgets.downcast::<gtk::Box>().unwrap().add(&grid);
-        }
+        let box_widget = get_dialog_box_child(&confirmation_dialog_delete);
+        box_widget.add(&grid);
 
         confirmation_dialog_delete.show_all();
 
