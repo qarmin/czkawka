@@ -66,10 +66,6 @@ pub struct FileEntry {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_checked_files: usize,
-    pub number_of_checked_folders: usize,
-    pub number_of_ignored_files: usize,
-    pub number_of_ignored_things: usize,
     pub number_of_music_entries: usize,
     pub number_of_removed_files: usize,
     pub number_of_failed_to_remove_files: usize,
@@ -185,7 +181,6 @@ impl SameMusic {
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
         }
-        self.information.number_of_checked_folders += folders_to_check.len();
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
@@ -251,8 +246,6 @@ impl SameMusic {
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
-                    self.information.number_of_checked_folders += 1;
-
                     if !self.recursive_search {
                         continue 'dir;
                     }
@@ -269,14 +262,12 @@ impl SameMusic {
                     if metadata.len() >= self.minimal_file_size {
                         let current_file_name = current_folder.join(entry_data.file_name());
                         if self.excluded_items.is_excluded(&current_file_name) {
-                            self.information.number_of_ignored_files += 1;
                             continue 'dir;
                         }
 
                         let allowed_extensions = [".mp3", ".flac", ".m4a"];
 
                         if !allowed_extensions.iter().any(|r| current_file_name.to_string_lossy().ends_with(r)) {
-                            self.information.number_of_ignored_files += 1;
                             continue 'dir;
                         }
 
@@ -307,14 +298,7 @@ impl SameMusic {
 
                         // Adding files to Vector
                         self.music_to_check.push(file_entry);
-
-                        self.information.number_of_checked_files += 1;
-                    } else {
-                        self.information.number_of_ignored_files += 1;
                     }
-                } else {
-                    // Probably this is symbolic links so we are free to ignore this
-                    self.information.number_of_ignored_things += 1;
                 }
             }
         }
@@ -655,10 +639,6 @@ impl DebugPrint for SameMusic {
         println!("Errors size - {}", self.text_messages.errors.len());
         println!("Warnings size - {}", self.text_messages.warnings.len());
         println!("Messages size - {}", self.text_messages.messages.len());
-        println!("Number of checked files - {}", self.information.number_of_checked_files);
-        println!("Number of checked folders - {}", self.information.number_of_checked_folders);
-        println!("Number of ignored files - {}", self.information.number_of_ignored_files);
-        println!("Number of ignored things(like symbolic links) - {}", self.information.number_of_ignored_things);
         println!("Number of removed files - {}", self.information.number_of_removed_files);
         println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
         println!("Number of duplicated music files - {}", self.information.number_of_duplicates_music_files);

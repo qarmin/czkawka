@@ -39,10 +39,6 @@ pub enum DeleteMethod {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_checked_files: usize,
-    pub number_of_checked_folders: usize,
-    pub number_of_ignored_files: usize,
-    pub number_of_ignored_things: usize,
     pub taken_space: u64,
     pub number_of_real_files: usize,
 }
@@ -129,7 +125,6 @@ impl BigFile {
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
         }
-        self.information.number_of_checked_folders += folders_to_check.len();
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
@@ -191,8 +186,6 @@ impl BigFile {
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
-                    self.information.number_of_checked_folders += 1;
-
                     if !self.recursive_search {
                         continue;
                     }
@@ -213,7 +206,6 @@ impl BigFile {
                         let allowed = self.allowed_extensions.file_extensions.iter().map(|e| e.to_lowercase()).any(|e| file_extension == Some(e));
                         if !allowed {
                             // Not an allowed extension, ignore it.
-                            self.information.number_of_ignored_files += 1;
                             continue 'dir;
                         }
                     }
@@ -245,11 +237,6 @@ impl BigFile {
 
                     self.big_files.entry(metadata.len()).or_insert_with(Vec::new);
                     self.big_files.get_mut(&metadata.len()).unwrap().push(fe);
-
-                    self.information.number_of_checked_files += 1;
-                } else {
-                    // Probably this is symbolic links so we are free to ignore this
-                    self.information.number_of_ignored_things += 1;
                 }
             }
         }
@@ -352,10 +339,6 @@ impl DebugPrint for BigFile {
         println!("Errors size - {}", self.text_messages.errors.len());
         println!("Warnings size - {}", self.text_messages.warnings.len());
         println!("Messages size - {}", self.text_messages.messages.len());
-        println!("Number of checked files - {}", self.information.number_of_checked_files);
-        println!("Number of checked folders - {}", self.information.number_of_checked_folders);
-        println!("Number of ignored files - {}", self.information.number_of_ignored_files);
-        println!("Number of ignored things(like symbolic links) - {}", self.information.number_of_ignored_things);
 
         println!("### Other");
         println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());

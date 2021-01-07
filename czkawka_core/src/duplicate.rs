@@ -62,20 +62,13 @@ pub struct FileEntry {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_checked_files: usize,
-    pub number_of_checked_folders: usize,
-    pub number_of_ignored_files: usize,
-    pub number_of_ignored_things: usize,
     pub number_of_groups_by_size: usize,
     pub number_of_duplicated_files_by_size: usize,
     pub number_of_groups_by_hash: usize,
     pub number_of_duplicated_files_by_hash: usize,
-    pub number_of_groups_after_pre_hash: usize,
-    pub number_of_duplicated_files_after_pre_hash: usize,
     pub number_of_groups_by_name: usize,
     pub number_of_duplicated_files_by_name: usize,
     pub lost_space_by_size: u64,
-    pub lost_space_after_pre_hash: u64,
     pub lost_space_by_hash: u64,
     pub bytes_read_when_hashing: u64,
     pub number_of_removed_files: usize,
@@ -231,7 +224,6 @@ impl DuplicateFinder {
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
         }
-        self.information.number_of_checked_folders += folders_to_check.len();
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
@@ -301,8 +293,6 @@ impl DuplicateFinder {
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
-                    self.information.number_of_checked_folders += 1;
-
                     if !self.recursive_search {
                         continue 'dir;
                     }
@@ -331,7 +321,6 @@ impl DuplicateFinder {
                         let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
                         if !allowed {
                             // Not an allowed extension, ignore it.
-                            self.information.number_of_ignored_files += 1;
                             continue 'dir;
                         }
                     }
@@ -364,15 +353,7 @@ impl DuplicateFinder {
                         // Adding files to BTreeMap
                         self.files_with_identical_names.entry(entry_data.file_name().to_string_lossy().to_string()).or_insert_with(Vec::new);
                         self.files_with_identical_names.get_mut(&entry_data.file_name().to_string_lossy().to_string()).unwrap().push(fe);
-
-                        self.information.number_of_checked_files += 1;
-                    } else {
-                        // Probably this is symbolic links so we are free to ignore this
-                        self.information.number_of_ignored_files += 1;
                     }
-                } else {
-                    // Probably this is symbolic links so we are free to ignore this
-                    self.information.number_of_ignored_things += 1;
                 }
             }
         }
@@ -383,8 +364,6 @@ impl DuplicateFinder {
 
         // Create new BTreeMap without single size entries(files have not duplicates)
         let mut new_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
-
-        self.information.number_of_duplicated_files_by_name = 0;
 
         for (name, vector) in &self.files_with_identical_names {
             if vector.len() > 1 {
@@ -409,7 +388,6 @@ impl DuplicateFinder {
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
         }
-        self.information.number_of_checked_folders += folders_to_check.len();
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
@@ -485,8 +463,6 @@ impl DuplicateFinder {
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
-                    self.information.number_of_checked_folders += 1;
-
                     if !self.recursive_search {
                         continue 'dir;
                     }
@@ -515,7 +491,7 @@ impl DuplicateFinder {
                         let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
                         if !allowed {
                             // Not an allowed extension, ignore it.
-                            self.information.number_of_ignored_files += 1;
+
                             continue 'dir;
                         }
                     }
@@ -548,15 +524,7 @@ impl DuplicateFinder {
                         // Adding files to BTreeMap
                         self.files_with_identical_size.entry(metadata.len()).or_insert_with(Vec::new);
                         self.files_with_identical_size.get_mut(&metadata.len()).unwrap().push(fe);
-
-                        self.information.number_of_checked_files += 1;
-                    } else {
-                        // Probably this is symbolic links so we are free to ignore this
-                        self.information.number_of_ignored_files += 1;
                     }
-                } else {
-                    // Probably this is symbolic links so we are free to ignore this
-                    self.information.number_of_ignored_things += 1;
                 }
             }
         }
@@ -685,9 +653,6 @@ impl DuplicateFinder {
             self.text_messages.warnings.append(&mut errors);
             for (_hash, mut vec_file_entry) in hash_map {
                 if vec_file_entry.len() > 1 {
-                    self.information.number_of_duplicated_files_after_pre_hash += vec_file_entry.len() - 1;
-                    self.information.number_of_groups_after_pre_hash += 1;
-                    self.information.lost_space_after_pre_hash += (vec_file_entry.len() as u64 - 1) * size;
                     pre_checked_map.entry(size).or_insert_with(Vec::new);
                     pre_checked_map.get_mut(&size).unwrap().append(&mut vec_file_entry);
                 }
@@ -803,9 +768,6 @@ impl DuplicateFinder {
             self.text_messages.warnings.append(&mut errors);
             for (_hash, vec_file_entry) in hash_map {
                 if vec_file_entry.len() > 1 {
-                    self.information.number_of_duplicated_files_after_pre_hash += vec_file_entry.len() - 1;
-                    self.information.number_of_groups_after_pre_hash += 1;
-                    self.information.lost_space_after_pre_hash += (vec_file_entry.len() as u64 - 1) * size;
                     self.files_with_identical_hashes.entry(size).or_insert_with(Vec::new);
                     self.files_with_identical_hashes.get_mut(&size).unwrap().push(vec_file_entry);
                 }
@@ -892,17 +854,9 @@ impl DebugPrint for DuplicateFinder {
         println!("Errors size - {}", self.text_messages.errors.len());
         println!("Warnings size - {}", self.text_messages.warnings.len());
         println!("Messages size - {}", self.text_messages.messages.len());
-        println!("Number of checked files - {}", self.information.number_of_checked_files);
-        println!("Number of checked folders - {}", self.information.number_of_checked_folders);
-        println!("Number of ignored files - {}", self.information.number_of_ignored_files);
-        println!("Number of ignored things(like symbolic links) - {}", self.information.number_of_ignored_things);
         println!(
             "Number of duplicated files by size(in groups) - {} ({})",
             self.information.number_of_duplicated_files_by_size, self.information.number_of_groups_by_size
-        );
-        println!(
-            "Number of duplicated files after pre hash(in groups) - {} ({})",
-            self.information.number_of_duplicated_files_after_pre_hash, self.information.number_of_groups_after_pre_hash
         );
         println!(
             "Number of duplicated files by hash(in groups) - {} ({})",
@@ -913,11 +867,6 @@ impl DebugPrint for DuplicateFinder {
             self.information.number_of_duplicated_files_by_name, self.information.number_of_groups_by_name
         );
         println!("Lost space by size - {} ({} bytes)", self.information.lost_space_by_size.file_size(options::BINARY).unwrap(), self.information.lost_space_by_size);
-        println!(
-            "Lost space after pre hash - {} ({} bytes)",
-            self.information.lost_space_after_pre_hash.file_size(options::BINARY).unwrap(),
-            self.information.lost_space_after_pre_hash
-        );
         println!("Lost space by hash - {} ({} bytes)", self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(), self.information.lost_space_by_hash);
         println!(
             "Gained space by removing duplicated entries - {} ({} bytes)",
