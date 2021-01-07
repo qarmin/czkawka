@@ -228,7 +228,8 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
                     let mut created_image = false;
 
-                    if !selected_rows.is_empty() && check_button_settings_show_preview_similar_images.get_active() {
+                    // Only show preview when selected is only one item, because there is no method to recognize current clicked item in multiselection
+                    if selected_rows.len() == 1 && check_button_settings_show_preview_similar_images.get_active() {
                         let tree_path = selected_rows[0].clone();
                         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
                             // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this

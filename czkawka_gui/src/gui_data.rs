@@ -371,6 +371,7 @@ impl GuiData {
 
         //// Dialog State - dialog with progress state, which allows to stop task
         let dialog_progress: gtk::Dialog = builder.get_object("dialog_progress").unwrap();
+        dialog_progress.set_title("Czkawka");
 
         let progress_bar_current_stage: gtk::ProgressBar = builder.get_object("progress_bar_current_stage").unwrap();
         let progress_bar_all_stages: gtk::ProgressBar = builder.get_object("progress_bar_all_stages").unwrap();
