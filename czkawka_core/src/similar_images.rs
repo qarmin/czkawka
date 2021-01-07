@@ -84,12 +84,6 @@ pub struct SimilarImages {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_checked_files: usize,
-    pub number_of_checked_folders: usize,
-    pub number_of_ignored_files: usize,
-    pub number_of_ignored_things: usize,
-    pub size_of_checked_images: u64,
-    pub lost_space: u64,
     pub number_of_removed_files: usize,
     pub number_of_failed_to_remove_files: usize,
     pub gained_space: u64,
@@ -181,7 +175,6 @@ impl SimilarImages {
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
         }
-        self.information.number_of_checked_folders += folders_to_check.len();
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
@@ -248,8 +241,6 @@ impl SimilarImages {
                     } //Permissions denied
                 };
                 if metadata.is_dir() {
-                    self.information.number_of_checked_folders += 1;
-
                     if !self.recursive_search {
                         continue;
                     }
@@ -276,7 +267,6 @@ impl SimilarImages {
                     // Checking allowed image extensions
                     let allowed_image_extensions = ["jpg", "png", "bmp", "ico", "webp", "tiff", "dds"];
                     if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                        self.information.number_of_ignored_files += 1;
                         continue 'dir;
                     }
 
@@ -310,16 +300,7 @@ impl SimilarImages {
                         };
 
                         self.images_to_check.insert(current_file_name.to_string_lossy().to_string(), fe);
-
-                        self.information.size_of_checked_images += metadata.len();
-                        self.information.number_of_checked_files += 1;
-                    } else {
-                        // Probably this is symbolic links so we are free to ignore this
-                        self.information.number_of_ignored_files += 1;
                     }
-                } else {
-                    // Probably this is symbolic links so we are free to ignore this
-                    self.information.number_of_ignored_things += 1;
                 }
             }
         }
@@ -578,14 +559,7 @@ impl DebugPrint for SimilarImages {
         }
 
         println!("---------------DEBUG PRINT---------------");
-        println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
         println!("Included directories - {:?}", self.directories.included_directories);
-        println!("Checked images {} / Different photos {}", self.information.number_of_checked_files, self.image_hashes.len());
-        println!(
-            "Size of checked images {} ({} Bytes)",
-            self.information.size_of_checked_images.file_size(options::BINARY).unwrap(),
-            self.information.size_of_checked_images
-        );
         println!("-----------------------------------------");
     }
 }

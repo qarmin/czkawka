@@ -51,7 +51,6 @@ pub struct EmptyFolder {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    number_of_checked_folders: usize,
     pub number_of_empty_folders: usize,
 }
 impl Info {
@@ -192,7 +191,6 @@ impl EmptyFolder {
                 progress_thread_handle.join().unwrap();
                 return false;
             }
-            self.information.number_of_checked_folders += 1;
             let current_folder = folders_to_check.pop().unwrap();
             // Checked folder may be deleted or we may not have permissions to open it so we assume that this folder is not be empty
             let read_dir = match fs::read_dir(&current_folder) {
@@ -322,7 +320,6 @@ impl DebugPrint for EmptyFolder {
         }
 
         println!("---------------DEBUG PRINT---------------");
-        println!("Number of all checked folders - {}", self.information.number_of_checked_folders);
         println!("Number of empty folders - {}", self.information.number_of_empty_folders);
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("-----------------------------------------");
