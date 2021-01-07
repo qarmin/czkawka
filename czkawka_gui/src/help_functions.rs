@@ -279,6 +279,9 @@ pub fn get_tree_view(scrolled_window: &gtk::ScrolledWindow) -> TreeView {
 
     tree_view
 }
+pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
+    dialog.get_children()[0].clone().downcast::<gtk::Box>().unwrap()
+}
 
 pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]

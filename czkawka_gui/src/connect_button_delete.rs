@@ -97,14 +97,14 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 pub fn empty_folder_remover(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+    let tree_view = get_tree_view(&scrolled_window);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();
     if selection_rows.is_empty() {
         return;
     }
-    let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+    let list_store = get_list_store(&scrolled_window);
 
     // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
@@ -183,14 +183,14 @@ pub fn empty_folder_remover(scrolled_window: &gtk::ScrolledWindow, column_file_n
 pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+    let tree_view = get_tree_view(&scrolled_window);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();
     if selection_rows.is_empty() {
         return;
     }
-    let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+    let list_store = get_list_store(&scrolled_window);
 
     // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
@@ -218,14 +218,14 @@ pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32
 pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
+    let tree_view = get_tree_view(&scrolled_window);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();
     if selection_rows.is_empty() {
         return;
     }
-    let list_store = tree_model.clone().downcast::<gtk::ListStore>().unwrap();
+    let list_store = get_list_store(&scrolled_window);
 
     // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
