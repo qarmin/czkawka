@@ -11,6 +11,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crossbeam_channel::Receiver;
+use std::io::BufWriter;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -329,16 +330,17 @@ impl SaveResults for EmptyFiles {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push(format!("Failed to create file {}", file_name));
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         if writeln!(
-            file,
+            writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         )
@@ -349,12 +351,12 @@ impl SaveResults for EmptyFiles {
         }
 
         if !self.empty_files.is_empty() {
-            writeln!(file, "Found {} empty files.", self.information.number_of_empty_files).unwrap();
+            writeln!(writer, "Found {} empty files.", self.information.number_of_empty_files).unwrap();
             for file_entry in self.empty_files.iter() {
-                writeln!(file, "{}", file_entry.path.display()).unwrap();
+                writeln!(writer, "{}", file_entry.path.display()).unwrap();
             }
         } else {
-            write!(file, "Not found any empty files.").unwrap();
+            write!(writer, "Not found any empty files.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true

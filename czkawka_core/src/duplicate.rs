@@ -14,6 +14,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use rayon::prelude::*;
+use std::io::BufWriter;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -904,16 +905,17 @@ impl SaveResults for DuplicateFinder {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push(format!("Failed to create file {}", file_name));
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         if writeln!(
-            file,
+            writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         )
@@ -925,29 +927,29 @@ impl SaveResults for DuplicateFinder {
         match self.check_method {
             CheckingMethod::Name => {
                 if !self.files_with_identical_size.is_empty() {
-                    writeln!(file, "-------------------------------------------------Files with same names-------------------------------------------------").unwrap();
+                    writeln!(writer, "-------------------------------------------------Files with same names-------------------------------------------------").unwrap();
                     writeln!(
-                        file,
+                        writer,
                         "Found {} files in {} groups with same name(may have different content)",
                         self.information.number_of_duplicated_files_by_name, self.information.number_of_groups_by_name,
                     )
                     .unwrap();
                     for (name, vector) in self.files_with_identical_names.iter().rev() {
-                        writeln!(file, "Name - {} - {} files ", name, vector.len()).unwrap();
+                        writeln!(writer, "Name - {} - {} files ", name, vector.len()).unwrap();
                         for j in vector {
-                            writeln!(file, "{}", j.path.display()).unwrap();
+                            writeln!(writer, "{}", j.path.display()).unwrap();
                         }
-                        writeln!(file).unwrap();
+                        writeln!(writer).unwrap();
                     }
                 } else {
-                    write!(file, "Not found any files with same names.").unwrap();
+                    write!(writer, "Not found any files with same names.").unwrap();
                 }
             }
             CheckingMethod::Size => {
                 if !self.files_with_identical_size.is_empty() {
-                    writeln!(file, "-------------------------------------------------Files with same size-------------------------------------------------").unwrap();
+                    writeln!(writer, "-------------------------------------------------Files with same size-------------------------------------------------").unwrap();
                     writeln!(
-                        file,
+                        writer,
                         "Found {} duplicated files which in {} groups which takes {}.",
                         self.information.number_of_duplicated_files_by_size,
                         self.information.number_of_groups_by_size,
@@ -955,20 +957,20 @@ impl SaveResults for DuplicateFinder {
                     )
                     .unwrap();
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
-                        write!(file, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
+                        write!(writer, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                         for file_entry in vector {
-                            writeln!(file, "{}", file_entry.path.display()).unwrap();
+                            writeln!(writer, "{}", file_entry.path.display()).unwrap();
                         }
                     }
                 } else {
-                    write!(file, "Not found any duplicates.").unwrap();
+                    write!(writer, "Not found any duplicates.").unwrap();
                 }
             }
             CheckingMethod::Hash | CheckingMethod::HashMB => {
                 if !self.files_with_identical_hashes.is_empty() {
-                    writeln!(file, "-------------------------------------------------Files with same hashes-------------------------------------------------").unwrap();
+                    writeln!(writer, "-------------------------------------------------Files with same hashes-------------------------------------------------").unwrap();
                     writeln!(
-                        file,
+                        writer,
                         "Found {} duplicated files which in {} groups which takes {}.",
                         self.information.number_of_duplicated_files_by_hash,
                         self.information.number_of_groups_by_hash,
@@ -977,14 +979,14 @@ impl SaveResults for DuplicateFinder {
                     .unwrap();
                     for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
                         for vector in vectors_vector {
-                            writeln!(file, "\n---- Size {} ({}) - {} files", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
+                            writeln!(writer, "\n---- Size {} ({}) - {} files", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
                             for file_entry in vector {
-                                writeln!(file, "{}", file_entry.path.display()).unwrap();
+                                writeln!(writer, "{}", file_entry.path.display()).unwrap();
                             }
                         }
                     }
                 } else {
-                    write!(file, "Not found any duplicates.").unwrap();
+                    write!(writer, "Not found any duplicates.").unwrap();
                 }
             }
             CheckingMethod::None => {
