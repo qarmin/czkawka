@@ -9,7 +9,7 @@ use humansize::{file_size_opts as options, FileSize};
 use std::collections::BTreeMap;
 use std::ffi::OsStr;
 use std::fs::{File, Metadata};
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU64};
@@ -361,16 +361,17 @@ impl SaveResults for BigFile {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         if writeln!(
-            file,
+            writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         )
@@ -381,15 +382,15 @@ impl SaveResults for BigFile {
         }
 
         if self.information.number_of_real_files != 0 {
-            write!(file, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
+            write!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
 
             for (size, files) in self.big_files.iter().rev() {
                 for file_entry in files {
-                    writeln!(file, "{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
+                    writeln!(writer, "{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
                 }
             }
         } else {
-            write!(file, "Not found any files.").unwrap();
+            write!(writer, "Not found any files.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true

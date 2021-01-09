@@ -11,6 +11,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crossbeam_channel::Receiver;
+use std::io::BufWriter;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -376,16 +377,17 @@ impl SaveResults for InvalidSymlinks {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push(format!("Failed to create file {}", file_name));
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         if writeln!(
-            file,
+            writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         )
@@ -396,10 +398,10 @@ impl SaveResults for InvalidSymlinks {
         }
 
         if !self.invalid_symlinks.is_empty() {
-            writeln!(file, "Found {} invalid symlinks.", self.information.number_of_invalid_symlinks).unwrap();
+            writeln!(writer, "Found {} invalid symlinks.", self.information.number_of_invalid_symlinks).unwrap();
             for file_entry in self.invalid_symlinks.iter() {
                 writeln!(
-                    file,
+                    writer,
                     "{}\t\t{}\t\t{}",
                     file_entry.symlink_path.display(),
                     file_entry.destination_path.display(),
@@ -411,7 +413,7 @@ impl SaveResults for InvalidSymlinks {
                 .unwrap();
             }
         } else {
-            write!(file, "Not found any invalid symlinks.").unwrap();
+            write!(writer, "Not found any invalid symlinks.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true

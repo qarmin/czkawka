@@ -13,6 +13,7 @@ use audiotags::Tag;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 use std::collections::HashMap;
+use std::io::BufWriter;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -664,16 +665,17 @@ impl SaveResults for SameMusic {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push(format!("Failed to create file {}", file_name));
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         if writeln!(
-            file,
+            writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         )
@@ -684,12 +686,12 @@ impl SaveResults for SameMusic {
         }
 
         if !self.music_entries.is_empty() {
-            writeln!(file, "Found {} same music files.", self.information.number_of_music_entries).unwrap();
+            writeln!(writer, "Found {} same music files.", self.information.number_of_music_entries).unwrap();
             for file_entry in self.music_entries.iter() {
-                writeln!(file, "{}", file_entry.path.display()).unwrap();
+                writeln!(writer, "{}", file_entry.path.display()).unwrap();
             }
         } else {
-            write!(file, "Not found any empty files.").unwrap();
+            write!(writer, "Not found any empty files.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true

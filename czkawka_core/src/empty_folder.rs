@@ -6,7 +6,7 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crossbeam_channel::Receiver;
 use std::collections::BTreeMap;
 use std::fs::{File, Metadata};
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -333,27 +333,28 @@ impl SaveResults for EmptyFolder {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
-        if writeln!(file, "Results of searching {:?} with excluded directories {:?}", self.directories.included_directories, self.directories.excluded_directories).is_err() {
+        if writeln!(writer, "Results of searching {:?} with excluded directories {:?}", self.directories.included_directories, self.directories.excluded_directories).is_err() {
             self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
             return false;
         }
 
         if !self.empty_folder_list.is_empty() {
-            writeln!(file, "-------------------------------------------------Empty folder list-------------------------------------------------").unwrap();
-            writeln!(file, "Found {} empty folders", self.information.number_of_empty_folders).unwrap();
+            writeln!(writer, "-------------------------------------------------Empty folder list-------------------------------------------------").unwrap();
+            writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders).unwrap();
             for name in self.empty_folder_list.keys() {
-                writeln!(file, "{}", name.display()).unwrap();
+                writeln!(writer, "{}", name.display()).unwrap();
             }
         } else {
-            write!(file, "Not found any empty folders.").unwrap();
+            write!(writer, "Not found any empty folders.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true

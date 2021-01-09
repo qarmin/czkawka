@@ -571,16 +571,17 @@ impl SaveResults for SimilarImages {
             k => k.to_string(),
         };
 
-        let mut file = match File::create(&file_name) {
+        let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(_) => {
                 self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
                 return false;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         if writeln!(
-            file,
+            writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         )
@@ -591,19 +592,18 @@ impl SaveResults for SimilarImages {
         }
 
         if !self.similar_vectors.is_empty() {
-            write!(file, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
+            write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
 
         // for struct_similar in self.similar_vectors.iter() {
-        //     writeln!(file, "Image {:?} have {} similar images", struct_similar.base_image.path, struct_similar.similar_images.len()).unwrap();
+        //     writeln!(writer, "Image {:?} have {} similar images", struct_similar.base_image.path, struct_similar.similar_images.len()).unwrap();
         //     for similar_picture in struct_similar.similar_images.iter() {
-        //         writeln!(file, "{:?} - Similarity Level: {}", similar_picture.path, get_string_from_similarity(&similar_picture.similarity)).unwrap();
+        //         writeln!(writer, "{:?} - Similarity Level: {}", similar_picture.path, get_string_from_similarity(&similar_picture.similarity)).unwrap();
         //     }
-        //     writeln!(file).unwrap();
+        //     writeln!(writer).unwrap();
         // }
         } else {
-            write!(file, "Not found any similar images.").unwrap();
+            write!(writer, "Not found any similar images.").unwrap();
         }
-        let _ = file.flush();
 
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
@@ -660,13 +660,14 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
             return;
         }
         let config_file = config_dir.join(CACHE_FILE_NAME);
-        let mut file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&config_file) {
+        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&config_file) {
             Ok(t) => t,
             Err(_) => {
                 text_messages.messages.push(format!("Cannot create or open cache file {}", config_file.display()));
                 return;
             }
         };
+        let mut writer = BufWriter::new(file_handler);
 
         for file_entry in hashmap.values() {
             let mut string: String = "".to_string();
@@ -678,7 +679,7 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
             }
             string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
 
-            if writeln!(file_handler, "{}", string).is_err() {
+            if writeln!(writer, "{}", string).is_err() {
                 text_messages.messages.push(format!("Failed to save some data to cache file {}", config_file.display()));
                 return;
             };
@@ -730,7 +731,12 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
                             have_at_least += 1;
                         }
                     }
-                    assert!(have_at_least != hash.len() as u8);
+                    if have_at_least == hash.len() as u8 {
+                        println!("ERROR START - {}", line);
+                        println!("have_at_least == hash.len() as u8");
+                        println!("ERROR END hash.len() - {} == have_at_least - {}", hash.len(), have_at_least);
+                        continue; // Just skip this entry, it is very very unlikelly that something have this hash, but if it has, then just ignore it
+                    }
                 }
 
                 hashmap_loaded_entries.insert(
