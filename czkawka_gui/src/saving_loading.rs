@@ -42,8 +42,8 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
         //// Included Directories
         data_to_save.push("--included_directories:".to_string());
-        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
-        let list_store = get_list_store(&scrolled_window_included_directories);
+        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+        let list_store = get_list_store(&tree_view_included_directories);
         if let Some(iter) = list_store.get_iter_first() {
             loop {
                 data_to_save.push(list_store.get_value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
@@ -55,8 +55,8 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
         //// Excluded Directories
         data_to_save.push("--excluded_directories:".to_string());
-        let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
-        let list_store = get_list_store(&scrolled_window_excluded_directories);
+        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
+        let list_store = get_list_store(&tree_view_excluded_directories);
         if let Some(iter) = list_store.get_iter_first() {
             loop {
                 data_to_save.push(list_store.get_value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
@@ -323,8 +323,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         // Setting data
         if manual_execution || loading_at_start {
             //// Included Directories
-            let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
-            let list_store = get_list_store(&scrolled_window_included_directories);
+            let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+            let list_store = get_list_store(&tree_view_included_directories);
             list_store.clear();
 
             let col_indices = [0];
@@ -335,8 +335,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
 
             //// Exclude Directories
-            let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
-            let list_store = get_list_store(&scrolled_window_excluded_directories);
+            let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
+            let list_store = get_list_store(&tree_view_excluded_directories);
             list_store.clear();
 
             let col_indices = [0];
@@ -362,9 +362,9 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
 
             gui_data.check_button_settings_show_text_view.set_active(bottom_text_panel);
             if !bottom_text_panel {
-                gui_data.scrolled_window_errors.hide();
+                gui_data.text_view_errors.hide();
             } else {
-                gui_data.scrolled_window_errors.show();
+                gui_data.text_view_errors.show();
             }
         } else {
             gui_data.check_button_settings_load_at_start.set_active(false);
@@ -387,8 +387,8 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     // Resetting included directories
     {
         let col_indices = [0];
-        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
-        let list_store = get_list_store(&scrolled_window_included_directories);
+        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+        let list_store = get_list_store(&tree_view_included_directories);
         list_store.clear();
 
         let current_dir: String = match env::current_dir() {
@@ -412,8 +412,8 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     // Resetting excluded directories
     {
         let col_indices = [0];
-        let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
-        let list_store = get_list_store(&scrolled_window_excluded_directories);
+        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
+        let list_store = get_list_store(&tree_view_excluded_directories);
         list_store.clear();
         if cfg!(target_family = "unix") {
             for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {

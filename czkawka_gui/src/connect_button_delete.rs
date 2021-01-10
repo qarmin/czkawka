@@ -12,17 +12,17 @@ use std::fs::Metadata;
 pub fn connect_button_delete(gui_data: &GuiData) {
     let gui_data = gui_data.clone();
     let buttons_delete = gui_data.buttons_delete.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
+    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
+    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
+    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
+    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
+    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
+    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
+    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
+    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
     let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
@@ -55,23 +55,23 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
         match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
-                tree_remove(&scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+                tree_remove(&tree_view_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
             }
             NotebookMainEnum::EmptyDirectories => {
-                empty_folder_remover(&scrolled_window_main_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
+                empty_folder_remover(&tree_view_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
             }
             NotebookMainEnum::EmptyFiles => {
-                basic_remove(&scrolled_window_main_empty_files_finder.clone(), ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
+                basic_remove(&tree_view_empty_files_finder.clone(), ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
             }
             NotebookMainEnum::Temporary => {
-                basic_remove(&scrolled_window_main_temporary_files_finder.clone(), ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
+                basic_remove(&tree_view_temporary_files_finder.clone(), ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
             }
             NotebookMainEnum::BigFiles => {
-                basic_remove(&scrolled_window_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
+                basic_remove(&tree_view_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
             }
             NotebookMainEnum::SimilarImages => {
                 tree_remove(
-                    &scrolled_window_similar_images_finder.clone(),
+                    &tree_view_similar_images_finder.clone(),
                     ColumnsSimilarImages::Name as i32,
                     ColumnsSimilarImages::Path as i32,
                     ColumnsSimilarImages::Color as i32,
@@ -80,29 +80,28 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                 image_preview_similar_images.hide();
             }
             NotebookMainEnum::Zeroed => {
-                basic_remove(&scrolled_window_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
+                basic_remove(&tree_view_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
             }
             NotebookMainEnum::SameMusic => {
-                tree_remove(&scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+                tree_remove(&tree_view_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
             }
             NotebookMainEnum::Symlinks => {
-                basic_remove(&scrolled_window_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
+                basic_remove(&tree_view_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
             }
         }
     });
 }
 
-pub fn empty_folder_remover(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
+pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let tree_view = get_tree_view(&scrolled_window);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();
     if selection_rows.is_empty() {
         return;
     }
-    let list_store = get_list_store(&scrolled_window);
+    let list_store = get_list_store(&tree_view);
 
     let mut messages: String = "".to_string();
 
@@ -176,17 +175,16 @@ pub fn empty_folder_remover(scrolled_window: &gtk::ScrolledWindow, column_file_n
     selection.unselect_all();
 }
 
-pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
+pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let tree_view = get_tree_view(&scrolled_window);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();
     if selection_rows.is_empty() {
         return;
     }
-    let list_store = get_list_store(&scrolled_window);
+    let list_store = get_list_store(&tree_view);
 
     let mut messages: String = "".to_string();
 
@@ -208,17 +206,16 @@ pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32
 }
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
-pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
+pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let tree_view = get_tree_view(&scrolled_window);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();
     if selection_rows.is_empty() {
         return;
     }
-    let list_store = get_list_store(&scrolled_window);
+    let list_store = get_list_store(&tree_view);
 
     let mut messages: String = "".to_string();
 

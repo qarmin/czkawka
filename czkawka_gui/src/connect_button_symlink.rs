@@ -12,22 +12,22 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
     let buttons_symlink = gui_data.buttons_symlink.clone();
     let notebook_main = gui_data.notebook_main.clone();
 
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
+    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
 
     let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
     buttons_symlink.connect_clicked(move |_| match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
         NotebookMainEnum::Duplicate => {
-            symlink(scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+            symlink(tree_view_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
         }
         NotebookMainEnum::SameMusic => {
-            symlink(scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+            symlink(tree_view_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
         }
         NotebookMainEnum::SimilarImages => {
             symlink(
-                scrolled_window_similar_images_finder.clone(),
+                tree_view_similar_images_finder.clone(),
                 ColumnsSimilarImages::Name as i32,
                 ColumnsSimilarImages::Path as i32,
                 ColumnsSimilarImages::Color as i32,
@@ -38,12 +38,11 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
         e => panic!("Not existent {:?}", e),
     });
 }
-fn symlink(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
+fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
     reset_text_view(&text_view_errors);
 
-    let tree_view = get_tree_view(&scrolled_window);
-    let list_store = get_list_store(&scrolled_window);
+    let list_store = get_list_store(&tree_view);
     let selection = tree_view.get_selection();
 
     let (selection_rows, tree_model) = selection.get_selected_rows();

@@ -1,4 +1,5 @@
 extern crate gtk;
+use crate::gui_main_notebook::GUIMainNotebook;
 use crate::notebook_enums::*;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
@@ -11,7 +12,7 @@ use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
-use gtk::{Builder, Button};
+use gtk::{Builder, Button, TreeView};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -24,6 +25,8 @@ pub struct GuiData {
 
     // Windows
     pub window_main: gtk::Window,
+
+    pub main_notebook: GUIMainNotebook,
 
     // States
     pub buttons_labels: [String; 5],
@@ -132,20 +135,13 @@ pub struct GuiData {
     pub scrolled_window_errors: gtk::ScrolledWindow,
 
     //// Scrolled windows
-    // Main notebook
-    pub scrolled_window_duplicate_finder: gtk::ScrolledWindow,
-    pub scrolled_window_main_empty_folder_finder: gtk::ScrolledWindow,
-    pub scrolled_window_main_empty_files_finder: gtk::ScrolledWindow,
-    pub scrolled_window_main_temporary_files_finder: gtk::ScrolledWindow,
-    pub scrolled_window_big_files_finder: gtk::ScrolledWindow,
-    pub scrolled_window_similar_images_finder: gtk::ScrolledWindow,
-    pub scrolled_window_zeroed_files_finder: gtk::ScrolledWindow,
-    pub scrolled_window_same_music_finder: gtk::ScrolledWindow,
-    pub scrolled_window_invalid_symlinks: gtk::ScrolledWindow,
 
     // Upper notebook
     pub scrolled_window_included_directories: gtk::ScrolledWindow,
     pub scrolled_window_excluded_directories: gtk::ScrolledWindow,
+
+    pub tree_view_included_directories: gtk::TreeView,
+    pub tree_view_excluded_directories: gtk::TreeView,
 
     //// Dialog State - dialog with progress state, which allows to stop task
     pub dialog_progress: gtk::Dialog,
@@ -189,6 +185,8 @@ impl GuiData {
         let window_main: gtk::Window = builder.get_object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
+
+        let main_notebook = GUIMainNotebook::create_from_builder(&builder);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         //// States
@@ -330,19 +328,13 @@ impl GuiData {
 
         //// Scrolled windows
         // Main notebook
-        let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
-        let scrolled_window_main_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_empty_folder_finder").unwrap();
-        let scrolled_window_main_empty_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_empty_files_finder").unwrap();
-        let scrolled_window_main_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_main_temporary_files_finder").unwrap();
-        let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
-        let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_similar_images_finder").unwrap();
-        let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_zeroed_files_finder").unwrap();
-        let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_same_music_finder").unwrap();
-        let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.get_object("scrolled_window_invalid_symlinks").unwrap();
 
         // Upper notebook
         let scrolled_window_included_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_included_directories").unwrap();
         let scrolled_window_excluded_directories: gtk::ScrolledWindow = builder.get_object("scrolled_window_excluded_directories").unwrap();
+
+        let tree_view_included_directories: gtk::TreeView = TreeView::new();
+        let tree_view_excluded_directories: gtk::TreeView = TreeView::new();
 
         //// Dialog State - dialog with progress state, which allows to stop task
         let dialog_progress: gtk::Dialog = builder.get_object("dialog_progress").unwrap();
@@ -381,6 +373,7 @@ impl GuiData {
             glade_src,
             builder,
             window_main,
+            main_notebook,
             buttons_labels,
             shared_buttons,
             shared_upper_notebooks,
@@ -454,17 +447,10 @@ impl GuiData {
             entry_info,
             text_view_errors,
             scrolled_window_errors,
-            scrolled_window_duplicate_finder,
-            scrolled_window_main_empty_folder_finder,
-            scrolled_window_main_empty_files_finder,
-            scrolled_window_main_temporary_files_finder,
-            scrolled_window_big_files_finder,
-            scrolled_window_similar_images_finder,
-            scrolled_window_zeroed_files_finder,
-            scrolled_window_same_music_finder,
-            scrolled_window_invalid_symlinks,
             scrolled_window_included_directories,
             scrolled_window_excluded_directories,
+            tree_view_included_directories,
+            tree_view_excluded_directories,
             dialog_progress,
             progress_bar_current_stage,
             progress_bar_all_stages,

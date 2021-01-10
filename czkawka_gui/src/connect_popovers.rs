@@ -9,22 +9,19 @@ use gtk::TreeIter;
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
-fn popover_select_all(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
     let selection = tree_view.get_selection();
 
     selection.select_all();
     popover.popdown();
 }
-fn popover_unselect_all(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
     let selection = tree_view.get_selection();
 
     selection.unselect_all();
     popover.popdown();
 }
-fn popover_reverse(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
     let selection = tree_view.get_selection();
 
     let (vector_tree_path, tree_model) = selection.get_selected_rows();
@@ -57,8 +54,7 @@ fn popover_reverse(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow
     popover.popdown();
 }
 
-fn popover_all_except_oldest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
     let selection = tree_view.get_selection();
     let tree_model = tree_view.get_model().unwrap();
 
@@ -116,8 +112,7 @@ fn popover_all_except_oldest(popover: &gtk::Popover, scrolled_window: &gtk::Scro
 
     popover.popdown();
 }
-fn popover_all_except_newest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
     let selection = tree_view.get_selection();
     let tree_model = tree_view.get_model().unwrap();
 
@@ -175,8 +170,7 @@ fn popover_all_except_newest(popover: &gtk::Popover, scrolled_window: &gtk::Scro
 
     popover.popdown();
 }
-fn popover_one_oldest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
     let selection = tree_view.get_selection();
     let tree_model = tree_view.get_model().unwrap();
 
@@ -234,8 +228,7 @@ fn popover_one_oldest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWin
 
     popover.popdown();
 }
-fn popover_one_newest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
     let selection = tree_view.get_selection();
     let tree_model = tree_view.get_model().unwrap();
 
@@ -293,7 +286,7 @@ fn popover_one_newest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWin
     popover.popdown();
 }
 
-fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_window: &gtk::ScrolledWindow, column_color: Option<i32>, column_file_name: i32, column_path: i32) {
+fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32) {
     popover.popdown();
 
     let wildcard: String;
@@ -367,7 +360,6 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_wi
     if !wildcard.is_empty() {
         let wildcard = wildcard.trim();
 
-        let tree_view = get_tree_view(&scrolled_window);
         let selection = tree_view.get_selection();
         let tree_model = tree_view.get_model().unwrap();
 
@@ -410,7 +402,7 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_wi
         }
     }
 }
-fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_window: &gtk::ScrolledWindow, column_color: Option<i32>, column_file_name: i32, column_path: i32) {
+fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32) {
     popover.popdown();
 
     let wildcard: String;
@@ -482,7 +474,6 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_
     if !wildcard.is_empty() {
         let wildcard = wildcard.trim();
 
-        let tree_view = get_tree_view(&scrolled_window);
         let selection = tree_view.get_selection();
         let tree_model = tree_view.get_model().unwrap();
 
@@ -526,8 +517,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, scrolled_
     }
 }
 
-fn popover_all_except_biggest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
     let selection = tree_view.get_selection();
     let tree_model = tree_view.get_model().unwrap();
 
@@ -588,8 +578,7 @@ fn popover_all_except_biggest(popover: &gtk::Popover, scrolled_window: &gtk::Scr
 
     popover.popdown();
 }
-fn popover_all_except_smallest(popover: &gtk::Popover, scrolled_window: &gtk::ScrolledWindow, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
-    let tree_view = get_tree_view(&scrolled_window);
+fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
     let selection = tree_view.get_selection();
     let tree_model = tree_view.get_model().unwrap();
 
@@ -655,7 +644,7 @@ fn popover_all_except_smallest(popover: &gtk::Popover, scrolled_window: &gtk::Sc
 pub struct PopoverObject {
     pub notebook_type: NotebookMainEnum,
     pub available_modes: Vec<String>,
-    pub scrolled_windows: gtk::ScrolledWindow,
+    pub tree_view: gtk::TreeView,
     pub column_path: Option<i32>,
     pub column_name: Option<i32>,
     pub column_color: Option<i32>,
@@ -679,7 +668,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::Duplicate,
             available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_duplicate_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_duplicate_finder.clone(),
             column_path: Some(ColumnsDuplicates::Path as i32),
             column_name: Some(ColumnsDuplicates::Name as i32),
             column_color: Some(ColumnsDuplicates::Color as i32),
@@ -691,7 +680,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::SameMusic,
             available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_same_music_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_same_music_finder.clone(),
             column_path: Some(ColumnsSameMusic::Path as i32),
             column_name: Some(ColumnsSameMusic::Name as i32),
             column_color: Some(ColumnsSameMusic::Color as i32),
@@ -703,7 +692,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::SimilarImages,
             available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_similar_images_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_similar_images_finder.clone(),
             column_path: Some(ColumnsSimilarImages::Path as i32),
             column_name: Some(ColumnsSimilarImages::Name as i32),
             column_color: Some(ColumnsSimilarImages::Color as i32),
@@ -715,7 +704,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::EmptyDirectories,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_main_empty_folder_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_empty_folder_finder.clone(),
             column_path: Some(ColumnsEmptyFolders::Path as i32),
             column_name: Some(ColumnsEmptyFolders::Name as i32),
             column_color: None,
@@ -727,7 +716,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::EmptyFiles,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_main_empty_files_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_empty_files_finder.clone(),
             column_path: Some(ColumnsEmptyFiles::Path as i32),
             column_name: Some(ColumnsEmptyFiles::Name as i32),
             column_color: None,
@@ -739,7 +728,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::Temporary,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_main_temporary_files_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_temporary_files_finder.clone(),
             column_path: Some(ColumnsTemporaryFiles::Path as i32),
             column_name: Some(ColumnsTemporaryFiles::Name as i32),
             column_color: None,
@@ -751,7 +740,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::BigFiles,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_big_files_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_big_files_finder.clone(),
             column_path: Some(ColumnsBigFiles::Path as i32),
             column_name: Some(ColumnsBigFiles::Name as i32),
             column_color: None,
@@ -763,7 +752,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         PopoverObject {
             notebook_type: NotebookMainEnum::Zeroed,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            scrolled_windows: gui_data.scrolled_window_zeroed_files_finder.clone(),
+            tree_view: gui_data.main_notebook.tree_view_zeroed_files_finder.clone(),
             column_path: Some(ColumnsZeroedFiles::Path as i32),
             column_name: Some(ColumnsZeroedFiles::Name as i32),
             column_color: None,
@@ -780,7 +769,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_select_all(&popover_select, &object_popover.scrolled_windows);
+        popover_select_all(&popover_select, &object_popover.tree_view);
     });
 
     let popover_select = gui_data.popover_select.clone();
@@ -789,7 +778,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_unselect_all.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_unselect_all(&popover_select, &object_popover.scrolled_windows);
+        popover_unselect_all(&popover_select, &object_popover.tree_view);
     });
 
     let popover_select = gui_data.popover_select.clone();
@@ -798,7 +787,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_reverse.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_reverse(&popover_select, &object_popover.scrolled_windows);
+        popover_reverse(&popover_select, &object_popover.tree_view);
     });
 
     let popover_select = gui_data.popover_select.clone();
@@ -809,7 +798,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_oldest(
             &popover_select,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color.unwrap(),
             object_popover.column_modification_as_secs.unwrap(),
             object_popover.column_name.unwrap(),
@@ -824,7 +813,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_newest(
             &popover_select,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color.unwrap(),
             object_popover.column_modification_as_secs.unwrap(),
             object_popover.column_name.unwrap(),
@@ -839,7 +828,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_one_oldest(
             &popover_select,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color.unwrap(),
             object_popover.column_modification_as_secs.unwrap(),
             object_popover.column_name.unwrap(),
@@ -854,7 +843,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_one_newest(
             &popover_select,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color.unwrap(),
             object_popover.column_modification_as_secs.unwrap(),
             object_popover.column_name.unwrap(),
@@ -871,7 +860,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_select_custom(
             &popover_select,
             &gui_data_clone,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color,
             object_popover.column_name.unwrap(),
             object_popover.column_path.unwrap(),
@@ -888,7 +877,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_unselect_custom(
             &popover_select,
             &gui_data_clone,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color,
             object_popover.column_name.unwrap(),
             object_popover.column_path.unwrap(),
@@ -903,7 +892,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_biggest(
             &popover_select,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color.unwrap(),
             object_popover.column_size_as_bytes.unwrap(),
             object_popover.column_dimensions.unwrap(),
@@ -918,7 +907,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_smallest(
             &popover_select,
-            &object_popover.scrolled_windows,
+            &object_popover.tree_view,
             object_popover.column_color.unwrap(),
             object_popover.column_size_as_bytes.unwrap(),
             object_popover.column_dimensions.unwrap(),

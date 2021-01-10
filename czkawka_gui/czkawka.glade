@@ -1229,7 +1229,7 @@ Author: Rafał Mikrut
                 <property name="tab_pos">left</property>
                 <property name="scrollable">True</property>
                 <child>
-                  <object class="GtkBox" id="notebook_main_duplicate_finder_label">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -1409,7 +1409,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolled_window_main_empty_folder_finder">
+                  <object class="GtkScrolledWindow" id="scrolled_window_empty_folder_finder">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
@@ -1433,7 +1433,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="notebook_big_main_file_finder">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -1508,7 +1508,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolled_window_main_empty_files_finder">
+                  <object class="GtkScrolledWindow" id="scrolled_window_empty_files_finder">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
@@ -1532,7 +1532,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolled_window_main_temporary_files_finder">
+                  <object class="GtkScrolledWindow" id="scrolled_window_temporary_files_finder">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
@@ -1556,7 +1556,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="notebook_main_similar_images_finder_label">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -1774,7 +1774,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="notebook_main_same_music_finder">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -1933,7 +1933,7 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="notebook_main_zeroed_files_finder">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>

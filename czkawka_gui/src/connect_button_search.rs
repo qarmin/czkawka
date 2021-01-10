@@ -36,8 +36,8 @@ pub fn connect_button_search(
 ) {
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
-    let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
+    let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+    let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
     let buttons_search_clone = gui_data.buttons_search.clone();
     let buttons_array = gui_data.buttons_array.clone();
     let check_button_recursive = gui_data.check_button_recursive.clone();
@@ -65,15 +65,15 @@ pub fn connect_button_search(
     let check_button_music_album_artist: gtk::CheckButton = gui_data.check_button_music_album_artist.clone();
     let check_button_music_year: gtk::CheckButton = gui_data.check_button_music_year.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
-    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
+    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
+    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
+    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
+    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
+    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
+    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
+    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
+    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let dialog_progress = gui_data.dialog_progress.clone();
     let label_stage = gui_data.label_stage.clone();
@@ -83,8 +83,8 @@ pub fn connect_button_search(
     let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
-        let included_directories = get_string_from_list_store(&scrolled_window_included_directories);
-        let excluded_directories = get_string_from_list_store(&scrolled_window_excluded_directories);
+        let included_directories = get_string_from_list_store(&tree_view_included_directories);
+        let excluded_directories = get_string_from_list_store(&tree_view_excluded_directories);
         let recursive_search = check_button_recursive.get_active();
         let excluded_items = entry_excluded_items.get_text().as_str().to_string();
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
@@ -113,7 +113,7 @@ pub fn connect_button_search(
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_duplicate_finder).clear();
+                get_list_store(&tree_view_duplicate_finder).clear();
 
                 let check_method;
                 if radio_button_duplicates_name.get_active() {
@@ -152,7 +152,7 @@ pub fn connect_button_search(
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_main_empty_files_finder).clear();
+                get_list_store(&tree_view_empty_files_finder).clear();
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -176,7 +176,7 @@ pub fn connect_button_search(
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_main_empty_folder_finder).clear();
+                get_list_store(&tree_view_empty_folder_finder).clear();
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -197,7 +197,7 @@ pub fn connect_button_search(
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_big_files_finder).clear();
+                get_list_store(&tree_view_big_files_finder).clear();
 
                 let numbers_of_files_to_check = entry_big_files_number.get_text().as_str().parse::<usize>().unwrap_or(50);
 
@@ -222,7 +222,7 @@ pub fn connect_button_search(
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_main_temporary_files_finder).clear();
+                get_list_store(&tree_view_temporary_files_finder).clear();
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -247,7 +247,7 @@ pub fn connect_button_search(
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_similar_images_finder).clear();
+                get_list_store(&tree_view_similar_images_finder).clear();
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -291,7 +291,7 @@ pub fn connect_button_search(
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_zeroed_files_finder).clear();
+                get_list_store(&tree_view_zeroed_files_finder).clear();
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
@@ -315,7 +315,7 @@ pub fn connect_button_search(
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_same_music_finder).clear();
+                get_list_store(&tree_view_same_music_finder).clear();
 
                 let minimal_file_size = entry_same_music_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
 
@@ -367,7 +367,7 @@ pub fn connect_button_search(
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
 
-                get_list_store(&scrolled_window_invalid_symlinks).clear();
+                get_list_store(&tree_view_invalid_symlinks).clear();
 
                 let glib_stop_sender = glib_stop_sender.clone();
                 let stop_receiver = stop_receiver.clone();
