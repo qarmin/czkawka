@@ -180,8 +180,8 @@ pub struct ExcludedDirectories {
 
 #[derive(Debug, StructOpt)]
 pub struct ExcludedItems {
-    #[structopt(short = "E", long, parse(from_os_str), help = "Excluded item(s)", long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)")]
-    pub excluded_items: Vec<PathBuf>,
+    #[structopt(short = "E", long, help = "Excluded item(s)", long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)")]
+    pub excluded_items: Vec<String>,
 }
 
 #[derive(Debug, StructOpt)]

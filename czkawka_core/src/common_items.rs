@@ -14,15 +14,14 @@ impl ExcludedItems {
     }
     /// Setting excluded items which needs to contains * wildcard
     /// Are a lot of slower than absolute path, so it should be used to heavy
-    pub fn set_excluded_items(&mut self, mut excluded_items: String, text_messages: &mut Messages) {
+    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>, text_messages: &mut Messages) {
         let start_time: SystemTime = SystemTime::now();
 
         if excluded_items.is_empty() {
             return;
         }
 
-        excluded_items = excluded_items.replace("\"", "");
-        let expressions: Vec<String> = excluded_items.split(',').map(String::from).collect();
+        let expressions: Vec<String> = excluded_items;
         let mut checked_expressions: Vec<String> = Vec::new();
 
         for expression in expressions {

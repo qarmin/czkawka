@@ -83,10 +83,10 @@ pub fn connect_button_search(
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
-        let included_directories = get_string_from_list_store(&tree_view_included_directories);
-        let excluded_directories = get_string_from_list_store(&tree_view_excluded_directories);
+        let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
+        let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories));
         let recursive_search = check_button_recursive.get_active();
-        let excluded_items = entry_excluded_items.get_text().as_str().to_string();
+        let excluded_items = entry_excluded_items.get_text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
 
         let show_dialog = Arc::new(AtomicBool::new(true));

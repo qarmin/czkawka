@@ -17,13 +17,8 @@ use czkawka_core::{
     temporary::{self, Temporary},
     zeroed::{self, ZeroedFiles},
 };
-use std::{path::PathBuf, process};
+use std::process;
 use structopt::StructOpt;
-
-fn path_list_to_str(path_list: Vec<PathBuf>) -> String {
-    let path_list: Vec<String> = path_list.into_iter().filter_map(|a| a.into_os_string().into_string().ok()).collect();
-    path_list.join(",")
-}
 
 fn main() {
     let command = Commands::from_args();
@@ -45,9 +40,9 @@ fn main() {
         } => {
             let mut df = DuplicateFinder::new();
 
-            df.set_included_directory(path_list_to_str(directories.directories));
-            df.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            df.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            df.set_included_directory(directories.directories);
+            df.set_excluded_directory(excluded_directories.excluded_directories);
+            df.set_excluded_items(excluded_items.excluded_items);
             df.set_minimal_file_size(minimal_file_size);
             df.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             df.set_check_method(search_method);
@@ -76,9 +71,9 @@ fn main() {
         } => {
             let mut ef = EmptyFolder::new();
 
-            ef.set_included_directory(path_list_to_str(directories.directories));
-            ef.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            ef.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            ef.set_included_directory(directories.directories);
+            ef.set_excluded_directory(excluded_directories.excluded_directories);
+            ef.set_excluded_items(excluded_items.excluded_items);
             ef.set_delete_folder(delete_folders);
 
             ef.find_empty_folders(None, None);
@@ -106,9 +101,9 @@ fn main() {
         } => {
             let mut bf = BigFile::new();
 
-            bf.set_included_directory(path_list_to_str(directories.directories));
-            bf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            bf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            bf.set_included_directory(directories.directories);
+            bf.set_excluded_directory(excluded_directories.excluded_directories);
+            bf.set_excluded_items(excluded_items.excluded_items);
             bf.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             bf.set_number_of_files_to_check(number_of_files);
             bf.set_recursive_search(!not_recursive.not_recursive);
@@ -140,9 +135,9 @@ fn main() {
         } => {
             let mut ef = EmptyFiles::new();
 
-            ef.set_included_directory(path_list_to_str(directories.directories));
-            ef.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            ef.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            ef.set_included_directory(directories.directories);
+            ef.set_excluded_directory(excluded_directories.excluded_directories);
+            ef.set_excluded_items(excluded_items.excluded_items);
             ef.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             ef.set_recursive_search(!not_recursive.not_recursive);
 
@@ -173,9 +168,9 @@ fn main() {
         } => {
             let mut tf = Temporary::new();
 
-            tf.set_included_directory(path_list_to_str(directories.directories));
-            tf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            tf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            tf.set_included_directory(directories.directories);
+            tf.set_excluded_directory(excluded_directories.excluded_directories);
+            tf.set_excluded_items(excluded_items.excluded_items);
             tf.set_recursive_search(!not_recursive.not_recursive);
 
             if delete_files {
@@ -206,9 +201,9 @@ fn main() {
         } => {
             let mut sf = SimilarImages::new();
 
-            sf.set_included_directory(path_list_to_str(directories.directories));
-            sf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            sf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            sf.set_included_directory(directories.directories);
+            sf.set_excluded_directory(excluded_directories.excluded_directories);
+            sf.set_excluded_items(excluded_items.excluded_items);
             sf.set_minimal_file_size(minimal_file_size);
             sf.set_recursive_search(!not_recursive.not_recursive);
             sf.set_similarity(similarity);
@@ -238,9 +233,9 @@ fn main() {
         } => {
             let mut zf = ZeroedFiles::new();
 
-            zf.set_included_directory(path_list_to_str(directories.directories));
-            zf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            zf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            zf.set_included_directory(directories.directories);
+            zf.set_excluded_directory(excluded_directories.excluded_directories);
+            zf.set_excluded_items(excluded_items.excluded_items);
             zf.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             zf.set_minimal_file_size(minimal_file_size);
             zf.set_recursive_search(!not_recursive.not_recursive);
@@ -274,9 +269,9 @@ fn main() {
         } => {
             let mut mf = SameMusic::new();
 
-            mf.set_included_directory(path_list_to_str(directories.directories));
-            mf.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            mf.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            mf.set_included_directory(directories.directories);
+            mf.set_excluded_directory(excluded_directories.excluded_directories);
+            mf.set_excluded_items(excluded_items.excluded_items);
             mf.set_minimal_file_size(minimal_file_size);
             mf.set_recursive_search(!not_recursive.not_recursive);
             mf.set_music_similarity(music_similarity);
@@ -309,9 +304,9 @@ fn main() {
         } => {
             let mut ifs = InvalidSymlinks::new();
 
-            ifs.set_included_directory(path_list_to_str(directories.directories));
-            ifs.set_excluded_directory(path_list_to_str(excluded_directories.excluded_directories));
-            ifs.set_excluded_items(path_list_to_str(excluded_items.excluded_items));
+            ifs.set_included_directory(directories.directories);
+            ifs.set_excluded_directory(excluded_directories.excluded_directories);
+            ifs.set_excluded_items(excluded_items.excluded_items);
             ifs.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             ifs.set_recursive_search(!not_recursive.not_recursive);
             if delete_files {
