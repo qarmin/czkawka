@@ -12,7 +12,7 @@ use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
 use gtk::{ListStore, TextView};
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub enum Message {
     Duplicates(DuplicateFinder),
@@ -110,27 +110,28 @@ pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
 //pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
-pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> String {
+pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
     let list_store: gtk::ListStore = get_list_store(&tree_view);
-    let mut first: bool = true;
 
-    let mut return_string: String = "".to_string();
+    let mut string_vector: Vec<String> = Vec::new();
+
     let tree_iter = match list_store.get_iter_first() {
         Some(t) => t,
-        None => return return_string,
+        None => {
+            return string_vector;
+        }
     };
     loop {
-        if !first {
-            return_string += ",";
-        } else {
-            first = false;
-        }
-        return_string += list_store.get_value(&tree_iter, 0).get::<String>().unwrap().unwrap().as_str();
+        string_vector.push(list_store.get_value(&tree_iter, 0).get::<String>().unwrap().unwrap());
         if !list_store.iter_next(&tree_iter) {
-            return return_string;
+            return string_vector;
         }
     }
 }
+pub fn get_path_buf_from_vector_of_strings(vec_string: Vec<String>) -> Vec<PathBuf> {
+    vec_string.iter().map(PathBuf::from).collect()
+}
+
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
         (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),

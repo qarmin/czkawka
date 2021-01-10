@@ -14,7 +14,7 @@ impl Directories {
     }
 
     /// Setting included directories, at least one must be provided
-    pub fn set_included_directory(&mut self, included_directory: String, text_messages: &mut Messages) -> bool {
+    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>, text_messages: &mut Messages) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
         if included_directory.is_empty() {
@@ -22,8 +22,7 @@ impl Directories {
             return false;
         }
 
-        let included_directory = included_directory.replace("\"", "");
-        let directories: Vec<_> = included_directory.split(',').map(|dir| dir.trim()).filter(|dir| !dir.is_empty()).map(PathBuf::from).collect();
+        let directories: Vec<PathBuf> = included_directory;
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {
@@ -66,15 +65,13 @@ impl Directories {
     }
 
     /// Setting absolute path to exclude
-    pub fn set_excluded_directory(&mut self, excluded_directory: String, text_messages: &mut Messages) {
+    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>, text_messages: &mut Messages) {
         let start_time: SystemTime = SystemTime::now();
         if excluded_directory.is_empty() {
             return;
         }
 
-        let excluded_directory = excluded_directory.replace("\"", "");
-
-        let directories: Vec<PathBuf> = excluded_directory.split(',').map(|dir| dir.trim()).filter(|dir| !dir.is_empty()).map(PathBuf::from).collect();
+        let directories: Vec<PathBuf> = excluded_directory;
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {

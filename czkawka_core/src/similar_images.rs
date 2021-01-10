@@ -531,15 +531,15 @@ impl SimilarImages {
     }
 
     /// Set included dir which needs to be relative, exists etc.
-    pub fn set_included_directory(&mut self, included_directory: String) {
+    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
 
-    pub fn set_excluded_directory(&mut self, excluded_directory: String) {
+    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
     }
 
-    pub fn set_excluded_items(&mut self, excluded_items: String) {
+    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 }
