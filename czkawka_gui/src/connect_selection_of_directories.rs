@@ -9,9 +9,9 @@ use czkawka_core::common::Common;
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
     {
-        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         let window_main = gui_data.window_main.clone();
-        let buttons_manual_add_directory = gui_data.buttons_manual_add_directory.clone();
+        let buttons_manual_add_directory = gui_data.upper_notebook.buttons_manual_add_directory.clone();
         buttons_manual_add_directory.connect_clicked(move |_| {
             let dialog_manual_add_directory = gtk::Dialog::with_buttons(Some("Add directory manually"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
             let entry: gtk::Entry = gtk::Entry::new();
@@ -47,9 +47,9 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add manually excluded directory
     {
-        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
+        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         let window_main = gui_data.window_main.clone();
-        let buttons_manual_add_excluded_directory = gui_data.buttons_manual_add_excluded_directory.clone();
+        let buttons_manual_add_excluded_directory = gui_data.upper_notebook.buttons_manual_add_excluded_directory.clone();
         buttons_manual_add_excluded_directory.connect_clicked(move |_| {
             let dialog_manual_add_directory = gtk::Dialog::with_buttons(
                 Some("Add excluded directory manually"),
@@ -90,9 +90,9 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add included directory
     {
-        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         let window_main = gui_data.window_main.clone();
-        let buttons_add_included_directory = gui_data.buttons_add_included_directory.clone();
+        let buttons_add_included_directory = gui_data.upper_notebook.buttons_add_included_directory.clone();
         buttons_add_included_directory.connect_clicked(move |_| {
             let chooser = gtk::FileChooserDialog::with_buttons(
                 Some("Folders to include"),
@@ -119,9 +119,9 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add excluded directory
     {
-        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
+        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         let window_main = gui_data.window_main.clone();
-        let buttons_add_excluded_directory = gui_data.buttons_add_excluded_directory.clone();
+        let buttons_add_excluded_directory = gui_data.upper_notebook.buttons_add_excluded_directory.clone();
         buttons_add_excluded_directory.connect_clicked(move |_| {
             let chooser = gtk::FileChooserDialog::with_buttons(
                 Some("Folders to exclude"),
@@ -149,8 +149,8 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Remove Excluded Folder
     {
-        let buttons_remove_excluded_directory = gui_data.buttons_remove_excluded_directory.clone();
-        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
+        let buttons_remove_excluded_directory = gui_data.upper_notebook.buttons_remove_excluded_directory.clone();
+        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         buttons_remove_excluded_directory.connect_clicked(move |_| {
             let list_store = get_list_store(&tree_view_excluded_directories);
             let selection = tree_view_excluded_directories.get_selection();
@@ -164,8 +164,8 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Remove Included Folder
     {
-        let buttons_remove_included_directory = gui_data.buttons_remove_included_directory.clone();
-        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
+        let buttons_remove_included_directory = gui_data.upper_notebook.buttons_remove_included_directory.clone();
+        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         buttons_remove_included_directory.connect_clicked(move |_| {
             let list_store = get_list_store(&tree_view_included_directories);
             let selection = tree_view_included_directories.get_selection();
