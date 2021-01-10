@@ -1,6 +1,6 @@
 extern crate gtk;
 use crate::gui_data::GuiData;
-use crate::help_functions::{get_list_store, get_tree_view};
+use crate::help_functions::get_list_store;
 use gtk::prelude::*;
 
 #[cfg(target_family = "windows")]
@@ -9,7 +9,7 @@ use czkawka_core::common::Common;
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
     {
-        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
+        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
         let window_main = gui_data.window_main.clone();
         let buttons_manual_add_directory = gui_data.buttons_manual_add_directory.clone();
         buttons_manual_add_directory.connect_clicked(move |_| {
@@ -31,7 +31,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
                 if !text.is_empty() {
-                    let list_store = get_list_store(&scrolled_window_included_directories);
+                    let list_store = get_list_store(&tree_view_included_directories);
 
                     let col_indices = [0];
 
@@ -47,7 +47,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add manually excluded directory
     {
-        let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
+        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
         let window_main = gui_data.window_main.clone();
         let buttons_manual_add_excluded_directory = gui_data.buttons_manual_add_excluded_directory.clone();
         buttons_manual_add_excluded_directory.connect_clicked(move |_| {
@@ -74,7 +74,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
                 if !text.is_empty() {
-                    let list_store = get_list_store(&scrolled_window_excluded_directories);
+                    let list_store = get_list_store(&tree_view_excluded_directories);
 
                     let col_indices = [0];
 
@@ -90,7 +90,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add included directory
     {
-        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
+        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
         let window_main = gui_data.window_main.clone();
         let buttons_add_included_directory = gui_data.buttons_add_included_directory.clone();
         buttons_add_included_directory.connect_clicked(move |_| {
@@ -106,7 +106,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             if response_type == gtk::ResponseType::Ok {
                 let folder = chooser.get_filenames();
 
-                let list_store = get_list_store(&scrolled_window_included_directories);
+                let list_store = get_list_store(&tree_view_included_directories);
 
                 let col_indices = [0];
                 for file_entry in &folder {
@@ -119,7 +119,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add excluded directory
     {
-        let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
+        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
         let window_main = gui_data.window_main.clone();
         let buttons_add_excluded_directory = gui_data.buttons_add_excluded_directory.clone();
         buttons_add_excluded_directory.connect_clicked(move |_| {
@@ -135,7 +135,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             if response_type == gtk::ResponseType::Ok {
                 let folder = chooser.get_filenames();
 
-                let list_store = get_list_store(&scrolled_window_excluded_directories);
+                let list_store = get_list_store(&tree_view_excluded_directories);
 
                 let col_indices = [0];
 
@@ -150,11 +150,10 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Remove Excluded Folder
     {
         let buttons_remove_excluded_directory = gui_data.buttons_remove_excluded_directory.clone();
-        let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
+        let tree_view_excluded_directories = gui_data.tree_view_excluded_directories.clone();
         buttons_remove_excluded_directory.connect_clicked(move |_| {
-            let tree_view = get_tree_view(&scrolled_window_excluded_directories);
-            let list_store = get_list_store(&scrolled_window_excluded_directories);
-            let selection = tree_view.get_selection();
+            let list_store = get_list_store(&tree_view_excluded_directories);
+            let selection = tree_view_excluded_directories.get_selection();
 
             let (vec_tree_path, _tree_model) = selection.get_selected_rows();
 
@@ -166,11 +165,10 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Remove Included Folder
     {
         let buttons_remove_included_directory = gui_data.buttons_remove_included_directory.clone();
-        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
+        let tree_view_included_directories = gui_data.tree_view_included_directories.clone();
         buttons_remove_included_directory.connect_clicked(move |_| {
-            let tree_view = get_tree_view(&scrolled_window_included_directories);
-            let list_store = get_list_store(&scrolled_window_included_directories);
-            let selection = tree_view.get_selection();
+            let list_store = get_list_store(&tree_view_included_directories);
+            let selection = tree_view_included_directories.get_selection();
 
             let (vec_tree_path, _tree_model) = selection.get_selected_rows();
 

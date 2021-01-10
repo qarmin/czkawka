@@ -14,26 +14,26 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let buttons_search = gui_data.buttons_search.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
-    let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
-    let scrolled_window_main_empty_files_finder = gui_data.scrolled_window_main_empty_files_finder.clone();
-    let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
+    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
+    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
+    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
+    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
     let buttons_array = gui_data.buttons_array.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
-    let scrolled_window_zeroed_files_finder = gui_data.scrolled_window_zeroed_files_finder.clone();
+    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
-    let scrolled_window_big_files_finder = gui_data.scrolled_window_big_files_finder.clone();
-    let scrolled_window_invalid_symlinks = gui_data.scrolled_window_invalid_symlinks.clone();
+    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
+    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
-    let scrolled_window_main_temporary_files_finder = gui_data.scrolled_window_main_temporary_files_finder.clone();
+    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
-    let scrolled_window_same_music_finder = gui_data.scrolled_window_same_music_finder.clone();
+    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.buttons_names.clone();
     let dialog_progress = gui_data.dialog_progress.clone();
@@ -86,7 +86,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_duplicate_finder);
+                        let list_store = get_list_store(&tree_view_duplicate_finder);
 
                         let col_indices = [0, 1, 2, 3, 4, 5];
 
@@ -214,7 +214,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_main_empty_folder_finder);
+                        let list_store = get_list_store(&tree_view_empty_folder_finder);
 
                         let col_indices = [0, 1, 2];
 
@@ -258,7 +258,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_main_empty_files_finder);
+                        let list_store = get_list_store(&tree_view_empty_files_finder);
 
                         let col_indices = [0, 1, 2];
 
@@ -302,7 +302,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_big_files_finder);
+                        let list_store = get_list_store(&tree_view_big_files_finder);
 
                         let col_indices = [0, 1, 2, 3];
 
@@ -353,7 +353,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_main_temporary_files_finder);
+                        let list_store = get_list_store(&tree_view_temporary_files_finder);
 
                         let col_indices = [0, 1, 2];
 
@@ -397,7 +397,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_similar_images_finder);
+                        let list_store = get_list_store(&tree_view_similar_images_finder);
 
                         let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -473,7 +473,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_zeroed_files_finder);
+                        let list_store = get_list_store(&tree_view_zeroed_files_finder);
 
                         let col_indices = [0, 1, 2, 3, 4];
 
@@ -523,7 +523,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_same_music_finder);
+                        let list_store = get_list_store(&tree_view_same_music_finder);
 
                         let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
@@ -626,7 +626,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     // Create GUI
                     {
-                        let list_store = get_list_store(&scrolled_window_invalid_symlinks);
+                        let list_store = get_list_store(&tree_view_invalid_symlinks);
 
                         let col_indices = [0, 1, 2, 3, 4];
 

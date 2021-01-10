@@ -10,7 +10,7 @@ use czkawka_core::similar_images::{SimilarImages, Similarity};
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
-use gtk::{ListStore, TextView, TreeView};
+use gtk::{ListStore, TextView};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -110,8 +110,8 @@ pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
 //pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
-pub fn get_string_from_list_store(scrolled_window: &gtk::ScrolledWindow) -> String {
-    let list_store: gtk::ListStore = get_list_store(&scrolled_window);
+pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> String {
+    let list_store: gtk::ListStore = get_list_store(&tree_view);
     let mut first: bool = true;
 
     let mut return_string: String = "".to_string();
@@ -263,15 +263,8 @@ pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) 
     }
 }
 
-pub fn get_list_store(scrolled_window: &gtk::ScrolledWindow) -> ListStore {
-    let list_store = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap().get_model().unwrap().downcast::<gtk::ListStore>().unwrap();
-
-    list_store
-}
-pub fn get_tree_view(scrolled_window: &gtk::ScrolledWindow) -> TreeView {
-    let tree_view = scrolled_window.get_children().get(0).unwrap().clone().downcast::<gtk::TreeView>().unwrap();
-
-    tree_view
+pub fn get_list_store(tree_view: &gtk::TreeView) -> ListStore {
+    tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap()
 }
 pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
     dialog.get_children()[0].clone().downcast::<gtk::Box>().unwrap()
