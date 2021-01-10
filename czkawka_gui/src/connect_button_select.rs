@@ -32,10 +32,10 @@ pub fn connect_button_select(gui_data: &GuiData) {
     }
 
     let gui_data = gui_data.clone();
-    let notebook_main = gui_data.notebook_main.clone();
-    let buttons_select_clone = gui_data.buttons_select.clone();
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_select = gui_data.buttons_select.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let buttons_select_clone = gui_data.bottom_buttons.buttons_select.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
 
     buttons_select_clone.connect_clicked(move |_| {
         show_required_popovers(&gui_data, &to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &hashmap);
@@ -45,22 +45,22 @@ pub fn connect_button_select(gui_data: &GuiData) {
 }
 
 fn show_required_popovers(gui_data: &GuiData, current_mode: &NotebookMainEnum, hashmap: &HashMap<NotebookMainEnum, Vec<&str>>) {
-    let buttons_popover_select_all = gui_data.buttons_popover_select_all.clone();
-    let buttons_popover_unselect_all = gui_data.buttons_popover_unselect_all.clone();
-    let buttons_popover_reverse = gui_data.buttons_popover_reverse.clone();
-    let buttons_popover_select_all_except_oldest = gui_data.buttons_popover_select_all_except_oldest.clone();
-    let buttons_popover_select_all_except_newest = gui_data.buttons_popover_select_all_except_newest.clone();
-    let buttons_popover_select_one_oldest = gui_data.buttons_popover_select_one_oldest.clone();
-    let buttons_popover_select_one_newest = gui_data.buttons_popover_select_one_newest.clone();
-    let buttons_popover_select_custom = gui_data.buttons_popover_select_custom.clone();
-    let buttons_popover_unselect_custom = gui_data.buttons_popover_unselect_custom.clone();
-    let buttons_popover_select_all_images_except_biggest = gui_data.buttons_popover_select_all_images_except_biggest.clone();
-    let buttons_popover_select_all_images_except_smallest = gui_data.buttons_popover_select_all_images_except_smallest.clone();
+    let buttons_popover_select_all = gui_data.popovers.buttons_popover_select_all.clone();
+    let buttons_popover_unselect_all = gui_data.popovers.buttons_popover_unselect_all.clone();
+    let buttons_popover_reverse = gui_data.popovers.buttons_popover_reverse.clone();
+    let buttons_popover_select_all_except_oldest = gui_data.popovers.buttons_popover_select_all_except_oldest.clone();
+    let buttons_popover_select_all_except_newest = gui_data.popovers.buttons_popover_select_all_except_newest.clone();
+    let buttons_popover_select_one_oldest = gui_data.popovers.buttons_popover_select_one_oldest.clone();
+    let buttons_popover_select_one_newest = gui_data.popovers.buttons_popover_select_one_newest.clone();
+    let buttons_popover_select_custom = gui_data.popovers.buttons_popover_select_custom.clone();
+    let buttons_popover_unselect_custom = gui_data.popovers.buttons_popover_unselect_custom.clone();
+    let buttons_popover_select_all_images_except_biggest = gui_data.popovers.buttons_popover_select_all_images_except_biggest.clone();
+    let buttons_popover_select_all_images_except_smallest = gui_data.popovers.buttons_popover_select_all_images_except_smallest.clone();
 
-    let separator_select_custom = gui_data.separator_select_custom.clone();
-    let separator_select_date = gui_data.separator_select_date.clone();
-    let separator_select_image_size = gui_data.separator_select_image_size.clone();
-    let separator_select_reverse = gui_data.separator_select_reverse.clone();
+    let separator_select_custom = gui_data.popovers.separator_select_custom.clone();
+    let separator_select_date = gui_data.popovers.separator_select_date.clone();
+    let separator_select_image_size = gui_data.popovers.separator_select_image_size.clone();
+    let separator_select_reverse = gui_data.popovers.separator_select_reverse.clone();
 
     let vec = hashmap.get(current_mode).unwrap();
 

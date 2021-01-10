@@ -763,36 +763,36 @@ pub fn connect_popovers(gui_data: &GuiData) {
         },
     ];
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_all = gui_data.buttons_popover_select_all.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_all = gui_data.popovers.buttons_popover_select_all.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_select_all(&popover_select, &object_popover.tree_view);
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_unselect_all = gui_data.buttons_popover_unselect_all.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_unselect_all = gui_data.popovers.buttons_popover_unselect_all.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_unselect_all.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_unselect_all(&popover_select, &object_popover.tree_view);
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_reverse = gui_data.buttons_popover_reverse.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_reverse = gui_data.popovers.buttons_popover_reverse.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_reverse.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_reverse(&popover_select, &object_popover.tree_view);
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_all_except_oldest = gui_data.buttons_popover_select_all_except_oldest.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_all_except_oldest = gui_data.popovers.buttons_popover_select_all_except_oldest.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
@@ -805,9 +805,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_all_except_newest = gui_data.buttons_popover_select_all_except_newest.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_all_except_newest = gui_data.popovers.buttons_popover_select_all_except_newest.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
@@ -820,9 +820,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_one_oldest = gui_data.buttons_popover_select_one_oldest.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_one_oldest = gui_data.popovers.buttons_popover_select_one_oldest.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
@@ -835,9 +835,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_one_newest = gui_data.buttons_popover_select_one_newest.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_one_newest = gui_data.popovers.buttons_popover_select_one_newest.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_one_newest.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
@@ -850,9 +850,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_custom = gui_data.buttons_popover_select_custom.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_custom = gui_data.popovers.buttons_popover_select_custom.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_select_custom.connect_clicked(move |_| {
@@ -867,9 +867,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_unselect_custom = gui_data.buttons_popover_unselect_custom.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_unselect_custom = gui_data.popovers.buttons_popover_unselect_custom.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
@@ -884,9 +884,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_all_images_except_biggest = gui_data.buttons_popover_select_all_images_except_biggest.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_all_images_except_biggest = gui_data.popovers.buttons_popover_select_all_images_except_biggest.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
@@ -899,9 +899,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popover_select.clone();
-    let buttons_popover_select_all_images_except_smallest = gui_data.buttons_popover_select_all_images_except_smallest.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let popover_select = gui_data.popovers.popover_select.clone();
+    let buttons_popover_select_all_images_except_smallest = gui_data.popovers.buttons_popover_select_all_images_except_smallest.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects; //.clone();
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();

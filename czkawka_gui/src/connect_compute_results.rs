@@ -11,14 +11,14 @@ use glib::Receiver;
 use gtk::prelude::*;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
-    let buttons_search = gui_data.buttons_search.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
     let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
-    let buttons_array = gui_data.buttons_array.clone();
+    let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
@@ -35,8 +35,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
-    let buttons_names = gui_data.buttons_names.clone();
-    let dialog_progress = gui_data.dialog_progress.clone();
+    let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
+    let dialog_progress = gui_data.progress_dialog.dialog_progress.clone();
 
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();

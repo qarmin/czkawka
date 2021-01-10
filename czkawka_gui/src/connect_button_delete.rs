@@ -11,9 +11,9 @@ use std::fs::Metadata;
 
 pub fn connect_button_delete(gui_data: &GuiData) {
     let gui_data = gui_data.clone();
-    let buttons_delete = gui_data.buttons_delete.clone();
+    let buttons_delete = gui_data.bottom_buttons.buttons_delete.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
     let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
     let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
@@ -23,8 +23,8 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-    let check_button_settings_confirm_deletion = gui_data.check_button_settings_confirm_deletion.clone();
-    let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
+    let check_button_settings_confirm_deletion = gui_data.upper_notebook.check_button_settings_confirm_deletion.clone();
+    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_delete.connect_clicked(move |_| {
         if check_button_settings_confirm_deletion.get_active() {

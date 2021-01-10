@@ -15,11 +15,11 @@ use std::path::Path;
 pub fn initialize_gui(gui_data: &mut GuiData) {
     //// Setup default look(duplicate finder)
     {
-        let buttons_search = gui_data.buttons_search.clone();
-        let buttons_save = gui_data.buttons_save.clone();
-        let buttons_delete = gui_data.buttons_delete.clone();
-        let buttons_select = gui_data.buttons_select.clone();
-        let buttons_symlink = gui_data.buttons_symlink.clone();
+        let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
+        let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
+        let buttons_delete = gui_data.bottom_buttons.buttons_delete.clone();
+        let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
+        let buttons_symlink = gui_data.bottom_buttons.buttons_symlink.clone();
         let scrolled_window_duplicate_finder = gui_data.main_notebook.scrolled_window_duplicate_finder.clone();
         let scrolled_window_empty_folder_finder = gui_data.main_notebook.scrolled_window_empty_folder_finder.clone();
         let scrolled_window_empty_files_finder = gui_data.main_notebook.scrolled_window_empty_files_finder.clone();
@@ -29,11 +29,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let scrolled_window_same_music_finder = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
         let scrolled_window_invalid_symlinks = gui_data.main_notebook.scrolled_window_invalid_symlinks.clone();
         let scrolled_window_zeroed_files_finder = gui_data.main_notebook.scrolled_window_zeroed_files_finder.clone();
-        let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
-        let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
+        let scrolled_window_included_directories = gui_data.upper_notebook.scrolled_window_included_directories.clone();
+        let scrolled_window_excluded_directories = gui_data.upper_notebook.scrolled_window_excluded_directories.clone();
 
-        let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
-        let check_button_settings_show_preview_similar_images = gui_data.check_button_settings_show_preview_similar_images.clone();
+        let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+        let check_button_settings_show_preview_similar_images = gui_data.upper_notebook.check_button_settings_show_preview_similar_images.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
 
         // Disable and show buttons
@@ -433,7 +433,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
             create_tree_view_directories(&mut tree_view);
 
-            gui_data.tree_view_included_directories = tree_view.clone();
+            gui_data.upper_notebook.tree_view_included_directories = tree_view.clone();
             scrolled_window_included_directories.add(&tree_view);
             scrolled_window_included_directories.show_all();
 
@@ -465,7 +465,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
             create_tree_view_directories(&mut tree_view);
 
-            gui_data.tree_view_excluded_directories = tree_view.clone();
+            gui_data.upper_notebook.tree_view_excluded_directories = tree_view.clone();
             scrolled_window_excluded_directories.add(&tree_view);
             scrolled_window_excluded_directories.show_all();
 

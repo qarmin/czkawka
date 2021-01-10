@@ -9,14 +9,14 @@ use std::fs;
 pub fn connect_button_symlink(gui_data: &GuiData) {
     let gui_data = gui_data.clone();
 
-    let buttons_symlink = gui_data.buttons_symlink.clone();
-    let notebook_main = gui_data.notebook_main.clone();
+    let buttons_symlink = gui_data.bottom_buttons.buttons_symlink.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
 
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
 
-    let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
+    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_symlink.connect_clicked(move |_| match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
         NotebookMainEnum::Duplicate => {
