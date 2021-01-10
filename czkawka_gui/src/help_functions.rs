@@ -222,13 +222,7 @@ pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree
 pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(button_names[index].as_str()).unwrap() {
-            if cfg!(target_family = "windows") {
-                if button_names[index] != "symlink" {
-                    button.show();
-                }
-            } else {
-                button.show();
-            }
+            button.show();
         } else {
             button.hide();
         }
@@ -286,7 +280,7 @@ pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
 pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]
     let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
-    assert!(vec.len() == 2); // 400x400 - should only have two elements, if have more, then something is not good
+    assert_eq!(vec.len(), 2); // 400x400 - should only have two elements, if have more, then something is not good
     let number1 = vec[0].parse::<u64>().expect("Invalid data in image dimension in position 0");
     let number2 = vec[1].parse::<u64>().expect("Invalid data in image dimension in position 1");
     (number1, number2)

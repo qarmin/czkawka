@@ -19,6 +19,7 @@ mod double_click_opening;
 mod gui_data;
 mod help_functions;
 mod initialize_gui;
+mod notebook_enums;
 mod saving_loading;
 
 use czkawka_core::*;

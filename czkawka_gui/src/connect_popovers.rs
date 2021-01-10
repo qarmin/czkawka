@@ -1,6 +1,7 @@
 extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::notebook_enums::*;
 use czkawka_core::common::Common;
 use gtk::prelude::*;
 use gtk::TreeIter;
@@ -652,7 +653,7 @@ fn popover_all_except_smallest(popover: &gtk::Popover, scrolled_window: &gtk::Sc
 
 #[derive(Clone)]
 pub struct PopoverObject {
-    pub name: String,
+    pub notebook_type: NotebookMainEnum,
     pub available_modes: Vec<String>,
     pub scrolled_windows: gtk::ScrolledWindow,
     pub column_path: Option<i32>,
@@ -664,9 +665,9 @@ pub struct PopoverObject {
     pub column_modification_as_secs: Option<i32>,
 }
 
-pub fn find_name(name: &str, vec: &[PopoverObject]) -> Option<PopoverObject> {
+pub fn find_name(notebook_type: &NotebookMainEnum, vec: &[PopoverObject]) -> Option<PopoverObject> {
     for e in vec {
-        if e.name == *name {
+        if e.notebook_type == *notebook_type {
             return Some(e.clone());
         }
     }
@@ -676,7 +677,7 @@ pub fn find_name(name: &str, vec: &[PopoverObject]) -> Option<PopoverObject> {
 pub fn connect_popovers(gui_data: &GuiData) {
     let popover_objects = vec![
         PopoverObject {
-            name: "notebook_main_duplicate_finder_label".to_string(),
+            notebook_type: NotebookMainEnum::Duplicate,
             available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_duplicate_finder.clone(),
             column_path: Some(ColumnsDuplicates::Path as i32),
@@ -688,7 +689,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
         },
         PopoverObject {
-            name: "notebook_main_same_music_finder".to_string(),
+            notebook_type: NotebookMainEnum::SameMusic,
             available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_same_music_finder.clone(),
             column_path: Some(ColumnsSameMusic::Path as i32),
@@ -700,7 +701,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
         },
         PopoverObject {
-            name: "notebook_main_similar_images_finder_label".to_string(),
+            notebook_type: NotebookMainEnum::SimilarImages,
             available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_similar_images_finder.clone(),
             column_path: Some(ColumnsSimilarImages::Path as i32),
@@ -712,7 +713,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
         },
         PopoverObject {
-            name: "scrolled_window_main_empty_folder_finder".to_string(),
+            notebook_type: NotebookMainEnum::EmptyDirectories,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_main_empty_folder_finder.clone(),
             column_path: Some(ColumnsEmptyFolders::Path as i32),
@@ -724,7 +725,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: None,
         },
         PopoverObject {
-            name: "scrolled_window_main_empty_files_finder".to_string(),
+            notebook_type: NotebookMainEnum::EmptyFiles,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_main_empty_files_finder.clone(),
             column_path: Some(ColumnsEmptyFiles::Path as i32),
@@ -736,7 +737,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: None,
         },
         PopoverObject {
-            name: "scrolled_window_main_temporary_files_finder".to_string(),
+            notebook_type: NotebookMainEnum::Temporary,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_main_temporary_files_finder.clone(),
             column_path: Some(ColumnsTemporaryFiles::Path as i32),
@@ -748,7 +749,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: None,
         },
         PopoverObject {
-            name: "notebook_big_main_file_finder".to_string(),
+            notebook_type: NotebookMainEnum::BigFiles,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_big_files_finder.clone(),
             column_path: Some(ColumnsBigFiles::Path as i32),
@@ -760,7 +761,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_modification_as_secs: None,
         },
         PopoverObject {
-            name: "notebook_main_zeroed_files_finder".to_string(),
+            notebook_type: NotebookMainEnum::Zeroed,
             available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
             scrolled_windows: gui_data.scrolled_window_zeroed_files_finder.clone(),
             column_path: Some(ColumnsZeroedFiles::Path as i32),
@@ -774,42 +775,38 @@ pub fn connect_popovers(gui_data: &GuiData) {
     ];
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_all = gui_data.buttons_popover_select_all.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_select_all(&popover_select, &object_popover.scrolled_windows);
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_unselect_all = gui_data.buttons_popover_unselect_all.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_unselect_all.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_unselect_all(&popover_select, &object_popover.scrolled_windows);
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_reverse = gui_data.buttons_popover_reverse.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_reverse.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_reverse(&popover_select, &object_popover.scrolled_windows);
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_all_except_oldest = gui_data.buttons_popover_select_all_except_oldest.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_oldest(
             &popover_select,
             &object_popover.scrolled_windows,
@@ -820,12 +817,11 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_all_except_newest = gui_data.buttons_popover_select_all_except_newest.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_newest(
             &popover_select,
             &object_popover.scrolled_windows,
@@ -836,12 +832,11 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_one_oldest = gui_data.buttons_popover_select_one_oldest.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_one_oldest(
             &popover_select,
             &object_popover.scrolled_windows,
@@ -852,12 +847,11 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_one_newest = gui_data.buttons_popover_select_one_newest.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_one_newest.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_one_newest(
             &popover_select,
             &object_popover.scrolled_windows,
@@ -868,13 +862,12 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_custom = gui_data.buttons_popover_select_custom.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_select_custom.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_select_custom(
             &popover_select,
             &gui_data_clone,
@@ -886,13 +879,12 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_unselect_custom = gui_data.buttons_popover_unselect_custom.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_unselect_custom(
             &popover_select,
             &gui_data_clone,
@@ -904,12 +896,11 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_all_images_except_biggest = gui_data.buttons_popover_select_all_images_except_biggest.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_biggest(
             &popover_select,
             &object_popover.scrolled_windows,
@@ -920,12 +911,11 @@ pub fn connect_popovers(gui_data: &GuiData) {
     });
 
     let popover_select = gui_data.popover_select.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let buttons_popover_select_all_images_except_smallest = gui_data.buttons_popover_select_all_images_except_smallest.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let vec_popover_objects = popover_objects; //.clone();
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
-        let object_popover = find_name(notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap(), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_smallest(
             &popover_select,
             &object_popover.scrolled_windows,

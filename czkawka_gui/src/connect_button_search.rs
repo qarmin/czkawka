@@ -3,6 +3,7 @@ use czkawka_core::*;
 extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::notebook_enums::*;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
@@ -34,7 +35,6 @@ pub fn connect_button_search(
     futures_sender_invalid_symlinks: futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>,
 ) {
     let entry_info = gui_data.entry_info.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let scrolled_window_included_directories = gui_data.scrolled_window_included_directories.clone();
     let scrolled_window_excluded_directories = gui_data.scrolled_window_excluded_directories.clone();
@@ -107,8 +107,8 @@ pub fn connect_button_search(
 
         reset_text_view(&text_view_errors);
 
-        match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-            "notebook_main_duplicate_finder_label" => {
+        match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
+            NotebookMainEnum::Duplicate => {
                 label_stage.show();
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
@@ -147,7 +147,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });
             }
-            "scrolled_window_main_empty_files_finder" => {
+            NotebookMainEnum::EmptyFiles => {
                 label_stage.show();
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
@@ -171,7 +171,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::EmptyFiles(vf));
                 });
             }
-            "scrolled_window_main_empty_folder_finder" => {
+            NotebookMainEnum::EmptyDirectories => {
                 label_stage.show();
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
@@ -192,7 +192,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::EmptyFolders(ef));
                 });
             }
-            "notebook_big_main_file_finder" => {
+            NotebookMainEnum::BigFiles => {
                 label_stage.show();
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
@@ -217,7 +217,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::BigFiles(bf));
                 });
             }
-            "scrolled_window_main_temporary_files_finder" => {
+            NotebookMainEnum::Temporary => {
                 label_stage.show();
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
@@ -240,7 +240,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::Temporary(tf));
                 });
             }
-            "notebook_main_similar_images_finder_label" => {
+            NotebookMainEnum::SimilarImages => {
                 image_preview_similar_images.hide();
 
                 label_stage.show();
@@ -286,7 +286,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });
             }
-            "notebook_main_zeroed_files_finder" => {
+            NotebookMainEnum::Zeroed => {
                 label_stage.show();
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
@@ -310,7 +310,7 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::ZeroedFiles(zf));
                 });
             }
-            "notebook_main_same_music_finder" => {
+            NotebookMainEnum::SameMusic => {
                 label_stage.show();
                 grid_progress_stages.show_all();
                 dialog_progress.resize(1, 1);
@@ -357,12 +357,12 @@ pub fn connect_button_search(
                     });
                 } else {
                     notebook_main.set_sensitive(true);
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
+                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(), &buttons_array, &buttons_names);
                     entry_info.set_text("ERROR: You must select at least one checkbox with music searching types.");
                     show_dialog.store(false, Ordering::Relaxed);
                 }
             }
-            "scrolled_window_invalid_symlinks" => {
+            NotebookMainEnum::Symlinks => {
                 label_stage.show();
                 grid_progress_stages.hide();
                 dialog_progress.resize(1, 1);
@@ -384,7 +384,6 @@ pub fn connect_button_search(
                     let _ = glib_stop_sender.send(Message::InvalidSymlinks(isf));
                 });
             }
-            e => panic!("Not existent {}", e),
         }
 
         // Show progress dialog

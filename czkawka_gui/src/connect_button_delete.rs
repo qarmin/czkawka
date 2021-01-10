@@ -1,6 +1,7 @@
 extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::notebook_enums::*;
 use gtk::prelude::*;
 use std::collections::BTreeMap;
 use std::fs;
@@ -12,7 +13,6 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let gui_data = gui_data.clone();
     let buttons_delete = gui_data.buttons_delete.clone();
     let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
     let scrolled_window_main_empty_folder_finder = gui_data.scrolled_window_main_empty_folder_finder.clone();
@@ -53,23 +53,23 @@ pub fn connect_button_delete(gui_data: &GuiData) {
             confirmation_dialog_delete.close();
         }
 
-        match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-            "notebook_main_duplicate_finder_label" => {
+        match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
+            NotebookMainEnum::Duplicate => {
                 tree_remove(&scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
             }
-            "scrolled_window_main_empty_folder_finder" => {
+            NotebookMainEnum::EmptyDirectories => {
                 empty_folder_remover(&scrolled_window_main_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
             }
-            "scrolled_window_main_empty_files_finder" => {
+            NotebookMainEnum::EmptyFiles => {
                 basic_remove(&scrolled_window_main_empty_files_finder.clone(), ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
             }
-            "scrolled_window_main_temporary_files_finder" => {
+            NotebookMainEnum::Temporary => {
                 basic_remove(&scrolled_window_main_temporary_files_finder.clone(), ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
             }
-            "notebook_big_main_file_finder" => {
+            NotebookMainEnum::BigFiles => {
                 basic_remove(&scrolled_window_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
             }
-            "notebook_main_similar_images_finder_label" => {
+            NotebookMainEnum::SimilarImages => {
                 tree_remove(
                     &scrolled_window_similar_images_finder.clone(),
                     ColumnsSimilarImages::Name as i32,
@@ -77,19 +77,17 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     ColumnsSimilarImages::Color as i32,
                     &gui_data,
                 );
-                // let list_store = get_list_store(&scrolled_window_similar_images_finder);
                 image_preview_similar_images.hide();
             }
-            "notebook_main_zeroed_files_finder" => {
+            NotebookMainEnum::Zeroed => {
                 basic_remove(&scrolled_window_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
             }
-            "notebook_main_same_music_finder" => {
+            NotebookMainEnum::SameMusic => {
                 tree_remove(&scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
             }
-            "scrolled_window_invalid_symlinks" => {
+            NotebookMainEnum::Symlinks => {
                 basic_remove(&scrolled_window_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
             }
-            e => panic!("Not existent {}", e),
         }
     });
 }
@@ -105,8 +103,6 @@ pub fn empty_folder_remover(scrolled_window: &gtk::ScrolledWindow, column_file_n
         return;
     }
     let list_store = get_list_store(&scrolled_window);
-
-    // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
     let mut messages: String = "".to_string();
 
@@ -192,8 +188,6 @@ pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32
     }
     let list_store = get_list_store(&scrolled_window);
 
-    // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
-
     let mut messages: String = "".to_string();
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
@@ -214,7 +208,6 @@ pub fn basic_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32
 }
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
-//
 pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
 
@@ -226,8 +219,6 @@ pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32,
         return;
     }
     let list_store = get_list_store(&scrolled_window);
-
-    // let new_tree_model = TreeModel::new(); // TODO - maybe create new model when inserting a new data, because this seems to be not optimal when using thousands of rows
 
     let mut messages: String = "".to_string();
 
@@ -243,7 +234,6 @@ pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32,
 
         map_with_path_to_delete.entry(path.clone()).or_insert_with(Vec::new);
         map_with_path_to_delete.get_mut(path.as_str()).unwrap().push(file_name);
-        // vec_path_to_delete.push((path, file_name));
     }
 
     // Delete duplicated entries, and remove real files
@@ -267,14 +257,14 @@ pub fn tree_remove(scrolled_window: &gtk::ScrolledWindow, column_file_name: i32,
         let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
         let mut current_iter = first_iter;
         if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
-            panic!(); // First element should be header
+            panic!("First deleted element, should be a header"); // First element should be header
         };
 
         let mut next_iter;
         let mut next_next_iter;
         'main: loop {
             if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
-                panic!(); // First element should be header
+                panic!("First deleted element, should be a header"); // First element should be header
             };
 
             next_iter = current_iter.clone();

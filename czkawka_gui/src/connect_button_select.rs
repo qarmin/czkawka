@@ -1,72 +1,50 @@
 extern crate gtk;
 use crate::gui_data::GuiData;
+use crate::notebook_enums::*;
 use gtk::prelude::*;
 use std::collections::HashMap;
+//  TODO Replace `all`, `image_size` etc. with this
+// pub enum PopoverType {
+//     All,
+//     ImageSize,
+//     Reverse,
+//     Custom,
+//     Date,
+// }
 
 pub fn connect_button_select(gui_data: &GuiData) {
     // let mode = ["all", "image_size", "reverse", "custom", "date"];
-    let mut hashmap: HashMap<&str, Vec<&str>> = Default::default();
+    let mut hashmap: HashMap<NotebookMainEnum, Vec<&str>> = Default::default();
     {
-        // Remember to update connect_popovers file, because this data are connected to each others
-        hashmap.insert("images", vec!["all", "image_size", "reverse", "custom", "date"]);
-        hashmap.insert("duplicate", vec!["all", "reverse", "custom", "date"]);
-        hashmap.insert("music", vec!["all", "reverse", "custom", "date"]);
+        {
+            // Remember to update connect_popovers file, because this data are connected to each others
+            hashmap.insert(NotebookMainEnum::SimilarImages, vec!["all", "image_size", "reverse", "custom", "date"]);
+            hashmap.insert(NotebookMainEnum::Duplicate, vec!["all", "reverse", "custom", "date"]);
+            hashmap.insert(NotebookMainEnum::SameMusic, vec!["all", "reverse", "custom", "date"]);
 
-        hashmap.insert("empty_files", vec!["all", "reverse", "custom"]);
-        hashmap.insert("empty_folders", vec!["all", "reverse", "custom"]);
-        hashmap.insert("big", vec!["all", "reverse", "custom"]);
-        hashmap.insert("symlinks", vec!["all", "reverse", "custom"]);
-        hashmap.insert("zeroed", vec!["all", "reverse", "custom"]);
-        hashmap.insert("temporary", vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::EmptyFiles, vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::EmptyDirectories, vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::BigFiles, vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::Symlinks, vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::Zeroed, vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::Temporary, vec!["all", "reverse", "custom"]);
+        }
     }
 
     let gui_data = gui_data.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
     let notebook_main = gui_data.notebook_main.clone();
     let buttons_select_clone = gui_data.buttons_select.clone();
     let popover_select = gui_data.popover_select.clone();
     let buttons_select = gui_data.buttons_select.clone();
 
     buttons_select_clone.connect_clicked(move |_| {
-        let current_mode;
-
-        match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-            "notebook_main_duplicate_finder_label" => {
-                current_mode = "duplicate";
-            }
-            "notebook_main_same_music_finder" => {
-                current_mode = "music";
-            }
-            "notebook_main_similar_images_finder_label" => {
-                current_mode = "images";
-            }
-            "scrolled_window_main_empty_folder_finder" => {
-                current_mode = "empty_folders";
-            }
-            "scrolled_window_main_empty_files_finder" => {
-                current_mode = "empty_files";
-            }
-            "scrolled_window_main_temporary_files_finder" => {
-                current_mode = "temporary";
-            }
-            "notebook_big_main_file_finder" => {
-                current_mode = "big";
-            }
-            "notebook_main_zeroed_files_finder" => {
-                current_mode = "zeroed";
-            }
-            "scrolled_window_invalid_symlinks" => {
-                current_mode = "symlinks";
-            }
-            e => panic!("Not existent {}", e),
-        }
-        show_required_popovers(&gui_data, current_mode, &hashmap);
+        show_required_popovers(&gui_data, &to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &hashmap);
         popover_select.set_relative_to(Some(&buttons_select));
         popover_select.popup();
     });
 }
 
-fn show_required_popovers(gui_data: &GuiData, current_mode: &str, hashmap: &HashMap<&str, Vec<&str>>) {
+fn show_required_popovers(gui_data: &GuiData, current_mode: &NotebookMainEnum, hashmap: &HashMap<NotebookMainEnum, Vec<&str>>) {
     let buttons_popover_select_all = gui_data.buttons_popover_select_all.clone();
     let buttons_popover_unselect_all = gui_data.buttons_popover_unselect_all.clone();
     let buttons_popover_reverse = gui_data.buttons_popover_reverse.clone();
