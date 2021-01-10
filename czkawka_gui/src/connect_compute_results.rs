@@ -3,6 +3,7 @@ use humansize::{file_size_opts as options, FileSize};
 extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::notebook_enums::*;
 use chrono::NaiveDateTime;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
@@ -186,17 +187,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_duplication_state.borrow_mut() = df;
 
                         if duplicates_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("symlink").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("symlink").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("duplicate").unwrap().get_mut("symlink").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("symlink").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("duplicate").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -232,15 +233,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_empty_folders_state.borrow_mut() = ef;
 
                         if empty_folder_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("select").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("select").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("empty_folder").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -276,15 +277,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_empty_files_state.borrow_mut() = vf;
 
                         if empty_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("select").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("empty_file").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("select").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("empty_file").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -327,15 +328,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_big_files_state.borrow_mut() = bf;
 
                         if biggest_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("select").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("big_file").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("select").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("big_file").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -371,15 +372,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_temporary_files_state.borrow_mut() = tf;
 
                         if temporary_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("select").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("select").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("temporary_file").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -445,17 +446,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_similar_images_state.borrow_mut() = sf;
 
                         if base_images_size > 0 {
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("symlink").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("symlink").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("similar_images").unwrap().get_mut("symlink").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("symlink").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("similar_images").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -497,15 +498,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_zeroed_files_state.borrow_mut() = zf;
 
                         if zeroed_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("select").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("select").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("zeroed_files").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -598,17 +599,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_same_music_state.borrow_mut() = mf;
 
                         if same_music_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("symlink").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("symlink").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("same_music").unwrap().get_mut("symlink").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("symlink").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("same_music").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
@@ -650,15 +651,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         *shared_same_invalid_symlinks.borrow_mut() = ifs;
 
                         if invalid_symlinks > 0 {
-                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("select").unwrap() = true;
                         } else {
-                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("select").unwrap() = false;
                         }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut("invalid_symlinks").unwrap(), &buttons_array, &buttons_names);
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

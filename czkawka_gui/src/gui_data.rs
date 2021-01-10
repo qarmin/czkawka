@@ -1,4 +1,5 @@
 extern crate gtk;
+use crate::notebook_enums::*;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -25,15 +26,13 @@ pub struct GuiData {
     pub window_main: gtk::Window,
 
     // States
-    pub main_notebooks_labels: [String; 9],
-    pub upper_notebooks_labels: [String; 5],
     pub buttons_labels: [String; 5],
 
     // Buttons state
-    pub shared_buttons: Rc<RefCell<HashMap<String, HashMap<String, bool>>>>,
+    pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
 
     // Upper Notebook state
-    pub shared_upper_notebooks: Rc<RefCell<HashMap<String, HashMap<String, bool>>>>,
+    pub shared_upper_notebooks: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<NotebookUpperEnum, bool>>>>,
 
     // State of search results
     pub shared_duplication_state: Rc<RefCell<DuplicateFinder>>,
@@ -123,7 +122,6 @@ pub struct GuiData {
     pub notebook_main: gtk::Notebook,
     pub notebook_upper: gtk::Notebook,
 
-    pub notebook_main_children_names: Vec<String>,
     pub notebook_upper_children_names: Vec<String>,
 
     //// Entry
@@ -194,33 +192,14 @@ impl GuiData {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         //// States
-        let main_notebooks_labels = [
-            "duplicate".to_string(),
-            "empty_folder".to_string(),
-            "empty_file".to_string(),
-            "temporary_file".to_string(),
-            "big_file".to_string(),
-            "similar_images".to_string(),
-            "zeroed_files".to_string(),
-            "same_music".to_string(),
-            "invalid_symlinks".to_string(),
-        ];
-        let upper_notebooks_labels = [
-            "included_directories".to_string(),
-            "excluded_directories".to_string(),
-            "excluded_items".to_string(),
-            "allowed_extensions".to_string(),
-            "settings".to_string(),
-        ];
         let buttons_labels = ["search".to_string(), "select".to_string(), "delete".to_string(), "save".to_string(), "symlink".to_string()];
 
         // Buttons State - to remember existence of different buttons on pages
 
-        let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<String, HashMap<String, bool>>::new()));
-        shared_buttons.borrow_mut().clear();
+        let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<String, bool>>::new()));
 
         // Show by default only search button
-        for i in main_notebooks_labels.iter() {
+        for i in get_all_main_tabs().iter() {
             let mut temp_hashmap: HashMap<String, bool> = Default::default();
             for j in buttons_labels.iter() {
                 if *j == "search" {
@@ -229,21 +208,21 @@ impl GuiData {
                     temp_hashmap.insert(j.to_string(), false);
                 }
             }
-            shared_buttons.borrow_mut().insert(i.to_string(), temp_hashmap);
+            shared_buttons.borrow_mut().insert(i.clone(), temp_hashmap);
         }
 
         // Upper Notebook state
-        let shared_upper_notebooks: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<String, HashMap<String, bool>>::new()));
+        let shared_upper_notebooks: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<NotebookUpperEnum, bool>>::new()));
 
-        for i in main_notebooks_labels.iter() {
-            let mut temp_hashmap: HashMap<String, bool> = Default::default();
-            for j in upper_notebooks_labels.iter() {
-                temp_hashmap.insert(j.to_string(), true);
+        for i in get_all_main_tabs().iter() {
+            let mut temp_hashmap: HashMap<NotebookUpperEnum, bool> = Default::default();
+            for j in get_all_upper_tabs().iter() {
+                temp_hashmap.insert(j.clone(), true);
             }
-            shared_upper_notebooks.borrow_mut().insert(i.to_string(), temp_hashmap);
+            shared_upper_notebooks.borrow_mut().insert(i.clone(), temp_hashmap);
         }
         // Some upper notebook tabs are disabled
-        *shared_upper_notebooks.borrow_mut().get_mut("temporary_file").unwrap().get_mut("allowed_extensions").unwrap() = false;
+        *shared_upper_notebooks.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut(&NotebookUpperEnum::AllowedExtensions).unwrap() = false;
 
         // State of search results
 
@@ -336,12 +315,8 @@ impl GuiData {
         let notebook_main: gtk::Notebook = builder.get_object("notebook_main").unwrap();
         let notebook_upper: gtk::Notebook = builder.get_object("notebook_upper").unwrap();
 
-        let mut notebook_main_children_names: Vec<String> = Vec::new();
         let mut notebook_upper_children_names: Vec<String> = Vec::new();
 
-        for i in notebook_main.get_children() {
-            notebook_main_children_names.push(i.get_buildable_name().unwrap().to_string());
-        }
         for i in notebook_upper.get_children() {
             notebook_upper_children_names.push(i.get_buildable_name().unwrap().to_string());
         }
@@ -406,8 +381,6 @@ impl GuiData {
             glade_src,
             builder,
             window_main,
-            main_notebooks_labels,
-            upper_notebooks_labels,
             buttons_labels,
             shared_buttons,
             shared_upper_notebooks,
@@ -477,7 +450,6 @@ impl GuiData {
             radio_button_similar_images_very_high,
             notebook_main,
             notebook_upper,
-            notebook_main_children_names,
             notebook_upper_children_names,
             entry_info,
             text_view_errors,

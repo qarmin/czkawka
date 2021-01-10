@@ -1,6 +1,7 @@
 extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::notebook_enums::*;
 use gtk::prelude::*;
 use gtk::{TreeIter, TreePath};
 use std::fs;
@@ -10,7 +11,6 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
 
     let buttons_symlink = gui_data.buttons_symlink.clone();
     let notebook_main = gui_data.notebook_main.clone();
-    let notebook_main_children_names = gui_data.notebook_main_children_names.clone();
 
     let scrolled_window_duplicate_finder = gui_data.scrolled_window_duplicate_finder.clone();
     let scrolled_window_similar_images_finder = gui_data.scrolled_window_similar_images_finder.clone();
@@ -18,14 +18,14 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
 
     let image_preview_similar_images = gui_data.image_preview_similar_images.clone();
 
-    buttons_symlink.connect_clicked(move |_| match notebook_main_children_names.get(notebook_main.get_current_page().unwrap() as usize).unwrap().as_str() {
-        "notebook_main_duplicate_finder_label" => {
+    buttons_symlink.connect_clicked(move |_| match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
+        NotebookMainEnum::Duplicate => {
             symlink(scrolled_window_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
         }
-        "notebook_main_same_music_finder" => {
+        NotebookMainEnum::SameMusic => {
             symlink(scrolled_window_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
         }
-        "notebook_main_similar_images_finder_label" => {
+        NotebookMainEnum::SimilarImages => {
             symlink(
                 scrolled_window_similar_images_finder.clone(),
                 ColumnsSimilarImages::Name as i32,
@@ -35,7 +35,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
             );
             image_preview_similar_images.hide();
         }
-        e => panic!("Not existent {}", e),
+        e => panic!("Not existent {:?}", e),
     });
 }
 fn symlink(scrolled_window: gtk::ScrolledWindow, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
