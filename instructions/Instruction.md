@@ -130,12 +130,17 @@ For now Czkawka store only 2 files on disk:
 - `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - DO NOT TRY TO EDIT THIS FILE MANUALLY! - editing this file may cause app crashes.
 
 
-This files are located in this path
+First file is located in this path
 
 Linux - `/home/username/.config/czkawka`  
 Mac - `/Users/username/Library/Application Support/pl.Qarmin.Czkawka`  
-Windows - `C:\Users\Alice\AppData\Roaming\Qarmin\Czkawka\config`
+Windows - `C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config`
 
+Second with cache here:
+
+Linux - `/home/username/.cache/czkawka`  
+Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
+Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
   
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
