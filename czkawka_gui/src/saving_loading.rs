@@ -23,9 +23,9 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         return;
     }
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        // Lin: /home/alice/.config/barapp
-        // Win: C:\Users\Alice\AppData\Roaming\Foo Corp\Bar App\config
-        // Mac: /Users/Alice/Library/Application Support/com.Foo-Corp.Bar-App
+        // Lin: /home/username/.config/czkawka
+        // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
+        // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 
         let config_dir = proj_dirs.config_dir();
         if config_dir.exists() {
@@ -166,9 +166,9 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
     reset_text_view(&text_view_errors);
 
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        // Lin: /home/alice/.config/barapp
-        // Win: C:\Users\Alice\AppData\Roaming\Foo Corp\Bar App\config
-        // Mac: /Users/Alice/Library/Application Support/com.Foo-Corp.Bar-App
+        // Lin: /home/username/.config/czkawka
+        // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
+        // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 
         let config_dir = proj_dirs.config_dir();
         let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));

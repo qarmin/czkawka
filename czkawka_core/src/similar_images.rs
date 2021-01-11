@@ -645,21 +645,21 @@ fn get_string_from_similarity(similarity: &Similarity) -> &str {
 
 fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        // Lin: /home/alice/.config/barapp
-        // Win: C:\Users\Alice\AppData\Roaming\Foo Corp\Bar App\config
-        // Mac: /Users/Alice/Library/Application Support/com.Foo-Corp.Bar-App
+        // Lin: /home/username/.cache/czkawka
+        // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
+        // Mac: /Users/Username/Library/Caches/pl.Qarmin.Czkawka
 
-        let config_dir = PathBuf::from(proj_dirs.config_dir());
-        if config_dir.exists() {
-            if !config_dir.is_dir() {
-                text_messages.messages.push(format!("Config dir {} is a file!", config_dir.display()));
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        if cache_dir.exists() {
+            if !cache_dir.is_dir() {
+                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
                 return;
             }
-        } else if fs::create_dir_all(&config_dir).is_err() {
-            text_messages.messages.push(format!("Cannot create config dir {}", config_dir.display()));
+        } else if fs::create_dir_all(&cache_dir).is_err() {
+            text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
             return;
         }
-        let config_file = config_dir.join(CACHE_FILE_NAME);
+        let config_file = cache_dir.join(CACHE_FILE_NAME);
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&config_file) {
             Ok(t) => t,
             Err(_) => {
@@ -688,13 +688,26 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
 }
 fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let config_dir = PathBuf::from(proj_dirs.config_dir());
-        let config_file = config_dir.join(CACHE_FILE_NAME);
+        let mut cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let mut config_file = cache_dir.join(CACHE_FILE_NAME);
         let file_handler = match OpenOptions::new().read(true).open(&config_file) {
             Ok(t) => t,
             Err(_) => {
                 text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
-                return None;
+                // return None; // Enable when removing compatibility section
+                // Compatibility for upgrading project from 2.1 to 2.2
+                {
+                    cache_dir = PathBuf::from(proj_dirs.config_dir());
+                    config_file = cache_dir.join(CACHE_FILE_NAME);
+                    match OpenOptions::new().read(true).open(&config_file) {
+                        Ok(t) => t,
+                        Err(_) => {
+                            text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
+                            return None;
+                        }
+                    }
+                }
+                // End of compatibility section to remove after release 2.2 version
             }
         };
 
