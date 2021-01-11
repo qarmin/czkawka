@@ -6,6 +6,7 @@
 - Written in memory safe Rust
 - Amazingly fast - due using more or less advanced algorithms and multithreading support
 - Free, Open Source without ads
+- Works on Linux, Windows and macOS  
 - CLI frontend, very fast to automate tasks
 - GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
 - Light/Dark theme match the appearance of the system(Linux only)
@@ -40,12 +41,6 @@ sudo apt install cargo libgtk-3-dev
 ```
 sudo yum install gtk3-devel glib2-devel
 ```
-### Windows(Not working yet)
-First you need to install Visual C++ components from Visual Studio installer - https://visualstudio.microsoft.com/downloads/
-
-Next install Rust from site https://rustup.rs/  
-
-After that the latest GTK 3 runtime must be installed from https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
 
 ## Usage
 ### Precompiled binaries
@@ -141,6 +136,12 @@ You need to install Homebrew and GTK Libraries
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rust gtk+3
 ```
+### Windows(Not working yet)
+First you need to install Visual C++ components from Visual Studio installer - https://visualstudio.microsoft.com/downloads/
+
+Next install Rust from site https://rustup.rs/
+
+After that the latest GTK 3 runtime must be installed from https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
 
 ### Compilation from source
 - Download the source
@@ -206,7 +207,7 @@ So still is a big room for improvements.
 |  | Czkawka | FSlint | DupeGuru |
 |:----------:|:-------------:|:-----:|:---:|
 | Language | Rust| Python | Python/Objective C |
-| OS | Linux, Windows, Mac(only CLI) | Linux | Linux, Windows, Mac|
+| OS | Linux, Windows, Mac | Linux | Linux, Windows, Mac|
 | Framework | GTK 3 (Gtk-rs)| GTK 2 (PyGTK) | Qt 5 (PyQt)/Cocoa |
 | Ram Usage | Low | Medium | Very High |
 | Duplicate finder | X | X | X |

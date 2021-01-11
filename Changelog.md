@@ -1,3 +1,12 @@
+## Version 2.2.0 - 11.01.2021r
+- Adds Mac GUI - [#160](https://github.com/qarmin/czkawka/pull/160)
+- Use master gtk plugin again - [#179](https://github.com/qarmin/czkawka/pull/179)
+- Only show preview when 1 image is selected - [#183](https://github.com/qarmin/czkawka/pull/183)
+- Add buffered write/read - [#186](https://github.com/qarmin/czkawka/pull/186)
+- Fix included/excluded files which contains commas - [#195](https://github.com/qarmin/czkawka/pull/195)
+- Move image cache to cache from config dir - [#197](https://github.com/qarmin/czkawka/pull/197)
+- Reorganize GUI Code(no visible changes) - [#184](https://github.com/qarmin/czkawka/pull/184), [#184](https://github.com/qarmin/czkawka/pull/184), [#189](https://github.com/qarmin/czkawka/pull/189), [#190](https://github.com/qarmin/czkawka/pull/190), [#194](https://github.com/qarmin/czkawka/pull/194)
+
 ## Version 2.1.0 - 31.12.2020r
 - Hide preview when deleting images or symlinking it - [#167](https://github.com/qarmin/czkawka/pull/167)
 - Add manual adding of directories - [#165](https://github.com/qarmin/czkawka/pull/165), [#168](https://github.com/qarmin/czkawka/pull/168)
