@@ -7,6 +7,7 @@ use crate::gui_upper_notepad::GUIUpperNotebook;
 use crate::notebook_enums::*;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
+use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -52,6 +53,7 @@ pub struct GuiData {
     pub shared_zeroed_files_state: Rc<RefCell<ZeroedFiles>>,
     pub shared_same_music_state: Rc<RefCell<SameMusic>>,
     pub shared_same_invalid_symlinks: Rc<RefCell<InvalidSymlinks>>,
+    pub shared_broken_files_state: Rc<RefCell<BrokenFiles>>,
 
     //// Entry
     pub entry_info: gtk::Entry,
@@ -124,6 +126,7 @@ impl GuiData {
         let shared_zeroed_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(ZeroedFiles::new()));
         let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
         let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(InvalidSymlinks::new()));
+        let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BrokenFiles::new()));
 
         //// Entry
         let entry_info: gtk::Entry = builder.get_object("entry_info").unwrap();
@@ -155,6 +158,7 @@ impl GuiData {
             shared_zeroed_files_state,
             shared_same_music_state,
             shared_same_invalid_symlinks,
+            shared_broken_files_state,
             entry_info,
             text_view_errors,
             scrolled_window_errors,

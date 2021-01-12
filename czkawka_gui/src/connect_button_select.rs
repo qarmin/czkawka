@@ -28,6 +28,7 @@ pub fn connect_button_select(gui_data: &GuiData) {
             hashmap.insert(NotebookMainEnum::Symlinks, vec!["all", "reverse", "custom"]);
             hashmap.insert(NotebookMainEnum::Zeroed, vec!["all", "reverse", "custom"]);
             hashmap.insert(NotebookMainEnum::Temporary, vec!["all", "reverse", "custom"]);
+            hashmap.insert(NotebookMainEnum::BrokenFiles, vec!["all", "reverse", "custom"]);
         }
     }
 

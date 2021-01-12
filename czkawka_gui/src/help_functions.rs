@@ -1,4 +1,5 @@
 use czkawka_core::big_file::BigFile;
+use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
@@ -24,6 +25,7 @@ pub enum Message {
     ZeroedFiles(ZeroedFiles),
     SameMusic(SameMusic),
     InvalidSymlinks(InvalidSymlinks),
+    BrokenFiles(BrokenFiles),
 }
 
 pub enum ColumnsDuplicates {
@@ -101,6 +103,13 @@ pub enum ColumnsInvalidSymlinks {
     Path,
     DestinationPath,
     TypeOfError,
+    Modification,
+}
+
+pub enum ColumnsBrokenFiles {
+    Name = 0,
+    Path,
+    ErrorType,
     Modification,
 }
 

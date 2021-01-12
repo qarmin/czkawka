@@ -164,6 +164,23 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
+    #[structopt(name = "broken", about = "Finds broken files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt")]
+    BrokenFiles {
+        #[structopt(flatten)]
+        directories: Directories,
+        #[structopt(flatten)]
+        excluded_directories: ExcludedDirectories,
+        #[structopt(flatten)]
+        excluded_items: ExcludedItems,
+        #[structopt(flatten)]
+        allowed_extensions: AllowedExtensions,
+        #[structopt(short = "D", long, help = "Delete found files")]
+        delete_files: bool,
+        #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
+        not_recursive: NotRecursive,
+    },
 }
 
 #[derive(Debug, StructOpt)]
@@ -320,4 +337,5 @@ EXAMPLES:
     {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
     {bin} zeroed -d /home/rafal -e /home/krzak -f results.txt"
     {bin} music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt
-    {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt"#;
+    {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
+    {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;

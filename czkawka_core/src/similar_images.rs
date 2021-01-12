@@ -265,8 +265,8 @@ impl SimilarImages {
                     .to_lowercase();
 
                     // Checking allowed image extensions
-                    let allowed_image_extensions = ["jpg", "png", "bmp", "ico", "webp", "tiff", "dds"];
-                    if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "webp", "tiff", "pnm", "tga", "ff", "gif"];
+                    if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(format!(".{}", e).as_str())) {
                         continue 'dir;
                     }
 

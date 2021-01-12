@@ -1,6 +1,6 @@
 use crate::gui_data::GuiData;
 
-use czkawka_core::{big_file, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, temporary, zeroed};
+use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, temporary, zeroed};
 
 use futures::StreamExt;
 use gtk::{LabelExt, ProgressBarExt, WidgetExt};
@@ -17,6 +17,7 @@ pub fn connect_progress_window(
     mut futures_receiver_temporary: futures::channel::mpsc::Receiver<temporary::ProgressData>,
     mut futures_receiver_zeroed: futures::channel::mpsc::Receiver<zeroed::ProgressData>,
     mut futures_receiver_invalid_symlinks: futures::channel::mpsc::Receiver<invalid_symlinks::ProgressData>,
+    mut futures_receiver_broken_files: futures::channel::mpsc::Receiver<broken_files::ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
 
@@ -237,6 +238,37 @@ pub fn connect_progress_window(
         let future = async move {
             while let Some(item) = futures_receiver_invalid_symlinks.next().await {
                 label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
+            }
+        };
+        main_context.spawn_local(future);
+    }
+    {
+        // Broken Files
+        let label_stage = gui_data.progress_dialog.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
+        let future = async move {
+            while let Some(item) = futures_receiver_broken_files.next().await {
+                match item.current_stage {
+                    0 => {
+                        progress_bar_current_stage.hide();
+                        label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
+                    }
+                    1 => {
+                        progress_bar_current_stage.show();
+                        if item.files_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                        } else {
+                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                        }
+                        label_stage.set_text(format!("Checking {}/{} files", item.files_checked, item.files_to_check).as_str());
+                    }
+                    _ => {
+                        panic!();
+                    }
+                }
             }
         };
         main_context.spawn_local(future);

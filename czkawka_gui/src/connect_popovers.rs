@@ -761,6 +761,18 @@ pub fn connect_popovers(gui_data: &GuiData) {
             column_size_as_bytes: Some(ColumnsZeroedFiles::SizeAsBytes as i32),
             column_modification_as_secs: None,
         },
+        PopoverObject {
+            notebook_type: NotebookMainEnum::BrokenFiles,
+            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
+            tree_view: gui_data.main_notebook.tree_view_broken_files.clone(),
+            column_path: Some(ColumnsBrokenFiles::Path as i32),
+            column_name: Some(ColumnsBrokenFiles::Name as i32),
+            column_color: None,
+            column_dimensions: None,
+            column_size: None,
+            column_size_as_bytes: None,
+            column_modification_as_secs: None,
+        },
     ];
 
     let popover_select = gui_data.popovers.popover_select.clone();

@@ -6,7 +6,7 @@
 - Written in memory safe Rust
 - Amazingly fast - due using more or less advanced algorithms and multithreading support
 - Free, Open Source without ads
-- Works on Linux, Windows and macOS  
+- Multiplatform - works on Linux, Windows and macOS  
 - CLI frontend, very fast to automate tasks
 - GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
 - Light/Dark theme match the appearance of the system(Linux only)
@@ -23,6 +23,7 @@
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
   - Same Music - Search for music with same artist, album etc.
   - Invalid Symbolic Links - Shows symbolic links which points to non-existent files/directories
+  - Broken Files - Finds files with invalid extension or corrupted
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
 
@@ -219,6 +220,7 @@ So still is a big room for improvements.
 | Zeroed Files| X | | |
 | Music duplicates(tags) | X | | X |
 | Invalid symlinks | X | X |  |
+| Broken Files | X |  |  |
 | Installed packages |  | X |  |
 | Invalid names |   | X |  |
 | Names conflict |   | X |  |
