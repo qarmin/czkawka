@@ -659,11 +659,11 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
             text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
             return;
         }
-        let config_file = cache_dir.join(CACHE_FILE_NAME);
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&config_file) {
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(_) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}", config_file.display()));
+                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
                 return;
             }
         };
@@ -680,7 +680,7 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
             string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
 
             if writeln!(writer, "{}", string).is_err() {
-                text_messages.messages.push(format!("Failed to save some data to cache file {}", config_file.display()));
+                text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
                 return;
             };
         }
@@ -688,26 +688,13 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
 }
 fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let mut cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let mut config_file = cache_dir.join(CACHE_FILE_NAME);
-        let file_handler = match OpenOptions::new().read(true).open(&config_file) {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_) => {
-                text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
-                // return None; // Enable when removing compatibility section
-                // Compatibility for upgrading project from 2.1 to 2.2
-                {
-                    cache_dir = PathBuf::from(proj_dirs.config_dir());
-                    config_file = cache_dir.join(CACHE_FILE_NAME);
-                    match OpenOptions::new().read(true).open(&config_file) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
-                            return None;
-                        }
-                    }
-                }
-                // End of compatibility section to remove after release 2.2 version
+                text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display()));
+                return None;
             }
         };
 
@@ -720,20 +707,26 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
             let line = match line {
                 Ok(t) => t,
                 Err(_) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, config_file.display()));
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
                     return None;
                 }
             };
             let uuu = line.split("//").collect::<Vec<&str>>();
             if uuu.len() != 12 {
-                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, config_file.display()));
-                return None;
+                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                continue;
             }
             // Don't load cache data if destination file not exists
             if Path::new(uuu[0]).exists() {
                 let mut hash: Node = [0u8; 8];
                 for i in 0..hash.len() {
-                    hash[i] = uuu[4 + i].parse::<u8>().unwrap();
+                    hash[i] = match uuu[4 + i].parse::<u8>() {
+                        Ok(t) => t,
+                        Err(_) => {
+                            text_messages.warnings.push(format!("Found invalid hash value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                            continue;
+                        }
+                    };
                 }
 
                 #[cfg(debug_assertions)]
@@ -756,9 +749,21 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
                     uuu[0].to_string(),
                     FileEntry {
                         path: PathBuf::from(uuu[0]),
-                        size: uuu[1].parse::<u64>().unwrap(),
+                        size: match uuu[1].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
                         dimensions: uuu[2].to_string(),
-                        modified_date: uuu[3].parse::<u64>().unwrap(),
+                        modified_date: match uuu[3].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
                         hash,
                         similarity: Similarity::None,
                     },
