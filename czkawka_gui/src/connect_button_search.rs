@@ -15,7 +15,7 @@ use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
 use gtk::prelude::*;
-use gtk::WindowPosition;
+use gtk::{ResponseType, WindowPosition};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -34,6 +34,7 @@ pub fn connect_button_search(
     futures_sender_zeroed: futures::channel::mpsc::Sender<zeroed::ProgressData>,
     futures_sender_invalid_symlinks: futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>,
 ) {
+    let stop_sender = gui_data.stop_sender.clone();
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
@@ -107,6 +108,9 @@ pub fn connect_button_search(
 
         reset_text_view(&text_view_errors);
 
+        let glib_stop_sender = glib_stop_sender.clone();
+        let stop_receiver = stop_receiver.clone();
+
         match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
                 label_stage.show();
@@ -128,9 +132,6 @@ pub fn connect_button_search(
                     panic!("No radio button is pressed");
                 }
                 let minimal_file_size = entry_duplicate_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
-
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
 
                 let futures_sender_duplicate_files = futures_sender_duplicate_files.clone();
                 // Find duplicates
@@ -154,9 +155,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_empty_files_finder).clear();
 
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
-
                 let futures_sender_empty_files = futures_sender_empty_files.clone();
                 // Find empty files
                 thread::spawn(move || {
@@ -178,9 +176,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_empty_folder_finder).clear();
 
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
-
                 let futures_sender_empty_folder = futures_sender_empty_folder.clone();
                 // Find empty folders
                 thread::spawn(move || {
@@ -201,8 +196,6 @@ pub fn connect_button_search(
 
                 let numbers_of_files_to_check = entry_big_files_number.get_text().as_str().parse::<usize>().unwrap_or(50);
 
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
                 let futures_sender_big_file = futures_sender_big_file.clone();
                 // Find big files
                 thread::spawn(move || {
@@ -223,9 +216,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&tree_view_temporary_files_finder).clear();
-
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
 
                 let futures_sender_temporary = futures_sender_temporary.clone();
                 // Find temporary files
@@ -248,9 +238,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&tree_view_similar_images_finder).clear();
-
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
 
                 let minimal_file_size = entry_similar_images_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024 * 16);
 
@@ -292,9 +279,6 @@ pub fn connect_button_search(
                 dialog_progress.resize(1, 1);
 
                 get_list_store(&tree_view_zeroed_files_finder).clear();
-
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
 
                 let futures_sender_zeroed = futures_sender_zeroed.clone();
                 // Find zeroed files
@@ -338,9 +322,6 @@ pub fn connect_button_search(
                 }
 
                 if music_similarity != MusicSimilarity::NONE {
-                    let glib_stop_sender = glib_stop_sender.clone();
-                    let stop_receiver = stop_receiver.clone();
-
                     let futures_sender_same_music = futures_sender_same_music.clone();
                     // Find Similar music
                     thread::spawn(move || {
@@ -369,8 +350,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_invalid_symlinks).clear();
 
-                let glib_stop_sender = glib_stop_sender.clone();
-                let stop_receiver = stop_receiver.clone();
                 let futures_sender_invalid_symlinks = futures_sender_invalid_symlinks.clone();
 
                 thread::spawn(move || {
@@ -389,6 +368,13 @@ pub fn connect_button_search(
         // Show progress dialog
         if show_dialog.load(Ordering::Relaxed) {
             dialog_progress.show();
+
+            let response = dialog_progress.run();
+            if response == ResponseType::DeleteEvent {
+                stop_sender.send(()).unwrap();
+            }
+
+            dialog_progress.hide();
         }
     });
 }
