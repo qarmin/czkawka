@@ -23,6 +23,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
+    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let check_button_settings_confirm_deletion = gui_data.upper_notebook.check_button_settings_confirm_deletion.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
@@ -87,6 +88,9 @@ pub fn connect_button_delete(gui_data: &GuiData) {
             }
             NotebookMainEnum::Symlinks => {
                 basic_remove(&tree_view_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
+            }
+            NotebookMainEnum::BrokenFiles => {
+                basic_remove(&tree_view_broken_files.clone(), ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, &gui_data);
             }
         }
     });

@@ -83,6 +83,15 @@ pub fn opening_double_click_function_invalid_symlinks(tree_view: &gtk::TreeView,
     gtk::Inhibit(false)
 }
 
+pub fn opening_double_click_function_broken_files(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+    if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
+        common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, OpenMode::PathAndName);
+    } else if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 3 {
+        common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+
 pub enum OpenMode {
     OnlyPath,
     PathAndName,

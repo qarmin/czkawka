@@ -25,7 +25,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
+    let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
     let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
+    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
@@ -512,7 +514,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SameMusic(mf) => {
                 if mf.get_stopped_search() {
-                    entry_info.set_text("Searching for empty files was stopped by user");
+                    entry_info.set_text("Searching for same music was stopped by user");
                 } else {
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
@@ -660,6 +662,50 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("select").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+            Message::BrokenFiles(br) => {
+                if br.get_stopped_search() {
+                    entry_info.set_text("Searching for broken files was stopped by user");
+                } else {
+                    let information = br.get_information();
+                    let text_messages = br.get_text_messages();
+
+                    let broken_files_number: usize = information.number_of_broken_files;
+
+                    entry_info.set_text(format!("Found {} broken files.", broken_files_number).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = get_list_store(&tree_view_broken_files);
+
+                        let col_indices = [0, 1, 2, 3];
+
+                        let vector = br.get_broken_files();
+
+                        for file_entry in vector {
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [&dyn ToValue; 4] = [&file, &directory, &file_entry.error_string, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_broken_files_state.borrow_mut() = br;
+
+                        if broken_files_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("select").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("select").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

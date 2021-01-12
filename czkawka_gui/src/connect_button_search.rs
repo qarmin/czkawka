@@ -5,6 +5,7 @@ use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use czkawka_core::big_file::BigFile;
+use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -33,6 +34,7 @@ pub fn connect_button_search(
     futures_sender_temporary: futures::channel::mpsc::Sender<temporary::ProgressData>,
     futures_sender_zeroed: futures::channel::mpsc::Sender<zeroed::ProgressData>,
     futures_sender_invalid_symlinks: futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>,
+    futures_sender_broken_files: futures::channel::mpsc::Sender<broken_files::ProgressData>,
 ) {
     let stop_sender = gui_data.stop_sender.clone();
     let entry_info = gui_data.entry_info.clone();
@@ -75,6 +77,7 @@ pub fn connect_button_search(
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
+    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let dialog_progress = gui_data.progress_dialog.dialog_progress.clone();
     let label_stage = gui_data.progress_dialog.label_stage.clone();
@@ -361,6 +364,26 @@ pub fn connect_button_search(
                     isf.set_excluded_items(excluded_items);
                     isf.find_invalid_links(Some(&stop_receiver), Some(&futures_sender_invalid_symlinks));
                     let _ = glib_stop_sender.send(Message::InvalidSymlinks(isf));
+                });
+            }
+            NotebookMainEnum::BrokenFiles => {
+                label_stage.show();
+                grid_progress_stages.show();
+                dialog_progress.resize(1, 1);
+
+                get_list_store(&tree_view_broken_files).clear();
+
+                let futures_sender_broken_files = futures_sender_broken_files.clone();
+
+                thread::spawn(move || {
+                    let mut br = BrokenFiles::new();
+
+                    br.set_included_directory(included_directories);
+                    br.set_excluded_directory(excluded_directories);
+                    br.set_recursive_search(recursive_search);
+                    br.set_excluded_items(excluded_items);
+                    br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
+                    let _ = glib_stop_sender.send(Message::BrokenFiles(br));
                 });
             }
         }

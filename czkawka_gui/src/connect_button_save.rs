@@ -16,6 +16,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
+    let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     buttons_save.connect_clicked(move |_| {
         let file_name;
@@ -65,6 +66,11 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 file_name = "results_invalid_symlinks.txt";
 
                 shared_same_invalid_symlinks.borrow_mut().save_results_to_file(file_name);
+            }
+            NotebookMainEnum::BrokenFiles => {
+                file_name = "results_broken_files.txt";
+
+                shared_broken_files_state.borrow_mut().save_results_to_file(file_name);
             }
         }
         post_save_things(file_name, &to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &gui_data);

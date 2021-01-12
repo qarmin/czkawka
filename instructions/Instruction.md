@@ -100,7 +100,7 @@ Then, for each selected tag by which we want to search for duplicates, we perfor
 ### Similar Images
 It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
-The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "webp", "tiff", "dds"]`.
+The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "webp", "tiff"]`.
 
 Next cached data are loaded from file to prevent hashing twice same file.  
 Automatically cache which points to non existing data is deleted.
@@ -123,6 +123,16 @@ Computed hash data is then thrown into a special tree that allows to compare has
 Next this hashes are saved to file, to be able to opens images without needing to hash it more times.
 
 Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.
+### Broken Files
+This tool is created to find files which are corrupted or have invalid extension.
+
+Currently only checking of images is implemented.
+
+At first image files are collected and then this files are opened.  
+
+If an error happens when opening this image then it means that this file is corrupted.
+
+Only some image extensions are supported, because I rely on image crate. Also some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130)
 
 ## Config/Cache files
 For now Czkawka store only 2 files on disk:
@@ -165,6 +175,7 @@ There are several buttons which do different actions:
 - Stop - button in progress dialog, allows to easily stop current task. Sometimes it may take a few seconds until all atomic operations ends and GUI will be able to use again
 - Select - allows selecting multiple entries at once
 - Delete - delete entirely all selected entries
+- Symlink - create symlink to selected files(first file is threaten as original and rest will become symlinks)
 - Save - save initial state of results
 - Hamburger(parallel lines) - used to show/hide bottom text panel which shows warnings/errors
 - Add (directories) - adds directories to include or exclude

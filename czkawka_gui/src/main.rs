@@ -83,6 +83,7 @@ fn main() {
     let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::Sender<temporary::ProgressData>, futures::channel::mpsc::Receiver<temporary::ProgressData>) = futures::channel::mpsc::channel(20);
     let (futures_sender_zeroed, futures_receiver_zeroed): (futures::channel::mpsc::Sender<zeroed::ProgressData>, futures::channel::mpsc::Receiver<zeroed::ProgressData>) = futures::channel::mpsc::channel(20);
     let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>, futures::channel::mpsc::Receiver<invalid_symlinks::ProgressData>) = futures::channel::mpsc::channel(20);
+    let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::Sender<broken_files::ProgressData>, futures::channel::mpsc::Receiver<broken_files::ProgressData>) = futures::channel::mpsc::channel(20);
 
     initialize_gui(&mut gui_data);
     reset_configuration(&gui_data, false); // Fallback for invalid loading setting project
@@ -102,6 +103,7 @@ fn main() {
         futures_sender_temporary,
         futures_sender_zeroed,
         futures_sender_invalid_symlinks,
+        futures_sender_broken_files,
     );
     connect_button_select(&gui_data);
     connect_button_stop(&gui_data);
@@ -121,6 +123,7 @@ fn main() {
         futures_receiver_temporary,
         futures_receiver_zeroed,
         futures_receiver_invalid_symlinks,
+        futures_receiver_broken_files,
     );
     connect_hide_text_view_errors(&gui_data);
     connect_settings(&gui_data);

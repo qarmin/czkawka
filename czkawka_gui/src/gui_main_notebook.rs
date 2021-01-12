@@ -14,6 +14,7 @@ pub struct GUIMainNotebook {
     pub scrolled_window_zeroed_files_finder: gtk::ScrolledWindow,
     pub scrolled_window_same_music_finder: gtk::ScrolledWindow,
     pub scrolled_window_invalid_symlinks: gtk::ScrolledWindow,
+    pub scrolled_window_broken_files: gtk::ScrolledWindow,
 
     pub tree_view_duplicate_finder: gtk::TreeView,
     pub tree_view_empty_folder_finder: gtk::TreeView,
@@ -24,6 +25,7 @@ pub struct GUIMainNotebook {
     pub tree_view_zeroed_files_finder: gtk::TreeView,
     pub tree_view_same_music_finder: gtk::TreeView,
     pub tree_view_invalid_symlinks: gtk::TreeView,
+    pub tree_view_broken_files: gtk::TreeView,
 
     pub entry_similar_images_minimal_size: gtk::Entry,
     pub entry_duplicate_minimal_size: gtk::Entry,
@@ -67,6 +69,7 @@ impl GUIMainNotebook {
         let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_zeroed_files_finder").unwrap();
         let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_same_music_finder").unwrap();
         let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.get_object("scrolled_window_invalid_symlinks").unwrap();
+        let scrolled_window_broken_files: gtk::ScrolledWindow = builder.get_object("scrolled_window_broken_files").unwrap();
 
         let tree_view_duplicate_finder: gtk::TreeView = TreeView::new();
         let tree_view_empty_folder_finder: gtk::TreeView = TreeView::new();
@@ -77,6 +80,7 @@ impl GUIMainNotebook {
         let tree_view_zeroed_files_finder: gtk::TreeView = TreeView::new();
         let tree_view_same_music_finder: gtk::TreeView = TreeView::new();
         let tree_view_invalid_symlinks: gtk::TreeView = TreeView::new();
+        let tree_view_broken_files: gtk::TreeView = TreeView::new();
 
         let entry_similar_images_minimal_size: gtk::Entry = builder.get_object("entry_similar_images_minimal_size").unwrap();
         let entry_duplicate_minimal_size: gtk::Entry = builder.get_object("entry_duplicate_minimal_size").unwrap();
@@ -116,6 +120,7 @@ impl GUIMainNotebook {
             scrolled_window_zeroed_files_finder,
             scrolled_window_same_music_finder,
             scrolled_window_invalid_symlinks,
+            scrolled_window_broken_files,
             tree_view_duplicate_finder,
             tree_view_empty_folder_finder,
             tree_view_empty_files_finder,
@@ -125,6 +130,7 @@ impl GUIMainNotebook {
             tree_view_zeroed_files_finder,
             tree_view_same_music_finder,
             tree_view_invalid_symlinks,
+            tree_view_broken_files,
             entry_similar_images_minimal_size,
             entry_duplicate_minimal_size,
             entry_big_files_number,

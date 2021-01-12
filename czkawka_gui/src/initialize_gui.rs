@@ -29,6 +29,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let scrolled_window_same_music_finder = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
         let scrolled_window_invalid_symlinks = gui_data.main_notebook.scrolled_window_invalid_symlinks.clone();
         let scrolled_window_zeroed_files_finder = gui_data.main_notebook.scrolled_window_zeroed_files_finder.clone();
+        let scrolled_window_broken_files = gui_data.main_notebook.scrolled_window_broken_files.clone();
         let scrolled_window_included_directories = gui_data.upper_notebook.scrolled_window_included_directories.clone();
         let scrolled_window_excluded_directories = gui_data.upper_notebook.scrolled_window_excluded_directories.clone();
 
@@ -415,6 +416,34 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
+                        }
+                    }
+                    gtk::Inhibit(false)
+                });
+            }
+            // Broken Files
+            {
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_broken_files(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_broken_files);
+
+                gui_data.main_notebook.tree_view_broken_files = tree_view.clone();
+                scrolled_window_broken_files.add(&tree_view);
+                scrolled_window_broken_files.show_all();
+
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |tree_view, e| {
+                    if let Some(button_number) = e.get_keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            basic_remove(&tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
