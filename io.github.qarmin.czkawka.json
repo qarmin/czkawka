@@ -1,0 +1,35 @@
+{
+    "app-id": "io.github.qarmin.czkawka",
+    "runtime": "org.gnome.Platform",
+    "runtime-version": "3.38",
+    "sdk": "org.gnome.Sdk",
+    "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
+    "command": "czkawka_gui",
+    "finish-args": [
+        "--share=ipc",
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--device=dri"
+    ],
+    "build-options": {
+        "append-path": "/usr/lib/sdk/rust-stable/bin",
+        "env": {
+            "CARGO_HOME": "/run/build/czkawka_gui/cargo"
+        }
+    },
+    "modules": [{
+        "name": "czkawka_gui",
+        "buildsystem": "simple",
+        "build-commands": [
+            "cargo --offline fetch --manifest-path Cargo.toml --verbose",
+            "cargo --offline build --release --verbose",
+            "install -Dm755 ./target/release/czkawka_gui -t /app/bin/"
+        ],
+        "sources": [{
+                "type": "dir",
+                "path": "."
+            },
+            "cargo-sources.json"
+        ]
+    }]
+}
