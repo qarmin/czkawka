@@ -1,6 +1,6 @@
-use std::fs::{File, Metadata};
+use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
@@ -11,11 +11,15 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crossbeam_channel::Receiver;
+use directories_next::ProjectDirs;
 use rayon::prelude::*;
-use std::io::BufWriter;
+use std::collections::HashMap;
+use std::io::{BufReader, BufWriter};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
+
+const CACHE_FILE_NAME: &str = "cache_broken_files.txt";
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -35,13 +39,15 @@ pub enum DeleteMethod {
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
+    pub size: u64,
     pub type_of_file: TypeOfFile,
     pub error_string: String,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum TypeOfFile {
-    Image,
+    Unknown = -1,
+    Image = 0,
 }
 
 /// Info struck with helpful information's about results
@@ -61,7 +67,7 @@ impl Info {
 pub struct BrokenFiles {
     text_messages: Messages,
     information: Info,
-    files_to_check: Vec<FileEntry>,
+    files_to_check: HashMap<String, FileEntry>,
     broken_files: Vec<FileEntry>,
     directories: Directories,
     allowed_extensions: Extensions,
@@ -80,10 +86,10 @@ impl BrokenFiles {
             allowed_extensions: Extensions::new(),
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
-            files_to_check: vec![],
+            files_to_check: Default::default(),
             delete_method: DeleteMethod::None,
             stopped_search: false,
-            broken_files: vec![],
+            broken_files: Default::default(),
         }
     }
 
@@ -232,13 +238,8 @@ impl BrokenFiles {
                     }
                     .to_lowercase();
 
-                    let type_of_file;
-
-                    // Checking allowed image extensions
-                    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "webp", "tiff", "pnm", "tga", "ff", "gif"];
-                    if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(format!(".{}", e).as_str())) {
-                        type_of_file = TypeOfFile::Image;
-                    } else {
+                    let type_of_file = check_extension_avaibility(&file_name_lowercase);
+                    if type_of_file == TypeOfFile::Unknown {
                         continue 'dir;
                     }
 
@@ -273,12 +274,13 @@ impl BrokenFiles {
                                 continue;
                             } // Permissions Denied
                         },
+                        size: metadata.len(),
                         type_of_file,
                         error_string: "".to_string(),
                     };
 
                     // Adding files to Vector
-                    self.files_to_check.push(fe);
+                    self.files_to_check.insert(fe.path.to_string_lossy().to_string(), fe);
                 }
             }
         }
@@ -292,6 +294,29 @@ impl BrokenFiles {
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
+        let loaded_hash_map = match load_cache_from_file(&mut self.text_messages) {
+            Some(t) => t,
+            None => Default::default(),
+        };
+
+        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
+        for (name, file_entry) in &self.files_to_check {
+            #[allow(clippy::collapsible_if)]
+            if !loaded_hash_map.contains_key(name) {
+                // If loaded data doesn't contains current image info
+                non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+            } else {
+                if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                    // When size or modification date of image changed, then it is clear that is different image
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                } else {
+                    // Checking may be omitted when already there is entry with same size and modification date
+                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                }
+            }
+        }
+
         let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
@@ -304,7 +329,7 @@ impl BrokenFiles {
             let mut progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = self.files_to_check.len();
+            let files_to_check = non_cached_files_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .try_send(ProgressData {
@@ -323,23 +348,34 @@ impl BrokenFiles {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
-        self.broken_files = self
-            .files_to_check
+        let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // This will not break
+                    check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
 
-                match image::open(&file_entry.path) {
-                    Ok(_) => Some(None),
-                    Err(t) => {
-                        let mut file_entry = file_entry.clone();
-                        file_entry.error_string = t.to_string();
-                        Some(Some(file_entry))
-                    } // Something is wrong with image
+                match file_entry.1.type_of_file {
+                    TypeOfFile::Image => {
+                        match image::open(&file_entry.1.path) {
+                            Ok(_) => Some(None),
+                            Err(t) => {
+                                let error_string = t.to_string();
+                                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
+                                if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
+                                    let mut file_entry = file_entry.1.clone();
+                                    file_entry.error_string = error_string;
+                                    Some(Some(file_entry))
+                                } else {
+                                    Some(None)
+                                }
+                            } // Something is wrong with image
+                        }
+                    }
+                    // This means that cache read invalid value because maybe cache comes from different czkawka version
+                    TypeOfFile::Unknown => Some(None),
                 }
             })
             .while_some()
@@ -351,16 +387,35 @@ impl BrokenFiles {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        self.information.number_of_broken_files = self.broken_files.len();
-
-        // Check if user aborted search(only from GUI)
+        // Break if stop was clicked
         if check_was_breaked.load(Ordering::Relaxed) {
             return false;
         }
+
+        // Just connect loaded results with already calculated
+        for (_name, file_entry) in records_already_cached {
+            vec_file_entry.push(file_entry.clone());
+        }
+
+        self.broken_files = vec_file_entry.iter().filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) }).collect();
+
+        // Must save all results to file, old loaded from file with all currently counted results
+        let mut all_results: HashMap<String, FileEntry> = self.files_to_check.clone();
+
+        for file_entry in vec_file_entry {
+            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+        }
+        for (_name, file_entry) in loaded_hash_map {
+            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+        }
+        save_cache_to_file(&all_results, &mut self.text_messages);
+
+        self.information.number_of_broken_files = self.broken_files.len();
+
         Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
 
         // Clean data
-        self.files_to_check = vec![];
+        self.files_to_check = Default::default();
 
         true
     }
@@ -370,7 +425,7 @@ impl BrokenFiles {
 
         match self.delete_method {
             DeleteMethod::Delete => {
-                for file_entry in &self.files_to_check {
+                for file_entry in self.broken_files.iter() {
                     if fs::remove_file(&file_entry.path).is_err() {
                         self.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
@@ -470,5 +525,120 @@ impl PrintResults for BrokenFiles {
         }
 
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+    }
+}
+
+fn save_cache_to_file(hashmap_file_entry: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
+    println!("Allowed to save {} entries", hashmap_file_entry.len());
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        // Lin: /home/username/.cache/czkawka
+        // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
+        // Mac: /Users/Username/Library/Caches/pl.Qarmin.Czkawka
+
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        if cache_dir.exists() {
+            if !cache_dir.is_dir() {
+                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
+                return;
+            }
+        } else if fs::create_dir_all(&cache_dir).is_err() {
+            text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
+            return;
+        }
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(_) => {
+                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
+                return;
+            }
+        };
+        let mut writer = BufWriter::new(file_handler);
+
+        for file_entry in hashmap_file_entry.values() {
+            // Only save to cache files which have more than 1KB
+            if file_entry.size > 1024 {
+                let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.error_string);
+
+                if writeln!(writer, "{}", string).is_err() {
+                    text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
+                    return;
+                };
+            }
+        }
+    }
+}
+
+fn load_cache_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(_) => {
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
+                return None;
+            }
+        };
+
+        let reader = BufReader::new(file_handler);
+
+        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = Default::default();
+
+        // Read the file line by line using the lines() iterator from std::io::BufRead.
+        for (index, line) in reader.lines().enumerate() {
+            let line = match line {
+                Ok(t) => t,
+                Err(_) => {
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
+                    return None;
+                }
+            };
+            let uuu = line.split("//").collect::<Vec<&str>>();
+            if uuu.len() != 4 {
+                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                continue;
+            }
+            // Don't load cache data if destination file not exists
+            if Path::new(uuu[0]).exists() {
+                hashmap_loaded_entries.insert(
+                    uuu[0].to_string(),
+                    FileEntry {
+                        path: PathBuf::from(uuu[0]),
+                        size: match uuu[1].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
+                        modified_date: match uuu[2].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
+                        type_of_file: check_extension_avaibility(&uuu[0].to_lowercase()),
+                        error_string: uuu[3].to_string(),
+                    },
+                );
+            }
+        }
+
+        return Some(hashmap_loaded_entries);
+    }
+
+    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
+    None
+}
+
+fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
+    // Checking allowed image extensions
+    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "tiff", "pnm", "tga", "ff", "gif"];
+    if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(format!(".{}", e).as_str())) {
+        TypeOfFile::Image
+    } else {
+        TypeOfFile::Unknown
     }
 }

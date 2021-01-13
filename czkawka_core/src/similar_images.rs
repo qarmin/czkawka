@@ -265,7 +265,7 @@ impl SimilarImages {
                     .to_lowercase();
 
                     // Checking allowed image extensions
-                    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "webp", "tiff", "pnm", "tga", "ff", "gif"];
+                    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "tiff", "pnm", "tga", "ff", "gif"];
                     if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(format!(".{}", e).as_str())) {
                         continue 'dir;
                     }
@@ -693,7 +693,7 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_) => {
-                text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display()));
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
                 return None;
             }
         };

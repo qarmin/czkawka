@@ -100,7 +100,7 @@ Then, for each selected tag by which we want to search for duplicates, we perfor
 ### Similar Images
 It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
-The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "webp", "tiff"]`.
+The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "tiff"]`.
 
 Next cached data are loaded from file to prevent hashing twice same file.  
 Automatically cache which points to non existing data is deleted.
@@ -138,6 +138,7 @@ Only some image extensions are supported, because I rely on image crate. Also so
 For now Czkawka store only 2 files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
 - `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - DO NOT TRY TO EDIT THIS FILE MANUALLY! - editing this file may cause app crashes.
+- `cache_broken_files.txt` - stores cache data of broken files
 
 
 First file is located in this path
@@ -151,7 +152,7 @@ Second with cache here:
 Linux - `/home/username/.cache/czkawka`  
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
-  
+
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
 
@@ -181,7 +182,7 @@ There are several buttons which do different actions:
 - Add (directories) - adds directories to include or exclude
 - Remove (directories) - remove directories to search or to exclude
 - Manual Add (directories) - allows to write by hand directories(may be used to write non visible in file manager directories)
-- Save current configuration - saves current GUI configuration to configuration file 
+- Save current configuration - saves current GUI configuration to configuration file
 - Load configuration - loads configuration of file and override current GUI config
 - Reset configuration - reset current GUI configuration to default
 
