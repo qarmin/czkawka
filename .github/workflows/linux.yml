@@ -10,7 +10,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
 
@@ -128,7 +128,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
 
