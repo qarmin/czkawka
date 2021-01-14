@@ -1,0 +1,41 @@
+app-id: com.github.qarmin.Czkawka
+runtime: org.gnome.Platform
+runtime-version: '3.38'
+sdk: org.gnome.Sdk
+sdk-extensions:
+- org.freedesktop.Sdk.Extension.rust-stable
+command: czkawka_gui
+rename-icon: com.github.qarmin.czkawka
+rename-desktop-file: com.github.qarmin.czkawka.desktop
+finish-args:
+- "--share=ipc"
+- "--socket=fallback-x11"
+- "--socket=wayland"
+- "--filesystem=host"
+- "--device=dri"
+build-options:
+  append-path: "/usr/lib/sdk/rust-stable/bin"
+  env:
+    CARGO_HOME: "/run/build/czkawka_gui/cargo"
+modules:
+- name: czkawka_gui
+  buildsystem: simple
+  build-commands:
+  - cargo --offline fetch --manifest-path Cargo.toml --verbose
+  - cargo --offline build --release --verbose
+  - install -Dm755 ./target/release/czkawka_gui -t /app/bin/
+  - install -Dm644 com.github.qarmin.czkawka.svg /app/share/icons/hicolor/scalable/apps/com.github.qarmin.czkawka.svg
+  - install -Dm644 com.github.qarmin.czkawka.desktop /app/share/applications/com.github.qarmin.czkawka.desktop
+  sources:
+  - type: dir
+    path: "."
+  - cargo-sources.json
+  - type: file
+    url: https://raw.githubusercontent.com/qarmin/czkawka/master/data/icons/com.github.qarmin.czkawka.svg
+    sha256: 23b61b21b5678f9ad9d23dd840652d2979e3fde8ee23bf313d1d4b2cb43c9d57
+  - type: file
+    url: https://raw.githubusercontent.com/qarmin/czkawka/master/pkgs/com.github.qarmin.czkawka.desktop
+    sha256: 4326eaa98b3fa544f2bf78632d191f53ec61616cef02fa0109ebb793ed1f9047
+  - type: git
+    url: https://github.com/qarmin/czkawka.git
+    tag: 2.2.0
