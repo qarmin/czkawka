@@ -1,9 +1,9 @@
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
-use std::fs::{File, Metadata};
+use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
@@ -13,13 +13,16 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
+use directories_next::ProjectDirs;
 use rayon::prelude::*;
-use std::io::BufWriter;
+use std::io::{BufReader, BufWriter};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
 
 const HASH_MB_LIMIT_BYTES: u64 = 1024 * 1024; // 1MB
+
+const CACHE_FILE_NAME: &str = "cache_duplicates.txt";
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -39,7 +42,7 @@ pub enum CheckingMethod {
     HashMB,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
     Blake3,
 }
@@ -58,6 +61,7 @@ pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
+    pub hash: String,
 }
 
 /// Info struck with helpful information's about results
@@ -349,6 +353,7 @@ impl DuplicateFinder {
                                     continue 'dir;
                                 } // Permissions Denied
                             },
+                            hash: "".to_string(),
                         };
 
                         // Adding files to BTreeMap
@@ -520,6 +525,7 @@ impl DuplicateFinder {
                                     continue 'dir;
                                 } // Permissions Denied
                             },
+                            hash: "".to_string(),
                         };
 
                         // Adding files to BTreeMap
@@ -631,8 +637,8 @@ impl DuplicateFinder {
                     hasher.update(&buffer[..n]);
 
                     let hash_string: String = hasher.finalize().to_hex().to_string();
-                    hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
+                    hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
+                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.clone());
                 }
                 Some((*size, hashmap_with_hash, errors, bytes_read))
             })
@@ -700,60 +706,191 @@ impl DuplicateFinder {
         //// PROGRESS THREAD END
 
         #[allow(clippy::type_complexity)]
-        let full_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)> = pre_checked_map
-            .par_iter()
-            .map(|(size, vec_file_entry)| {
-                let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
-                let mut errors: Vec<String> = Vec::new();
-                let mut file_handler: File;
-                let mut bytes_read: u64 = 0;
-                atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                'fe: for file_entry in vec_file_entry {
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                        check_was_breaked.store(true, Ordering::Relaxed);
-                        return None;
-                    }
-                    file_handler = match File::open(&file_entry.path) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            errors.push(format!("Unable to check hash of file {}", file_entry.path.display()));
-                            continue 'fe;
-                        }
-                    };
+        let mut full_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)>;
 
-                    let mut hasher: blake3::Hasher = blake3::Hasher::new();
-                    let mut buffer = [0u8; 1024 * 32];
-                    let mut current_file_read_bytes: u64 = 0;
-
-                    loop {
-                        let n = match file_handler.read(&mut buffer) {
-                            Ok(t) => t,
-                            Err(_) => {
-                                errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                                continue 'fe;
+        match self.check_method {
+            CheckingMethod::HashMB => {
+                full_hash_results = pre_checked_map
+                    .par_iter()
+                    .map(|(size, vec_file_entry)| {
+                        let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
+                        let mut errors: Vec<String> = Vec::new();
+                        let mut file_handler: File;
+                        let mut bytes_read: u64 = 0;
+                        atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                        'fe: for file_entry in vec_file_entry {
+                            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                                check_was_breaked.store(true, Ordering::Relaxed);
+                                return None;
                             }
-                        };
-                        if n == 0 {
-                            break;
+                            file_handler = match File::open(&file_entry.path) {
+                                Ok(t) => t,
+                                Err(_) => {
+                                    errors.push(format!("Unable to check hash of file {}", file_entry.path.display()));
+                                    continue 'fe;
+                                }
+                            };
+
+                            let mut hasher: blake3::Hasher = blake3::Hasher::new();
+                            let mut buffer = [0u8; 1024 * 128];
+                            let mut current_file_read_bytes: u64 = 0;
+
+                            loop {
+                                let n = match file_handler.read(&mut buffer) {
+                                    Ok(t) => t,
+                                    Err(_) => {
+                                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                                        continue 'fe;
+                                    }
+                                };
+                                if n == 0 {
+                                    break;
+                                }
+
+                                current_file_read_bytes += n as u64;
+                                bytes_read += n as u64;
+                                hasher.update(&buffer[..n]);
+
+                                if current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
+                                    break;
+                                }
+                            }
+
+                            let hash_string: String = hasher.finalize().to_hex().to_string();
+                            hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
+                            hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
                         }
+                        Some((*size, hashmap_with_hash, errors, bytes_read))
+                    })
+                    .while_some()
+                    .collect();
+            }
+            CheckingMethod::Hash => {
+                let loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, &self.hash_type) {
+                    Some(t) => t,
+                    None => Default::default(),
+                };
 
-                        current_file_read_bytes += n as u64;
-                        bytes_read += n as u64;
-                        hasher.update(&buffer[..n]);
+                let mut records_already_cached: HashMap<u64, Vec<FileEntry>> = Default::default();
+                let mut non_cached_files_to_check: HashMap<u64, Vec<FileEntry>> = Default::default();
+                for (size, vec_file_entry) in pre_checked_map {
+                    #[allow(clippy::collapsible_if)]
+                    if !loaded_hash_map.contains_key(&size) {
+                        // If loaded data doesn't contains current info
+                        non_cached_files_to_check.insert(size, vec_file_entry);
+                    } else {
+                        let loaded_vec_file_entry = loaded_hash_map.get(&size).unwrap();
 
-                        if self.check_method == CheckingMethod::HashMB && current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
-                            break;
+                        for file_entry in vec_file_entry {
+                            let mut found: bool = false;
+                            for loaded_file_entry in loaded_vec_file_entry {
+                                if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
+                                    records_already_cached.entry(file_entry.size).or_insert_with(Vec::new);
+                                    records_already_cached.get_mut(&file_entry.size).unwrap().push(loaded_file_entry.clone());
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if !found {
+                                non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
+                                non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry);
+                            }
                         }
                     }
-
-                    let hash_string: String = hasher.finalize().to_hex().to_string();
-                    hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
                 }
-                Some((*size, hashmap_with_hash, errors, bytes_read))
-            })
-            .while_some()
-            .collect();
+
+                full_hash_results = non_cached_files_to_check
+                    .par_iter()
+                    .map(|(size, vec_file_entry)| {
+                        let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
+                        let mut errors: Vec<String> = Vec::new();
+                        let mut file_handler: File;
+                        let mut bytes_read: u64 = 0;
+                        atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                        'fe: for file_entry in vec_file_entry {
+                            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                                check_was_breaked.store(true, Ordering::Relaxed);
+                                return None;
+                            }
+                            file_handler = match File::open(&file_entry.path) {
+                                Ok(t) => t,
+                                Err(_) => {
+                                    errors.push(format!("Unable to check hash of file {}", file_entry.path.display()));
+                                    continue 'fe;
+                                }
+                            };
+
+                            let mut hasher: blake3::Hasher = blake3::Hasher::new();
+                            let mut buffer = [0u8; 1024 * 128];
+
+                            loop {
+                                let n = match file_handler.read(&mut buffer) {
+                                    Ok(t) => t,
+                                    Err(_) => {
+                                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                                        continue 'fe;
+                                    }
+                                };
+                                if n == 0 {
+                                    break;
+                                }
+
+                                bytes_read += n as u64;
+                                hasher.update(&buffer[..n]);
+                            }
+
+                            let hash_string: String = hasher.finalize().to_hex().to_string();
+                            let mut file_entry = file_entry.clone();
+                            file_entry.hash = hash_string.clone();
+                            hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
+                            hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry);
+                        }
+                        Some((*size, hashmap_with_hash, errors, bytes_read))
+                    })
+                    .while_some()
+                    .collect();
+
+                // Size, Vec
+
+                'main: for (size, vec_file_entry) in records_already_cached {
+                    // Check if size already exists, if exists we must to change it outside because cannot have mut and non mut reference to full_hash_results
+                    for (full_size, full_hashmap, _errors, _bytes_read) in &mut full_hash_results {
+                        if size == *full_size {
+                            for file_entry in vec_file_entry {
+                                full_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
+                                full_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
+                            }
+                            continue 'main;
+                        }
+                    }
+                    // Size doesn't exists add results to files
+                    let mut temp_hashmap: HashMap<String, Vec<FileEntry>> = Default::default();
+                    for file_entry in vec_file_entry {
+                        temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
+                        temp_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
+                    }
+                    full_hash_results.push((size, temp_hashmap, Vec::new(), 0));
+                }
+
+                // Must save all results to file, old loaded from file with all currently counted results
+                let mut all_results: HashMap<String, FileEntry> = Default::default();
+                for (_size, vec_file_entry) in loaded_hash_map {
+                    for file_entry in vec_file_entry {
+                        all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                    }
+                }
+                for (_size, hashmap, _errors, _bytes_read) in &full_hash_results {
+                    for vec_file_entry in hashmap.values() {
+                        for file_entry in vec_file_entry {
+                            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                        }
+                    }
+                }
+                save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type);
+            }
+            _ => panic!("What"),
+        }
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
@@ -1168,4 +1305,105 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
         }
     };
     (gained_space, removed_files, failed_to_remove_files)
+}
+
+fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType) {
+    println!("Trying to save {} files", hashmap.len());
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        if cache_dir.exists() {
+            if !cache_dir.is_dir() {
+                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
+                return;
+            }
+        } else if fs::create_dir_all(&cache_dir).is_err() {
+            text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
+            return;
+        }
+        let cache_file = cache_dir.join(CACHE_FILE_NAME.replace(".", format!("_{:?}.", type_of_hash).as_str()));
+        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(_) => {
+                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
+                return;
+            }
+        };
+        let mut writer = BufWriter::new(file_handler);
+
+        for file_entry in hashmap.values() {
+            // Only cache bigger than 5MB files
+            if file_entry.size > 5 * 1024 * 1024 {
+                let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
+
+                if writeln!(writer, "{}", string).is_err() {
+                    text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
+                    return;
+                };
+            }
+        }
+    }
+}
+
+fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(CACHE_FILE_NAME.replace(".", format!("_{:?}.", type_of_hash).as_str()));
+        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(_) => {
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
+                return None;
+            }
+        };
+
+        let reader = BufReader::new(file_handler);
+
+        let mut hashmap_loaded_entries: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+
+        // Read the file line by line using the lines() iterator from std::io::BufRead.
+        for (index, line) in reader.lines().enumerate() {
+            let line = match line {
+                Ok(t) => t,
+                Err(_) => {
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
+                    return None;
+                }
+            };
+            let uuu = line.split("//").collect::<Vec<&str>>();
+            if uuu.len() != 4 {
+                text_messages
+                    .warnings
+                    .push(format!("Found invalid data(too much or too low amount of data) in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                continue;
+            }
+            // Don't load cache data if destination file not exists
+            if Path::new(uuu[0]).exists() {
+                let file_entry = FileEntry {
+                    path: PathBuf::from(uuu[0]),
+                    size: match uuu[1].parse::<u64>() {
+                        Ok(t) => t,
+                        Err(_) => {
+                            text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                            continue;
+                        }
+                    },
+                    modified_date: match uuu[2].parse::<u64>() {
+                        Ok(t) => t,
+                        Err(_) => {
+                            text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                            continue;
+                        }
+                    },
+                    hash: uuu[3].to_string(),
+                };
+                hashmap_loaded_entries.entry(file_entry.size).or_insert_with(Vec::new);
+                hashmap_loaded_entries.get_mut(&file_entry.size).unwrap().push(file_entry);
+            }
+        }
+
+        return Some(hashmap_loaded_entries);
+    }
+
+    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
+    None
 }

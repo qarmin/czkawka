@@ -137,17 +137,17 @@ Only some image extensions are supported, because I rely on image crate. Also so
 ## Config/Cache files
 For now Czkawka store only 2 files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - DO NOT TRY TO EDIT THIS FILE MANUALLY! - editing this file may cause app crashes.
+- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file may cause app crashes.
 - `cache_broken_files.txt` - stores cache data of broken files
+- `cache_duplicates_Blake3.txt` - stores cache data of duplicated files, to not get too big performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
 
-
-First file is located in this path
+Config files are located in this path
 
 Linux - `/home/username/.config/czkawka`  
 Mac - `/Users/username/Library/Application Support/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config`
 
-Second with cache here:
+Cache should be here:
 
 Linux - `/home/username/.cache/czkawka`  
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  

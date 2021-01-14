@@ -6,13 +6,11 @@
 - Written in memory safe Rust
 - Amazingly fast - due using more or less advanced algorithms and multithreading support
 - Free, Open Source without ads
-- Multiplatform - works on Linux, Windows and macOS  
+- Multiplatform - works on Linux, Windows and macOS
+- Cache support - second and further scans should be a lot of faster than first
 - CLI frontend, very fast to automate tasks
-- GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
-- Light/Dark theme match the appearance of the system(Linux only)
-- Saving results to a file - allows reading entries found by the tool easily
+- GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions or excluded items with * wildcard
-- Image previews to get quick view at the compared photos
 - Multiple tools to use:
   - Duplicates - Finds duplicates basing on file name, size, hash, first 1 MB of hash
   - Empty Folders - Finds empty folders with the help of advanced algorithm
@@ -228,6 +226,7 @@ So still is a big room for improvements.
 | Non stripped binaries |   | X |  |
 | Redundant whitespace |  | X |  |
 | Multiple languages(po) | | X | X |
+| Cache support | X |  | X |
 | Project Activity | High | Very Low | High |
 
 ## Contributions
