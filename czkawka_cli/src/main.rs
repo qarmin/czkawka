@@ -7,6 +7,7 @@ use czkawka_core::common_traits::*;
 
 use czkawka_core::{
     big_file::{self, BigFile},
+    broken_files::{self, BrokenFiles},
     duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
     empty_folder::EmptyFolder,
@@ -325,6 +326,40 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             ifs.print_results();
             ifs.get_text_messages().print_messages();
+        }
+        Commands::BrokenFiles {
+            directories,
+            excluded_directories,
+            excluded_items,
+            allowed_extensions,
+            delete_files,
+            file_to_save,
+            not_recursive,
+        } => {
+            let mut br = BrokenFiles::new();
+
+            br.set_included_directory(directories.directories);
+            br.set_excluded_directory(excluded_directories.excluded_directories);
+            br.set_excluded_items(excluded_items.excluded_items);
+            br.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
+            br.set_recursive_search(!not_recursive.not_recursive);
+
+            if delete_files {
+                br.set_delete_method(broken_files::DeleteMethod::Delete);
+            }
+
+            br.find_broken_files(None, None);
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !br.save_results_to_file(file_name) {
+                    br.get_text_messages().print_messages();
+                    process::exit(1);
+                }
+            }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            br.print_results();
+            br.get_text_messages().print_messages();
         }
     }
 }

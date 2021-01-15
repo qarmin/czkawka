@@ -18,7 +18,7 @@ impl Extensions {
         if allowed_extensions.is_empty() {
             return;
         }
-        allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,webp,hdr,svg");
+        allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
         allowed_extensions = allowed_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
         allowed_extensions = allowed_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
         allowed_extensions = allowed_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");

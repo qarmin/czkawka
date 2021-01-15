@@ -265,8 +265,8 @@ impl SimilarImages {
                     .to_lowercase();
 
                     // Checking allowed image extensions
-                    let allowed_image_extensions = ["jpg", "png", "bmp", "ico", "webp", "tiff", "dds"];
-                    if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "tiff", "pnm", "tga", "ff", "gif"];
+                    if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(format!(".{}", e).as_str())) {
                         continue 'dir;
                     }
 
@@ -326,20 +326,20 @@ impl SimilarImages {
             None => Default::default(),
         };
 
-        let mut hashes_already_counted: HashMap<String, FileEntry> = Default::default();
-        let mut hashes_to_check: HashMap<String, FileEntry> = Default::default();
+        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
         for (name, file_entry) in &self.images_to_check {
             #[allow(clippy::collapsible_if)]
             if !loaded_hash_map.contains_key(name) {
                 // If loaded data doesn't contains current image info
-                hashes_to_check.insert(name.clone(), file_entry.clone());
+                non_cached_files_to_check.insert(name.clone(), file_entry.clone());
             } else {
                 if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
                     // When size or modification date of image changed, then it is clear that is different image
-                    hashes_to_check.insert(name.clone(), file_entry.clone());
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
                     // Checking may be omitted when already there is entry with same size and modification date
-                    hashes_already_counted.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
                 }
             }
         }
@@ -358,7 +358,7 @@ impl SimilarImages {
             let mut progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let images_to_check = hashes_to_check.len();
+            let images_to_check = non_cached_files_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .try_send(ProgressData {
@@ -377,7 +377,7 @@ impl SimilarImages {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
-        let mut vec_file_entry: Vec<(FileEntry, Node)> = hashes_to_check
+        let mut vec_file_entry: Vec<(FileEntry, Node)> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
@@ -416,7 +416,7 @@ impl SimilarImages {
         let hash_map_modification = SystemTime::now();
 
         // Just connect loaded results with already calculated hashes
-        for (_name, file_entry) in hashes_already_counted {
+        for (_name, file_entry) in records_already_cached {
             vec_file_entry.push((file_entry.clone(), file_entry.hash));
         }
 
@@ -457,15 +457,15 @@ impl SimilarImages {
         // Maybe also add here progress report
 
         let mut new_vector: Vec<Vec<FileEntry>> = Vec::new();
-        let mut hashes_to_check = self.image_hashes.clone();
+        let mut non_cached_files_to_check = self.image_hashes.clone();
         for (hash, vec_file_entry) in &self.image_hashes {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
-            if !hashes_to_check.contains_key(hash) {
+            if !non_cached_files_to_check.contains_key(hash) {
                 continue;
             }
-            hashes_to_check.remove(hash);
+            non_cached_files_to_check.remove(hash);
 
             let vector_with_found_similar_hashes = self.bktree.find(hash, similarity).collect::<Vec<_>>();
             if vector_with_found_similar_hashes.len() == 1 && vec_file_entry.len() == 1 {
@@ -493,7 +493,7 @@ impl SimilarImages {
                     panic!("I'm not sure if same hash can have distance > 0");
                 }
 
-                if let Some(vec_file_entry) = hashes_to_check.get(*similar_hash) {
+                if let Some(vec_file_entry) = non_cached_files_to_check.get(*similar_hash) {
                     vector_of_similar_images.append(
                         &mut (vec_file_entry
                             .iter()
@@ -515,7 +515,7 @@ impl SimilarImages {
                             })
                             .collect::<Vec<_>>()),
                     );
-                    hashes_to_check.remove(*similar_hash);
+                    non_cached_files_to_check.remove(*similar_hash);
                 }
             }
             if vector_of_similar_images.len() > 1 {
@@ -527,6 +527,12 @@ impl SimilarImages {
         self.similar_vectors = new_vector;
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
+
+        // Clean unused data
+        self.image_hashes = Default::default();
+        self.images_to_check = Default::default();
+        self.bktree = BKTree::new(Hamming);
+
         true
     }
 
@@ -659,11 +665,11 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
             text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
             return;
         }
-        let config_file = cache_dir.join(CACHE_FILE_NAME);
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&config_file) {
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(_) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}", config_file.display()));
+                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
                 return;
             }
         };
@@ -680,7 +686,7 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
             string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
 
             if writeln!(writer, "{}", string).is_err() {
-                text_messages.messages.push(format!("Failed to save some data to cache file {}", config_file.display()));
+                text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
                 return;
             };
         }
@@ -688,26 +694,13 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
 }
 fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let mut cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let mut config_file = cache_dir.join(CACHE_FILE_NAME);
-        let file_handler = match OpenOptions::new().read(true).open(&config_file) {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_) => {
-                text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
-                // return None; // Enable when removing compatibility section
-                // Compatibility for upgrading project from 2.1 to 2.2
-                {
-                    cache_dir = PathBuf::from(proj_dirs.config_dir());
-                    config_file = cache_dir.join(CACHE_FILE_NAME);
-                    match OpenOptions::new().read(true).open(&config_file) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            text_messages.messages.push(format!("Cannot find or open cache file {}", config_file.display()));
-                            return None;
-                        }
-                    }
-                }
-                // End of compatibility section to remove after release 2.2 version
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
+                return None;
             }
         };
 
@@ -720,20 +713,26 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
             let line = match line {
                 Ok(t) => t,
                 Err(_) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, config_file.display()));
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
                     return None;
                 }
             };
             let uuu = line.split("//").collect::<Vec<&str>>();
             if uuu.len() != 12 {
-                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, config_file.display()));
-                return None;
+                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                continue;
             }
             // Don't load cache data if destination file not exists
             if Path::new(uuu[0]).exists() {
                 let mut hash: Node = [0u8; 8];
                 for i in 0..hash.len() {
-                    hash[i] = uuu[4 + i].parse::<u8>().unwrap();
+                    hash[i] = match uuu[4 + i].parse::<u8>() {
+                        Ok(t) => t,
+                        Err(_) => {
+                            text_messages.warnings.push(format!("Found invalid hash value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                            continue;
+                        }
+                    };
                 }
 
                 #[cfg(debug_assertions)]
@@ -756,9 +755,21 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
                     uuu[0].to_string(),
                     FileEntry {
                         path: PathBuf::from(uuu[0]),
-                        size: uuu[1].parse::<u64>().unwrap(),
+                        size: match uuu[1].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
                         dimensions: uuu[2].to_string(),
-                        modified_date: uuu[3].parse::<u64>().unwrap(),
+                        modified_date: match uuu[3].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
                         hash,
                         similarity: Similarity::None,
                     },

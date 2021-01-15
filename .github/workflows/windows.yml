@@ -10,7 +10,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
 
@@ -149,7 +149,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 

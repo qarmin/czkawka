@@ -6,13 +6,11 @@
 - Written in memory safe Rust
 - Amazingly fast - due using more or less advanced algorithms and multithreading support
 - Free, Open Source without ads
-- Works on Linux, Windows and macOS  
+- Multiplatform - works on Linux, Windows and macOS
+- Cache support - second and further scans should be a lot of faster than first
 - CLI frontend, very fast to automate tasks
-- GUI GTK frontend - uses modern GTK 3 and looks similar to FSlint
-- Light/Dark theme match the appearance of the system(Linux only)
-- Saving results to a file - allows reading entries found by the tool easily
+- GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions or excluded items with * wildcard
-- Image previews to get quick view at the compared photos
 - Multiple tools to use:
   - Duplicates - Finds duplicates basing on file name, size, hash, first 1 MB of hash
   - Empty Folders - Finds empty folders with the help of advanced algorithm
@@ -23,8 +21,9 @@
   - Zeroed Files - Find files which are filled with zeros(usually corrupted)
   - Same Music - Search for music with same artist, album etc.
   - Invalid Symbolic Links - Shows symbolic links which points to non-existent files/directories
+  - Broken Files - Finds files with invalid extension or corrupted
 
-![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
+![Czkawka](https://user-images.githubusercontent.com/41945903/104711404-9cbb7400-5721-11eb-904d-9677c189f7ab.gif)
 
 ## Instruction
 You can find instruction how to use Czkawka [here](instructions/Instruction.md)
@@ -49,7 +48,7 @@ If the app does not run when clicking at a launcher, run it through a terminal.
 You don't need to have any additional libraries for CLI Czkawka
 #### GUI Requirements
 ##### Linux
-For Czkawka GUI you need to have at least GTK 3.22.  
+For Czkawka GUI you need to have at least GTK 3.22 and also Alsa installed(for finding broken music files).  
 It should be installed by default on all the most popular distros.
 ##### Windows
 `czkawka_gui.exe` extracted from zip file `windows_czkawka_gui.zip` needs to have all files inside around, because use them.
@@ -123,12 +122,12 @@ If you want to compile CLI frontend, then just skip lines which contains `gtk` w
 ```shell
 sudo apt install -y curl  # Needed by Rust update tool
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo apt install -y libgtk-3-dev
+sudo apt install -y libgtk-3-dev libasound2-dev
 ```
 #### Fedora/CentOS/Rocky Linux
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo yum install gtk3-devel glib2-devel
+sudo yum install gtk3-devel glib2-devel alsa-lib-devel
 ```
 #### MacOS
 You need to install Homebrew and GTK Libraries
@@ -219,6 +218,7 @@ So still is a big room for improvements.
 | Zeroed Files| X | | |
 | Music duplicates(tags) | X | | X |
 | Invalid symlinks | X | X |  |
+| Broken Files | X |  |  |
 | Installed packages |  | X |  |
 | Invalid names |   | X |  |
 | Names conflict |   | X |  |
@@ -226,6 +226,7 @@ So still is a big room for improvements.
 | Non stripped binaries |   | X |  |
 | Redundant whitespace |  | X |  |
 | Multiple languages(po) | | X | X |
+| Cache support | X |  | X |
 | Project Activity | High | Very Low | High |
 
 ## Contributions

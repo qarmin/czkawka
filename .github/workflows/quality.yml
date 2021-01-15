@@ -25,7 +25,7 @@ jobs:
           override: true
 
       - name: Install Gtk
-        run: sudo apt install -y libgtk-3-dev
+        run: sudo apt install -y libgtk-3-dev libasound2-dev
 
       - name: Check the format
         run: cargo fmt --all -- --check

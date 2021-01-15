@@ -100,7 +100,7 @@ Then, for each selected tag by which we want to search for duplicates, we perfor
 ### Similar Images
 It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
-The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "webp", "tiff", "dds"]`.
+The tool first collects images with specific extensions that can be checked - `["jpg", "png", "bmp", "ico", "tiff"]`.
 
 Next cached data are loaded from file to prevent hashing twice same file.  
 Automatically cache which points to non existing data is deleted.
@@ -123,25 +123,34 @@ Computed hash data is then thrown into a special tree that allows to compare has
 Next this hashes are saved to file, to be able to opens images without needing to hash it more times.
 
 Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.
+### Broken Files
+This tool is created to find files which are corrupted or have invalid extension.
+
+At first files from specific group(image,archive,audio) are collected and then this files are opened.  
+
+If an error happens when opening this file then it means that this file is corrupted or unsupported.
+
+Only some file extensions are supported, because I rely on external crates. Also some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.
 
 ## Config/Cache files
 For now Czkawka store only 2 files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - DO NOT TRY TO EDIT THIS FILE MANUALLY! - editing this file may cause app crashes.
+- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file may cause app crashes.
+- `cache_broken_files.txt` - stores cache data of broken files
+- `cache_duplicates_Blake3.txt` - stores cache data of duplicated files, to not get too big performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
 
-
-First file is located in this path
+Config files are located in this path
 
 Linux - `/home/username/.config/czkawka`  
 Mac - `/Users/username/Library/Application Support/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config`
 
-Second with cache here:
+Cache should be here:
 
 Linux - `/home/username/.cache/czkawka`  
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
-  
+
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
 
@@ -165,12 +174,13 @@ There are several buttons which do different actions:
 - Stop - button in progress dialog, allows to easily stop current task. Sometimes it may take a few seconds until all atomic operations ends and GUI will be able to use again
 - Select - allows selecting multiple entries at once
 - Delete - delete entirely all selected entries
+- Symlink - create symlink to selected files(first file is threaten as original and rest will become symlinks)
 - Save - save initial state of results
 - Hamburger(parallel lines) - used to show/hide bottom text panel which shows warnings/errors
 - Add (directories) - adds directories to include or exclude
 - Remove (directories) - remove directories to search or to exclude
 - Manual Add (directories) - allows to write by hand directories(may be used to write non visible in file manager directories)
-- Save current configuration - saves current GUI configuration to configuration file 
+- Save current configuration - saves current GUI configuration to configuration file
 - Load configuration - loads configuration of file and override current GUI config
 - Reset configuration - reset current GUI configuration to default
 

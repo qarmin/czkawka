@@ -25,7 +25,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
+    let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
     let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
+    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
@@ -95,6 +97,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let btreemap = df.get_files_sorted_by_names();
 
                                 for (name, vector) in btreemap.iter().rev() {
+                                    // Sort
+                                    let vector = if vector.len() > 2 {
+                                        let mut vector = vector.clone();
+                                        vector.sort_by_key(|e| e.path.clone());
+                                        vector
+                                    } else {
+                                        vector.clone()
+                                    };
+
                                     let values: [&dyn ToValue; 6] = [
                                         &name,
                                         &(format!("{} results", vector.len())),
@@ -123,6 +134,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                                 for (size, vectors_vector) in btreemap.iter().rev() {
                                     for vector in vectors_vector {
+                                        // Sort
+                                        let vector = if vector.len() > 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| e.path.clone());
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+
                                         let values: [&dyn ToValue; 6] = [
                                             &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
                                             &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
@@ -151,6 +171,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let btreemap = df.get_files_sorted_by_size();
 
                                 for (size, vector) in btreemap.iter().rev() {
+                                    // Sort
+                                    let vector = if vector.len() > 2 {
+                                        let mut vector = vector.clone();
+                                        vector.sort_by_key(|e| e.path.clone());
+                                        vector
+                                    } else {
+                                        vector.clone()
+                                    };
+
                                     let values: [&dyn ToValue; 6] = [
                                         &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
                                         &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
@@ -264,6 +293,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = vf.get_empty_files();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
@@ -359,6 +392,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = tf.get_temporary_files();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
@@ -404,6 +441,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let vec_struct_similar = sf.get_similar_images();
 
                         for vec_file_entry in vec_struct_similar.iter() {
+                            // Sort
+                            let vec_file_entry = if vec_file_entry.len() > 2 {
+                                let mut vec_file_entry = vec_file_entry.clone();
+                                vec_file_entry.sort_by_key(|e| e.path.clone());
+                                vec_file_entry
+                            } else {
+                                vec_file_entry.clone()
+                            };
+
                             // Header
                             let values: [&dyn ToValue; 10] = [
                                 &"".to_string(),
@@ -479,6 +525,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = zf.get_zeroed_files();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [&dyn ToValue; 5] = [
@@ -512,7 +562,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SameMusic(mf) => {
                 if mf.get_stopped_search() {
-                    entry_info.set_text("Searching for empty files was stopped by user");
+                    entry_info.set_text("Searching for same music was stopped by user");
                 } else {
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
@@ -540,6 +590,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let text: String = "-----".to_string();
 
                         for vec_file_entry in vector {
+                            // Sort
+                            let vec_file_entry = if vec_file_entry.len() > 2 {
+                                let mut vec_file_entry = vec_file_entry.clone();
+                                vec_file_entry.sort_by_key(|e| e.path.clone());
+                                vec_file_entry
+                            } else {
+                                vec_file_entry.clone()
+                            };
+
                             let values: [&dyn ToValue; 13] = [
                                 &"".to_string(),
                                 &(0),
@@ -632,6 +691,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = ifs.get_invalid_symlinks();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.symlink_path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.symlink_path);
                             let values: [&dyn ToValue; 5] = [
@@ -660,6 +723,54 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("select").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+            Message::BrokenFiles(br) => {
+                if br.get_stopped_search() {
+                    entry_info.set_text("Searching for broken files was stopped by user");
+                } else {
+                    let information = br.get_information();
+                    let text_messages = br.get_text_messages();
+
+                    let broken_files_number: usize = information.number_of_broken_files;
+
+                    entry_info.set_text(format!("Found {} broken files.", broken_files_number).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = get_list_store(&tree_view_broken_files);
+
+                        let col_indices = [0, 1, 2, 3];
+
+                        let vector = br.get_broken_files();
+
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
+                        for file_entry in vector {
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [&dyn ToValue; 4] = [&file, &directory, &file_entry.error_string, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
+                            list_store.set(&list_store.append(), &col_indices, &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_broken_files_state.borrow_mut() = br;
+
+                        if broken_files_number > 0 {
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("select").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("select").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

@@ -402,6 +402,10 @@ impl SameMusic {
         self.music_entries = vec_file_entry;
 
         Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());
+
+        // Clean for duplicate files
+        self.music_to_check.clear();
+
         true
     }
     fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
@@ -589,6 +593,10 @@ impl SameMusic {
         progress_thread_handle.join().unwrap();
 
         Common::print_time(start_time, SystemTime::now(), "check_for_duplicates".to_string());
+
+        // Clear unused data
+        self.music_entries.clear();
+
         true
     }
 

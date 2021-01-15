@@ -1,6 +1,6 @@
-use std::fs::{File, Metadata};
+use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
@@ -11,11 +11,15 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crossbeam_channel::Receiver;
+use directories_next::ProjectDirs;
 use rayon::prelude::*;
-use std::io::BufWriter;
+use std::collections::HashMap;
+use std::io::{BufReader, BufWriter};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
+
+const CACHE_FILE_NAME: &str = "cache_broken_files.txt";
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -34,14 +38,24 @@ pub enum DeleteMethod {
 #[derive(Clone)]
 pub struct FileEntry {
     pub path: PathBuf,
-    pub size: u64,
     pub modified_date: u64,
+    pub size: u64,
+    pub type_of_file: TypeOfFile,
+    pub error_string: String,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum TypeOfFile {
+    Unknown = -1,
+    Image = 0,
+    ArchiveZIP,
+    Audio,
 }
 
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_zeroed_files: usize,
+    pub number_of_broken_files: usize,
     pub number_of_removed_files: usize,
     pub number_of_failed_to_remove_files: usize,
 }
@@ -52,21 +66,20 @@ impl Info {
 }
 
 /// Struct with required information's to work
-pub struct ZeroedFiles {
+pub struct BrokenFiles {
     text_messages: Messages,
     information: Info,
-    zeroed_files: Vec<FileEntry>,
+    files_to_check: HashMap<String, FileEntry>,
+    broken_files: Vec<FileEntry>,
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
     recursive_search: bool,
     delete_method: DeleteMethod,
     stopped_search: bool,
-    minimal_file_size: u64,
-    files_to_check: Vec<FileEntry>,
 }
 
-impl ZeroedFiles {
+impl BrokenFiles {
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -75,21 +88,20 @@ impl ZeroedFiles {
             allowed_extensions: Extensions::new(),
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
-            zeroed_files: vec![],
+            files_to_check: Default::default(),
             delete_method: DeleteMethod::None,
             stopped_search: false,
-            minimal_file_size: 1024,
-            files_to_check: Vec::with_capacity(1024),
+            broken_files: Default::default(),
         }
     }
 
-    pub fn find_zeroed_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
-        if !self.check_for_zeroed_files(stop_receiver, progress_sender) {
+        if !self.look_for_broken_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
@@ -101,8 +113,8 @@ impl ZeroedFiles {
         self.stopped_search
     }
 
-    pub const fn get_zeroed_files(&self) -> &Vec<FileEntry> {
-        &self.zeroed_files
+    pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
+        &self.broken_files
     }
 
     pub const fn get_text_messages(&self) -> &Messages {
@@ -115,13 +127,6 @@ impl ZeroedFiles {
 
     pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
         self.delete_method = delete_method;
-    }
-
-    pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
-        self.minimal_file_size = match minimal_file_size {
-            0 => 1,
-            t => t,
-        };
     }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
@@ -143,7 +148,6 @@ impl ZeroedFiles {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    /// Check files for files which have 0
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -182,6 +186,7 @@ impl ZeroedFiles {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
+
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 // End thread which send info to gui
@@ -229,15 +234,16 @@ impl ZeroedFiles {
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                    if metadata.len() == 0 || metadata.len() < self.minimal_file_size {
-                        continue 'dir;
-                    }
-
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
                         Err(_) => continue,
                     }
                     .to_lowercase();
+
+                    let type_of_file = check_extension_avaibility(&file_name_lowercase);
+                    if type_of_file == TypeOfFile::Unknown {
+                        continue 'dir;
+                    }
 
                     // Checking allowed extensions
                     if !self.allowed_extensions.file_extensions.is_empty() {
@@ -247,6 +253,7 @@ impl ZeroedFiles {
                             continue 'dir;
                         }
                     }
+
                     // Checking files
                     let current_file_name = current_folder.join(entry_data.file_name());
                     if self.excluded_items.is_excluded(&current_file_name) {
@@ -256,7 +263,6 @@ impl ZeroedFiles {
                     // Creating new file entry
                     let fe: FileEntry = FileEntry {
                         path: current_file_name.clone(),
-                        size: metadata.len(),
                         modified_date: match metadata.modified() {
                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                 Ok(d) => d.as_secs(),
@@ -270,10 +276,13 @@ impl ZeroedFiles {
                                 continue;
                             } // Permissions Denied
                         },
+                        size: metadata.len(),
+                        type_of_file,
+                        error_string: "".to_string(),
                     };
 
                     // Adding files to Vector
-                    self.files_to_check.push(fe);
+                    self.files_to_check.insert(fe.path.to_string_lossy().to_string(), fe);
                 }
             }
         }
@@ -284,15 +293,37 @@ impl ZeroedFiles {
         Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
         true
     }
+    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+        let system_time = SystemTime::now();
 
-    /// Check files for files which have 0
-    fn check_for_zeroed_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
+        let loaded_hash_map = match load_cache_from_file(&mut self.text_messages) {
+            Some(t) => t,
+            None => Default::default(),
+        };
+
+        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
+        for (name, file_entry) in &self.files_to_check {
+            #[allow(clippy::collapsible_if)]
+            if !loaded_hash_map.contains_key(name) {
+                // If loaded data doesn't contains current image info
+                non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+            } else {
+                if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                    // When size or modification date of image changed, then it is clear that is different image
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                } else {
+                    // Checking may be omitted when already there is entry with same size and modification date
+                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                }
+            }
+        }
+
+        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
         let progress_thread_handle;
@@ -300,7 +331,7 @@ impl ZeroedFiles {
             let mut progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = self.files_to_check.len();
+            let files_to_check = non_cached_files_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .try_send(ProgressData {
@@ -319,87 +350,112 @@ impl ZeroedFiles {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
-
-        self.zeroed_files = self
-            .files_to_check
+        let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // This will not break
+                    check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
+                let file_entry = file_entry.1;
 
-                let file_entry = file_entry.clone();
-                let mut n;
-                let mut file_handler: File = match File::open(&file_entry.path) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        return Some(None);
-                    }
-                };
-
-                // First search
-                let mut buffer = [0u8; 64];
-                n = match file_handler.read(&mut buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        return Some(None);
-                    }
-                };
-                for i in buffer[0..n].iter() {
-                    if *i != 0 {
-                        return Some(None);
-                    }
-                }
-                // Second search
-                loop {
-                    let mut buffer = [0u8; 1024 * 32];
-                    n = match file_handler.read(&mut buffer) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            return Some(None);
-                        }
-                    };
-                    for i in buffer[0..n].iter() {
-                        if *i != 0 {
-                            return Some(None);
+                match file_entry.type_of_file {
+                    TypeOfFile::Image => {
+                        match image::open(&file_entry.path) {
+                            Ok(_) => Some(None),
+                            Err(t) => {
+                                let error_string = t.to_string();
+                                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
+                                if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
+                                    let mut file_entry = file_entry.clone();
+                                    file_entry.error_string = error_string;
+                                    Some(Some(file_entry))
+                                } else {
+                                    Some(None)
+                                }
+                            } // Something is wrong with image
                         }
                     }
-                    if n == 0 {
-                        break;
-                    }
-                }
+                    TypeOfFile::ArchiveZIP => match fs::File::open(&file_entry.path) {
+                        Ok(file) => match zip::ZipArchive::new(file) {
+                            Ok(_) => Some(None),
+                            Err(e) => {
+                                // TODO Maybe filter out unnecessary types of errors
+                                let error_string = e.to_string();
+                                let mut file_entry = file_entry.clone();
+                                file_entry.error_string = error_string;
+                                Some(Some(file_entry))
+                            }
+                        },
+                        Err(_) => Some(None),
+                    },
+                    TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
+                        Ok(file) => match rodio::Decoder::new(BufReader::new(file)) {
+                            Ok(_) => Some(None),
+                            Err(e) => {
+                                let error_string = e.to_string();
+                                let mut file_entry = file_entry.clone();
+                                file_entry.error_string = error_string;
+                                Some(Some(file_entry))
+                            }
+                        },
+                        Err(_) => Some(None),
+                    },
 
-                Some(Some(file_entry))
+                    // This means that cache read invalid value because maybe cache comes from different czkawka version
+                    TypeOfFile::Unknown => Some(None),
+                }
             })
             .while_some()
             .filter(|file_entry| file_entry.is_some())
             .map(|file_entry| file_entry.unwrap())
-            .collect::<Vec<_>>();
+            .collect::<Vec<FileEntry>>();
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        self.information.number_of_zeroed_files = self.zeroed_files.len();
+        // Break if stop was clicked
+        if check_was_breaked.load(Ordering::Relaxed) {
+            return false;
+        }
 
-        Common::print_time(start_time, SystemTime::now(), "search for zeroed_files".to_string());
+        // Just connect loaded results with already calculated
+        for (_name, file_entry) in records_already_cached {
+            vec_file_entry.push(file_entry.clone());
+        }
 
-        //Clean unused data
-        self.files_to_check.clear();
+        self.broken_files = vec_file_entry.iter().filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) }).collect();
+
+        // Must save all results to file, old loaded from file with all currently counted results
+        let mut all_results: HashMap<String, FileEntry> = self.files_to_check.clone();
+
+        for file_entry in vec_file_entry {
+            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+        }
+        for (_name, file_entry) in loaded_hash_map {
+            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+        }
+        save_cache_to_file(&all_results, &mut self.text_messages);
+
+        self.information.number_of_broken_files = self.broken_files.len();
+
+        Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
+
+        // Clean unused data
+        self.files_to_check = Default::default();
 
         true
     }
-
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
 
         match self.delete_method {
             DeleteMethod::Delete => {
-                for file_entry in &self.zeroed_files {
-                    if fs::remove_file(file_entry.path.clone()).is_err() {
+                for file_entry in self.broken_files.iter() {
+                    if fs::remove_file(&file_entry.path).is_err() {
                         self.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
                 }
@@ -412,13 +468,13 @@ impl ZeroedFiles {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
-impl Default for ZeroedFiles {
+impl Default for BrokenFiles {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl DebugPrint for ZeroedFiles {
+impl DebugPrint for BrokenFiles {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
     /// Debugging printing - only available on debug build
@@ -438,18 +494,16 @@ impl DebugPrint for ZeroedFiles {
 
         println!("### Other");
 
-        println!("Zeroed list size - {}", self.zeroed_files.len());
         println!("Allowed extensions - {:?}", self.allowed_extensions.file_extensions);
         println!("Excluded items - {:?}", self.excluded_items.items);
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search.to_string());
         println!("Delete Method - {:?}", self.delete_method);
-        println!("Minimal File Size - {:?}", self.minimal_file_size);
         println!("-----------------------------------------");
     }
 }
-impl SaveResults for ZeroedFiles {
+impl SaveResults for BrokenFiles {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
@@ -477,28 +531,148 @@ impl SaveResults for ZeroedFiles {
             return false;
         }
 
-        if !self.zeroed_files.is_empty() {
-            writeln!(writer, "Found {} zeroed files.", self.information.number_of_zeroed_files).unwrap();
-            for file_entry in self.zeroed_files.iter() {
-                writeln!(writer, "{}", file_entry.path.display()).unwrap();
+        if !self.broken_files.is_empty() {
+            writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files).unwrap();
+            for file_entry in self.broken_files.iter() {
+                writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.error_string).unwrap();
             }
         } else {
-            write!(writer, "Not found any zeroed files.").unwrap();
+            write!(writer, "Not found any broken files.").unwrap();
         }
         Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
         true
     }
 }
-impl PrintResults for ZeroedFiles {
+impl PrintResults for BrokenFiles {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
-        println!("Found {} zeroed files.\n", self.information.number_of_zeroed_files);
-        for file_entry in self.zeroed_files.iter() {
-            println!("{}", file_entry.path.display());
+        println!("Found {} broken files.\n", self.information.number_of_broken_files);
+        for file_entry in self.broken_files.iter() {
+            println!("{} - {}", file_entry.path.display(), file_entry.error_string);
         }
 
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+    }
+}
+
+fn save_cache_to_file(hashmap_file_entry: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        // Lin: /home/username/.cache/czkawka
+        // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
+        // Mac: /Users/Username/Library/Caches/pl.Qarmin.Czkawka
+
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        if cache_dir.exists() {
+            if !cache_dir.is_dir() {
+                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
+                return;
+            }
+        } else if fs::create_dir_all(&cache_dir).is_err() {
+            text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
+            return;
+        }
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(_) => {
+                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
+                return;
+            }
+        };
+        let mut writer = BufWriter::new(file_handler);
+
+        for file_entry in hashmap_file_entry.values() {
+            // Only save to cache files which have more than 1KB
+            if file_entry.size > 1024 {
+                let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.error_string);
+
+                if writeln!(writer, "{}", string).is_err() {
+                    text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
+                    return;
+                };
+            }
+        }
+    }
+}
+
+fn load_cache_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(_) => {
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
+                return None;
+            }
+        };
+
+        let reader = BufReader::new(file_handler);
+
+        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = Default::default();
+
+        // Read the file line by line using the lines() iterator from std::io::BufRead.
+        for (index, line) in reader.lines().enumerate() {
+            let line = match line {
+                Ok(t) => t,
+                Err(_) => {
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
+                    return None;
+                }
+            };
+            let uuu = line.split("//").collect::<Vec<&str>>();
+            if uuu.len() != 4 {
+                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                continue;
+            }
+            // Don't load cache data if destination file not exists
+            if Path::new(uuu[0]).exists() {
+                hashmap_loaded_entries.insert(
+                    uuu[0].to_string(),
+                    FileEntry {
+                        path: PathBuf::from(uuu[0]),
+                        size: match uuu[1].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
+                        modified_date: match uuu[2].parse::<u64>() {
+                            Ok(t) => t,
+                            Err(_) => {
+                                text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                                continue;
+                            }
+                        },
+                        type_of_file: check_extension_avaibility(&uuu[0].to_lowercase()),
+                        error_string: uuu[3].to_string(),
+                    },
+                );
+            }
+        }
+
+        return Some(hashmap_loaded_entries);
+    }
+
+    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
+    None
+}
+
+fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
+    // Checking allowed image extensions
+    let allowed_image_extensions = [".jpg", ".jpeg", ".png", ".bmp", ".ico", ".tiff", ".pnm", ".tga", ".ff", ".gif"];
+    let allowed_archive_zip_extensions = [".zip"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
+    let allowed_audio_extensions = [".mp3", ".flac", ".wav", ".ogg"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
+    if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+        TypeOfFile::Image
+    } else if allowed_archive_zip_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+        TypeOfFile::ArchiveZIP
+    } else if allowed_audio_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+        TypeOfFile::Audio
+    } else {
+        TypeOfFile::Unknown
     }
 }
