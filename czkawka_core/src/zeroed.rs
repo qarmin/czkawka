@@ -385,6 +385,10 @@ impl ZeroedFiles {
         self.information.number_of_zeroed_files = self.zeroed_files.len();
 
         Common::print_time(start_time, SystemTime::now(), "search for zeroed_files".to_string());
+
+        //Clean unused data
+        self.files_to_check.clear();
+
         true
     }
 

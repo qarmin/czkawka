@@ -443,7 +443,7 @@ impl BrokenFiles {
 
         Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
 
-        // Clean data
+        // Clean unused data
         self.files_to_check = Default::default();
 
         true
