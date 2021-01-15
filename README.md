@@ -23,7 +23,7 @@
   - Invalid Symbolic Links - Shows symbolic links which points to non-existent files/directories
   - Broken Files - Finds files with invalid extension or corrupted
 
-![Czkawka](https://user-images.githubusercontent.com/41945903/100857797-69809680-348d-11eb-8382-acdec05fd3b8.gif)
+![Czkawka](https://user-images.githubusercontent.com/41945903/104711404-9cbb7400-5721-11eb-904d-9677c189f7ab.gif)
 
 ## Instruction
 You can find instruction how to use Czkawka [here](instructions/Instruction.md)
