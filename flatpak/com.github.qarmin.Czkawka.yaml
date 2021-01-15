@@ -13,6 +13,7 @@ finish-args:
 - "--socket=wayland"
 - "--filesystem=host"
 - "--device=dri"
+- "--socket=pulseaudio"
 build-options:
   append-path: "/usr/lib/sdk/rust-stable/bin"
   env:
@@ -38,4 +39,4 @@ modules:
     sha256: 4326eaa98b3fa544f2bf78632d191f53ec61616cef02fa0109ebb793ed1f9047
   - type: git
     url: https://github.com/qarmin/czkawka.git
-    tag: 2.2.0
+    tag: 2.3.0
