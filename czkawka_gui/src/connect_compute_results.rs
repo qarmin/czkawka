@@ -97,6 +97,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let btreemap = df.get_files_sorted_by_names();
 
                                 for (name, vector) in btreemap.iter().rev() {
+                                    // Sort
+                                    let vector = if vector.len() > 2 {
+                                        let mut vector = vector.clone();
+                                        vector.sort_by_key(|e| e.path.clone());
+                                        vector
+                                    } else {
+                                        vector.clone()
+                                    };
+
                                     let values: [&dyn ToValue; 6] = [
                                         &name,
                                         &(format!("{} results", vector.len())),
@@ -125,6 +134,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                                 for (size, vectors_vector) in btreemap.iter().rev() {
                                     for vector in vectors_vector {
+                                        // Sort
+                                        let vector = if vector.len() > 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| e.path.clone());
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+
                                         let values: [&dyn ToValue; 6] = [
                                             &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
                                             &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
@@ -153,6 +171,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let btreemap = df.get_files_sorted_by_size();
 
                                 for (size, vector) in btreemap.iter().rev() {
+                                    // Sort
+                                    let vector = if vector.len() > 2 {
+                                        let mut vector = vector.clone();
+                                        vector.sort_by_key(|e| e.path.clone());
+                                        vector
+                                    } else {
+                                        vector.clone()
+                                    };
+
                                     let values: [&dyn ToValue; 6] = [
                                         &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
                                         &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
@@ -266,6 +293,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = vf.get_empty_files();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
@@ -361,6 +392,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = tf.get_temporary_files();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
@@ -406,6 +441,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let vec_struct_similar = sf.get_similar_images();
 
                         for vec_file_entry in vec_struct_similar.iter() {
+                            // Sort
+                            let vec_file_entry = if vec_file_entry.len() > 2 {
+                                let mut vec_file_entry = vec_file_entry.clone();
+                                vec_file_entry.sort_by_key(|e| e.path.clone());
+                                vec_file_entry
+                            } else {
+                                vec_file_entry.clone()
+                            };
+
                             // Header
                             let values: [&dyn ToValue; 10] = [
                                 &"".to_string(),
@@ -481,6 +525,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = zf.get_zeroed_files();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [&dyn ToValue; 5] = [
@@ -542,6 +590,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let text: String = "-----".to_string();
 
                         for vec_file_entry in vector {
+                            // Sort
+                            let vec_file_entry = if vec_file_entry.len() > 2 {
+                                let mut vec_file_entry = vec_file_entry.clone();
+                                vec_file_entry.sort_by_key(|e| e.path.clone());
+                                vec_file_entry
+                            } else {
+                                vec_file_entry.clone()
+                            };
+
                             let values: [&dyn ToValue; 13] = [
                                 &"".to_string(),
                                 &(0),
@@ -634,6 +691,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let vector = ifs.get_invalid_symlinks();
 
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.symlink_path.clone());
+
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.symlink_path);
                             let values: [&dyn ToValue; 5] = [
@@ -683,6 +744,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let col_indices = [0, 1, 2, 3];
 
                         let vector = br.get_broken_files();
+
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| e.path.clone());
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
