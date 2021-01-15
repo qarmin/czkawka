@@ -48,6 +48,8 @@ pub struct FileEntry {
 pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
+    ArchiveZIP,
+    Audio,
 }
 
 /// Info struck with helpful information's about results
@@ -356,16 +358,17 @@ impl BrokenFiles {
                     check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
+                let file_entry = file_entry.1;
 
-                match file_entry.1.type_of_file {
+                match file_entry.type_of_file {
                     TypeOfFile::Image => {
-                        match image::open(&file_entry.1.path) {
+                        match image::open(&file_entry.path) {
                             Ok(_) => Some(None),
                             Err(t) => {
                                 let error_string = t.to_string();
                                 // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
                                 if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                                    let mut file_entry = file_entry.1.clone();
+                                    let mut file_entry = file_entry.clone();
                                     file_entry.error_string = error_string;
                                     Some(Some(file_entry))
                                 } else {
@@ -374,6 +377,32 @@ impl BrokenFiles {
                             } // Something is wrong with image
                         }
                     }
+                    TypeOfFile::ArchiveZIP => match fs::File::open(&file_entry.path) {
+                        Ok(file) => match zip::ZipArchive::new(file) {
+                            Ok(_) => Some(None),
+                            Err(e) => {
+                                // TODO Maybe filter out unnecessary types of errors
+                                let error_string = e.to_string();
+                                let mut file_entry = file_entry.clone();
+                                file_entry.error_string = error_string;
+                                Some(Some(file_entry))
+                            }
+                        },
+                        Err(_) => Some(None),
+                    },
+                    TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
+                        Ok(file) => match rodio::Decoder::new(BufReader::new(file)) {
+                            Ok(_) => Some(None),
+                            Err(e) => {
+                                let error_string = e.to_string();
+                                let mut file_entry = file_entry.clone();
+                                file_entry.error_string = error_string;
+                                Some(Some(file_entry))
+                            }
+                        },
+                        Err(_) => Some(None),
+                    },
+
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
                     TypeOfFile::Unknown => Some(None),
                 }
@@ -529,7 +558,6 @@ impl PrintResults for BrokenFiles {
 }
 
 fn save_cache_to_file(hashmap_file_entry: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
-    println!("Allowed to save {} entries", hashmap_file_entry.len());
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -635,9 +663,15 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<HashMap<String, 
 
 fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     // Checking allowed image extensions
-    let allowed_image_extensions = ["jpg", "jpeg", "png", "bmp", "ico", "tiff", "pnm", "tga", "ff", "gif"];
-    if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(format!(".{}", e).as_str())) {
+    let allowed_image_extensions = [".jpg", ".jpeg", ".png", ".bmp", ".ico", ".tiff", ".pnm", ".tga", ".ff", ".gif"];
+    let allowed_archive_zip_extensions = [".zip"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
+    let allowed_audio_extensions = [".mp3", ".flac", ".wav", ".ogg"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
+    if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::Image
+    } else if allowed_archive_zip_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+        TypeOfFile::ArchiveZIP
+    } else if allowed_audio_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+        TypeOfFile::Audio
     } else {
         TypeOfFile::Unknown
     }
