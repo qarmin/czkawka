@@ -1,3 +1,15 @@
+## Version 2.3.0 - 15.01.2021r
+- Add cache for duplicate finder - [#205](https://github.com/qarmin/czkawka/pull/205)
+- Add cache for broken files - [#204](https://github.com/qarmin/czkawka/pull/204)
+- Decrease ram usage - [#212](https://github.com/qarmin/czkawka/pull/212)
+- Add support for finding broken zip and audio files - [#210](https://github.com/qarmin/czkawka/pull/210)
+- Sort Results by path where it is possible - [#211](https://github.com/qarmin/czkawka/pull/211)
+- Add missing popover info for invalid symlinks - [#209](https://github.com/qarmin/czkawka/pull/209)
+- Use the oldest available OS in Linux and Mac CI and the newest on Windows - [#206](https://github.com/qarmin/czkawka/pull/206)
+- Add broken files support - [#202](https://github.com/qarmin/czkawka/pull/202)
+- Remove save workaround and fix crashes when loading/saving cache - [#200](https://github.com/qarmin/czkawka/pull/200)
+- Fix error when closing dialog progress by X - [#199](https://github.com/qarmin/czkawka/pull/199)
+
 ## Version 2.2.0 - 11.01.2021r
 - Adds Mac GUI - [#160](https://github.com/qarmin/czkawka/pull/160)
 - Use master gtk plugin again - [#179](https://github.com/qarmin/czkawka/pull/179)
