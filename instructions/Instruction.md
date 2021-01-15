@@ -126,13 +126,11 @@ Finally, each hash is compared with the others and if the distance between them 
 ### Broken Files
 This tool is created to find files which are corrupted or have invalid extension.
 
-Currently only checking of images is implemented.
+At first files from specific group(image,archive,audio) are collected and then this files are opened.  
 
-At first image files are collected and then this files are opened.  
+If an error happens when opening this file then it means that this file is corrupted or unsupported.
 
-If an error happens when opening this image then it means that this file is corrupted.
-
-Only some image extensions are supported, because I rely on image crate. Also some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130)
+Only some file extensions are supported, because I rely on external crates. Also some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.
 
 ## Config/Cache files
 For now Czkawka store only 2 files on disk:

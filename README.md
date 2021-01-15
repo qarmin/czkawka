@@ -48,7 +48,7 @@ If the app does not run when clicking at a launcher, run it through a terminal.
 You don't need to have any additional libraries for CLI Czkawka
 #### GUI Requirements
 ##### Linux
-For Czkawka GUI you need to have at least GTK 3.22.  
+For Czkawka GUI you need to have at least GTK 3.22 and also Alsa installed(for finding broken music files).  
 It should be installed by default on all the most popular distros.
 ##### Windows
 `czkawka_gui.exe` extracted from zip file `windows_czkawka_gui.zip` needs to have all files inside around, because use them.
@@ -122,12 +122,12 @@ If you want to compile CLI frontend, then just skip lines which contains `gtk` w
 ```shell
 sudo apt install -y curl  # Needed by Rust update tool
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo apt install -y libgtk-3-dev
+sudo apt install -y libgtk-3-dev libasound2-dev
 ```
 #### Fedora/CentOS/Rocky Linux
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo yum install gtk3-devel glib2-devel
+sudo yum install gtk3-devel glib2-devel alsa-lib-devel
 ```
 #### MacOS
 You need to install Homebrew and GTK Libraries

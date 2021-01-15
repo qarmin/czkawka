@@ -29,4 +29,8 @@ bitflags = "1.2.1"
 audiotags = "0.2.7182"
 
 # Futures - needed by async progress sender
-futures = "0.3.8"
+futures = "0.3.9"
+
+# Needed by broken files
+zip = "0.5.9"
+rodio = "0.13.0"
