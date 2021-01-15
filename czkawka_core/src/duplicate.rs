@@ -923,6 +923,10 @@ impl DuplicateFinder {
         }
 
         Common::print_time(start_time, SystemTime::now(), "check_files_hash - full hash".to_string());
+
+        // Clean unused data
+        self.files_with_identical_size = Default::default();
+
         true
     }
 

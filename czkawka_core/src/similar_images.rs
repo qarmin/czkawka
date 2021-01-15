@@ -527,6 +527,12 @@ impl SimilarImages {
         self.similar_vectors = new_vector;
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
+
+        // Clean unused data
+        self.image_hashes = Default::default();
+        self.images_to_check = Default::default();
+        self.bktree = BKTree::new(Hamming);
+
         true
     }
 
