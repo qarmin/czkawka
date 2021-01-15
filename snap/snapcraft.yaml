@@ -15,6 +15,7 @@ parts:
     source: https://github.com/qarmin/czkawka.git
     build-packages:
       - libgtk-3-dev
+      - libasound2-dev
       - curl
       - gcc
       - git
