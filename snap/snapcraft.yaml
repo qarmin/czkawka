@@ -32,7 +32,7 @@ parts:
 apps:
   czkawka:
     command: bin/czkawka_gui
-    extensions: [gnome-3-34]
+    extensions: [gnome-3-28]
     plugs:
       - home
       - removable-media
