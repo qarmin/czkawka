@@ -7,7 +7,7 @@ description: |
   This program have frontend written in modern GTK 3.
 
 grade: stable # must be 'stable' to release into candidate/stable channels
-confinement: strict # use 'strict' once you have the right plugs and slots
+confinement: classic # use 'strict' once you have the right plugs and slots
 
 parts:
   czkawka:
@@ -21,6 +21,7 @@ parts:
       - git
     stage-packages:
       - libgtk-3-dev
+      - libasound2-dev
     override-build: |
       if ! command -v rustup 2>/dev/null; then
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile=minimal
@@ -32,7 +33,7 @@ parts:
 apps:
   czkawka:
     command: bin/czkawka_gui
-    extensions: [gnome-3-28]
+    #    extensions: [gnome-3-28]
     plugs:
       - home
       - removable-media
