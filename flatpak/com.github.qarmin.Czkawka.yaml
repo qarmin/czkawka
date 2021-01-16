@@ -13,7 +13,6 @@ finish-args:
 - "--socket=wayland"
 - "--filesystem=host"
 - "--device=dri"
-- "--socket=pulseaudio"
 build-options:
   append-path: "/usr/lib/sdk/rust-stable/bin"
   env:
