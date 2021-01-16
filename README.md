@@ -87,6 +87,13 @@ Snap also are available, but there is no access to external drives.
 ```
 sudo snap install czkawka
 ```
+
+By default, Snap can only access to the files in your home directory. You have to allow czkawka to access to all the drives:
+
+```
+sudo snap connect czkawka:removable-media
+```
+
 Snap store entry - https://snapcraft.io/czkawka
 
 Edgy builds are build for every commit, but it may be a little unstable(very rarely, because I'm not pushing untested code).
