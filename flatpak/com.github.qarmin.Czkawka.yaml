@@ -24,22 +24,13 @@ modules:
   - cargo --offline fetch --manifest-path Cargo.toml --verbose
   - cargo --offline build --release --verbose
   - install -Dm755 ./target/release/czkawka_gui -t /app/bin/
-  - install -Dm644 com.github.qarmin.czkawka.svg /app/share/icons/hicolor/scalable/apps/com.github.qarmin.czkawka.svg
-  - install -Dm644 com.github.qarmin.czkawka.desktop /app/share/applications/com.github.qarmin.czkawka.desktop
-  - install -Dm644 com.github.qarmin.Czkawka.metainfo.xml /app/share/metainfo/com.github.qarmin.Czkawka.metainfo.xml
+  - install -Dm644 ./data/icons/com.github.qarmin.czkawka.svg /app/share/icons/hicolor/scalable/apps/com.github.qarmin.czkawka.svg
+  - install -Dm644 ./pkgs/com.github.qarmin.czkawka.desktop /app/share/applications/com.github.qarmin.czkawka.desktop
+  - install -Dm644 ./flatpak/com.github.qarmin.Czkawka.metainfo.xml /app/share/metainfo/com.github.qarmin.Czkawka.metainfo.xml
   sources:
   - type: dir
     path: "."
   - cargo-sources.json
-  - type: file
-    url: https://raw.githubusercontent.com/qarmin/czkawka/master/data/icons/com.github.qarmin.czkawka.svg
-    sha256: 23b61b21b5678f9ad9d23dd840652d2979e3fde8ee23bf313d1d4b2cb43c9d57
-  - type: file
-    url: https://raw.githubusercontent.com/qarmin/czkawka/master/pkgs/com.github.qarmin.czkawka.desktop
-    sha256: 4326eaa98b3fa544f2bf78632d191f53ec61616cef02fa0109ebb793ed1f9047
-  - type: file
-    url: https://raw.githubusercontent.com/qarmin/czkawka/master/flatpak/com.github.qarmin.Czkawka.metainfo.xml
-    sha256: 9cbdb2c07119f69068a3c85766d49abc6bba1edbe011e5f8c525d6f8e59bea0c
   - type: git
     url: https://github.com/qarmin/czkawka.git
     tag: 2.3.0
