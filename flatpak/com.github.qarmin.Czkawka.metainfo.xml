@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.github.qarmin.Czkawka</id>
   <name>Czkawka</name>
-  <summary> Multi functional app to find duplicates, empty folders, similar images etc. </summary>
+  <summary>Multi functional app to find duplicates, empty folders, similar images etc.</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <url type="homepage">https://github.com/qarmin/czkawka</url>
@@ -21,4 +21,5 @@
     <release version="3.3.0" date="2021-01-15"/>
   </releases>
   <content_rating type="oars-1.0"/>
+  <developer_name>Rafał Mikrut</developer_name>
 </component>
