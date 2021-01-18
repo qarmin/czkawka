@@ -26,7 +26,7 @@ modules:
   - install -Dm755 ./target/release/czkawka_gui -t /app/bin/
   - install -Dm644 ./data/icons/com.github.qarmin.czkawka.svg -t /app/share/icons/hicolor/scalable/apps/
   - install -Dm644 ./pkgs/com.github.qarmin.czkawka.desktop -t /app/share/applications/
-  - install -Dm644 ./flatpak/com.github.qarmin.Czkawka.appdata.xml -t /app/share/appdata
+  - install -Dm644 ./flatpak/com.github.qarmin.Czkawka.metainfo.xml -t /app/share/metainfo
   sources:
   - type: dir
     path: "."
