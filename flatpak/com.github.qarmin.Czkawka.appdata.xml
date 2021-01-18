@@ -5,7 +5,6 @@
   <summary>Multi functional app to find duplicates, empty folders, similar images etc.</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
-  <url type="homepage">https://github.com/qarmin/czkawka</url>
   <description>
     <p>
       Czkawka is written in Rust, simple, fast and easy to use app to remove unnecessary files from your computer.
@@ -22,4 +21,7 @@
   </releases>
   <content_rating type="oars-1.0"/>
   <developer_name>Rafał Mikrut</developer_name>
+  <url type="homepage">https://github.com/qarmin/czkawka</url>
+  <url type="bugtracker">https://github.com/qarmin/czkawka/issues</url>
+  <url type="donation">https://github.com/sponsors/qarmin</url>
 </component>
