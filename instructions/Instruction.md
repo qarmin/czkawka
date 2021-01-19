@@ -1,59 +1,72 @@
 # Instruction
 
-- [Basic information](#basic-informations)
-- [Tools - How works?](#tools---how-works)
-- [Config/Cache files](#configcache-files)
+- [Tools](#tools)
+- [Config / Cache files](#configcache-files)
 - [GUI](#gui-gtk)
 - [CLI](#cli)
 - [Tips and tricks](#tips-and-tricks)
 
-## Basic Informations
-Czkawka for now contains two independent frontends - Console and Graphical interface which share the core module which contains basic and common functions used by each frontend.
-
+Czkawka for now contains two independent frontends - the terminal and graphical interface which share the core module.
 Using Rust language without unsafe code, helps to create safe, fast with small resource requirements.
+This code also has good support for multi-threading.
 
-The code has very good support for multithreading, so the better processor/disk the performance should increase exponentially.
+# Tools
 
-## Tools - How works?
 ### Duplicate Finder
 
 Duplicate Finder allows you to search for files and group them according to a predefined criterion:
-- **By name** - Groups files by name e.g. `/home/rafal/plik.txt` will be treat like duplicate of file `/home/romb/plik.txt`. This is the fastest method, but it is very unreliable and should not be used unless you know what you are doing.
-- **By size** - Groups files by its size(in bytes), which must be exactly the same. It is as fast as the previous mode and usually gives much more correct results with duplicates, but I also do not recommend using it if you do not know what you are doing.
-- **By hash** - A mode containing a check of the hash (cryptographic hash) of a given file which determines with great probability whether the files are identical.
 
-  This is the slowest, but almost 100% sure way to check the files.
+- **By name** - Groups files by name e.g. `/home/john/cats.txt` will be treated like a duplicate of a file named
+  `/home/lucy/cats.txt`. This is the fastest method, but it is very unreliable and should not be used unless you know 
+  what you are doing.
 
-  Because the hash is only checked inside groups of files of the same size, it is practically impossible for two different files to be considered identical.
+- **By size** - Groups files by their size (in bytes and perfect matches only). It is as fast as the previous mode and 
+  usually gives better results with duplicates, but I also do not recommend using it if you do not know what you are doing.
 
-  It consists of 3 parts:
-  - Grouping files of identical size - allows you to throw away files of unique size, which are already known to have no duplicates at this stage.
-  - PreHash check - Each group of files of identical size is placed in a queue using all processor threads (each action in the group is independent of the others).
-  In each such group a small fragment of each file (2KB) is loaded in turn and then hashed. All files whose partial hashes are unique within the group are removed from it. Using this step usually allowed me to reduce the time of searching for duplicates even by half.
-  - Checking the Hash - After leaving files that have the same beginning in groups, you should now check the whole contents of the file to make sure they are identical.
+- **By hash** - A mode containing a check of the hash (cryptographic hash) of a given file which determines with great 
+   probability whether the files are identical. 
+   
+   This is the slowest, but almost 100% sure way to check the files.
 
-- **By hashmb** - Works the same way as via hash, only in the last phase it does not check the whole file but only its first Megabyte. It is perfect for quick search of possible duplicate files.
+   Because the hash is only checked inside groups of files of the same size, it is practically impossible for two different
+   files to be considered identical.
+
+   It consists of 3 steps:
+   - Grouping files of identical size - allows you to throw away files of unique size, which are already known to have no 
+     duplicates at this stage.
+   
+   - PreHash check - Each group of files of identical size is placed in a queue using all processor threads (each action in
+     the group is independent of the others). In each such group a small fragment of each file (2KB) is loaded in turn and 
+     then hashed. All files whose partial hashes are unique within the group are removed from it. Using this step usually 
+     allows me to reduce the time of searching for duplicates even by half.
+     
+   - Checking the hash - After leaving files that have the same beginning in groups, you should now check the whole contents
+     of the file to make sure they are identical.
+
+- **By hashmb** - Works the same way as via hash, only in the last phase it does not check the whole file but only its first
+  megabyte. It is perfect for quick search of possible duplicate files.
 
 ### Empty Files
-Searching for empty files is rather easy, because we only need to read file metadata and check if its length is 0.
+Searching for empty files is easy and fast, because we only need check the file metadata and its length.
 
 ### Empty Directories
-Empty directories are those that do not contain any other files, symbolic links, etc. unless they are other empty directories.
-
-At the beginning, a special entry is created for each directory containing - the parent path (only if it is not a folder directly selected by the user) and a flag to indicate whether the given directory is empty(at the beginning each one is potentially empty).
+At the beginning, a special entry is created for each directory containing - the parent path (only if it is not a folder
+directly selected by the user) and a flag to indicate whether the given directory is empty (at the beginning each one is 
+set to be potentionally empty).
 
 First, user-defined folders are put into the pool of folders to be checked.
 
 Each element is checked to see if it is
 - folder - this folder is added to the check queue as possible empty - `FolderEmptiness::Maybe`
-- anything else - the given folder is "poisoned" with the `FolderEmptiness::No` flag, indicating that the folder is no longer empty. Then each folder directly or indirectly containing the file is also poisoned with the `FolderEmptiness::No` flag.
+- anything else - the given folder is "poisoned" with the `FolderEmptiness::No` flag, indicating that the folder is no longer
+  empty. Then each folder directly or indirectly containing the file is also poisoned with the `FolderEmptiness::No` flag.
 
-e.g. There is 4 checked folder which may be empty `/krowa/`, `/krowa/ucho/`, `/krowa/ucho/stos/`, `/krowa/ucho/flaga/`.
+Example: there are 4 checked folders which *may* be empty `/cow/`, `/cow/ear/`, `/cow/ear/stack/`, `/cow/ear/flag/`.
 
-In the last one is found a file, so that means that `/krowa/ucho/flaga/` is not empty and also all parents - `/krowa/ucho/` and `/krowa/`.
-`/krowa/ucho/stos/` still may be empty.
+The last folder contains a file, so that means that `/cow/ear/flag` is not empty and also all its parents - `/cow/ear/` and `/cow/`,
+but `/cow/ear/stack/` may still be empty.
 
-Finally, all folders with the flag `FolderEmpriness::Maybe` are considered empty
+Finally, all folders with the flag `FolderEmptiness::Maybe` are defaulted to empty.
 
 ### Big Files
 From each file inside the given path its size is read and then after sorting it, e.g. 50 largest files are displayed.
