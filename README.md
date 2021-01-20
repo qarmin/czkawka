@@ -303,5 +303,5 @@ The program is completely free to use.
 
 "Gratis to uczciwa cena" - "Free is a fair price"
 
-## Dotations
+## Donations
 If you are using the app, I would appreciate a donation for its further development, which can be done [here](https://github.com/sponsors/qarmin).
