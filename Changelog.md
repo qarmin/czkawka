@@ -1,3 +1,7 @@
+## Version 2.3.1 - 20.01.2021r
+- Added flatpak support - [#203](https://github.com/qarmin/czkawka/pull/203)
+- Spell fixes - [#222](https://github.com/qarmin/czkawka/pull/222), [#219](https://github.com/qarmin/czkawka/pull/219)
+
 ## Version 2.3.0 - 15.01.2021r
 - Add cache for duplicate finder - [#205](https://github.com/qarmin/czkawka/pull/205)
 - Add cache for broken files - [#204](https://github.com/qarmin/czkawka/pull/204)
