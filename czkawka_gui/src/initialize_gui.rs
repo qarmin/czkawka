@@ -5,7 +5,7 @@ use crate::gui_data::*;
 use crate::help_functions::*;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
-use gtk::{SelectionMode, TreeView};
+use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 use image::imageops::FilterType;
 use image::GenericImageView;
 use std::cmp::Ordering;
@@ -227,82 +227,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.connect_button_press_event(opening_double_click_function_similar_images);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
-                    let (selected_rows, tree_model) = tree_view.get_selection().get_selected_rows();
-
-                    let mut created_image = false;
-
-                    // Only show preview when selected is only one item, because there is no method to recognize current clicked item in multiselection
-                    if selected_rows.len() == 1 && check_button_settings_show_preview_similar_images.get_active() {
-                        let tree_path = selected_rows[0].clone();
-                        if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-                            // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
-                            #[allow(clippy::never_loop)]
-                            'dir: loop {
-                                let cache_dir = proj_dirs.cache_dir();
-                                if cache_dir.exists() {
-                                    if !cache_dir.is_dir() {
-                                        add_text_to_text_view(&text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
-                                        break 'dir;
-                                    }
-                                } else if fs::create_dir_all(cache_dir).is_err() {
-                                    add_text_to_text_view(&text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
-                                    break 'dir;
-                                }
-                                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
-                                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
-
-                                let file_name = format!("{}/{}", path, name);
-                                let file_name = file_name.as_str();
-
-                                if let Some(extension) = Path::new(file_name).extension() {
-                                    let img = match image::open(&file_name) {
-                                        Ok(t) => t,
-                                        Err(_) => {
-                                            add_text_to_text_view(&text_view_errors, format!("Failed to open temporary image file {}", file_name).as_str());
-                                            break 'dir;
-                                        }
-                                    };
-                                    if img.width() == 0 || img.height() == 0 {
-                                        add_text_to_text_view(&text_view_errors, format!("Cannot create preview of image {}, with 0 width or height", file_name).as_str());
-                                        break 'dir;
-                                    }
-                                    let ratio = img.width() / img.height();
-                                    let requested_dimensions = (400, 400);
-                                    let mut new_size;
-                                    match ratio.cmp(&(requested_dimensions.0 / requested_dimensions.1)) {
-                                        Ordering::Greater => {
-                                            new_size = (requested_dimensions.0, (img.height() * requested_dimensions.0) / img.width());
-                                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-                                        }
-                                        Ordering::Less => {
-                                            new_size = ((img.width() * requested_dimensions.1) / img.height(), requested_dimensions.1);
-                                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-                                        }
-                                        Ordering::Equal => {
-                                            new_size = requested_dimensions;
-                                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-                                        }
-                                    }
-                                    let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
-                                    let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
-                                    if img.save(&file_dir).is_err() {
-                                        add_text_to_text_view(&text_view_errors, format!("Failed to save temporary image file to {}", file_dir.display()).as_str());
-                                        break 'dir;
-                                    }
-                                    let string_dir = file_dir.to_string_lossy().to_string();
-                                    image_preview_similar_images.set_from_file(string_dir);
-                                    created_image = true;
-                                }
-                                break 'dir;
-                            }
-                        }
-                    }
-                    if created_image {
-                        image_preview_similar_images.show();
-                    } else {
-                        image_preview_similar_images.hide();
-                    }
-
+                    show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview_similar_images, &image_preview_similar_images);
                     gtk::Inhibit(false)
                 });
 
@@ -310,6 +235,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 scrolled_window_similar_images_finder.add(&tree_view);
                 scrolled_window_similar_images_finder.show_all();
 
+                let image_preview_similar_images = image_preview_similar_images_clone.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
+                let check_button_settings_show_preview_similar_images = gui_data.upper_notebook.check_button_settings_show_preview_similar_images.clone();
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.get_keycode() {
@@ -319,6 +247,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                             image_preview_similar_images_clone.hide();
                         }
                     }
+                    show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview_similar_images, &image_preview_similar_images);
                     gtk::Inhibit(false)
                 });
             }
@@ -515,5 +444,82 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 gtk::Inhibit(false)
             });
         }
+    }
+}
+fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview_similar_images: &CheckButton, image_preview_similar_images: &Image) {
+    let (selected_rows, tree_model) = tree_view.get_selection().get_selected_rows();
+
+    let mut created_image = false;
+
+    // Only show preview when selected is only one item, because there is no method to recognize current clicked item in multiselection
+    if selected_rows.len() == 1 && check_button_settings_show_preview_similar_images.get_active() {
+        let tree_path = selected_rows[0].clone();
+        if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+            // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
+            #[allow(clippy::never_loop)]
+            'dir: loop {
+                let cache_dir = proj_dirs.cache_dir();
+                if cache_dir.exists() {
+                    if !cache_dir.is_dir() {
+                        add_text_to_text_view(&text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
+                        break 'dir;
+                    }
+                } else if fs::create_dir_all(cache_dir).is_err() {
+                    add_text_to_text_view(&text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
+                    break 'dir;
+                }
+                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
+                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
+
+                let file_name = format!("{}/{}", path, name);
+                let file_name = file_name.as_str();
+
+                if let Some(extension) = Path::new(file_name).extension() {
+                    let img = match image::open(&file_name) {
+                        Ok(t) => t,
+                        Err(_) => {
+                            add_text_to_text_view(&text_view_errors, format!("Failed to open temporary image file {}", file_name).as_str());
+                            break 'dir;
+                        }
+                    };
+                    if img.width() == 0 || img.height() == 0 {
+                        add_text_to_text_view(&text_view_errors, format!("Cannot create preview of image {}, with 0 width or height", file_name).as_str());
+                        break 'dir;
+                    }
+                    let ratio = img.width() / img.height();
+                    let requested_dimensions = (400, 400);
+                    let mut new_size;
+                    match ratio.cmp(&(requested_dimensions.0 / requested_dimensions.1)) {
+                        Ordering::Greater => {
+                            new_size = (requested_dimensions.0, (img.height() * requested_dimensions.0) / img.width());
+                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+                        }
+                        Ordering::Less => {
+                            new_size = ((img.width() * requested_dimensions.1) / img.height(), requested_dimensions.1);
+                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+                        }
+                        Ordering::Equal => {
+                            new_size = requested_dimensions;
+                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+                        }
+                    }
+                    let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
+                    let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
+                    if img.save(&file_dir).is_err() {
+                        add_text_to_text_view(&text_view_errors, format!("Failed to save temporary image file to {}", file_dir.display()).as_str());
+                        break 'dir;
+                    }
+                    let string_dir = file_dir.to_string_lossy().to_string();
+                    image_preview_similar_images.set_from_file(string_dir);
+                    created_image = true;
+                }
+                break 'dir;
+            }
+        }
+    }
+    if created_image {
+        image_preview_similar_images.show();
+    } else {
+        image_preview_similar_images.hide();
     }
 }
