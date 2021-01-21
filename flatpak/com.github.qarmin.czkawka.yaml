@@ -1,12 +1,10 @@
-app-id: com.github.qarmin.Czkawka
+app-id: com.github.qarmin.czkawka
 runtime: org.gnome.Platform
 runtime-version: '3.38'
 sdk: org.gnome.Sdk
 sdk-extensions:
 - org.freedesktop.Sdk.Extension.rust-stable
 command: czkawka_gui
-rename-icon: com.github.qarmin.czkawka
-rename-desktop-file: com.github.qarmin.czkawka.desktop
 finish-args:
 - "--share=ipc"
 - "--socket=fallback-x11"
@@ -26,11 +24,11 @@ modules:
   - install -Dm755 ./target/release/czkawka_gui -t /app/bin/
   - install -Dm644 ./data/icons/com.github.qarmin.czkawka.svg -t /app/share/icons/hicolor/scalable/apps/
   - install -Dm644 ./pkgs/com.github.qarmin.czkawka.desktop -t /app/share/applications/
-  - install -Dm644 ./flatpak/com.github.qarmin.Czkawka.metainfo.xml -t /app/share/metainfo
+  - install -Dm644 ./data/com.github.qarmin.czkawka.metainfo.xml -t /app/share/metainfo
   sources:
   - type: dir
     path: "."
   - cargo-sources.json
   - type: git
     url: https://github.com/qarmin/czkawka.git
-    tag: 2.3.1
+    tag: 2.3.2

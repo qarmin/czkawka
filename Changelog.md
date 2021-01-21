@@ -1,3 +1,8 @@
+## Version 2.3.2 - 21.01.2021r
+- Add support for moving selection by keyboard to update similar image preview [#223](https://github.com/qarmin/czkawka/pull/223)
+
+This version is only needed to test flatpak build
+
 ## Version 2.3.1 - 20.01.2021r
 - Added flatpak support - [#203](https://github.com/qarmin/czkawka/pull/203)
 - Spell fixes - [#222](https://github.com/qarmin/czkawka/pull/222), [#219](https://github.com/qarmin/czkawka/pull/219)
