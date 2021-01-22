@@ -43,6 +43,10 @@ sudo apt install cargo libgtk-3-dev
 ```
 sudo yum install gtk3-devel glib2-devel
 ```
+### Void Linux (CLI only)
+```
+sudo xbps-install gcc pkg-config alsa-lib-devel
+```
 
 
 # Installation
