@@ -32,12 +32,12 @@ You can find an instruction on how to use Czkawka [**here**](instructions/Instru
 
 ## Requirements
 If you are using Windows or Mac binaries, there is no specific requirements.  
-Same with Appimage on Linux (except having system 18.04+ or similar).  
+Same with Appimage, Flatpak and Snap on Linux (except having system 18.04+ or similar).  
 
 Although, compiled GUI binaries on Linux or compiling it on your own OS requires you to install these packages:
 ### Ubuntu/Debian
 ```
-sudo apt install cargo libgtk-3-dev
+sudo apt install libgtk-3-dev
 ```
 ### Fedora/CentOS
 ```
@@ -48,10 +48,7 @@ sudo yum install gtk3-devel glib2-devel
 sudo xbps-install gcc pkg-config alsa-lib-devel
 ```
 
-
 # Installation
-
-
 ### Precompiled binaries
 Ready-to-go executables are available [**here**](https://github.com/qarmin/czkawka/releases/).
 If the app does not run when clicking at a launcher, run it through a terminal.  
@@ -99,38 +96,44 @@ You can update the package with the same command.
 
 
 ### Snap
-Snaps also are available, but there is no access to external drives.
 ```
 sudo snap install czkawka
 ```
 The Snap store entry can be found [**here**](https://snapcraft.io/czkawka).
 
-Fresh builds are created for every commit, but they may be a little unstable, although that happenes very rarely
+Fresh builds are available in edge branch, but they may be a little unstable, although that happenes very rarely
 because I don't push untested code.
 
-<!-- Dunno if the flatpak section should be here, because it just takes valuable
-     space, but if you want to keep it you do you. I'm only fixing the english
-     here. -->
-
 ### Flatpak
-Maybe someday
-
+```
+flatpak install flathub com.github.qarmin.czkawka
+```
+Czkawka can be found here - https://flathub.org/apps/details/com.github.qarmin.czkawka
 
 ### Debian/Ubuntu repository and PPA
-I tried to set up it, but I'm having problems described in this [**issue**](https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21).
+I tried to set up it, but I'm having problems described in this [**issue**](https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21).  
+Still you can install Czkawka with different methods on this OS.
 
 ### AUR - Arch Linux Package (unofficial)
 Czkawka is also available in Arch Linux's AUR from which it can be easily installed.
 ```
 yay -Syu czkawka-git
 ```
+or 
+```
+yay -Syu czkawka-gui-bin
+yay -Syu czkawka-cli-bin
+```
 
-*This is unofficial package, so new versions will not be always available.*
+Package info's - https://aur.archlinux.org/packages/?O=0&SeB=nd&K=czkawka&outdated=&SB=n&SO=a&PP=50&do_Search=Go
 
+*This are unofficial packages, so new versions will not be always available immediately.*
+
+### Docker image (unofficial)
+Czkawka docker image is available [**here**](https://github.com/jlesage/docker-czkawka)
 
 ### Development versions
 Artifacts from each commit can be downloaded [**here**](https://github.com/qarmin/czkawka/actions)
-
 
 <!-- Note the #Compilation link if you're changing this! -->  
 # Compilation

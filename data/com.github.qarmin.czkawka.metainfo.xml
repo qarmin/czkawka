@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.github.qarmin.czkawka</id>
   <name>Czkawka</name>
-  <summary>Multi functional app to find duplicates, empty folders, similar images etc.</summary>
+  <summary>Multi functional app to find duplicates, empty folders, similar images, broken files etc.</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <description>
@@ -13,7 +13,9 @@
   <launchable type="desktop-id">com.github.qarmin.czkawka.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>https://user-images.githubusercontent.com/41945903/104711404-9cbb7400-5721-11eb-904d-9677c189f7ab.gif</image>
+      <image>https://user-images.githubusercontent.com/41945903/105611697-04735e00-5db7-11eb-833b-120eff81cf48.png</image>
+      <image>https://user-images.githubusercontent.com/41945903/105611700-06d5b800-5db7-11eb-93b7-8e121150cf0f.png</image>
+      <image>https://user-images.githubusercontent.com/41945903/105611698-05a48b00-5db7-11eb-9f2e-c95a3b0bb11f.png</image>
     </screenshot>
   </screenshots>
   <releases>
