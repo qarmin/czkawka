@@ -1,6 +1,7 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
 
+mod connect_about_buttons;
 mod connect_button_delete;
 mod connect_button_save;
 mod connect_button_search;
@@ -8,6 +9,7 @@ mod connect_button_select;
 mod connect_button_stop;
 mod connect_button_symlink;
 mod connect_compute_results;
+mod connect_header_buttons;
 mod connect_hide_text_view_errors;
 mod connect_notebook_tabs;
 mod connect_popovers;
@@ -16,9 +18,12 @@ mod connect_selection_of_directories;
 mod connect_settings;
 mod create_tree_view;
 mod double_click_opening;
+mod gui_about;
 mod gui_bottom_buttons;
 mod gui_data;
+mod gui_header;
 mod gui_main_notebook;
+mod gui_options;
 mod gui_popovers;
 mod gui_progress_dialog;
 mod gui_upper_notepad;
@@ -30,6 +35,7 @@ mod saving_loading;
 use czkawka_core::*;
 
 extern crate gtk;
+use crate::connect_about_buttons::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_save::*;
 use crate::connect_button_search::*;
@@ -37,6 +43,7 @@ use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
 use crate::connect_button_symlink::*;
 use crate::connect_compute_results::*;
+use crate::connect_header_buttons::*;
 use crate::connect_hide_text_view_errors::*;
 use crate::connect_notebook_tabs::*;
 use crate::connect_popovers::*;
@@ -127,6 +134,8 @@ fn main() {
     );
     connect_hide_text_view_errors(&gui_data);
     connect_settings(&gui_data);
+    connect_button_about(&gui_data);
+    connect_about_buttons(&gui_data);
 
     // Quit the program when X in main window was clicked
     {

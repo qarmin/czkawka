@@ -1,6 +1,9 @@
 extern crate gtk;
+use crate::gui_about::GUIAbout;
 use crate::gui_bottom_buttons::GUIBottomButtons;
+use crate::gui_header::GUIHeader;
 use crate::gui_main_notebook::GUIMainNotebook;
+use crate::gui_options::GUIOptions;
 use crate::gui_popovers::GUIPopovers;
 use crate::gui_progress_dialog::GUIProgressDialog;
 use crate::gui_upper_notepad::GUIUpperNotebook;
@@ -36,6 +39,9 @@ pub struct GuiData {
     pub popovers: GUIPopovers,
     pub bottom_buttons: GUIBottomButtons,
     pub progress_dialog: GUIProgressDialog,
+    pub about: GUIAbout,
+    pub options: GUIOptions,
+    pub header: GUIHeader,
 
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
@@ -83,6 +89,9 @@ impl GuiData {
         let popovers = GUIPopovers::create_from_builder(&builder);
         let bottom_buttons = GUIBottomButtons::create_from_builder(&builder);
         let progress_dialog = GUIProgressDialog::create_from_builder(&builder);
+        let options = GUIOptions::create_from_builder(&builder);
+        let about = GUIAbout::create_from_builder(&builder);
+        let header = GUIHeader::create_from_builder(&builder);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,6 +143,7 @@ impl GuiData {
         //// Bottom
         let text_view_errors: gtk::TextView = builder.get_object("text_view_errors").unwrap();
         let scrolled_window_errors: gtk::ScrolledWindow = builder.get_object("scrolled_window_errors").unwrap();
+        scrolled_window_errors.show_all(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
         let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = unbounded();
@@ -147,6 +157,9 @@ impl GuiData {
             popovers,
             bottom_buttons,
             progress_dialog,
+            about,
+            options,
+            header,
             shared_buttons,
             shared_upper_notebooks,
             shared_duplication_state,
