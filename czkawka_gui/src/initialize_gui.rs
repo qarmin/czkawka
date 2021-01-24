@@ -13,13 +13,28 @@ use std::fs;
 use std::path::Path;
 
 pub fn initialize_gui(gui_data: &mut GuiData) {
-    //// Setup default look(duplicate finder)
+    //// Initialize button
     {
         let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
         let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
         let buttons_delete = gui_data.bottom_buttons.buttons_delete.clone();
         let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
         let buttons_symlink = gui_data.bottom_buttons.buttons_symlink.clone();
+
+        // Disable and show buttons - only search button should be visible
+        buttons_search.show();
+        buttons_save.hide();
+        buttons_delete.hide();
+        buttons_select.hide();
+        buttons_symlink.hide();
+
+        // TODO Add Option window
+        let button_settings = gui_data.header.button_settings.clone();
+        button_settings.hide();
+    }
+
+    //// Initialize main scrolled view with notebook
+    {
         let scrolled_window_duplicate_finder = gui_data.main_notebook.scrolled_window_duplicate_finder.clone();
         let scrolled_window_empty_folder_finder = gui_data.main_notebook.scrolled_window_empty_folder_finder.clone();
         let scrolled_window_empty_files_finder = gui_data.main_notebook.scrolled_window_empty_files_finder.clone();
@@ -30,19 +45,10 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let scrolled_window_invalid_symlinks = gui_data.main_notebook.scrolled_window_invalid_symlinks.clone();
         let scrolled_window_zeroed_files_finder = gui_data.main_notebook.scrolled_window_zeroed_files_finder.clone();
         let scrolled_window_broken_files = gui_data.main_notebook.scrolled_window_broken_files.clone();
-        let scrolled_window_included_directories = gui_data.upper_notebook.scrolled_window_included_directories.clone();
-        let scrolled_window_excluded_directories = gui_data.upper_notebook.scrolled_window_excluded_directories.clone();
 
         let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
         let check_button_settings_show_preview_similar_images = gui_data.upper_notebook.check_button_settings_show_preview_similar_images.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
-
-        // Disable and show buttons
-        buttons_search.show();
-        buttons_save.hide();
-        buttons_delete.hide();
-        buttons_select.hide();
-        buttons_symlink.hide();
 
         // Set Main Scrolled Window Treeviews
         {
@@ -379,6 +385,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 });
             }
         }
+    }
+
+    //// Initialize upper notebook
+    {
+        let scrolled_window_included_directories = gui_data.upper_notebook.scrolled_window_included_directories.clone();
+        let scrolled_window_excluded_directories = gui_data.upper_notebook.scrolled_window_excluded_directories.clone();
 
         // Set Included Directory
         {

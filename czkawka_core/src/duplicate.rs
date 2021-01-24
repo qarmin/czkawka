@@ -1312,7 +1312,6 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
 }
 
 fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType) {
-    println!("Trying to save {} files", hashmap.len());
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
