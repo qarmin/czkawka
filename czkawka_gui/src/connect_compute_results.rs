@@ -38,12 +38,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
-    let dialog_progress = gui_data.progress_dialog.dialog_progress.clone();
+    let window_progress = gui_data.progress_window.window_progress.clone();
 
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
 
-        dialog_progress.hide();
+        window_progress.hide();
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);

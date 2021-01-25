@@ -38,7 +38,7 @@ pub struct GuiData {
     pub upper_notebook: GUIUpperNotebook,
     pub popovers: GUIPopovers,
     pub bottom_buttons: GUIBottomButtons,
-    pub progress_dialog: GUIProgressDialog,
+    pub progress_window: GUIProgressDialog,
     pub about: GUIAbout,
     pub options: GUIOptions,
     pub header: GUIHeader,
@@ -88,7 +88,7 @@ impl GuiData {
         let upper_notebook = GUIUpperNotebook::create_from_builder(&builder);
         let popovers = GUIPopovers::create_from_builder(&builder);
         let bottom_buttons = GUIBottomButtons::create_from_builder(&builder);
-        let progress_dialog = GUIProgressDialog::create_from_builder(&builder);
+        let progress_window = GUIProgressDialog::create_from_builder(&builder);
         let options = GUIOptions::create_from_builder(&builder);
         let about = GUIAbout::create_from_builder(&builder);
         let header = GUIHeader::create_from_builder(&builder);
@@ -156,7 +156,7 @@ impl GuiData {
             upper_notebook,
             popovers,
             bottom_buttons,
-            progress_dialog,
+            progress_window,
             about,
             options,
             header,

@@ -16,7 +16,7 @@ use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
 use gtk::prelude::*;
-use gtk::{ResponseType, WindowPosition};
+use gtk::WindowPosition;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -36,7 +36,6 @@ pub fn connect_button_search(
     futures_sender_invalid_symlinks: futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>,
     futures_sender_broken_files: futures::channel::mpsc::Sender<broken_files::ProgressData>,
 ) {
-    let stop_sender = gui_data.stop_sender.clone();
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
@@ -79,11 +78,11 @@ pub fn connect_button_search(
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
-    let dialog_progress = gui_data.progress_dialog.dialog_progress.clone();
-    let label_stage = gui_data.progress_dialog.label_stage.clone();
-    let grid_progress_stages = gui_data.progress_dialog.grid_progress_stages.clone();
-    let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
+    let window_progress = gui_data.progress_window.window_progress.clone();
+    let label_stage = gui_data.progress_window.label_stage.clone();
+    let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
+    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
@@ -103,7 +102,7 @@ pub fn connect_button_search(
         entry_info.set_text("Searching data, it may take a while, please wait...");
 
         // Set dialog to center to current screen(it is impossible to center it to main window)
-        dialog_progress.set_position(WindowPosition::CenterAlways);
+        window_progress.set_position(WindowPosition::CenterAlways);
 
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);
@@ -118,7 +117,7 @@ pub fn connect_button_search(
             NotebookMainEnum::Duplicate => {
                 label_stage.show();
                 grid_progress_stages.show_all();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_duplicate_finder).clear();
 
@@ -154,7 +153,7 @@ pub fn connect_button_search(
             NotebookMainEnum::EmptyFiles => {
                 label_stage.show();
                 grid_progress_stages.hide();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_empty_files_finder).clear();
 
@@ -175,7 +174,7 @@ pub fn connect_button_search(
             NotebookMainEnum::EmptyDirectories => {
                 label_stage.show();
                 grid_progress_stages.hide();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_empty_folder_finder).clear();
 
@@ -193,7 +192,7 @@ pub fn connect_button_search(
             NotebookMainEnum::BigFiles => {
                 label_stage.show();
                 grid_progress_stages.hide();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_big_files_finder).clear();
 
@@ -216,7 +215,7 @@ pub fn connect_button_search(
             NotebookMainEnum::Temporary => {
                 label_stage.show();
                 grid_progress_stages.hide();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_temporary_files_finder).clear();
 
@@ -238,7 +237,7 @@ pub fn connect_button_search(
 
                 label_stage.show();
                 grid_progress_stages.show_all();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_similar_images_finder).clear();
 
@@ -279,7 +278,7 @@ pub fn connect_button_search(
             NotebookMainEnum::Zeroed => {
                 label_stage.show();
                 grid_progress_stages.show_all();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_zeroed_files_finder).clear();
 
@@ -300,7 +299,7 @@ pub fn connect_button_search(
             NotebookMainEnum::SameMusic => {
                 label_stage.show();
                 grid_progress_stages.show_all();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
@@ -349,7 +348,7 @@ pub fn connect_button_search(
             NotebookMainEnum::Symlinks => {
                 label_stage.show();
                 grid_progress_stages.hide();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_invalid_symlinks).clear();
 
@@ -369,7 +368,7 @@ pub fn connect_button_search(
             NotebookMainEnum::BrokenFiles => {
                 label_stage.show();
                 grid_progress_stages.show();
-                dialog_progress.resize(1, 1);
+                window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_broken_files).clear();
 
@@ -390,14 +389,7 @@ pub fn connect_button_search(
 
         // Show progress dialog
         if show_dialog.load(Ordering::Relaxed) {
-            dialog_progress.show();
-
-            let response = dialog_progress.run();
-            if response == ResponseType::DeleteEvent {
-                stop_sender.send(()).unwrap();
-            }
-
-            dialog_progress.hide();
+            window_progress.show();
         }
     });
 }
