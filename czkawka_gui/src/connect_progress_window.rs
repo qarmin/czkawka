@@ -23,10 +23,10 @@ pub fn connect_progress_window(
 
     {
         // Duplicate Files
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
-        let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
-        let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
-        let grid_progress_stages = gui_data.progress_dialog.grid_progress_stages.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
+        let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
         let future = async move {
             while let Some(item) = futures_receiver_duplicate_files.next().await {
                 match item.checking_method {
@@ -91,7 +91,7 @@ pub fn connect_progress_window(
     }
     {
         // Empty Files
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
         let future = async move {
             while let Some(item) = futures_receiver_empty_files.next().await {
                 label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
@@ -101,7 +101,7 @@ pub fn connect_progress_window(
     }
     {
         // Empty Folder
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
         let future = async move {
             while let Some(item) = futures_receiver_empty_folder.next().await {
                 label_stage.set_text(format!("Scanned {} folders", item.folders_checked).as_str());
@@ -111,7 +111,7 @@ pub fn connect_progress_window(
     }
     {
         // Big Files
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
         let future = async move {
             while let Some(item) = futures_receiver_big_files.next().await {
                 label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
@@ -121,9 +121,9 @@ pub fn connect_progress_window(
     }
     {
         // Same Music
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
-        let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
-        let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
         let future = async move {
             while let Some(item) = futures_receiver_same_music.next().await {
                 match item.current_stage {
@@ -162,9 +162,9 @@ pub fn connect_progress_window(
     }
     {
         // Similar Images
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
-        let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
-        let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
         let future = async move {
             while let Some(item) = futures_receiver_similar_images.next().await {
                 match item.current_stage {
@@ -193,7 +193,7 @@ pub fn connect_progress_window(
     }
     {
         // Temporary
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
         let future = async move {
             while let Some(item) = futures_receiver_temporary.next().await {
                 label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
@@ -203,9 +203,9 @@ pub fn connect_progress_window(
     }
     {
         // Zeroed Files
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
-        let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
-        let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
         let future = async move {
             while let Some(item) = futures_receiver_zeroed.next().await {
                 match item.current_stage {
@@ -234,7 +234,7 @@ pub fn connect_progress_window(
     }
     {
         // Invalid Symlinks
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
         let future = async move {
             while let Some(item) = futures_receiver_invalid_symlinks.next().await {
                 label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
@@ -244,9 +244,9 @@ pub fn connect_progress_window(
     }
     {
         // Broken Files
-        let label_stage = gui_data.progress_dialog.label_stage.clone();
-        let progress_bar_current_stage = gui_data.progress_dialog.progress_bar_current_stage.clone();
-        let progress_bar_all_stages = gui_data.progress_dialog.progress_bar_all_stages.clone();
+        let label_stage = gui_data.progress_window.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
         let future = async move {
             while let Some(item) = futures_receiver_broken_files.next().await {
                 match item.current_stage {

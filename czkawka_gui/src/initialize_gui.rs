@@ -457,6 +457,19 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             });
         }
     }
+
+    //// Window progress
+    {
+        let window_progress = gui_data.progress_window.window_progress.clone();
+        let stop_sender = gui_data.stop_sender.clone();
+
+        window_progress.hide_on_delete();
+
+        window_progress.connect_delete_event(move |_e, _y| {
+            stop_sender.send(()).unwrap();
+            gtk::Inhibit(true)
+        });
+    }
 }
 fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview_similar_images: &CheckButton, image_preview_similar_images: &Image) {
     let (selected_rows, tree_model) = tree_view.get_selection().get_selected_rows();
