@@ -21,7 +21,7 @@ pub enum Commands {
         allowed_extensions: AllowedExtensions,
         #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (NAME, SIZE, HASH, HASHMB)", long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASHMB - More accurate but slower, checking by the hash of the file's first mebibyte or\nHASH - The slowest method, checking by the hash of the entire file")]
         search_method: CheckingMethod,
-        #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nNONE - not delete files")]
+        #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
         #[structopt(flatten)]
         file_to_save: FileToSave,
@@ -249,9 +249,10 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "none" => Ok(DeleteMethod::None),
         "aen" => Ok(DeleteMethod::AllExceptNewest),
         "aeo" => Ok(DeleteMethod::AllExceptOldest),
+        "hard" => Ok(DeleteMethod::HardLink),
         "on" => Ok(DeleteMethod::OneNewest),
         "oo" => Ok(DeleteMethod::OneOldest),
-        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO)"),
+        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD)"),
     }
 }
 
