@@ -31,6 +31,11 @@ mod help_functions;
 mod initialize_gui;
 mod notebook_enums;
 mod saving_loading;
+mod taskbar_progress;
+#[cfg(target_os = "windows")]
+mod taskbar_progress_win;
+#[cfg(not(target_os = "windows"))]
+mod taskbar_progress_dummy;
 
 use czkawka_core::*;
 

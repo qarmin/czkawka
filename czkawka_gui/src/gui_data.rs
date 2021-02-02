@@ -8,6 +8,7 @@ use crate::gui_popovers::GUIPopovers;
 use crate::gui_progress_dialog::GUIProgressDialog;
 use crate::gui_upper_notepad::GUIUpperNotebook;
 use crate::notebook_enums::*;
+use crate::taskbar_progress::TaskbarProgress;
 use crossbeam_channel::unbounded;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -42,6 +43,9 @@ pub struct GuiData {
     pub about: GUIAbout,
     pub options: GUIOptions,
     pub header: GUIHeader,
+
+    // Taskbar state
+    pub taskbar_state: Rc<Option<TaskbarProgress>>,
 
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
@@ -94,6 +98,9 @@ impl GuiData {
         let header = GUIHeader::create_from_builder(&builder);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Taskbar state
+        let taskbar_state = Rc::new(TaskbarProgress::new().ok());
 
         // Buttons State - to remember existence of different buttons on pages
         let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<String, bool>>::new()));
@@ -160,6 +167,7 @@ impl GuiData {
             about,
             options,
             header,
+            taskbar_state,
             shared_buttons,
             shared_upper_notebooks,
             shared_duplication_state,

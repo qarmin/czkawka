@@ -600,6 +600,7 @@ dependencies = [
  "humansize",
  "image",
  "open",
+ "winapi",
 ]
 
 [[package]]

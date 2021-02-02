@@ -3,6 +3,7 @@ use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
+use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -462,10 +463,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
     {
         let window_progress = gui_data.progress_window.window_progress.clone();
         let stop_sender = gui_data.stop_sender.clone();
+        let taskbar_state = gui_data.taskbar_state.clone();
 
         window_progress.hide_on_delete();
 
         window_progress.connect_delete_event(move |_e, _y| {
+            #[allow(unused_must_use)]
+            if let Some(taskbar_prog) = taskbar_state.as_ref() {
+                taskbar_prog.set_progress_state(TBPF_NOPROGRESS);
+            }
+
             stop_sender.send(()).unwrap();
             gtk::Inhibit(true)
         });

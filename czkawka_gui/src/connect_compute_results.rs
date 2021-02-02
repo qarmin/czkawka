@@ -4,6 +4,7 @@ extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
+use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use chrono::NaiveDateTime;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
@@ -39,11 +40,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
+    let taskbar_state = gui_data.taskbar_state.clone();
 
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
 
         window_progress.hide();
+
+        #[allow(unused_must_use)]
+        if let Some(taskbar_prog) = taskbar_state.as_ref() {
+            taskbar_prog.set_progress_state(TBPF_NOPROGRESS);
+        }
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);
