@@ -99,6 +99,12 @@ You can update the package with the same command.
 ```
 sudo snap install czkawka
 ```
+By default, Snap can only access to the files in your home directory. You have to allow czkawka to access to all the drives:
+
+```
+sudo snap connect czkawka:removable-media
+```
+
 The Snap store entry can be found [**here**](https://snapcraft.io/czkawka).
 
 Fresh builds are available in edge branch, but they may be a little unstable, although that happenes very rarely
