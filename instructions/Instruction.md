@@ -198,7 +198,7 @@ There are several buttons which do different actions:
 - Reset configuration - reset current GUI configuration to default
 
 ### Opening/Manipulating files
-It is possible to open selected files by double clicking at them.
+It is possible to open selected files by double clicking at them and open parent directory by double clicking with right mouse button.
 
 To open multiple file just select desired files with CTRL key pressed and still when clicking this key, double click at selected items with left mouse button.
 
