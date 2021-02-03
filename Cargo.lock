@@ -570,6 +570,7 @@ dependencies = [
  "bitflags",
  "bk-tree",
  "blake3",
+ "crc32fast",
  "crossbeam-channel",
  "directories-next",
  "futures",
@@ -579,6 +580,7 @@ dependencies = [
  "img_hash",
  "rayon",
  "rodio",
+ "xxhash-rust",
  "zip",
 ]
 
@@ -2745,6 +2747,12 @@ checksum = "244c3741f4240ef46274860397c7c74e50eb23624996930e484c16679633a54c"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "xxhash-rust"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94b92e16d90ed01ad0736f1123137630b5bcef5f5bafee62468283e027c1c85d"
 
 [[package]]
 name = "zip"
