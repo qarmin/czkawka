@@ -62,7 +62,12 @@ pub fn connect_progress_window(
                                     progress_bar_all_stages.set_fraction((2f64) / (item.max_stage + 1) as f64);
                                     progress_bar_current_stage.set_fraction(0f64);
                                 }
-                                label_stage.set_text(format!("Analyzed full hash of {}/{} files", item.files_checked, item.files_to_check).as_str());
+
+                                if item.checking_method == duplicate::CheckingMethod::Hash {
+                                    label_stage.set_text(format!("Analyzed full hash of {}/{} files", item.files_checked, item.files_to_check).as_str());
+                                } else {
+                                    label_stage.set_text(format!("Analyzed hash of {}/{} files", item.files_checked, item.files_to_check).as_str());
+                                }
                             }
                             _ => {
                                 panic!("Not available current_stage");
