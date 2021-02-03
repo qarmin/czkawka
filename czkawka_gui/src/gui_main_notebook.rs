@@ -53,6 +53,10 @@ pub struct GUIMainNotebook {
     pub radio_button_similar_images_high: gtk::RadioButton,
     pub radio_button_similar_images_very_high: gtk::RadioButton,
 
+    pub radio_button_hash_type_blake3: gtk::RadioButton,
+    pub radio_button_hash_type_crc32: gtk::RadioButton,
+    pub radio_button_hash_type_xxh3: gtk::RadioButton,
+
     pub image_preview_similar_images: gtk::Image,
 }
 
@@ -107,6 +111,10 @@ impl GUIMainNotebook {
         let radio_button_similar_images_high: gtk::RadioButton = builder.get_object("radio_button_similar_images_high").unwrap();
         let radio_button_similar_images_very_high: gtk::RadioButton = builder.get_object("radio_button_similar_images_very_high").unwrap();
 
+        let radio_button_hash_type_blake3: gtk::RadioButton = builder.get_object("radio_button_hash_type_blake3").unwrap();
+        let radio_button_hash_type_crc32: gtk::RadioButton = builder.get_object("radio_button_hash_type_crc32").unwrap();
+        let radio_button_hash_type_xxh3: gtk::RadioButton = builder.get_object("radio_button_hash_type_xxh3").unwrap();
+
         let image_preview_similar_images: gtk::Image = builder.get_object("image_preview_similar_images").unwrap();
 
         Self {
@@ -150,6 +158,9 @@ impl GUIMainNotebook {
             radio_button_similar_images_medium,
             radio_button_similar_images_high,
             radio_button_similar_images_very_high,
+            radio_button_hash_type_blake3,
+            radio_button_hash_type_crc32,
+            radio_button_hash_type_xxh3,
             image_preview_similar_images,
         }
     }

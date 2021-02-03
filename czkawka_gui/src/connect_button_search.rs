@@ -6,7 +6,7 @@ use crate::help_functions::*;
 use crate::notebook_enums::*;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::duplicate::DuplicateFinder;
+use czkawka_core::duplicate::{DuplicateFinder, HashType};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
@@ -84,6 +84,9 @@ pub fn connect_button_search(
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
     let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let radio_button_hash_type_blake3 = gui_data.main_notebook.radio_button_hash_type_blake3.clone();
+    let radio_button_hash_type_crc32 = gui_data.main_notebook.radio_button_hash_type_crc32.clone();
+    let radio_button_hash_type_xxh3 = gui_data.main_notebook.radio_button_hash_type_xxh3.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -135,6 +138,17 @@ pub fn connect_button_search(
                 }
                 let minimal_file_size = entry_duplicate_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
 
+                let hash_type: HashType;
+                if radio_button_hash_type_blake3.get_active() {
+                    hash_type = duplicate::HashType::Blake3;
+                } else if radio_button_hash_type_crc32.get_active() {
+                    hash_type = duplicate::HashType::CRC32;
+                } else if radio_button_hash_type_xxh3.get_active() {
+                    hash_type = duplicate::HashType::XXH3;
+                } else {
+                    panic!("No radio button is pressed");
+                }
+
                 let futures_sender_duplicate_files = futures_sender_duplicate_files.clone();
                 // Find duplicates
                 thread::spawn(move || {
@@ -146,6 +160,7 @@ pub fn connect_button_search(
                     df.set_allowed_extensions(allowed_extensions);
                     df.set_minimal_file_size(minimal_file_size);
                     df.set_check_method(check_method);
+                    df.set_hash_type(hash_type);
                     df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
                     let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });

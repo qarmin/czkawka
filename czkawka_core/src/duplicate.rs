@@ -15,6 +15,7 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use directories_next::ProjectDirs;
 use rayon::prelude::*;
+use std::hash::Hasher;
 use std::io::{BufReader, BufWriter};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -45,6 +46,8 @@ pub enum CheckingMethod {
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
     Blake3,
+    CRC32,
+    XXH3,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -185,6 +188,10 @@ impl DuplicateFinder {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
+    }
+
+    pub fn set_hash_type(&mut self, hash_type: HashType) {
+        self.hash_type = hash_type;
     }
 
     pub fn set_check_method(&mut self, check_method: CheckingMethod) {
@@ -558,10 +565,6 @@ impl DuplicateFinder {
 
     /// The slowest checking type, which must be applied after checking for size
     fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
-        if self.hash_type != HashType::Blake3 {
-            panic!(); // TODO Add more hash types
-        }
-
         let check_type = Arc::new(self.hash_type);
 
         let start_time: SystemTime = SystemTime::now();
@@ -1326,6 +1329,36 @@ fn pre_hash_calculation(errors: &mut Vec<String>, file_handler: &mut File, bytes
 
             Some(hasher.finalize().to_hex().to_string())
         }
+        HashType::CRC32 => {
+            let mut hasher: crc32fast::Hasher = crc32fast::Hasher::new();
+            let n = match file_handler.read(buffer) {
+                Ok(t) => t,
+                Err(_) => {
+                    errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                    return None;
+                }
+            };
+
+            *bytes_read += n as u64;
+            hasher.update(&buffer[..n]);
+
+            Some(hasher.finalize().to_string())
+        }
+        HashType::XXH3 => {
+            let mut hasher: xxhash_rust::xxh3::Xxh3 = xxhash_rust::xxh3::Xxh3::new();
+            let n = match file_handler.read(buffer) {
+                Ok(t) => t,
+                Err(_) => {
+                    errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                    return None;
+                }
+            };
+
+            *bytes_read += n as u64;
+            hasher.update(&buffer[..n]);
+
+            Some(hasher.finish().to_string())
+        }
     }
 }
 
@@ -1358,6 +1391,60 @@ fn hashmb_calculation(errors: &mut Vec<String>, file_handler: &mut File, bytes_r
 
             Some(hasher.finalize().to_hex().to_string())
         }
+        HashType::CRC32 => {
+            let mut hasher: crc32fast::Hasher = crc32fast::Hasher::new();
+            let mut current_file_read_bytes: u64 = 0;
+
+            loop {
+                let n = match file_handler.read(buffer) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                        return None;
+                    }
+                };
+                if n == 0 {
+                    break;
+                }
+
+                current_file_read_bytes += n as u64;
+                *bytes_read += n as u64;
+                hasher.update(&buffer[..n]);
+
+                if current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
+                    break;
+                }
+            }
+
+            Some(hasher.finalize().to_string())
+        }
+        HashType::XXH3 => {
+            let mut hasher: xxhash_rust::xxh3::Xxh3 = xxhash_rust::xxh3::Xxh3::new();
+            let mut current_file_read_bytes: u64 = 0;
+
+            loop {
+                let n = match file_handler.read(buffer) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                        return None;
+                    }
+                };
+                if n == 0 {
+                    break;
+                }
+
+                current_file_read_bytes += n as u64;
+                *bytes_read += n as u64;
+                hasher.update(&buffer[..n]);
+
+                if current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
+                    break;
+                }
+            }
+
+            Some(hasher.finish().to_string())
+        }
     }
 }
 
@@ -1383,6 +1470,48 @@ fn hash_calculation(errors: &mut Vec<String>, file_handler: &mut File, bytes_rea
             }
 
             Some(hasher.finalize().to_hex().to_string())
+        }
+        HashType::CRC32 => {
+            let mut hasher: crc32fast::Hasher = crc32fast::Hasher::new();
+
+            loop {
+                let n = match file_handler.read(buffer) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                        return None;
+                    }
+                };
+                if n == 0 {
+                    break;
+                }
+
+                *bytes_read += n as u64;
+                hasher.update(&buffer[..n]);
+            }
+
+            Some(hasher.finalize().to_string())
+        }
+        HashType::XXH3 => {
+            let mut hasher: xxhash_rust::xxh3::Xxh3 = xxhash_rust::xxh3::Xxh3::new();
+
+            loop {
+                let n = match file_handler.read(buffer) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
+                        return None;
+                    }
+                };
+                if n == 0 {
+                    break;
+                }
+
+                *bytes_read += n as u64;
+                hasher.update(&buffer[..n]);
+            }
+
+            Some(hasher.finish().to_string())
         }
     }
 }

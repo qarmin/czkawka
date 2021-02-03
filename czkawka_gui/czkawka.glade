@@ -43,7 +43,7 @@ Author: Rafał Mikrut
 This program is free to use and will always be.
 </property>
     <property name="authors">Rafał Mikrut(qarmin)</property>
-    <property name="logo">data/icons/com.github.qarmin.czkawka.svg</property>
+    <property name="logo_icon_name">system-search</property>
     <property name="license_type">mit-x11</property>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -1339,6 +1339,38 @@ This program is free to use and will always be.
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="radio_button_hash_type_crc32">
+                            <property name="label" translatable="yes">CRC32</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">radio_button_hash_type_blake3</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="radio_button_hash_type_xxh3">
+                            <property name="label" translatable="yes">XXH3</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">radio_button_hash_type_blake3</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>
