@@ -5,9 +5,8 @@ summary: Czkawka - fast data cleaner written in Rust # 79 char long summary
 description: |
   Czkawka is very fast and feature rich cleaner which finds file duplicates, empty folders and files, duplicated music, similar images or the biggest files in selected directories.
   This program have frontend written in modern GTK 3.
-
 grade: stable # must be 'stable' to release into candidate/stable channels
-confinement: classic # use 'strict' once you have the right plugs and slots
+confinement: strict # use 'strict' once you have the right plugs and slots
 
 parts:
   czkawka:
@@ -21,15 +20,17 @@ parts:
       - git
     stage-packages:
       - libgtk-3-dev
-      - libasound2-dev
     override-build: |
       if ! command -v rustup 2>/dev/null; then
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile=minimal
           export PATH="${HOME}/.cargo/bin:${PATH}"
       fi
-
       cargo install --locked --path czkawka_gui --root "${SNAPCRAFT_PART_INSTALL}" --force
-
 apps:
   czkawka:
     command: bin/czkawka_gui
+    extensions: [gnome-3-28]
+    plugs:
+      - home
+      - removable-media
+      - udisks2
