@@ -32,9 +32,14 @@ futures = "0.3.9"
 
 # Needed by broken files
 zip = "0.5.9"
-rodio = "0.13.0"
+rodio = { version = "0.13.0", optional = true }
 
 # Hashes
 blake3 = "0.3"
 crc32fast = "1.2.1"
 xxhash-rust = { version = "0.8.1", features = ["xxh3"] }
+
+[features]
+default = []
+
+broken_audio = ["rodio"]
