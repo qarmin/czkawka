@@ -49,6 +49,7 @@ pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
     ArchiveZIP,
+    #[cfg(feature = "broken_audio")]
     Audio,
 }
 
@@ -390,6 +391,7 @@ impl BrokenFiles {
                         },
                         Err(_) => Some(None),
                     },
+                    #[cfg(feature = "broken_audio")]
                     TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
                         Ok(file) => match rodio::Decoder::new(BufReader::new(file)) {
                             Ok(_) => Some(None),
@@ -671,7 +673,15 @@ fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     } else if allowed_archive_zip_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::ArchiveZIP
     } else if allowed_audio_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
-        TypeOfFile::Audio
+        #[cfg(feature = "broken_audio")]
+        {
+            TypeOfFile::Audio
+        }
+
+        #[cfg(not(feature = "broken_audio"))]
+        {
+            TypeOfFile::Unknown
+        }
     } else {
         TypeOfFile::Unknown
     }

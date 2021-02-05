@@ -107,14 +107,14 @@ sudo snap connect czkawka:removable-media
 
 The Snap store entry can be found [**here**](https://snapcraft.io/czkawka).
 
-Fresh builds are available in edge branch, but they may be a little unstable, although that happenes very rarely
+Fresh builds are available in edge branch, but they may be a little unstable, although that happens very rarely
 because I don't push untested code.
 
 ### Flatpak
 ```
 flatpak install flathub com.github.qarmin.czkawka
 ```
-Czkawka can be found here - https://flathub.org/apps/details/com.github.qarmin.czkawka
+Flathub page with Czkawka can be found [**here**](https://flathub.org/apps/details/com.github.qarmin.czkawka)
 
 ### Debian/Ubuntu repository and PPA
 I tried to set up it, but I'm having problems described in this [**issue**](https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21).  
@@ -191,18 +191,27 @@ After that the latest GTK 3 runtime must be installed from https://github.com/ts
 git clone https://github.com/qarmin/czkawka.git
 cd czkawka
 ```
-- Run GTK GUI
+- Compile and run GTK GUI
 ```
 cargo run --bin czkawka_gui
 ```
 
 For Linux-to-Windows cross-building instruction look at the CI.
 ![GUI](https://user-images.githubusercontent.com/41945903/103371136-fb9cae80-4ace-11eb-8d72-7b4c8ac44260.png)
-- Run CLI (this will print help with a lot of examples)
+- Compile and run CLI (this will print help with a lot of examples)
 ```
 cargo run --bin czkawka_cli
 ```
 ![CLI](https://user-images.githubusercontent.com/41945903/93716816-0bbcfd80-fb72-11ea-8d31-4c87cc2abe6d.png)
+
+### Additional features
+For now, finding broken audio files is temporary disabled by default, because it crash when not found audio libraries on computer.  
+I'm waiting for ability to disable audio playback feature, so after that I will be able to reenable by default this feature (https://github.com/RustAudio/rodio/issues/349)
+
+To enable checking for broken audio files, just add at the end ` --all-features` 
+```
+cargo run --all-features --bin czkawka_cli -- broken  -d /home/rafal/ -f "results.txt"
+```
 
 <!-- End of compilation section -->
 
