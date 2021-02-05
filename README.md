@@ -52,7 +52,7 @@ sudo xbps-install gcc pkg-config alsa-lib-devel
 ### Precompiled binaries
 Ready-to-go executables are available [**here**](https://github.com/qarmin/czkawka/releases/).
 If the app does not run when clicking at a launcher, run it through a terminal.  
-You don't need to have any additional libraries for CLI Czkawka
+You don't need to have any additional libraries for CLI Czkawka.
 
 ### GUI Requirements
 
@@ -87,7 +87,7 @@ There is a problem with this currently, as it doesn't allow you to open two imag
 
 ### Cargo
 The easiest method to install Czkawka is using the `cargo` command. For compiling it, you need to get all the 
-requirements from the [compilation section](#Compilation)
+requirements from the [compilation section](#Compilation).
 ```
 cargo install czkawka_gui
 cargo install czkawka_cli
@@ -177,7 +177,7 @@ brew install rust gtk+3
 
 ### Windows
 
-*Will be avaible in the future*
+*Will be available in the future*
 
 <!-- First you need to install Visual C++ components from Visual Studio installer - https://visualstudio.microsoft.com/downloads/
 Next install Rust from site https://rustup.rs/
@@ -210,7 +210,7 @@ cargo run --bin czkawka_cli
 ## Benchmarks
 
 
-Since Czkawka is written in Rust and it aims to be a faster alternative to FSlint (which written in Python), we need 
+Since Czkawka is written in Rust and it aims to be a faster alternative to FSlint (which is written in Python), we need
 to compare the speed of these tools.
 
 I tested it on a 256 GB SSD and a i7-4770 CPU.
@@ -310,7 +310,7 @@ Code is distributed under MIT license.
 
 Icon is created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
 
-Windows dark theme is used from [AdMin repo](https://github.com/nrhodes91/AdMin) with MIT license
+Windows dark theme is used from [AdMin repo](https://github.com/nrhodes91/AdMin) with MIT license.
 
 The program is completely free to use.
 
