@@ -57,6 +57,7 @@ pub enum DeleteMethod {
     AllExceptOldest,
     OneOldest,
     OneNewest,
+    HardLink,
 }
 
 #[derive(Clone, Debug)]
@@ -1266,6 +1267,26 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
                             warnings.push(format!("Failed to delete {}", file.path.display()));
                         }
                     };
+                }
+            }
+        }
+        DeleteMethod::HardLink => {
+            for (index, file) in vector.iter().enumerate() {
+                if q_time == 0 || q_time > file.modified_date {
+                    q_time = file.modified_date;
+                    q_index = index;
+                }
+            }
+            let src = vector[q_index].path.clone();
+            for (index, file) in vector.iter().enumerate() {
+                if q_index != index {
+                    if fs::remove_file(file.path.clone()).and_then(|_| fs::hard_link(&src, &file.path)).is_ok() {
+                        removed_files += 1;
+                        gained_space += file.size;
+                    } else {
+                        failed_to_remove_files += 1;
+                        warnings.push(format!("Failed to link {} -> {}", file.path.display(), src.display()));
+                    }
                 }
             }
         }
