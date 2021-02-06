@@ -113,12 +113,12 @@ Then, for each selected tag by which we want to search for duplicates, we perfor
 ### Similar Images
 It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
-The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".pnm", ".tga", ".ff", ".gif"]`.
+The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp", ".avif"]`.
 
 Next cached data are loaded from file to prevent hashing twice same file.  
 Automatically cache which points to non existing data is deleted.
 
-Then a perceptual hash is created for each image which isn't availavle in cache.
+Then a perceptual hash is created for each image which isn't available in cache.
 
 Cryptographic hash (used for example in ciphers) for similar inputs gives completely different outputs  
 11110 ==>  AAAAAB  
@@ -146,7 +146,7 @@ If an error happens when opening this file then it means that this file is corru
 Only some file extensions are supported, because I rely on external crates. Also some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.
 
 ## Config/Cache files
-For now Czkawka store only 2 files on disk:
+For now Czkawka store few config and cache files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
 - `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file may cause app crashes.
 - `cache_broken_files.txt` - stores cache data of broken files
