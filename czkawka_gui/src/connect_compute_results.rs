@@ -47,10 +47,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
         window_progress.hide();
 
-        #[allow(unused_must_use)]
-        if let Some(taskbar_prog) = taskbar_state.as_ref() {
-            taskbar_prog.set_progress_state(TBPF_NOPROGRESS);
-        }
+        taskbar_state.as_ref().set_progress_state(TBPF_NOPROGRESS);
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);

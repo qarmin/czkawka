@@ -468,10 +468,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         window_progress.hide_on_delete();
 
         window_progress.connect_delete_event(move |_e, _y| {
-            #[allow(unused_must_use)]
-            if let Some(taskbar_prog) = taskbar_state.as_ref() {
-                taskbar_prog.set_progress_state(TBPF_NOPROGRESS);
-            }
+            taskbar_state.as_ref().set_progress_state(TBPF_NOPROGRESS);
 
             stop_sender.send(()).unwrap();
             gtk::Inhibit(true)

@@ -1,6 +1,6 @@
 #![cfg(not(target_os = "windows"))]
+use std::convert::From;
 
-type HRESULT = i32;
 enum HWND__ {}
 type HWND = *mut HWND__;
 
@@ -19,20 +19,19 @@ pub mod tbp_flags {
 pub struct TaskbarProgress {}
 
 impl TaskbarProgress {
-	pub fn new() -> Result<TaskbarProgress, HRESULT> {
+	pub fn new() -> TaskbarProgress {
 		TaskbarProgress {}
 	}
 
-	pub fn set_progress_state(&self, tbp_flags: TBPFLAG) -> Result<(), HRESULT> {}
+	pub fn set_progress_state(&self, tbp_flags: TBPFLAG) {}
 
-	pub fn set_progress_value(&self, completed: u64, total: u64) -> Result<(), HRESULT> {}
+	pub fn set_progress_value(&self, completed: u64, total: u64) {}
 }
 
-impl TryFrom<HWND> for TaskbarProgress {
-	type Error = HRESULT;
+impl From<HWND> for TaskbarProgress {
 
-	fn try_from(hwnd: HWND) -> Result<Self, Self::Error> {
-		Ok(TaskbarProgress {})
+	fn from(hwnd: HWND) -> Self {
+		TaskbarProgress {}
 	}
 }
 

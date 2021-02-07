@@ -113,11 +113,8 @@ pub fn connect_button_search(
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);
         progress_bar_current_stage.set_fraction(0 as f64);
-        #[allow(unused_must_use)]
-        if let Some(taskbar_prog) = taskbar_state.as_ref() {
-            taskbar_prog.set_progress_state(TBPF_NOPROGRESS);
-            taskbar_prog.set_progress_value(0, 1);
-        }
+        taskbar_state.as_ref().set_progress_state(TBPF_NOPROGRESS);
+        taskbar_state.as_ref().set_progress_value(0, 1);
 
         reset_text_view(&text_view_errors);
 
