@@ -4,7 +4,8 @@ use std::convert::From;
 enum HWND__ {}
 type HWND = *mut HWND__;
 
-enum TBPFLAG {
+#[allow(non_camel_case_types, dead_code)]
+pub enum TBPFLAG {
 	TBPF_NOPROGRESS = 0,
 	TBPF_INDETERMINATE = 0x1,
 	TBPF_NORMAL = 0x2,
@@ -13,7 +14,7 @@ enum TBPFLAG {
 }
 
 pub mod tbp_flags {
-	use TBPFLAG::*;
+	pub use super::TBPFLAG::*;
 }
 
 pub struct TaskbarProgress {}
@@ -23,14 +24,13 @@ impl TaskbarProgress {
 		TaskbarProgress {}
 	}
 
-	pub fn set_progress_state(&self, tbp_flags: TBPFLAG) {}
+	pub fn set_progress_state(&self, _tbp_flags: TBPFLAG) {}
 
-	pub fn set_progress_value(&self, completed: u64, total: u64) {}
+	pub fn set_progress_value(&self, _completed: u64, _total: u64) {}
 }
 
 impl From<HWND> for TaskbarProgress {
-
-	fn from(hwnd: HWND) -> Self {
+	fn from(_hwnd: HWND) -> Self {
 		TaskbarProgress {}
 	}
 }
