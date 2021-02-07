@@ -39,6 +39,8 @@ blake3 = "0.3"
 crc32fast = "1.2.1"
 xxhash-rust = { version = "0.8.1", features = ["xxh3"] }
 
+tempfile = "3.1"
+
 [features]
 default = []
 
