@@ -218,7 +218,7 @@ pub fn connect_progress_window(
                             #[allow(unused_must_use)]
                             if let Some(taskbar_prog) = taskbar_state.as_ref() {
                                 taskbar_prog.set_progress_value((2 * item.music_to_check + item.music_checked) as u64, item.music_to_check as u64 * (item.max_stage + 1) as u64);
-                                taskbar_prog.set_progress_state(TBPF_NORMAL);
+                                // taskbar_prog.set_progress_state(TBPF_NORMAL);
                             }
                         } else {
                             progress_bar_all_stages.set_fraction((2f64) / (item.max_stage + 1) as f64);
@@ -226,7 +226,7 @@ pub fn connect_progress_window(
                             #[allow(unused_must_use)]
                             if let Some(taskbar_prog) = taskbar_state.as_ref() {
                                 taskbar_prog.set_progress_value(2, (item.max_stage + 1) as u64);
-                                taskbar_prog.set_progress_state(TBPF_NORMAL);
+                                // taskbar_prog.set_progress_state(TBPF_NORMAL);
                             }
                         }
                         label_stage.set_text(format!("Checking for duplicates of {}/{} music files", item.music_checked, item.music_to_check).as_str());

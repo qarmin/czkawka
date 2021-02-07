@@ -32,7 +32,7 @@ open = "1.4.0"
 image = "0.23.12"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", features = ["combaseapi", "guiddef", "objbase", "shobjidl_core", "unknwnbase", "windef", "winerror", "wtypesbase", "winuser"] }
+winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_core", "unknwnbase", "windef", "winerror", "wtypesbase", "winuser"] }
 
 [dependencies.gtk]
 version = "0.9.2"
