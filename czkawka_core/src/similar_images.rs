@@ -600,13 +600,21 @@ impl SaveResults for SimilarImages {
         if !self.similar_vectors.is_empty() {
             write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
 
-        // for struct_similar in self.similar_vectors.iter() {
-        //     writeln!(writer, "Image {:?} have {} similar images", struct_similar.base_image.path, struct_similar.similar_images.len()).unwrap();
-        //     for similar_picture in struct_similar.similar_images.iter() {
-        //         writeln!(writer, "{:?} - Similarity Level: {}", similar_picture.path, get_string_from_similarity(&similar_picture.similarity)).unwrap();
-        //     }
-        //     writeln!(writer).unwrap();
-        // }
+            for struct_similar in self.similar_vectors.iter() {
+                writeln!(writer, "Found {} images which have similar friends", self.similar_vectors.len()).unwrap();
+                for file_entry in struct_similar {
+                    writeln!(
+                        writer,
+                        "{} - {} - {} - {}",
+                        file_entry.path.display(),
+                        file_entry.dimensions,
+                        file_entry.size.file_size(options::BINARY).unwrap(),
+                        get_string_from_similarity(&file_entry.similarity)
+                    )
+                    .unwrap();
+                }
+                writeln!(writer).unwrap();
+            }
         } else {
             write!(writer, "Not found any similar images.").unwrap();
         }
