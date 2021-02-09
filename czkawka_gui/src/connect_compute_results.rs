@@ -4,7 +4,6 @@ extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use chrono::NaiveDateTime;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
@@ -47,7 +46,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
         window_progress.hide();
 
-        taskbar_state.as_ref().set_progress_state(TBPF_NOPROGRESS);
+        taskbar_state.hide();
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);

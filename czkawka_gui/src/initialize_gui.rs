@@ -3,7 +3,6 @@ use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
-use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -468,7 +467,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         window_progress.hide_on_delete();
 
         window_progress.connect_delete_event(move |_e, _y| {
-            taskbar_state.as_ref().set_progress_state(TBPF_NOPROGRESS);
+            taskbar_state.hide();
 
             stop_sender.send(()).unwrap();
             gtk::Inhibit(true)

@@ -21,6 +21,7 @@ pub struct TaskbarProgress {
     current_state: RefCell<TBPFLAG>,
     current_progress: RefCell<(u64, u64)>,
     must_uninit_com: bool,
+    is_active: RefCell<bool>,
 }
 
 impl TaskbarProgress {
@@ -30,7 +31,7 @@ impl TaskbarProgress {
     }
 
     pub fn set_progress_state(&self, tbp_flags: TBPFLAG) {
-        if tbp_flags == *self.current_state.borrow() {
+        if tbp_flags == *self.current_state.borrow() || !*self.is_active.borrow() {
             return ();
         }
         let result = unsafe {
@@ -46,7 +47,7 @@ impl TaskbarProgress {
     }
 
     pub fn set_progress_value(&self, completed: u64, total: u64) {
-        if (completed, total) == *self.current_progress.borrow() {
+        if (completed, total) == *self.current_progress.borrow() || !*self.is_active.borrow() {
             return ();
         }
         let result = unsafe {
@@ -60,6 +61,15 @@ impl TaskbarProgress {
             self.current_progress.replace((completed, total));
         }
     }
+
+    pub fn hide(&self) {
+        self.set_progress_state(tbp_flags::TBPF_NOPROGRESS);
+        *self.is_active.borrow_mut() = false;
+    }
+
+    pub fn show(&self) {
+        *self.is_active.borrow_mut() = true;
+    }
 }
 
 impl From<HWND> for TaskbarProgress {
@@ -71,6 +81,7 @@ impl From<HWND> for TaskbarProgress {
                 current_state: RefCell::new(tbp_flags::TBPF_NOPROGRESS),
                 current_progress: RefCell::new((0, 0)),
                 must_uninit_com: false,
+                is_active: RefCell::new(false),
             };
         }
 
@@ -84,6 +95,7 @@ impl From<HWND> for TaskbarProgress {
                 current_state: RefCell::new(tbp_flags::TBPF_NOPROGRESS),
                 current_progress: RefCell::new((0, 0)),
                 must_uninit_com: false,
+                is_active: RefCell::new(false),
             };
         }
 
@@ -98,6 +110,7 @@ impl From<HWND> for TaskbarProgress {
             current_state: RefCell::new(tbp_flags::TBPF_NOPROGRESS), // Assume no progress
             current_progress: RefCell::new((0, 0)),
             must_uninit_com: true,
+            is_active: RefCell::new(false),
         }
     }
 }

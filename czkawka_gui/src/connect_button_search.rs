@@ -113,8 +113,6 @@ pub fn connect_button_search(
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);
         progress_bar_current_stage.set_fraction(0 as f64);
-        taskbar_state.as_ref().set_progress_state(TBPF_NOPROGRESS);
-        taskbar_state.as_ref().set_progress_value(0, 1);
 
         reset_text_view(&text_view_errors);
 
@@ -410,6 +408,8 @@ pub fn connect_button_search(
         // Show progress dialog
         if show_dialog.load(Ordering::Relaxed) {
             window_progress.show();
+            taskbar_state.show();
+            taskbar_state.set_progress_state(TBPF_NOPROGRESS);
         }
     });
 }

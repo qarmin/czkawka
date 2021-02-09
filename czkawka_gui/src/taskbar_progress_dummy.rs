@@ -27,6 +27,10 @@ impl TaskbarProgress {
     pub fn set_progress_state(&self, _tbp_flags: TBPFLAG) {}
 
     pub fn set_progress_value(&self, _completed: u64, _total: u64) {}
+
+    pub fn hide(&self) {}
+
+    pub fn show(&self) {}
 }
 
 impl From<HWND> for TaskbarProgress {
