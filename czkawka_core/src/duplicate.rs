@@ -3,6 +3,7 @@ use humansize::{file_size_opts as options, FileSize};
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
+use std::io::{Error, ErrorKind, Result};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
@@ -1280,12 +1281,12 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
             let src = vector[q_index].path.clone();
             for (index, file) in vector.iter().enumerate() {
                 if q_index != index {
-                    if fs::remove_file(file.path.clone()).and_then(|_| fs::hard_link(&src, &file.path)).is_ok() {
+                    if let Err(e) = make_hard_link(&src, &file.path) {
+                        failed_to_remove_files += 1;
+                        warnings.push(format!("Failed to link {} -> {} ({})", file.path.display(), src.display(), e));
+                    } else {
                         removed_files += 1;
                         gained_space += file.size;
-                    } else {
-                        failed_to_remove_files += 1;
-                        warnings.push(format!("Failed to link {} -> {}", file.path.display(), src.display()));
                     }
                 }
             }
@@ -1295,6 +1296,17 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
         }
     };
     (gained_space, removed_files, failed_to_remove_files)
+}
+
+fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> Result<()> {
+    let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
+    let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
+    fs::rename(dst, temp.path())?;
+    let result = fs::hard_link(src, dst);
+    if result.is_err() {
+        fs::rename(temp.path(), dst)?;
+    }
+    result
 }
 
 fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType) {
@@ -1599,4 +1611,62 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
 
     text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::{read_dir, File};
+    use std::io::Result;
+    #[cfg(target_family = "windows")]
+    use std::os::fs::MetadataExt;
+    #[cfg(target_family = "unix")]
+    use std::os::unix::fs::MetadataExt;
+
+    #[cfg(target_family = "unix")]
+    fn assert_inode(before: &Metadata, after: &Metadata) {
+        assert_eq!(before.ino(), after.ino());
+    }
+    #[cfg(target_family = "windows")]
+    fn assert_inode(_: &Metadata, _: &Metadata) {}
+
+    #[test]
+    fn test_make_hard_link() -> Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&src)?;
+        let metadata = fs::metadata(&src)?;
+        File::create(&dst)?;
+
+        make_hard_link(&src, &dst)?;
+
+        assert_inode(&metadata, &fs::metadata(&dst)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+        assert_inode(&metadata, &fs::metadata(&src)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&src)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
+
+        let mut actual = read_dir(&dir)?.map(|e| e.unwrap().path()).collect::<Vec<PathBuf>>();
+        actual.sort();
+        assert_eq!(vec![src, dst], actual);
+        Ok(())
+    }
+
+    #[test]
+    fn test_make_hard_link_fails() -> Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&dst)?;
+        let metadata = fs::metadata(&dst)?;
+
+        assert!(make_hard_link(&src, &dst).is_err());
+
+        assert_inode(&metadata, &fs::metadata(&dst)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+
+        assert_eq!(vec![dst], read_dir(&dir)?.map(|e| e.unwrap().path()).collect::<Vec<PathBuf>>());
+        Ok(())
+    }
 }
