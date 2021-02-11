@@ -82,7 +82,7 @@ Execute in the same folder with:
 ```
 
 ### Appimage
-Appimage files are available in release page - [**Github releases**](https://github.com/qarmin/czkawka/releases/)
+Appimage files are available in release page - [**GitHub releases**](https://github.com/qarmin/czkawka/releases/)
 There is a problem with this currently, as it doesn't allow you to open two images/files at once.
 
 ### Cargo
@@ -206,7 +206,7 @@ cargo run --bin czkawka_cli
 
 ### Additional features
 For now, finding broken audio files is temporary disabled by default, because it crash when not found audio libraries on computer.  
-I'm waiting for ability to disable audio playback feature, so after that I will be able to reenable by default this feature (https://github.com/RustAudio/rodio/issues/349)
+I'm waiting for ability to disable audio playback feature, so after that I will be able to re-enable by default this feature (https://github.com/RustAudio/rodio/issues/349)
 
 To enable checking for broken audio files, just add at the end ` --all-features` 
 ```
@@ -263,7 +263,7 @@ Similar images which check 1421 image files which took 110.1 MB
 <!-- it's a lot of room, not a big room lol -->
 So there is still is a lot of room for improvements.
 
-## Comparsion other tools
+## Comparison to other tools
 
 |                        | Czkawka | FSlint     | DupeGuru          |
 |:----------------------:|:-------:|:----------:|:-----------------:|
