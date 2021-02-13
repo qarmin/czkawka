@@ -1209,7 +1209,7 @@ This program is free to use and will always be.
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Minimal file size(in bytes)</property>
+                            <property name="label" translatable="yes">Minimum file size(in bytes)</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1245,7 +1245,7 @@ This program is free to use and will always be.
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkRadioButton" id="radio_button_duplicates_name">
-                            <property name="label" translatable="yes">Name(very fast)</property>
+                            <property name="label" translatable="yes">Name (very fast)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -1260,7 +1260,7 @@ This program is free to use and will always be.
                         </child>
                         <child>
                           <object class="GtkRadioButton" id="radio_button_duplicates_size">
-                            <property name="label" translatable="yes">Size(very fast)</property>
+                            <property name="label" translatable="yes">Size (very fast)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -1275,7 +1275,7 @@ This program is free to use and will always be.
                         </child>
                         <child>
                           <object class="GtkRadioButton" id="radio_button_duplicates_hashmb">
-                            <property name="label" translatable="yes">HashMb(fast)</property>
+                            <property name="label" translatable="yes">HashMb (fast)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -1290,7 +1290,7 @@ This program is free to use and will always be.
                         </child>
                         <child>
                           <object class="GtkRadioButton" id="radio_button_duplicates_hash">
-                            <property name="label" translatable="yes">Hash(slow but accurate)</property>
+                            <property name="label" translatable="yes">Hash (slow but accurate)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -1572,7 +1572,7 @@ This program is free to use and will always be.
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Minimal file size(in bytes)</property>
+                                <property name="label" translatable="yes">Minimum file size(in bytes)</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1786,7 +1786,7 @@ This program is free to use and will always be.
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Minimal file size(in bytes)</property>
+                            <property name="label" translatable="yes">Minimum file size (in bytes)</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1945,7 +1945,7 @@ This program is free to use and will always be.
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Minimal file size(in bytes)</property>
+                            <property name="label" translatable="yes">Minimum file size (in bytes)</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
