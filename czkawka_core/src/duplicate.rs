@@ -10,7 +10,7 @@ use std::io::{self, Error, ErrorKind};
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, thread};
+use std::{fs, mem, thread};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -151,6 +151,7 @@ pub struct DuplicateFinder {
     ignore_hard_links: bool,
     dryrun: bool,
     stopped_search: bool,
+    use_cache: bool,
 }
 
 impl DuplicateFinder {
@@ -172,6 +173,7 @@ impl DuplicateFinder {
             ignore_hard_links: true,
             hash_type: HashType::Blake3,
             dryrun: false,
+            use_cache: true,
         }
     }
 
@@ -219,6 +221,10 @@ impl DuplicateFinder {
 
     pub const fn get_files_sorted_by_names(&self) -> &BTreeMap<String, Vec<FileEntry>> {
         &self.files_with_identical_names
+    }
+
+    pub fn set_use_cache(&mut self, use_cache: bool) {
+        self.use_cache = use_cache;
     }
 
     pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
@@ -795,38 +801,46 @@ impl DuplicateFinder {
                     .collect();
             }
             CheckingMethod::Hash => {
-                let loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, &self.hash_type) {
-                    Some(t) => t,
-                    None => Default::default(),
-                };
+                let loaded_hash_map;
 
-                let mut records_already_cached: HashMap<u64, Vec<FileEntry>> = Default::default();
-                let mut non_cached_files_to_check: HashMap<u64, Vec<FileEntry>> = Default::default();
-                for (size, vec_file_entry) in pre_checked_map {
-                    #[allow(clippy::collapsible_if)]
-                    if !loaded_hash_map.contains_key(&size) {
-                        // If loaded data doesn't contains current info
-                        non_cached_files_to_check.insert(size, vec_file_entry);
-                    } else {
-                        let loaded_vec_file_entry = loaded_hash_map.get(&size).unwrap();
+                let mut records_already_cached: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+                let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-                        for file_entry in vec_file_entry {
-                            let mut found: bool = false;
-                            for loaded_file_entry in loaded_vec_file_entry {
-                                if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
-                                    records_already_cached.entry(file_entry.size).or_insert_with(Vec::new);
-                                    records_already_cached.get_mut(&file_entry.size).unwrap().push(loaded_file_entry.clone());
-                                    found = true;
-                                    break;
+                if self.use_cache {
+                    loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, &self.hash_type) {
+                        Some(t) => t,
+                        None => Default::default(),
+                    };
+
+                    for (size, vec_file_entry) in pre_checked_map {
+                        #[allow(clippy::collapsible_if)]
+                        if !loaded_hash_map.contains_key(&size) {
+                            // If loaded data doesn't contains current info
+                            non_cached_files_to_check.insert(size, vec_file_entry);
+                        } else {
+                            let loaded_vec_file_entry = loaded_hash_map.get(&size).unwrap();
+
+                            for file_entry in vec_file_entry {
+                                let mut found: bool = false;
+                                for loaded_file_entry in loaded_vec_file_entry {
+                                    if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
+                                        records_already_cached.entry(file_entry.size).or_insert_with(Vec::new);
+                                        records_already_cached.get_mut(&file_entry.size).unwrap().push(loaded_file_entry.clone());
+                                        found = true;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            if !found {
-                                non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
-                                non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry);
+                                if !found {
+                                    non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
+                                    non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry);
+                                }
                             }
                         }
                     }
+                } else {
+                    loaded_hash_map = Default::default();
+                    mem::swap(&mut pre_checked_map, &mut non_cached_files_to_check);
                 }
 
                 full_hash_results = non_cached_files_to_check
@@ -860,43 +874,43 @@ impl DuplicateFinder {
                     .while_some()
                     .collect();
 
-                // Size, Vec
-
-                'main: for (size, vec_file_entry) in records_already_cached {
-                    // Check if size already exists, if exists we must to change it outside because cannot have mut and non mut reference to full_hash_results
-                    for (full_size, full_hashmap, _errors, _bytes_read) in &mut full_hash_results {
-                        if size == *full_size {
-                            for file_entry in vec_file_entry {
-                                full_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
-                                full_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
+                if self.use_cache {
+                    'main: for (size, vec_file_entry) in records_already_cached {
+                        // Check if size already exists, if exists we must to change it outside because cannot have mut and non mut reference to full_hash_results
+                        for (full_size, full_hashmap, _errors, _bytes_read) in &mut full_hash_results {
+                            if size == *full_size {
+                                for file_entry in vec_file_entry {
+                                    full_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
+                                    full_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
+                                }
+                                continue 'main;
                             }
-                            continue 'main;
                         }
-                    }
-                    // Size doesn't exists add results to files
-                    let mut temp_hashmap: HashMap<String, Vec<FileEntry>> = Default::default();
-                    for file_entry in vec_file_entry {
-                        temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
-                        temp_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
-                    }
-                    full_hash_results.push((size, temp_hashmap, Vec::new(), 0));
-                }
-
-                // Must save all results to file, old loaded from file with all currently counted results
-                let mut all_results: HashMap<String, FileEntry> = Default::default();
-                for (_size, vec_file_entry) in loaded_hash_map {
-                    for file_entry in vec_file_entry {
-                        all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-                    }
-                }
-                for (_size, hashmap, _errors, _bytes_read) in &full_hash_results {
-                    for vec_file_entry in hashmap.values() {
+                        // Size doesn't exists add results to files
+                        let mut temp_hashmap: HashMap<String, Vec<FileEntry>> = Default::default();
                         for file_entry in vec_file_entry {
-                            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                            temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
+                            temp_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
+                        }
+                        full_hash_results.push((size, temp_hashmap, Vec::new(), 0));
+                    }
+
+                    // Must save all results to file, old loaded from file with all currently counted results
+                    let mut all_results: HashMap<String, FileEntry> = Default::default();
+                    for (_size, vec_file_entry) in loaded_hash_map {
+                        for file_entry in vec_file_entry {
+                            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
                         }
                     }
+                    for (_size, hashmap, _errors, _bytes_read) in &full_hash_results {
+                        for vec_file_entry in hashmap.values() {
+                            for file_entry in vec_file_entry {
+                                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                            }
+                        }
+                    }
+                    save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type);
                 }
-                save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type);
             }
             _ => panic!("What"),
         }

@@ -112,10 +112,15 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             let check_button_settings_show_text_view = gui_data.settings.check_button_settings_show_text_view.clone();
             data_to_save.push(check_button_settings_show_text_view.get_active().to_string());
 
-            //// Show bottom text panel with errors
+            //// Hide/Show hard linked files, with same inodes
             data_to_save.push("--hide_hard_links:".to_string());
             let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
             data_to_save.push(check_button_settings_hide_hard_links.get_active().to_string());
+
+            //// Use cache system
+            data_to_save.push("--use_cache:".to_string());
+            let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
+            data_to_save.push(check_button_settings_use_cache.get_active().to_string());
         }
 
         // Creating/Opening config file
@@ -143,9 +148,9 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
         }
         if data_saved {
-            add_text_to_text_view(&text_view_errors, format!("Saved configuration to file {}", config_dir.display()).as_str());
+            add_text_to_text_view(&text_view_errors, format!("Saved configuration to file {}", config_file.display()).as_str());
         } else {
-            add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_dir.display()).as_str());
+            add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_file.display()).as_str());
         }
     } else {
         add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't save file.");
@@ -164,6 +169,7 @@ enum TypeOfLoadedData {
     ShowPreviews,
     BottomTextPanel,
     HideHardLinks,
+    UseCache,
 }
 
 pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
@@ -207,6 +213,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut show_previews: bool = true;
         let mut bottom_text_panel: bool = true;
         let mut hide_hard_links: bool = true;
+        let mut use_cache: bool = true;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -234,6 +241,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::BottomTextPanel;
             } else if line.starts_with("--hide_hard_links") {
                 current_type = TypeOfLoadedData::HideHardLinks;
+            } else if line.starts_with("--use_cache") {
+                current_type = TypeOfLoadedData::UseCache;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -338,6 +347,19 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             );
                         }
                     }
+                    TypeOfLoadedData::UseCache => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            use_cache = true;
+                        } else if line == "0" || line == "false" {
+                            use_cache = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -389,6 +411,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 gui_data.scrolled_window_errors.show();
             }
             gui_data.settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
+            gui_data.settings.check_button_settings_use_cache.set_active(use_cache);
         } else {
             gui_data.settings.check_button_settings_load_at_start.set_active(false);
         }
@@ -469,6 +492,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         gui_data.settings.check_button_settings_show_preview_similar_images.set_active(true);
         gui_data.settings.check_button_settings_show_text_view.set_active(true);
         gui_data.settings.check_button_settings_hide_hard_links.set_active(true);
+        gui_data.settings.check_button_settings_use_cache.set_active(true);
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");

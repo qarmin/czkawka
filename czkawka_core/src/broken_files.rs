@@ -2,7 +2,7 @@ use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, thread};
+use std::{fs, mem, thread};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -78,6 +78,7 @@ pub struct BrokenFiles {
     recursive_search: bool,
     delete_method: DeleteMethod,
     stopped_search: bool,
+    use_cache: bool,
 }
 
 impl BrokenFiles {
@@ -93,6 +94,7 @@ impl BrokenFiles {
             delete_method: DeleteMethod::None,
             stopped_search: false,
             broken_files: Default::default(),
+            use_cache: true,
         }
     }
 
@@ -128,6 +130,10 @@ impl BrokenFiles {
 
     pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
         self.delete_method = delete_method;
+    }
+
+    pub fn set_use_cache(&mut self, use_cache: bool) {
+        self.use_cache = use_cache;
     }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
@@ -297,27 +303,35 @@ impl BrokenFiles {
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
-        let loaded_hash_map = match load_cache_from_file(&mut self.text_messages) {
-            Some(t) => t,
-            None => Default::default(),
-        };
+        let loaded_hash_map;
 
         let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
         let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
-        for (name, file_entry) in &self.files_to_check {
-            #[allow(clippy::collapsible_if)]
-            if !loaded_hash_map.contains_key(name) {
-                // If loaded data doesn't contains current image info
-                non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-            } else {
-                if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
-                    // When size or modification date of image changed, then it is clear that is different image
+
+        if self.use_cache {
+            loaded_hash_map = match load_cache_from_file(&mut self.text_messages) {
+                Some(t) => t,
+                None => Default::default(),
+            };
+
+            for (name, file_entry) in &self.files_to_check {
+                #[allow(clippy::collapsible_if)]
+                if !loaded_hash_map.contains_key(name) {
+                    // If loaded data doesn't contains current image info
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
-                    // Checking may be omitted when already there is entry with same size and modification date
-                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                    if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                        // When size or modification date of image changed, then it is clear that is different image
+                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                    } else {
+                        // Checking may be omitted when already there is entry with same size and modification date
+                        records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                    }
                 }
             }
+        } else {
+            loaded_hash_map = Default::default();
+            mem::swap(&mut self.files_to_check, &mut non_cached_files_to_check);
         }
 
         let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
@@ -430,16 +444,18 @@ impl BrokenFiles {
 
         self.broken_files = vec_file_entry.iter().filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) }).collect();
 
-        // Must save all results to file, old loaded from file with all currently counted results
-        let mut all_results: HashMap<String, FileEntry> = self.files_to_check.clone();
+        if self.use_cache {
+            // Must save all results to file, old loaded from file with all currently counted results
+            let mut all_results: HashMap<String, FileEntry> = self.files_to_check.clone();
 
-        for file_entry in vec_file_entry {
-            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            for file_entry in vec_file_entry {
+                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+            for (_name, file_entry) in loaded_hash_map {
+                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+            save_cache_to_file(&all_results, &mut self.text_messages);
         }
-        for (_name, file_entry) in loaded_hash_map {
-            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-        }
-        save_cache_to_file(&all_results, &mut self.text_messages);
 
         self.information.number_of_broken_files = self.broken_files.len();
 

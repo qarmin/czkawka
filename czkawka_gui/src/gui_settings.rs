@@ -9,6 +9,7 @@ pub struct GUISettings {
     pub check_button_settings_load_at_start: gtk::CheckButton,
     pub check_button_settings_confirm_deletion: gtk::CheckButton,
     pub check_button_settings_show_text_view: gtk::CheckButton,
+    pub check_button_settings_use_cache: gtk::CheckButton,
 
     // Duplicates
     pub check_button_settings_hide_hard_links: gtk::CheckButton,
@@ -31,6 +32,7 @@ impl GUISettings {
         let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
         let check_button_settings_confirm_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_deletion").unwrap();
         let check_button_settings_show_text_view: gtk::CheckButton = builder.get_object("check_button_settings_show_text_view").unwrap();
+        let check_button_settings_use_cache: gtk::CheckButton = builder.get_object("check_button_settings_use_cache").unwrap();
 
         // Duplicates
         let check_button_settings_hide_hard_links: gtk::CheckButton = builder.get_object("check_button_settings_hide_hard_links").unwrap();
@@ -54,6 +56,7 @@ impl GUISettings {
             button_settings_reset_configuration,
             check_button_settings_show_preview_similar_images,
             check_button_settings_hide_hard_links,
+            check_button_settings_use_cache,
         }
     }
 }
