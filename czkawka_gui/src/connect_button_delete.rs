@@ -31,7 +31,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
         if check_button_settings_confirm_deletion.get_active() {
             let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some("Delete confirmation"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
             let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
-            let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask in future");
+            let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
             check_button.set_active(true);
 
             for widgets in confirmation_dialog_delete.get_children() {
