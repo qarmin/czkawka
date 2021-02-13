@@ -462,13 +462,10 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
     {
         let window_progress = gui_data.progress_window.window_progress.clone();
         let stop_sender = gui_data.stop_sender.clone();
-        let taskbar_state = gui_data.taskbar_state.clone();
 
         window_progress.hide_on_delete();
 
         window_progress.connect_delete_event(move |_e, _y| {
-            taskbar_state.hide();
-
             stop_sender.send(()).unwrap();
             gtk::Inhibit(true)
         });
