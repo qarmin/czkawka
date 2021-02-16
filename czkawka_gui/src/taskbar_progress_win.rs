@@ -70,6 +70,24 @@ impl TaskbarProgress {
     pub fn show(&self) {
         *self.is_active.borrow_mut() = true;
     }
+
+    /// Releases the ITaskbarList3 pointer, uninitialises the COM API and sets the struct to a valid "empty" state.
+    /// It's required for proper use of the COM API, because `drop` is never called (objects moved to GTK closures have `static` lifetime).
+    pub fn release(&mut self) {
+        unsafe {
+            if let Some(list) = self.taskbar_list.as_ref() {
+                list.Release();
+                self.taskbar_list = ptr::null_mut();
+                self.hwnd = ptr::null_mut();
+            }
+            // A thread must call CoUninitialize once for each successful call it has made to
+            // the CoInitialize or CoInitializeEx function, including any call that returns S_FALSE.
+            if self.must_uninit_com {
+                combaseapi::CoUninitialize();
+                self.must_uninit_com = false;
+            }
+        }
+    }
 }
 
 impl From<HWND> for TaskbarProgress {

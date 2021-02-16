@@ -46,7 +46,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
         window_progress.hide();
 
-        taskbar_state.hide();
+        taskbar_state.borrow().hide();
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);

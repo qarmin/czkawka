@@ -31,6 +31,8 @@ impl TaskbarProgress {
     pub fn hide(&self) {}
 
     pub fn show(&self) {}
+
+    pub fn release(&mut self) {}
 }
 
 impl From<HWND> for TaskbarProgress {

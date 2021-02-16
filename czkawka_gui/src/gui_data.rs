@@ -45,7 +45,7 @@ pub struct GuiData {
     pub header: GUIHeader,
 
     // Taskbar state
-    pub taskbar_state: Rc<TaskbarProgress>,
+    pub taskbar_state: Rc<RefCell<TaskbarProgress>>,
 
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
@@ -100,7 +100,7 @@ impl GuiData {
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Taskbar state
-        let taskbar_state = Rc::new(TaskbarProgress::new());
+        let taskbar_state = Rc::new(RefCell::new(TaskbarProgress::new()));
 
         // Buttons State - to remember existence of different buttons on pages
         let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<String, bool>>::new()));

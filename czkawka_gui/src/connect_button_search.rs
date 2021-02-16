@@ -408,8 +408,8 @@ pub fn connect_button_search(
         // Show progress dialog
         if show_dialog.load(Ordering::Relaxed) {
             window_progress.show();
-            taskbar_state.show();
-            taskbar_state.set_progress_state(TBPF_NOPROGRESS);
+            taskbar_state.borrow().show();
+            taskbar_state.borrow().set_progress_state(TBPF_NOPROGRESS);
         }
     });
 }
