@@ -21,6 +21,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
+use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
+
 #[allow(clippy::too_many_arguments)]
 pub fn connect_button_search(
     gui_data: &GuiData,
@@ -83,6 +85,7 @@ pub fn connect_button_search(
     let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
     let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
+    let taskbar_state = gui_data.taskbar_state.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let radio_button_hash_type_blake3 = gui_data.main_notebook.radio_button_hash_type_blake3.clone();
     let radio_button_hash_type_crc32 = gui_data.main_notebook.radio_button_hash_type_crc32.clone();
@@ -405,6 +408,8 @@ pub fn connect_button_search(
         // Show progress dialog
         if show_dialog.load(Ordering::Relaxed) {
             window_progress.show();
+            taskbar_state.borrow().show();
+            taskbar_state.borrow().set_progress_state(TBPF_NOPROGRESS);
         }
     });
 }

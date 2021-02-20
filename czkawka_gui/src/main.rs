@@ -31,6 +31,11 @@ mod help_functions;
 mod initialize_gui;
 mod notebook_enums;
 mod saving_loading;
+mod taskbar_progress;
+#[cfg(not(target_os = "windows"))]
+mod taskbar_progress_dummy;
+#[cfg(target_os = "windows")]
+mod taskbar_progress_win;
 
 use czkawka_core::*;
 
@@ -140,9 +145,11 @@ fn main() {
     // Quit the program when X in main window was clicked
     {
         let window_main = gui_data.window_main.clone();
+        let taskbar_state = gui_data.taskbar_state.clone();
         window_main.connect_delete_event(move |_, _| {
             save_configuration(&gui_data, false); // Save configuration at exit
             gtk::main_quit();
+            taskbar_state.borrow_mut().release();
             Inhibit(false)
         });
     }

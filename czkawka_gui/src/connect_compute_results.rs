@@ -39,11 +39,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
+    let taskbar_state = gui_data.taskbar_state.clone();
 
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
 
         window_progress.hide();
+
+        taskbar_state.borrow().hide();
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);

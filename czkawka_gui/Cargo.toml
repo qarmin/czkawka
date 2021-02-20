@@ -31,6 +31,9 @@ open = "1.4.0"
 # To get image preview
 image = "0.23.12"
 
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_core", "windef", "winerror", "wtypesbase", "winuser"] }
+
 [dependencies.gtk]
 version = "0.9.2"
 default-features = false # just in case
