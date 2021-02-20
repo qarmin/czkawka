@@ -1,9 +1,13 @@
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
+#[cfg(target_family = "unix")]
+use std::collections::HashSet;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
@@ -61,7 +65,7 @@ pub enum DeleteMethod {
     HardLink,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -551,12 +555,16 @@ impl DuplicateFinder {
         // Create new BTreeMap without single size entries(files have not duplicates)
         let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-        for (size, vector) in &self.files_with_identical_size {
+        for (size, vec) in &self.files_with_identical_size {
+            if vec.len() <= 1 {
+                continue;
+            }
+            let vector = filter_hard_links(vec);
             if vector.len() > 1 {
                 self.information.number_of_duplicated_files_by_size += vector.len() - 1;
                 self.information.number_of_groups_by_size += 1;
                 self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
-                new_map.insert(*size, vector.clone());
+                new_map.insert(*size, vector);
             }
         }
         self.files_with_identical_size = new_map;
@@ -1298,6 +1306,26 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
     (gained_space, removed_files, failed_to_remove_files)
 }
 
+#[cfg(target_family = "windows")]
+fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
+    vec_file_entry.to_vec()
+}
+
+#[cfg(target_family = "unix")]
+fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
+    let mut inodes: HashSet<u64> = HashSet::with_capacity(vec_file_entry.len());
+    let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
+    for f in vec_file_entry {
+        if let Ok(meta) = fs::metadata(&f.path) {
+            if !inodes.insert(meta.ino()) {
+                continue;
+            }
+        }
+        identical.push(f.clone());
+    }
+    identical
+}
+
 fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
     let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
@@ -1667,6 +1695,39 @@ mod tests {
         assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
 
         assert_eq!(vec![dst], read_dir(&dir)?.map(|e| e.unwrap().path()).collect::<Vec<PathBuf>>());
+        Ok(())
+    }
+
+    #[test]
+    fn test_filter_hard_links_empty() {
+        let expected: Vec<FileEntry> = Default::default();
+        assert_eq!(expected, filter_hard_links(&[]));
+    }
+
+    #[cfg(target_family = "unix")]
+    #[test]
+    fn test_filter_hard_links() -> Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&src)?;
+        fs::hard_link(src.clone(), dst.clone())?;
+        let e1 = FileEntry { path: src, ..Default::default() };
+        let e2 = FileEntry { path: dst, ..Default::default() };
+        let actual = filter_hard_links(&[e1.clone(), e2]);
+        assert_eq!(vec![e1], actual);
+        Ok(())
+    }
+
+    #[test]
+    fn test_filter_hard_links_regular_files() -> Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&src)?;
+        File::create(&dst)?;
+        let e1 = FileEntry { path: src, ..Default::default() };
+        let e2 = FileEntry { path: dst, ..Default::default() };
+        let actual = filter_hard_links(&[e1.clone(), e2.clone()]);
+        assert_eq!(vec![e1, e2], actual);
         Ok(())
     }
 }
