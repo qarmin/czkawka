@@ -241,7 +241,7 @@ jobs:
           echo "gtk-theme-name = admin-gtk3-dark-osx" >> $GTK_APP/share/gtk-3.0/settings.ini
           echo "gtk-font-name = Segoe UI 10" >> $GTK_APP/share/gtk-3.0/settings.ini
           echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
-          cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r
+          cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r -L
 
           zip -r gtk_app.zip $GTK_APP
         env:
