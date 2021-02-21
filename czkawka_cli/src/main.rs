@@ -36,6 +36,7 @@ fn main() {
             allowed_extensions,
             search_method,
             delete_method,
+            hash_type,
             file_to_save,
             not_recursive,
         } => {
@@ -48,6 +49,7 @@ fn main() {
             df.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             df.set_check_method(search_method);
             df.set_delete_method(delete_method);
+            df.set_hash_type(hash_type);
             df.set_recursive_search(!not_recursive.not_recursive);
 
             df.find_duplicates(None, None);
