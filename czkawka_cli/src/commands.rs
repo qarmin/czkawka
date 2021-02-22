@@ -30,6 +30,8 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[structopt(flatten)]
+        allow_hard_links: AllowHardLinks,
     },
     #[structopt(name = "empty-folders", about = "Finds empty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
     EmptyFolders {
@@ -225,6 +227,12 @@ pub struct NotRecursive {
 pub struct FileToSave {
     #[structopt(short, long, value_name = "file-name", help = "Saves the results into the file")]
     pub file_to_save: Option<PathBuf>,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct AllowHardLinks {
+    #[structopt(short = "L", long, help = "Do not ignore hard links")]
+    pub allow_hard_links: bool,
 }
 
 impl FileToSave {

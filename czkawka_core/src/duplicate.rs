@@ -148,6 +148,7 @@ pub struct DuplicateFinder {
     check_method: CheckingMethod,
     delete_method: DeleteMethod,
     hash_type: HashType,
+    ignore_hard_links: bool,
     stopped_search: bool,
 }
 
@@ -167,6 +168,7 @@ impl DuplicateFinder {
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
             stopped_search: false,
+            ignore_hard_links: true,
             hash_type: HashType::Blake3,
         }
     }
@@ -235,6 +237,10 @@ impl DuplicateFinder {
 
     pub fn set_hash_type(&mut self, hash_type: HashType) {
         self.hash_type = hash_type;
+    }
+
+    pub fn set_ignore_hard_links(&mut self, ignore_hard_links: bool) {
+        self.ignore_hard_links = ignore_hard_links;
     }
 
     pub fn set_check_method(&mut self, check_method: CheckingMethod) {
@@ -596,7 +602,14 @@ impl DuplicateFinder {
             if vec.len() <= 1 {
                 continue;
             }
-            let vector = filter_hard_links(vec);
+
+            let vector;
+            if self.ignore_hard_links {
+                vector = filter_hard_links(vec);
+            } else {
+                vector = vec.clone();
+            }
+
             if vector.len() > 1 {
                 self.information.number_of_duplicated_files_by_size += vector.len() - 1;
                 self.information.number_of_groups_by_size += 1;
