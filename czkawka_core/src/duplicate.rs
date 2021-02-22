@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
-use std::io::{Error, ErrorKind, Result};
+use std::io::{self, Error, ErrorKind};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -48,11 +48,48 @@ pub enum CheckingMethod {
     HashMB,
 }
 
+impl MyHasher for blake3::Hasher {
+    fn update(&mut self, bytes: &[u8]) {
+        self.update(bytes);
+    }
+    fn finalize(&self) -> String {
+        self.finalize().to_hex().to_string()
+    }
+}
+
+impl MyHasher for crc32fast::Hasher {
+    fn update(&mut self, bytes: &[u8]) {
+        self.write(bytes);
+    }
+    fn finalize(&self) -> String {
+        self.finish().to_string()
+    }
+}
+
+impl MyHasher for xxhash_rust::xxh3::Xxh3 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.write(bytes);
+    }
+    fn finalize(&self) -> String {
+        self.finish().to_string()
+    }
+}
+
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
     Blake3,
     CRC32,
     XXH3,
+}
+
+impl HashType {
+    fn hasher(self: &HashType) -> Box<dyn MyHasher> {
+        match self {
+            HashType::Blake3 => Box::new(blake3::Hasher::new()),
+            HashType::CRC32 => Box::new(crc32fast::Hasher::new()),
+            HashType::XXH3 => Box::new(xxhash_rust::xxh3::Xxh3::new()),
+        }
+    }
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -622,31 +659,23 @@ impl DuplicateFinder {
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut file_handler: File;
                 let mut bytes_read: u64 = 0;
                 let mut buffer = [0u8; 1024 * 2];
 
                 atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                'fe: for file_entry in vec_file_entry {
+                for file_entry in vec_file_entry {
                     if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                         check_was_breaked.store(true, Ordering::Relaxed);
                         return None;
                     }
-                    file_handler = match File::open(&file_entry.path) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            errors.push(format!("Unable to check hash of file {}", file_entry.path.display()));
-                            continue 'fe;
+                    match hash_calculation(&mut buffer, &file_entry, &check_type, 0) {
+                        Ok((hash_string, bytes)) => {
+                            bytes_read += bytes;
+                            hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
+                            hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.clone());
                         }
-                    };
-
-                    let hash_string = match pre_hash_calculation(&mut errors, &mut file_handler, &mut bytes_read, &mut buffer, &file_entry, &check_type) {
-                        Some(t) => t,
-                        None => continue 'fe,
-                    };
-
-                    hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
-                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.clone());
+                        Err(s) => errors.push(s),
+                    }
                 }
                 Some((*size, hashmap_with_hash, errors, bytes_read))
             })
@@ -723,30 +752,23 @@ impl DuplicateFinder {
                     .map(|(size, vec_file_entry)| {
                         let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
                         let mut errors: Vec<String> = Vec::new();
-                        let mut file_handler: File;
                         let mut bytes_read: u64 = 0;
                         let mut buffer = [0u8; 1024 * 128];
                         atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                        'fe: for file_entry in vec_file_entry {
+                        for file_entry in vec_file_entry {
                             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                                 check_was_breaked.store(true, Ordering::Relaxed);
                                 return None;
                             }
-                            file_handler = match File::open(&file_entry.path) {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    errors.push(format!("Unable to check hash of file {}", file_entry.path.display()));
-                                    continue 'fe;
+
+                            match hash_calculation(&mut buffer, &file_entry, &check_type, HASH_MB_LIMIT_BYTES) {
+                                Ok((hash_string, bytes)) => {
+                                    bytes_read += bytes;
+                                    hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
+                                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
                                 }
-                            };
-
-                            let hash_string = match hashmb_calculation(&mut errors, &mut file_handler, &mut bytes_read, &mut buffer, &file_entry, &check_type) {
-                                Some(t) => t,
-                                None => continue 'fe,
-                            };
-
-                            hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                            hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
+                                Err(s) => errors.push(s),
+                            }
                         }
                         Some((*size, hashmap_with_hash, errors, bytes_read))
                     })
@@ -793,33 +815,26 @@ impl DuplicateFinder {
                     .map(|(size, vec_file_entry)| {
                         let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
                         let mut errors: Vec<String> = Vec::new();
-                        let mut file_handler: File;
                         let mut bytes_read: u64 = 0;
                         let mut buffer = [0u8; 1024 * 128];
 
                         atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                        'fe: for file_entry in vec_file_entry {
+                        for file_entry in vec_file_entry {
                             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                                 check_was_breaked.store(true, Ordering::Relaxed);
                                 return None;
                             }
-                            file_handler = match File::open(&file_entry.path) {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    errors.push(format!("Unable to check hash of file {}", file_entry.path.display()));
-                                    continue 'fe;
+
+                            match hash_calculation(&mut buffer, &file_entry, &check_type, u64::MAX) {
+                                Ok((hash_string, bytes)) => {
+                                    bytes_read += bytes;
+                                    let mut file_entry = file_entry.clone();
+                                    file_entry.hash = hash_string.clone();
+                                    hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
+                                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry);
                                 }
-                            };
-
-                            let hash_string = match hash_calculation(&mut errors, &mut file_handler, &mut bytes_read, &mut buffer, &file_entry, &check_type) {
-                                Some(t) => t,
-                                None => continue 'fe,
-                            };
-
-                            let mut file_entry = file_entry.clone();
-                            file_entry.hash = hash_string.clone();
-                            hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
-                            hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry);
+                                Err(s) => errors.push(s),
+                            }
                         }
                         Some((*size, hashmap_with_hash, errors, bytes_read))
                     })
@@ -1326,7 +1341,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     identical
 }
 
-fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> Result<()> {
+fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
     let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
     fs::rename(dst, temp.path())?;
@@ -1373,208 +1388,33 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
     }
 }
 
-fn pre_hash_calculation(errors: &mut Vec<String>, file_handler: &mut File, bytes_read: &mut u64, buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType) -> Option<String> {
-    match hash_type {
-        HashType::Blake3 => {
-            let mut hasher: blake3::Hasher = blake3::Hasher::new();
-            let n = match file_handler.read(buffer) {
-                Ok(t) => t,
-                Err(_) => {
-                    errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                    return None;
-                }
-            };
-
-            *bytes_read += n as u64;
-            hasher.update(&buffer[..n]);
-
-            Some(hasher.finalize().to_hex().to_string())
-        }
-        HashType::CRC32 => {
-            let mut hasher: crc32fast::Hasher = crc32fast::Hasher::new();
-            let n = match file_handler.read(buffer) {
-                Ok(t) => t,
-                Err(_) => {
-                    errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                    return None;
-                }
-            };
-
-            *bytes_read += n as u64;
-            hasher.update(&buffer[..n]);
-
-            Some(hasher.finalize().to_string())
-        }
-        HashType::XXH3 => {
-            let mut hasher: xxhash_rust::xxh3::Xxh3 = xxhash_rust::xxh3::Xxh3::new();
-            let n = match file_handler.read(buffer) {
-                Ok(t) => t,
-                Err(_) => {
-                    errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                    return None;
-                }
-            };
-
-            *bytes_read += n as u64;
-            hasher.update(&buffer[..n]);
-
-            Some(hasher.finish().to_string())
-        }
-    }
+pub trait MyHasher {
+    fn update(&mut self, bytes: &[u8]);
+    fn finalize(&self) -> String;
 }
 
-fn hashmb_calculation(errors: &mut Vec<String>, file_handler: &mut File, bytes_read: &mut u64, buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType) -> Option<String> {
-    match hash_type {
-        HashType::Blake3 => {
-            let mut hasher: blake3::Hasher = blake3::Hasher::new();
-            let mut current_file_read_bytes: u64 = 0;
+fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<(String, u64), String> {
+    let mut file_handler = match File::open(&file_entry.path) {
+        Ok(t) => t,
+        Err(_) => return Err(format!("Unable to check hash of file {}", file_entry.path.display())),
+    };
+    let hasher = &mut *hash_type.hasher();
+    let mut current_file_read_bytes: u64 = 0;
+    loop {
+        let n = match file_handler.read(buffer) {
+            Ok(0) => break,
+            Ok(t) => t,
+            Err(_) => return Err(format!("Error happened when checking hash of file {}", file_entry.path.display())),
+        };
 
-            loop {
-                let n = match file_handler.read(buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                        return None;
-                    }
-                };
-                if n == 0 {
-                    break;
-                }
+        current_file_read_bytes += n as u64;
+        hasher.update(&buffer[..n]);
 
-                current_file_read_bytes += n as u64;
-                *bytes_read += n as u64;
-                hasher.update(&buffer[..n]);
-
-                if current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
-                    break;
-                }
-            }
-
-            Some(hasher.finalize().to_hex().to_string())
-        }
-        HashType::CRC32 => {
-            let mut hasher: crc32fast::Hasher = crc32fast::Hasher::new();
-            let mut current_file_read_bytes: u64 = 0;
-
-            loop {
-                let n = match file_handler.read(buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                        return None;
-                    }
-                };
-                if n == 0 {
-                    break;
-                }
-
-                current_file_read_bytes += n as u64;
-                *bytes_read += n as u64;
-                hasher.update(&buffer[..n]);
-
-                if current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
-                    break;
-                }
-            }
-
-            Some(hasher.finalize().to_string())
-        }
-        HashType::XXH3 => {
-            let mut hasher: xxhash_rust::xxh3::Xxh3 = xxhash_rust::xxh3::Xxh3::new();
-            let mut current_file_read_bytes: u64 = 0;
-
-            loop {
-                let n = match file_handler.read(buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                        return None;
-                    }
-                };
-                if n == 0 {
-                    break;
-                }
-
-                current_file_read_bytes += n as u64;
-                *bytes_read += n as u64;
-                hasher.update(&buffer[..n]);
-
-                if current_file_read_bytes >= HASH_MB_LIMIT_BYTES {
-                    break;
-                }
-            }
-
-            Some(hasher.finish().to_string())
+        if current_file_read_bytes >= limit {
+            break;
         }
     }
-}
-
-fn hash_calculation(errors: &mut Vec<String>, file_handler: &mut File, bytes_read: &mut u64, buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType) -> Option<String> {
-    match hash_type {
-        HashType::Blake3 => {
-            let mut hasher: blake3::Hasher = blake3::Hasher::new();
-
-            loop {
-                let n = match file_handler.read(buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                        return None;
-                    }
-                };
-                if n == 0 {
-                    break;
-                }
-
-                *bytes_read += n as u64;
-                hasher.update(&buffer[..n]);
-            }
-
-            Some(hasher.finalize().to_hex().to_string())
-        }
-        HashType::CRC32 => {
-            let mut hasher: crc32fast::Hasher = crc32fast::Hasher::new();
-
-            loop {
-                let n = match file_handler.read(buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                        return None;
-                    }
-                };
-                if n == 0 {
-                    break;
-                }
-
-                *bytes_read += n as u64;
-                hasher.update(&buffer[..n]);
-            }
-
-            Some(hasher.finalize().to_string())
-        }
-        HashType::XXH3 => {
-            let mut hasher: xxhash_rust::xxh3::Xxh3 = xxhash_rust::xxh3::Xxh3::new();
-
-            loop {
-                let n = match file_handler.read(buffer) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        errors.push(format!("Error happened when checking hash of file {}", file_entry.path.display()));
-                        return None;
-                    }
-                };
-                if n == 0 {
-                    break;
-                }
-
-                *bytes_read += n as u64;
-                hasher.update(&buffer[..n]);
-            }
-
-            Some(hasher.finish().to_string())
-        }
-    }
+    Ok((hasher.finalize(), current_file_read_bytes))
 }
 
 fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
@@ -1645,7 +1485,7 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
 mod tests {
     use super::*;
     use std::fs::{read_dir, File};
-    use std::io::Result;
+    use std::io;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;
     #[cfg(target_family = "unix")]
@@ -1659,7 +1499,7 @@ mod tests {
     fn assert_inode(_: &Metadata, _: &Metadata) {}
 
     #[test]
-    fn test_make_hard_link() -> Result<()> {
+    fn test_make_hard_link() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
         File::create(&src)?;
@@ -1682,7 +1522,7 @@ mod tests {
     }
 
     #[test]
-    fn test_make_hard_link_fails() -> Result<()> {
+    fn test_make_hard_link_fails() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
         File::create(&dst)?;
@@ -1706,7 +1546,7 @@ mod tests {
 
     #[cfg(target_family = "unix")]
     #[test]
-    fn test_filter_hard_links() -> Result<()> {
+    fn test_filter_hard_links() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
         File::create(&src)?;
@@ -1719,7 +1559,7 @@ mod tests {
     }
 
     #[test]
-    fn test_filter_hard_links_regular_files() -> Result<()> {
+    fn test_filter_hard_links_regular_files() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
         File::create(&src)?;
@@ -1728,6 +1568,47 @@ mod tests {
         let e2 = FileEntry { path: dst, ..Default::default() };
         let actual = filter_hard_links(&[e1.clone(), e2.clone()]);
         assert_eq!(vec![e1, e2], actual);
+        Ok(())
+    }
+
+    #[test]
+    fn test_hash_calculation() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let mut buf = [0u8; 1 << 10];
+        let src = dir.path().join("a");
+        let mut file = File::create(&src)?;
+        file.write_all(b"aa")?;
+        let e = FileEntry { path: src, ..Default::default() };
+        let r = hash_calculation(&mut buf, &e, &HashType::Blake3, 0).unwrap();
+        assert_eq!(2, r.1);
+        assert!(!r.0.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn test_hash_calculation_limit() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let mut buf = [0u8; 1];
+        let src = dir.path().join("a");
+        let mut file = File::create(&src)?;
+        file.write_all(b"aa")?;
+        let e = FileEntry { path: src, ..Default::default() };
+        let r1 = hash_calculation(&mut buf, &e, &HashType::Blake3, 1).unwrap();
+        let r2 = hash_calculation(&mut buf, &e, &HashType::Blake3, 2).unwrap();
+        let r3 = hash_calculation(&mut buf, &e, &HashType::Blake3, u64::MAX).unwrap();
+        assert_ne!(r1, r2);
+        assert_eq!(r2, r3);
+        Ok(())
+    }
+
+    #[test]
+    fn test_hash_calculation_invalid_file() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let mut buf = [0u8; 1 << 10];
+        let src = dir.path().join("a");
+        let e = FileEntry { path: src, ..Default::default() };
+        let r = hash_calculation(&mut buf, &e, &HashType::Blake3, 0).unwrap_err();
+        assert!(!r.is_empty());
         Ok(())
     }
 }
