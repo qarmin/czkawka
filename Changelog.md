@@ -1,3 +1,20 @@
+## Version 2.4.0 - 22.02.2021r
+- Add about dialog - [#226](https://github.com/qarmin/czkawka/pull/226)
+- Remove checking for ico in similar images - [#227](https://github.com/qarmin/czkawka/pull/227)
+- Change progress dialog to progress window  - [#229](https://github.com/qarmin/czkawka/pull/229)
+- Restore snap confinement  - [#218](https://github.com/qarmin/czkawka/pull/218), [8dcb718](https://github.com/qarmin/czkawka/commit/8dcb7188434e1c1728368642e17ccec29a4b372d)
+- Add support for CRC32 and XXH3 hash - [#243](https://github.com/qarmin/czkawka/pull/243)
+- Add delete method to replace duplicate files with hard links - [#236](https://github.com/qarmin/czkawka/pull/236)
+- Add checking for broken music opt-in - [#249](https://github.com/qarmin/czkawka/pull/249)
+- Allow to save to files similar images results - [10156ccfd3](https://github.com/qarmin/czkawka/commit/10156ccfd3ba880d26d4bbad1e025b0050d7753b)
+- Keep original file if replacing duplicate with hardlink fails - [#256](https://github.com/qarmin/czkawka/pull/256)
+- Fix Windows theme - [#265](https://github.com/qarmin/czkawka/pull/265)
+- Windows taskbar progress support - [#264](https://github.com/qarmin/czkawka/pull/264)
+- Ignore duplicates if those are hard links - [#234](https://github.com/qarmin/czkawka/pull/234)
+- Support the hash type parameter in the CLI - [#267](https://github.com/qarmin/czkawka/pull/267)
+- Use one implementation for all hash calculations - [#268](https://github.com/qarmin/czkawka/pull/268)
+- Disable for now broken tga and gif files - [#270](https://github.com/qarmin/czkawka/pull/270)
+
 ## Version 2.3.2 - 21.01.2021r
 - Add support for moving selection by keyboard to update similar image preview [#223](https://github.com/qarmin/czkawka/pull/223)
 
