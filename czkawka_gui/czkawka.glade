@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 
+<!-- Generated with glade 3.38.2 
 
 The MIT License (MIT)
 
@@ -33,27 +33,27 @@ Author: Rafał Mikrut
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
   <object class="GtkAboutDialog" id="about_dialog">
-    <property name="can_focus">False</property>
-    <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
-    <property name="program_name">Czkawka</property>
+    <property name="can-focus">False</property>
+    <property name="window-position">center</property>
+    <property name="type-hint">dialog</property>
+    <property name="program-name">Czkawka</property>
     <property name="version">2.3.2</property>
     <property name="comments" translatable="yes">2020 - 2021  Rafał Mikrut(qarmin)
 
 This program is free to use and will always be.
 </property>
     <property name="authors">Rafał Mikrut(qarmin)</property>
-    <property name="logo_icon_name">system-search</property>
-    <property name="license_type">mit-x11</property>
+    <property name="logo-icon-name">system-search</property>
+    <property name="license-type">mit-x11</property>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
             <child>
               <placeholder/>
             </child>
@@ -70,23 +70,23 @@ This program is free to use and will always be.
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkButton" id="button_repository">
                         <property name="label" translatable="yes">Repository</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -98,8 +98,8 @@ This program is free to use and will always be.
                       <object class="GtkButton" id="button_instruction">
                         <property name="label" translatable="yes">Instruction</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -118,13 +118,13 @@ This program is free to use and will always be.
                   <object class="GtkButton" id="button_donation">
                     <property name="label" translatable="yes">Donation</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack_type">end</property>
+                    <property name="pack-type">end</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -144,24 +144,21 @@ This program is free to use and will always be.
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
   </object>
   <object class="GtkPopover" id="popover_right_click">
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="position">left</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkButton" id="buttons_popover_right_click_open_file">
             <property name="label" translatable="yes">Open File</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -173,8 +170,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_right_click_open_folder">
             <property name="label" translatable="yes">Open Folder</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -186,18 +183,18 @@ This program is free to use and will always be.
     </child>
   </object>
   <object class="GtkPopover" id="popover_select">
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkButton" id="buttons_popover_select_custom">
             <property name="label" translatable="yes">Select custom</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -209,8 +206,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_unselect_custom">
             <property name="label" translatable="yes">Unselect custom</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -221,7 +218,7 @@ This program is free to use and will always be.
         <child>
           <object class="GtkSeparator" id="separator_select_custom">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -233,8 +230,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_all_images_except_biggest">
             <property name="label" translatable="yes">Select all except biggest</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -246,8 +243,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_all_images_except_smallest">
             <property name="label" translatable="yes">Select all except smallest</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -258,7 +255,7 @@ This program is free to use and will always be.
         <child>
           <object class="GtkSeparator" id="separator_select_image_size">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -270,8 +267,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_all_except_oldest">
             <property name="label" translatable="yes">Select all except oldest</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -283,8 +280,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_all_except_newest">
             <property name="label" translatable="yes">Select all except newest</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -296,8 +293,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_one_oldest">
             <property name="label" translatable="yes">Select one oldest</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -309,8 +306,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_one_newest">
             <property name="label" translatable="yes">Select one newest</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -321,7 +318,7 @@ This program is free to use and will always be.
         <child>
           <object class="GtkSeparator" id="separator_select_date">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -333,8 +330,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_reverse">
             <property name="label" translatable="yes">Reverse Selection</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -345,7 +342,7 @@ This program is free to use and will always be.
         <child>
           <object class="GtkSeparator" id="separator_select_reverse">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -357,8 +354,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_select_all">
             <property name="label" translatable="yes">Select All</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -370,8 +367,8 @@ This program is free to use and will always be.
           <object class="GtkButton" id="buttons_popover_unselect_all">
             <property name="label" translatable="yes">Unselect All</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -383,58 +380,58 @@ This program is free to use and will always be.
     </child>
   </object>
   <object class="GtkWindow" id="window_main">
-    <property name="can_focus">False</property>
-    <property name="default_width">1100</property>
-    <property name="default_height">800</property>
+    <property name="can-focus">False</property>
+    <property name="default-width">1100</property>
+    <property name="default-height">800</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkPaned">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can-focus">True</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkNotebook" id="notebook_upper">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can-focus">True</property>
                 <child>
                   <object class="GtkBox" id="notebook_upper_included_directories">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_start">5</property>
-                    <property name="margin_end">5</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_start">5</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
                         <child>
                           <object class="GtkButton" id="buttons_add_included_directory">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkAlignment">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="xscale">0</property>
                                 <property name="yscale">0</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="spacing">4</property>
                                     <child>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">list-add</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">list-add</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -445,7 +442,7 @@ This program is free to use and will always be.
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can-focus">False</property>
                                         <property name="label" translatable="yes">Add </property>
                                       </object>
                                       <packing>
@@ -468,24 +465,24 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkButton" id="buttons_remove_included_directory">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkAlignment">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="xscale">0</property>
                                 <property name="yscale">0</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="spacing">4</property>
                                     <child>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">list-remove</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">list-remove</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -496,7 +493,7 @@ This program is free to use and will always be.
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can-focus">False</property>
                                         <property name="label" translatable="yes">Remove  </property>
                                       </object>
                                       <packing>
@@ -519,24 +516,24 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkButton" id="buttons_manual_add_directory">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkAlignment">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="xscale">0</property>
                                 <property name="yscale">0</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="spacing">4</property>
                                     <child>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">insert-link</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">insert-link</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -547,7 +544,7 @@ This program is free to use and will always be.
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can-focus">False</property>
                                         <property name="label" translatable="yes">Manual Add</property>
                                       </object>
                                       <packing>
@@ -577,8 +574,8 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_included_directories">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -593,10 +590,10 @@ This program is free to use and will always be.
                       <object class="GtkCheckButton" id="check_button_recursive">
                         <property name="label" translatable="yes">Recursive</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
                         <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -606,54 +603,54 @@ This program is free to use and will always be.
                     </child>
                   </object>
                   <packing>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Included Directories</property>
                   </object>
                   <packing>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox" id="notebook_upper_excluded_directories">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_start">5</property>
-                    <property name="margin_end">5</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
                     <property name="spacing">6</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_start">5</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
                         <child>
                           <object class="GtkButton" id="buttons_add_excluded_directory">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkAlignment">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="xscale">0</property>
                                 <property name="yscale">0</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="spacing">4</property>
                                     <child>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">list-add</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">list-add</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -664,7 +661,7 @@ This program is free to use and will always be.
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can-focus">False</property>
                                         <property name="label" translatable="yes">Add </property>
                                       </object>
                                       <packing>
@@ -687,24 +684,24 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkButton" id="buttons_remove_excluded_directory">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkAlignment">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="xscale">0</property>
                                 <property name="yscale">0</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="spacing">4</property>
                                     <child>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">list-remove</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">list-remove</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -715,7 +712,7 @@ This program is free to use and will always be.
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can-focus">False</property>
                                         <property name="label" translatable="yes">Remove  </property>
                                       </object>
                                       <packing>
@@ -738,24 +735,24 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkButton" id="buttons_manual_add_excluded_directory">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkAlignment">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="xscale">0</property>
                                 <property name="yscale">0</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="spacing">4</property>
                                     <child>
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">insert-link</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">insert-link</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -766,7 +763,7 @@ This program is free to use and will always be.
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can-focus">False</property>
                                         <property name="label" translatable="yes">Manual Add</property>
                                       </object>
                                       <packing>
@@ -796,8 +793,8 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_excluded_directories">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -816,27 +813,27 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Excluded Directories</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox" id="notebook_upper_excluded_items">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Excluded items must contains * wildcard and should be separated by commas.</property>
                             <attributes>
                               <attribute name="scale" value="1"/>
@@ -853,11 +850,11 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">This is slower than Excluded Directories, so use it carefully.</property>
                             <attributes>
                               <attribute name="scale" value="1"/>
@@ -874,12 +871,12 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Excluded items</property>
                           </object>
                           <packing>
@@ -891,7 +888,7 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkEntry" id="entry_excluded_items">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can-focus">True</property>
                             <property name="text" translatable="yes">*/.git,*/node_modules,*/lost+found</property>
                           </object>
                           <packing>
@@ -915,27 +912,27 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Excluded Items</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox" id="notebook_upper_allowed_extensions">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Allowed extensions must be separated by commas(by default all are available)</property>
                             <attributes>
                               <attribute name="scale" value="1"/>
@@ -952,11 +949,11 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Macros IMAGE, VIDEO, MUSIC, TEXT are available</property>
                             <attributes>
                               <attribute name="scale" value="1"/>
@@ -973,11 +970,11 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Usage example  ".exe, IMAGE, VIDEO, .rar, 7z"</property>
                             <attributes>
                               <attribute name="scale" value="1"/>
@@ -994,12 +991,12 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Allowed Extensions</property>
                           </object>
                           <packing>
@@ -1011,7 +1008,7 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkEntry" id="entry_allowed_extensions">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can-focus">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1034,99 +1031,100 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Allowed Extensions</property>
                   </object>
                   <packing>
                     <property name="position">3</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
+                  <!-- n-columns=4 n-rows=3 -->
                   <object class="GtkGrid" id="notebook_upper_settings">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_start">5</property>
-                    <property name="margin_end">5</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="column_homogeneous">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">5</property>
+                    <property name="margin-bottom">5</property>
+                    <property name="column-homogeneous">True</property>
                     <child>
                       <object class="GtkCheckButton" id="check_button_settings_save_at_exit">
                         <property name="label" translatable="yes">Save configuration at exit</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
                         <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="button_settings_save_configuration">
                         <property name="label" translatable="yes">Save current configuration</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="button_settings_load_configuration">
                         <property name="label" translatable="yes">Load configuration</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">3</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="button_settings_reset_configuration">
                         <property name="label" translatable="yes">Reset configuration</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">2</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="check_button_settings_load_at_start">
                         <property name="label" translatable="yes">Load configuration at start</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
                         <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="check_button_settings_confirm_deletion">
                         <property name="label" translatable="yes">Show confirm dialog when deleting</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
                         <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
                         <property name="width">2</property>
                       </packing>
                     </child>
@@ -1134,28 +1132,28 @@ This program is free to use and will always be.
                       <object class="GtkCheckButton" id="check_button_settings_show_preview_similar_images">
                         <property name="label" translatable="yes">Show image preview</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
                         <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">3</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="check_button_settings_show_text_view">
                         <property name="label" translatable="yes">Show bottom text panel</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
                         <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -1175,12 +1173,12 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Settings</property>
                   </object>
                   <packing>
                     <property name="position">4</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
               </object>
@@ -1192,23 +1190,23 @@ This program is free to use and will always be.
             <child>
               <object class="GtkNotebook" id="notebook_main">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tab_pos">left</property>
+                <property name="can-focus">True</property>
+                <property name="tab-pos">left</property>
                 <property name="scrollable">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimum file size(in bytes)</property>
                           </object>
                           <packing>
@@ -1220,11 +1218,11 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkEntry" id="entry_duplicate_minimal_size">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">15</property>
+                            <property name="can-focus">True</property>
+                            <property name="max-length">15</property>
                             <property name="text" translatable="yes">1024</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="input_purpose">number</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1242,14 +1240,14 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkRadioButton" id="radio_button_duplicates_name">
                             <property name="label" translatable="yes">Name (very fast)</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                             <property name="group">radio_button_duplicates_hash</property>
                           </object>
                           <packing>
@@ -1262,9 +1260,9 @@ This program is free to use and will always be.
                           <object class="GtkRadioButton" id="radio_button_duplicates_size">
                             <property name="label" translatable="yes">Size (very fast)</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                             <property name="group">radio_button_duplicates_hash</property>
                           </object>
                           <packing>
@@ -1277,9 +1275,9 @@ This program is free to use and will always be.
                           <object class="GtkRadioButton" id="radio_button_duplicates_hashmb">
                             <property name="label" translatable="yes">HashMb (fast)</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                             <property name="group">radio_button_duplicates_hash</property>
                           </object>
                           <packing>
@@ -1292,10 +1290,10 @@ This program is free to use and will always be.
                           <object class="GtkRadioButton" id="radio_button_duplicates_hash">
                             <property name="label" translatable="yes">Hash (slow but accurate)</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
                             <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1313,11 +1311,11 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Hash type:</property>
                           </object>
                           <packing>
@@ -1330,10 +1328,10 @@ This program is free to use and will always be.
                           <object class="GtkRadioButton" id="radio_button_hash_type_blake3">
                             <property name="label" translatable="yes">Blake3</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
                             <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1345,10 +1343,10 @@ This program is free to use and will always be.
                           <object class="GtkRadioButton" id="radio_button_hash_type_crc32">
                             <property name="label" translatable="yes">CRC32</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
                             <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="draw-indicator">True</property>
                             <property name="group">radio_button_hash_type_blake3</property>
                           </object>
                           <packing>
@@ -1361,10 +1359,10 @@ This program is free to use and will always be.
                           <object class="GtkRadioButton" id="radio_button_hash_type_xxh3">
                             <property name="label" translatable="yes">XXH3</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
                             <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="draw-indicator">True</property>
                             <property name="group">radio_button_hash_type_blake3</property>
                           </object>
                           <packing>
@@ -1383,8 +1381,8 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_duplicate_finder">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -1400,18 +1398,18 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Duplicates files</property>
                   </object>
                   <packing>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_empty_folder_finder">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -1423,28 +1421,28 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Empty Directories</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Number of showed files</property>
                           </object>
                           <packing>
@@ -1456,11 +1454,11 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkEntry" id="entry_big_files_number">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">15</property>
+                            <property name="can-focus">True</property>
+                            <property name="max-length">15</property>
                             <property name="text" translatable="yes">50</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="input_purpose">number</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1478,8 +1476,8 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_big_files_finder">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -1498,19 +1496,19 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Big Files</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_empty_files_finder">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -1522,19 +1520,19 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Empty Files</property>
                   </object>
                   <packing>
                     <property name="position">3</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_temporary_files_finder">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -1546,32 +1544,32 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Temporary Files</property>
                   </object>
                   <packing>
                     <property name="position">4</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="spacing">8</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Minimum file size(in bytes)</property>
                               </object>
                               <packing>
@@ -1583,11 +1581,11 @@ This program is free to use and will always be.
                             <child>
                               <object class="GtkEntry" id="entry_similar_images_minimal_size">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="max_length">15</property>
+                                <property name="can-focus">True</property>
+                                <property name="max-length">15</property>
                                 <property name="text" translatable="yes">16384</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="input_purpose">number</property>
+                                <property name="caps-lock-warning">False</property>
+                                <property name="input-purpose">number</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1605,11 +1603,11 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Similarity </property>
                               </object>
                               <packing>
@@ -1622,9 +1620,9 @@ This program is free to use and will always be.
                               <object class="GtkRadioButton" id="radio_button_similar_images_minimal">
                                 <property name="label" translatable="yes">Minimal</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
                                 <property name="group">radio_button_similar_images_very_high</property>
                               </object>
                               <packing>
@@ -1637,9 +1635,9 @@ This program is free to use and will always be.
                               <object class="GtkRadioButton" id="radio_button_similar_images_very_small">
                                 <property name="label" translatable="yes">Very Small</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
                                 <property name="group">radio_button_similar_images_very_high</property>
                               </object>
                               <packing>
@@ -1652,9 +1650,9 @@ This program is free to use and will always be.
                               <object class="GtkRadioButton" id="radio_button_similar_images_small">
                                 <property name="label" translatable="yes">Small</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
                                 <property name="group">radio_button_similar_images_very_high</property>
                               </object>
                               <packing>
@@ -1667,9 +1665,9 @@ This program is free to use and will always be.
                               <object class="GtkRadioButton" id="radio_button_similar_images_medium">
                                 <property name="label" translatable="yes">Medium</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
                                 <property name="group">radio_button_similar_images_very_high</property>
                               </object>
                               <packing>
@@ -1682,9 +1680,9 @@ This program is free to use and will always be.
                               <object class="GtkRadioButton" id="radio_button_similar_images_high">
                                 <property name="label" translatable="yes">High</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
                                 <property name="group">radio_button_similar_images_very_high</property>
                               </object>
                               <packing>
@@ -1697,10 +1695,10 @@ This program is free to use and will always be.
                               <object class="GtkRadioButton" id="radio_button_similar_images_very_high">
                                 <property name="label" translatable="yes">Very High</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
                                 <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="draw-indicator">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1718,8 +1716,8 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_similar_images_finder">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="shadow_type">in</property>
+                            <property name="can-focus">True</property>
+                            <property name="shadow-type">in</property>
                             <child>
                               <placeholder/>
                             </child>
@@ -1740,13 +1738,13 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkImage" id="image_preview_similar_images">
-                            <property name="width_request">100</property>
-                            <property name="height_request">80</property>
+                            <property name="width-request">100</property>
+                            <property name="height-request">80</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                           </object>
                         </child>
                       </object>
@@ -1764,28 +1762,28 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Similar Images</property>
                   </object>
                   <packing>
                     <property name="position">5</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimum file size (in bytes)</property>
                           </object>
                           <packing>
@@ -1797,11 +1795,11 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkEntry" id="entry_same_music_minimal_size">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">15</property>
+                            <property name="can-focus">True</property>
+                            <property name="max-length">15</property>
                             <property name="text" translatable="yes">1024</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="input_purpose">number</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1819,16 +1817,16 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_title">
                             <property name="label" translatable="yes">Title</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
                             <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1840,10 +1838,10 @@ This program is free to use and will always be.
                           <object class="GtkCheckButton" id="check_button_music_artist">
                             <property name="label" translatable="yes">Artist</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
                             <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1855,9 +1853,9 @@ This program is free to use and will always be.
                           <object class="GtkCheckButton" id="check_button_music_album_title">
                             <property name="label" translatable="yes">Album Title</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1869,9 +1867,9 @@ This program is free to use and will always be.
                           <object class="GtkCheckButton" id="check_button_music_album_artist">
                             <property name="label" translatable="yes">Album Artist</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1883,9 +1881,9 @@ This program is free to use and will always be.
                           <object class="GtkCheckButton" id="check_button_music_year">
                             <property name="label" translatable="yes">Year</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1903,8 +1901,8 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_same_music_finder">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -1923,28 +1921,28 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Music Duplicates</property>
                   </object>
                   <packing>
                     <property name="position">6</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimum file size (in bytes)</property>
                           </object>
                           <packing>
@@ -1956,11 +1954,11 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkEntry" id="entry_zeroed_files_minimal_size">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">15</property>
+                            <property name="can-focus">True</property>
+                            <property name="max-length">15</property>
                             <property name="text" translatable="yes">1024</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="input_purpose">number</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1978,8 +1976,8 @@ This program is free to use and will always be.
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_zeroed_files_finder">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -1998,19 +1996,19 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Zeroed Files</property>
                   </object>
                   <packing>
                     <property name="position">7</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_invalid_symlinks">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -2022,19 +2020,19 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Invalid Symlinks</property>
                   </object>
                   <packing>
                     <property name="position">8</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_broken_files">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -2046,12 +2044,12 @@ This program is free to use and will always be.
                 <child type="tab">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Broken Files</property>
                   </object>
                   <packing>
                     <property name="position">9</property>
-                    <property name="tab_fill">False</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
               </object>
@@ -2070,37 +2068,37 @@ This program is free to use and will always be.
         <child>
           <object class="GtkBox" id="buttons">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_start">5</property>
-            <property name="margin_end">5</property>
-            <property name="margin_top">2</property>
-            <property name="margin_bottom">5</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-top">2</property>
+            <property name="margin-bottom">5</property>
             <child>
               <object class="GtkBox" id="control_buttons">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">2</property>
                 <child>
                   <object class="GtkButton" id="buttons_search">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="top_padding">4</property>
-                        <property name="bottom_padding">4</property>
+                        <property name="can-focus">False</property>
+                        <property name="top-padding">4</property>
+                        <property name="bottom-padding">4</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="icon_name">edit-find</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">edit-find</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2111,7 +2109,7 @@ This program is free to use and will always be.
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Search</property>
                               </object>
                               <packing>
@@ -2141,19 +2139,19 @@ This program is free to use and will always be.
             <child>
               <object class="GtkButton" id="buttons_show_errors">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
                 <child>
                   <object class="GtkAlignment">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="top_padding">4</property>
-                    <property name="bottom_padding">4</property>
+                    <property name="can-focus">False</property>
+                    <property name="top-padding">4</property>
+                    <property name="bottom-padding">4</property>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="icon_name">format-justify-fill</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">format-justify-fill</property>
                       </object>
                     </child>
                   </object>
@@ -2162,34 +2160,34 @@ This program is free to use and will always be.
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack_type">end</property>
+                <property name="pack-type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkBox" id="action_buttons">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">2</property>
                 <child>
                   <object class="GtkButton" id="buttons_select">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="icon_name">edit-select-all</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">edit-select-all</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2200,7 +2198,7 @@ This program is free to use and will always be.
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Select</property>
                               </object>
                               <packing>
@@ -2223,22 +2221,22 @@ This program is free to use and will always be.
                 <child>
                   <object class="GtkButton" id="buttons_delete">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="icon_name">list-remove</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">list-remove</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2249,7 +2247,7 @@ This program is free to use and will always be.
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Delete</property>
                               </object>
                               <packing>
@@ -2272,22 +2270,22 @@ This program is free to use and will always be.
                 <child>
                   <object class="GtkButton" id="buttons_save">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="icon_name">document-save</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">document-save</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2298,7 +2296,7 @@ This program is free to use and will always be.
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Save</property>
                               </object>
                               <packing>
@@ -2321,22 +2319,22 @@ This program is free to use and will always be.
                 <child>
                   <object class="GtkButton" id="buttons_symlink">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                     <child>
                       <object class="GtkAlignment">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkImage">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="icon_name">network-transmit-receive</property>
+                                <property name="can-focus">False</property>
+                                <property name="icon-name">network-transmit-receive</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2347,7 +2345,7 @@ This program is free to use and will always be.
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Symlink</property>
                               </object>
                               <packing>
@@ -2371,7 +2369,7 @@ This program is free to use and will always be.
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack_type">end</property>
+                <property name="pack-type">end</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -2385,18 +2383,18 @@ This program is free to use and will always be.
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_start">5</property>
-            <property name="margin_end">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
             <child>
               <object class="GtkEntry" id="entry_info">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can-focus">True</property>
                 <property name="editable">False</property>
-                <property name="has_frame">False</property>
-                <property name="shadow_type">none</property>
+                <property name="has-frame">False</property>
+                <property name="shadow-type">none</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -2407,18 +2405,18 @@ This program is free to use and will always be.
             <child>
               <object class="GtkEntry">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can-focus">True</property>
                 <property name="editable">False</property>
-                <property name="has_frame">False</property>
+                <property name="has-frame">False</property>
                 <property name="text" translatable="yes">Czkawka 2.3.2</property>
                 <property name="xalign">1</property>
-                <property name="shadow_type">none</property>
-                <property name="caps_lock_warning">False</property>
+                <property name="shadow-type">none</property>
+                <property name="caps-lock-warning">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack_type">end</property>
+                <property name="pack-type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -2432,14 +2430,14 @@ This program is free to use and will always be.
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window_errors">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="resize_mode">queue</property>
-            <property name="shadow_type">in</property>
-            <property name="min_content_height">100</property>
+            <property name="can-focus">True</property>
+            <property name="resize-mode">queue</property>
+            <property name="shadow-type">in</property>
+            <property name="min-content-height">100</property>
             <child>
               <object class="GtkTextView" id="text_view_errors">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can-focus">True</property>
                 <property name="editable">False</property>
                 <property name="monospace">True</property>
               </object>
@@ -2448,7 +2446,7 @@ This program is free to use and will always be.
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">5</property>
           </packing>
         </child>
@@ -2457,23 +2455,23 @@ This program is free to use and will always be.
     <child type="titlebar">
       <object class="GtkHeaderBar">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="show_close_button">True</property>
+        <property name="can-focus">False</property>
+        <property name="show-close-button">True</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkButton" id="button_settings">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">settings-app-symbolic</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">settings-app-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -2486,13 +2484,13 @@ This program is free to use and will always be.
             <child>
               <object class="GtkButton" id="button_app_info">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">dialog-information</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">dialog-information</property>
                   </object>
                 </child>
               </object>
@@ -2504,74 +2502,90 @@ This program is free to use and will always be.
             </child>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
           </packing>
         </child>
       </object>
     </child>
   </object>
   <object class="GtkWindow" id="window_progress">
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="title" translatable="yes">Czkawka Progress Window</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_start">10</property>
-        <property name="margin_end">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="can-focus">False</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
+          <!-- n-columns=3 n-rows=3 -->
           <object class="GtkGrid" id="grid_progress_stages">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="label" translatable="yes">All stages: </property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkProgressBar" id="progress_bar_all_stages">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
-                <property name="pulse_step">0.09999999977648258</property>
-                <property name="show_text">True</property>
+                <property name="pulse-step">0.099999999776482579</property>
+                <property name="show-text">True</property>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Current stage:  </property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkProgressBar" id="progress_bar_current_stage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="show_text">True</property>
+                <property name="can-focus">False</property>
+                <property name="show-text">True</property>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -2583,7 +2597,7 @@ This program is free to use and will always be.
         <child>
           <object class="GtkLabel" id="label_stage">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="label" translatable="yes">Stage 1/2</property>
           </object>
           <packing>
@@ -2595,26 +2609,26 @@ This program is free to use and will always be.
         <child>
           <object class="GtkButtonBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
             <child>
               <object class="GtkButton" id="button_stop_in_dialog">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
                 <child>
                   <object class="GtkAlignment">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">dialog-cancel</property>
+                            <property name="can-focus">False</property>
+                            <property name="icon-name">dialog-cancel</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2625,7 +2639,7 @@ This program is free to use and will always be.
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Stop</property>
                           </object>
                           <packing>
@@ -2656,9 +2670,6 @@ This program is free to use and will always be.
           </packing>
         </child>
       </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
     </child>
   </object>
 </interface>
