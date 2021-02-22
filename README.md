@@ -116,9 +116,16 @@ flatpak install flathub com.github.qarmin.czkawka
 ```
 Flathub page with Czkawka can be found [**here**](https://flathub.org/apps/details/com.github.qarmin.czkawka)
 
-### Debian/Ubuntu repository and PPA
-I tried to set up it, but I'm having problems described in this [**issue**](https://salsa.debian.org/rust-team/debcargo-conf/-/issues/21).  
-Still you can install Czkawka with different methods on this OS.
+#
+
+**Unofficial packages, which may not always provide the latest version of Czkawka.**
+
+### PPA - Debian/Ubuntu (unofficial)
+```
+sudo add-apt-repository ppa:xtradeb/apps
+sudo apt-get update
+sudo apt-get install czkawka
+```
 
 ### AUR - Arch Linux Package (unofficial)
 Czkawka is also available in Arch Linux's AUR from which it can be easily installed.
@@ -132,8 +139,6 @@ yay -Syu czkawka-cli-bin
 ```
 
 Package info's - https://aur.archlinux.org/packages/?O=0&SeB=nd&K=czkawka&outdated=&SB=n&SO=a&PP=50&do_Search=Go
-
-*This are unofficial packages, so new versions will not be always available immediately.*
 
 ### Docker image (unofficial)
 Czkawka docker image is available [**here**](https://github.com/jlesage/docker-czkawka)
