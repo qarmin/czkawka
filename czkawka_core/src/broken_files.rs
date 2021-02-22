@@ -665,7 +665,7 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<HashMap<String, 
 
 fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     // Checking allowed image extensions
-    let allowed_image_extensions = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp", ".avif"];
+    let allowed_image_extensions = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".ff", ".jif", ".jfi", ".ico", ".webp", ".avif"]; // TODO Re-enable broken files checking after image-rs update // tga, gif
     let allowed_archive_zip_extensions = [".zip"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
     let allowed_audio_extensions = [".mp3", ".flac", ".wav", ".ogg"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
     if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
