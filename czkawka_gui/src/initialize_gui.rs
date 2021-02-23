@@ -27,10 +27,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         buttons_delete.hide();
         buttons_select.hide();
         buttons_symlink.hide();
-
-        // TODO Add Option window
-        let button_settings = gui_data.header.button_settings.clone();
-        button_settings.hide();
     }
 
     //// Initialize main scrolled view with notebook
@@ -47,7 +43,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let scrolled_window_broken_files = gui_data.main_notebook.scrolled_window_broken_files.clone();
 
         let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
-        let check_button_settings_show_preview_similar_images = gui_data.upper_notebook.check_button_settings_show_preview_similar_images.clone();
+        let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
 
         // Set Main Scrolled Window Treeviews
@@ -243,7 +239,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let image_preview_similar_images = image_preview_similar_images_clone.clone();
                 let text_view_errors = gui_data.text_view_errors.clone();
-                let check_button_settings_show_preview_similar_images = gui_data.upper_notebook.check_button_settings_show_preview_similar_images.clone();
+                let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.get_keycode() {

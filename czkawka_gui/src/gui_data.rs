@@ -3,9 +3,9 @@ use crate::gui_about::GUIAbout;
 use crate::gui_bottom_buttons::GUIBottomButtons;
 use crate::gui_header::GUIHeader;
 use crate::gui_main_notebook::GUIMainNotebook;
-use crate::gui_options::GUIOptions;
 use crate::gui_popovers::GUIPopovers;
 use crate::gui_progress_dialog::GUIProgressDialog;
+use crate::gui_settings::GUISettings;
 use crate::gui_upper_notepad::GUIUpperNotebook;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
@@ -41,7 +41,7 @@ pub struct GuiData {
     pub bottom_buttons: GUIBottomButtons,
     pub progress_window: GUIProgressDialog,
     pub about: GUIAbout,
-    pub options: GUIOptions,
+    pub settings: GUISettings,
     pub header: GUIHeader,
 
     // Taskbar state
@@ -93,9 +93,9 @@ impl GuiData {
         let popovers = GUIPopovers::create_from_builder(&builder);
         let bottom_buttons = GUIBottomButtons::create_from_builder(&builder);
         let progress_window = GUIProgressDialog::create_from_builder(&builder);
-        let options = GUIOptions::create_from_builder(&builder);
         let about = GUIAbout::create_from_builder(&builder);
         let header = GUIHeader::create_from_builder(&builder);
+        let settings = GUISettings::create_from_builder(&builder);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -165,7 +165,7 @@ impl GuiData {
             bottom_buttons,
             progress_window,
             about,
-            options,
+            settings,
             header,
             taskbar_state,
             shared_buttons,

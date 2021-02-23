@@ -54,7 +54,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
         match msg {
             Message::Duplicates(df) => {
                 if df.get_stopped_search() {
-                    entry_info.set_text("Searching for duplicated was stopped by user");
+                    entry_info.set_text("Searching for duplicates was stopped by user");
                 } else {
                     let information = df.get_information();
                     let text_messages = df.get_text_messages();
@@ -426,7 +426,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SimilarImages(sf) => {
                 if sf.get_stopped_search() {
-                    entry_info.set_text("Searching for duplicated was stopped by user");
+                    entry_info.set_text("Searching for similar images was stopped by user");
                 } else {
                     //let information = sf.get_information();
                     let text_messages = sf.get_text_messages();

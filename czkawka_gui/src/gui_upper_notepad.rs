@@ -14,17 +14,6 @@ pub struct GUIUpperNotebook {
     pub entry_excluded_items: gtk::Entry,
     pub entry_allowed_extensions: gtk::Entry,
 
-    //// Settings
-    pub check_button_settings_save_at_exit: gtk::CheckButton,
-    pub check_button_settings_load_at_start: gtk::CheckButton,
-    pub check_button_settings_confirm_deletion: gtk::CheckButton,
-    pub check_button_settings_show_preview_similar_images: gtk::CheckButton,
-    pub check_button_settings_show_text_view: gtk::CheckButton,
-
-    pub button_settings_save_configuration: gtk::Button,
-    pub button_settings_load_configuration: gtk::Button,
-    pub button_settings_reset_configuration: gtk::Button,
-
     pub check_button_recursive: gtk::CheckButton,
 
     pub buttons_manual_add_directory: gtk::Button,
@@ -48,17 +37,6 @@ impl GUIUpperNotebook {
         let entry_allowed_extensions: gtk::Entry = builder.get_object("entry_allowed_extensions").unwrap();
         let entry_excluded_items: gtk::Entry = builder.get_object("entry_excluded_items").unwrap();
 
-        //// Settings
-        let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
-        let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
-        let check_button_settings_confirm_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_deletion").unwrap();
-        let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.get_object("check_button_settings_show_preview_similar_images").unwrap();
-        let check_button_settings_show_text_view: gtk::CheckButton = builder.get_object("check_button_settings_show_text_view").unwrap();
-
-        let button_settings_save_configuration: gtk::Button = builder.get_object("button_settings_save_configuration").unwrap();
-        let button_settings_load_configuration: gtk::Button = builder.get_object("button_settings_load_configuration").unwrap();
-        let button_settings_reset_configuration: gtk::Button = builder.get_object("button_settings_reset_configuration").unwrap();
-
         let check_button_recursive: gtk::CheckButton = builder.get_object("check_button_recursive").unwrap();
 
         let buttons_manual_add_directory: gtk::Button = builder.get_object("buttons_manual_add_directory").unwrap();
@@ -76,14 +54,6 @@ impl GUIUpperNotebook {
             tree_view_excluded_directories,
             entry_excluded_items,
             entry_allowed_extensions,
-            check_button_settings_save_at_exit,
-            check_button_settings_load_at_start,
-            check_button_settings_confirm_deletion,
-            check_button_settings_show_preview_similar_images,
-            check_button_settings_show_text_view,
-            button_settings_save_configuration,
-            button_settings_load_configuration,
-            button_settings_reset_configuration,
             check_button_recursive,
             buttons_manual_add_directory,
             buttons_add_included_directory,

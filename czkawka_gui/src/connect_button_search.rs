@@ -90,6 +90,7 @@ pub fn connect_button_search(
     let radio_button_hash_type_blake3 = gui_data.main_notebook.radio_button_hash_type_blake3.clone();
     let radio_button_hash_type_crc32 = gui_data.main_notebook.radio_button_hash_type_crc32.clone();
     let radio_button_hash_type_xxh3 = gui_data.main_notebook.radio_button_hash_type_xxh3.clone();
+    let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -97,6 +98,7 @@ pub fn connect_button_search(
         let recursive_search = check_button_recursive.get_active();
         let excluded_items = entry_excluded_items.get_text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
+        let hide_hard_links = check_button_settings_hide_hard_links.get_active();
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 
@@ -164,6 +166,7 @@ pub fn connect_button_search(
                     df.set_minimal_file_size(minimal_file_size);
                     df.set_check_method(check_method);
                     df.set_hash_type(hash_type);
+                    df.set_ignore_hard_links(hide_hard_links);
                     df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
                     let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });
