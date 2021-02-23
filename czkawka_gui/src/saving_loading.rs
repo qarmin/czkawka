@@ -13,7 +13,7 @@ use std::{env, fs};
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";
 
 pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
-    let check_button_settings_save_at_exit = gui_data.upper_notebook.check_button_settings_save_at_exit.clone();
+    let check_button_settings_save_at_exit = gui_data.settings.check_button_settings_save_at_exit.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
 
     reset_text_view(&text_view_errors);
@@ -89,28 +89,33 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
             //// Save at exit
             data_to_save.push("--save_at_exit:".to_string());
-            let check_button_settings_save_at_exit = gui_data.upper_notebook.check_button_settings_save_at_exit.clone();
+            let check_button_settings_save_at_exit = gui_data.settings.check_button_settings_save_at_exit.clone();
             data_to_save.push(check_button_settings_save_at_exit.get_active().to_string());
 
             //// Load at start
             data_to_save.push("--load_at_start:".to_string());
-            let check_button_settings_load_at_start = gui_data.upper_notebook.check_button_settings_load_at_start.clone();
+            let check_button_settings_load_at_start = gui_data.settings.check_button_settings_load_at_start.clone();
             data_to_save.push(check_button_settings_load_at_start.get_active().to_string());
 
             //// Confirm deletion of files
             data_to_save.push("--confirm_deletion:".to_string());
-            let check_button_settings_confirm_deletion = gui_data.upper_notebook.check_button_settings_confirm_deletion.clone();
+            let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
             data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
 
             //// Show image previews in similar images
             data_to_save.push("--show_previews:".to_string());
-            let check_button_settings_show_preview_similar_images = gui_data.upper_notebook.check_button_settings_show_preview_similar_images.clone();
+            let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
             data_to_save.push(check_button_settings_show_preview_similar_images.get_active().to_string());
 
             //// Show bottom text panel with errors
             data_to_save.push("--bottom_text_panel:".to_string());
-            let check_button_settings_show_text_view = gui_data.upper_notebook.check_button_settings_show_text_view.clone();
+            let check_button_settings_show_text_view = gui_data.settings.check_button_settings_show_text_view.clone();
             data_to_save.push(check_button_settings_show_text_view.get_active().to_string());
+
+            //// Show bottom text panel with errors
+            data_to_save.push("--hide_hard_links:".to_string());
+            let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
+            data_to_save.push(check_button_settings_hide_hard_links.get_active().to_string());
         }
 
         // Creating/Opening config file
@@ -158,6 +163,7 @@ enum TypeOfLoadedData {
     ConfirmDeletion,
     ShowPreviews,
     BottomTextPanel,
+    HideHardLinks,
 }
 
 pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
@@ -200,6 +206,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut confirm_deletion: bool = true;
         let mut show_previews: bool = true;
         let mut bottom_text_panel: bool = true;
+        let mut hide_hard_links: bool = true;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -225,6 +232,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::ShowPreviews;
             } else if line.starts_with("--bottom_text_panel") {
                 current_type = TypeOfLoadedData::BottomTextPanel;
+            } else if line.starts_with("--hide_hard_links") {
+                current_type = TypeOfLoadedData::HideHardLinks;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -316,6 +325,19 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             );
                         }
                     }
+                    TypeOfLoadedData::HideHardLinks => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            hide_hard_links = true;
+                        } else if line == "0" || line == "false" {
+                            hide_hard_links = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -355,19 +377,20 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             entry_allowed_extensions.set_text(allowed_extensions.iter().map(|e| e.to_string() + ",").collect::<String>().as_str());
 
             //// Buttons
-            gui_data.upper_notebook.check_button_settings_load_at_start.set_active(loading_at_start);
-            gui_data.upper_notebook.check_button_settings_save_at_exit.set_active(saving_at_exit);
-            gui_data.upper_notebook.check_button_settings_confirm_deletion.set_active(confirm_deletion);
-            gui_data.upper_notebook.check_button_settings_show_preview_similar_images.set_active(show_previews);
+            gui_data.settings.check_button_settings_load_at_start.set_active(loading_at_start);
+            gui_data.settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
+            gui_data.settings.check_button_settings_confirm_deletion.set_active(confirm_deletion);
+            gui_data.settings.check_button_settings_show_preview_similar_images.set_active(show_previews);
 
-            gui_data.upper_notebook.check_button_settings_show_text_view.set_active(bottom_text_panel);
+            gui_data.settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
             if !bottom_text_panel {
-                gui_data.text_view_errors.hide();
+                gui_data.scrolled_window_errors.hide();
             } else {
-                gui_data.text_view_errors.show();
+                gui_data.scrolled_window_errors.show();
             }
+            gui_data.settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
         } else {
-            gui_data.upper_notebook.check_button_settings_load_at_start.set_active(false);
+            gui_data.settings.check_button_settings_load_at_start.set_active(false);
         }
 
         if manual_execution {
@@ -440,11 +463,12 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
 
     // Set settings
     {
-        gui_data.upper_notebook.check_button_settings_save_at_exit.set_active(true);
-        gui_data.upper_notebook.check_button_settings_load_at_start.set_active(true);
-        gui_data.upper_notebook.check_button_settings_confirm_deletion.set_active(true);
-        gui_data.upper_notebook.check_button_settings_show_preview_similar_images.set_active(true);
-        gui_data.upper_notebook.check_button_settings_show_text_view.set_active(true);
+        gui_data.settings.check_button_settings_save_at_exit.set_active(true);
+        gui_data.settings.check_button_settings_load_at_start.set_active(true);
+        gui_data.settings.check_button_settings_confirm_deletion.set_active(true);
+        gui_data.settings.check_button_settings_show_preview_similar_images.set_active(true);
+        gui_data.settings.check_button_settings_show_text_view.set_active(true);
+        gui_data.settings.check_button_settings_hide_hard_links.set_active(true);
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");

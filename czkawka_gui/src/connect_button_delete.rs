@@ -24,7 +24,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
-    let check_button_settings_confirm_deletion = gui_data.upper_notebook.check_button_settings_confirm_deletion.clone();
+    let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_delete.connect_clicked(move |_| {
