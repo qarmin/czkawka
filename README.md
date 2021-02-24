@@ -275,7 +275,6 @@ So there is still is a lot of room for improvements.
 | Language               | Rust    | Python     | Python/Obj-C      |
 | OS                     | All     | Linux only | All               |
 | Framework              | GTK 3   | PyGTK      | Qt 5 (PyQt)/Cocoa |
-| Ram Usage              | Low     | Medium     | Very High         |
 | Duplicate finder       | •       | •          | •                 |
 | Empty files            | •       | •          |                   |
 | Empty folders          | •       | •          |                   |

@@ -3,6 +3,7 @@
 
 mod connect_about_buttons;
 mod connect_button_delete;
+mod connect_button_hardlink;
 mod connect_button_save;
 mod connect_button_search;
 mod connect_button_select;
@@ -42,6 +43,7 @@ use czkawka_core::*;
 extern crate gtk;
 use crate::connect_about_buttons::*;
 use crate::connect_button_delete::*;
+use crate::connect_button_hardlink::*;
 use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
@@ -120,6 +122,7 @@ fn main() {
     connect_button_select(&gui_data);
     connect_button_stop(&gui_data);
     connect_button_symlink(&gui_data);
+    connect_button_hardlink(&gui_data);
     connect_notebook_tabs(&gui_data);
     connect_selection_of_directories(&gui_data);
     connect_popovers(&gui_data);
