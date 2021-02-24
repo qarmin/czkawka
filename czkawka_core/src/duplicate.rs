@@ -1354,7 +1354,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     identical
 }
 
-fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
+pub fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
     let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
     fs::rename(dst, temp.path())?;
