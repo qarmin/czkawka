@@ -937,7 +937,6 @@ impl DuplicateFinder {
     /// Using another function to delete files to avoid duplicates data
     fn delete_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
-
         if self.delete_method == DeleteMethod::None {
             return;
         }
@@ -1219,118 +1218,39 @@ impl PrintResults for DuplicateFinder {
 /// Returns size of removed elements, number of deleted and failed to delete files and modified warning list
 fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &mut Vec<String>) -> (u64, usize, usize) {
     assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
-    let mut q_index: usize = 0;
-    let mut q_time: u64 = 0;
-
     let mut gained_space: u64 = 0;
     let mut removed_files: usize = 0;
     let mut failed_to_remove_files: usize = 0;
-
-    match delete_method {
-        DeleteMethod::OneOldest => {
-            for (index, file) in vector.iter().enumerate() {
-                if q_time == 0 || q_time > file.modified_date {
-                    q_time = file.modified_date;
-                    q_index = index;
-                }
-            }
-            match fs::remove_file(vector[q_index].path.clone()) {
-                Ok(_) => {
-                    removed_files += 1;
-                    gained_space += vector[q_index].size;
-                }
-                Err(_) => {
-                    failed_to_remove_files += 1;
-                    warnings.push(format!("Failed to delete {}", vector[q_index].path.display()));
-                }
-            };
-        }
-        DeleteMethod::OneNewest => {
-            for (index, file) in vector.iter().enumerate() {
-                if q_time == 0 || q_time < file.modified_date {
-                    q_time = file.modified_date;
-                    q_index = index;
-                }
-            }
-            match fs::remove_file(vector[q_index].path.clone()) {
-                Ok(_) => {
-                    removed_files += 1;
-                    gained_space += vector[q_index].size;
-                }
-                Err(_) => {
-                    failed_to_remove_files += 1;
-                    warnings.push(format!("Failed to delete {}", vector[q_index].path.display()));
-                }
-            };
-        }
-        DeleteMethod::AllExceptOldest => {
-            for (index, file) in vector.iter().enumerate() {
-                if q_time == 0 || q_time > file.modified_date {
-                    q_time = file.modified_date;
-                    q_index = index;
-                }
-            }
-            for (index, file) in vector.iter().enumerate() {
-                if q_index != index {
-                    match fs::remove_file(file.path.clone()) {
-                        Ok(_) => {
-                            removed_files += 1;
-                            gained_space += file.size;
-                        }
-                        Err(_) => {
-                            failed_to_remove_files += 1;
-                            warnings.push(format!("Failed to delete {}", file.path.display()));
-                        }
-                    };
-                }
-            }
-        }
-        DeleteMethod::AllExceptNewest => {
-            for (index, file) in vector.iter().enumerate() {
-                if q_time == 0 || q_time < file.modified_date {
-                    q_time = file.modified_date;
-                    q_index = index;
-                }
-            }
-            for (index, file) in vector.iter().enumerate() {
-                if q_index != index {
-                    match fs::remove_file(file.path.clone()) {
-                        Ok(_) => {
-                            removed_files += 1;
-                            gained_space += file.size;
-                        }
-                        Err(_) => {
-                            failed_to_remove_files += 1;
-                            warnings.push(format!("Failed to delete {}", file.path.display()));
-                        }
-                    };
-                }
-            }
-        }
-        DeleteMethod::HardLink => {
-            for (index, file) in vector.iter().enumerate() {
-                if q_time == 0 || q_time > file.modified_date {
-                    q_time = file.modified_date;
-                    q_index = index;
-                }
-            }
-            let src = vector[q_index].path.clone();
-            for (index, file) in vector.iter().enumerate() {
-                if q_index != index {
-                    if let Err(e) = make_hard_link(&src, &file.path) {
-                        failed_to_remove_files += 1;
-                        warnings.push(format!("Failed to link {} -> {} ({})", file.path.display(), src.display(), e));
-                    } else {
-                        removed_files += 1;
-                        gained_space += file.size;
-                    }
-                }
-            }
-        }
-        DeleteMethod::None => {
-            // Just don't remove files
-        }
+    let mut values = vector.iter().enumerate();
+    let q_index = match delete_method {
+        DeleteMethod::OneOldest | DeleteMethod::AllExceptNewest => values.max_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
+        DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::HardLink => values.min_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
+        DeleteMethod::None => values.next(),
     };
+    let q_index = q_index.map(|t| t.0).unwrap_or(0);
+    let n = match delete_method {
+        DeleteMethod::OneNewest | DeleteMethod::OneOldest => 1,
+        DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptOldest | DeleteMethod::None | DeleteMethod::HardLink => usize::MAX,
+    };
+    for (index, file) in vector.iter().enumerate() {
+        if q_index == index {
+            continue;
+        } else if removed_files + failed_to_remove_files >= n {
+            break;
+        }
+        let r = match delete_method {
+            DeleteMethod::OneOldest | DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptNewest => fs::remove_file(&file.path),
+            DeleteMethod::HardLink => make_hard_link(&vector[q_index].path, &file.path),
+            DeleteMethod::None => Ok(()),
+        };
+        if let Err(e) = r {
+            failed_to_remove_files += 1;
+            warnings.push(format!("Failed to remove {} ({})", file.path.display(), e));
+        } else {
+            removed_files += 1;
+            gained_space += file.size;
+        }
+    }
     (gained_space, removed_files, failed_to_remove_files)
 }
 
