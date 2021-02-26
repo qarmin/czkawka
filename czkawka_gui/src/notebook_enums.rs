@@ -1,5 +1,5 @@
 pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = 10;
-pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 5;
+pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 4;
 
 // Needs to be updated when changed order of notebook tabs
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
@@ -51,7 +51,6 @@ pub enum NotebookUpperEnum {
     ExcludedDirectories,
     ExcludedItems,
     AllowedExtensions,
-    Settings,
 }
 pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
     match notebook_number {
@@ -59,10 +58,9 @@ pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
         1 => NotebookUpperEnum::ExcludedDirectories,
         2 => NotebookUpperEnum::ExcludedItems,
         3 => NotebookUpperEnum::AllowedExtensions,
-        4 => NotebookUpperEnum::Settings,
         _ => panic!("Invalid Upper Notebook Tab"),
     }
 }
 pub fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
-    [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2), to_notebook_upper_enum(3), to_notebook_upper_enum(4)]
+    [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2), to_notebook_upper_enum(3)]
 }
