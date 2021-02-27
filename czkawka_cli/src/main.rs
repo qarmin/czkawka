@@ -40,6 +40,7 @@ fn main() {
             file_to_save,
             not_recursive,
             allow_hard_links,
+            dryrun,
         } => {
             let mut df = DuplicateFinder::new();
 
@@ -53,6 +54,7 @@ fn main() {
             df.set_hash_type(hash_type);
             df.set_recursive_search(!not_recursive.not_recursive);
             df.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
+            df.set_dryrun(dryrun.dryrun);
 
             df.find_duplicates(None, None);
 

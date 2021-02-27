@@ -32,6 +32,8 @@ pub enum Commands {
         not_recursive: NotRecursive,
         #[structopt(flatten)]
         allow_hard_links: AllowHardLinks,
+        #[structopt(flatten)]
+        dryrun: DryRun,
     },
     #[structopt(name = "empty-folders", about = "Finds empty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
     EmptyFolders {
@@ -233,6 +235,12 @@ pub struct FileToSave {
 pub struct AllowHardLinks {
     #[structopt(short = "L", long, help = "Do not ignore hard links")]
     pub allow_hard_links: bool,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct DryRun {
+    #[structopt(long, help = "Do nothing and print the operation that would happen.")]
+    pub dryrun: bool,
 }
 
 impl FileToSave {
