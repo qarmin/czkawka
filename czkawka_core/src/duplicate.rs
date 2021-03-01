@@ -149,6 +149,7 @@ pub struct DuplicateFinder {
     delete_method: DeleteMethod,
     hash_type: HashType,
     ignore_hard_links: bool,
+    dryrun: bool,
     stopped_search: bool,
 }
 
@@ -170,6 +171,7 @@ impl DuplicateFinder {
             stopped_search: false,
             ignore_hard_links: true,
             hash_type: HashType::Blake3,
+            dryrun: false,
         }
     }
 
@@ -241,6 +243,10 @@ impl DuplicateFinder {
 
     pub fn set_ignore_hard_links(&mut self, ignore_hard_links: bool) {
         self.ignore_hard_links = ignore_hard_links;
+    }
+
+    pub fn set_dryrun(&mut self, dryrun: bool) {
+        self.dryrun = dryrun;
     }
 
     pub fn set_check_method(&mut self, check_method: CheckingMethod) {
@@ -944,7 +950,7 @@ impl DuplicateFinder {
         match self.check_method {
             CheckingMethod::Name => {
                 for vector in self.files_with_identical_names.values() {
-                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
+                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                     self.information.gained_space += tuple.0;
                     self.information.number_of_removed_files += tuple.1;
                     self.information.number_of_failed_to_remove_files += tuple.2;
@@ -953,7 +959,7 @@ impl DuplicateFinder {
             CheckingMethod::Hash | CheckingMethod::HashMB => {
                 for vector_vectors in self.files_with_identical_hashes.values() {
                     for vector in vector_vectors.iter() {
-                        let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
+                        let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                         self.information.gained_space += tuple.0;
                         self.information.number_of_removed_files += tuple.1;
                         self.information.number_of_failed_to_remove_files += tuple.2;
@@ -962,7 +968,7 @@ impl DuplicateFinder {
             }
             CheckingMethod::Size => {
                 for vector in self.files_with_identical_size.values() {
-                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages.warnings);
+                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                     self.information.gained_space += tuple.0;
                     self.information.number_of_removed_files += tuple.1;
                     self.information.number_of_failed_to_remove_files += tuple.2;
@@ -1216,7 +1222,7 @@ impl PrintResults for DuplicateFinder {
 
 /// Functions to remove slice(vector) of files with provided method
 /// Returns size of removed elements, number of deleted and failed to delete files and modified warning list
-fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &mut Vec<String>) -> (u64, usize, usize) {
+fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_messages: &mut Messages, dryrun: bool) -> (u64, usize, usize) {
     assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
     let mut gained_space: u64 = 0;
     let mut removed_files: usize = 0;
@@ -1238,17 +1244,40 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, warnings: &m
         } else if removed_files + failed_to_remove_files >= n {
             break;
         }
+
         let r = match delete_method {
-            DeleteMethod::OneOldest | DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptNewest => fs::remove_file(&file.path),
-            DeleteMethod::HardLink => make_hard_link(&vector[q_index].path, &file.path),
-            DeleteMethod::None => Ok(()),
+            DeleteMethod::OneOldest | DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptNewest => {
+                if dryrun {
+                    Ok(Some(format!("Delete {}", file.path.display())))
+                } else {
+                    fs::remove_file(&file.path).map(|_| None)
+                }
+            }
+            DeleteMethod::HardLink => {
+                let src = &vector[q_index].path;
+                if dryrun {
+                    Ok(Some(format!("Replace file {} with hard link to {}", file.path.display(), src.display())))
+                } else {
+                    make_hard_link(&src, &file.path).map(|_| None)
+                }
+            }
+            DeleteMethod::None => Ok(None),
         };
-        if let Err(e) = r {
-            failed_to_remove_files += 1;
-            warnings.push(format!("Failed to remove {} ({})", file.path.display(), e));
-        } else {
-            removed_files += 1;
-            gained_space += file.size;
+
+        match r {
+            Err(e) => {
+                failed_to_remove_files += 1;
+                text_messages.warnings.push(format!("Failed to remove {} ({})", file.path.display(), e));
+            }
+            Ok(Some(msg)) => {
+                text_messages.messages.push(msg);
+                removed_files += 1;
+                gained_space += file.size;
+            }
+            Ok(None) => {
+                removed_files += 1;
+                gained_space += file.size;
+            }
         }
     }
     (gained_space, removed_files, failed_to_remove_files)
