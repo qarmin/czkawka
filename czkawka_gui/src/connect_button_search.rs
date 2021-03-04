@@ -91,6 +91,7 @@ pub fn connect_button_search(
     let radio_button_hash_type_crc32 = gui_data.main_notebook.radio_button_hash_type_crc32.clone();
     let radio_button_hash_type_xxh3 = gui_data.main_notebook.radio_button_hash_type_xxh3.clone();
     let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
+    let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -99,6 +100,7 @@ pub fn connect_button_search(
         let excluded_items = entry_excluded_items.get_text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.get_active();
+        let use_cache = check_button_settings_use_cache.get_active();
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 
@@ -167,6 +169,7 @@ pub fn connect_button_search(
                     df.set_check_method(check_method);
                     df.set_hash_type(hash_type);
                     df.set_ignore_hard_links(hide_hard_links);
+                    df.set_use_cache(use_cache);
                     df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
                     let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });
@@ -292,6 +295,7 @@ pub fn connect_button_search(
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
                     sf.set_similarity(similarity);
+                    sf.set_use_cache(use_cache);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });
@@ -402,6 +406,7 @@ pub fn connect_button_search(
                     br.set_excluded_directory(excluded_directories);
                     br.set_recursive_search(recursive_search);
                     br.set_excluded_items(excluded_items);
+                    br.set_use_cache(use_cache);
                     br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
                     let _ = glib_stop_sender.send(Message::BrokenFiles(br));
                 });
