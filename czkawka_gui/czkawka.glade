@@ -2516,6 +2516,21 @@ This program is free to use and will always be.
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkCheckButton" id="check_button_settings_confirm_group_deletion">
+                        <property name="label" translatable="yes">Show confirm dialog when deleting all files in group</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkCheckButton" id="check_button_settings_show_text_view">
                         <property name="label" translatable="yes">Show bottom text panel</property>
                         <property name="visible">True</property>
@@ -2527,7 +2542,7 @@ This program is free to use and will always be.
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>

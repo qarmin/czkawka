@@ -25,6 +25,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
+    let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_delete.connect_clicked(move |_| {
@@ -56,7 +57,10 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
         match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
-                tree_remove(&tree_view_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+                if !check_button_settings_confirm_group_deletion.get_active() || !check_if_deleting_all_files_in_group(&tree_view_duplicate_finder.clone(), ColumnsDuplicates::Color as i32, &window_main, &check_button_settings_confirm_group_deletion)
+                {
+                    tree_remove(&tree_view_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+                }
             }
             NotebookMainEnum::EmptyDirectories => {
                 empty_folder_remover(&tree_view_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
@@ -71,20 +75,27 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                 basic_remove(&tree_view_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
             }
             NotebookMainEnum::SimilarImages => {
-                tree_remove(
-                    &tree_view_similar_images_finder.clone(),
-                    ColumnsSimilarImages::Name as i32,
-                    ColumnsSimilarImages::Path as i32,
-                    ColumnsSimilarImages::Color as i32,
-                    &gui_data,
-                );
-                image_preview_similar_images.hide();
+                if !check_button_settings_confirm_group_deletion.get_active()
+                    || !check_if_deleting_all_files_in_group(&tree_view_similar_images_finder.clone(), ColumnsSimilarImages::Color as i32, &window_main, &check_button_settings_confirm_group_deletion)
+                {
+                    tree_remove(
+                        &tree_view_similar_images_finder.clone(),
+                        ColumnsSimilarImages::Name as i32,
+                        ColumnsSimilarImages::Path as i32,
+                        ColumnsSimilarImages::Color as i32,
+                        &gui_data,
+                    );
+                    image_preview_similar_images.hide();
+                }
             }
             NotebookMainEnum::Zeroed => {
                 basic_remove(&tree_view_zeroed_files_finder.clone(), ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
             }
             NotebookMainEnum::SameMusic => {
-                tree_remove(&tree_view_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+                if !check_button_settings_confirm_group_deletion.get_active() || !check_if_deleting_all_files_in_group(&tree_view_same_music_finder.clone(), ColumnsSameMusic::Color as i32, &window_main, &check_button_settings_confirm_group_deletion)
+                {
+                    tree_remove(&tree_view_same_music_finder.clone(), ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+                }
             }
             NotebookMainEnum::Symlinks => {
                 basic_remove(&tree_view_invalid_symlinks.clone(), ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
@@ -94,6 +105,81 @@ pub fn connect_button_delete(gui_data: &GuiData) {
             }
         }
     });
+}
+
+pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_color: i32, window_main: &gtk::Window, check_button_settings_confirm_group_deletion: &gtk::CheckButton) -> bool {
+    let selection = tree_view.get_selection();
+    let (selection_rows, tree_model) = selection.get_selected_rows();
+    if selection_rows.is_empty() {
+        return false;
+    }
+
+    let mut current_selected_row = 0;
+
+    let mut selected_all_records: bool = true;
+
+    if let Some(first_iter) = tree_model.get_iter_first() {
+        let current_iter = first_iter;
+        if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+            panic!("First element, should be a header"); // First element should be header
+        };
+
+        loop {
+            if !tree_model.iter_next(&current_iter) {
+                if selected_all_records {
+                    break;
+                }
+                break;
+            }
+
+            if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+                if selected_all_records {
+                    break;
+                }
+            } else if current_selected_row != selection_rows.len() && selection_rows[current_selected_row] == tree_model.get_path(&current_iter).unwrap() {
+                current_selected_row += 1;
+            } else {
+                selected_all_records = false;
+            }
+        }
+    } else {
+        return false;
+    }
+
+    if !selected_all_records {
+        return false;
+    } else {
+        let confirmation_dialog_delete = gtk::Dialog::with_buttons(
+            Some("Confirmation of deleting all files in group"),
+            Some(window_main),
+            gtk::DialogFlags::MODAL,
+            &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
+        );
+        let label: gtk::Label = gtk::Label::new(Some("In some groups there are selected all records, are you sure that you want to delete them?"));
+        let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
+        check_button.set_active(true);
+
+        for widgets in confirmation_dialog_delete.get_children() {
+            // By default GtkBox is child of dialog, so we can easily add other things to it
+            widgets.clone().downcast::<gtk::Box>().unwrap().add(&label);
+            widgets.downcast::<gtk::Box>().unwrap().add(&check_button);
+        }
+
+        confirmation_dialog_delete.show_all();
+
+        let response_type = confirmation_dialog_delete.run();
+        if response_type == gtk::ResponseType::Ok {
+            if !check_button.get_active() {
+                check_button_settings_confirm_group_deletion.set_active(false);
+            }
+        } else {
+            confirmation_dialog_delete.close();
+            return true;
+        }
+        confirmation_dialog_delete.close();
+    }
+
+    false
 }
 
 pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {

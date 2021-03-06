@@ -102,6 +102,11 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
             data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
 
+            //// Confirm deletion of all files in group
+            data_to_save.push("--confirm_group_deletion:".to_string());
+            let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
+            data_to_save.push(check_button_settings_confirm_group_deletion.get_active().to_string());
+
             //// Show image previews in similar images
             data_to_save.push("--show_previews:".to_string());
             let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
@@ -166,6 +171,7 @@ enum TypeOfLoadedData {
     LoadingAtStart,
     SavingAtExit,
     ConfirmDeletion,
+    ConfirmGroupDeletion,
     ShowPreviews,
     BottomTextPanel,
     HideHardLinks,
@@ -210,6 +216,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut loading_at_start: bool = true;
         let mut saving_at_exit: bool = true;
         let mut confirm_deletion: bool = true;
+        let mut confirm_group_deletion: bool = true;
         let mut show_previews: bool = true;
         let mut bottom_text_panel: bool = true;
         let mut hide_hard_links: bool = true;
@@ -235,6 +242,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::SavingAtExit;
             } else if line.starts_with("--confirm_deletion") {
                 current_type = TypeOfLoadedData::ConfirmDeletion;
+            } else if line.starts_with("--confirm_group_deletion") {
+                current_type = TypeOfLoadedData::ConfirmGroupDeletion;
             } else if line.starts_with("--show_previews") {
                 current_type = TypeOfLoadedData::ShowPreviews;
             } else if line.starts_with("--bottom_text_panel") {
@@ -301,6 +310,19 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             confirm_deletion = true;
                         } else if line == "0" || line == "false" {
                             confirm_deletion = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
+                    TypeOfLoadedData::ConfirmGroupDeletion => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            confirm_group_deletion = true;
+                        } else if line == "0" || line == "false" {
+                            confirm_group_deletion = false;
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
@@ -402,6 +424,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             gui_data.settings.check_button_settings_load_at_start.set_active(loading_at_start);
             gui_data.settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
             gui_data.settings.check_button_settings_confirm_deletion.set_active(confirm_deletion);
+            gui_data.settings.check_button_settings_confirm_group_deletion.set_active(confirm_group_deletion);
             gui_data.settings.check_button_settings_show_preview_similar_images.set_active(show_previews);
 
             gui_data.settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
@@ -489,6 +512,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         gui_data.settings.check_button_settings_save_at_exit.set_active(true);
         gui_data.settings.check_button_settings_load_at_start.set_active(true);
         gui_data.settings.check_button_settings_confirm_deletion.set_active(true);
+        gui_data.settings.check_button_settings_confirm_group_deletion.set_active(true);
         gui_data.settings.check_button_settings_show_preview_similar_images.set_active(true);
         gui_data.settings.check_button_settings_show_text_view.set_active(true);
         gui_data.settings.check_button_settings_hide_hard_links.set_active(true);
