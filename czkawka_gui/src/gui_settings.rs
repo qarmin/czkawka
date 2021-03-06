@@ -8,6 +8,7 @@ pub struct GUISettings {
     pub check_button_settings_save_at_exit: gtk::CheckButton,
     pub check_button_settings_load_at_start: gtk::CheckButton,
     pub check_button_settings_confirm_deletion: gtk::CheckButton,
+    pub check_button_settings_confirm_group_deletion: gtk::CheckButton,
     pub check_button_settings_show_text_view: gtk::CheckButton,
     pub check_button_settings_use_cache: gtk::CheckButton,
 
@@ -31,6 +32,7 @@ impl GUISettings {
         let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
         let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
         let check_button_settings_confirm_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_deletion").unwrap();
+        let check_button_settings_confirm_group_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_group_deletion").unwrap();
         let check_button_settings_show_text_view: gtk::CheckButton = builder.get_object("check_button_settings_show_text_view").unwrap();
         let check_button_settings_use_cache: gtk::CheckButton = builder.get_object("check_button_settings_use_cache").unwrap();
 
@@ -50,6 +52,7 @@ impl GUISettings {
             check_button_settings_save_at_exit,
             check_button_settings_load_at_start,
             check_button_settings_confirm_deletion,
+            check_button_settings_confirm_group_deletion,
             check_button_settings_show_text_view,
             button_settings_save_configuration,
             button_settings_load_configuration,
