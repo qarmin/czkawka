@@ -3,6 +3,7 @@ use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use gtk::prelude::*;
+use gtk::Align;
 use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
@@ -29,30 +30,8 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
     buttons_delete.connect_clicked(move |_| {
-        if check_button_settings_confirm_deletion.get_active() {
-            let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some("Delete confirmation"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
-            let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
-            let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
-            check_button.set_active(true);
-
-            for widgets in confirmation_dialog_delete.get_children() {
-                // By default GtkBox is child of dialog, so we can easily add other things to it
-                widgets.clone().downcast::<gtk::Box>().unwrap().add(&label);
-                widgets.downcast::<gtk::Box>().unwrap().add(&check_button);
-            }
-
-            confirmation_dialog_delete.show_all();
-
-            let response_type = confirmation_dialog_delete.run();
-            if response_type == gtk::ResponseType::Ok {
-                if !check_button.get_active() {
-                    check_button_settings_confirm_deletion.set_active(false);
-                }
-            } else {
-                confirmation_dialog_delete.close();
-                return;
-            }
-            confirmation_dialog_delete.close();
+        if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main) {
+            return;
         }
 
         match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
@@ -107,6 +86,53 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     });
 }
 
+pub fn check_if_can_delete_files(check_button_settings_confirm_deletion: &gtk::CheckButton, window_main: &gtk::Window) -> bool {
+    if check_button_settings_confirm_deletion.get_active() {
+        let confirmation_dialog_delete = gtk::Dialog::with_buttons(
+            Some("Delete confirmation"),
+            Some(window_main),
+            gtk::DialogFlags::DESTROY_WITH_PARENT,
+            &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
+        );
+        let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
+        let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
+        check_button.set_active(true);
+        check_button.set_halign(Align::Center);
+
+        let button_box = confirmation_dialog_delete.get_children()[0].clone().downcast::<gtk::Box>().unwrap().get_children()[0]
+            .clone()
+            .downcast::<gtk::Box>()
+            .unwrap()
+            .get_children()[0]
+            .clone()
+            .downcast::<gtk::ButtonBox>()
+            .unwrap();
+
+        let button_ok = button_box.get_children()[0].clone();
+        button_ok.grab_focus();
+
+        let internal_box = confirmation_dialog_delete.get_children()[0].clone().downcast::<gtk::Box>().unwrap();
+        internal_box.add(&label);
+        internal_box.add(&check_button);
+
+        confirmation_dialog_delete.show_all();
+
+        let response_type = confirmation_dialog_delete.run();
+        if response_type == gtk::ResponseType::Ok {
+            if !check_button.get_active() {
+                check_button_settings_confirm_deletion.set_active(false);
+            }
+            confirmation_dialog_delete.hide();
+            confirmation_dialog_delete.close();
+        } else {
+            confirmation_dialog_delete.hide();
+            confirmation_dialog_delete.close();
+            return false;
+        };
+    }
+    true
+}
+
 pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_color: i32, window_main: &gtk::Window, check_button_settings_confirm_group_deletion: &gtk::CheckButton) -> bool {
     let selection = tree_view.get_selection();
     let (selection_rows, tree_model) = selection.get_selected_rows();
@@ -149,34 +175,49 @@ pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_co
     if !selected_all_records {
         return false;
     } else {
-        let confirmation_dialog_delete = gtk::Dialog::with_buttons(
+        let confirmation_dialog_group_delete = gtk::Dialog::with_buttons(
             Some("Confirmation of deleting all files in group"),
             Some(window_main),
             gtk::DialogFlags::MODAL,
             &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
         );
-        let label: gtk::Label = gtk::Label::new(Some("In some groups there are selected all records, are you sure that you want to delete them?"));
+        let label: gtk::Label = gtk::Label::new(Some("In some groups there are selected all records."));
+        let label2: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete them?"));
         let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
         check_button.set_active(true);
+        check_button.set_halign(Align::Center);
 
-        for widgets in confirmation_dialog_delete.get_children() {
-            // By default GtkBox is child of dialog, so we can easily add other things to it
-            widgets.clone().downcast::<gtk::Box>().unwrap().add(&label);
-            widgets.downcast::<gtk::Box>().unwrap().add(&check_button);
-        }
+        let button_box = confirmation_dialog_group_delete.get_children()[0].clone().downcast::<gtk::Box>().unwrap().get_children()[0]
+            .clone()
+            .downcast::<gtk::Box>()
+            .unwrap()
+            .get_children()[0]
+            .clone()
+            .downcast::<gtk::ButtonBox>()
+            .unwrap();
 
-        confirmation_dialog_delete.show_all();
+        let button_ok = button_box.get_children()[0].clone();
+        button_ok.grab_focus();
 
-        let response_type = confirmation_dialog_delete.run();
+        let internal_box = confirmation_dialog_group_delete.get_children()[0].clone().downcast::<gtk::Box>().unwrap();
+        internal_box.add(&label);
+        internal_box.add(&label2);
+        internal_box.add(&check_button);
+
+        confirmation_dialog_group_delete.show_all();
+
+        let response_type = confirmation_dialog_group_delete.run();
         if response_type == gtk::ResponseType::Ok {
             if !check_button.get_active() {
                 check_button_settings_confirm_group_deletion.set_active(false);
             }
         } else {
-            confirmation_dialog_delete.close();
+            confirmation_dialog_group_delete.hide();
+            confirmation_dialog_group_delete.close();
             return true;
         }
-        confirmation_dialog_delete.close();
+        confirmation_dialog_group_delete.hide();
+        confirmation_dialog_group_delete.close();
     }
 
     false
