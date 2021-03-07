@@ -1,4 +1,4 @@
-use crate::connect_button_delete::{basic_remove, empty_folder_remover, tree_remove};
+use crate::connect_button_delete::{basic_remove, check_if_can_delete_files, check_if_deleting_all_files_in_group, empty_folder_remover, tree_remove};
 use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::gui_data::*;
@@ -85,6 +85,17 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.get_keycode() {
                         // Handle delete button
                         if button_number == 119 {
+                            if tree_view.get_selection().get_selected_rows().0.is_empty() {
+                                return gtk::Inhibit(false);
+                            }
+                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                                return gtk::Inhibit(false);
+                            }
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.get_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsDuplicates::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
+                            {
+                                return gtk::Inhibit(false);
+                            }
                             tree_remove(&tree_view, ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
                         }
                     }
@@ -247,6 +258,17 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.get_keycode() {
                         // Handle delete button
                         if button_number == 119 {
+                            if tree_view.get_selection().get_selected_rows().0.is_empty() {
+                                return gtk::Inhibit(false);
+                            }
+                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                                return gtk::Inhibit(false);
+                            }
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.get_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsSimilarImages::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
+                            {
+                                return gtk::Inhibit(false);
+                            }
                             tree_remove(&tree_view, ColumnsSimilarImages::Name as i32, ColumnsSimilarImages::Path as i32, ColumnsSimilarImages::Color as i32, &gui_data);
                             image_preview_similar_images_clone.hide();
                         }
@@ -320,6 +342,17 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.get_keycode() {
                         // Handle delete button
                         if button_number == 119 {
+                            if tree_view.get_selection().get_selected_rows().0.is_empty() {
+                                return gtk::Inhibit(false);
+                            }
+                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                                return gtk::Inhibit(false);
+                            }
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.get_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsSameMusic::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
+                            {
+                                return gtk::Inhibit(false);
+                            }
                             tree_remove(&tree_view, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
                         }
                     }

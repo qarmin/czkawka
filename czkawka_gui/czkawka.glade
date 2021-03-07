@@ -2586,7 +2586,7 @@ This program is free to use and will always be.
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkCheckButton" id="check_button_settings_hide_hard_links">
-                    <property name="label" translatable="yes">Hide hard links</property>
+                    <property name="label" translatable="yes">Hide hard links(only Linux and MacOS)</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
