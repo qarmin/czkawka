@@ -37,7 +37,7 @@ rodio = { version = "0.13.0", optional = true }
 # Hashes
 blake3 = "0.3"
 crc32fast = "1.2.1"
-xxhash-rust = { version = "0.8.1", features = ["xxh3"] }
+xxhash-rust = { version = "0.8.2", features = ["xxh3"] }
 
 tempfile = "3.1"
 
