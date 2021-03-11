@@ -225,6 +225,7 @@ pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_co
 
 pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
+    let use_trash = gui_data.settings.check_button_settings_use_trash.clone().get_active();
 
     let selection = tree_view.get_selection();
 
@@ -290,11 +291,20 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
         }
 
         if !error_happened {
-            match fs::remove_dir_all(format!("{}/{}", path, name)) {
-                Ok(_) => {
-                    list_store.remove(&list_store.get_iter(tree_path).unwrap());
+            if !use_trash {
+                match fs::remove_dir_all(format!("{}/{}", path, name)) {
+                    Ok(_) => {
+                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                    }
+                    Err(_) => error_happened = true,
                 }
-                Err(_) => error_happened = true,
+            } else {
+                match trash::delete(format!("{}/{}", path, name)) {
+                    Ok(_) => {
+                        list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                    }
+                    Err(_) => error_happened = true,
+                }
             }
         }
         if error_happened {
@@ -308,6 +318,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
 pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
+    let use_trash = gui_data.settings.check_button_settings_use_trash.clone().get_active();
 
     let selection = tree_view.get_selection();
 
@@ -324,11 +335,20 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
         let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap().unwrap();
         let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), column_path).get::<String>().unwrap().unwrap();
 
-        match fs::remove_file(format!("{}/{}", path, name)) {
-            Ok(_) => {
-                list_store.remove(&list_store.get_iter(tree_path).unwrap());
+        if !use_trash {
+            match fs::remove_file(format!("{}/{}", path, name)) {
+                Ok(_) => {
+                    list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                }
+                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
             }
-            Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+        } else {
+            match trash::delete(format!("{}/{}", path, name)) {
+                Ok(_) => {
+                    list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                }
+                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+            }
         }
     }
 
@@ -339,6 +359,7 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
 pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
+    let use_trash = gui_data.settings.check_button_settings_use_trash.clone().get_active();
 
     let selection = tree_view.get_selection();
 
@@ -369,13 +390,22 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         vec_file_name.sort();
         vec_file_name.dedup();
         for file_name in vec_file_name {
-            if fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
+            if !use_trash {
+                if fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
+                    messages += format!(
+                        "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
+                        path, file_name
+                    )
+                    .as_str()
+                }
+            } else if trash::delete(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
                 messages += format!(
                     "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
                     path, file_name
                 )
                 .as_str()
             }
+
             vec_path_to_delete.push((path.clone(), file_name.clone()));
         }
     }
