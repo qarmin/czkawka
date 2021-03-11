@@ -1,3 +1,16 @@
+## Version 3.0.0 - 11.03.2021r
+- Option to not ignore hardlinks - [#273](https://github.com/qarmin/czkawka/pull/273)
+- Hardlink support for GUI - [#276](https://github.com/qarmin/czkawka/pull/276)
+- New settings window - [#262](https://github.com/qarmin/czkawka/pull/262)
+- Unify file removing - [#278](https://github.com/qarmin/czkawka/pull/278)
+- Dryrun in duplicates CLI  - [#277](https://github.com/qarmin/czkawka/pull/277)
+- Option to turn off cache - [#263](https://github.com/qarmin/czkawka/pull/263)
+- Update Image dependency and fix crashes - [#270](https://github.com/qarmin/czkawka/pull/270), [e3aca69](https://github.com/qarmin/czkawka/commit/e3aca69499966499413e4b7cd4d1037bec6a5d68)
+- Add confirmation dialog when trying to remove all files in group - [#281](https://github.com/qarmin/czkawka/pull/281)
+- Add confirmation dialog when removing files with delete key - [#282](https://github.com/qarmin/czkawka/pull/282)
+- Open file when clicking at the Enter button - [#285](https://github.com/qarmin/czkawka/pull/285)
+- Allow to put files to trash instead fully remove them - [#284](https://github.com/qarmin/czkawka/pull/284)
+
 ## Version 2.4.0 - 22.02.2021r
 - Add about dialog - [#226](https://github.com/qarmin/czkawka/pull/226)
 - Remove checking for ico in similar images - [#227](https://github.com/qarmin/czkawka/pull/227)

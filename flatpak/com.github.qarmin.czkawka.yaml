@@ -26,9 +26,7 @@ modules:
   - install -Dm644 ./pkgs/com.github.qarmin.czkawka.desktop -t /app/share/applications/
   - install -Dm644 ./data/com.github.qarmin.czkawka.metainfo.xml -t /app/share/metainfo
   sources:
-  - type: dir
-    path: "."
   - cargo-sources.json
   - type: git
     url: https://github.com/qarmin/czkawka.git
-    tag: 2.4.0
+    tag: 3.0.0

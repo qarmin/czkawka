@@ -37,7 +37,7 @@ Author: Rafał Mikrut
     <property name="window-position">center</property>
     <property name="type-hint">dialog</property>
     <property name="program-name">Czkawka</property>
-    <property name="version">2.4.0</property>
+    <property name="version">3.0.0</property>
     <property name="comments" translatable="yes">2020 - 2021  Rafał Mikrut(qarmin)
 
 This program is free to use and will always be.
@@ -2194,7 +2194,7 @@ This program is free to use and will always be.
                 <property name="can-focus">True</property>
                 <property name="editable">False</property>
                 <property name="has-frame">False</property>
-                <property name="text" translatable="yes">Czkawka 2.4.0</property>
+                <property name="text" translatable="yes">Czkawka 3.0.0</property>
                 <property name="xalign">1</property>
                 <property name="shadow-type">none</property>
                 <property name="caps-lock-warning">False</property>
