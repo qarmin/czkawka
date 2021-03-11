@@ -11,6 +11,12 @@ pub fn opening_double_click_function_duplicates(tree_view: &gtk::TreeView, event
     }
     gtk::Inhibit(false)
 }
+pub fn opening_enter_function_duplicates(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, OpenMode::PathAndName);
+    }
+    gtk::Inhibit(false)
+}
 
 pub fn opening_double_click_function_empty_folders(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
@@ -20,11 +26,23 @@ pub fn opening_double_click_function_empty_folders(tree_view: &gtk::TreeView, ev
     }
     gtk::Inhibit(false)
 }
+pub fn opening_enter_function_empty_folders(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, OpenMode::PathAndName);
+    }
+    gtk::Inhibit(false)
+}
 pub fn opening_double_click_function_empty_files(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
         common_open_function(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, OpenMode::PathAndName);
     } else if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 3 {
         common_open_function(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+pub fn opening_enter_function_empty_files(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, OpenMode::PathAndName);
     }
     gtk::Inhibit(false)
 }
@@ -37,12 +55,24 @@ pub fn opening_double_click_function_temporary_files(tree_view: &gtk::TreeView, 
     }
     gtk::Inhibit(false)
 }
+pub fn opening_enter_function_temporary_files(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, OpenMode::PathAndName);
+    }
+    gtk::Inhibit(false)
+}
 
 pub fn opening_double_click_function_big_files(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
         common_open_function(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, OpenMode::PathAndName);
     } else if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 3 {
         common_open_function(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+pub fn opening_enter_function_big_files(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, OpenMode::PathAndName);
     }
     gtk::Inhibit(false)
 }
@@ -55,12 +85,24 @@ pub fn opening_double_click_function_zeroed_files(tree_view: &gtk::TreeView, eve
     }
     gtk::Inhibit(false)
 }
+pub fn opening_enter_function_zeroed_files(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, OpenMode::PathAndName);
+    }
+    gtk::Inhibit(false)
+}
 
 pub fn opening_double_click_function_same_music(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
         common_open_function(tree_view, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, OpenMode::PathAndName);
     } else if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 3 {
         common_open_function(tree_view, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+pub fn opening_enter_function_same_music(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, OpenMode::PathAndName);
     }
     gtk::Inhibit(false)
 }
@@ -73,6 +115,12 @@ pub fn opening_double_click_function_similar_images(tree_view: &gtk::TreeView, e
     }
     gtk::Inhibit(false)
 }
+pub fn opening_enter_function_similar_images(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsSimilarImages::Name as i32, ColumnsSimilarImages::Path as i32, OpenMode::PathAndName);
+    }
+    gtk::Inhibit(false)
+}
 
 pub fn opening_double_click_function_invalid_symlinks(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
@@ -82,12 +130,24 @@ pub fn opening_double_click_function_invalid_symlinks(tree_view: &gtk::TreeView,
     }
     gtk::Inhibit(false)
 }
+pub fn opening_enter_function_invalid_symlinks(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, OpenMode::PathAndName);
+    }
+    gtk::Inhibit(false)
+}
 
 pub fn opening_double_click_function_broken_files(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 1 {
-        common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, OpenMode::PathAndName);
+        common_open_function(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, OpenMode::PathAndName);
     } else if event.get_event_type() == gdk::EventType::DoubleButtonPress && event.get_button() == 3 {
-        common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, OpenMode::OnlyPath);
+        common_open_function(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+pub fn opening_enter_function_broken_files(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    if event.get_keycode() == Some(36) {
+        common_open_function(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, OpenMode::PathAndName);
     }
     gtk::Inhibit(false)
 }
