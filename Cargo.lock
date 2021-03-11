@@ -230,9 +230,9 @@ checksum = "bed57e2090563b83ba8f83366628ce535a7584c9afa4c9fc0612a03925c6df58"
 
 [[package]]
 name = "byteorder"
-version = "1.4.2"
+version = "1.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae44d1a3d5a19df61dd0c8beb138458ac2a53a7ac09eba97d55592540004306b"
+checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "bytes"
@@ -599,6 +599,7 @@ dependencies = [
  "humansize",
  "image",
  "open",
+ "trash",
  "winapi",
 ]
 
@@ -1654,9 +1655,9 @@ checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
 
 [[package]]
 name = "open"
-version = "1.5.1"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2033f93630dd4b04768ecf5e16bcd3002a89e1e1dbef375bf290dd67e2b7a4d"
+checksum = "a7e9f1bdf15cd1f5a00cc9002a733a6ee6d0ff562491852d59652471c4a389f7"
 dependencies = [
  "which",
  "winapi",
@@ -2298,9 +2299,9 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "syn"
-version = "1.0.61"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed22b90a0e734a23a7610f4283ac9e5acfb96cbb30dfefa540d66f866f1c09c5"
+checksum = "8fd9bc7ccc2688b3344c2f48b9b546648b25ce0b20fc717ee7fa7981a8ca9717"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2473,6 +2474,15 @@ checksum = "c3311ef71dea6a1fd6bf5bfc10ec5b4bef6174048f6b481dbc6ce915ff48c0a0"
 dependencies = [
  "num-integer",
  "strength_reduce",
+]
+
+[[package]]
+name = "trash"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90df96afb154814e214f37eac04920c66886fd95962f22febb4d537b0dacd512"
+dependencies = [
+ "winapi",
 ]
 
 [[package]]
@@ -2745,9 +2755,9 @@ dependencies = [
 
 [[package]]
 name = "xxhash-rust"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94b92e16d90ed01ad0736f1123137630b5bcef5f5bafee62468283e027c1c85d"
+checksum = "e575e15bedf6e57b5c2d763ffc6c3c760143466cbd09d762d539680ab5992ded"
 
 [[package]]
 name = "zip"
