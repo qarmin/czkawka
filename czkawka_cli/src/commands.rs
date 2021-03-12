@@ -67,7 +67,7 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
-    #[structopt(name = "empty-files", about = "Finds emtpy files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt")]
+    #[structopt(name = "empty-files", about = "Finds empty files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt")]
     EmptyFiles {
         #[structopt(flatten)]
         directories: Directories,
