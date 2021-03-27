@@ -45,7 +45,7 @@ pub enum CheckingMethod {
     Name,
     Size,
     Hash,
-    HashMB,
+    HashMb,
 }
 
 impl MyHasher for blake3::Hasher {
@@ -78,16 +78,16 @@ impl MyHasher for xxhash_rust::xxh3::Xxh3 {
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
     Blake3,
-    CRC32,
-    XXH3,
+    Crc32,
+    Xxh3,
 }
 
 impl HashType {
     fn hasher(self: &HashType) -> Box<dyn MyHasher> {
         match self {
             HashType::Blake3 => Box::new(blake3::Hasher::new()),
-            HashType::CRC32 => Box::new(crc32fast::Hasher::new()),
-            HashType::XXH3 => Box::new(xxhash_rust::xxh3::Xxh3::new()),
+            HashType::Crc32 => Box::new(crc32fast::Hasher::new()),
+            HashType::Xxh3 => Box::new(xxhash_rust::xxh3::Xxh3::new()),
         }
     }
 }
@@ -193,7 +193,7 @@ impl DuplicateFinder {
                     return;
                 }
             }
-            CheckingMethod::HashMB | CheckingMethod::Hash => {
+            CheckingMethod::HashMb | CheckingMethod::Hash => {
                 if !self.check_files_size(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
@@ -477,7 +477,7 @@ impl DuplicateFinder {
             let checking_method = self.check_method.clone();
             let max_stage = match self.check_method {
                 CheckingMethod::Size => 0,
-                CheckingMethod::HashMB | CheckingMethod::Hash => 2,
+                CheckingMethod::HashMb | CheckingMethod::Hash => 2,
                 _ => 255,
             };
             progress_thread_handle = thread::spawn(move || loop {
@@ -771,7 +771,7 @@ impl DuplicateFinder {
         let mut full_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)>;
 
         match self.check_method {
-            CheckingMethod::HashMB => {
+            CheckingMethod::HashMb => {
                 full_hash_results = pre_checked_map
                     .par_iter()
                     .map(|(size, vec_file_entry)| {
@@ -970,7 +970,7 @@ impl DuplicateFinder {
                     self.information.number_of_failed_to_remove_files += tuple.2;
                 }
             }
-            CheckingMethod::Hash | CheckingMethod::HashMB => {
+            CheckingMethod::Hash | CheckingMethod::HashMb => {
                 for vector_vectors in self.files_with_identical_hashes.values() {
                     for vector in vector_vectors.iter() {
                         let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
@@ -1129,7 +1129,7 @@ impl SaveResults for DuplicateFinder {
                     write!(writer, "Not found any duplicates.").unwrap();
                 }
             }
-            CheckingMethod::Hash | CheckingMethod::HashMB => {
+            CheckingMethod::Hash | CheckingMethod::HashMb => {
                 if !self.files_with_identical_hashes.is_empty() {
                     writeln!(writer, "-------------------------------------------------Files with same hashes-------------------------------------------------").unwrap();
                     writeln!(
@@ -1183,7 +1183,7 @@ impl PrintResults for DuplicateFinder {
                     println!();
                 }
             }
-            CheckingMethod::Hash | CheckingMethod::HashMB => {
+            CheckingMethod::Hash | CheckingMethod::HashMb => {
                 for (_size, vector) in self.files_with_identical_hashes.iter() {
                     for j in vector {
                         number_of_files += j.len() as u64;
@@ -1317,7 +1317,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     identical
 }
 
-pub fn make_hard_link(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
+pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
     let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
     fs::rename(dst, temp.path())?;

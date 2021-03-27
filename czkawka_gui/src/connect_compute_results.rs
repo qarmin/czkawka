@@ -70,7 +70,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             duplicates_group = information.number_of_groups_by_name;
                             entry_info.set_text(format!("Found {} files in {} groups which have same names.", duplicates_number, duplicates_group).as_str());
                         }
-                        CheckingMethod::Hash | CheckingMethod::HashMB => {
+                        CheckingMethod::Hash | CheckingMethod::HashMb => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
@@ -132,7 +132,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     }
                                 }
                             }
-                            CheckingMethod::Hash | CheckingMethod::HashMB => {
+                            CheckingMethod::Hash | CheckingMethod::HashMb => {
                                 let btreemap = df.get_files_sorted_by_hash();
 
                                 for (size, vectors_vector) in btreemap.iter().rev() {

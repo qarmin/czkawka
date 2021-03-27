@@ -2,7 +2,7 @@ use gtk::prelude::*;
 use gtk::TreeView;
 
 #[derive(Clone)]
-pub struct GUIMainNotebook {
+pub struct GuiMainNotebook {
     pub notebook_main: gtk::Notebook,
 
     pub scrolled_window_duplicate_finder: gtk::ScrolledWindow,
@@ -60,7 +60,7 @@ pub struct GUIMainNotebook {
     pub image_preview_similar_images: gtk::Image,
 }
 
-impl GUIMainNotebook {
+impl GuiMainNotebook {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let notebook_main: gtk::Notebook = builder.get_object("notebook_main").unwrap();
 

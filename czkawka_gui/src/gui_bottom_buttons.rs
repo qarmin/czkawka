@@ -2,7 +2,7 @@ use gtk::prelude::*;
 use gtk::Button;
 
 #[derive(Clone)]
-pub struct GUIBottomButtons {
+pub struct GuiBottomButtons {
     pub buttons_search: gtk::Button,
     pub buttons_select: gtk::Button,
     pub buttons_delete: gtk::Button,
@@ -14,7 +14,7 @@ pub struct GUIBottomButtons {
     pub buttons_array: [Button; 6],
 }
 
-impl GUIBottomButtons {
+impl GuiBottomButtons {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let buttons_search: gtk::Button = builder.get_object("buttons_search").unwrap();
         let buttons_select: gtk::Button = builder.get_object("buttons_select").unwrap();

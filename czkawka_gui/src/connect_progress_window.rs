@@ -32,7 +32,7 @@ pub fn connect_progress_window(
         let future = async move {
             while let Some(item) = futures_receiver_duplicate_files.next().await {
                 match item.checking_method {
-                    duplicate::CheckingMethod::Hash | duplicate::CheckingMethod::HashMB => {
+                    duplicate::CheckingMethod::Hash | duplicate::CheckingMethod::HashMb => {
                         label_stage.show();
                         match item.current_stage {
                             // Checking Size

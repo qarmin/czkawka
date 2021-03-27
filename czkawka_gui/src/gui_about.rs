@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 
 #[derive(Clone)]
-pub struct GUIAbout {
+pub struct GuiAbout {
     pub about_dialog: gtk::AboutDialog,
 
     pub button_repository: gtk::Button,
@@ -9,7 +9,7 @@ pub struct GUIAbout {
     pub button_instruction: gtk::Button,
 }
 
-impl GUIAbout {
+impl GuiAbout {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let about_dialog: gtk::AboutDialog = builder.get_object("about_dialog").unwrap();
 

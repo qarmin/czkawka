@@ -2,7 +2,7 @@ use gtk::prelude::*;
 use gtk::TreeView;
 
 #[derive(Clone)]
-pub struct GUIUpperNotebook {
+pub struct GuiUpperNotebook {
     pub notebook_upper: gtk::Notebook,
 
     pub scrolled_window_included_directories: gtk::ScrolledWindow,
@@ -24,7 +24,7 @@ pub struct GUIUpperNotebook {
     pub buttons_remove_excluded_directory: gtk::Button,
 }
 
-impl GUIUpperNotebook {
+impl GuiUpperNotebook {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let notebook_upper: gtk::Notebook = builder.get_object("notebook_upper").unwrap();
 

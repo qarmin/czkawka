@@ -66,7 +66,7 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
         let mut tree_iter_array: Vec<TreeIter> = Vec::new();
         let mut oldest_index: Option<usize> = None;
         let mut current_index: usize = 0;
-        let mut oldest_modification_time: u64 = u64::max_value();
+        let mut oldest_modification_time: u64 = u64::MAX;
 
         let mut file_length: usize = 0;
 
@@ -182,7 +182,7 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
         let mut tree_iter_array: Vec<TreeIter> = Vec::new();
         let mut oldest_index: Option<usize> = None;
         let mut current_index: usize = 0;
-        let mut oldest_modification_time: u64 = u64::max_value();
+        let mut oldest_modification_time: u64 = u64::MAX;
 
         let mut file_length: usize = 0;
 
@@ -294,7 +294,7 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
         Path,
         Name,
         PathName,
-    };
+    }
     let wildcard_type: WildcardType;
 
     // Accept Dialog
@@ -410,7 +410,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
         Path,
         Name,
         PathName,
-    };
+    }
     let wildcard_type: WildcardType;
 
     // Accept Dialog
@@ -590,8 +590,8 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
         let mut tree_iter_array: Vec<TreeIter> = Vec::new();
         let mut smallest_index: Option<usize> = None;
         let mut current_index: usize = 0;
-        let mut smallest_size_as_bytes: u64 = u64::max_value();
-        let mut smallest_number_of_pixels: u64 = u64::max_value();
+        let mut smallest_size_as_bytes: u64 = u64::MAX;
+        let mut smallest_number_of_pixels: u64 = u64::MAX;
 
         loop {
             let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();

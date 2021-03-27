@@ -137,7 +137,7 @@ pub fn connect_button_search(
                 } else if radio_button_duplicates_size.get_active() {
                     check_method = duplicate::CheckingMethod::Size;
                 } else if radio_button_duplicates_hashmb.get_active() {
-                    check_method = duplicate::CheckingMethod::HashMB;
+                    check_method = duplicate::CheckingMethod::HashMb;
                 } else if radio_button_duplicates_hash.get_active() {
                     check_method = duplicate::CheckingMethod::Hash;
                 } else {
@@ -149,9 +149,9 @@ pub fn connect_button_search(
                 if radio_button_hash_type_blake3.get_active() {
                     hash_type = duplicate::HashType::Blake3;
                 } else if radio_button_hash_type_crc32.get_active() {
-                    hash_type = duplicate::HashType::CRC32;
+                    hash_type = duplicate::HashType::Crc32;
                 } else if radio_button_hash_type_xxh3.get_active() {
-                    hash_type = duplicate::HashType::XXH3;
+                    hash_type = duplicate::HashType::Xxh3;
                 } else {
                     panic!("No radio button is pressed");
                 }
