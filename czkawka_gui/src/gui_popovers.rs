@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 
 #[derive(Clone)]
-pub struct GUIPopovers {
+pub struct GuiPopovers {
     pub buttons_popover_select_all: gtk::Button,
     pub buttons_popover_unselect_all: gtk::Button,
     pub buttons_popover_reverse: gtk::Button,
@@ -26,7 +26,7 @@ pub struct GUIPopovers {
     pub popover_right_click: gtk::Popover,
 }
 
-impl GUIPopovers {
+impl GuiPopovers {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
         let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();

@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 
 #[derive(Clone)]
-pub struct GUISettings {
+pub struct GuiSettings {
     pub window_settings: gtk::Window,
 
     // General
@@ -25,7 +25,7 @@ pub struct GUISettings {
     pub button_settings_reset_configuration: gtk::Button,
 }
 
-impl GUISettings {
+impl GuiSettings {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let window_settings: gtk::Window = builder.get_object("window_settings").unwrap();
 
@@ -56,13 +56,13 @@ impl GUISettings {
             check_button_settings_confirm_deletion,
             check_button_settings_confirm_group_deletion,
             check_button_settings_show_text_view,
+            check_button_settings_use_cache,
+            check_button_settings_use_trash,
+            check_button_settings_hide_hard_links,
+            check_button_settings_show_preview_similar_images,
             button_settings_save_configuration,
             button_settings_load_configuration,
             button_settings_reset_configuration,
-            check_button_settings_show_preview_similar_images,
-            check_button_settings_hide_hard_links,
-            check_button_settings_use_cache,
-            check_button_settings_use_trash,
         }
     }
 }

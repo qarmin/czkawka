@@ -7,7 +7,7 @@ use crossbeam_channel::Receiver;
 use std::collections::BTreeMap;
 use std::fs::{File, Metadata};
 use std::io::{BufWriter, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -288,7 +288,7 @@ impl EmptyFolder {
     }
 }
 
-fn set_as_not_empty_folder(folders_checked: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &PathBuf) {
+fn set_as_not_empty_folder(folders_checked: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &Path) {
     // Not folder so it may be a file or symbolic link so it isn't empty
     folders_checked.get_mut(current_folder).unwrap().is_empty = FolderEmptiness::No;
     let mut d = folders_checked.get_mut(current_folder).unwrap();

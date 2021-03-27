@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 
 #[derive(Clone)]
-pub struct GUIProgressDialog {
+pub struct GuiProgressDialog {
     pub window_progress: gtk::Window,
 
     pub progress_bar_current_stage: gtk::ProgressBar,
@@ -14,7 +14,7 @@ pub struct GUIProgressDialog {
     pub button_stop_in_dialog: gtk::Button,
 }
 
-impl GUIProgressDialog {
+impl GuiProgressDialog {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let window_progress: gtk::Window = builder.get_object("window_progress").unwrap();
 

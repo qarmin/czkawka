@@ -256,8 +256,8 @@ impl FileToSave {
 fn parse_hash_type(src: &str) -> Result<HashType, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "blake3" => Ok(HashType::Blake3),
-        "crc32" => Ok(HashType::CRC32),
-        "xxh3" => Ok(HashType::XXH3),
+        "crc32" => Ok(HashType::Crc32),
+        "xxh3" => Ok(HashType::Xxh3),
         _ => Err("Couldn't parse the hash type (allowed: BLAKE3, CRC32, XXH3)"),
     }
 }
@@ -267,7 +267,7 @@ fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
         "name" => Ok(CheckingMethod::Name),
         "size" => Ok(CheckingMethod::Size),
         "hash" => Ok(CheckingMethod::Hash),
-        "hashmb" => Ok(CheckingMethod::HashMB),
+        "hashmb" => Ok(CheckingMethod::HashMb),
         _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH, HASHMB)"),
     }
 }

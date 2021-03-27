@@ -1,12 +1,12 @@
 extern crate gtk;
-use crate::gui_about::GUIAbout;
-use crate::gui_bottom_buttons::GUIBottomButtons;
-use crate::gui_header::GUIHeader;
-use crate::gui_main_notebook::GUIMainNotebook;
-use crate::gui_popovers::GUIPopovers;
-use crate::gui_progress_dialog::GUIProgressDialog;
-use crate::gui_settings::GUISettings;
-use crate::gui_upper_notepad::GUIUpperNotebook;
+use crate::gui_about::GuiAbout;
+use crate::gui_bottom_buttons::GuiBottomButtons;
+use crate::gui_header::GuiHeader;
+use crate::gui_main_notebook::GuiMainNotebook;
+use crate::gui_popovers::GuiPopovers;
+use crate::gui_progress_dialog::GuiProgressDialog;
+use crate::gui_settings::GuiSettings;
+use crate::gui_upper_notepad::GuiUpperNotebook;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 use crossbeam_channel::unbounded;
@@ -35,14 +35,14 @@ pub struct GuiData {
     // Windows
     pub window_main: gtk::Window,
 
-    pub main_notebook: GUIMainNotebook,
-    pub upper_notebook: GUIUpperNotebook,
-    pub popovers: GUIPopovers,
-    pub bottom_buttons: GUIBottomButtons,
-    pub progress_window: GUIProgressDialog,
-    pub about: GUIAbout,
-    pub settings: GUISettings,
-    pub header: GUIHeader,
+    pub main_notebook: GuiMainNotebook,
+    pub upper_notebook: GuiUpperNotebook,
+    pub popovers: GuiPopovers,
+    pub bottom_buttons: GuiBottomButtons,
+    pub progress_window: GuiProgressDialog,
+    pub about: GuiAbout,
+    pub settings: GuiSettings,
+    pub header: GuiHeader,
 
     // Taskbar state
     pub taskbar_state: Rc<RefCell<TaskbarProgress>>,
@@ -88,14 +88,14 @@ impl GuiData {
         window_main.show_all();
         window_main.set_title("Czkawka");
 
-        let main_notebook = GUIMainNotebook::create_from_builder(&builder);
-        let upper_notebook = GUIUpperNotebook::create_from_builder(&builder);
-        let popovers = GUIPopovers::create_from_builder(&builder);
-        let bottom_buttons = GUIBottomButtons::create_from_builder(&builder);
-        let progress_window = GUIProgressDialog::create_from_builder(&builder);
-        let about = GUIAbout::create_from_builder(&builder);
-        let header = GUIHeader::create_from_builder(&builder);
-        let settings = GUISettings::create_from_builder(&builder);
+        let main_notebook = GuiMainNotebook::create_from_builder(&builder);
+        let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
+        let popovers = GuiPopovers::create_from_builder(&builder);
+        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder);
+        let progress_window = GuiProgressDialog::create_from_builder(&builder);
+        let about = GuiAbout::create_from_builder(&builder);
+        let header = GuiHeader::create_from_builder(&builder);
+        let settings = GuiSettings::create_from_builder(&builder);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 

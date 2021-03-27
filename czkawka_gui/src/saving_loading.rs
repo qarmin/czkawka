@@ -37,8 +37,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             add_text_to_text_view(&text_view_errors, format!("Failed configuration to create configuration folder {}", config_dir.display()).as_str());
             return;
         }
-
-        let mut data_to_save: Vec<String> = Vec::new();
+        let mut data_to_save: Vec<String> = Vec::with_capacity(16);
 
         //// Included Directories
         data_to_save.push("--included_directories:".to_string());

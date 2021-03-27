@@ -48,7 +48,7 @@ pub struct FileEntry {
 pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
-    ArchiveZIP,
+    ArchiveZip,
     #[cfg(feature = "broken_audio")]
     Audio,
 }
@@ -315,18 +315,16 @@ impl BrokenFiles {
             };
 
             for (name, file_entry) in &self.files_to_check {
-                #[allow(clippy::collapsible_if)]
+                #[allow(clippy::if_same_then_else)]
                 if !loaded_hash_map.contains_key(name) {
                     // If loaded data doesn't contains current image info
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                } else if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                    // When size or modification date of image changed, then it is clear that is different image
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
-                    if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
-                        // When size or modification date of image changed, then it is clear that is different image
-                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                    } else {
-                        // Checking may be omitted when already there is entry with same size and modification date
-                        records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
-                    }
+                    // Checking may be omitted when already there is entry with same size and modification date
+                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
                 }
             }
         } else {
@@ -392,7 +390,7 @@ impl BrokenFiles {
                             } // Something is wrong with image
                         }
                     }
-                    TypeOfFile::ArchiveZIP => match fs::File::open(&file_entry.path) {
+                    TypeOfFile::ArchiveZip => match fs::File::open(&file_entry.path) {
                         Ok(file) => match zip::ZipArchive::new(file) {
                             Ok(_) => Some(None),
                             Err(e) => {
@@ -687,7 +685,7 @@ fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::Image
     } else if allowed_archive_zip_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
-        TypeOfFile::ArchiveZIP
+        TypeOfFile::ArchiveZip
     } else if allowed_audio_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
         #[cfg(feature = "broken_audio")]
         {
