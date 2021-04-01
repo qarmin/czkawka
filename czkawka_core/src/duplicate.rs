@@ -1089,7 +1089,7 @@ impl SaveResults for DuplicateFinder {
         }
         match self.check_method {
             CheckingMethod::Name => {
-                if !self.files_with_identical_size.is_empty() {
+                if !self.files_with_identical_names.is_empty() {
                     writeln!(writer, "-------------------------------------------------Files with same names-------------------------------------------------").unwrap();
                     writeln!(
                         writer,
