@@ -86,7 +86,7 @@ impl InvalidSymlinks {
         }
     }
 
-    pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
+    pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -136,7 +136,7 @@ impl InvalidSymlinks {
     }
 
     /// Check files for any with size == 0
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -153,12 +153,12 @@ impl InvalidSymlinks {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 0,
                         files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,

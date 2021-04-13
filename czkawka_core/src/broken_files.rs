@@ -98,7 +98,7 @@ impl BrokenFiles {
         }
     }
 
-    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -155,7 +155,7 @@ impl BrokenFiles {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -172,12 +172,12 @@ impl BrokenFiles {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 1,
                         files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
@@ -300,7 +300,7 @@ impl BrokenFiles {
         Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
         true
     }
-    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
         let loaded_hash_map;
@@ -341,13 +341,13 @@ impl BrokenFiles {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = non_cached_files_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 1,
                         files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
