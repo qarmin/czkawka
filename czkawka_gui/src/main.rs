@@ -88,16 +88,18 @@ fn main() {
     let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
     // Futures progress report
-    let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (futures::channel::mpsc::Sender<duplicate::ProgressData>, futures::channel::mpsc::Receiver<duplicate::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_empty_files, futures_receiver_empty_files): (futures::channel::mpsc::Sender<empty_files::ProgressData>, futures::channel::mpsc::Receiver<empty_files::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_empty_folder, futures_receiver_empty_folder): (futures::channel::mpsc::Sender<empty_folder::ProgressData>, futures::channel::mpsc::Receiver<empty_folder::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_big_file, futures_receiver_big_file): (futures::channel::mpsc::Sender<big_file::ProgressData>, futures::channel::mpsc::Receiver<big_file::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_same_music, futures_receiver_same_music): (futures::channel::mpsc::Sender<same_music::ProgressData>, futures::channel::mpsc::Receiver<same_music::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_similar_images, futures_receiver_similar_images): (futures::channel::mpsc::Sender<similar_images::ProgressData>, futures::channel::mpsc::Receiver<similar_images::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::Sender<temporary::ProgressData>, futures::channel::mpsc::Receiver<temporary::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_zeroed, futures_receiver_zeroed): (futures::channel::mpsc::Sender<zeroed::ProgressData>, futures::channel::mpsc::Receiver<zeroed::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>, futures::channel::mpsc::Receiver<invalid_symlinks::ProgressData>) = futures::channel::mpsc::channel(20);
-    let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::Sender<broken_files::ProgressData>, futures::channel::mpsc::Receiver<broken_files::ProgressData>) = futures::channel::mpsc::channel(20);
+    let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (futures::channel::mpsc::UnboundedSender<duplicate::ProgressData>, futures::channel::mpsc::UnboundedReceiver<duplicate::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_empty_files, futures_receiver_empty_files): (futures::channel::mpsc::UnboundedSender<empty_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<empty_files::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_empty_folder, futures_receiver_empty_folder): (futures::channel::mpsc::UnboundedSender<empty_folder::ProgressData>, futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_big_file, futures_receiver_big_file): (futures::channel::mpsc::UnboundedSender<big_file::ProgressData>, futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_same_music, futures_receiver_same_music): (futures::channel::mpsc::UnboundedSender<same_music::ProgressData>, futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_similar_images, futures_receiver_similar_images): (futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>, futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>) =
+        futures::channel::mpsc::unbounded();
+    let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::UnboundedSender<temporary::ProgressData>, futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_zeroed, futures_receiver_zeroed): (futures::channel::mpsc::UnboundedSender<zeroed::ProgressData>, futures::channel::mpsc::UnboundedReceiver<zeroed::ProgressData>) = futures::channel::mpsc::unbounded();
+    let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>, futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>) =
+        futures::channel::mpsc::unbounded();
+    let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) = futures::channel::mpsc::unbounded();
 
     initialize_gui(&mut gui_data);
     reset_configuration(&gui_data, false); // Fallback for invalid loading setting project

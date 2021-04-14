@@ -9,16 +9,16 @@ use gtk::{LabelExt, ProgressBarExt, WidgetExt};
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(
     gui_data: &GuiData,
-    mut futures_receiver_duplicate_files: futures::channel::mpsc::Receiver<duplicate::ProgressData>,
-    mut futures_receiver_empty_files: futures::channel::mpsc::Receiver<empty_files::ProgressData>,
-    mut futures_receiver_empty_folder: futures::channel::mpsc::Receiver<empty_folder::ProgressData>,
-    mut futures_receiver_big_files: futures::channel::mpsc::Receiver<big_file::ProgressData>,
-    mut futures_receiver_same_music: futures::channel::mpsc::Receiver<same_music::ProgressData>,
-    mut futures_receiver_similar_images: futures::channel::mpsc::Receiver<similar_images::ProgressData>,
-    mut futures_receiver_temporary: futures::channel::mpsc::Receiver<temporary::ProgressData>,
-    mut futures_receiver_zeroed: futures::channel::mpsc::Receiver<zeroed::ProgressData>,
-    mut futures_receiver_invalid_symlinks: futures::channel::mpsc::Receiver<invalid_symlinks::ProgressData>,
-    mut futures_receiver_broken_files: futures::channel::mpsc::Receiver<broken_files::ProgressData>,
+    mut futures_receiver_duplicate_files: futures::channel::mpsc::UnboundedReceiver<duplicate::ProgressData>,
+    mut futures_receiver_empty_files: futures::channel::mpsc::UnboundedReceiver<empty_files::ProgressData>,
+    mut futures_receiver_empty_folder: futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>,
+    mut futures_receiver_big_files: futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
+    mut futures_receiver_same_music: futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>,
+    mut futures_receiver_similar_images: futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
+    mut futures_receiver_temporary: futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
+    mut futures_receiver_zeroed: futures::channel::mpsc::UnboundedReceiver<zeroed::ProgressData>,
+    mut futures_receiver_invalid_symlinks: futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>,
+    mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
 

@@ -177,7 +177,7 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
+    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
 
         match self.check_method {
@@ -289,7 +289,7 @@ impl DuplicateFinder {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -306,12 +306,12 @@ impl DuplicateFinder {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         checking_method: CheckingMethod::Name,
                         current_stage: 0,
                         max_stage: 0,
@@ -454,7 +454,7 @@ impl DuplicateFinder {
 
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
-    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -471,7 +471,7 @@ impl DuplicateFinder {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let checking_method = self.check_method.clone();
@@ -482,7 +482,7 @@ impl DuplicateFinder {
             };
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         checking_method: checking_method.clone(),
                         current_stage: 0,
                         max_stage,
@@ -636,7 +636,7 @@ impl DuplicateFinder {
     }
 
     /// The slowest checking type, which must be applied after checking for size
-    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let check_type = Arc::new(self.hash_type);
 
         let start_time: SystemTime = SystemTime::now();
@@ -651,14 +651,14 @@ impl DuplicateFinder {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = self.files_with_identical_size.iter().map(|e| e.1.len()).sum();
             let checking_method = self.check_method.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         checking_method: checking_method.clone(),
                         current_stage: 1,
                         max_stage: 2,
@@ -741,14 +741,14 @@ impl DuplicateFinder {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = pre_checked_map.iter().map(|e| e.1.len()).sum();
             let checking_method = self.check_method.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         checking_method: checking_method.clone(),
                         current_stage: 2,
                         max_stage: 2,

@@ -151,7 +151,7 @@ impl SimilarImages {
     }
 
     /// Public function used by CLI to search for empty folders
-    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
+    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -173,7 +173,7 @@ impl SimilarImages {
 
     /// Function to check if folder are empty.
     /// Parameter initial_checking for second check before deleting to be sure that checked folder is still empty
-    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -190,12 +190,12 @@ impl SimilarImages {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 1,
                         images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
@@ -324,7 +324,7 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
-    fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
         let loaded_hash_map;
@@ -367,13 +367,13 @@ impl SimilarImages {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let images_to_check = non_cached_files_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 1,
                         images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,

@@ -112,7 +112,7 @@ impl SameMusic {
         }
     }
 
-    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) {
+    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -174,7 +174,7 @@ impl SameMusic {
     }
 
     /// Check files for any with size == 0
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -191,12 +191,12 @@ impl SameMusic {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 2,
                         music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
@@ -312,7 +312,7 @@ impl SameMusic {
         true
     }
 
-    fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
         let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
@@ -325,13 +325,13 @@ impl SameMusic {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let music_to_check = self.music_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 2,
                         music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
@@ -408,7 +408,7 @@ impl SameMusic {
 
         true
     }
-    fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::Sender<ProgressData>>) -> bool {
+    fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         if MusicSimilarity::NONE == self.music_similarity {
             panic!("This can't be none");
         }
@@ -422,13 +422,13 @@ impl SameMusic {
 
         let progress_thread_handle;
         if let Some(progress_sender) = progress_sender {
-            let mut progress_send = progress_sender.clone();
+            let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let music_to_check = self.music_to_check.len();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
-                    .try_send(ProgressData {
+                    .unbounded_send(ProgressData {
                         current_stage: 2,
                         max_stage: 2,
                         music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,

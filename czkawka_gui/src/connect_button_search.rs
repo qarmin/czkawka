@@ -27,16 +27,16 @@ use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 pub fn connect_button_search(
     gui_data: &GuiData,
     glib_stop_sender: Sender<Message>,
-    futures_sender_duplicate_files: futures::channel::mpsc::Sender<duplicate::ProgressData>,
-    futures_sender_empty_files: futures::channel::mpsc::Sender<empty_files::ProgressData>,
-    futures_sender_empty_folder: futures::channel::mpsc::Sender<empty_folder::ProgressData>,
-    futures_sender_big_file: futures::channel::mpsc::Sender<big_file::ProgressData>,
-    futures_sender_same_music: futures::channel::mpsc::Sender<same_music::ProgressData>,
-    futures_sender_similar_images: futures::channel::mpsc::Sender<similar_images::ProgressData>,
-    futures_sender_temporary: futures::channel::mpsc::Sender<temporary::ProgressData>,
-    futures_sender_zeroed: futures::channel::mpsc::Sender<zeroed::ProgressData>,
-    futures_sender_invalid_symlinks: futures::channel::mpsc::Sender<invalid_symlinks::ProgressData>,
-    futures_sender_broken_files: futures::channel::mpsc::Sender<broken_files::ProgressData>,
+    futures_sender_duplicate_files: futures::channel::mpsc::UnboundedSender<duplicate::ProgressData>,
+    futures_sender_empty_files: futures::channel::mpsc::UnboundedSender<empty_files::ProgressData>,
+    futures_sender_empty_folder: futures::channel::mpsc::UnboundedSender<empty_folder::ProgressData>,
+    futures_sender_big_file: futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
+    futures_sender_same_music: futures::channel::mpsc::UnboundedSender<same_music::ProgressData>,
+    futures_sender_similar_images: futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
+    futures_sender_temporary: futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
+    futures_sender_zeroed: futures::channel::mpsc::UnboundedSender<zeroed::ProgressData>,
+    futures_sender_invalid_symlinks: futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>,
+    futures_sender_broken_files: futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
 ) {
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
