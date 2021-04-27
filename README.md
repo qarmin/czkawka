@@ -265,7 +265,6 @@ Similar images which check 1421 image files which took 110.1 MB
 | Czkawka 1.4.0  | 25s       |
 | DupeGuru 4.0.4 | 92s       |
 
-<!-- it's a lot of room, not a big room lol -->
 So there is still is a lot of room for improvements.
 
 ## Comparison to other tools
@@ -301,16 +300,22 @@ Contributions to this repository are welcome.
 You can help by creating a:
 - Bug report - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
-- Pull Requests - implementing a new feature yourself or fixing bugs, but you have to pay attention to code quality. 
+- Pull Requests - implementing a new feature yourself or fixing bugs.
   If the change is bigger, then it's a good idea to open a new issue to discuss changes.
 - Documentation - There is an [instruction](instructions/Instruction.md) which you can improve.
+
+You can also help by doing different things:
+- Creating text articles - [LinuxUprising](https://www.linuxuprising.com/2021/03/find-and-remove-duplicate-files-similar.html) or [Ubunlog](https://ubunlog.com/en/czkawka-finds-and-removes-empty-and-broken-duplicate-files/)
+- Adding Czkawka to repositories - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=czkawka&branch=edge) or [NixOS](https://github.com/NixOS/nixpkgs/pull/116441) or [OpenMandriva](https://github.com/OpenMandrivaAssociation/czkawka)
+- Creating videos - [Tutorial Spanish 1](https://www.youtube.com/watch?v=tALYBsJAYwE) or [Tutorial Spanish 2](https://www.youtube.com/watch?v=V9x-pHJRmKY)
+- Recommending it to others
 
 The code should be clean and well formatted (Clippy and fmt are required in each PR).
 
 ## Name
 Czkawka is a Polish word which means _hiccup_.  
 
-I chose this name because I wanted to hear people speaking other languages pronounce it.
+I chose this name because I wanted to hear people speaking other languages pronounce it, so feel free to spell it the way you want.
 
 This name is not as bad as it seems, because I was also thinking about using words like _żółć_, _gżegżółka_ or _żołądź_, 
 but I gave up on these ideas because they contained Polish characters, which would cause difficulty in searching for the project.
