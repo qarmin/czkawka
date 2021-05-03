@@ -1,11 +1,9 @@
 # Installation
 ## Requirements
-Same with Appimage, Flatpak and Snap on Linux (except having system 18.04+ or similar).
-
 ### Linux
 If you use Snap, Flatpak or Appimage, you may skip this section.
 
-For Czkawka GUI you are required to have at least `GTK 3.22` and also `Alsa` installed (for finding broken music files).  
+For Czkawka GUI you are required to have at least `GTK 3.22` and also `Alsa` installed (for finding broken music files, but it is disabled by default).  
 It should be installed by default on all the most popular distros.
 #### Ubuntu/Debian
 ```
