@@ -41,6 +41,9 @@ xxhash-rust = { version = "0.8.2", features = ["xxh3"] }
 
 tempfile = "3.1"
 
+# Ignore
+ignore = "0.4.17"
+
 [features]
 default = []
 

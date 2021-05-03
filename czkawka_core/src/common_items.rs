@@ -3,7 +3,7 @@ use crate::common_messages::Messages;
 use std::path::Path;
 use std::time::SystemTime;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ExcludedItems {
     pub items: Vec<String>,
 }

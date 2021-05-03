@@ -98,9 +98,9 @@ So there is still is a lot of room for improvements.
 | Music duplicates(tags) | •       |            | •                 |
 | Invalid symlinks       | •       | •          |                   |
 | Broken Files           | •       |            |                   |
+| Names conflict         | •       | •          |                   |
 | Installed packages     |         | •          |                   |
 | Invalid names          |         | •          |                   |
-| Names conflict         |         | •          |                   |
 | Bad ID                 |         | •          |                   |
 | Non stripped binaries  |         | •          |                   |
 | Redundant whitespace   |         | •          |                   |

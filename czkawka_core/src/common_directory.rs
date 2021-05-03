@@ -3,7 +3,7 @@ use crate::common_messages::Messages;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,

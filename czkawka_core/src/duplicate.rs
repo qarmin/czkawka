@@ -19,6 +19,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use directories_next::ProjectDirs;
+use ignore::WalkBuilder;
 use rayon::prelude::*;
 use std::hash::Hasher;
 use std::io::{BufReader, BufWriter};
@@ -291,12 +292,6 @@ impl DuplicateFinder {
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-
-        // Add root folders for finding
-        for id in &self.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
 
         //// PROGRESS THREAD START
         const LOOP_DURATION: u32 = 200; //in ms
@@ -330,109 +325,158 @@ impl DuplicateFinder {
 
         //// PROGRESS THREAD END
 
-        while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
+        let sst: SystemTime = SystemTime::now();
+        let (tx, rx) = std::sync::mpsc::channel();
+        let collect_thread = std::thread::spawn(move || {
+            let mut vec = Vec::new();
+            for path in rx {
+                vec.push(path);
+            }
+            vec
+        });
+
+        // TODO create template, to be able to use it in all tools
+
+        let excluded_files = Arc::new(self.excluded_items.clone());
+        let directories = Arc::new(self.directories.clone());
+        let recursive_search = if self.recursive_search { None } else { Some(1) };
+
+        let mut builder = WalkBuilder::new(&self.directories.included_directories[0]);
+        for i in self.directories.included_directories.iter().skip(1) {
+            builder.add(i);
+        }
+        builder.max_depth(recursive_search);
+        builder.hidden(false).parents(false).ignore(false).git_ignore(false).git_global(false).git_exclude(false);
+        builder.filter_entry(move |entry_data| {
+            // println!("B - {:?}", entry_data);
+            // println!("A - {:?}", entry_data.path().canonicalize());
+
+            let current_file_name = match entry_data.path().canonicalize() {
+                Ok(t) => t,
+                Err(_) => return false,
+            };
+            if excluded_files.is_excluded(&current_file_name) {
                 return false;
             }
-
-            let current_folder = folders_to_check.pop().unwrap();
-
-            // Read current dir, if permission are denied just go to next
-            let read_dir = match fs::read_dir(&current_folder) {
-                Ok(t) => t,
-                Err(_) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
-                    continue;
-                } // Permissions denied
-            };
-
-            // Check every sub folder/file/link etc.
-            'dir: for entry in read_dir {
-                let entry_data = match entry {
-                    Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
-                        continue 'dir;
-                    } //Permissions denied
-                };
-                let metadata: Metadata = match entry_data.metadata() {
-                    Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
-                        continue 'dir;
-                    } //Permissions denied
-                };
-                if metadata.is_dir() {
-                    if !self.recursive_search {
-                        continue 'dir;
-                    }
-
-                    let next_folder = current_folder.join(entry_data.file_name());
-                    if self.directories.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    if self.excluded_items.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    folders_to_check.push(next_folder);
-                } else if metadata.is_file() {
-                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                    // let mut have_valid_extension: bool;
-                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                        Ok(t) => t,
-                        Err(_) => continue 'dir,
-                    }
-                    .to_lowercase();
-
-                    // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                        if !allowed {
-                            // Not an allowed extension, ignore it.
-                            continue 'dir;
-                        }
-                    }
-                    // Checking files
-                    if metadata.len() >= self.minimal_file_size {
-                        let current_file_name = current_folder.join(entry_data.file_name());
-                        if self.excluded_items.is_excluded(&current_file_name) {
-                            continue 'dir;
-                        }
-
-                        // Creating new file entry
-                        let fe: FileEntry = FileEntry {
-                            path: current_file_name.clone(),
-                            size: metadata.len(),
-                            modified_date: match metadata.modified() {
-                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                    Ok(d) => d.as_secs(),
-                                    Err(_) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
-                                        0
-                                    }
-                                },
-                                Err(_) => {
-                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                    continue 'dir;
-                                } // Permissions Denied
-                            },
-                            hash: "".to_string(),
-                        };
-
-                        // Adding files to BTreeMap
-                        self.files_with_identical_names.entry(entry_data.file_name().to_string_lossy().to_string()).or_insert_with(Vec::new);
-                        self.files_with_identical_names.get_mut(&entry_data.file_name().to_string_lossy().to_string()).unwrap().push(fe);
-                    }
-                }
+            if entry_data.path().is_dir() && directories.is_excluded(entry_data.path()) {
+                return false;
             }
+            true
+        });
+
+        builder.build_parallel().run(|| {
+            let tx = tx.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_file_counter = atomic_file_counter.clone();
+            Box::new(move |result| {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    return ignore::WalkState::Quit;
+                }
+                let r = match result {
+                    Ok(t) => t.path().to_path_buf(),
+                    Err(_) => return ignore::WalkState::Continue,
+                };
+
+                tx.send(r).unwrap();
+                ignore::WalkState::Continue
+            })
+        });
+
+        // Check user exited
+        if !progress_thread_run.load(Ordering::Relaxed) {
+            progress_thread_handle.join().unwrap();
+            return false;
         }
 
-        // End thread which send info to gui
+        drop(tx);
+        let files_to_check = collect_thread.join().unwrap();
+        println!("Number of searched files: {}", files_to_check.len());
+        // TODO Par iter needed
+
+        let allowed_extensions = Arc::new(self.allowed_extensions.file_extensions.clone());
+        let minimal_size = Arc::new(self.minimal_file_size);
+
+        let results = files_to_check
+            .par_iter()
+            .map(|path_buf| {
+                if path_buf.is_dir() {
+                    return None;
+                }
+                let file_name_lowercase = match path_buf.file_name() {
+                    Some(t) => t.to_string_lossy().to_lowercase(),
+                    None => return None,
+                };
+
+                // Checking allowed extensions
+                if !allowed_extensions.is_empty() {
+                    let allowed = allowed_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                    if !allowed {
+                        // Not an allowed extension, ignore it.
+                        return None;
+                    }
+                }
+
+                let metadata = match fs::metadata(&path_buf) {
+                    Ok(t) => t,
+                    Err(_) => return None,
+                };
+
+                // Checking files
+                if metadata.len() >= *minimal_size {
+                    let current_file_path = match path_buf.canonicalize() {
+                        Ok(t) => t,
+                        Err(_) => return None,
+                    };
+                    let file_name = match path_buf.file_name() {
+                        Some(t) => t.to_string_lossy().to_string(),
+                        None => return None,
+                    };
+                    // TODO Check if this is needed
+                    // if self.excluded_items.is_excluded(&current_file_name) {
+                    //     return;
+                    // }
+
+                    // Creating new file entrymatch
+                    let fe: FileEntry = FileEntry {
+                        path: current_file_path,
+                        size: metadata.len(),
+                        modified_date: match metadata.modified() {
+                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                Ok(d) => d.as_secs(),
+                                Err(_) => {
+                                    // self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_path.display()));
+                                    0
+                                }
+                            },
+                            Err(_) => {
+                                // self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_path.display()));
+                                return None;
+                            } // Permissions Denied
+                        },
+                        hash: "".to_string(),
+                    };
+
+                    return Some((file_name, fe));
+                }
+                None
+            })
+            .filter(|a| a.is_some())
+            .map(|a| a.unwrap())
+            .collect::<Vec<(String, FileEntry)>>();
+
+        for entry in results {
+            // Adding files to BTreeMap
+            self.files_with_identical_names.entry(entry.0.clone()).or_insert_with(Vec::new);
+            self.files_with_identical_names.get_mut(&entry.0).unwrap().push(entry.1);
+        }
+
+        // END THREAD
+
+        let eet: SystemTime = SystemTime::now();
+        println!("SEARCHING TOOK {:?}", eet.duration_since(sst).unwrap());
+        // End thread which send info to gui about it
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
