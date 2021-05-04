@@ -83,36 +83,39 @@ So there is still is a lot of room for improvements.
 
 ## Comparison to other tools
 
-|                        | Czkawka | FSlint     | DupeGuru          |
-|:----------------------:|:-------:|:----------:|:-----------------:|
-| Language               | Rust    | Python     | Python/Obj-C      |
-| OS                     | All     | Linux only | All               |
-| Framework              | GTK 3   | PyGTK      | Qt 5 (PyQt)/Cocoa |
-| Duplicate finder       | •       | •          | •                 |
-| Empty files            | •       | •          |                   |
-| Empty folders          | •       | •          |                   |
-| Temporary files        | •       | •          |                   |
-| Big files              | •       |            |                   |
-| Similar images         | •       |            | •                 |
-| Zeroed Files           | •       |            |                   |
-| Music duplicates(tags) | •       |            | •                 |
-| Invalid symlinks       | •       | •          |                   |
-| Broken Files           | •       |            |                   |
-| Installed packages     |         | •          |                   |
-| Invalid names          |         | •          |                   |
-| Names conflict         |         | •          |                   |
-| Bad ID                 |         | •          |                   |
-| Non stripped binaries  |         | •          |                   |
-| Redundant whitespace   |         | •          |                   |
-| Multiple languages(po) |         | •          | •                 |
-| Cache support          | •       |            | •                 |
-| Project Activity       | High    | Very Low   | High              |
+Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So this two apps shouldn't be compared directly or be considered as an alternative to the second one.
+
+|                        | Czkawka     | FSlint     | DupeGuru          | Bleachbit |
+|:----------------------:|:-----------:|:----------:|:-----------------:|:-----------------:|
+| Language               | Rust        | Python     | Python/Obj-C      | Python            |
+| OS                     | Lin,Mac,Win | Lin        | Lin,Mac,Win       | Lin,Mac,Win       |
+| Framework              | GTK 3       | PyGTK2     | Qt 5 (PyQt)/Cocoa | PyGTK3            |
+| Duplicate finder       | •           | •          | •                 |                   |
+| Empty files            | •           | •          |                   |                   |
+| Empty folders          | •           | •          |                   |                   |
+| Temporary files        | •           | •          |                   | •                 |
+| Big files              | •           |            |                   |                   |
+| Similar images         | •           |            | •                 |                   |
+| Zeroed Files           | •           |            |                   |                   |
+| Music duplicates(tags) | •           |            | •                 |                   |
+| Invalid symlinks       | •           | •          |                   |                   |
+| Broken Files           | •           |            |                   |                   |
+| Names conflict         | •           | •          |                   |                   |
+| Installed packages     |             | •          |                   |                   |
+| Invalid names          |             | •          |                   |                   |
+| Bad ID                 |             | •          |                   |                   |
+| Non stripped binaries  |             | •          |                   |                   |
+| Redundant whitespace   |             | •          |                   |                   |
+| Overwriting files      |             | •          |                   | •                 |
+| Multiple languages(po) |             | •          | •                 | •                 |
+| Cache support          | •           |            | •                 |                   |
+| In active development  | Yes         | No         | Yes               | Yes               |
 
 ## Contributions
 Contributions to this repository are welcome.  
 
 You can help by creating a:
-- Bug report - memory leaks, unexpected behavior, crashes
+- Bug reports - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
 - Pull Requests - implementing a new feature yourself or fixing bugs.
   If the change is bigger, then it's a good idea to open a new issue to discuss changes.
@@ -123,8 +126,6 @@ You can also help by doing different things:
 - Adding Czkawka to repositories - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=czkawka&branch=edge) or [NixOS](https://github.com/NixOS/nixpkgs/pull/116441) or [OpenMandriva](https://github.com/OpenMandrivaAssociation/czkawka)
 - Creating videos - [Tutorial Spanish 1](https://www.youtube.com/watch?v=tALYBsJAYwE) or [Tutorial Spanish 2](https://www.youtube.com/watch?v=V9x-pHJRmKY)
 - Recommending it to others
-
-The code should be clean and well formatted (Clippy and fmt are required in each PR).
 
 ## Name
 Czkawka is a Polish word which means _hiccup_.  
