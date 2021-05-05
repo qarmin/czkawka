@@ -85,31 +85,31 @@ So there is still is a lot of room for improvements.
 
 Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So this two apps shouldn't be compared directly or be considered as an alternative to the second one.
 
-|                        | Czkawka     | FSlint     | DupeGuru          | Bleachbit |
-|:----------------------:|:-----------:|:----------:|:-----------------:|:-----------------:|
-| Language               | Rust        | Python     | Python/Obj-C      | Python            |
-| OS                     | Lin,Mac,Win | Lin        | Lin,Mac,Win       | Lin,Mac,Win       |
-| Framework              | GTK 3       | PyGTK2     | Qt 5 (PyQt)/Cocoa | PyGTK3            |
-| Duplicate finder       | •           | •          | •                 |                   |
-| Empty files            | •           | •          |                   |                   |
-| Empty folders          | •           | •          |                   |                   |
-| Temporary files        | •           | •          |                   | •                 |
-| Big files              | •           |            |                   |                   |
-| Similar images         | •           |            | •                 |                   |
-| Zeroed Files           | •           |            |                   |                   |
-| Music duplicates(tags) | •           |            | •                 |                   |
-| Invalid symlinks       | •           | •          |                   |                   |
-| Broken Files           | •           |            |                   |                   |
-| Names conflict         | •           | •          |                   |                   |
-| Installed packages     |             | •          |                   |                   |
-| Invalid names          |             | •          |                   |                   |
-| Bad ID                 |             | •          |                   |                   |
-| Non stripped binaries  |             | •          |                   |                   |
-| Redundant whitespace   |             | •          |                   |                   |
-| Overwriting files      |             | •          |                   | •                 |
-| Multiple languages(po) |             | •          | •                 | •                 |
-| Cache support          | •           |            | •                 |                   |
-| In active development  | Yes         | No         | Yes               | Yes               |
+|                        | Czkawka     | FSlint     | DupeGuru          | Bleachbit   |
+|:----------------------:|:-----------:|:----------:|:-----------------:|:-----------:|
+| Language               | Rust        | Python     | Python/Obj-C      | Python      |
+| OS                     | Lin,Mac,Win | Lin        | Lin,Mac,Win       | Lin,Mac,Win |
+| Framework              | GTK 3       | PyGTK2     | Qt 5 (PyQt)/Cocoa | PyGTK3      |
+| Duplicate finder       | •           | •          | •                 |             |
+| Empty files            | •           | •          |                   |             |
+| Empty folders          | •           | •          |                   |             |
+| Temporary files        | •           | •          |                   | •           |
+| Big files              | •           |            |                   |             |
+| Similar images         | •           |            | •                 |             |
+| Zeroed Files           | •           |            |                   |             |
+| Music duplicates(tags) | •           |            | •                 |             |
+| Invalid symlinks       | •           | •          |                   |             |
+| Broken Files           | •           |            |                   |             |
+| Names conflict         | •           | •          |                   |             |
+| Installed packages     |             | •          |                   |             |
+| Invalid names          |             | •          |                   |             |
+| Bad ID                 |             | •          |                   |             |
+| Non stripped binaries  |             | •          |                   |             |
+| Redundant whitespace   |             | •          |                   |             |
+| Overwriting files      |             | •          |                   | •           |
+| Multiple languages(po) |             | •          | •                 | •           |
+| Cache support          | •           |            | •                 |             |
+| In active development  | Yes         | No         | Yes               | Yes         |
 
 ## Contributions
 Contributions to this repository are welcome.  
