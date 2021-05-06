@@ -152,6 +152,7 @@ pub struct DuplicateFinder {
     dryrun: bool,
     stopped_search: bool,
     use_cache: bool,
+    minimal_cache_file_size: u64,
 }
 
 impl DuplicateFinder {
@@ -174,6 +175,7 @@ impl DuplicateFinder {
             hash_type: HashType::Blake3,
             dryrun: false,
             use_cache: true,
+            minimal_cache_file_size: 2 * 1024 * 1024, // By default cache only >= 1MB files
         }
     }
 
@@ -217,6 +219,10 @@ impl DuplicateFinder {
 
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
+    }
+
+    pub fn set_minimal_cache_file_size(&mut self, minimal_cache_file_size: u64) {
+        self.minimal_cache_file_size = minimal_cache_file_size;
     }
 
     pub const fn get_files_sorted_by_names(&self) -> &BTreeMap<String, Vec<FileEntry>> {
@@ -909,7 +915,7 @@ impl DuplicateFinder {
                             }
                         }
                     }
-                    save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type);
+                    save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, self.minimal_cache_file_size);
                 }
             }
             _ => panic!("What"),
@@ -1328,7 +1334,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     result
 }
 
-fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType) {
+fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, minimal_cache_file_size: u64) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
@@ -1352,7 +1358,7 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
 
         for file_entry in hashmap.values() {
             // Only cache bigger than 5MB files
-            if file_entry.size > 5 * 1024 * 1024 {
+            if file_entry.size >= minimal_cache_file_size {
                 let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
 
                 if writeln!(writer, "{}", string).is_err() {

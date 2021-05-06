@@ -33,6 +33,7 @@ fn main() {
             excluded_directories,
             excluded_items,
             minimal_file_size,
+            minimal_cached_file_size,
             allowed_extensions,
             search_method,
             delete_method,
@@ -48,6 +49,7 @@ fn main() {
             df.set_excluded_directory(excluded_directories.excluded_directories);
             df.set_excluded_items(excluded_items.excluded_items);
             df.set_minimal_file_size(minimal_file_size);
+            df.set_minimal_cache_file_size(minimal_cached_file_size);
             df.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             df.set_check_method(search_method);
             df.set_delete_method(delete_method);

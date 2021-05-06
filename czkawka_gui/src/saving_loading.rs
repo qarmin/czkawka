@@ -130,6 +130,11 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             data_to_save.push("--use_trash:".to_string());
             let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
             data_to_save.push(check_button_settings_use_trash.get_active().to_string());
+
+            //// minimal cache file size
+            data_to_save.push("--cache_minimal_file_size:".to_string());
+            let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
+            data_to_save.push(entry_settings_cache_file_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024).to_string());
         }
 
         // Creating/Opening config file
@@ -181,6 +186,7 @@ enum TypeOfLoadedData {
     HideHardLinks,
     UseCache,
     UseTrash,
+    CacheMinimalSize,
 }
 
 pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
@@ -227,6 +233,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut hide_hard_links: bool = true;
         let mut use_cache: bool = true;
         let mut use_trash: bool = false;
+        let mut cache_minimal_size: u64 = 2 * 1024 * 1024;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -260,6 +267,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::UseCache;
             } else if line.starts_with("--use_trash") {
                 current_type = TypeOfLoadedData::UseTrash;
+            } else if line.starts_with("--cache_minimal_file_size") {
+                current_type = TypeOfLoadedData::CacheMinimalSize;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -403,6 +412,16 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             );
                         }
                     }
+                    TypeOfLoadedData::CacheMinimalSize => {
+                        if let Ok(number) = line.parse::<u64>() {
+                            cache_minimal_size = number;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(u64) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -457,6 +476,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             gui_data.settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
             gui_data.settings.check_button_settings_use_cache.set_active(use_cache);
             gui_data.settings.check_button_settings_use_trash.set_active(use_trash);
+            gui_data.settings.entry_settings_cache_file_minimal_size.set_text(cache_minimal_size.to_string().as_str());
         } else {
             gui_data.settings.check_button_settings_load_at_start.set_active(false);
         }
@@ -540,6 +560,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         gui_data.settings.check_button_settings_hide_hard_links.set_active(true);
         gui_data.settings.check_button_settings_use_cache.set_active(true);
         gui_data.settings.check_button_settings_use_trash.set_active(false);
+        gui_data.settings.entry_settings_cache_file_minimal_size.set_text("2097152");
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");

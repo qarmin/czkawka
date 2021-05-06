@@ -92,6 +92,7 @@ pub fn connect_button_search(
     let radio_button_hash_type_xxh3 = gui_data.main_notebook.radio_button_hash_type_xxh3.clone();
     let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
     let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
+    let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -101,6 +102,7 @@ pub fn connect_button_search(
         let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.get_active();
         let use_cache = check_button_settings_use_cache.get_active();
+        let minimal_cache_file_size = entry_settings_cache_file_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024);
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 
@@ -166,6 +168,7 @@ pub fn connect_button_search(
                     df.set_excluded_items(excluded_items);
                     df.set_allowed_extensions(allowed_extensions);
                     df.set_minimal_file_size(minimal_file_size);
+                    df.set_minimal_cache_file_size(minimal_cache_file_size);
                     df.set_check_method(check_method);
                     df.set_hash_type(hash_type);
                     df.set_ignore_hard_links(hide_hard_links);
