@@ -1,6 +1,6 @@
 ![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
-**Czkawka** (_tch•kav•ka_, hiccup) is a simple, fast and easy to use app to remove unnecessary files from your computer.
+**Czkawka** (_tch•kav•ka_, hiccup) is a simple, fast and free app to remove unnecessary files from your computer.
 
 ## Features
 - Written in memory safe Rust
@@ -38,48 +38,52 @@ If you want try to develop Czkawka or just use the latest available feature, you
 
 ## Benchmarks
 
-Since Czkawka is written in Rust and it aims to be a faster alternative to FSlint (which is written in Python), we need
-to compare the speed of these tools.
+Since Czkawka is written in Rust and it aims to be a faster alternative to FSlint or DupeGuru which are written in Python, we need to compare the speed of these tools.
 
 I tested it on a 256 GB SSD and a i7-4770 CPU.
 
-I prepared a directory and performed a test without any folder exceptions (I removed all directories from FSlint and
-Czkawka from other tabs than Include Directory) which contained 229 868 files, took 203.7 GB and had 13 708 duplicate
-files in 9117 groups which took 7.90 GB.
+I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links which contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which took 4,1 GB.
 
 Minimum file size to check I set to 1 KB on all programs.
 
 | App                         | Executing Time |
 |:---------------------------:|:--------------:|
-| FSlint 2.4.7 (Second Run)   | 86s            |
-| Czkawka 1.4.0 (Second Run)  | 12s            |
-| DupeGuru 4.0.4 (Second Run) | 28s            |
+| FSlint 2.4.7 (First Run)    | 86s            |
+| FSlint 2.4.7 (Second Run)   | 43s            |
+| Czkawka 3.0.0 (First Run)   | 8s             |
+| Czkawka 3.0.0 (Second Run)  | 7s             |
+| DupeGuru 4.1.1 (First Run)  | 22s            |
+| DupeGuru 4.1.1 (Second Run) | 21s            |
 
-
-I used Mprof for checking memory usage FSlint and DupeGuru, for Czkawka I used Heaptrack.
-To not get a crash from DupeGuru I checked a smaller directory with 217 986 files and 41 883 folders.
+I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for Czkawka.
 
 | App            | Idle Ram | Max Operational Ram Usage | Stabilized after search |
 |:--------------:|:--------:|:-------------------------:|:-----------------------:|
-| FSlint 2.4.7   | 62 MB    | 84 MB                     | 84 MB                   |
-| Czkawka 1.4.0  | 9 MB     | 66 MB                     | 32 MB                   |
-| DupeGuru 4.0.4 | 80 MB    | 210 MB                    | 155 MB                  |
+| FSlint 2.4.7   | 62 MB    | 164 MB                    | 158 MB                  |
+| Dupeguru 4.1.1 | 90 MB    | 170 MB                    | 166 MB                  |
+| Czkawka 3.0.0  | 12 MB    | 122 MB                    | 60 MB                   |
 
-Similar images which check 332 files which took 1.7 GB
 
-| App            | Scan time  |
-|:--------------:|:----------:|
-| Czkawka 1.4.0  | 58s        |
-| DupeGuru 4.0.4 | 51s        |
+In Dupeguru I enabled checking images with different dimensions to match Czkawka behavior.
+Both apps use caching mechanism, so second scan is really fast.
 
-Similar images which check 1421 image files which took 110.1 MB
+Similar images which check 10949 files which took 6.6 GB
 
-| App            | Scan time |
-|:--------------:|:----------|
-| Czkawka 1.4.0  | 25s       |
-| DupeGuru 4.0.4 | 92s       |
+| App                         | Scan time |
+|:---------------------------:|:---------:|
+| Czkawka 3.0.0 (First Run)   | 276s      |
+| Czkawka 3.0.0 (Second Run)  | 1s        |
+| DupeGuru 4.1.1 (First Run)  | 539s      |
+| DupeGuru 4.1.1 (Second Run) | 1s        |
 
-So there is still is a lot of room for improvements.
+Similar images which check 349 image files which took 1.7 GB
+
+| App                         | Scan time |
+|:---------------------------:|:----------|
+| Czkawka 3.0.0 (First Run)   | 54s       |
+| Czkawka 3.0.0 (Second Run)  | 1s        |
+| DupeGuru 4.1.1 (First Run)  | 55s       |
+| DupeGuru 4.1.1 (Second Run) | 1s        |
 
 ## Comparison to other tools
 
