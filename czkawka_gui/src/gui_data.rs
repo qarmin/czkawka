@@ -21,7 +21,7 @@ use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
-use gtk::Builder;
+use gtk::{Builder, WindowPosition};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -87,6 +87,7 @@ impl GuiData {
         let window_main: gtk::Window = builder.get_object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
+        window_main.set_position(WindowPosition::CenterAlways);
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
