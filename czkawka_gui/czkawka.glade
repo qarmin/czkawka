@@ -2257,7 +2257,7 @@ This program is free to use and will always be.
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="icon-name">settings-app-symbolic</property>
+                    <property name="icon-name">applications-engineering</property>
                   </object>
                 </child>
               </object>

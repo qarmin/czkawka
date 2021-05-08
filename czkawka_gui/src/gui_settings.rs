@@ -1,4 +1,5 @@
 use gtk::prelude::*;
+use gtk::WindowPosition;
 
 #[derive(Clone)]
 pub struct GuiSettings {
@@ -29,6 +30,7 @@ pub struct GuiSettings {
 impl GuiSettings {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let window_settings: gtk::Window = builder.get_object("window_settings").unwrap();
+        window_settings.set_position(WindowPosition::CenterAlways);
 
         // General
         let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
