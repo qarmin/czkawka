@@ -1,8 +1,8 @@
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
+use std::collections::BTreeMap;
 #[cfg(target_family = "unix")]
 use std::collections::HashSet;
-use std::collections::{BTreeMap, HashMap};
 use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
@@ -684,11 +684,11 @@ impl DuplicateFinder {
         //// PROGRESS THREAD END
 
         #[allow(clippy::type_complexity)]
-        let pre_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)> = self
+        let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>, u64)> = self
             .files_with_identical_size
             .par_iter()
             .map(|(size, vec_file_entry)| {
-                let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
+                let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
                 let mut bytes_read: u64 = 0;
                 let mut buffer = [0u8; 1024 * 2];
@@ -774,14 +774,14 @@ impl DuplicateFinder {
         //// PROGRESS THREAD END
 
         #[allow(clippy::type_complexity)]
-        let mut full_hash_results: Vec<(u64, HashMap<String, Vec<FileEntry>>, Vec<String>, u64)>;
+        let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>, u64)>;
 
         match self.check_method {
             CheckingMethod::HashMb => {
                 full_hash_results = pre_checked_map
                     .par_iter()
                     .map(|(size, vec_file_entry)| {
-                        let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
+                        let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
                         let mut errors: Vec<String> = Vec::new();
                         let mut bytes_read: u64 = 0;
                         let mut buffer = [0u8; 1024 * 128];
@@ -852,7 +852,7 @@ impl DuplicateFinder {
                 full_hash_results = non_cached_files_to_check
                     .par_iter()
                     .map(|(size, vec_file_entry)| {
-                        let mut hashmap_with_hash: HashMap<String, Vec<FileEntry>> = Default::default();
+                        let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
                         let mut errors: Vec<String> = Vec::new();
                         let mut bytes_read: u64 = 0;
                         let mut buffer = [0u8; 1024 * 128];
@@ -893,7 +893,7 @@ impl DuplicateFinder {
                             }
                         }
                         // Size doesn't exists add results to files
-                        let mut temp_hashmap: HashMap<String, Vec<FileEntry>> = Default::default();
+                        let mut temp_hashmap: BTreeMap<String, Vec<FileEntry>> = Default::default();
                         for file_entry in vec_file_entry {
                             temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
                             temp_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
@@ -902,7 +902,7 @@ impl DuplicateFinder {
                     }
 
                     // Must save all results to file, old loaded from file with all currently counted results
-                    let mut all_results: HashMap<String, FileEntry> = Default::default();
+                    let mut all_results: BTreeMap<String, FileEntry> = Default::default();
                     for (_size, vec_file_entry) in loaded_hash_map {
                         for file_entry in vec_file_entry {
                             all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
@@ -1334,7 +1334,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     result
 }
 
-fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, minimal_cache_file_size: u64) {
+fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, minimal_cache_file_size: u64) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {

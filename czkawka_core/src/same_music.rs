@@ -12,7 +12,7 @@ use crate::common_traits::*;
 use audiotags::Tag;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::io::BufWriter;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -457,7 +457,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let title = file_entry.title.to_lowercase().trim().to_string();
                     if !title.is_empty() {
@@ -484,7 +484,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let artist = file_entry.artist.to_lowercase().trim().to_string();
                     if !artist.is_empty() {
@@ -511,7 +511,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let album_title = file_entry.album_title.to_lowercase().trim().to_string();
                     if !album_title.is_empty() {
@@ -538,7 +538,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: HashMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let album_artist = file_entry.album_artist.to_lowercase().trim().to_string();
                     if !album_artist.is_empty() {
@@ -565,7 +565,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: HashMap<i32, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<i32, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let year = file_entry.year;
                     if year != 0 {

@@ -10,7 +10,7 @@ use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
 use img_hash::HasherConfig;
 use rayon::prelude::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
@@ -75,10 +75,10 @@ pub struct SimilarImages {
     similar_vectors: Vec<Vec<FileEntry>>,
     recursive_search: bool,
     minimal_file_size: u64,
-    image_hashes: HashMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
+    image_hashes: BTreeMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: Similarity,
-    images_to_check: HashMap<String, FileEntry>,
+    images_to_check: BTreeMap<String, FileEntry>,
     use_cache: bool,
 }
 
@@ -329,8 +329,8 @@ impl SimilarImages {
 
         let loaded_hash_map;
 
-        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
-        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
+        let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
             loaded_hash_map = match load_hashes_from_file(&mut self.text_messages) {
@@ -440,7 +440,7 @@ impl SimilarImages {
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: HashMap<String, FileEntry> = loaded_hash_map;
+            let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
@@ -671,7 +671,7 @@ fn get_string_from_similarity(similarity: &Similarity) -> &str {
     }
 }
 
-fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
+fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -714,7 +714,7 @@ fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut
         }
     }
 }
-fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
+fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(CACHE_FILE_NAME);
@@ -728,7 +728,7 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<HashMap<String,
 
         let reader = BufReader::new(file_handler);
 
-        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = Default::default();
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = Default::default();
 
         // Read the file line by line using the lines() iterator from std::io::BufRead.
         for (index, line) in reader.lines().enumerate() {
