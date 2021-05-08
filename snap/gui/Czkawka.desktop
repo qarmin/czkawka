@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Exec=Czkawka
+Name=Czkawka
+Comment=Multi functional app to clean OS which allow to find duplicates, empty folders, similar files etc.
+Icon=${SNAP}/meta/gui/Czkawka.png
+Categories=System;
+StartupWMClass=Czkawka
+TryExec=Czkawka
+Name[en_US]=Czkawka.desktop
