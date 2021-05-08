@@ -1,3 +1,19 @@
+## Version 3.1.0 - 09.05.2021r
+- Clean README, by moving instructions to different files - [9aea6e9b](https://github.com/qarmin/czkawka/commit/9aea6e9b1ef5ac1e56ccd008e7456b80401179d0)
+- Fix excluded items on Windows - [#324](https://github.com/qarmin/czkawka/pull/324)
+- Center windows and add missing settings icon - [#323](https://github.com/qarmin/czkawka/pull/323)
+- Sort cache - [#322](https://github.com/qarmin/czkawka/pull/322)
+- Add desktop file to Snap - [018d5bebb](https://github.com/qarmin/czkawka/commit/018d5bebb0b297ba35529b03b8e2e68eb0a9b474), [ade2a756e2](https://github.com/qarmin/czkawka/commit/ade2a756e29c5ce5739d6268fcab7e76f59ed5f6)
+- Customize minimum file size of cached records - [#321](https://github.com/qarmin/czkawka/pull/321)
+- Update benchmarks - [2044b9185](https://github.com/qarmin/czkawka/commit/2044b91852fea89dfaf10dc1ab79c1d00e9e0c12)
+- Rearrange Instruction  - [8e7ac4a2d7f5b0](https://github.com/qarmin/czkawka/commit/8e7ac4a2d7f5b0beba2552581fb3a0d19c2efeb5)
+- Add info that Czkawka and Bleachbit are not alternatives to each other - [30602a486](https://github.com/qarmin/czkawka/commit/30602a486f6ade6f9b7b91a73708225b4f4c2a7d)
+- Fix crashes with too small message queue - [#316](https://github.com/qarmin/czkawka/pull/316)
+- Fix a little unsorted results - [#304](https://github.com/qarmin/czkawka/pull/304)
+- Fix Appimage(external bug) - [#299](https://github.com/qarmin/czkawka/issues/299)
+- Fix error with saving results of name duplicates - [#307](https://github.com/qarmin/czkawka/pull/307)
+- Update to Rust 1.5.1 - [#302](https://github.com/qarmin/czkawka/pull/302)
+
 ## Version 3.0.0 - 11.03.2021r
 - Option to not ignore hardlinks - [#273](https://github.com/qarmin/czkawka/pull/273)
 - Hardlink support for GUI - [#276](https://github.com/qarmin/czkawka/pull/276)
