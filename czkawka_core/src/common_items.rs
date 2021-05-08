@@ -27,6 +27,9 @@ impl ExcludedItems {
         for expression in expressions {
             let expression: String = expression.trim().to_string();
 
+            #[cfg(target_family = "windows")]
+            let expression = expression.replace("/", "\\");
+
             if expression.is_empty() {
                 continue;
             }
@@ -35,7 +38,7 @@ impl ExcludedItems {
                     checked_expressions.push("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*".to_string());
                 }
                 if cfg!(target_family = "windows") {
-                    checked_expressions.push("*/.git/*,*/node_modules/*,*/lost+found/*,*:/windows/*".to_string());
+                    checked_expressions.push("*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*".to_string());
                 }
                 continue;
             }
