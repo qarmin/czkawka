@@ -540,7 +540,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
             entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*");
         }
         if cfg!(target_family = "windows") {
-            entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*:/windows/*");
+            entry_excluded_items.set_text("*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*");
         }
     }
     // Resetting allowed extensions

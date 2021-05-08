@@ -360,6 +360,11 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
     if !wildcard.is_empty() {
         let wildcard = wildcard.trim();
 
+        #[cfg(target_family = "windows")]
+        let wildcard = wildcard.replace("/", "\\");
+        #[cfg(target_family = "windows")]
+        let wildcard = wildcard.as_str();
+
         let selection = tree_view.get_selection();
         let tree_model = tree_view.get_model().unwrap();
 
@@ -473,6 +478,11 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
     }
     if !wildcard.is_empty() {
         let wildcard = wildcard.trim();
+
+        #[cfg(target_family = "windows")]
+        let wildcard = wildcard.replace("/", "\\");
+        #[cfg(target_family = "windows")]
+        let wildcard = wildcard.as_str();
 
         let selection = tree_view.get_selection();
         let tree_model = tree_view.get_model().unwrap();

@@ -157,6 +157,12 @@ mod test {
         assert!(!Common::regex_check("*home/*koc", "/koc/home/"));
         assert!(!Common::regex_check("*home/", "/home"));
         assert!(!Common::regex_check("*TTT", "/GGG"));
+
+        #[cfg(target_family = "windows")]
+        {
+            assert!(Common::regex_check("*\\home", "C:\\home"));
+            assert!(Common::regex_check("*/home", "C:\\home"));
+        }
     }
     #[test]
     fn test_windows_path() {
