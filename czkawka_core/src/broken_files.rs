@@ -13,7 +13,7 @@ use crate::common_traits::*;
 use crossbeam_channel::Receiver;
 use directories_next::ProjectDirs;
 use rayon::prelude::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::io::{BufReader, BufWriter};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -70,7 +70,7 @@ impl Info {
 pub struct BrokenFiles {
     text_messages: Messages,
     information: Info,
-    files_to_check: HashMap<String, FileEntry>,
+    files_to_check: BTreeMap<String, FileEntry>,
     broken_files: Vec<FileEntry>,
     directories: Directories,
     allowed_extensions: Extensions,
@@ -305,8 +305,8 @@ impl BrokenFiles {
 
         let loaded_hash_map;
 
-        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
-        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
+        let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
             loaded_hash_map = match load_cache_from_file(&mut self.text_messages) {
@@ -444,7 +444,7 @@ impl BrokenFiles {
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: HashMap<String, FileEntry> = self.files_to_check.clone();
+            let mut all_results: BTreeMap<String, FileEntry> = self.files_to_check.clone();
 
             for file_entry in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
@@ -573,7 +573,7 @@ impl PrintResults for BrokenFiles {
     }
 }
 
-fn save_cache_to_file(hashmap_file_entry: &HashMap<String, FileEntry>, text_messages: &mut Messages) {
+fn save_cache_to_file(hashmap_file_entry: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -613,7 +613,7 @@ fn save_cache_to_file(hashmap_file_entry: &HashMap<String, FileEntry>, text_mess
     }
 }
 
-fn load_cache_from_file(text_messages: &mut Messages) -> Option<HashMap<String, FileEntry>> {
+fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(CACHE_FILE_NAME);
@@ -627,7 +627,7 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<HashMap<String, 
 
         let reader = BufReader::new(file_handler);
 
-        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = Default::default();
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = Default::default();
 
         // Read the file line by line using the lines() iterator from std::io::BufRead.
         for (index, line) in reader.lines().enumerate() {
