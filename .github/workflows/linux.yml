@@ -177,13 +177,13 @@ jobs:
           strip czkawka_gui
           wget https://github.com/AppImage/pkg2appimage/releases/download/continuous/pkg2appimage-1806-x86_64.AppImage
           chmod +x pkg2appimage-1806-x86_64.AppImage
-          ./pkg2appimage-1806-x86_64.AppImage misc/czkawka.yml
+          ./pkg2appimage-1806-x86_64.AppImage misc/czkawka-appimage-recipe.yml
           mv out/Czkawka*.AppImage out/Czkawka-minimal.AppImage
 
       - name: Minimal Appimage Upload
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-appimage-${{ runner.os }}-${{ matrix.toolchain }}-alternate
+          name: czkawka_gui-${{ matrix.toolchain }}_minimal
           path: out/*.AppImage
 
 
