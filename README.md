@@ -7,7 +7,7 @@
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
 - Free, Open Source without ads
 - Multiplatform - works on Linux, Windows and macOS
-- Cache support - second and further scans should be a lot of faster than the first
+- Cache support - second and further scans should be a lot faster than the first one
 - CLI frontend - for easy automation
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions 
