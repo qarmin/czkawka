@@ -169,6 +169,24 @@ jobs:
           path: target/release/czkawka_gui
         if: ${{ matrix.type == 'release' }}
 
+      - name: Minimal AppImage
+        run: |
+          pwd
+          rm -rf czkawka_gui
+          cp target/release/czkawka_gui .
+          strip czkawka_gui
+          wget https://github.com/AppImage/pkg2appimage/releases/download/continuous/pkg2appimage-1806-x86_64.AppImage
+          chmod +x pkg2appimage-1806-x86_64.AppImage
+          ./pkg2appimage-1806-x86_64.AppImage misc/czkawka-appimage-recipe.yml
+          mv out/Czkawka*.AppImage out/czkawka_gui-minimal.AppImage
+
+      - name: Minimal Appimage Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-${{ matrix.toolchain }}_minimal
+          path: out/*.AppImage
+
+
   linux-appimage-gui:
     strategy:
       matrix:
