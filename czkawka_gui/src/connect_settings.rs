@@ -13,7 +13,7 @@ pub fn connect_settings(gui_data: &GuiData) {
         button_settings.connect_clicked(move |_| {
             window_main.set_sensitive(false);
             window_settings.show();
-            window_settings.set_position(WindowPosition::CenterAlways);
+            window_settings.set_position(WindowPosition::Center);
         });
 
         let window_main = gui_data.window_main.clone();

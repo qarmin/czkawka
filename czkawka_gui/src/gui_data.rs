@@ -87,7 +87,7 @@ impl GuiData {
         let window_main: gtk::Window = builder.get_object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
-        window_main.set_position(WindowPosition::CenterAlways);
+        window_main.set_position(WindowPosition::Center);
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
