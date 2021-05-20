@@ -183,7 +183,7 @@ jobs:
       - name: Minimal Appimage Upload
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-${{ matrix.toolchain }}_minimal
+          name: czkawka_gui-${{ matrix.toolchain }}_minimal_AppImage
           path: out/*.AppImage
 
 
