@@ -109,7 +109,7 @@ pub enum Commands {
         excluded_directories: ExcludedDirectories,
         #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "16384", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
-        #[structopt(short, long, default_value = "High", parse(try_from_str = parse_similar_images_similarity), help = "Similairty level (Minimal, VerySmall, Small, Medium, High, Very High)", long_help = "Methods to choose similarity level of images which will be considered as duplicated.")]
+        #[structopt(short, long, default_value = "High", parse(try_from_str = parse_similar_images_similarity), help = "Similairty level (Minimal, VerySmall, Small, Medium, High, VeryHigh)", long_help = "Methods to choose similarity level of images which will be considered as duplicated.")]
         similarity: Similarity,
         #[structopt(flatten)]
         excluded_items: ExcludedItems,
