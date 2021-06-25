@@ -94,8 +94,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_duplicate_finder);
 
-                        let col_indices = [0, 1, 2, 3, 4, 5];
-
                         match df.get_check_method() {
                             CheckingMethod::Name => {
                                 let btreemap = df.get_files_sorted_by_names();
@@ -113,26 +111,27 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         vector.clone()
                                     };
 
-                                    let values: [&dyn ToValue; 6] = [
-                                        &name,
-                                        &(format!("{} results", vector.len())),
-                                        &"".to_string(), // No text in 3 column
-                                        &(0),            // Not used here
-                                        &(HEADER_ROW_COLOR.to_string()),
-                                        &(TEXT_COLOR.to_string()),
+                                    let values: [(u32, &dyn ToValue); 6] = [
+                                        (0, &name),
+                                        (1, (&(format!("{} results", vector.len())))),
+                                        (2, (&"".to_string())), // No text in 3 column
+                                        (3, (&(0))),            // Not used here
+                                        (4, &(HEADER_ROW_COLOR.to_string())),
+                                        (5, &(TEXT_COLOR.to_string())),
                                     ];
-                                    list_store.set(&list_store.append(), &col_indices, &values);
+
+                                    list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
-                                        let values: [&dyn ToValue; 6] = [
-                                            &file,
-                                            &directory,
-                                            &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap())),
-                                            &(entry.modified_date),
-                                            &(MAIN_ROW_COLOR.to_string()),
-                                            &(TEXT_COLOR.to_string()),
+                                        let values: [(u32, &dyn ToValue); 6] = [
+                                            (0, &file),
+                                            (1, &directory),
+                                            (2, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap()))),
+                                            (3, &(entry.modified_date)),
+                                            (4, &(MAIN_ROW_COLOR.to_string())),
+                                            (5, &(TEXT_COLOR.to_string())),
                                         ];
-                                        list_store.set(&list_store.append(), &col_indices, &values);
+                                        list_store.set(&list_store.append(), &values);
                                     }
                                 }
                             }
@@ -153,26 +152,32 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             vector.clone()
                                         };
 
-                                        let values: [&dyn ToValue; 6] = [
-                                            &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
-                                            &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
-                                            &"".to_string(), // No text in 3 column
-                                            &(0),            // Not used here
-                                            &(HEADER_ROW_COLOR.to_string()),
-                                            &(TEXT_COLOR.to_string()),
+                                        let values: [(u32, &dyn ToValue); 6] = [
+                                            (0, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                            (
+                                                1,
+                                                &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                            ),
+                                            (2, &"".to_string()), // No text in 3 column
+                                            (3, &(0)),
+                                            (4, &(HEADER_ROW_COLOR.to_string())),
+                                            (5, &(TEXT_COLOR.to_string())),
                                         ];
-                                        list_store.set(&list_store.append(), &col_indices, &values);
+
+                                        list_store.set(&list_store.append(), &values);
                                         for entry in vector {
                                             let (directory, file) = split_path(&entry.path);
-                                            let values: [&dyn ToValue; 6] = [
-                                                &file,
-                                                &directory,
-                                                &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
-                                                &(entry.modified_date),
-                                                &(MAIN_ROW_COLOR.to_string()),
-                                                &(TEXT_COLOR.to_string()),
+
+                                            let values: [(u32, &dyn ToValue); 6] = [
+                                                (0, &file),
+                                                (1, &directory),
+                                                (2, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
+                                                (3, &(entry.modified_date)),
+                                                (4, &(MAIN_ROW_COLOR.to_string())),
+                                                (5, &(TEXT_COLOR.to_string())),
                                             ];
-                                            list_store.set(&list_store.append(), &col_indices, &values);
+
+                                            list_store.set(&list_store.append(), &values);
                                         }
                                     }
                                 }
@@ -192,27 +197,30 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     } else {
                                         vector.clone()
                                     };
-
-                                    let values: [&dyn ToValue; 6] = [
-                                        &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size)),
-                                        &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
-                                        &"".to_string(), // No text in 3 column
-                                        &(0),            // Not used here
-                                        &(HEADER_ROW_COLOR.to_string()),
-                                        &(TEXT_COLOR.to_string()),
+                                    let values: [(u32, &dyn ToValue); 6] = [
+                                        (0, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                        (
+                                            1,
+                                            &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                        ),
+                                        (2, &"".to_string()), // No text in 3 column
+                                        (3, &(0)),            // Not used here
+                                        (4, &(HEADER_ROW_COLOR.to_string())),
+                                        (5, &(TEXT_COLOR.to_string())),
                                     ];
-                                    list_store.set(&list_store.append(), &col_indices, &values);
+
+                                    list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
-                                        let values: [&dyn ToValue; 6] = [
-                                            &file,
-                                            &directory,
-                                            &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
-                                            &(entry.modified_date),
-                                            &(MAIN_ROW_COLOR.to_string()),
-                                            &(TEXT_COLOR.to_string()),
+                                        let values: [(u32, &dyn ToValue); 6] = [
+                                            (0, &file),
+                                            (1, &directory),
+                                            (2, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
+                                            (3, &(entry.modified_date)),
+                                            (4, &(MAIN_ROW_COLOR.to_string())),
+                                            (5, &(TEXT_COLOR.to_string())),
                                         ];
-                                        list_store.set(&list_store.append(), &col_indices, &values);
+                                        list_store.set(&list_store.append(), &values);
                                     }
                                 }
                             }
@@ -260,8 +268,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_empty_folder_finder);
 
-                        let col_indices = [0, 1, 2];
-
                         let hashmap = ef.get_empty_folder_list();
                         let mut vector = hashmap.keys().cloned().collect::<Vec<PathBuf>>();
 
@@ -272,8 +278,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for path in vector {
                             let (directory, file) = split_path(&path);
-                            let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(hashmap.get(&path).unwrap().modified_date as i64, 0).to_string())];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            let values: [(u32, &dyn ToValue); 3] = [(0, &file), (1, &directory), (2, &(NaiveDateTime::from_timestamp(hashmap.get(&path).unwrap().modified_date as i64, 0).to_string()))];
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
@@ -310,8 +316,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_empty_files_finder);
 
-                        let col_indices = [0, 1, 2];
-
                         let vector = vf.get_empty_files();
 
                         // Sort
@@ -323,8 +327,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            let values: [(u32, &dyn ToValue); 3] = [(0, &file), (1, &directory), (2, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()))];
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
@@ -361,8 +365,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_big_files_finder);
 
-                        let col_indices = [0, 1, 2, 3];
-
                         let btreemap = bf.get_big_files();
 
                         for (size, vector) in btreemap.iter().rev() {
@@ -373,13 +375,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             });
                             for file_entry in vector {
                                 let (directory, file) = split_path(&file_entry.path);
-                                let values: [&dyn ToValue; 4] = [
-                                    &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size)),
-                                    &file,
-                                    &directory,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                let values: [(u32, &dyn ToValue); 4] = [
+                                    (0, &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size))),
+                                    (1, &file),
+                                    (2, &directory),
+                                    (3, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
                                 ];
-                                list_store.set(&list_store.append(), &col_indices, &values);
+                                list_store.set(&list_store.append(), &values);
                             }
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -417,8 +419,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_temporary_files_finder);
 
-                        let col_indices = [0, 1, 2];
-
                         let vector = tf.get_temporary_files();
 
                         // Sort
@@ -430,8 +430,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 3] = [&file, &directory, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            let values: [(u32, &dyn ToValue); 3] = [(0, &file), (1, &directory), (2, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()))];
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
@@ -468,8 +468,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_similar_images_finder);
 
-                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
                         let vec_struct_similar = sf.get_similar_images();
 
                         for vec_file_entry in vec_struct_similar.iter() {
@@ -486,36 +484,36 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             };
 
                             // Header
-                            let values: [&dyn ToValue; 10] = [
-                                &"".to_string(),
-                                &"".to_string(),
-                                &(0),
-                                &"".to_string(),
-                                &"".to_string(),
-                                &"".to_string(),
-                                &"".to_string(),
-                                &(0),
-                                &(HEADER_ROW_COLOR.to_string()),
-                                &(TEXT_COLOR.to_string()),
+                            let values: [(u32, &dyn ToValue); 10] = [
+                                (0, &"".to_string()),
+                                (1, &"".to_string()),
+                                (2, &(0)),
+                                (3, &"".to_string()),
+                                (4, &"".to_string()),
+                                (5, &"".to_string()),
+                                (6, &"".to_string()),
+                                (7, &(0)),
+                                (8, &(HEADER_ROW_COLOR.to_string())),
+                                (9, &(TEXT_COLOR.to_string())),
                             ];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            list_store.set(&list_store.append(), &values);
 
                             // Meat
                             for file_entry in vec_file_entry.iter() {
                                 let (directory, file) = split_path(&file_entry.path);
-                                let values: [&dyn ToValue; 10] = [
-                                    &(get_text_from_similarity(&file_entry.similarity).to_string()),
-                                    &file_entry.size.file_size(options::BINARY).unwrap(),
-                                    &file_entry.size,
-                                    &file_entry.dimensions,
-                                    &file,
-                                    &directory,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
-                                    &(file_entry.modified_date),
-                                    &(MAIN_ROW_COLOR.to_string()),
-                                    &(TEXT_COLOR.to_string()),
+                                let values: [(u32, &dyn ToValue); 10] = [
+                                    (0, &(get_text_from_similarity(&file_entry.similarity).to_string())),
+                                    (1, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (2, &file_entry.size),
+                                    (3, &file_entry.dimensions),
+                                    (4, &file),
+                                    (5, &directory),
+                                    (6, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (7, &(file_entry.modified_date)),
+                                    (8, &(MAIN_ROW_COLOR.to_string())),
+                                    (9, &(TEXT_COLOR.to_string())),
                                 ];
-                                list_store.set(&list_store.append(), &col_indices, &values);
+                                list_store.set(&list_store.append(), &values);
                             }
                         }
 
@@ -558,8 +556,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_zeroed_files_finder);
 
-                        let col_indices = [0, 1, 2, 3, 4];
-
                         let vector = zf.get_zeroed_files();
 
                         // Sort
@@ -571,14 +567,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 5] = [
-                                &(file_entry.size.file_size(options::BINARY).unwrap()),
-                                &(file_entry.size),
-                                &file,
-                                &directory,
-                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                            let values: [(u32, &dyn ToValue); 5] = [
+                                (0, &(file_entry.size.file_size(options::BINARY).unwrap())),
+                                (1, &(file_entry.size)),
+                                (2, &file),
+                                (3, &directory),
+                                (4, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
                             ];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
@@ -615,8 +611,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_same_music_finder);
 
-                        let col_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
                         let vector = mf.get_duplicated_music_entries();
 
                         let music_similarity = *mf.get_music_similarity();
@@ -642,55 +636,70 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 vec_file_entry.clone()
                             };
 
-                            let values: [&dyn ToValue; 13] = [
-                                &"".to_string(),
-                                &(0),
-                                &"".to_string(),
-                                &"".to_string(),
-                                &(match is_title {
-                                    true => text.clone(),
-                                    false => "".to_string(),
-                                }),
-                                &(match is_artist {
-                                    true => text.clone(),
-                                    false => "".to_string(),
-                                }),
-                                &(match is_album_title {
-                                    true => text.clone(),
-                                    false => "".to_string(),
-                                }),
-                                &(match is_album_artist {
-                                    true => text.clone(),
-                                    false => "".to_string(),
-                                }),
-                                &(match is_year {
-                                    true => text.clone(),
-                                    false => "".to_string(),
-                                }),
-                                &"".to_string(),
-                                &(0),
-                                &(HEADER_ROW_COLOR.to_string()),
-                                &(TEXT_COLOR.to_string()),
+                            let values: [(u32, &dyn ToValue); 13] = [
+                                (0, &"".to_string()),
+                                (1, &(0)),
+                                (2, &"".to_string()),
+                                (3, &"".to_string()),
+                                (
+                                    4,
+                                    &(match is_title {
+                                        true => text.clone(),
+                                        false => "".to_string(),
+                                    }),
+                                ),
+                                (
+                                    5,
+                                    &(match is_artist {
+                                        true => text.clone(),
+                                        false => "".to_string(),
+                                    }),
+                                ),
+                                (
+                                    6,
+                                    &(match is_album_title {
+                                        true => text.clone(),
+                                        false => "".to_string(),
+                                    }),
+                                ),
+                                (
+                                    7,
+                                    &(match is_album_artist {
+                                        true => text.clone(),
+                                        false => "".to_string(),
+                                    }),
+                                ),
+                                (
+                                    8,
+                                    &(match is_year {
+                                        true => text.clone(),
+                                        false => "".to_string(),
+                                    }),
+                                ),
+                                (9, &"".to_string()),
+                                (10, &(0)),
+                                (11, &(HEADER_ROW_COLOR.to_string())),
+                                (12, &(TEXT_COLOR.to_string())),
                             ];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            list_store.set(&list_store.append(), &values);
                             for file_entry in vec_file_entry {
                                 let (directory, file) = split_path(&file_entry.path);
-                                let values: [&dyn ToValue; 13] = [
-                                    &file_entry.size.file_size(options::BINARY).unwrap(),
-                                    &file_entry.size,
-                                    &file,
-                                    &directory,
-                                    &file_entry.title,
-                                    &file_entry.artist,
-                                    &file_entry.album_title,
-                                    &file_entry.album_artist,
-                                    &file_entry.year.to_string(),
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
-                                    &(file_entry.modified_date),
-                                    &(MAIN_ROW_COLOR.to_string()),
-                                    &(TEXT_COLOR.to_string()),
+                                let values: [(u32, &dyn ToValue); 13] = [
+                                    (0, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (1, &file_entry.size),
+                                    (2, &file),
+                                    (3, &directory),
+                                    (4, &file_entry.title),
+                                    (5, &file_entry.artist),
+                                    (6, &file_entry.album_title),
+                                    (7, &file_entry.album_artist),
+                                    (8, &file_entry.year.to_string()),
+                                    (9, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (10, &(file_entry.modified_date)),
+                                    (11, &(MAIN_ROW_COLOR.to_string())),
+                                    (12, &(TEXT_COLOR.to_string())),
                                 ];
-                                list_store.set(&list_store.append(), &col_indices, &values);
+                                list_store.set(&list_store.append(), &values);
                             }
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -732,8 +741,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_invalid_symlinks);
 
-                        let col_indices = [0, 1, 2, 3, 4];
-
                         let vector = ifs.get_invalid_symlinks();
 
                         // Sort
@@ -746,14 +753,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.symlink_path);
-                            let values: [&dyn ToValue; 5] = [
-                                &file,
-                                &directory,
-                                &file_entry.destination_path.to_string_lossy().to_string(),
-                                &get_text_from_invalid_symlink_cause(&file_entry.type_of_error),
-                                &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                            let values: [(u32, &dyn ToValue); 5] = [
+                                (0, &file),
+                                (1, &directory),
+                                (2, &file_entry.destination_path.to_string_lossy().to_string()),
+                                (3, &get_text_from_invalid_symlink_cause(&file_entry.type_of_error)),
+                                (4, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
                             ];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
@@ -790,8 +797,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_broken_files);
 
-                        let col_indices = [0, 1, 2, 3];
-
                         let vector = br.get_broken_files();
 
                         // Sort
@@ -803,8 +808,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [&dyn ToValue; 4] = [&file, &directory, &file_entry.error_string, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())];
-                            list_store.set(&list_store.append(), &col_indices, &values);
+                            let values: [(u32, &dyn ToValue); 4] = [(0, &file), (1, &directory), (2, &file_entry.error_string), (3, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()))];
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }

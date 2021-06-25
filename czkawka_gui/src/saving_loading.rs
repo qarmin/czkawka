@@ -432,11 +432,9 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             let list_store = get_list_store(&tree_view_included_directories);
             list_store.clear();
 
-            let col_indices = [0];
-
             for directory in included_directories {
-                let values: [&dyn ToValue; 1] = [&directory];
-                list_store.set(&list_store.append(), &col_indices, &values);
+                let values: [(u32, &dyn ToValue); 1] = [(0, &directory)];
+                list_store.set(&list_store.append(), &values);
             }
 
             //// Exclude Directories
@@ -444,11 +442,9 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             let list_store = get_list_store(&tree_view_excluded_directories);
             list_store.clear();
 
-            let col_indices = [0];
-
             for directory in excluded_directories {
-                let values: [&dyn ToValue; 1] = [&directory];
-                list_store.set(&list_store.append(), &col_indices, &values);
+                let values: [(u32, &dyn ToValue); 1] = [(0, &directory)];
+                list_store.set(&list_store.append(), &values);
             }
 
             //// Excluded Items
@@ -496,7 +492,6 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
 
     // Resetting included directories
     {
-        let col_indices = [0];
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         let list_store = get_list_store(&tree_view_included_directories);
         list_store.clear();
@@ -516,19 +511,18 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
             }
         };
 
-        let values: [&dyn ToValue; 1] = [&current_dir];
-        list_store.set(&list_store.append(), &col_indices, &values);
+        let values: [(u32, &dyn ToValue); 1] = [(0, &current_dir)];
+        list_store.set(&list_store.append(), &values);
     }
     // Resetting excluded directories
     {
-        let col_indices = [0];
         let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
         list_store.clear();
         if cfg!(target_family = "unix") {
             for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
-                let values: [&dyn ToValue; 1] = [&i];
-                list_store.set(&list_store.append(), &col_indices, &values);
+                let values: [(u32, &dyn ToValue); 1] = [(0, &i)];
+                list_store.set(&list_store.append(), &values);
             }
         }
     }

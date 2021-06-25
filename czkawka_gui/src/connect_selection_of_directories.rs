@@ -33,10 +33,8 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 if !text.is_empty() {
                     let list_store = get_list_store(&tree_view_included_directories);
 
-                    let col_indices = [0];
-
-                    let values: [&dyn ToValue; 1] = [&text];
-                    list_store.set(&list_store.append(), &col_indices, &values);
+                    let values: [(u32, &dyn ToValue); 1] = [(0, &text)];
+                    list_store.set(&list_store.append(), &values);
                 }
             } else {
                 dialog_manual_add_directory.close();
@@ -76,10 +74,8 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
                 if !text.is_empty() {
                     let list_store = get_list_store(&tree_view_excluded_directories);
 
-                    let col_indices = [0];
-
-                    let values: [&dyn ToValue; 1] = [&text];
-                    list_store.set(&list_store.append(), &col_indices, &values);
+                    let values: [(u32, &dyn ToValue); 1] = [(0, &text)];
+                    list_store.set(&list_store.append(), &values);
                 }
             } else {
                 dialog_manual_add_directory.close();
@@ -108,10 +104,9 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 
                 let list_store = get_list_store(&tree_view_included_directories);
 
-                let col_indices = [0];
                 for file_entry in &folder {
-                    let values: [&dyn ToValue; 1] = [&file_entry.to_string_lossy().to_string()];
-                    list_store.set(&list_store.append(), &col_indices, &values);
+                    let values: [(u32, &dyn ToValue); 1] = [(0, &file_entry.to_string_lossy().to_string())];
+                    list_store.set(&list_store.append(), &values);
                 }
             }
             chooser.close();
@@ -137,11 +132,9 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 
                 let list_store = get_list_store(&tree_view_excluded_directories);
 
-                let col_indices = [0];
-
                 for file_entry in &folder {
-                    let values: [&dyn ToValue; 1] = [&file_entry.to_string_lossy().to_string()];
-                    list_store.set(&list_store.append(), &col_indices, &values);
+                    let values: [(u32, &dyn ToValue); 1] = [(0, &file_entry.to_string_lossy().to_string())];
+                    list_store.set(&list_store.append(), &values);
                 }
             }
             chooser.close();
