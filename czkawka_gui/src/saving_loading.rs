@@ -2,7 +2,6 @@ use crate::gui_data::*;
 use crate::help_functions::*;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
-use gtk::{EntryExt, GtkListStoreExt, ToggleButtonExt};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;

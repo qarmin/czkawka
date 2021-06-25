@@ -16,16 +16,16 @@ pub struct GuiProgressDialog {
 
 impl GuiProgressDialog {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
-        let window_progress: gtk::Window = builder.get_object("window_progress").unwrap();
+        let window_progress: gtk::Window = builder.object("window_progress").unwrap();
 
-        let progress_bar_current_stage: gtk::ProgressBar = builder.get_object("progress_bar_current_stage").unwrap();
-        let progress_bar_all_stages: gtk::ProgressBar = builder.get_object("progress_bar_all_stages").unwrap();
+        let progress_bar_current_stage: gtk::ProgressBar = builder.object("progress_bar_current_stage").unwrap();
+        let progress_bar_all_stages: gtk::ProgressBar = builder.object("progress_bar_all_stages").unwrap();
 
-        let label_stage: gtk::Label = builder.get_object("label_stage").unwrap();
+        let label_stage: gtk::Label = builder.object("label_stage").unwrap();
 
-        let grid_progress_stages: gtk::Grid = builder.get_object("grid_progress_stages").unwrap();
+        let grid_progress_stages: gtk::Grid = builder.object("grid_progress_stages").unwrap();
 
-        let button_stop_in_dialog: gtk::Button = builder.get_object("button_stop_in_dialog").unwrap();
+        let button_stop_in_dialog: gtk::Button = builder.object("button_stop_in_dialog").unwrap();
 
         Self {
             window_progress,

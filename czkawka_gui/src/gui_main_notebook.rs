@@ -62,18 +62,18 @@ pub struct GuiMainNotebook {
 
 impl GuiMainNotebook {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
-        let notebook_main: gtk::Notebook = builder.get_object("notebook_main").unwrap();
+        let notebook_main: gtk::Notebook = builder.object("notebook_main").unwrap();
 
-        let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_duplicate_finder").unwrap();
-        let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_folder_finder").unwrap();
-        let scrolled_window_empty_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_empty_files_finder").unwrap();
-        let scrolled_window_temporary_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_temporary_files_finder").unwrap();
-        let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_big_files_finder").unwrap();
-        let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_similar_images_finder").unwrap();
-        let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_zeroed_files_finder").unwrap();
-        let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.get_object("scrolled_window_same_music_finder").unwrap();
-        let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.get_object("scrolled_window_invalid_symlinks").unwrap();
-        let scrolled_window_broken_files: gtk::ScrolledWindow = builder.get_object("scrolled_window_broken_files").unwrap();
+        let scrolled_window_duplicate_finder: gtk::ScrolledWindow = builder.object("scrolled_window_duplicate_finder").unwrap();
+        let scrolled_window_empty_folder_finder: gtk::ScrolledWindow = builder.object("scrolled_window_empty_folder_finder").unwrap();
+        let scrolled_window_empty_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_empty_files_finder").unwrap();
+        let scrolled_window_temporary_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_temporary_files_finder").unwrap();
+        let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_big_files_finder").unwrap();
+        let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.object("scrolled_window_similar_images_finder").unwrap();
+        let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_zeroed_files_finder").unwrap();
+        let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.object("scrolled_window_same_music_finder").unwrap();
+        let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.object("scrolled_window_invalid_symlinks").unwrap();
+        let scrolled_window_broken_files: gtk::ScrolledWindow = builder.object("scrolled_window_broken_files").unwrap();
 
         let tree_view_duplicate_finder: gtk::TreeView = TreeView::new();
         let tree_view_empty_folder_finder: gtk::TreeView = TreeView::new();
@@ -86,36 +86,36 @@ impl GuiMainNotebook {
         let tree_view_invalid_symlinks: gtk::TreeView = TreeView::new();
         let tree_view_broken_files: gtk::TreeView = TreeView::new();
 
-        let entry_similar_images_minimal_size: gtk::Entry = builder.get_object("entry_similar_images_minimal_size").unwrap();
-        let entry_duplicate_minimal_size: gtk::Entry = builder.get_object("entry_duplicate_minimal_size").unwrap();
-        let entry_big_files_number: gtk::Entry = builder.get_object("entry_big_files_number").unwrap();
-        let entry_same_music_minimal_size: gtk::Entry = builder.get_object("entry_same_music_minimal_size").unwrap();
+        let entry_similar_images_minimal_size: gtk::Entry = builder.object("entry_similar_images_minimal_size").unwrap();
+        let entry_duplicate_minimal_size: gtk::Entry = builder.object("entry_duplicate_minimal_size").unwrap();
+        let entry_big_files_number: gtk::Entry = builder.object("entry_big_files_number").unwrap();
+        let entry_same_music_minimal_size: gtk::Entry = builder.object("entry_same_music_minimal_size").unwrap();
 
         //// Check Buttons
-        let check_button_music_title: gtk::CheckButton = builder.get_object("check_button_music_title").unwrap();
-        let check_button_music_artist: gtk::CheckButton = builder.get_object("check_button_music_artist").unwrap();
-        let check_button_music_album_title: gtk::CheckButton = builder.get_object("check_button_music_album_title").unwrap();
-        let check_button_music_album_artist: gtk::CheckButton = builder.get_object("check_button_music_album_artist").unwrap();
-        let check_button_music_year: gtk::CheckButton = builder.get_object("check_button_music_year").unwrap();
+        let check_button_music_title: gtk::CheckButton = builder.object("check_button_music_title").unwrap();
+        let check_button_music_artist: gtk::CheckButton = builder.object("check_button_music_artist").unwrap();
+        let check_button_music_album_title: gtk::CheckButton = builder.object("check_button_music_album_title").unwrap();
+        let check_button_music_album_artist: gtk::CheckButton = builder.object("check_button_music_album_artist").unwrap();
+        let check_button_music_year: gtk::CheckButton = builder.object("check_button_music_year").unwrap();
 
         //// Radio Buttons
-        let radio_button_duplicates_name: gtk::RadioButton = builder.get_object("radio_button_duplicates_name").unwrap();
-        let radio_button_duplicates_size: gtk::RadioButton = builder.get_object("radio_button_duplicates_size").unwrap();
-        let radio_button_duplicates_hashmb: gtk::RadioButton = builder.get_object("radio_button_duplicates_hashmb").unwrap();
-        let radio_button_duplicates_hash: gtk::RadioButton = builder.get_object("radio_button_duplicates_hash").unwrap();
+        let radio_button_duplicates_name: gtk::RadioButton = builder.object("radio_button_duplicates_name").unwrap();
+        let radio_button_duplicates_size: gtk::RadioButton = builder.object("radio_button_duplicates_size").unwrap();
+        let radio_button_duplicates_hashmb: gtk::RadioButton = builder.object("radio_button_duplicates_hashmb").unwrap();
+        let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
-        let radio_button_similar_images_minimal: gtk::RadioButton = builder.get_object("radio_button_similar_images_minimal").unwrap();
-        let radio_button_similar_images_very_small: gtk::RadioButton = builder.get_object("radio_button_similar_images_very_small").unwrap();
-        let radio_button_similar_images_small: gtk::RadioButton = builder.get_object("radio_button_similar_images_small").unwrap();
-        let radio_button_similar_images_medium: gtk::RadioButton = builder.get_object("radio_button_similar_images_medium").unwrap();
-        let radio_button_similar_images_high: gtk::RadioButton = builder.get_object("radio_button_similar_images_high").unwrap();
-        let radio_button_similar_images_very_high: gtk::RadioButton = builder.get_object("radio_button_similar_images_very_high").unwrap();
+        let radio_button_similar_images_minimal: gtk::RadioButton = builder.object("radio_button_similar_images_minimal").unwrap();
+        let radio_button_similar_images_very_small: gtk::RadioButton = builder.object("radio_button_similar_images_very_small").unwrap();
+        let radio_button_similar_images_small: gtk::RadioButton = builder.object("radio_button_similar_images_small").unwrap();
+        let radio_button_similar_images_medium: gtk::RadioButton = builder.object("radio_button_similar_images_medium").unwrap();
+        let radio_button_similar_images_high: gtk::RadioButton = builder.object("radio_button_similar_images_high").unwrap();
+        let radio_button_similar_images_very_high: gtk::RadioButton = builder.object("radio_button_similar_images_very_high").unwrap();
 
-        let radio_button_hash_type_blake3: gtk::RadioButton = builder.get_object("radio_button_hash_type_blake3").unwrap();
-        let radio_button_hash_type_crc32: gtk::RadioButton = builder.get_object("radio_button_hash_type_crc32").unwrap();
-        let radio_button_hash_type_xxh3: gtk::RadioButton = builder.get_object("radio_button_hash_type_xxh3").unwrap();
+        let radio_button_hash_type_blake3: gtk::RadioButton = builder.object("radio_button_hash_type_blake3").unwrap();
+        let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
+        let radio_button_hash_type_xxh3: gtk::RadioButton = builder.object("radio_button_hash_type_xxh3").unwrap();
 
-        let image_preview_similar_images: gtk::Image = builder.get_object("image_preview_similar_images").unwrap();
+        let image_preview_similar_images: gtk::Image = builder.object("image_preview_similar_images").unwrap();
 
         Self {
             notebook_main,

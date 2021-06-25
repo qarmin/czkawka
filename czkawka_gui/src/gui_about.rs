@@ -12,12 +12,12 @@ pub struct GuiAbout {
 
 impl GuiAbout {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
-        let about_dialog: gtk::AboutDialog = builder.get_object("about_dialog").unwrap();
+        let about_dialog: gtk::AboutDialog = builder.object("about_dialog").unwrap();
         about_dialog.set_position(WindowPosition::Center);
 
-        let button_repository: gtk::Button = builder.get_object("button_repository").unwrap();
-        let button_donation: gtk::Button = builder.get_object("button_donation").unwrap();
-        let button_instruction: gtk::Button = builder.get_object("button_instruction").unwrap();
+        let button_repository: gtk::Button = builder.object("button_repository").unwrap();
+        let button_donation: gtk::Button = builder.object("button_donation").unwrap();
+        let button_instruction: gtk::Button = builder.object("button_instruction").unwrap();
 
         Self {
             about_dialog,
