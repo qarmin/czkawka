@@ -10,26 +10,26 @@ use gtk::TreeIter;
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
 fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
-    let selection = tree_view.get_selection();
+    let selection = tree_view.selection();
 
     selection.select_all();
     popover.popdown();
 }
 fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
-    let selection = tree_view.get_selection();
+    let selection = tree_view.selection();
 
     selection.unselect_all();
     popover.popdown();
 }
 fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
-    let selection = tree_view.get_selection();
+    let selection = tree_view.selection();
 
-    let (vector_tree_path, tree_model) = selection.get_selected_rows();
+    let (vector_tree_path, tree_model) = selection.selected_rows();
 
     if vector_tree_path.is_empty() {
         selection.select_all();
     } else {
-        let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+        let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
         let mut current_path_index = 0;
         let mut tree_iter_selected: TreeIter;
@@ -37,8 +37,8 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
             if current_path_index >= vector_tree_path.len() {
                 selection.select_iter(&tree_iter_all);
             } else {
-                tree_iter_selected = tree_model.get_iter(vector_tree_path.get(current_path_index).unwrap()).unwrap();
-                if tree_model.get_path(&tree_iter_all).unwrap() == tree_model.get_path(&tree_iter_selected).unwrap() {
+                tree_iter_selected = tree_model.iter(vector_tree_path.get(current_path_index).unwrap()).unwrap();
+                if tree_model.path(&tree_iter_all).unwrap() == tree_model.path(&tree_iter_selected).unwrap() {
                     selection.unselect_iter(&tree_iter_selected);
                     current_path_index += 1;
                 } else {
@@ -55,10 +55,10 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView) {
 }
 
 fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let selection = tree_view.get_selection();
-    let tree_model = tree_view.get_model().unwrap();
+    let selection = tree_view.selection();
+    let tree_model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -71,7 +71,7 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
         let mut file_length: usize = 0;
 
         loop {
-            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -79,8 +79,8 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.get_value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.get_value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
             if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length < file_length) {
                 file_length = current_file_length;
                 oldest_modification_time = modification;
@@ -113,10 +113,10 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let selection = tree_view.get_selection();
-    let tree_model = tree_view.get_model().unwrap();
+    let selection = tree_view.selection();
+    let tree_model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -129,7 +129,7 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
         let mut file_length: usize = 0;
 
         loop {
-            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -137,8 +137,8 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.get_value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.get_value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
             if modification > newest_modification_time || (modification == newest_modification_time && current_file_length < file_length) {
                 file_length = current_file_length;
                 newest_modification_time = modification;
@@ -171,10 +171,10 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let selection = tree_view.get_selection();
-    let tree_model = tree_view.get_model().unwrap();
+    let selection = tree_view.selection();
+    let tree_model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -187,7 +187,7 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
         let mut file_length: usize = 0;
 
         loop {
-            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -195,8 +195,8 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.get_value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.get_value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
             if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length > file_length) {
                 file_length = current_file_length;
                 oldest_modification_time = modification;
@@ -229,10 +229,10 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let selection = tree_view.get_selection();
-    let tree_model = tree_view.get_model().unwrap();
+    let selection = tree_view.selection();
+    let tree_model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -244,7 +244,7 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
 
         let mut file_length: usize = 0;
         loop {
-            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -252,8 +252,8 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.get_value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.get_value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
             if modification > newest_modification_time || (modification == newest_modification_time && current_file_length > file_length) {
                 file_length = current_file_length;
                 newest_modification_time = modification;
@@ -330,7 +330,7 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
         grid.attach(&entry_name, 1, 2, 1, 1);
         grid.attach(&entry_name_path, 1, 3, 1, 1);
 
-        for widgets in confirmation_dialog_delete.get_children() {
+        for widgets in confirmation_dialog_delete.children() {
             // By default GtkBox is child of dialog, so we can easily add other things to it
             widgets.downcast::<gtk::Box>().unwrap().add(&grid);
         }
@@ -339,15 +339,15 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
 
         let response_type = confirmation_dialog_delete.run();
         if response_type == gtk::ResponseType::Ok {
-            if radio_path.get_active() {
+            if radio_path.is_active() {
                 wildcard_type = WildcardType::Path;
-                wildcard = entry_path.get_text().to_string();
-            } else if radio_name.get_active() {
+                wildcard = entry_path.text().to_string();
+            } else if radio_name.is_active() {
                 wildcard_type = WildcardType::Name;
-                wildcard = entry_name.get_text().to_string();
-            } else if radio_name_path.get_active() {
+                wildcard = entry_name.text().to_string();
+            } else if radio_name_path.is_active() {
                 wildcard_type = WildcardType::PathName;
-                wildcard = entry_name_path.get_text().to_string();
+                wildcard = entry_name_path.text().to_string();
             } else {
                 panic!("Non handled option in select wildcard");
             }
@@ -365,14 +365,14 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
         #[cfg(target_family = "windows")]
         let wildcard = wildcard.as_str();
 
-        let selection = tree_view.get_selection();
-        let tree_model = tree_view.get_model().unwrap();
+        let selection = tree_view.selection();
+        let tree_model = tree_view.model().unwrap();
 
-        let tree_iter = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+        let tree_iter = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
         loop {
             if let Some(column_color) = column_color {
-                let color = tree_model.get_value(&tree_iter, column_color).get::<String>().unwrap().unwrap();
+                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !tree_model.iter_next(&tree_iter) {
                         break;
@@ -381,8 +381,8 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
                 }
             }
 
-            let path = tree_model.get_value(&tree_iter, column_path).get::<String>().unwrap().unwrap();
-            let name = tree_model.get_value(&tree_iter, column_file_name).get::<String>().unwrap().unwrap();
+            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap().unwrap();
+            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
@@ -458,15 +458,15 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
 
         let response_type = confirmation_dialog_delete.run();
         if response_type == gtk::ResponseType::Ok {
-            if radio_path.get_active() {
+            if radio_path.is_active() {
                 wildcard_type = WildcardType::Path;
-                wildcard = entry_path.get_text().to_string();
-            } else if radio_name.get_active() {
+                wildcard = entry_path.text().to_string();
+            } else if radio_name.is_active() {
                 wildcard_type = WildcardType::Name;
-                wildcard = entry_name.get_text().to_string();
-            } else if radio_name_path.get_active() {
+                wildcard = entry_name.text().to_string();
+            } else if radio_name_path.is_active() {
                 wildcard_type = WildcardType::PathName;
-                wildcard = entry_name_path.get_text().to_string();
+                wildcard = entry_name_path.text().to_string();
             } else {
                 panic!("Non handled option in unselect wildcard");
             }
@@ -484,14 +484,14 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
         #[cfg(target_family = "windows")]
         let wildcard = wildcard.as_str();
 
-        let selection = tree_view.get_selection();
-        let tree_model = tree_view.get_model().unwrap();
+        let selection = tree_view.selection();
+        let tree_model = tree_view.model().unwrap();
 
-        let tree_iter = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+        let tree_iter = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
         loop {
             if let Some(column_color) = column_color {
-                let color = tree_model.get_value(&tree_iter, column_color).get::<String>().unwrap().unwrap();
+                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !tree_model.iter_next(&tree_iter) {
                         break;
@@ -500,8 +500,8 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
                 }
             }
 
-            let path = tree_model.get_value(&tree_iter, column_path).get::<String>().unwrap().unwrap();
-            let name = tree_model.get_value(&tree_iter, column_file_name).get::<String>().unwrap().unwrap();
+            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap().unwrap();
+            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
@@ -528,10 +528,10 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
 }
 
 fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
-    let selection = tree_view.get_selection();
-    let tree_model = tree_view.get_model().unwrap();
+    let selection = tree_view.selection();
+    let tree_model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -543,7 +543,7 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
         let mut biggest_number_of_pixels: u64 = 0;
 
         loop {
-            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -551,8 +551,8 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let size_as_bytes = tree_model.get_value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
-            let dimensions_string = tree_model.get_value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
+            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
+            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
 
             let dimensions = change_dimension_to_krotka(dimensions_string);
             let number_of_pixels = dimensions.0 * dimensions.1;
@@ -589,10 +589,10 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
     popover.popdown();
 }
 fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
-    let selection = tree_view.get_selection();
-    let tree_model = tree_view.get_model().unwrap();
+    let selection = tree_view.selection();
+    let tree_model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.get_iter_first().unwrap(); // Never should be available button where there is no available records
+    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -604,7 +604,7 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
         let mut smallest_number_of_pixels: u64 = u64::MAX;
 
         loop {
-            let color = tree_model.get_value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -612,8 +612,8 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let size_as_bytes = tree_model.get_value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
-            let dimensions_string = tree_model.get_value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
+            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
+            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
 
             let dimensions = change_dimension_to_krotka(dimensions_string);
             let number_of_pixels = dimensions.0 * dimensions.1;
@@ -802,7 +802,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_select_all(&popover_select, &object_popover.tree_view);
     });
 
@@ -811,7 +811,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_unselect_all.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_unselect_all(&popover_select, &object_popover.tree_view);
     });
 
@@ -820,7 +820,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_reverse.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_reverse(&popover_select, &object_popover.tree_view);
     });
 
@@ -829,7 +829,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_oldest(
             &popover_select,
             &object_popover.tree_view,
@@ -844,7 +844,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_newest(
             &popover_select,
             &object_popover.tree_view,
@@ -859,7 +859,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_one_oldest(
             &popover_select,
             &object_popover.tree_view,
@@ -874,7 +874,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_one_newest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_one_newest(
             &popover_select,
             &object_popover.tree_view,
@@ -890,7 +890,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_select_custom.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_select_custom(
             &popover_select,
             &gui_data_clone,
@@ -907,7 +907,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     let gui_data_clone = gui_data.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_unselect_custom(
             &popover_select,
             &gui_data_clone,
@@ -923,7 +923,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_biggest(
             &popover_select,
             &object_popover.tree_view,
@@ -938,7 +938,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let vec_popover_objects = popover_objects; //.clone();
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &vec_popover_objects).unwrap();
+        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
         popover_all_except_smallest(
             &popover_select,
             &object_popover.tree_view,

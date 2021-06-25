@@ -16,7 +16,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             let dialog_manual_add_directory = gtk::Dialog::with_buttons(Some("Add directory manually"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
             let entry: gtk::Entry = gtk::Entry::new();
 
-            for widgets in dialog_manual_add_directory.get_children() {
+            for widgets in dialog_manual_add_directory.children() {
                 // By default GtkBox is child of dialog, so we can easily add other things to it
                 widgets.clone().downcast::<gtk::Box>().unwrap().add(&entry);
             }
@@ -25,7 +25,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 
             let response_type = dialog_manual_add_directory.run();
             if response_type == gtk::ResponseType::Ok {
-                let text = entry.get_text().to_string().trim().to_string();
+                let text = entry.text().to_string().trim().to_string();
 
                 #[cfg(target_family = "windows")]
                 let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
@@ -59,7 +59,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             );
             let entry: gtk::Entry = gtk::Entry::new();
 
-            for widgets in dialog_manual_add_directory.get_children() {
+            for widgets in dialog_manual_add_directory.children() {
                 // By default GtkBox is child of dialog, so we can easily add other things to it
                 widgets.clone().downcast::<gtk::Box>().unwrap().add(&entry);
             }
@@ -68,7 +68,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 
             let response_type = dialog_manual_add_directory.run();
             if response_type == gtk::ResponseType::Ok {
-                let text = entry.get_text().to_string().trim().to_string();
+                let text = entry.text().to_string().trim().to_string();
 
                 #[cfg(target_family = "windows")]
                 let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
@@ -104,7 +104,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             chooser.show_all();
             let response_type = chooser.run();
             if response_type == gtk::ResponseType::Ok {
-                let folder = chooser.get_filenames();
+                let folder = chooser.filenames();
 
                 let list_store = get_list_store(&tree_view_included_directories);
 
@@ -133,7 +133,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             chooser.show_all();
             let response_type = chooser.run();
             if response_type == gtk::ResponseType::Ok {
-                let folder = chooser.get_filenames();
+                let folder = chooser.filenames();
 
                 let list_store = get_list_store(&tree_view_excluded_directories);
 
@@ -153,12 +153,12 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
         let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         buttons_remove_excluded_directory.connect_clicked(move |_| {
             let list_store = get_list_store(&tree_view_excluded_directories);
-            let selection = tree_view_excluded_directories.get_selection();
+            let selection = tree_view_excluded_directories.selection();
 
-            let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+            let (vec_tree_path, _tree_model) = selection.selected_rows();
 
             for tree_path in vec_tree_path.iter().rev() {
-                list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                list_store.remove(&list_store.iter(tree_path).unwrap());
             }
         });
     }
@@ -168,12 +168,12 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         buttons_remove_included_directory.connect_clicked(move |_| {
             let list_store = get_list_store(&tree_view_included_directories);
-            let selection = tree_view_included_directories.get_selection();
+            let selection = tree_view_included_directories.selection();
 
-            let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+            let (vec_tree_path, _tree_model) = selection.selected_rows();
 
             for tree_path in vec_tree_path.iter().rev() {
-                list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                list_store.remove(&list_store.iter(tree_path).unwrap());
             }
         });
     }

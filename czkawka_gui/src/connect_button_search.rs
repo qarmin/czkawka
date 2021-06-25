@@ -97,12 +97,12 @@ pub fn connect_button_search(
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
         let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories));
-        let recursive_search = check_button_recursive.get_active();
-        let excluded_items = entry_excluded_items.get_text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
-        let allowed_extensions = entry_allowed_extensions.get_text().as_str().to_string();
-        let hide_hard_links = check_button_settings_hide_hard_links.get_active();
-        let use_cache = check_button_settings_use_cache.get_active();
-        let minimal_cache_file_size = entry_settings_cache_file_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024);
+        let recursive_search = check_button_recursive.is_active();
+        let excluded_items = entry_excluded_items.text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
+        let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
+        let hide_hard_links = check_button_settings_hide_hard_links.is_active();
+        let use_cache = check_button_settings_use_cache.is_active();
+        let minimal_cache_file_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024);
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 
@@ -125,7 +125,7 @@ pub fn connect_button_search(
         let glib_stop_sender = glib_stop_sender.clone();
         let stop_receiver = stop_receiver.clone();
 
-        match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
+        match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
                 label_stage.show();
                 grid_progress_stages.show_all();
@@ -134,25 +134,25 @@ pub fn connect_button_search(
                 get_list_store(&tree_view_duplicate_finder).clear();
 
                 let check_method;
-                if radio_button_duplicates_name.get_active() {
+                if radio_button_duplicates_name.is_active() {
                     check_method = duplicate::CheckingMethod::Name;
-                } else if radio_button_duplicates_size.get_active() {
+                } else if radio_button_duplicates_size.is_active() {
                     check_method = duplicate::CheckingMethod::Size;
-                } else if radio_button_duplicates_hashmb.get_active() {
+                } else if radio_button_duplicates_hashmb.is_active() {
                     check_method = duplicate::CheckingMethod::HashMb;
-                } else if radio_button_duplicates_hash.get_active() {
+                } else if radio_button_duplicates_hash.is_active() {
                     check_method = duplicate::CheckingMethod::Hash;
                 } else {
                     panic!("No radio button is pressed");
                 }
-                let minimal_file_size = entry_duplicate_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
+                let minimal_file_size = entry_duplicate_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024);
 
                 let hash_type: HashType;
-                if radio_button_hash_type_blake3.get_active() {
+                if radio_button_hash_type_blake3.is_active() {
                     hash_type = duplicate::HashType::Blake3;
-                } else if radio_button_hash_type_crc32.get_active() {
+                } else if radio_button_hash_type_crc32.is_active() {
                     hash_type = duplicate::HashType::Crc32;
-                } else if radio_button_hash_type_xxh3.get_active() {
+                } else if radio_button_hash_type_xxh3.is_active() {
                     hash_type = duplicate::HashType::Xxh3;
                 } else {
                     panic!("No radio button is pressed");
@@ -223,7 +223,7 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_big_files_finder).clear();
 
-                let numbers_of_files_to_check = entry_big_files_number.get_text().as_str().parse::<usize>().unwrap_or(50);
+                let numbers_of_files_to_check = entry_big_files_number.text().as_str().parse::<usize>().unwrap_or(50);
 
                 let futures_sender_big_file = futures_sender_big_file.clone();
                 // Find big files
@@ -268,20 +268,20 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_similar_images_finder).clear();
 
-                let minimal_file_size = entry_similar_images_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024 * 16);
+                let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
 
                 let similarity;
-                if radio_button_similar_images_minimal.get_active() {
+                if radio_button_similar_images_minimal.is_active() {
                     similarity = similar_images::Similarity::Minimal;
-                } else if radio_button_similar_images_very_small.get_active() {
+                } else if radio_button_similar_images_very_small.is_active() {
                     similarity = similar_images::Similarity::VerySmall;
-                } else if radio_button_similar_images_small.get_active() {
+                } else if radio_button_similar_images_small.is_active() {
                     similarity = similar_images::Similarity::Small;
-                } else if radio_button_similar_images_medium.get_active() {
+                } else if radio_button_similar_images_medium.is_active() {
                     similarity = similar_images::Similarity::Medium;
-                } else if radio_button_similar_images_high.get_active() {
+                } else if radio_button_similar_images_high.is_active() {
                     similarity = similar_images::Similarity::High;
-                } else if radio_button_similar_images_very_high.get_active() {
+                } else if radio_button_similar_images_very_high.is_active() {
                     similarity = similar_images::Similarity::VeryHigh;
                 } else {
                     panic!("No radio button is pressed");
@@ -331,23 +331,23 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
-                let minimal_file_size = entry_same_music_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(1024);
+                let minimal_file_size = entry_same_music_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024);
 
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
 
-                if check_button_music_title.get_active() {
+                if check_button_music_title.is_active() {
                     music_similarity |= MusicSimilarity::TITLE;
                 }
-                if check_button_music_artist.get_active() {
+                if check_button_music_artist.is_active() {
                     music_similarity |= MusicSimilarity::ARTIST;
                 }
-                if check_button_music_album_title.get_active() {
+                if check_button_music_album_title.is_active() {
                     music_similarity |= MusicSimilarity::ALBUM_TITLE;
                 }
-                if check_button_music_album_artist.get_active() {
+                if check_button_music_album_artist.is_active() {
                     music_similarity |= MusicSimilarity::ALBUM_ARTIST;
                 }
-                if check_button_music_year.get_active() {
+                if check_button_music_year.is_active() {
                     music_similarity |= MusicSimilarity::YEAR;
                 }
 

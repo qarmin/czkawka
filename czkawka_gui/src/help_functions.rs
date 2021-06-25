@@ -124,14 +124,14 @@ pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
 
     let mut string_vector: Vec<String> = Vec::new();
 
-    let tree_iter = match list_store.get_iter_first() {
+    let tree_iter = match list_store.iter_first() {
         Some(t) => t,
         None => {
             return string_vector;
         }
     };
     loop {
-        string_vector.push(list_store.get_value(&tree_iter, 0).get::<String>().unwrap().unwrap());
+        string_vector.push(list_store.value(&tree_iter, 0).get::<String>().unwrap().unwrap());
         if !list_store.iter_next(&tree_iter) {
             return string_vector;
         }
@@ -182,16 +182,16 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
         messages += "\n";
     }
 
-    text_view.get_buffer().unwrap().set_text(messages.as_str());
+    text_view.buffer().unwrap().set_text(messages.as_str());
 }
 
 pub fn reset_text_view(text_view: &TextView) {
-    text_view.get_buffer().unwrap().set_text("");
+    text_view.buffer().unwrap().set_text("");
 }
 
 pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
-    let buffer = text_view.get_buffer().unwrap();
-    let current_text = match buffer.get_text(&buffer.get_start_iter(), &buffer.get_end_iter(), true) {
+    let buffer = text_view.buffer().unwrap();
+    let current_text = match buffer.text(&buffer.start_iter(), &buffer.end_iter(), true) {
         Some(t) => t.to_string(),
         None => "".to_string(),
     };
@@ -199,10 +199,10 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    // let name = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(),ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
-    // let path = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
-    // let modification = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(),ColumnsDuplicates::Modification as i32).get::<String>().unwrap().unwrap();
-    let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
+    // let name = tree_model.value(&tree_model.iter(tree_path).unwrap(),ColumnsDuplicates::Name as i32).get::<String>().unwrap().unwrap();
+    // let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap().unwrap();
+    // let modification = tree_model.value(&tree_model.iter(tree_path).unwrap(),ColumnsDuplicates::Modification as i32).get::<String>().unwrap().unwrap();
+    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap().unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -211,7 +211,7 @@ pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_mod
     true
 }
 pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap().unwrap();
+    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap().unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -220,7 +220,7 @@ pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_mod
     true
 }
 pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.get_value(&tree_model.get_iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap().unwrap();
+    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap().unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -274,10 +274,10 @@ pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) 
 }
 
 pub fn get_list_store(tree_view: &gtk::TreeView) -> ListStore {
-    tree_view.get_model().unwrap().downcast::<gtk::ListStore>().unwrap()
+    tree_view.model().unwrap().downcast::<gtk::ListStore>().unwrap()
 }
 pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
-    dialog.get_children()[0].clone().downcast::<gtk::Box>().unwrap()
+    dialog.children()[0].clone().downcast::<gtk::Box>().unwrap()
 }
 
 pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {

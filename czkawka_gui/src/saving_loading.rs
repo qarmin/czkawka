@@ -17,7 +17,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
     reset_text_view(&text_view_errors);
 
-    if !manual_execution && !check_button_settings_save_at_exit.get_active() {
+    if !manual_execution && !check_button_settings_save_at_exit.is_active() {
         // When check button is deselected, not save configuration at exit
         return;
     }
@@ -42,9 +42,9 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         data_to_save.push("--included_directories:".to_string());
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         let list_store = get_list_store(&tree_view_included_directories);
-        if let Some(iter) = list_store.get_iter_first() {
+        if let Some(iter) = list_store.iter_first() {
             loop {
-                data_to_save.push(list_store.get_value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
+                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
                 if !list_store.iter_next(&iter) {
                     break;
                 }
@@ -55,9 +55,9 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         data_to_save.push("--excluded_directories:".to_string());
         let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
-        if let Some(iter) = list_store.get_iter_first() {
+        if let Some(iter) = list_store.iter_first() {
             loop {
-                data_to_save.push(list_store.get_value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
+                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
                 if !list_store.iter_next(&iter) {
                     break;
                 }
@@ -68,7 +68,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             //// Excluded Items
             data_to_save.push("--excluded_items:".to_string());
             let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
-            for item in entry_excluded_items.get_text().split(',') {
+            for item in entry_excluded_items.text().split(',') {
                 if item.trim().is_empty() {
                     continue;
                 }
@@ -78,7 +78,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             //// Allowed extensions
             data_to_save.push("--allowed_extensions:".to_string());
             let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
-            for extension in entry_allowed_extensions.get_text().split(',') {
+            for extension in entry_allowed_extensions.text().split(',') {
                 if extension.trim().is_empty() {
                     continue;
                 }
@@ -88,52 +88,52 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             //// Save at exit
             data_to_save.push("--save_at_exit:".to_string());
             let check_button_settings_save_at_exit = gui_data.settings.check_button_settings_save_at_exit.clone();
-            data_to_save.push(check_button_settings_save_at_exit.get_active().to_string());
+            data_to_save.push(check_button_settings_save_at_exit.is_active().to_string());
 
             //// Load at start
             data_to_save.push("--load_at_start:".to_string());
             let check_button_settings_load_at_start = gui_data.settings.check_button_settings_load_at_start.clone();
-            data_to_save.push(check_button_settings_load_at_start.get_active().to_string());
+            data_to_save.push(check_button_settings_load_at_start.is_active().to_string());
 
             //// Confirm deletion of files
             data_to_save.push("--confirm_deletion:".to_string());
             let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
-            data_to_save.push(check_button_settings_confirm_deletion.get_active().to_string());
+            data_to_save.push(check_button_settings_confirm_deletion.is_active().to_string());
 
             //// Confirm deletion of all files in group
             data_to_save.push("--confirm_group_deletion:".to_string());
             let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
-            data_to_save.push(check_button_settings_confirm_group_deletion.get_active().to_string());
+            data_to_save.push(check_button_settings_confirm_group_deletion.is_active().to_string());
 
             //// Show image previews in similar images
             data_to_save.push("--show_previews:".to_string());
             let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
-            data_to_save.push(check_button_settings_show_preview_similar_images.get_active().to_string());
+            data_to_save.push(check_button_settings_show_preview_similar_images.is_active().to_string());
 
             //// Show bottom text panel with errors
             data_to_save.push("--bottom_text_panel:".to_string());
             let check_button_settings_show_text_view = gui_data.settings.check_button_settings_show_text_view.clone();
-            data_to_save.push(check_button_settings_show_text_view.get_active().to_string());
+            data_to_save.push(check_button_settings_show_text_view.is_active().to_string());
 
             //// Hide/Show hard linked files, with same inodes
             data_to_save.push("--hide_hard_links:".to_string());
             let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
-            data_to_save.push(check_button_settings_hide_hard_links.get_active().to_string());
+            data_to_save.push(check_button_settings_hide_hard_links.is_active().to_string());
 
             //// Use cache system
             data_to_save.push("--use_cache:".to_string());
             let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
-            data_to_save.push(check_button_settings_use_cache.get_active().to_string());
+            data_to_save.push(check_button_settings_use_cache.is_active().to_string());
 
             //// Delete to trash
             data_to_save.push("--use_trash:".to_string());
             let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
-            data_to_save.push(check_button_settings_use_trash.get_active().to_string());
+            data_to_save.push(check_button_settings_use_trash.is_active().to_string());
 
             //// minimal cache file size
             data_to_save.push("--cache_minimal_file_size:".to_string());
             let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
-            data_to_save.push(entry_settings_cache_file_minimal_size.get_text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024).to_string());
+            data_to_save.push(entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024).to_string());
         }
 
         // Creating/Opening config file
