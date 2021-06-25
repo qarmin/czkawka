@@ -42,6 +42,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
 
+    let main_context = glib::MainContext::default();
+    let _guard = main_context.acquire().unwrap();
+
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
 

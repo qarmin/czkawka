@@ -22,6 +22,7 @@ pub fn connect_progress_window(
     mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
+    let _guard = main_context.acquire().unwrap();
 
     {
         // Duplicate Files
