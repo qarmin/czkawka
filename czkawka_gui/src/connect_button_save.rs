@@ -21,7 +21,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     buttons_save.connect_clicked(move |_| {
         let file_name;
 
-        match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
+        match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
                 file_name = "results_duplicates.txt";
 
@@ -73,7 +73,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 shared_broken_files_state.borrow_mut().save_results_to_file(file_name);
             }
         }
-        post_save_things(file_name, &to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &gui_data);
+        post_save_things(file_name, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &gui_data);
     });
 }
 fn post_save_things(file_name: &str, type_of_tab: &NotebookMainEnum, gui_data: &GuiData) {

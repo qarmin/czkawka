@@ -18,7 +18,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
 
-    buttons_symlink.connect_clicked(move |_| match to_notebook_main_enum(notebook_main.get_current_page().unwrap()) {
+    buttons_symlink.connect_clicked(move |_| match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
         NotebookMainEnum::Duplicate => {
             symlink(tree_view_duplicate_finder.clone(), ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
         }
@@ -43,9 +43,9 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
     reset_text_view(&text_view_errors);
 
     let list_store = get_list_store(&tree_view);
-    let selection = tree_view.get_selection();
+    let selection = tree_view.selection();
 
-    let (selection_rows, tree_model) = selection.get_selected_rows();
+    let (selection_rows, tree_model) = selection.selected_rows();
     if selection_rows.is_empty() {
         return;
     }
@@ -57,11 +57,11 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of symlinked files without its root
     let mut vec_symlink_data: Vec<SymlinkData> = Vec::new();
 
-    let current_iter: TreeIter = tree_model.get_iter_first().unwrap(); // Symlink button should be only visible when more than 1 element is visible, otherwise it needs to be fixed
+    let current_iter: TreeIter = tree_model.iter_first().unwrap(); // Symlink button should be only visible when more than 1 element is visible, otherwise it needs to be fixed
     let mut current_symlink_data: Option<SymlinkData> = None;
     let mut current_selected_index = 0;
     loop {
-        if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+        if tree_model.value(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
             if let Some(current_symlink_data) = current_symlink_data {
                 if !current_symlink_data.files_to_symlink.is_empty() {
                     vec_symlink_data.push(current_symlink_data);
@@ -75,13 +75,13 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
             continue;
         }
 
-        if tree_model.get_path(&current_iter).unwrap() == selection_rows[current_selected_index] {
-            let file_name = tree_model.get_value(&current_iter, column_file_name).get::<String>().unwrap().unwrap();
-            let path = tree_model.get_value(&current_iter, column_path).get::<String>().unwrap().unwrap();
+        if tree_model.path(&current_iter).unwrap() == selection_rows[current_selected_index] {
+            let file_name = tree_model.value(&current_iter, column_file_name).get::<String>().unwrap();
+            let path = tree_model.value(&current_iter, column_path).get::<String>().unwrap();
             let full_file_path = format!("{}/{}", path, file_name);
 
             if current_symlink_data.is_some() {
-                vec_tree_path_to_remove.push(tree_model.get_path(&current_iter).unwrap());
+                vec_tree_path_to_remove.push(tree_model.path(&current_iter).unwrap());
                 let mut temp_data = current_symlink_data.unwrap();
                 temp_data.files_to_symlink.push(full_file_path);
                 current_symlink_data = Some(temp_data);
@@ -149,34 +149,34 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
         println!();
     }
     for tree_path in vec_tree_path_to_remove.iter().rev() {
-        list_store.remove(&tree_model.get_iter(tree_path).unwrap());
+        list_store.remove(&tree_model.iter(tree_path).unwrap());
     }
 
     // Remove only child from header
-    if let Some(first_iter) = list_store.get_iter_first() {
+    if let Some(first_iter) = list_store.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+        if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
             panic!(); // First element should be header
         };
 
         let mut next_iter;
         let mut next_next_iter;
         'main: loop {
-            if tree_model.get_value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+            if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
                 panic!(); // First element should be header
             };
 
             next_iter = current_iter.clone();
             if !list_store.iter_next(&next_iter) {
                 // There is only single header left (H1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
                 break 'main;
             }
 
-            if tree_model.get_value(&next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
                 current_iter = next_iter.clone();
                 continue 'main;
             }
@@ -184,15 +184,15 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
             next_next_iter = next_iter.clone();
             if !list_store.iter_next(&next_next_iter) {
                 // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.path(&next_iter).unwrap());
                 break 'main;
             }
 
-            if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(list_store.get_path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(list_store.get_path(&next_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(list_store.path(&next_iter).unwrap());
                 current_iter = next_next_iter.clone();
                 continue 'main;
             }
@@ -203,14 +203,14 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
                     break 'main;
                 }
                 // Move to next header
-                if tree_model.get_value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+                if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                     current_iter = next_next_iter.clone();
                     continue 'main;
                 }
             }
         }
         for tree_path in vec_tree_path_to_delete.iter().rev() {
-            list_store.remove(&list_store.get_iter(&tree_path).unwrap());
+            list_store.remove(&list_store.iter(&tree_path).unwrap());
         }
     }
 

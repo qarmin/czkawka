@@ -28,28 +28,28 @@ pub struct GuiPopovers {
 
 impl GuiPopovers {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
-        let buttons_popover_select_all: gtk::Button = builder.get_object("buttons_popover_select_all").unwrap();
-        let buttons_popover_unselect_all: gtk::Button = builder.get_object("buttons_popover_unselect_all").unwrap();
-        let buttons_popover_reverse: gtk::Button = builder.get_object("buttons_popover_reverse").unwrap();
-        let buttons_popover_select_all_except_oldest: gtk::Button = builder.get_object("buttons_popover_select_all_except_oldest").unwrap();
-        let buttons_popover_select_all_except_newest: gtk::Button = builder.get_object("buttons_popover_select_all_except_newest").unwrap();
-        let buttons_popover_select_one_oldest: gtk::Button = builder.get_object("buttons_popover_select_one_oldest").unwrap();
-        let buttons_popover_select_one_newest: gtk::Button = builder.get_object("buttons_popover_select_one_newest").unwrap();
-        let buttons_popover_select_custom: gtk::Button = builder.get_object("buttons_popover_select_custom").unwrap();
-        let buttons_popover_unselect_custom: gtk::Button = builder.get_object("buttons_popover_unselect_custom").unwrap();
-        let buttons_popover_select_all_images_except_biggest: gtk::Button = builder.get_object("buttons_popover_select_all_images_except_biggest").unwrap();
-        let buttons_popover_select_all_images_except_smallest: gtk::Button = builder.get_object("buttons_popover_select_all_images_except_smallest").unwrap();
+        let buttons_popover_select_all: gtk::Button = builder.object("buttons_popover_select_all").unwrap();
+        let buttons_popover_unselect_all: gtk::Button = builder.object("buttons_popover_unselect_all").unwrap();
+        let buttons_popover_reverse: gtk::Button = builder.object("buttons_popover_reverse").unwrap();
+        let buttons_popover_select_all_except_oldest: gtk::Button = builder.object("buttons_popover_select_all_except_oldest").unwrap();
+        let buttons_popover_select_all_except_newest: gtk::Button = builder.object("buttons_popover_select_all_except_newest").unwrap();
+        let buttons_popover_select_one_oldest: gtk::Button = builder.object("buttons_popover_select_one_oldest").unwrap();
+        let buttons_popover_select_one_newest: gtk::Button = builder.object("buttons_popover_select_one_newest").unwrap();
+        let buttons_popover_select_custom: gtk::Button = builder.object("buttons_popover_select_custom").unwrap();
+        let buttons_popover_unselect_custom: gtk::Button = builder.object("buttons_popover_unselect_custom").unwrap();
+        let buttons_popover_select_all_images_except_biggest: gtk::Button = builder.object("buttons_popover_select_all_images_except_biggest").unwrap();
+        let buttons_popover_select_all_images_except_smallest: gtk::Button = builder.object("buttons_popover_select_all_images_except_smallest").unwrap();
 
-        let separator_select_image_size: gtk::Separator = builder.get_object("separator_select_image_size").unwrap();
-        let separator_select_reverse: gtk::Separator = builder.get_object("separator_select_reverse").unwrap();
-        let separator_select_date: gtk::Separator = builder.get_object("separator_select_date").unwrap();
-        let separator_select_custom: gtk::Separator = builder.get_object("separator_select_custom").unwrap();
+        let separator_select_image_size: gtk::Separator = builder.object("separator_select_image_size").unwrap();
+        let separator_select_reverse: gtk::Separator = builder.object("separator_select_reverse").unwrap();
+        let separator_select_date: gtk::Separator = builder.object("separator_select_date").unwrap();
+        let separator_select_custom: gtk::Separator = builder.object("separator_select_custom").unwrap();
 
-        let buttons_popover_right_click_open_file: gtk::Button = builder.get_object("buttons_popover_right_click_open_file").unwrap();
-        let buttons_popover_right_click_open_folder: gtk::Button = builder.get_object("buttons_popover_right_click_open_folder").unwrap();
+        let buttons_popover_right_click_open_file: gtk::Button = builder.object("buttons_popover_right_click_open_file").unwrap();
+        let buttons_popover_right_click_open_folder: gtk::Button = builder.object("buttons_popover_right_click_open_folder").unwrap();
 
-        let popover_select: gtk::Popover = builder.get_object("popover_select").unwrap();
-        let popover_right_click: gtk::Popover = builder.get_object("popover_right_click").unwrap();
+        let popover_select: gtk::Popover = builder.object("popover_select").unwrap();
+        let popover_right_click: gtk::Popover = builder.object("popover_right_click").unwrap();
 
         Self {
             buttons_popover_select_all,

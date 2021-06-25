@@ -39,7 +39,7 @@ pub fn connect_button_select(gui_data: &GuiData) {
     let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
 
     buttons_select_clone.connect_clicked(move |_| {
-        show_required_popovers(&gui_data, &to_notebook_main_enum(notebook_main.get_current_page().unwrap()), &hashmap);
+        show_required_popovers(&gui_data, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &hashmap);
         popover_select.set_relative_to(Some(&buttons_select));
         popover_select.popup();
     });

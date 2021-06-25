@@ -53,19 +53,19 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             // Duplicate Files
             {
                 let col_types: [glib::types::Type; 6] = [
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                     glib::types::Type::U64,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
-                tree_view.get_selection().set_select_function(Some(Box::new(select_function_duplicates)));
+                tree_view.selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_select_function(Some(Box::new(select_function_duplicates)));
 
                 create_tree_view_duplicates(&mut tree_view);
 
@@ -73,7 +73,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_press_event(opening_enter_function_duplicates);
 
                 tree_view.connect_button_release_event(move |_tree_view, _e| {
-                    // println!("{}", e.get_button());
+                    // println!("{}", e.button());
                     gtk::Inhibit(false)
                 });
 
@@ -83,16 +83,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            if tree_view.get_selection().get_selected_rows().0.is_empty() {
+                            if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
                             if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.get_active()
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
                                 && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsDuplicates::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
@@ -105,12 +105,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Empty Folders
             {
-                let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 3] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_empty_folders(&mut tree_view);
 
@@ -123,7 +123,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             empty_folder_remover(&tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
@@ -134,12 +134,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Empty Files
             {
-                let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 3] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_empty_files(&mut tree_view);
 
@@ -152,7 +152,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
@@ -163,12 +163,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Temporary Files
             {
-                let col_types: [glib::types::Type; 3] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 3] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_temporary_files(&mut tree_view);
 
@@ -181,7 +181,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
@@ -192,12 +192,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Big Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_big_files(&mut tree_view);
 
@@ -210,7 +210,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
@@ -225,23 +225,23 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 image_preview_similar_images.hide();
 
                 let col_types: [glib::types::Type; 10] = [
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                     glib::types::Type::U64,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                     glib::types::Type::U64,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
-                tree_view.get_selection().set_select_function(Some(Box::new(select_function_similar_images)));
+                tree_view.selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_select_function(Some(Box::new(select_function_similar_images)));
 
                 create_tree_view_similar_images(&mut tree_view);
 
@@ -261,16 +261,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            if tree_view.get_selection().get_selected_rows().0.is_empty() {
+                            if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
                             if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.get_active()
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
                                 && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsSimilarImages::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
@@ -285,12 +285,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Zeroed Files
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::String, glib::types::Type::U64, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::STRING, glib::types::Type::U64, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_zeroed_files(&mut tree_view);
 
@@ -303,7 +303,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
@@ -315,28 +315,28 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             // Same Music
             {
                 let col_types: [glib::types::Type; 13] = [
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
                     glib::types::Type::U64,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                     glib::types::Type::U64,
-                    glib::types::Type::String,
-                    glib::types::Type::String,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_same_music(&mut tree_view);
-                tree_view.get_selection().set_select_function(Some(Box::new(select_function_same_music)));
+                tree_view.selection().set_select_function(Some(Box::new(select_function_same_music)));
 
                 tree_view.connect_button_press_event(opening_double_click_function_same_music);
                 tree_view.connect_key_press_event(opening_enter_function_same_music);
@@ -347,16 +347,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            if tree_view.get_selection().get_selected_rows().0.is_empty() {
+                            if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
                             if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.get_active()
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
                                 && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsSameMusic::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
@@ -369,12 +369,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Invalid Symlinks
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_invalid_symlinks(&mut tree_view);
 
@@ -387,7 +387,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
@@ -398,12 +398,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Broken Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::String, glib::types::Type::String, glib::types::Type::String, glib::types::Type::String];
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-                tree_view.get_selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_broken_files(&mut tree_view);
 
@@ -416,7 +416,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
-                    if let Some(button_number) = e.get_keycode() {
+                    if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
                             basic_remove(&tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, &gui_data);
@@ -435,12 +435,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
         // Set Included Directory
         {
-            let col_types: [glib::types::Type; 1] = [glib::types::Type::String];
+            let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-            tree_view.get_selection().set_mode(SelectionMode::Multiple);
+            tree_view.selection().set_mode(SelectionMode::Multiple);
 
             create_tree_view_directories(&mut tree_view);
 
@@ -449,16 +449,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             scrolled_window_included_directories.show_all();
 
             tree_view.connect_key_release_event(move |tree_view, e| {
-                if let Some(button_number) = e.get_keycode() {
+                if let Some(button_number) = e.keycode() {
                     // Handle delete button
                     if button_number == 119 {
                         let list_store = get_list_store(&tree_view);
-                        let selection = tree_view.get_selection();
+                        let selection = tree_view.selection();
 
-                        let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+                        let (vec_tree_path, _tree_model) = selection.selected_rows();
 
                         for tree_path in vec_tree_path.iter().rev() {
-                            list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                            list_store.remove(&list_store.iter(tree_path).unwrap());
                         }
                     }
                 }
@@ -467,12 +467,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         }
         // Set Excluded Directory
         {
-            let col_types: [glib::types::Type; 1] = [glib::types::Type::String];
+            let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
-            tree_view.get_selection().set_mode(SelectionMode::Multiple);
+            tree_view.selection().set_mode(SelectionMode::Multiple);
 
             create_tree_view_directories(&mut tree_view);
 
@@ -481,16 +481,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             scrolled_window_excluded_directories.show_all();
 
             tree_view.connect_key_release_event(move |tree_view, e| {
-                if let Some(button_number) = e.get_keycode() {
+                if let Some(button_number) = e.keycode() {
                     // Handle delete button
                     if button_number == 119 {
                         let list_store = get_list_store(&tree_view);
-                        let selection = tree_view.get_selection();
+                        let selection = tree_view.selection();
 
-                        let (vec_tree_path, _tree_model) = selection.get_selected_rows();
+                        let (vec_tree_path, _tree_model) = selection.selected_rows();
 
                         for tree_path in vec_tree_path.iter().rev() {
-                            list_store.remove(&list_store.get_iter(tree_path).unwrap());
+                            list_store.remove(&list_store.iter(tree_path).unwrap());
                         }
                     }
                 }
@@ -513,12 +513,12 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
     }
 }
 fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview_similar_images: &CheckButton, image_preview_similar_images: &Image) {
-    let (selected_rows, tree_model) = tree_view.get_selection().get_selected_rows();
+    let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
     let mut created_image = false;
 
     // Only show preview when selected is only one item, because there is no method to recognize current clicked item in multiselection
-    if selected_rows.len() == 1 && check_button_settings_show_preview_similar_images.get_active() {
+    if selected_rows.len() == 1 && check_button_settings_show_preview_similar_images.is_active() {
         let tree_path = selected_rows[0].clone();
         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
             // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
@@ -534,8 +534,8 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     add_text_to_text_view(&text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
                     break 'dir;
                 }
-                let path = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
-                let name = tree_model.get_value(&tree_model.get_iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
+                let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap();
+                let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap();
 
                 let file_name = format!("{}/{}", path, name);
                 let file_name = file_name.as_str();

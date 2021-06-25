@@ -29,29 +29,29 @@ pub struct GuiSettings {
 
 impl GuiSettings {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
-        let window_settings: gtk::Window = builder.get_object("window_settings").unwrap();
+        let window_settings: gtk::Window = builder.object("window_settings").unwrap();
         window_settings.set_position(WindowPosition::Center);
 
         // General
-        let check_button_settings_save_at_exit: gtk::CheckButton = builder.get_object("check_button_settings_save_at_exit").unwrap();
-        let check_button_settings_load_at_start: gtk::CheckButton = builder.get_object("check_button_settings_load_at_start").unwrap();
-        let check_button_settings_confirm_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_deletion").unwrap();
-        let check_button_settings_confirm_group_deletion: gtk::CheckButton = builder.get_object("check_button_settings_confirm_group_deletion").unwrap();
-        let check_button_settings_show_text_view: gtk::CheckButton = builder.get_object("check_button_settings_show_text_view").unwrap();
-        let check_button_settings_use_cache: gtk::CheckButton = builder.get_object("check_button_settings_use_cache").unwrap();
-        let check_button_settings_use_trash: gtk::CheckButton = builder.get_object("check_button_settings_use_trash").unwrap();
+        let check_button_settings_save_at_exit: gtk::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
+        let check_button_settings_load_at_start: gtk::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
+        let check_button_settings_confirm_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_deletion").unwrap();
+        let check_button_settings_confirm_group_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_group_deletion").unwrap();
+        let check_button_settings_show_text_view: gtk::CheckButton = builder.object("check_button_settings_show_text_view").unwrap();
+        let check_button_settings_use_cache: gtk::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
+        let check_button_settings_use_trash: gtk::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
 
         // Duplicates
-        let check_button_settings_hide_hard_links: gtk::CheckButton = builder.get_object("check_button_settings_hide_hard_links").unwrap();
-        let entry_settings_cache_file_minimal_size: gtk::Entry = builder.get_object("entry_settings_cache_file_minimal_size").unwrap();
+        let check_button_settings_hide_hard_links: gtk::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
+        let entry_settings_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
 
         // Similar Images
-        let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.get_object("check_button_settings_show_preview_similar_images").unwrap();
+        let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
 
         // Saving/Loading/Resetting configuration
-        let button_settings_save_configuration: gtk::Button = builder.get_object("button_settings_save_configuration").unwrap();
-        let button_settings_load_configuration: gtk::Button = builder.get_object("button_settings_load_configuration").unwrap();
-        let button_settings_reset_configuration: gtk::Button = builder.get_object("button_settings_reset_configuration").unwrap();
+        let button_settings_save_configuration: gtk::Button = builder.object("button_settings_save_configuration").unwrap();
+        let button_settings_load_configuration: gtk::Button = builder.object("button_settings_load_configuration").unwrap();
+        let button_settings_reset_configuration: gtk::Button = builder.object("button_settings_reset_configuration").unwrap();
 
         Self {
             window_settings,

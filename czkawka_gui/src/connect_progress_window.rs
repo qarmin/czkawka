@@ -4,7 +4,8 @@ use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, temporary, zeroed};
 
 use futures::StreamExt;
-use gtk::{LabelExt, ProgressBarExt, WidgetExt};
+
+use gtk::prelude::*;
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(
@@ -21,6 +22,7 @@ pub fn connect_progress_window(
     mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
+    let _guard = main_context.acquire().unwrap();
 
     {
         // Duplicate Files

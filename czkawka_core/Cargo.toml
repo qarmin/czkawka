@@ -10,9 +10,9 @@ repository = "https://github.com/qarmin/czkawka"
 
 
 [dependencies]
-humansize = "1"
-rayon = "1"
-crossbeam-channel = "0.5.0"
+humansize = "1.1.1"
+rayon = "1.5.1"
+crossbeam-channel = "0.5.1"
 
 # For saving/loading config files to specific directories
 directories-next = "2.0.0"
@@ -20,7 +20,7 @@ directories-next = "2.0.0"
 # Needed by similar images
 img_hash = "3.1"
 bk-tree = "0.3"
-image = "0.23.12"
+image = "0.23.14"
 hamming = "0.1"
 
 # Needed by same music
@@ -28,18 +28,18 @@ bitflags = "1.2.1"
 audiotags = "0.2.7182"
 
 # Futures - needed by async progress sender
-futures = "0.3.9"
+futures = "0.3.15"
 
 # Needed by broken files
-zip = "0.5.9"
-rodio = { version = "0.13.0", optional = true }
+zip = "0.5.13"
+rodio = { version = "0.14.0", optional = true }
 
 # Hashes
-blake3 = "0.3"
+blake3 = "0.3.8"
 crc32fast = "1.2.1"
 xxhash-rust = { version = "0.8.2", features = ["xxh3"] }
 
-tempfile = "3.1"
+tempfile = "3.2"
 
 [features]
 default = []

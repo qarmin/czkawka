@@ -84,7 +84,7 @@ impl GuiData {
         let builder = Builder::from_string(glade_src.as_str());
 
         //// Windows
-        let window_main: gtk::Window = builder.get_object("window_main").unwrap();
+        let window_main: gtk::Window = builder.object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
         window_main.set_position(WindowPosition::Center);
@@ -146,11 +146,11 @@ impl GuiData {
         let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BrokenFiles::new()));
 
         //// Entry
-        let entry_info: gtk::Entry = builder.get_object("entry_info").unwrap();
+        let entry_info: gtk::Entry = builder.object("entry_info").unwrap();
 
         //// Bottom
-        let text_view_errors: gtk::TextView = builder.get_object("text_view_errors").unwrap();
-        let scrolled_window_errors: gtk::ScrolledWindow = builder.get_object("scrolled_window_errors").unwrap();
+        let text_view_errors: gtk::TextView = builder.object("text_view_errors").unwrap();
+        let scrolled_window_errors: gtk::ScrolledWindow = builder.object("scrolled_window_errors").unwrap();
         scrolled_window_errors.show_all(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
