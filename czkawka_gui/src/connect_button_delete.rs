@@ -140,7 +140,7 @@ pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_co
 
     if let Some(first_iter) = tree_model.iter_first() {
         let current_iter = first_iter;
-        if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+        if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
             panic!("First element, should be a header"); // First element should be header
         };
 
@@ -152,7 +152,7 @@ pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_co
                 break;
             }
 
-            if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 if selected_all_records {
                     break;
                 }
@@ -233,8 +233,8 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for tree_path in selection_rows.iter().rev() {
-        let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap().unwrap();
-        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap().unwrap();
+        let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap();
+        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
@@ -326,8 +326,8 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for tree_path in selection_rows.iter().rev() {
-        let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap().unwrap();
-        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap().unwrap();
+        let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap();
+        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
 
         if !use_trash {
             match fs::remove_file(format!("{}/{}", path, name)) {
@@ -370,8 +370,8 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
     for tree_path in selection_rows.iter().rev() {
-        let file_name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap().unwrap();
-        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap().unwrap();
+        let file_name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap();
+        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
 
         list_store.remove(&list_store.iter(tree_path).unwrap());
 
@@ -408,14 +408,14 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
     if let Some(first_iter) = list_store.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+        if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
             panic!("First deleted element, should be a header"); // First element should be header
         };
 
         let mut next_iter;
         let mut next_next_iter;
         'main: loop {
-            if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+            if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
                 panic!("First deleted element, should be a header"); // First element should be header
             };
 
@@ -426,7 +426,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
                 break 'main;
             }
 
-            if tree_model.value(&next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                 vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
                 current_iter = next_iter.clone();
@@ -441,7 +441,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
                 break 'main;
             }
 
-            if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                 vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
                 vec_tree_path_to_delete.push(list_store.path(&next_iter).unwrap());
@@ -455,7 +455,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
                     break 'main;
                 }
                 // Move to next header
-                if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+                if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                     current_iter = next_next_iter.clone();
                     continue 'main;
                 }

@@ -44,7 +44,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let list_store = get_list_store(&tree_view_included_directories);
         if let Some(iter) = list_store.iter_first() {
             loop {
-                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
+                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap());
                 if !list_store.iter_next(&iter) {
                     break;
                 }
@@ -57,7 +57,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let list_store = get_list_store(&tree_view_excluded_directories);
         if let Some(iter) = list_store.iter_first() {
             loop {
-                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap().unwrap());
+                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap());
                 if !list_store.iter_next(&iter) {
                     break;
                 }

@@ -62,7 +62,7 @@ fn hardlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, c
     let mut current_hardlink_data: Option<HardlinkData> = None;
     let mut current_selected_index = 0;
     loop {
-        if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+        if tree_model.value(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
             if let Some(current_hardlink_data) = current_hardlink_data {
                 if !current_hardlink_data.files_to_hardlink.is_empty() {
                     vec_hardlink_data.push(current_hardlink_data);
@@ -77,8 +77,8 @@ fn hardlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, c
         }
 
         if tree_model.path(&current_iter).unwrap() == selection_rows[current_selected_index] {
-            let file_name = tree_model.value(&current_iter, column_file_name).get::<String>().unwrap().unwrap();
-            let path = tree_model.value(&current_iter, column_path).get::<String>().unwrap().unwrap();
+            let file_name = tree_model.value(&current_iter, column_file_name).get::<String>().unwrap();
+            let path = tree_model.value(&current_iter, column_path).get::<String>().unwrap();
             let full_file_path = format!("{}/{}", path, file_name);
 
             if current_hardlink_data.is_some() {
@@ -135,14 +135,14 @@ fn hardlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, c
     if let Some(first_iter) = list_store.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+        if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
             panic!(); // First element should be header
         };
 
         let mut next_iter;
         let mut next_next_iter;
         'main: loop {
-            if tree_model.value(&current_iter, column_color).get::<String>().unwrap().unwrap() != HEADER_ROW_COLOR {
+            if tree_model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
                 panic!(); // First element should be header
             };
 
@@ -153,7 +153,7 @@ fn hardlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, c
                 break 'main;
             }
 
-            if tree_model.value(&next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                 vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
                 current_iter = next_iter.clone();
@@ -168,7 +168,7 @@ fn hardlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, c
                 break 'main;
             }
 
-            if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+            if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                 vec_tree_path_to_delete.push(list_store.path(&current_iter).unwrap());
                 vec_tree_path_to_delete.push(list_store.path(&next_iter).unwrap());
@@ -182,7 +182,7 @@ fn hardlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, c
                     break 'main;
                 }
                 // Move to next header
-                if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap().unwrap() == HEADER_ROW_COLOR {
+                if tree_model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                     current_iter = next_next_iter.clone();
                     continue 'main;
                 }

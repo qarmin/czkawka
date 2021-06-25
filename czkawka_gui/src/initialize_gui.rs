@@ -534,8 +534,8 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     add_text_to_text_view(&text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
                     break 'dir;
                 }
-                let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap().unwrap();
-                let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap().unwrap();
+                let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap();
+                let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap();
 
                 let file_name = format!("{}/{}", path, name);
                 let file_name = file_name.as_str();

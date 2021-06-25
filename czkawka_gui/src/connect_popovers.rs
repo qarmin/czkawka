@@ -71,7 +71,7 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
         let mut file_length: usize = 0;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -79,8 +79,8 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().len();
             if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length < file_length) {
                 file_length = current_file_length;
                 oldest_modification_time = modification;
@@ -129,7 +129,7 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
         let mut file_length: usize = 0;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -137,8 +137,8 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().len();
             if modification > newest_modification_time || (modification == newest_modification_time && current_file_length < file_length) {
                 file_length = current_file_length;
                 newest_modification_time = modification;
@@ -187,7 +187,7 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
         let mut file_length: usize = 0;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -195,8 +195,8 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().len();
             if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length > file_length) {
                 file_length = current_file_length;
                 oldest_modification_time = modification;
@@ -244,7 +244,7 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
 
         let mut file_length: usize = 0;
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -252,8 +252,8 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap().unwrap();
-            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().unwrap().len();
+            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap();
+            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().len();
             if modification > newest_modification_time || (modification == newest_modification_time && current_file_length > file_length) {
                 file_length = current_file_length;
                 newest_modification_time = modification;
@@ -372,7 +372,7 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
 
         loop {
             if let Some(column_color) = column_color {
-                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap().unwrap();
+                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !tree_model.iter_next(&tree_iter) {
                         break;
@@ -381,8 +381,8 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
                 }
             }
 
-            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap().unwrap();
-            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap().unwrap();
+            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap();
+            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
@@ -491,7 +491,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
 
         loop {
             if let Some(column_color) = column_color {
-                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap().unwrap();
+                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !tree_model.iter_next(&tree_iter) {
                         break;
@@ -500,8 +500,8 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
                 }
             }
 
-            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap().unwrap();
-            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap().unwrap();
+            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap();
+            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
@@ -543,7 +543,7 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
         let mut biggest_number_of_pixels: u64 = 0;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -551,8 +551,8 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
-            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
+            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap();
+            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap();
 
             let dimensions = change_dimension_to_krotka(dimensions_string);
             let number_of_pixels = dimensions.0 * dimensions.1;
@@ -604,7 +604,7 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
         let mut smallest_number_of_pixels: u64 = u64::MAX;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap().unwrap();
+            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
                 if !tree_model.iter_next(&tree_iter_all) {
                     end = true;
@@ -612,8 +612,8 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
                 break;
             }
             tree_iter_array.push(tree_iter_all.clone());
-            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap().unwrap();
-            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap().unwrap();
+            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap();
+            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap();
 
             let dimensions = change_dimension_to_krotka(dimensions_string);
             let number_of_pixels = dimensions.0 * dimensions.1;
