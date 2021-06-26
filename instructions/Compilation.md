@@ -1,12 +1,12 @@
-# Compilation Czkawka from sources
+# Compiling Czkawka from sources
 
 ## Requirements
 Program  | Min  | What for
 ---------|------|------------------------------------------------------------
-Rust     | 1.51 | Czkawka for now, aims to support only the latest stable Rust version
+Rust     | 1.51 | Czkawka, for now, aims to support only the latest stable Rust version
 GTK      | 3.22 | Only for the `GTK` backend
 
-If you only want the terminal version without a GUI, just skip all packages with `gtk`.
+If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
 
 #### Debian / Ubuntu
 ```shell
@@ -22,7 +22,7 @@ sudo yum install gtk3-devel glib2-devel alsa-lib-devel # Latest is optional
 ```
 
 #### macOS
-You need to install Rust Homebrew and GTK Libraries
+You need to install Rust via Homebrew and GTK Libraries
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
@@ -60,7 +60,7 @@ cargo run --release --bin czkawka_cli
 
 
 ## Additional features
-For now, finding broken audio files is temporary disabled by default, because it crash when not found audio libraries on computer.  
+For now, finding broken audio files is temporary disabled by default, because it crashes when audio libraries are not found on the computer.  
 I'm waiting for ability to disable audio playback feature, so after that I will be able to re-enable by default this feature (https://github.com/RustAudio/rodio/issues/349)
 
 To enable checking for broken audio files, just add ` --all-features`
