@@ -35,13 +35,13 @@ At the end execute it:
 ```
 
 ### Windows
-By default, all needed libraries are bundled with app inside `windows_czkawka_gui.zip`, but if you compile app or just move `czkawka_gui.exe`, then you need to install the `GTK 3`
+By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 3`
 runtime from [**here**](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
 
 ## Installation
 ### Precompiled binaries
 Ready-to-go executables for Linux, Windows and macOS are available [**here**](https://github.com/qarmin/czkawka/releases/).  
-If the app does not run when clicking at a launcher, run it through a terminal.  
+If the app does not run when clicking the launcher, run it through a terminal.  
 You don't need to have any additional libraries for CLI Czkawka.
 
 ### Nightly Builds
@@ -49,11 +49,11 @@ Artifacts from each commit can be downloaded [**here**](https://github.com/qarmi
 
 ### Appimage
 Appimage files are available in release page - [**GitHub releases**](https://github.com/qarmin/czkawka/releases/)  
-This version is bundled with own theme.  
+This version is bundled with its own theme.  
 There is also a small problem with not being able to open 2 images at once.
 
 ### Cargo
-The easiest method to install Czkawka is using the `cargo` command. For compiling it, you need to get all the
+The easiest method to install Czkawka is using the `cargo` command. To compile it, you need to get all the
 requirements from the [compilation section](Compilation.md).
 ```
 cargo install czkawka_gui
@@ -65,7 +65,7 @@ You can update the package with the same command.
 ```
 sudo snap install czkawka
 ```
-By default, Snap can only access to the files in your home directory. You have to allow czkawka to access to all the drives:
+By default, Snap can only access the files in your home directory. You have to allow czkawka access to all the drives:
 
 ```
 sudo snap connect czkawka:removable-media

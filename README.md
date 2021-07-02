@@ -13,28 +13,28 @@
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions 
   or excluded items with the `*` wildcard
 - Multiple tools to use:
-  - Duplicates - Finds duplicates basing on file name, size, hash, first 1 MB of hash
+  - Duplicates - Finds duplicates based on file name, size, hash, hash of just first 1 MB of a file
   - Empty Folders - Finds empty folders with the help of an advanced algorithm
   - Big Files - Finds the provided number of the biggest files in given location
   - Empty Files - Looks for empty files across the drive
   - Temporary Files - Finds temporary files
   - Similar Images - Finds images which are not exactly the same (different resolution, watermarks)
   - Zeroed Files - Finds files which are filled with zeros (usually corrupted)
-  - Same Music - Searches for music with same artist, album etc.
-  - Invalid Symbolic Links - Shows symbolic links which points to non-existent files/directories
+  - Same Music - Searches for music with the same artist, album etc.
+  - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
   - Broken Files - Finds files with an invalid extension or that are corrupted
 
 <!-- The GIF thingy -->
 ![Czkawka](https://user-images.githubusercontent.com/41945903/104711404-9cbb7400-5721-11eb-904d-9677c189f7ab.gif)
 
 ## How do I use it?
-You can find an instruction on how to use Czkawka [**here**](instructions/Instruction.md).
+You can find the instructions on how to use Czkawka [**here**](instructions/Instruction.md).
 
 ## Installation
-Installation instruction with download links you can find [**here**](instructions/Installation.md).
+Installation instructions with download links you can find [**here**](instructions/Installation.md).
 
 ## Compilation
-If you want try to develop Czkawka or just use the latest available feature, you may want to look at the [**compilation instruction**](instructions/Compilation.md).
+If you want to try and develop Czkawka or just use the latest available feature, you may want to look at the [**compilation instruction**](instructions/Compilation.md).
 
 ## Benchmarks
 
@@ -42,9 +42,9 @@ Since Czkawka is written in Rust and it aims to be a faster alternative to FSlin
 
 I tested it on a 256 GB SSD and a i7-4770 CPU.
 
-I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links which contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which took 4,1 GB.
+I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links which contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which occupied 4,1 GB.
 
-Minimum file size to check I set to 1 KB on all programs.
+I set the minimal file size to check to 1KB on all programs.
 
 | App                         | Executing Time |
 |:---------------------------:|:--------------:|
@@ -67,7 +67,7 @@ I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for
 In Dupeguru I enabled checking images with different dimensions to match Czkawka behavior.
 Both apps use caching mechanism, so second scan is really fast.
 
-Similar images which check 10949 files which took 6.6 GB
+Similar images which check 10949 files that occupied 6.6 GB
 
 | App                         | Scan time |
 |:---------------------------:|:---------:|
@@ -76,7 +76,7 @@ Similar images which check 10949 files which took 6.6 GB
 | DupeGuru 4.1.1 (First Run)  | 539s      |
 | DupeGuru 4.1.1 (Second Run) | 1s        |
 
-Similar images which check 349 image files which took 1.7 GB
+Similar images which check 349 image files that occupied 1.7 GB
 
 | App                         | Scan time |
 |:---------------------------:|:----------|
@@ -87,7 +87,7 @@ Similar images which check 349 image files which took 1.7 GB
 
 ## Comparison to other tools
 
-Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So this two apps shouldn't be compared directly or be considered as an alternative to the second one.
+Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these two apps shouldn't be compared directly or be considered as an alternative to one another.
 
 |                        | Czkawka     | FSlint     | DupeGuru          | Bleachbit   |
 |:----------------------:|:-----------:|:----------:|:-----------------:|:-----------:|
@@ -118,7 +118,7 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 ## Contributions
 Contributions to this repository are welcome.  
 
-You can help by creating a:
+You can help by creating:
 - Bug reports - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
 - Pull Requests - implementing a new feature yourself or fixing bugs.
@@ -145,7 +145,7 @@ for a possible change of the name of the program, and the opinions were extremel
 ## License
 Code is distributed under MIT license.
 
-Icon is created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
+Icon was created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
 
 Windows dark theme is used from [AdMin repo](https://github.com/nrhodes91/AdMin) with MIT license.
 
