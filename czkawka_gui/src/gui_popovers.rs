@@ -1,4 +1,5 @@
 use gtk::prelude::*;
+use gtk::Builder;
 
 #[derive(Clone)]
 pub struct GuiPopovers {
@@ -27,7 +28,10 @@ pub struct GuiPopovers {
 }
 
 impl GuiPopovers {
-    pub fn create_from_builder(builder: &gtk::Builder) -> Self {
+    pub fn create_from_builder() -> Self {
+        let glade_src = include_str!("../ui/popover_select.glade").to_string();
+        let builder = Builder::from_string(glade_src.as_str());
+
         let buttons_popover_select_all: gtk::Button = builder.object("buttons_popover_select_all").unwrap();
         let buttons_popover_unselect_all: gtk::Button = builder.object("buttons_popover_unselect_all").unwrap();
         let buttons_popover_reverse: gtk::Button = builder.object("buttons_popover_reverse").unwrap();
@@ -45,10 +49,15 @@ impl GuiPopovers {
         let separator_select_date: gtk::Separator = builder.object("separator_select_date").unwrap();
         let separator_select_custom: gtk::Separator = builder.object("separator_select_custom").unwrap();
 
+        let popover_select: gtk::Popover = builder.object("popover_select").unwrap();
+
+        // Popover right click
+        let glade_src = include_str!("../ui/popover_right_click.glade").to_string();
+        let builder = Builder::from_string(glade_src.as_str());
+
         let buttons_popover_right_click_open_file: gtk::Button = builder.object("buttons_popover_right_click_open_file").unwrap();
         let buttons_popover_right_click_open_folder: gtk::Button = builder.object("buttons_popover_right_click_open_folder").unwrap();
 
-        let popover_select: gtk::Popover = builder.object("popover_select").unwrap();
         let popover_right_click: gtk::Popover = builder.object("popover_right_click").unwrap();
 
         Self {

@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::WindowPosition;
+use gtk::{Builder, WindowPosition};
 
 #[derive(Clone)]
 pub struct GuiAbout {
@@ -11,7 +11,10 @@ pub struct GuiAbout {
 }
 
 impl GuiAbout {
-    pub fn create_from_builder(builder: &gtk::Builder) -> Self {
+    pub fn create_from_builder() -> Self {
+        let glade_src = include_str!("../ui/about_dialog.glade").to_string();
+        let builder = Builder::from_string(glade_src.as_str());
+
         let about_dialog: gtk::AboutDialog = builder.object("about_dialog").unwrap();
         about_dialog.set_position(WindowPosition::Center);
 
