@@ -80,7 +80,7 @@ pub struct GuiData {
 impl GuiData {
     pub fn new() -> Self {
         //// Loading glade file content and build with it help UI
-        let glade_src = include_str!("../czkawka.glade").to_string();
+        let glade_src = include_str!("../ui/main_window.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         //// Windows
@@ -91,12 +91,12 @@ impl GuiData {
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
-        let popovers = GuiPopovers::create_from_builder(&builder);
+        let popovers = GuiPopovers::create_from_builder();
         let bottom_buttons = GuiBottomButtons::create_from_builder(&builder);
-        let progress_window = GuiProgressDialog::create_from_builder(&builder);
-        let about = GuiAbout::create_from_builder(&builder);
+        let progress_window = GuiProgressDialog::create_from_builder();
+        let about = GuiAbout::create_from_builder();
         let header = GuiHeader::create_from_builder(&builder);
-        let settings = GuiSettings::create_from_builder(&builder);
+        let settings = GuiSettings::create_from_builder();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 

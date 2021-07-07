@@ -1,4 +1,5 @@
 use gtk::prelude::*;
+use gtk::Builder;
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
@@ -15,7 +16,10 @@ pub struct GuiProgressDialog {
 }
 
 impl GuiProgressDialog {
-    pub fn create_from_builder(builder: &gtk::Builder) -> Self {
+    pub fn create_from_builder() -> Self {
+        let glade_src = include_str!("../ui/progress.glade").to_string();
+        let builder = Builder::from_string(glade_src.as_str());
+
         let window_progress: gtk::Window = builder.object("window_progress").unwrap();
 
         let progress_bar_current_stage: gtk::ProgressBar = builder.object("progress_bar_current_stage").unwrap();

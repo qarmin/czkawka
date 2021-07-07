@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::WindowPosition;
+use gtk::{Builder, WindowPosition};
 
 #[derive(Clone)]
 pub struct GuiSettings {
@@ -28,7 +28,10 @@ pub struct GuiSettings {
 }
 
 impl GuiSettings {
-    pub fn create_from_builder(builder: &gtk::Builder) -> Self {
+    pub fn create_from_builder() -> Self {
+        let glade_src = include_str!("../ui/settings.glade").to_string();
+        let builder = Builder::from_string(glade_src.as_str());
+
         let window_settings: gtk::Window = builder.object("window_settings").unwrap();
         window_settings.set_position(WindowPosition::Center);
 
