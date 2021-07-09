@@ -28,9 +28,12 @@ pub enum Message {
     BrokenFiles(BrokenFiles),
 }
 
+#[derive(Debug)]
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
-    Name = 0,
+    VisibleSelectButton = 0,
+    ActiveSelectButton,
+    Name,
     Path,
     Modification,
     ModificationAsSecs,
