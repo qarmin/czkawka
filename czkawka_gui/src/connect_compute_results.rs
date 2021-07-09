@@ -114,25 +114,29 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         vector.clone()
                                     };
 
-                                    let values: [(u32, &dyn ToValue); 6] = [
-                                        (0, &name),
-                                        (1, (&(format!("{} results", vector.len())))),
-                                        (2, (&"".to_string())), // No text in 3 column
-                                        (3, (&(0))),            // Not used here
-                                        (4, &(HEADER_ROW_COLOR.to_string())),
-                                        (5, &(TEXT_COLOR.to_string())),
+                                    let values: [(u32, &dyn ToValue); 8] = [
+                                        (0, &false),
+                                        (1, &false),
+                                        (2, &name),
+                                        (3, (&(format!("{} results", vector.len())))),
+                                        (4, (&"".to_string())), // No text in 3 column
+                                        (5, (&(0))),            // Not used here
+                                        (6, &(HEADER_ROW_COLOR.to_string())),
+                                        (7, &(TEXT_COLOR.to_string())),
                                     ];
 
                                     list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 6] = [
-                                            (0, &file),
-                                            (1, &directory),
-                                            (2, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap()))),
-                                            (3, &(entry.modified_date)),
-                                            (4, &(MAIN_ROW_COLOR.to_string())),
-                                            (5, &(TEXT_COLOR.to_string())),
+                                        let values: [(u32, &dyn ToValue); 8] = [
+                                            (0, &true),
+                                            (1, &false),
+                                            (2, &file),
+                                            (3, &directory),
+                                            (4, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap()))),
+                                            (5, &(entry.modified_date)),
+                                            (6, &(MAIN_ROW_COLOR.to_string())),
+                                            (7, &(TEXT_COLOR.to_string())),
                                         ];
                                         list_store.set(&list_store.append(), &values);
                                     }
@@ -155,29 +159,33 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             vector.clone()
                                         };
 
-                                        let values: [(u32, &dyn ToValue); 6] = [
-                                            (0, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                        let values: [(u32, &dyn ToValue); 8] = [
+                                            (0, &false),
+                                            (1, &false),
+                                            (2, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
                                             (
-                                                1,
+                                                3,
                                                 &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
                                             ),
-                                            (2, &"".to_string()), // No text in 3 column
-                                            (3, &(0)),
-                                            (4, &(HEADER_ROW_COLOR.to_string())),
-                                            (5, &(TEXT_COLOR.to_string())),
+                                            (4, &"".to_string()), // No text in 3 column
+                                            (5, &(0)),
+                                            (6, &(HEADER_ROW_COLOR.to_string())),
+                                            (7, &(TEXT_COLOR.to_string())),
                                         ];
 
                                         list_store.set(&list_store.append(), &values);
                                         for entry in vector {
                                             let (directory, file) = split_path(&entry.path);
 
-                                            let values: [(u32, &dyn ToValue); 6] = [
-                                                (0, &file),
-                                                (1, &directory),
-                                                (2, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
-                                                (3, &(entry.modified_date)),
-                                                (4, &(MAIN_ROW_COLOR.to_string())),
-                                                (5, &(TEXT_COLOR.to_string())),
+                                            let values: [(u32, &dyn ToValue); 8] = [
+                                                (0, &true),
+                                                (1, &false),
+                                                (2, &file),
+                                                (3, &directory),
+                                                (4, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
+                                                (5, &(entry.modified_date)),
+                                                (6, &(MAIN_ROW_COLOR.to_string())),
+                                                (7, &(TEXT_COLOR.to_string())),
                                             ];
 
                                             list_store.set(&list_store.append(), &values);
@@ -200,28 +208,32 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     } else {
                                         vector.clone()
                                     };
-                                    let values: [(u32, &dyn ToValue); 6] = [
-                                        (0, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                    let values: [(u32, &dyn ToValue); 8] = [
+                                        (0, &false),
+                                        (1, &false),
+                                        (2, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
                                         (
-                                            1,
+                                            3,
                                             &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
                                         ),
-                                        (2, &"".to_string()), // No text in 3 column
-                                        (3, &(0)),            // Not used here
-                                        (4, &(HEADER_ROW_COLOR.to_string())),
-                                        (5, &(TEXT_COLOR.to_string())),
+                                        (4, &"".to_string()), // No text in 3 column
+                                        (5, &(0)),            // Not used here
+                                        (6, &(HEADER_ROW_COLOR.to_string())),
+                                        (7, &(TEXT_COLOR.to_string())),
                                     ];
 
                                     list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 6] = [
-                                            (0, &file),
-                                            (1, &directory),
-                                            (2, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
-                                            (3, &(entry.modified_date)),
-                                            (4, &(MAIN_ROW_COLOR.to_string())),
-                                            (5, &(TEXT_COLOR.to_string())),
+                                        let values: [(u32, &dyn ToValue); 8] = [
+                                            (0, &true),
+                                            (1, &false),
+                                            (2, &file),
+                                            (3, &directory),
+                                            (4, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
+                                            (5, &(entry.modified_date)),
+                                            (6, &(MAIN_ROW_COLOR.to_string())),
+                                            (7, &(TEXT_COLOR.to_string())),
                                         ];
                                         list_store.set(&list_store.append(), &values);
                                     }

@@ -52,7 +52,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         {
             // Duplicate Files
             {
-                let col_types: [glib::types::Type; 6] = [
+                let col_types: [glib::types::Type; 8] = [
+                    glib::types::Type::BOOL,
+                    glib::types::Type::BOOL,
                     glib::types::Type::STRING,
                     glib::types::Type::STRING,
                     glib::types::Type::STRING,

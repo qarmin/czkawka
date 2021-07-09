@@ -3,6 +3,42 @@ use gtk::prelude::*;
 use gtk::TreeViewColumn;
 
 pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsDuplicates::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value for {:?} at path {}: {}", ColumnsDuplicates::ActiveSelectButton, path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsDuplicates::ActiveSelectButton as u32, &fixed.to_value());
+
+        // let color = model
+        //     .value(&iter, ColumnsDuplicates::Color as i32)
+        //     .get::<String>()
+        //     .unwrap_or_else(|err| panic!("ListStore value for {:?} at path {}: {}", ColumnsDuplicates::Color, path, err));
+        // println!("{}", color);
+        // if color == HEADER_ROW_COLOR {
+        //     // r.set_visible(false);
+        //     // println!("AEAE {}", color);
+        //     // r.set_active(false);
+        // } else {
+        //     // r.set_visible(true);
+        // }
+    });
+
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "visible", ColumnsDuplicates::VisibleSelectButton as i32);
+    column.add_attribute(&renderer, "active", ColumnsDuplicates::ActiveSelectButton as i32);
+    column.add_attribute(&renderer, "sensitive", ColumnsDuplicates::ActiveSelectButton as i32);
+    column.add_attribute(&renderer, "cell-background", ColumnsDuplicates::Color as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
