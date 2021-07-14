@@ -95,9 +95,9 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != oldest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &(true).to_value());
+                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &(false).to_value());
+                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -151,9 +151,9 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != newest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &(true).to_value());
+                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &(false).to_value());
+                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -165,116 +165,112 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
 
     popover.popdown();
 }
-fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let selection = tree_view.selection();
-    let tree_model = tree_view.model().unwrap();
+fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
+    let model = get_list_store(&tree_view);
 
-    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
-
-    let mut end: bool = false;
-
-    loop {
-        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-        let mut oldest_index: Option<usize> = None;
-        let mut current_index: usize = 0;
-        let mut oldest_modification_time: u64 = u64::MAX;
-
-        let mut file_length: usize = 0;
-
+    if let Some(iter) = model.iter_first() {
+        let mut end: bool = false;
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
-            if color == HEADER_ROW_COLOR {
-                if !tree_model.iter_next(&tree_iter_all) {
-                    end = true;
+            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+            let mut oldest_index: Option<usize> = None;
+            let mut current_index: usize = 0;
+            let mut oldest_modification_time: u64 = u64::MAX;
+
+            let mut file_length: usize = 0;
+
+            loop {
+                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                if color == HEADER_ROW_COLOR {
+                    if !model.iter_next(&iter) {
+                        end = true;
+                    }
+                    break;
                 }
+                tree_iter_array.push(iter.clone());
+                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
+                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
+                if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length > file_length) {
+                    file_length = current_file_length;
+                    oldest_modification_time = modification;
+                    oldest_index = Some(current_index);
+                }
+
+                current_index += 1;
+
+                if !model.iter_next(&iter) {
+                    end = true;
+                    break;
+                }
+            }
+            if oldest_index == None {
+                continue;
+            }
+            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                if index == oldest_index.unwrap() {
+                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                } else {
+                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                }
+            }
+
+            if end {
                 break;
             }
-            tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap();
-            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().len();
-            if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length > file_length) {
-                file_length = current_file_length;
-                oldest_modification_time = modification;
-                oldest_index = Some(current_index);
-            }
-
-            current_index += 1;
-
-            if !tree_model.iter_next(&tree_iter_all) {
-                end = true;
-                break;
-            }
-        }
-        if oldest_index == None {
-            continue;
-        }
-        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-            if index == oldest_index.unwrap() {
-                selection.select_iter(tree_iter);
-            } else {
-                selection.unselect_iter(tree_iter);
-            }
-        }
-
-        if end {
-            break;
         }
     }
 
     popover.popdown();
 }
-fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32) {
-    let selection = tree_view.selection();
-    let tree_model = tree_view.model().unwrap();
+fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
+    let model = get_list_store(&tree_view);
 
-    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
-
-    let mut end: bool = false;
-
-    loop {
-        let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-        let mut newest_index: Option<usize> = None;
-        let mut current_index: usize = 0;
-        let mut newest_modification_time: u64 = 0;
-
-        let mut file_length: usize = 0;
+    if let Some(iter) = model.iter_first() {
+        let mut end: bool = false;
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
-            if color == HEADER_ROW_COLOR {
-                if !tree_model.iter_next(&tree_iter_all) {
-                    end = true;
+            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+            let mut newest_index: Option<usize> = None;
+            let mut current_index: usize = 0;
+            let mut newest_modification_time: u64 = 0;
+
+            let mut file_length: usize = 0;
+            loop {
+                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                if color == HEADER_ROW_COLOR {
+                    if !model.iter_next(&iter) {
+                        end = true;
+                    }
+                    break;
                 }
+                tree_iter_array.push(iter.clone());
+                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
+                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
+                if modification > newest_modification_time || (modification == newest_modification_time && current_file_length > file_length) {
+                    file_length = current_file_length;
+                    newest_modification_time = modification;
+                    newest_index = Some(current_index);
+                }
+
+                current_index += 1;
+
+                if !model.iter_next(&iter) {
+                    end = true;
+                    break;
+                }
+            }
+            if newest_index == None {
+                continue;
+            }
+            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                if index == newest_index.unwrap() {
+                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                } else {
+                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                }
+            }
+
+            if end {
                 break;
             }
-            tree_iter_array.push(tree_iter_all.clone());
-            let modification = tree_model.value(&tree_iter_all, column_modification_as_secs).get::<u64>().unwrap();
-            let current_file_length = tree_model.value(&tree_iter_all, column_file_name).get::<String>().unwrap().len();
-            if modification > newest_modification_time || (modification == newest_modification_time && current_file_length > file_length) {
-                file_length = current_file_length;
-                newest_modification_time = modification;
-                newest_index = Some(current_index);
-            }
-
-            current_index += 1;
-
-            if !tree_model.iter_next(&tree_iter_all) {
-                end = true;
-                break;
-            }
-        }
-        if newest_index == None {
-            continue;
-        }
-        for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-            if index == newest_index.unwrap() {
-                selection.select_iter(tree_iter);
-            } else {
-                selection.unselect_iter(tree_iter);
-            }
-        }
-
-        if end {
-            break;
         }
     }
 
@@ -361,23 +357,23 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
         let wildcard = wildcard.as_str();
 
         let selection = tree_view.selection();
-        let tree_model = tree_view.model().unwrap();
+        let model = tree_view.model().unwrap();
 
-        let tree_iter = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
+        let tree_iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
         loop {
             if let Some(column_color) = column_color {
-                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap();
+                let color = model.value(&tree_iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
-                    if !tree_model.iter_next(&tree_iter) {
+                    if !model.iter_next(&tree_iter) {
                         break;
                     }
                     continue;
                 }
             }
 
-            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap();
-            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap();
+            let path = model.value(&tree_iter, column_path).get::<String>().unwrap();
+            let name = model.value(&tree_iter, column_file_name).get::<String>().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
@@ -396,7 +392,7 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
                 }
             }
 
-            if !tree_model.iter_next(&tree_iter) {
+            if !model.iter_next(&tree_iter) {
                 break;
             }
         }
@@ -480,42 +476,42 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
         let wildcard = wildcard.as_str();
 
         let selection = tree_view.selection();
-        let tree_model = tree_view.model().unwrap();
+        let model = tree_view.model().unwrap();
 
-        let tree_iter = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
+        let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
         loop {
             if let Some(column_color) = column_color {
-                let color = tree_model.value(&tree_iter, column_color).get::<String>().unwrap();
+                let color = model.value(&iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
-                    if !tree_model.iter_next(&tree_iter) {
+                    if !model.iter_next(&iter) {
                         break;
                     }
                     continue;
                 }
             }
 
-            let path = tree_model.value(&tree_iter, column_path).get::<String>().unwrap();
-            let name = tree_model.value(&tree_iter, column_file_name).get::<String>().unwrap();
+            let path = model.value(&iter, column_path).get::<String>().unwrap();
+            let name = model.value(&iter, column_file_name).get::<String>().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
-                        selection.unselect_iter(&tree_iter);
+                        selection.unselect_iter(&iter);
                     }
                 }
                 WildcardType::Name => {
                     if Common::regex_check(wildcard, name) {
-                        selection.unselect_iter(&tree_iter);
+                        selection.unselect_iter(&iter);
                     }
                 }
                 WildcardType::PathName => {
                     if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                        selection.unselect_iter(&tree_iter);
+                        selection.unselect_iter(&iter);
                     }
                 }
             }
 
-            if !tree_model.iter_next(&tree_iter) {
+            if !model.iter_next(&iter) {
                 break;
             }
         }
@@ -524,9 +520,9 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
 
 fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
     let selection = tree_view.selection();
-    let tree_model = tree_view.model().unwrap();
+    let model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
+    let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -538,16 +534,16 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
         let mut biggest_number_of_pixels: u64 = 0;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
+            let color = model.value(&iter, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
-                if !tree_model.iter_next(&tree_iter_all) {
+                if !model.iter_next(&iter) {
                     end = true;
                 }
                 break;
             }
-            tree_iter_array.push(tree_iter_all.clone());
-            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap();
-            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap();
+            tree_iter_array.push(iter.clone());
+            let size_as_bytes = model.value(&iter, column_size_as_bytes).get::<u64>().unwrap();
+            let dimensions_string = model.value(&iter, column_dimensions).get::<String>().unwrap();
 
             let dimensions = change_dimension_to_krotka(dimensions_string);
             let number_of_pixels = dimensions.0 * dimensions.1;
@@ -560,7 +556,7 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
 
             current_index += 1;
 
-            if !tree_model.iter_next(&tree_iter_all) {
+            if !model.iter_next(&iter) {
                 end = true;
                 break;
             }
@@ -585,9 +581,9 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
 }
 fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
     let selection = tree_view.selection();
-    let tree_model = tree_view.model().unwrap();
+    let model = tree_view.model().unwrap();
 
-    let tree_iter_all = tree_model.iter_first().unwrap(); // Never should be available button where there is no available records
+    let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
     let mut end: bool = false;
 
@@ -599,16 +595,16 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
         let mut smallest_number_of_pixels: u64 = u64::MAX;
 
         loop {
-            let color = tree_model.value(&tree_iter_all, column_color).get::<String>().unwrap();
+            let color = model.value(&iter, column_color).get::<String>().unwrap();
             if color == HEADER_ROW_COLOR {
-                if !tree_model.iter_next(&tree_iter_all) {
+                if !model.iter_next(&iter) {
                     end = true;
                 }
                 break;
             }
-            tree_iter_array.push(tree_iter_all.clone());
-            let size_as_bytes = tree_model.value(&tree_iter_all, column_size_as_bytes).get::<u64>().unwrap();
-            let dimensions_string = tree_model.value(&tree_iter_all, column_dimensions).get::<String>().unwrap();
+            tree_iter_array.push(iter.clone());
+            let size_as_bytes = model.value(&iter, column_size_as_bytes).get::<u64>().unwrap();
+            let dimensions_string = model.value(&iter, column_dimensions).get::<String>().unwrap();
 
             let dimensions = change_dimension_to_krotka(dimensions_string);
             let number_of_pixels = dimensions.0 * dimensions.1;
@@ -621,7 +617,7 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
 
             current_index += 1;
 
-            if !tree_model.iter_next(&tree_iter_all) {
+            if !model.iter_next(&iter) {
                 end = true;
                 break;
             }
@@ -874,6 +870,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color.unwrap(),
             object_popover.column_modification_as_secs.unwrap(),
             object_popover.column_name.unwrap(),
+            object_popover.column_selection.unwrap(),
         );
     });
 
@@ -889,6 +886,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color.unwrap(),
             object_popover.column_modification_as_secs.unwrap(),
             object_popover.column_name.unwrap(),
+            object_popover.column_selection.unwrap(),
         );
     });
 
