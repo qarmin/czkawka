@@ -277,7 +277,7 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 
-fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32) {
+fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32) {
     popover.popdown();
 
     let wildcard: String;
@@ -356,49 +356,48 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
         #[cfg(target_family = "windows")]
         let wildcard = wildcard.as_str();
 
-        let selection = tree_view.selection();
-        let model = tree_view.model().unwrap();
+        let model = get_list_store(&tree_view);
 
-        let tree_iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
+        let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
         loop {
             if let Some(column_color) = column_color {
-                let color = model.value(&tree_iter, column_color).get::<String>().unwrap();
+                let color = model.value(&iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&tree_iter) {
+                    if !model.iter_next(&iter) {
                         break;
                     }
                     continue;
                 }
             }
 
-            let path = model.value(&tree_iter, column_path).get::<String>().unwrap();
-            let name = model.value(&tree_iter, column_file_name).get::<String>().unwrap();
+            let path = model.value(&iter, column_path).get::<String>().unwrap();
+            let name = model.value(&iter, column_file_name).get::<String>().unwrap();
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
-                        selection.select_iter(&tree_iter);
+                        model.set_value(&iter, column_button_selection, &true.to_value());
                     }
                 }
                 WildcardType::Name => {
                     if Common::regex_check(wildcard, name) {
-                        selection.select_iter(&tree_iter);
+                        model.set_value(&iter, column_button_selection, &true.to_value());
                     }
                 }
                 WildcardType::PathName => {
                     if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                        selection.select_iter(&tree_iter);
+                        model.set_value(&iter, column_button_selection, &true.to_value());
                     }
                 }
             }
 
-            if !model.iter_next(&tree_iter) {
+            if !model.iter_next(&iter) {
                 break;
             }
         }
     }
 }
-fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32) {
+fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32) {
     popover.popdown();
 
     let wildcard: String;
@@ -475,8 +474,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
         #[cfg(target_family = "windows")]
         let wildcard = wildcard.as_str();
 
-        let selection = tree_view.selection();
-        let model = tree_view.model().unwrap();
+        let model = get_list_store(&tree_view);
 
         let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
@@ -496,17 +494,17 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
-                        selection.unselect_iter(&iter);
+                        model.set_value(&iter, column_button_selection, &false.to_value());
                     }
                 }
                 WildcardType::Name => {
                     if Common::regex_check(wildcard, name) {
-                        selection.unselect_iter(&iter);
+                        model.set_value(&iter, column_button_selection, &false.to_value());
                     }
                 }
                 WildcardType::PathName => {
                     if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                        selection.unselect_iter(&iter);
+                        model.set_value(&iter, column_button_selection, &false.to_value());
                     }
                 }
             }
@@ -518,7 +516,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
     }
 }
 
-fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
+fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, _column_button_selection: u32) {
     let selection = tree_view.selection();
     let model = tree_view.model().unwrap();
 
@@ -579,7 +577,7 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
 
     popover.popdown();
 }
-fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32) {
+fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, _column_button_selection: u32) {
     let selection = tree_view.selection();
     let model = tree_view.model().unwrap();
 
@@ -904,6 +902,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color,
             object_popover.column_name.unwrap(),
             object_popover.column_path.unwrap(),
+            object_popover.column_selection.unwrap(),
         );
     });
 
@@ -921,6 +920,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color,
             object_popover.column_name.unwrap(),
             object_popover.column_path.unwrap(),
+            object_popover.column_selection.unwrap(),
         );
     });
 
@@ -936,6 +936,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color.unwrap(),
             object_popover.column_size_as_bytes.unwrap(),
             object_popover.column_dimensions.unwrap(),
+            object_popover.column_selection.unwrap(),
         );
     });
 
@@ -951,6 +952,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
             object_popover.column_color.unwrap(),
             object_popover.column_size_as_bytes.unwrap(),
             object_popover.column_dimensions.unwrap(),
+            object_popover.column_selection.unwrap(),
         );
     });
 }
