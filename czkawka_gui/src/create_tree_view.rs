@@ -14,19 +14,6 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
             .unwrap_or_else(|err| panic!("ListStore value for {:?} at path {}: {}", ColumnsDuplicates::ActiveSelectButton, path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsDuplicates::ActiveSelectButton as u32, &fixed.to_value());
-
-        // let color = model
-        //     .value(&iter, ColumnsDuplicates::Color as i32)
-        //     .get::<String>()
-        //     .unwrap_or_else(|err| panic!("ListStore value for {:?} at path {}: {}", ColumnsDuplicates::Color, path, err));
-        // println!("{}", color);
-        // if color == HEADER_ROW_COLOR {
-        //     // r.set_visible(false);
-        //     // println!("AEAE {}", color);
-        //     // r.set_active(false);
-        // } else {
-        //     // r.set_visible(true);
-        // }
     });
 
     let column = gtk::TreeViewColumn::new();
@@ -35,7 +22,6 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
     column.set_fixed_width(30);
     column.add_attribute(&renderer, "visible", ColumnsDuplicates::VisibleSelectButton as i32);
     column.add_attribute(&renderer, "active", ColumnsDuplicates::ActiveSelectButton as i32);
-    column.add_attribute(&renderer, "sensitive", ColumnsDuplicates::ActiveSelectButton as i32);
     column.add_attribute(&renderer, "cell-background", ColumnsDuplicates::Color as i32);
     tree_view.append_column(&column);
 
