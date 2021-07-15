@@ -95,11 +95,24 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 return gtk::Inhibit(false);
                             }
                             if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsDuplicates::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
+                                && check_if_deleting_all_files_in_group(
+                                    &tree_view.clone(),
+                                    ColumnsDuplicates::Color as i32,
+                                    ColumnsDuplicates::ActiveSelectButton as i32,
+                                    &gui_data.window_main,
+                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
+                                )
                             {
                                 return gtk::Inhibit(false);
                             }
-                            tree_remove(&tree_view, ColumnsDuplicates::Name as i32, ColumnsDuplicates::Path as i32, ColumnsDuplicates::Color as i32, &gui_data);
+                            tree_remove(
+                                &tree_view,
+                                ColumnsDuplicates::Name as i32,
+                                ColumnsDuplicates::Path as i32,
+                                ColumnsDuplicates::Color as i32,
+                                ColumnsDuplicates::ActiveSelectButton as i32,
+                                &gui_data,
+                            );
                         }
                     }
                     gtk::Inhibit(false)
@@ -157,7 +170,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
+                            basic_remove(&tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, ColumnsEmptyFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -186,7 +199,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, &gui_data);
+                            basic_remove(&tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, ColumnsTemporaryFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -215,7 +228,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, &gui_data);
+                            basic_remove(&tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -275,11 +288,24 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 return gtk::Inhibit(false);
                             }
                             if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsSimilarImages::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
+                                && check_if_deleting_all_files_in_group(
+                                    &tree_view.clone(),
+                                    ColumnsSimilarImages::Color as i32,
+                                    ColumnsSimilarImages::ActiveSelectButton as i32,
+                                    &gui_data.window_main,
+                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
+                                )
                             {
                                 return gtk::Inhibit(false);
                             }
-                            tree_remove(&tree_view, ColumnsSimilarImages::Name as i32, ColumnsSimilarImages::Path as i32, ColumnsSimilarImages::Color as i32, &gui_data);
+                            tree_remove(
+                                &tree_view,
+                                ColumnsSimilarImages::Name as i32,
+                                ColumnsSimilarImages::Path as i32,
+                                ColumnsSimilarImages::Color as i32,
+                                ColumnsSimilarImages::ActiveSelectButton as i32,
+                                &gui_data,
+                            );
                             image_preview_similar_images_clone.hide();
                         }
                     }
@@ -317,7 +343,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, &gui_data);
+                            basic_remove(&tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, ColumnsZeroedFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -370,11 +396,24 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 return gtk::Inhibit(false);
                             }
                             if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(&tree_view.clone(), ColumnsSameMusic::Color as i32, &gui_data.window_main, &gui_data.settings.check_button_settings_confirm_group_deletion)
+                                && check_if_deleting_all_files_in_group(
+                                    &tree_view.clone(),
+                                    ColumnsSameMusic::Color as i32,
+                                    ColumnsSameMusic::ActiveSelectButton as i32,
+                                    &gui_data.window_main,
+                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
+                                )
                             {
                                 return gtk::Inhibit(false);
                             }
-                            tree_remove(&tree_view, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, ColumnsSameMusic::Color as i32, &gui_data);
+                            tree_remove(
+                                &tree_view,
+                                ColumnsSameMusic::Name as i32,
+                                ColumnsSameMusic::Path as i32,
+                                ColumnsSameMusic::Color as i32,
+                                ColumnsSameMusic::ActiveSelectButton as i32,
+                                &gui_data,
+                            );
                         }
                     }
                     gtk::Inhibit(false)
@@ -410,7 +449,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, &gui_data);
+                            basic_remove(&tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, ColumnsInvalidSymlinks::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -439,7 +478,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, &gui_data);
+                            basic_remove(&tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, ColumnsBrokenFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
