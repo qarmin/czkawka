@@ -1,5 +1,6 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
+#![allow(clippy::collapsible_else_if)]
 
 mod connect_about_buttons;
 mod connect_button_delete;
