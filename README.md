@@ -115,8 +115,14 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 | Cache support          | •           |            | •                 |             |
 | In active development  | Yes         | No         | Yes               | Yes         |
 
+## Other apps
+There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.
+- [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize
+- [FSlint](https://github.com/pixelb/fslint) - A little outdated, but have a lot of helpful tools
+- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, but only in CLI
+
 ## Contributions
-Contributions to this repository are welcome.  
+Contributions to this repository are welcome.
 
 You can help by creating:
 - Bug reports - memory leaks, unexpected behavior, crashes
@@ -132,7 +138,7 @@ You can also help by doing different things:
 - Recommending it to others
 
 ## Name
-Czkawka is a Polish word which means _hiccup_.  
+Czkawka is a Polish word which means _hiccup_.
 
 I chose this name because I wanted to hear people speaking other languages pronounce it, so feel free to spell it the way you want.
 
