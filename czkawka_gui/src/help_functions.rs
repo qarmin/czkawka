@@ -43,7 +43,8 @@ pub enum ColumnsDuplicates {
 
 pub enum ColumnsEmptyFolders {
     // Columns for empty folder treeview
-    Name = 0,
+    ActiveSelectButton = 0,
+    Name,
     Path,
     Modification,
 }
@@ -52,23 +53,28 @@ pub enum ColumnsDirectory {
     Path = 0,
 }
 pub enum ColumnsBigFiles {
-    Size = 0,
+    ActiveSelectButton = 0,
+    Size,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsEmptyFiles {
-    Name = 0,
+    ActiveSelectButton = 0,
+    Name,
     Path,
     Modification,
 }
 pub enum ColumnsTemporaryFiles {
-    Name = 0,
+    ActiveSelectButton = 0,
+    Name,
     Path,
     Modification,
 }
 pub enum ColumnsSimilarImages {
-    Similarity = 0,
+    VisibleSelectButton = 0,
+    ActiveSelectButton,
+    Similarity,
     Size,
     SizeAsBytes,
     Dimensions,
@@ -80,14 +86,17 @@ pub enum ColumnsSimilarImages {
     TextColor,
 }
 pub enum ColumnsZeroedFiles {
-    Size = 0,
+    ActiveSelectButton = 0,
+    Size,
     SizeAsBytes,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsSameMusic {
-    Size = 0,
+    VisibleSelectButton = 0,
+    ActiveSelectButton,
+    Size,
     SizeAsBytes,
     Name,
     Path,
@@ -102,7 +111,8 @@ pub enum ColumnsSameMusic {
     TextColor,
 }
 pub enum ColumnsInvalidSymlinks {
-    Name = 0,
+    ActiveSelectButton = 0,
+    Name,
     Path,
     DestinationPath,
     TypeOfError,
@@ -110,7 +120,8 @@ pub enum ColumnsInvalidSymlinks {
 }
 
 pub enum ColumnsBrokenFiles {
-    Name = 0,
+    ActiveSelectButton = 0,
+    Name,
     Path,
     ErrorType,
     Modification,

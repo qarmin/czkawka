@@ -11,11 +11,10 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsDuplicates::ActiveSelectButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value for {:?} at path {}: {}", ColumnsDuplicates::ActiveSelectButton, path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsDuplicates::ActiveSelectButton as u32, &fixed.to_value());
     });
-
     let column = gtk::TreeViewColumn::new();
     column.pack_start(&renderer, true);
     column.set_resizable(false);
@@ -62,6 +61,25 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsEmptyFolders::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsEmptyFolders::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsEmptyFolders::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -93,6 +111,25 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsBigFiles::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsBigFiles::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsBigFiles::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -133,6 +170,25 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsTemporaryFiles::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsTemporaryFiles::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsTemporaryFiles::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -164,6 +220,25 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsEmptyFiles::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsEmptyFiles::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsEmptyFiles::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -195,6 +270,27 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsSimilarImages::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsSimilarImages::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "visible", ColumnsSimilarImages::VisibleSelectButton as i32);
+    column.add_attribute(&renderer, "active", ColumnsSimilarImages::ActiveSelectButton as i32);
+    column.add_attribute(&renderer, "cell-background", ColumnsSimilarImages::Color as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -275,6 +371,25 @@ pub fn create_tree_view_directories(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_zeroed_files(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsZeroedFiles::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsZeroedFiles::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsZeroedFiles::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -315,6 +430,27 @@ pub fn create_tree_view_zeroed_files(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsSameMusic::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsSameMusic::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "visible", ColumnsSameMusic::VisibleSelectButton as i32);
+    column.add_attribute(&renderer, "active", ColumnsSameMusic::ActiveSelectButton as i32);
+    column.add_attribute(&renderer, "cell-background", ColumnsSameMusic::Color as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -418,6 +554,25 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsInvalidSymlinks::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsInvalidSymlinks::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsInvalidSymlinks::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -467,6 +622,25 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
 }
 
 pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsBrokenFiles::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsBrokenFiles::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "active", ColumnsBrokenFiles::ActiveSelectButton as i32);
+    tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);

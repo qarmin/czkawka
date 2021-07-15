@@ -107,7 +107,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Empty Folders
             {
-                let col_types: [glib::types::Type; 3] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -136,7 +136,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Empty Files
             {
-                let col_types: [glib::types::Type; 3] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -165,7 +165,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Temporary Files
             {
-                let col_types: [glib::types::Type; 3] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 4] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -194,7 +194,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Big Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -226,7 +226,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview_similar_images_clone = image_preview_similar_images.clone();
                 image_preview_similar_images.hide();
 
-                let col_types: [glib::types::Type; 10] = [
+                let col_types: [glib::types::Type; 12] = [
+                    glib::types::Type::BOOL,
+                    glib::types::Type::BOOL,
                     glib::types::Type::STRING,
                     glib::types::Type::STRING,
                     glib::types::Type::U64,
@@ -287,7 +289,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Zeroed Files
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::STRING, glib::types::Type::U64, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 6] = [
+                    glib::types::Type::BOOL,
+                    glib::types::Type::STRING,
+                    glib::types::Type::U64,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -316,7 +325,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Same Music
             {
-                let col_types: [glib::types::Type; 13] = [
+                let col_types: [glib::types::Type; 15] = [
+                    glib::types::Type::BOOL,
+                    glib::types::Type::BOOL,
                     glib::types::Type::STRING,
                     glib::types::Type::U64,
                     glib::types::Type::STRING,
@@ -371,7 +382,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Invalid Symlinks
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 6] = [
+                    glib::types::Type::BOOL,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                    glib::types::Type::STRING,
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -400,7 +418,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Broken Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 5] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
