@@ -41,7 +41,13 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                 }
             }
             NotebookMainEnum::EmptyDirectories => {
-                empty_folder_remover(&tree_view_empty_folder_finder.clone(), ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
+                empty_folder_remover(
+                    &tree_view_empty_folder_finder.clone(),
+                    ColumnsEmptyFolders::Name as i32,
+                    ColumnsEmptyFolders::Path as i32,
+                    ColumnsEmptyFolders::ActiveSelectButton as i32,
+                    &gui_data,
+                );
             }
             NotebookMainEnum::EmptyFiles => {
                 basic_remove(&tree_view_empty_files_finder.clone(), ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, &gui_data);
@@ -217,24 +223,33 @@ pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_co
     false
 }
 
-pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {
+pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
     let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
 
-    let selection = tree_view.selection();
+    let model = get_list_store(&tree_view);
 
-    let (selection_rows, tree_model) = selection.selected_rows();
-    if selection_rows.is_empty() {
-        return;
+    let mut selected_rows = Vec::new();
+
+    if let Some(iter) = model.iter_first() {
+        loop {
+            if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                selected_rows.push(model.path(&iter).unwrap());
+            }
+            if !model.iter_next(&iter) {
+                break;
+            }
+        }
     }
-    let list_store = get_list_store(&tree_view);
 
     let mut messages: String = "".to_string();
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selection_rows.iter().rev() {
-        let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_file_name).get::<String>().unwrap();
-        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
+    for tree_path in selected_rows.iter().rev() {
+        let iter = model.iter(tree_path).unwrap();
+
+        let name = model.value(&iter, column_file_name).get::<String>().unwrap();
+        let path = model.value(&iter, column_path).get::<String>().unwrap();
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
@@ -288,14 +303,14 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             if !use_trash {
                 match fs::remove_dir_all(format!("{}/{}", path, name)) {
                     Ok(_) => {
-                        list_store.remove(&list_store.iter(tree_path).unwrap());
+                        model.remove(&iter);
                     }
                     Err(_) => error_happened = true,
                 }
             } else {
                 match trash::delete(format!("{}/{}", path, name)) {
                     Ok(_) => {
-                        list_store.remove(&list_store.iter(tree_path).unwrap());
+                        model.remove(&iter);
                     }
                     Err(_) => error_happened = true,
                 }
@@ -307,7 +322,6 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
     }
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
-    selection.unselect_all();
 }
 
 pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, gui_data: &GuiData) {

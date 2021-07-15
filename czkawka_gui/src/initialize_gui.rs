@@ -128,7 +128,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            empty_folder_remover(&tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, &gui_data);
+                            empty_folder_remover(&tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, ColumnsEmptyFolders::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
