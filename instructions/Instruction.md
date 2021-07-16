@@ -3,7 +3,7 @@
 - [GUI](#gui-gtk)
 - [CLI](#cli)
 - [Config / Cache files](#configcache-files)
-- [Tips and tricks](#tips-and-tricks)
+- [Tips, tricks and known bugs](#tips-tricks-and-known-bugs)
 - [Tools](#tools)
 
 Czkawka for now contains two independent frontends - the terminal and graphical interface which share the core module.
@@ -15,7 +15,7 @@ This code also has good support for multi-threading.
 
 ### GUI overview
 The GUI is built from different pieces:
-- Red - Program settings, contains info about included/excluded directories which user may want to check. Also, there is a tab with allowed extensions, which allows users to choose which type of files they want to check. Next category is Excluded items, which allows to discard specific path by using `*` wildcard - so `/home/*` means that e.g. `/home/rafal/` will be ignored but not `/home/czkawka/`. The last one is settings tab which allows to save configuration of the program, reset and load it when needed.
+- Red - Program settings, contains info about included/excluded directories which user may want to check. Also, there is a tab with allowed extensions, which allows users to choose which type of files they want to check. Next category is Excluded items, which allows to discard specific path by using `*` wildcard - so `/home/ra*` means that e.g. `/home/rafal/` will be ignored but not `/home/czkawka/`. The last one is settings tab which allows to save configuration of the program, reset and load it when needed.
 - Green - This allows to choose which tool we want to use.
 - Blue - Here are settings for the current tool, which we want/need to configure
 - Pink - Window in which results of searching are printed
@@ -85,12 +85,19 @@ Linux - `/home/username/.cache/czkawka`
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 
-## Tips and Tricks
+## Tips, Tricks and Known Bugs
 - **Manually adding multiple directories**  
   You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want. After setting required values, configuration must be loaded to Czkawka.
 - **Slow checking of little number similar images**  
   If you checked before a large number of images (several tens of thousands) and they are still present on the disk, then the required information  about all of them is loaded from and saved to the cache, even if you are working with only few image files. You can rename cache file `cache_similar_image.txt`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save a lot of faster.
+- **Not all columns are visible**
+  For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
+    - View can be scrolled via horizontal scroll bar
+    - Size of other columns can be slimmed 
+  
+  This is handled via https://github.com/qarmin/czkawka/issues/169
 
+![AA](https://user-images.githubusercontent.com/41945903/125684641-728e264a-34ab-41b1-9853-ab45dc25551f.png)
 
 # Tools
 
