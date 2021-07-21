@@ -11,7 +11,7 @@ repository = "https://github.com/qarmin/czkawka"
 [dependencies]
 czkawka_core = { path = "../czkawka_core" }
 gdk = "0.14.0"
-glib = "0.14.0"
+glib = "0.14.2"
 
 humansize = "1.1.1"
 chrono = "0.4.19"
@@ -26,7 +26,7 @@ futures = "0.3.15"
 directories-next = "2.0.0"
 
 # For opening files
-open = "1.7.0"
+open = "1.7.1"
 
 # To get image preview
 image = "0.23.14"
