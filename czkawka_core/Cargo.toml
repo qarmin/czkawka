@@ -18,10 +18,10 @@ crossbeam-channel = "0.5.1"
 directories-next = "2.0.0"
 
 # Needed by similar images
-img_hash = "3.1"
-bk-tree = "0.3"
+img_hash = "3.2.0"
+bk-tree = "0.4.0"
 image = "0.23.14"
-hamming = "0.1"
+hamming = "0.1.3"
 
 # Needed by same music
 bitflags = "1.2.1"
