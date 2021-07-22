@@ -7,6 +7,7 @@ use crate::notebook_enums::*;
 use chrono::NaiveDateTime;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
+use czkawka_core::similar_images;
 use glib::Receiver;
 use gtk::prelude::*;
 use std::path::PathBuf;
@@ -522,7 +523,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let values: [(u32, &dyn ToValue); 12] = [
                                     (0, &true),
                                     (1, &false),
-                                    (2, &(get_text_from_similarity(&file_entry.similarity).to_string())),
+                                    (2, &(similar_images::get_string_from_similarity(&file_entry.similarity).to_string())),
                                     (3, &file_entry.size.file_size(options::BINARY).unwrap()),
                                     (4, &file_entry.size),
                                     (5, &file_entry.dimensions),

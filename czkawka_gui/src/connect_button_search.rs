@@ -53,12 +53,7 @@ pub fn connect_button_search(
     let radio_button_duplicates_size = gui_data.main_notebook.radio_button_duplicates_size.clone();
     let radio_button_duplicates_hashmb = gui_data.main_notebook.radio_button_duplicates_hashmb.clone();
     let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
-    let radio_button_similar_images_minimal = gui_data.main_notebook.radio_button_similar_images_minimal.clone();
-    let radio_button_similar_images_very_small = gui_data.main_notebook.radio_button_similar_images_very_small.clone();
-    let radio_button_similar_images_small = gui_data.main_notebook.radio_button_similar_images_small.clone();
-    let radio_button_similar_images_medium = gui_data.main_notebook.radio_button_similar_images_medium.clone();
-    let radio_button_similar_images_high = gui_data.main_notebook.radio_button_similar_images_high.clone();
-    let radio_button_similar_images_very_high = gui_data.main_notebook.radio_button_similar_images_very_high.clone();
+    let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
     let entry_duplicate_minimal_size = gui_data.main_notebook.entry_duplicate_minimal_size.clone();
     let stop_receiver = gui_data.stop_receiver.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
@@ -270,22 +265,7 @@ pub fn connect_button_search(
 
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
 
-                let similarity;
-                if radio_button_similar_images_minimal.is_active() {
-                    similarity = similar_images::Similarity::Minimal;
-                } else if radio_button_similar_images_very_small.is_active() {
-                    similarity = similar_images::Similarity::VerySmall;
-                } else if radio_button_similar_images_small.is_active() {
-                    similarity = similar_images::Similarity::Small;
-                } else if radio_button_similar_images_medium.is_active() {
-                    similarity = similar_images::Similarity::Medium;
-                } else if radio_button_similar_images_high.is_active() {
-                    similarity = similar_images::Similarity::High;
-                } else if radio_button_similar_images_very_high.is_active() {
-                    similarity = similar_images::Similarity::VeryHigh;
-                } else {
-                    panic!("No radio button is pressed");
-                }
+                let similarity = similar_images::Similarity::Similar(scale_similarity.value() as u32);
 
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images

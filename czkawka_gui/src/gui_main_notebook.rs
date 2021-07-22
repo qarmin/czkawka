@@ -46,12 +46,7 @@ pub struct GuiMainNotebook {
     pub radio_button_duplicates_hashmb: gtk::RadioButton,
     pub radio_button_duplicates_hash: gtk::RadioButton,
 
-    pub radio_button_similar_images_minimal: gtk::RadioButton,
-    pub radio_button_similar_images_very_small: gtk::RadioButton,
-    pub radio_button_similar_images_small: gtk::RadioButton,
-    pub radio_button_similar_images_medium: gtk::RadioButton,
-    pub radio_button_similar_images_high: gtk::RadioButton,
-    pub radio_button_similar_images_very_high: gtk::RadioButton,
+    pub scale_similarity: gtk::Scale,
 
     pub radio_button_hash_type_blake3: gtk::RadioButton,
     pub radio_button_hash_type_crc32: gtk::RadioButton,
@@ -104,12 +99,7 @@ impl GuiMainNotebook {
         let radio_button_duplicates_hashmb: gtk::RadioButton = builder.object("radio_button_duplicates_hashmb").unwrap();
         let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
-        let radio_button_similar_images_minimal: gtk::RadioButton = builder.object("radio_button_similar_images_minimal").unwrap();
-        let radio_button_similar_images_very_small: gtk::RadioButton = builder.object("radio_button_similar_images_very_small").unwrap();
-        let radio_button_similar_images_small: gtk::RadioButton = builder.object("radio_button_similar_images_small").unwrap();
-        let radio_button_similar_images_medium: gtk::RadioButton = builder.object("radio_button_similar_images_medium").unwrap();
-        let radio_button_similar_images_high: gtk::RadioButton = builder.object("radio_button_similar_images_high").unwrap();
-        let radio_button_similar_images_very_high: gtk::RadioButton = builder.object("radio_button_similar_images_very_high").unwrap();
+        let scale_similarity: gtk::Scale = builder.object("scale_similarity").unwrap();
 
         let radio_button_hash_type_blake3: gtk::RadioButton = builder.object("radio_button_hash_type_blake3").unwrap();
         let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
@@ -152,12 +142,7 @@ impl GuiMainNotebook {
             radio_button_duplicates_size,
             radio_button_duplicates_hashmb,
             radio_button_duplicates_hash,
-            radio_button_similar_images_minimal,
-            radio_button_similar_images_very_small,
-            radio_button_similar_images_small,
-            radio_button_similar_images_medium,
-            radio_button_similar_images_high,
-            radio_button_similar_images_very_high,
+            scale_similarity,
             radio_button_hash_type_blake3,
             radio_button_hash_type_crc32,
             radio_button_hash_type_xxh3,

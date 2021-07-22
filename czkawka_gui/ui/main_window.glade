@@ -32,6 +32,11 @@ Author: Rafał Mikrut
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
   <object class="GtkWindow" id="window_main">
     <property name="can-focus">False</property>
     <property name="default-width">1100</property>
@@ -1075,13 +1080,10 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_images_minimal">
-                                <property name="label" translatable="yes">Minimal</property>
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_images_very_high</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">  Very High  </property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1090,78 +1092,30 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_images_very_small">
-                                <property name="label" translatable="yes">Very Small</property>
+                              <object class="GtkScale" id="scale_similarity">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_images_very_high</property>
+                                <property name="fill-level">100</property>
+                                <property name="round-digits">1</property>
+                                <property name="digits">0</property>
+                                <property name="value-pos">right</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_images_small">
-                                <property name="label" translatable="yes">Small</property>
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_images_very_high</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">  Minimal  </property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_images_medium">
-                                <property name="label" translatable="yes">Medium</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_images_very_high</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_images_high">
-                                <property name="label" translatable="yes">High</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_images_very_high</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_images_very_high">
-                                <property name="label" translatable="yes">Very High</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">6</property>
                               </packing>
                             </child>
                           </object>
