@@ -38,7 +38,7 @@ pub struct ProgressData {
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub enum Similarity {
     None,
-    Similar(u32),
+    Similar(u64),
 }
 
 #[derive(Clone, Debug)]
@@ -55,14 +55,14 @@ pub struct FileEntry {
 struct Hamming;
 
 impl bk_tree::Metric<Node> for Hamming {
-    fn distance(&self, a: &Node, b: &Node) -> u32 {
-        hamming::distance_fast(a, b).unwrap() as u32
+    fn distance(&self, a: &Node, b: &Node) -> u64 {
+        hamming::distance_fast(a, b).unwrap() as u64
     }
 
-    // TODO Probably needs to be implemented
-    fn threshold_distance(&self, _a: &Node, _b: &Node, _threshold: u32) -> Option<u32> {
-        None
-    }
+    // // TODO Probably needs to be implemented
+    // fn threshold_distance(&self, _a: &Node, _b: &Node, _threshold: u32) -> Option<u32> {
+    //     None
+    // }
 }
 
 /// Struct to store most basics info about all folder
@@ -410,11 +410,11 @@ impl SimilarImages {
 
                 let hash = hasher.hash_image(&image);
                 let mut buf = [0u8; 8];
+                buf.copy_from_slice(&hash.as_bytes());
                 if buf.iter().all(|e| *e == 0) {
                     // A little broken image
-                    return None;
+                    return Some(None);
                 }
-                buf.copy_from_slice(&hash.as_bytes());
                 file_entry.hash = buf;
 
                 Some(Some((file_entry, buf)))
@@ -454,7 +454,7 @@ impl SimilarImages {
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
         let hash_map_modification = SystemTime::now();
 
-        let similarity: u32 = match self.similarity {
+        let similarity: u64 = match self.similarity {
             Similarity::Similar(k) => k,
             _ => panic!(),
         };

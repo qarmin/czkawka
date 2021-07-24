@@ -19,7 +19,7 @@ directories-next = "2.0.0"
 
 # Needed by similar images
 img_hash = "3.2.0"
-bk-tree = "0.4.0"
+bk-tree = "0.3.0" # Do not update. Updating broke of searching for similar hashes
 image = "0.23.14"
 hamming = "0.1.3"
 
