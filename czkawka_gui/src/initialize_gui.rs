@@ -48,6 +48,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
 
+        let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
+
+        // Set step increment
+        {
+            scale_similarity.set_range(0_f64, 12_f64);
+            scale_similarity.adjustment().set_step_increment(1_f64);
+        }
+
         // Set Main Scrolled Window Treeviews
         {
             // Duplicate Files

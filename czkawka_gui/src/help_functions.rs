@@ -7,7 +7,7 @@ use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
-use czkawka_core::similar_images::{SimilarImages, Similarity};
+use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
@@ -255,28 +255,6 @@ pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Bu
 pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
     for button in buttons_array {
         button.hide();
-    }
-}
-
-// pub fn hide_all_buttons_except(except_name: &str, buttons_array: &[gtk::Button], button_names: &[String]) {
-//     for (index, button) in buttons_array.iter().enumerate() {
-//         if except_name == button_names[index] {
-//             button.show();
-//         } else {
-//             button.hide();
-//         }
-//     }
-// }
-
-pub fn get_text_from_similarity(similarity: &Similarity) -> &str {
-    match similarity {
-        Similarity::None => "Original",
-        Similarity::Minimal => "Minimal",
-        Similarity::VerySmall => "Very Small",
-        Similarity::Small => "Small",
-        Similarity::Medium => "Medium",
-        Similarity::High => "High",
-        Similarity::VeryHigh => "Very High",
     }
 }
 

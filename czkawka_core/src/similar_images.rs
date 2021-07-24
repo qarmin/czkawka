@@ -38,12 +38,7 @@ pub struct ProgressData {
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub enum Similarity {
     None,
-    Minimal,
-    VerySmall,
-    Small,
-    Medium,
-    High,
-    VeryHigh,
+    Similar(u64),
 }
 
 #[derive(Clone, Debug)]
@@ -60,14 +55,14 @@ pub struct FileEntry {
 struct Hamming;
 
 impl bk_tree::Metric<Node> for Hamming {
-    fn distance(&self, a: &Node, b: &Node) -> u32 {
-        hamming::distance_fast(a, b).unwrap() as u32
+    fn distance(&self, a: &Node, b: &Node) -> u64 {
+        hamming::distance_fast(a, b).unwrap() as u64
     }
 
-    // TODO Probably needs to be implemented
-    fn threshold_distance(&self, _a: &Node, _b: &Node, _threshold: u32) -> Option<u32> {
-        None
-    }
+    // // TODO Probably needs to be implemented
+    // fn threshold_distance(&self, _a: &Node, _b: &Node, _threshold: u32) -> Option<u32> {
+    //     None
+    // }
 }
 
 /// Struct to store most basics info about all folder
@@ -115,7 +110,7 @@ impl SimilarImages {
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
             image_hashes: Default::default(),
             stopped_search: false,
-            similarity: Similarity::High,
+            similarity: Similarity::Similar(1),
             images_to_check: Default::default(),
             use_cache: true,
         }
@@ -416,6 +411,10 @@ impl SimilarImages {
                 let hash = hasher.hash_image(&image);
                 let mut buf = [0u8; 8];
                 buf.copy_from_slice(&hash.as_bytes());
+                if buf.iter().all(|e| *e == 0) {
+                    // A little broken image
+                    return Some(None);
+                }
                 file_entry.hash = buf;
 
                 Some(Some((file_entry, buf)))
@@ -455,14 +454,9 @@ impl SimilarImages {
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
         let hash_map_modification = SystemTime::now();
 
-        let similarity: u32 = match self.similarity {
-            Similarity::VeryHigh => 0,
-            Similarity::High => 1,
-            Similarity::Medium => 2,
-            Similarity::Small => 3,
-            Similarity::VerySmall => 4,
-            Similarity::Minimal => 5,
-            _ => panic!("0-5 similarity levels are allowed, check if not added more."),
+        let similarity: u64 = match self.similarity {
+            Similarity::Similar(k) => k,
+            _ => panic!(),
         };
 
         // TODO
@@ -500,7 +494,7 @@ impl SimilarImages {
                     dimensions: fe.dimensions.clone(),
                     modified_date: fe.modified_date,
                     hash: fe.hash,
-                    similarity: Similarity::VeryHigh,
+                    similarity: Similarity::Similar(0),
                 })
                 .collect();
 
@@ -522,15 +516,7 @@ impl SimilarImages {
                                 dimensions: fe.dimensions.clone(),
                                 modified_date: fe.modified_date,
                                 hash: [0; 8],
-                                similarity: match similarity {
-                                    0 => Similarity::VeryHigh,
-                                    1 => Similarity::High,
-                                    2 => Similarity::Medium,
-                                    3 => Similarity::Small,
-                                    4 => Similarity::VerySmall,
-                                    5 => Similarity::Minimal,
-                                    _ => panic!("0-5 similarity levels are allowed, check if not added more."),
-                                },
+                                similarity: Similarity::Similar(*similarity),
                             })
                             .collect::<Vec<_>>()),
                     );
@@ -661,18 +647,6 @@ impl PrintResults for SimilarImages {
                 println!();
             }
         }
-    }
-}
-
-fn get_string_from_similarity(similarity: &Similarity) -> &str {
-    match similarity {
-        Similarity::Minimal => "Minimal",
-        Similarity::VerySmall => "Very Small",
-        Similarity::Small => "Small",
-        Similarity::Medium => "Medium",
-        Similarity::High => "High",
-        Similarity::VeryHigh => "Very High",
-        Similarity::None => panic!(),
     }
 }
 
@@ -809,4 +783,28 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
 
     text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
+}
+pub fn get_string_from_similarity(similarity: &Similarity) -> String {
+    match similarity {
+        Similarity::None => {
+            panic!()
+        }
+        Similarity::Similar(k) => {
+            if *k < 1 {
+                format!("Very High {}", *k)
+            } else if *k < 2 {
+                format!("High {}", *k)
+            } else if *k < 4 {
+                format!("Medium {}", *k)
+            } else if *k < 6 {
+                format!("Small {}", *k)
+            } else if *k < 9 {
+                format!("Very Small {}", *k)
+            } else if *k < 13 {
+                format!("Minimal {}", *k)
+            } else {
+                panic!()
+            }
+        }
+    }
 }
