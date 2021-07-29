@@ -26,7 +26,7 @@ futures = "0.3.15"
 directories-next = "2.0.0"
 
 # For opening files
-open = "1.7.1"
+open = "2.0.0"
 
 # To get image preview
 image = "0.23.14"

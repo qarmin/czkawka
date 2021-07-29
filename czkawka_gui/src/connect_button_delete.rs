@@ -201,7 +201,7 @@ pub fn check_if_can_delete_files(check_button_settings_confirm_deletion: &gtk::C
 }
 
 pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_color: i32, column_selection: i32, window_main: &gtk::Window, check_button_settings_confirm_group_deletion: &gtk::CheckButton) -> bool {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     let mut selected_all_records: bool = true;
 
@@ -283,7 +283,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
     let text_view_errors = gui_data.text_view_errors.clone();
     let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
 
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     let mut selected_rows = Vec::new();
 
@@ -384,7 +384,7 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
     let text_view_errors = gui_data.text_view_errors.clone();
     let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
 
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     let mut messages: String = "".to_string();
 
@@ -434,7 +434,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
     let text_view_errors = gui_data.text_view_errors.clone();
     let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
 
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     let mut messages: String = "".to_string();
 
@@ -554,7 +554,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
             }
         }
         for tree_path in vec_tree_path_to_delete.iter().rev() {
-            model.remove(&model.iter(&tree_path).unwrap());
+            model.remove(&model.iter(tree_path).unwrap());
         }
     }
 

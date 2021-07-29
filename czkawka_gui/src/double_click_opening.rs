@@ -175,15 +175,8 @@ pub fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_
             }
         }
 
-        match open::that(&end_path) {
-            Ok(t) => {
-                if !t.success() {
-                    println!("Failed to open {}, status {:?}", end_path, t.code());
-                }
-            }
-            Err(_) => {
-                println!("Failed to open {}", end_path);
-            }
+        if let Err(e) = open::that(&end_path) {
+            println!("Failed to open {} - Error {}", end_path, e);
         }
     }
 }

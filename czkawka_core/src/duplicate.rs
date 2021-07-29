@@ -699,7 +699,7 @@ impl DuplicateFinder {
                         check_was_breaked.store(true, Ordering::Relaxed);
                         return None;
                     }
-                    match hash_calculation(&mut buffer, &file_entry, &check_type, 0) {
+                    match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
                         Ok((hash_string, bytes)) => {
                             bytes_read += bytes;
                             hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
@@ -792,7 +792,7 @@ impl DuplicateFinder {
                                 return None;
                             }
 
-                            match hash_calculation(&mut buffer, &file_entry, &check_type, HASH_MB_LIMIT_BYTES) {
+                            match hash_calculation(&mut buffer, file_entry, &check_type, HASH_MB_LIMIT_BYTES) {
                                 Ok((hash_string, bytes)) => {
                                     bytes_read += bytes;
                                     hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
@@ -864,7 +864,7 @@ impl DuplicateFinder {
                                 return None;
                             }
 
-                            match hash_calculation(&mut buffer, &file_entry, &check_type, u64::MAX) {
+                            match hash_calculation(&mut buffer, file_entry, &check_type, u64::MAX) {
                                 Ok((hash_string, bytes)) => {
                                     bytes_read += bytes;
                                     let mut file_entry = file_entry.clone();
@@ -1278,7 +1278,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
                 if dryrun {
                     Ok(Some(format!("Replace file {} with hard link to {}", file.path.display(), src.display())))
                 } else {
-                    make_hard_link(&src, &file.path).map(|_| None)
+                    make_hard_link(src, &file.path).map(|_| None)
                 }
             }
             DeleteMethod::None => Ok(None),

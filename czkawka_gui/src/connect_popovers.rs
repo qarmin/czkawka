@@ -10,7 +10,7 @@ use gtk::TreeIter;
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
 fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         loop {
@@ -24,7 +24,7 @@ fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         loop {
@@ -38,7 +38,7 @@ fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, colum
     popover.popdown();
 }
 fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         loop {
@@ -54,7 +54,7 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_but
 }
 
 fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -95,9 +95,9 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != oldest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -110,7 +110,7 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -151,9 +151,9 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != newest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -166,7 +166,7 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -207,9 +207,9 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index == oldest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -222,7 +222,7 @@ fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -262,9 +262,9 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index == newest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -356,7 +356,7 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
         #[cfg(target_family = "windows")]
         let wildcard = wildcard.as_str();
 
-        let model = get_list_store(&tree_view);
+        let model = get_list_store(tree_view);
 
         let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
@@ -474,7 +474,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
         #[cfg(target_family = "windows")]
         let wildcard = wildcard.as_str();
 
-        let model = get_list_store(&tree_view);
+        let model = get_list_store(tree_view);
 
         let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
@@ -517,7 +517,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
 }
 
 fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -561,9 +561,9 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != biggest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
@@ -576,7 +576,7 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
     popover.popdown();
 }
 fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, column_button_selection: u32) {
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -620,9 +620,9 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != smallest_index.unwrap() {
-                    model.set_value(&tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
-                    model.set_value(&tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
                 }
             }
 
