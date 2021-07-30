@@ -134,7 +134,7 @@ pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
 pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
-    let list_store: gtk::ListStore = get_list_store(&tree_view);
+    let list_store: gtk::ListStore = get_list_store(tree_view);
 
     let mut string_vector: Vec<String> = Vec::new();
 

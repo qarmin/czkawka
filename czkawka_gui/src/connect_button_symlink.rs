@@ -210,7 +210,7 @@ fn symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, co
             }
         }
         for tree_path in vec_tree_path_to_delete.iter().rev() {
-            list_store.remove(&list_store.iter(&tree_path).unwrap());
+            list_store.remove(&list_store.iter(tree_path).unwrap());
         }
     }
 

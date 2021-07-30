@@ -114,7 +114,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
-                                &tree_view,
+                                tree_view,
                                 ColumnsDuplicates::Name as i32,
                                 ColumnsDuplicates::Path as i32,
                                 ColumnsDuplicates::Color as i32,
@@ -149,7 +149,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            empty_folder_remover(&tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, ColumnsEmptyFolders::ActiveSelectButton as i32, &gui_data);
+                            empty_folder_remover(tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, ColumnsEmptyFolders::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -178,7 +178,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, ColumnsEmptyFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, ColumnsEmptyFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -207,7 +207,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, ColumnsTemporaryFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, ColumnsTemporaryFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -236,7 +236,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -307,7 +307,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
-                                &tree_view,
+                                tree_view,
                                 ColumnsSimilarImages::Name as i32,
                                 ColumnsSimilarImages::Path as i32,
                                 ColumnsSimilarImages::Color as i32,
@@ -351,7 +351,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, ColumnsZeroedFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, ColumnsZeroedFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -415,7 +415,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
-                                &tree_view,
+                                tree_view,
                                 ColumnsSameMusic::Name as i32,
                                 ColumnsSameMusic::Path as i32,
                                 ColumnsSameMusic::Color as i32,
@@ -457,7 +457,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, ColumnsInvalidSymlinks::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, ColumnsInvalidSymlinks::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -486,7 +486,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(&tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, ColumnsBrokenFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, ColumnsBrokenFiles::ActiveSelectButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -519,7 +519,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 if let Some(button_number) = e.keycode() {
                     // Handle delete button
                     if button_number == 119 {
-                        let list_store = get_list_store(&tree_view);
+                        let list_store = get_list_store(tree_view);
                         let selection = tree_view.selection();
 
                         let (vec_tree_path, _tree_model) = selection.selected_rows();
@@ -551,7 +551,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 if let Some(button_number) = e.keycode() {
                     // Handle delete button
                     if button_number == 119 {
-                        let list_store = get_list_store(&tree_view);
+                        let list_store = get_list_store(tree_view);
                         let selection = tree_view.selection();
 
                         let (vec_tree_path, _tree_model) = selection.selected_rows();
@@ -594,11 +594,11 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                 let cache_dir = proj_dirs.cache_dir();
                 if cache_dir.exists() {
                     if !cache_dir.is_dir() {
-                        add_text_to_text_view(&text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
+                        add_text_to_text_view(text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
                         break 'dir;
                     }
                 } else if fs::create_dir_all(cache_dir).is_err() {
-                    add_text_to_text_view(&text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
+                    add_text_to_text_view(text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
                     break 'dir;
                 }
                 let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap();
@@ -611,12 +611,12 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     let img = match image::open(&file_name) {
                         Ok(t) => t,
                         Err(_) => {
-                            add_text_to_text_view(&text_view_errors, format!("Failed to open temporary image file {}", file_name).as_str());
+                            add_text_to_text_view(text_view_errors, format!("Failed to open temporary image file {}", file_name).as_str());
                             break 'dir;
                         }
                     };
                     if img.width() == 0 || img.height() == 0 {
-                        add_text_to_text_view(&text_view_errors, format!("Cannot create preview of image {}, with 0 width or height", file_name).as_str());
+                        add_text_to_text_view(text_view_errors, format!("Cannot create preview of image {}, with 0 width or height", file_name).as_str());
                         break 'dir;
                     }
                     let ratio = img.width() / img.height();
@@ -639,7 +639,7 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
                     let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
                     if img.save(&file_dir).is_err() {
-                        add_text_to_text_view(&text_view_errors, format!("Failed to save temporary image file to {}", file_dir.display()).as_str());
+                        add_text_to_text_view(text_view_errors, format!("Failed to save temporary image file to {}", file_dir.display()).as_str());
                         break 'dir;
                     }
                     let string_dir = file_dir.to_string_lossy().to_string();

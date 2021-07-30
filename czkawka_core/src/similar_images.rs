@@ -410,7 +410,7 @@ impl SimilarImages {
 
                 let hash = hasher.hash_image(&image);
                 let mut buf = [0u8; 8];
-                buf.copy_from_slice(&hash.as_bytes());
+                buf.copy_from_slice(hash.as_bytes());
                 if buf.iter().all(|e| *e == 0) {
                     // A little broken image
                     return Some(None);
