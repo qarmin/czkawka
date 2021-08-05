@@ -10,7 +10,7 @@ use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
 use img_hash::HasherConfig;
 use rayon::prelude::*;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
@@ -18,7 +18,7 @@ use std::io::*;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{current, sleep};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
@@ -40,6 +40,8 @@ pub enum Similarity {
     None,
     Similar(u32),
 }
+
+const MAX_SIMILARITY: u32 = 12;
 
 #[derive(Clone, Debug)]
 pub struct FileEntry {
@@ -468,46 +470,63 @@ impl SimilarImages {
         // TODO
         // Maybe also add here progress report
 
-        let mut new_vector: Vec<Vec<FileEntry>> = Vec::new();
-        let mut non_cached_files_to_check = self.image_hashes.clone();
-        for (hash, vec_file_entry) in &self.image_hashes {
+        let mut collected_similar_images: BTreeMap<Node, Vec<FileEntry>> = Default::default();
+
+        let mut available_hashes = self.image_hashes.clone();
+        let mut this_time_check_hashes;
+        let mut master_of_group: BTreeSet<Node> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
+
+        // - Dla każdego hashu
+        // - Sprawdź czy użytkownik przerwał działanie programu
+        // - Wyszukaj podobne hashe o określonej odległości
+        // - Jeśli nie ma podobnych hashy to przejdź do następnego obiektu
+
+        // - W przypadku gdy jest hash, należy wrzucić wyrzucić wszystkie podobne hashe z tablicy do sprawdzania
+        // - Nie wywalać z tej tablicy hashu oryginalnego
+        for current_similarity in 0..=MAX_SIMILARITY {
+            this_time_check_hashes = available_hashes.clone();
+
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return false;
             }
-            if !non_cached_files_to_check.contains_key(hash) {
-                continue;
-            }
-            non_cached_files_to_check.remove(hash);
 
-            let vector_with_found_similar_hashes = self.bktree.find(hash, similarity).collect::<Vec<_>>();
-            if vector_with_found_similar_hashes.len() == 1 && vec_file_entry.len() == 1 {
-                // This one picture doesn't have similar pictures, so there is no go
-                continue;
-            }
+            for (hash, vec_file_entry) in this_time_check_hashes.iter() {
+                let vector_with_found_similar_hashes = self.bktree.find(hash, similarity).filter(|r| return r.0 == current_similarity).collect::<Vec<_>>();
 
-            let mut vector_of_similar_images: Vec<FileEntry> = vec_file_entry
-                .iter()
-                .map(|fe| FileEntry {
-                    path: fe.path.clone(),
-                    size: fe.size,
-                    dimensions: fe.dimensions.clone(),
-                    modified_date: fe.modified_date,
-                    hash: fe.hash,
-                    similarity: Similarity::Similar(0),
-                })
-                .collect();
-
-            for (similarity, similar_hash) in vector_with_found_similar_hashes.iter() {
-                if *similarity == 0 && hash == *similar_hash {
-                    // This was already read before
+                // No similar images with current similarity
+                if vector_with_found_similar_hashes.is_empty() {
                     continue;
-                } else if hash == *similar_hash {
-                    panic!("I'm not sure if same hash can have distance > 0");
+                }
+                // This one picture doesn't have similar pictures except self in similarity 0
+                if current_similarity == 0 && vector_with_found_similar_hashes.len() == 1 {
+                    continue;
                 }
 
-                if let Some(vec_file_entry) = non_cached_files_to_check.get(*similar_hash) {
-                    vector_of_similar_images.append(
-                        &mut (vec_file_entry
+                // Jeśli jeszcze nie dodał, to dodaje teraz grupę główną do już obrobionych
+                if !master_of_group.contains(hash) {
+                    master_of_group.insert(*hash);
+                    collected_similar_images.insert(*hash, Vec::new());
+
+                    let mut things: Vec<FileEntry> = vec_file_entry
+                        .iter()
+                        .map(|fe| FileEntry {
+                            path: fe.path.clone(),
+                            size: fe.size,
+                            dimensions: fe.dimensions.clone(),
+                            modified_date: fe.modified_date,
+                            hash: fe.hash,
+                            similarity: Similarity::Similar(0),
+                        })
+                        .collect();
+                    collected_similar_images.get_mut(hash).unwrap().append(&mut things);
+                }
+
+                // Since we checked hash, we don't need to check it again
+                vector_with_found_similar_hashes.iter().for_each(|e| {
+                    if e.1 != hash {
+                        let mut things: Vec<FileEntry> = available_hashes
+                            .get_mut(e.1)
+                            .unwrap()
                             .iter()
                             .map(|fe| FileEntry {
                                 path: fe.path.clone(),
@@ -515,20 +534,19 @@ impl SimilarImages {
                                 dimensions: fe.dimensions.clone(),
                                 modified_date: fe.modified_date,
                                 hash: [0; 8],
-                                similarity: Similarity::Similar(*similarity),
+                                similarity: Similarity::Similar(similarity),
                             })
-                            .collect::<Vec<_>>()),
-                    );
-                    non_cached_files_to_check.remove(*similar_hash);
-                }
-            }
-            if vector_of_similar_images.len() > 1 {
-                // Not sure why it may happens
-                new_vector.push((*vector_of_similar_images).to_owned());
+                            .collect::<Vec<_>>();
+                        collected_similar_images.get_mut(hash).unwrap().append(&mut things);
+                        available_hashes.remove(e.1);
+                    }
+                });
             }
         }
 
-        self.similar_vectors = new_vector;
+        let rr: Vec<Vec<FileEntry>> = collected_similar_images.values().map(|e| e.clone()).collect();
+
+        // self.similar_vectors = collected_similar_images.iter().values().collect::<Vec<Vec<FileEntry>>>();
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
 
