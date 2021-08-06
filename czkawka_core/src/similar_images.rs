@@ -18,7 +18,7 @@ use std::io::*;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{current, sleep};
+use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
@@ -461,13 +461,6 @@ impl SimilarImages {
         };
 
         // TODO
-        // Now is A is similar to B with VeryHigh and C with Medium
-        // And D is similar with C with High
-        // And Similarity is set to Medium(or lower)
-        // And A is checked before D
-        // Then C is shown that is similar group A, not D
-
-        // TODO
         // Maybe also add here progress report
 
         let mut collected_similar_images: BTreeMap<Node, Vec<FileEntry>> = Default::default();
@@ -476,13 +469,6 @@ impl SimilarImages {
         let mut this_time_check_hashes;
         let mut master_of_group: BTreeSet<Node> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
 
-        // - Dla każdego hashu
-        // - Sprawdź czy użytkownik przerwał działanie programu
-        // - Wyszukaj podobne hashe o określonej odległości
-        // - Jeśli nie ma podobnych hashy to przejdź do następnego obiektu
-
-        // - W przypadku gdy jest hash, należy wrzucić wyrzucić wszystkie podobne hashe z tablicy do sprawdzania
-        // - Nie wywalać z tej tablicy hashu oryginalnego
         for current_similarity in 0..=MAX_SIMILARITY {
             this_time_check_hashes = available_hashes.clone();
 
@@ -491,12 +477,17 @@ impl SimilarImages {
             }
 
             for (hash, vec_file_entry) in this_time_check_hashes.iter() {
-                let vector_with_found_similar_hashes = self.bktree.find(hash, similarity).filter(|r| return r.0 == current_similarity).collect::<Vec<_>>();
+                let vector_with_found_similar_hashes = self
+                    .bktree
+                    .find(hash, similarity)
+                    .filter(|r| (r.0 == current_similarity) && !master_of_group.contains(r.1) && available_hashes.contains_key(r.1))
+                    .collect::<Vec<_>>();
 
-                // No similar images with current similarity
+                // Not found any hash with specific distance
                 if vector_with_found_similar_hashes.is_empty() {
                     continue;
                 }
+
                 // This one picture doesn't have similar pictures except self in similarity 0
                 if current_similarity == 0 && vector_with_found_similar_hashes.len() == 1 {
                     continue;
@@ -522,8 +513,8 @@ impl SimilarImages {
                 }
 
                 // Since we checked hash, we don't need to check it again
-                vector_with_found_similar_hashes.iter().for_each(|e| {
-                    if e.1 != hash {
+                if current_similarity != 0 {
+                    vector_with_found_similar_hashes.iter().for_each(|e| {
                         let mut things: Vec<FileEntry> = available_hashes
                             .get_mut(e.1)
                             .unwrap()
@@ -534,19 +525,17 @@ impl SimilarImages {
                                 dimensions: fe.dimensions.clone(),
                                 modified_date: fe.modified_date,
                                 hash: [0; 8],
-                                similarity: Similarity::Similar(similarity),
+                                similarity: Similarity::Similar(current_similarity),
                             })
                             .collect::<Vec<_>>();
                         collected_similar_images.get_mut(hash).unwrap().append(&mut things);
                         available_hashes.remove(e.1);
-                    }
-                });
+                    });
+                }
             }
         }
 
-        let rr: Vec<Vec<FileEntry>> = collected_similar_images.values().map(|e| e.clone()).collect();
-
-        // self.similar_vectors = collected_similar_images.iter().values().collect::<Vec<Vec<FileEntry>>>();
+        self.similar_vectors = collected_similar_images.values().cloned().collect();
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
 
