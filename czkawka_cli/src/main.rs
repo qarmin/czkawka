@@ -33,6 +33,7 @@ fn main() {
             excluded_directories,
             excluded_items,
             minimal_file_size,
+            maximal_file_size,
             minimal_cached_file_size,
             allowed_extensions,
             search_method,
@@ -49,6 +50,7 @@ fn main() {
             df.set_excluded_directory(excluded_directories.excluded_directories);
             df.set_excluded_items(excluded_items.excluded_items);
             df.set_minimal_file_size(minimal_file_size);
+            df.set_maximal_file_size(maximal_file_size);
             df.set_minimal_cache_file_size(minimal_cached_file_size);
             df.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             df.set_check_method(search_method);
@@ -205,6 +207,7 @@ fn main() {
             excluded_items,
             file_to_save,
             minimal_file_size,
+            maximal_file_size,
             similarity,
             not_recursive,
         } => {
@@ -214,6 +217,7 @@ fn main() {
             sf.set_excluded_directory(excluded_directories.excluded_directories);
             sf.set_excluded_items(excluded_items.excluded_items);
             sf.set_minimal_file_size(minimal_file_size);
+            sf.set_maximal_file_size(maximal_file_size);
             sf.set_recursive_search(!not_recursive.not_recursive);
             sf.set_similarity(similarity);
 
@@ -239,6 +243,7 @@ fn main() {
             file_to_save,
             not_recursive,
             minimal_file_size,
+            maximal_file_size,
         } => {
             let mut zf = ZeroedFiles::new();
 
@@ -247,6 +252,7 @@ fn main() {
             zf.set_excluded_items(excluded_items.excluded_items);
             zf.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
             zf.set_minimal_file_size(minimal_file_size);
+            zf.set_maximal_file_size(maximal_file_size);
             zf.set_recursive_search(!not_recursive.not_recursive);
 
             if delete_files {
@@ -274,6 +280,7 @@ fn main() {
             file_to_save,
             not_recursive,
             minimal_file_size,
+            maximal_file_size,
             music_similarity,
         } => {
             let mut mf = SameMusic::new();
@@ -282,6 +289,7 @@ fn main() {
             mf.set_excluded_directory(excluded_directories.excluded_directories);
             mf.set_excluded_items(excluded_items.excluded_items);
             mf.set_minimal_file_size(minimal_file_size);
+            mf.set_maximal_file_size(maximal_file_size);
             mf.set_recursive_search(!not_recursive.not_recursive);
             mf.set_music_similarity(music_similarity);
 

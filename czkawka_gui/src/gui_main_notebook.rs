@@ -28,9 +28,13 @@ pub struct GuiMainNotebook {
     pub tree_view_broken_files: gtk::TreeView,
 
     pub entry_similar_images_minimal_size: gtk::Entry,
+    pub entry_similar_images_maximal_size: gtk::Entry,
     pub entry_duplicate_minimal_size: gtk::Entry,
-    pub entry_big_files_number: gtk::Entry,
+    pub entry_duplicate_maximal_size: gtk::Entry,
     pub entry_same_music_minimal_size: gtk::Entry,
+    pub entry_same_music_maximal_size: gtk::Entry,
+
+    pub entry_big_files_number: gtk::Entry,
 
     //// Check Buttons
     pub check_button_music_title: gtk::CheckButton,
@@ -82,9 +86,13 @@ impl GuiMainNotebook {
         let tree_view_broken_files: gtk::TreeView = TreeView::new();
 
         let entry_similar_images_minimal_size: gtk::Entry = builder.object("entry_similar_images_minimal_size").unwrap();
+        let entry_similar_images_maximal_size: gtk::Entry = builder.object("entry_similar_images_maximal_size").unwrap();
         let entry_duplicate_minimal_size: gtk::Entry = builder.object("entry_duplicate_minimal_size").unwrap();
-        let entry_big_files_number: gtk::Entry = builder.object("entry_big_files_number").unwrap();
+        let entry_duplicate_maximal_size: gtk::Entry = builder.object("entry_duplicate_maximal_size").unwrap();
         let entry_same_music_minimal_size: gtk::Entry = builder.object("entry_same_music_minimal_size").unwrap();
+        let entry_same_music_maximal_size: gtk::Entry = builder.object("entry_same_music_maximal_size").unwrap();
+
+        let entry_big_files_number: gtk::Entry = builder.object("entry_big_files_number").unwrap();
 
         //// Check Buttons
         let check_button_music_title: gtk::CheckButton = builder.object("check_button_music_title").unwrap();
@@ -130,6 +138,7 @@ impl GuiMainNotebook {
             tree_view_invalid_symlinks,
             tree_view_broken_files,
             entry_similar_images_minimal_size,
+            entry_similar_images_maximal_size,
             entry_duplicate_minimal_size,
             entry_big_files_number,
             entry_same_music_minimal_size,
@@ -147,6 +156,8 @@ impl GuiMainNotebook {
             radio_button_hash_type_crc32,
             radio_button_hash_type_xxh3,
             image_preview_similar_images,
+            entry_duplicate_maximal_size,
+            entry_same_music_maximal_size,
         }
     }
 }

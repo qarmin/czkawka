@@ -145,6 +145,7 @@ pub struct DuplicateFinder {
     excluded_items: ExcludedItems,
     recursive_search: bool,
     minimal_file_size: u64,
+    maximal_file_size: u64,
     check_method: CheckingMethod,
     delete_method: DeleteMethod,
     hash_type: HashType,
@@ -167,7 +168,8 @@ impl DuplicateFinder {
             allowed_extensions: Extensions::new(),
             check_method: CheckingMethod::None,
             delete_method: DeleteMethod::None,
-            minimal_file_size: 1024,
+            minimal_file_size: 8192,
+            maximal_file_size: u64::MAX,
             directories: Directories::new(),
             excluded_items: ExcludedItems::new(),
             stopped_search: false,
@@ -239,6 +241,12 @@ impl DuplicateFinder {
 
     pub const fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
         &self.files_with_identical_hashes
+    }
+    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
+        self.maximal_file_size = match maximal_file_size {
+            0 => 1,
+            t => t,
+        };
     }
 
     pub const fn get_text_messages(&self) -> &Messages {
@@ -404,7 +412,7 @@ impl DuplicateFinder {
                         }
                     }
                     // Checking files
-                    if metadata.len() >= self.minimal_file_size {
+                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
                         let current_file_name = current_folder.join(entry_data.file_name());
                         if self.excluded_items.is_excluded(&current_file_name) {
                             continue 'dir;
@@ -576,7 +584,7 @@ impl DuplicateFinder {
                         }
                     }
                     // Checking files
-                    if metadata.len() >= self.minimal_file_size {
+                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
                         let current_file_name = current_folder.join(entry_data.file_name());
                         if self.excluded_items.is_excluded(&current_file_name) {
                             continue 'dir;

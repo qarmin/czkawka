@@ -47,6 +47,7 @@ pub fn connect_button_search(
     let check_button_recursive = gui_data.upper_notebook.check_button_recursive.clone();
     let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
     let entry_same_music_minimal_size = gui_data.main_notebook.entry_same_music_minimal_size.clone();
+    let entry_same_music_maximal_size = gui_data.main_notebook.entry_same_music_maximal_size.clone();
     let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let radio_button_duplicates_name = gui_data.main_notebook.radio_button_duplicates_name.clone();
@@ -55,9 +56,11 @@ pub fn connect_button_search(
     let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
     let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
     let entry_duplicate_minimal_size = gui_data.main_notebook.entry_duplicate_minimal_size.clone();
+    let entry_duplicate_maximal_size = gui_data.main_notebook.entry_duplicate_maximal_size.clone();
     let stop_receiver = gui_data.stop_receiver.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
     let entry_similar_images_minimal_size = gui_data.main_notebook.entry_similar_images_minimal_size.clone();
+    let entry_similar_images_maximal_size = gui_data.main_notebook.entry_similar_images_maximal_size.clone();
     let check_button_music_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
     let check_button_music_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_album_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_album_title.clone();
@@ -140,7 +143,8 @@ pub fn connect_button_search(
                 } else {
                     panic!("No radio button is pressed");
                 }
-                let minimal_file_size = entry_duplicate_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024);
+                let minimal_file_size = entry_duplicate_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
+                let maximal_file_size = entry_duplicate_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let hash_type: HashType;
                 if radio_button_hash_type_blake3.is_active() {
@@ -163,6 +167,7 @@ pub fn connect_button_search(
                     df.set_excluded_items(excluded_items);
                     df.set_allowed_extensions(allowed_extensions);
                     df.set_minimal_file_size(minimal_file_size);
+                    df.set_maximal_file_size(maximal_file_size);
                     df.set_minimal_cache_file_size(minimal_cache_file_size);
                     df.set_check_method(check_method);
                     df.set_hash_type(hash_type);
@@ -264,6 +269,7 @@ pub fn connect_button_search(
                 get_list_store(&tree_view_similar_images_finder).clear();
 
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
+                let maximal_file_size = entry_similar_images_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let similarity = similar_images::Similarity::Similar(scale_similarity.value() as u32);
 
@@ -277,6 +283,7 @@ pub fn connect_button_search(
                     sf.set_recursive_search(recursive_search);
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
+                    sf.set_maximal_file_size(maximal_file_size);
                     sf.set_similarity(similarity);
                     sf.set_use_cache(use_cache);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
@@ -311,7 +318,8 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
-                let minimal_file_size = entry_same_music_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024);
+                let minimal_file_size = entry_same_music_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
+                let maximal_file_size = entry_same_music_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
 
@@ -341,6 +349,7 @@ pub fn connect_button_search(
                         mf.set_excluded_directory(excluded_directories);
                         mf.set_excluded_items(excluded_items);
                         mf.set_minimal_file_size(minimal_file_size);
+                        mf.set_maximal_file_size(maximal_file_size);
                         mf.set_recursive_search(recursive_search);
                         mf.set_music_similarity(music_similarity);
                         mf.find_same_music(Some(&stop_receiver), Some(&futures_sender_same_music));

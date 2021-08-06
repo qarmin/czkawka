@@ -60,19 +60,19 @@ jobs:
           python misc/check_results.py TestSuite 15 8
 
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" "$(pwd)\testsuite" -e "$(pwd)/TestSuite/subFolder" -D aeo
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" "$(pwd)\testsuite" -e "$(pwd)/TestSuite/subFolder" -D aeo -m 1024
           python misc/check_results.py TestSuite 13 8
 
           rm -r TestSuite
           unzip TestSuite.zip -d TestSuite
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" "$(pwd)/teStSuite" -D aen
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" "$(pwd)/teStSuite" -D aen -m 1024
           python misc/check_results.py TestSuite 7 8
 
           rm -r TestSuite
           unzip TestSuite.zip -d TestSuite
 
-          target/release/czkawka_cli dup -d "$(pwd)\TestSuite" "$(pwd)/TESTSUITE" -D aen
+          target/release/czkawka_cli dup -d "$(pwd)\TestSuite" "$(pwd)/TESTSUITE" -D aen -m 1024
           python misc/check_results.py TestSuite 7 8
 
           rm -r TestSuite
@@ -81,25 +81,25 @@ jobs:
 
 
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen -m 1024
           python misc/check_results.py TestSuite 7 8
 
           rm -r TestSuite
           unzip TestSuite.zip -d TestSuite
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen -m 1024
           python misc/check_results.py TestSuite 7 8
 
           rm -r TestSuite
           unzip TestSuite.zip -d TestSuite
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -x TEXT -D aeo
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -x TEXT -D aeo -m 1024
           python misc/check_results.py TestSuite 14 8
 
           rm -r TestSuite
           unzip TestSuite.zip -d TestSuite
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -e "$(pwd)/TestSuite/SubFolder" -D aeo
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -e "$(pwd)/TestSuite/SubFolder" -D aeo -m 1024
           python misc/check_results.py TestSuite 13 8
 
           rm -r TestSuite
@@ -111,9 +111,9 @@ jobs:
           rm -r TestSuite
           unzip TestSuite.zip -d TestSuite
 
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -m 1024
           python misc/check_results.py TestSuite 15 8
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -D aeo
+          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -D aeo -m 1024
           python misc/check_results.py TestSuite 13 8
 
 

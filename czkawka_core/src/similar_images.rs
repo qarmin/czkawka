@@ -76,6 +76,7 @@ pub struct SimilarImages {
     similar_vectors: Vec<Vec<FileEntry>>,
     recursive_search: bool,
     minimal_file_size: u64,
+    maximal_file_size: u64,
     image_hashes: BTreeMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: Similarity,
@@ -109,6 +110,7 @@ impl SimilarImages {
             similar_vectors: vec![],
             recursive_search: true,
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
+            maximal_file_size: u64::MAX,
             image_hashes: Default::default(),
             stopped_search: false,
             similarity: Similarity::Similar(1),
@@ -143,6 +145,12 @@ impl SimilarImages {
 
     pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
         self.minimal_file_size = match minimal_file_size {
+            0 => 1,
+            t => t,
+        };
+    }
+    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
+        self.maximal_file_size = match maximal_file_size {
             0 => 1,
             t => t,
         };
@@ -278,7 +286,7 @@ impl SimilarImages {
                     }
 
                     // Checking files
-                    if metadata.len() >= self.minimal_file_size {
+                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
                         let current_file_name = current_folder.join(entry_data.file_name());
                         if self.excluded_items.is_excluded(&current_file_name) {
                             continue 'dir;
