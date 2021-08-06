@@ -63,6 +63,7 @@ pub struct ZeroedFiles {
     delete_method: DeleteMethod,
     stopped_search: bool,
     minimal_file_size: u64,
+    maximal_file_size: u64,
     files_to_check: Vec<FileEntry>,
 }
 
@@ -78,7 +79,8 @@ impl ZeroedFiles {
             zeroed_files: vec![],
             delete_method: DeleteMethod::None,
             stopped_search: false,
-            minimal_file_size: 1024,
+            minimal_file_size: 8192,
+            maximal_file_size: u64::MAX,
             files_to_check: Vec::with_capacity(1024),
         }
     }
@@ -119,6 +121,12 @@ impl ZeroedFiles {
 
     pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
         self.minimal_file_size = match minimal_file_size {
+            0 => 1,
+            t => t,
+        };
+    }
+    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
+        self.maximal_file_size = match maximal_file_size {
             0 => 1,
             t => t,
         };
@@ -229,7 +237,7 @@ impl ZeroedFiles {
                     folders_to_check.push(next_folder);
                 } else if metadata.is_file() {
                     atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                    if metadata.len() == 0 || metadata.len() < self.minimal_file_size {
+                    if metadata.len() == 0 || !(self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
                         continue 'dir;
                     }
 

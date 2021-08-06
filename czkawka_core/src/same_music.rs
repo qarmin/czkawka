@@ -88,6 +88,7 @@ pub struct SameMusic {
     directories: Directories,
     excluded_items: ExcludedItems,
     minimal_file_size: u64,
+    maximal_file_size: u64,
     recursive_search: bool,
     delete_method: DeleteMethod,
     music_similarity: MusicSimilarity,
@@ -106,7 +107,8 @@ impl SameMusic {
             delete_method: DeleteMethod::None,
             music_similarity: MusicSimilarity::NONE,
             stopped_search: false,
-            minimal_file_size: 1024,
+            minimal_file_size: 8192,
+            maximal_file_size: u64::MAX,
             duplicated_music_entries: vec![],
             music_to_check: Vec::with_capacity(2048),
         }
@@ -171,6 +173,13 @@ impl SameMusic {
 
     pub fn set_music_similarity(&mut self, music_similarity: MusicSimilarity) {
         self.music_similarity = music_similarity;
+    }
+
+    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
+        self.maximal_file_size = match maximal_file_size {
+            0 => 1,
+            t => t,
+        };
     }
 
     /// Check files for any with size == 0
@@ -260,7 +269,7 @@ impl SameMusic {
                 } else if metadata.is_file() {
                     atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     // Checking files
-                    if metadata.len() >= self.minimal_file_size {
+                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
                         let current_file_name = current_folder.join(entry_data.file_name());
                         if self.excluded_items.is_excluded(&current_file_name) {
                             continue 'dir;
