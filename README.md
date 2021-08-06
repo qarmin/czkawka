@@ -134,7 +134,7 @@ You can help by creating:
 You can also help by doing different things:
 - Creating text articles - [LinuxUprising](https://www.linuxuprising.com/2021/03/find-and-remove-duplicate-files-similar.html) or [Ubunlog](https://ubunlog.com/en/czkawka-finds-and-removes-empty-and-broken-duplicate-files/)
 - Adding Czkawka to repositories - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=czkawka&branch=edge) or [NixOS](https://github.com/NixOS/nixpkgs/pull/116441) or [OpenMandriva](https://github.com/OpenMandrivaAssociation/czkawka)
-- Creating videos - [Tutorial Spanish 1](https://www.youtube.com/watch?v=tALYBsJAYwE) or [Tutorial Spanish 2](https://www.youtube.com/watch?v=V9x-pHJRmKY)
+- Creating videos - [First Video](https://www.youtube.com/watch?v=CWlRiTD4vDc) or [Tutorial Spanish](https://www.youtube.com/watch?v=V9x-pHJRmKY)
 - Recommending it to others
 
 ## Name
@@ -158,6 +158,12 @@ Windows dark theme is used from [AdMin repo](https://github.com/nrhodes91/AdMin)
 The program is completely free to use.
 
 "Gratis to uczciwa cena" - "Free is a fair price"
+
+## Thanks
+
+Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
+
+Thanks also to all the people who create patches for this program, make it available on other systems, create videos, articles about it etc.
 
 ## Donations
 If you are using the app, I would appreciate a donation for its further development, which can be done [here](https://github.com/sponsors/qarmin).

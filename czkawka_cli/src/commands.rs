@@ -289,10 +289,10 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
 // TODO For now it looks different
 fn parse_similar_images_similarity(src: &str) -> Result<Similarity, &'static str> {
     match src.to_ascii_lowercase().replace('_', "").as_str() {
-        "minimal" => Ok(Similarity::Similar(5)),
-        "verysmall" => Ok(Similarity::Similar(4)),
-        "small" => Ok(Similarity::Similar(3)),
-        "medium" => Ok(Similarity::Similar(2)),
+        "minimal" => Ok(Similarity::Similar(12)),
+        "verysmall" => Ok(Similarity::Similar(8)),
+        "small" => Ok(Similarity::Similar(5)),
+        "medium" => Ok(Similarity::Similar(3)),
         "high" => Ok(Similarity::Similar(1)),
         "veryhigh" => Ok(Similarity::Similar(0)),
         _ => Err("Couldn't parse the delete method (allowed: verysmall, small, medium, high, veryhigh)"),

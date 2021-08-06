@@ -265,7 +265,7 @@ pub fn connect_button_search(
 
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
 
-                let similarity = similar_images::Similarity::Similar(scale_similarity.value() as u64);
+                let similarity = similar_images::Similarity::Similar(scale_similarity.value() as u32);
 
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
