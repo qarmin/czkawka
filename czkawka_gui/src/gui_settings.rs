@@ -17,6 +17,7 @@ pub struct GuiSettings {
     // Duplicates
     pub check_button_settings_hide_hard_links: gtk::CheckButton,
     pub entry_settings_cache_file_minimal_size: gtk::Entry,
+    pub check_button_settings_show_preview_duplicates: gtk::CheckButton,
 
     // Similar Images
     pub check_button_settings_show_preview_similar_images: gtk::CheckButton,
@@ -47,6 +48,7 @@ impl GuiSettings {
         // Duplicates
         let check_button_settings_hide_hard_links: gtk::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
         let entry_settings_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
+        let check_button_settings_show_preview_duplicates: gtk::CheckButton = builder.object("check_button_settings_show_preview_duplicates").unwrap();
 
         // Similar Images
         let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
@@ -67,6 +69,7 @@ impl GuiSettings {
             check_button_settings_use_trash,
             check_button_settings_hide_hard_links,
             entry_settings_cache_file_minimal_size,
+            check_button_settings_show_preview_duplicates,
             check_button_settings_show_preview_similar_images,
             button_settings_save_configuration,
             button_settings_load_configuration,
