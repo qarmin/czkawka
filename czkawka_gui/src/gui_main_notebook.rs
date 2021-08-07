@@ -57,6 +57,7 @@ pub struct GuiMainNotebook {
     pub radio_button_hash_type_xxh3: gtk::RadioButton,
 
     pub image_preview_similar_images: gtk::Image,
+    pub image_preview_duplicates: gtk::Image,
 }
 
 impl GuiMainNotebook {
@@ -114,6 +115,7 @@ impl GuiMainNotebook {
         let radio_button_hash_type_xxh3: gtk::RadioButton = builder.object("radio_button_hash_type_xxh3").unwrap();
 
         let image_preview_similar_images: gtk::Image = builder.object("image_preview_similar_images").unwrap();
+        let image_preview_duplicates: gtk::Image = builder.object("image_preview_duplicates").unwrap();
 
         Self {
             notebook_main,
@@ -158,6 +160,7 @@ impl GuiMainNotebook {
             image_preview_similar_images,
             entry_duplicate_maximal_size,
             entry_same_music_maximal_size,
+            image_preview_duplicates,
         }
     }
 }

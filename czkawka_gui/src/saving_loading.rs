@@ -106,9 +106,14 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
             data_to_save.push(check_button_settings_confirm_group_deletion.is_active().to_string());
 
             //// Show image previews in similar images
-            data_to_save.push("--show_previews:".to_string());
+            data_to_save.push("--show_previews_similar_images:".to_string());
             let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
             data_to_save.push(check_button_settings_show_preview_similar_images.is_active().to_string());
+
+            //// Show image previews in duplicates
+            data_to_save.push("--show_previews_duplicates:".to_string());
+            let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
+            data_to_save.push(check_button_settings_show_preview_duplicates.is_active().to_string());
 
             //// Show bottom text panel with errors
             data_to_save.push("--bottom_text_panel:".to_string());
@@ -180,7 +185,8 @@ enum TypeOfLoadedData {
     SavingAtExit,
     ConfirmDeletion,
     ConfirmGroupDeletion,
-    ShowPreviews,
+    ShowPreviewSimilarImages,
+    ShowPreviewDuplicates,
     BottomTextPanel,
     HideHardLinks,
     UseCache,
@@ -217,7 +223,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
         };
 
-        // Parsing Data
+        // Parsing Data - this are default values
 
         let mut included_directories: Vec<String> = Vec::new();
         let mut excluded_directories: Vec<String> = Vec::new();
@@ -227,7 +233,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut saving_at_exit: bool = true;
         let mut confirm_deletion: bool = true;
         let mut confirm_group_deletion: bool = true;
-        let mut show_previews: bool = true;
+        let mut show_previews_similar_images: bool = true;
+        let mut show_previews_duplicates: bool = true;
         let mut bottom_text_panel: bool = true;
         let mut hide_hard_links: bool = true;
         let mut use_cache: bool = true;
@@ -256,8 +263,10 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                 current_type = TypeOfLoadedData::ConfirmDeletion;
             } else if line.starts_with("--confirm_group_deletion") {
                 current_type = TypeOfLoadedData::ConfirmGroupDeletion;
-            } else if line.starts_with("--show_previews") {
-                current_type = TypeOfLoadedData::ShowPreviews;
+            } else if line.starts_with("--show_previews_similar_images") {
+                current_type = TypeOfLoadedData::ShowPreviewSimilarImages;
+            } else if line.starts_with("--show_previews_duplicates") {
+                current_type = TypeOfLoadedData::ShowPreviewDuplicates;
             } else if line.starts_with("--bottom_text_panel") {
                 current_type = TypeOfLoadedData::BottomTextPanel;
             } else if line.starts_with("--hide_hard_links") {
@@ -346,12 +355,25 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
                             );
                         }
                     }
-                    TypeOfLoadedData::ShowPreviews => {
+                    TypeOfLoadedData::ShowPreviewSimilarImages => {
                         let line = line.to_lowercase();
                         if line == "1" || line == "true" {
-                            show_previews = true;
+                            show_previews_similar_images = true;
                         } else if line == "0" || line == "false" {
-                            show_previews = false;
+                            show_previews_similar_images = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
+                    TypeOfLoadedData::ShowPreviewDuplicates => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            show_previews_duplicates = true;
+                        } else if line == "0" || line == "false" {
+                            show_previews_duplicates = false;
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
@@ -460,7 +482,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             gui_data.settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
             gui_data.settings.check_button_settings_confirm_deletion.set_active(confirm_deletion);
             gui_data.settings.check_button_settings_confirm_group_deletion.set_active(confirm_group_deletion);
-            gui_data.settings.check_button_settings_show_preview_similar_images.set_active(show_previews);
+            gui_data.settings.check_button_settings_show_preview_similar_images.set_active(show_previews_similar_images);
+            gui_data.settings.check_button_settings_show_preview_duplicates.set_active(show_previews_duplicates);
 
             gui_data.settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
             if !bottom_text_panel {
@@ -549,6 +572,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         gui_data.settings.check_button_settings_confirm_deletion.set_active(true);
         gui_data.settings.check_button_settings_confirm_group_deletion.set_active(true);
         gui_data.settings.check_button_settings_show_preview_similar_images.set_active(true);
+        gui_data.settings.check_button_settings_show_preview_duplicates.set_active(true);
         gui_data.settings.check_button_settings_show_text_view.set_active(true);
         gui_data.settings.check_button_settings_hide_hard_links.set_active(true);
         gui_data.settings.check_button_settings_use_cache.set_active(true);

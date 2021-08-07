@@ -45,7 +45,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let scrolled_window_broken_files = gui_data.main_notebook.scrolled_window_broken_files.clone();
 
         let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+        let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
         let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
+        let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
 
         let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
@@ -60,6 +62,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         {
             // Duplicate Files
             {
+                let image_preview_duplicates_cloned = image_preview_duplicates.clone();
+                image_preview_duplicates.hide();
+                let text_view_errors_cloned = text_view_errors.clone();
+                let check_button_settings_show_preview_duplicates_cloned = check_button_settings_show_preview_duplicates.clone();
+
                 let col_types: [glib::types::Type; 8] = [
                     glib::types::Type::BOOL,
                     glib::types::Type::BOOL,
@@ -81,15 +88,23 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.connect_button_press_event(opening_double_click_function_duplicates);
                 tree_view.connect_key_press_event(opening_enter_function_duplicates);
-
-                tree_view.connect_button_release_event(move |_tree_view, _e| {
-                    // println!("{}", e.button());
+                tree_view.connect_button_release_event(move |tree_view, _event| {
+                    show_preview(
+                        tree_view,
+                        &text_view_errors_cloned,
+                        &check_button_settings_show_preview_duplicates_cloned,
+                        &image_preview_duplicates_cloned,
+                        ColumnsDuplicates::Path as i32,
+                        ColumnsDuplicates::Name as i32,
+                    );
                     gtk::Inhibit(false)
                 });
 
                 gui_data.main_notebook.tree_view_duplicate_finder = tree_view.clone();
                 scrolled_window_duplicate_finder.add(&tree_view);
                 scrolled_window_duplicate_finder.show_all();
+
+                let text_view_errors_cloned = text_view_errors.clone();
 
                 let gui_data = gui_data.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
@@ -121,8 +136,17 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 ColumnsDuplicates::ActiveSelectButton as i32,
                                 &gui_data,
                             );
+                            image_preview_duplicates.hide();
                         }
                     }
+                    show_preview(
+                        tree_view,
+                        &text_view_errors_cloned,
+                        &check_button_settings_show_preview_duplicates,
+                        &image_preview_duplicates,
+                        ColumnsDuplicates::Path as i32,
+                        ColumnsDuplicates::Name as i32,
+                    );
                     gtk::Inhibit(false)
                 });
             }
@@ -273,7 +297,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_button_press_event(opening_double_click_function_similar_images);
                 tree_view.connect_key_press_event(opening_enter_function_similar_images);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
-                    show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview_similar_images, &image_preview_similar_images);
+                    show_preview(
+                        tree_view,
+                        &text_view_errors,
+                        &check_button_settings_show_preview_similar_images,
+                        &image_preview_similar_images,
+                        ColumnsSimilarImages::Path as i32,
+                        ColumnsSimilarImages::Name as i32,
+                    );
                     gtk::Inhibit(false)
                 });
 
@@ -317,7 +348,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                             image_preview_similar_images_clone.hide();
                         }
                     }
-                    show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview_similar_images, &image_preview_similar_images);
+                    show_preview(
+                        tree_view,
+                        &text_view_errors,
+                        &check_button_settings_show_preview_similar_images,
+                        &image_preview_similar_images,
+                        ColumnsSimilarImages::Path as i32,
+                        ColumnsSimilarImages::Name as i32,
+                    );
                     gtk::Inhibit(false)
                 });
             }
@@ -579,13 +617,13 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         });
     }
 }
-fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview_similar_images: &CheckButton, image_preview_similar_images: &Image) {
+fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview: &CheckButton, image_preview_similar_images: &Image, column_path: i32, column_name: i32) {
     let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
     let mut created_image = false;
 
     // Only show preview when selected is only one item, because there is no method to recognize current clicked item in multiselection
-    if selected_rows.len() == 1 && check_button_settings_show_preview_similar_images.is_active() {
+    if selected_rows.len() == 1 && check_button_settings_show_preview.is_active() {
         let tree_path = selected_rows[0].clone();
         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
             // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
@@ -601,13 +639,17 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     add_text_to_text_view(text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
                     break 'dir;
                 }
-                let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Path as i32).get::<String>().unwrap();
-                let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), ColumnsSimilarImages::Name as i32).get::<String>().unwrap();
+                let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
+                let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
 
                 let file_name = format!("{}/{}", path, name);
                 let file_name = file_name.as_str();
 
                 if let Some(extension) = Path::new(file_name).extension() {
+                    if !["jpg", "jpeg", "png", "bmp", "tiff", "tif", "pnm", "tga", "ff", "gif", "jif", "jfi", "webp"].contains(&extension.to_string_lossy().to_string().to_lowercase().as_str()) {
+                        break 'dir;
+                    }
+
                     let img = match image::open(&file_name) {
                         Ok(t) => t,
                         Err(_) => {
