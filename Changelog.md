@@ -1,3 +1,19 @@
+## Version 3.2.0 - 07.08.2021r
+- Use checkbox instead selection to select files [#392](https://github.com/qarmin/czkawka/pull/392)
+- Re-enable hardlink on windows - [#410](https://github.com/qarmin/czkawka/pull/410)
+- Fix symlink and harlink creating - [#409](https://github.com/qarmin/czkawka/pull/409)
+- Add image preview to duplicate finder [#408](https://github.com/qarmin/czkawka/pull/408)
+- Add setting maximum file size [#407](https://github.com/qarmin/czkawka/pull/407)
+- Add new grouping algorithm to similar images [#405](https://github.com/qarmin/czkawka/pull/405)
+- Update to Rust 1.54 [#400](https://github.com/qarmin/czkawka/pull/400)
+- Add webp support to similar images [#396](https://github.com/qarmin/czkawka/pull/396)
+- Use GtkScale instead radio buttons for similarity [#397](https://github.com/qarmin/czkawka/pull/397)
+- Update all dependencies [#405](https://github.com/qarmin/czkawka/pull/405), [#395](https://github.com/qarmin/czkawka/pull/395)
+- Split UI into multiple files [#391](https://github.com/qarmin/czkawka/pull/391)
+- Update to gtk-rs 0.14 [#383](https://github.com/qarmin/czkawka/pull/383)
+- Fix bug with moving windows [#361](https://github.com/qarmin/czkawka/pull/361)
+- Generate Minimal Appimage [#339](https://github.com/qarmin/czkawka/pull/339)
+
 ## Version 3.1.0 - 09.05.2021r
 - Clean README, by moving instructions to different files - [9aea6e9b](https://github.com/qarmin/czkawka/commit/9aea6e9b1ef5ac1e56ccd008e7456b80401179d0)
 - Fix excluded items on Windows - [#324](https://github.com/qarmin/czkawka/pull/324)
