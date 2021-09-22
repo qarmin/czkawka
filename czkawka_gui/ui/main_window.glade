@@ -496,7 +496,7 @@ Author: Rafał Mikrut
                           <object class="GtkEntry" id="entry_excluded_items">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="text" translatable="yes">*/.git,*/node_modules,*/lost+found</property>
+                            <property name="text" translatable="yes"></property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
