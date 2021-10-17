@@ -367,7 +367,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
         let full_path = format!("{}/{}", path, name);
 
         #[cfg(target_family = "windows")]
-        let full_path = full_path.replace("/", "\\");
+        let full_path = format!("{}/{}", path, name).replace("/", "\\");
 
         if !error_happened {
             if !use_trash {
@@ -385,7 +385,8 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
                     Err(_) => error_happened = true,
                 }
             }
-        } else {
+        }
+        if error_happened {
             messages += format!("Failed to remove folder {} because folder doesn't exists, you don't have permissions or isn't empty.\n", full_path).as_str()
         }
     }
@@ -425,7 +426,7 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
         let full_path = format!("{}/{}", path, name);
 
         #[cfg(target_family = "windows")]
-        let full_path = full_path.replace("/", "\\");
+        let full_path = format!("{}/{}", path, name).replace("/", "\\");
 
         if !use_trash {
             match fs::remove_file(full_path) {
@@ -497,7 +498,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
             let full_path = format!("{}/{}", path.clone(), file_name.clone());
 
             #[cfg(target_family = "windows")]
-            let full_path = full_path.replace("/", "\\");
+            let full_path = format!("{}/{}", path.clone(), file_name.clone()).replace("/", "\\");
 
             if !use_trash {
                 if fs::remove_file(full_path).is_err() {
