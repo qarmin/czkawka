@@ -353,6 +353,10 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
                                 break 'dir;
                             }
                         };
+
+                    #[cfg(target_family = "windows")]
+                    let next_folder = next_folder.replace("/", "\\");
+
                     folders_to_check.push(next_folder.clone());
                 } else {
                     error_happened = true;
@@ -360,12 +364,12 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             }
         }
 
+        let full_path = format!("{}/{}", path, name);
+
+        #[cfg(target_family = "windows")]
+        let full_path = full_path.replace("/", "\\");
+
         if !error_happened {
-            let full_path = format!("{}/{}", path, name);
-
-            #[cfg(target_family = "windows")]
-            let full_path = full_path.replace("/", "\\");
-
             if !use_trash {
                 match fs::remove_dir_all(full_path) {
                     Ok(_) => {
@@ -381,8 +385,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
                     Err(_) => error_happened = true,
                 }
             }
-        }
-        if error_happened {
+        } else {
             messages += format!("Failed to remove folder {} because folder doesn't exists, you don't have permissions or isn't empty.\n", full_path).as_str()
         }
     }
