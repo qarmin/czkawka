@@ -309,7 +309,12 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
+
         let mut folders_to_check: Vec<String> = vec![format!("{}/{}", path, name)];
+
+        #[cfg(target_family = "windows")]
+        let mut folders_to_check: Vec<String> = vec![format!("{}\\{}", path, name)];
+
         let mut current_folder: String;
         let mut next_folder: String;
         'dir: while !folders_to_check.is_empty() {
@@ -356,15 +361,20 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
         }
 
         if !error_happened {
+            let full_path = format!("{}/{}", path, name);
+
+            #[cfg(target_family = "windows")]
+            let full_path = full_path.replace("/", "\\");
+
             if !use_trash {
-                match fs::remove_dir_all(format!("{}/{}", path, name)) {
+                match fs::remove_dir_all(full_path) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
                     Err(_) => error_happened = true,
                 }
             } else {
-                match trash::delete(format!("{}/{}", path, name)) {
+                match trash::delete(full_path) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
@@ -373,7 +383,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             }
         }
         if error_happened {
-            messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str()
+            messages += format!("Failed to remove folder {} because folder doesn't exists, you don't have permissions or isn't empty.\n", full_path).as_str()
         }
     }
 
@@ -409,19 +419,24 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
         let path = model.value(&iter, column_path).get::<String>().unwrap();
 
+        let full_path = format!("{}/{}", path, name);
+
+        #[cfg(target_family = "windows")]
+        let full_path = full_path.replace("/", "\\");
+
         if !use_trash {
-            match fs::remove_file(format!("{}/{}", path, name)) {
+            match fs::remove_file(full_path) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                Err(_) => messages += format!("Failed to remove file {} because file doesn't exists or you don't have permissions.\n", full_path).as_str(),
             }
         } else {
-            match trash::delete(format!("{}/{}", path, name)) {
+            match trash::delete(full_path) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                Err(_) => messages += format!("Failed to remove file {} because file doesn't exists or you don't have permissions.\n", full_path).as_str(),
             }
         }
     }
@@ -476,18 +491,23 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         vec_file_name.sort();
         vec_file_name.dedup();
         for file_name in vec_file_name {
+            let full_path = format!("{}/{}", path.clone(), file_name.clone());
+
+            #[cfg(target_family = "windows")]
+            let full_path = full_path.replace("/", "\\");
+
             if !use_trash {
-                if fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
+                if fs::remove_file(full_path).is_err() {
                     messages += format!(
-                        "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
-                        path, file_name
+                        "Failed to remove file {}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
+                        full_path
                     )
                     .as_str()
                 }
-            } else if trash::delete(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
+            } else if trash::delete(full_path).is_err() {
                 messages += format!(
-                    "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
-                    path, file_name
+                    "Failed to remove file {}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
+                    full_path
                 )
                 .as_str()
             }
