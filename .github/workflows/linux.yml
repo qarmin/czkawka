@@ -126,7 +126,7 @@ jobs:
   linux-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.51.0 ]
+        toolchain: [ stable, 1.53.0 ]
         type: [ release ]
     runs-on: ubuntu-18.04
     steps:
