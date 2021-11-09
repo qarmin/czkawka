@@ -3,7 +3,7 @@
 ## Requirements
 Program  | Min  | What for
 ---------|------|------------------------------------------------------------
-Rust     | 1.51 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04
+Rust     | 1.53 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04
 GTK      | 3.22 | Only for the `GTK` backend
 
 If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
