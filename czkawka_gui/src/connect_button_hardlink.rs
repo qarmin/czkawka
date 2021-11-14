@@ -153,8 +153,8 @@ pub fn hardlink_symlink(tree_view: gtk::TreeView, column_file_name: i32, column_
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 match make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     Ok(_) => (),
-                    Err(_) => {
-                        add_text_to_text_view(&text_view_errors, format!("Failed to hardlink {}.", file_to_hardlink).as_str());
+                    Err(e) => {
+                        add_text_to_text_view(&text_view_errors, format!("Failed to hardlink {}, reason {}", file_to_hardlink, e).as_str());
                         continue;
                     }
                 }
@@ -166,8 +166,8 @@ pub fn hardlink_symlink(tree_view: gtk::TreeView, column_file_name: i32, column_
             for file_to_symlink in symhardlink_data.files_to_symhardlink {
                 match fs::remove_file(&file_to_symlink) {
                     Ok(_) => (),
-                    Err(_) => {
-                        add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink.", file_to_symlink).as_str());
+                    Err(e) => {
+                        add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
                         continue;
                     }
                 };
@@ -176,19 +176,18 @@ pub fn hardlink_symlink(tree_view: gtk::TreeView, column_file_name: i32, column_
                 {
                     match std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
                         Ok(_) => (),
-                        Err(_) => {
-                            add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink.", file_to_symlink).as_str());
+                        Err(e) => {
+                            add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
                             continue;
                         }
                     };
                 }
-                // TODO Add this, because for now it not working ()
                 #[cfg(target_family = "windows")]
                 {
                     match std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
                         Ok(_) => (),
-                        Err(_) => {
-                            add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink.", file_to_symlink).as_str());
+                        Err(e) => {
+                            add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
                             continue;
                         }
                     };

@@ -357,8 +357,8 @@ impl DuplicateFinder {
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
+                Err(e) => {
+                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                     continue;
                 } // Permissions denied
             };
@@ -367,15 +367,15 @@ impl DuplicateFinder {
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                         continue 'dir;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                         continue 'dir;
                     } //Permissions denied
                 };
@@ -399,7 +399,10 @@ impl DuplicateFinder {
                     // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
-                        Err(_) => continue 'dir,
+                        Err(_inspected) => {
+                            println!("File {:?} has not valid UTF-8 name", entry_data);
+                            continue 'dir;
+                        }
                     }
                     .to_lowercase();
 
@@ -425,14 +428,14 @@ impl DuplicateFinder {
                             modified_date: match metadata.modified() {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
-                                    Err(_) => {
+                                    Err(_inspected) => {
                                         self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                         0
                                     }
                                 },
-                                Err(_) => {
-                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                    continue 'dir;
+                                Err(e) => {
+                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                    0
                                 } // Permissions Denied
                             },
                             hash: "".to_string(),
@@ -528,8 +531,8 @@ impl DuplicateFinder {
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
+                Err(e) => {
+                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                     continue;
                 } // Permissions denied
             };
@@ -538,15 +541,15 @@ impl DuplicateFinder {
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                         continue 'dir;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                         continue 'dir;
                     } //Permissions denied
                 };
@@ -570,7 +573,10 @@ impl DuplicateFinder {
                     // let mut have_valid_extension: bool;
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
-                        Err(_) => continue 'dir,
+                        Err(_inspected) => {
+                            println!("File {:?} has not valid UTF-8 name", entry_data);
+                            continue 'dir;
+                        }
                     }
                     .to_lowercase();
 
@@ -597,14 +603,14 @@ impl DuplicateFinder {
                             modified_date: match metadata.modified() {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
-                                    Err(_) => {
+                                    Err(_inspected) => {
                                         self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                         0
                                     }
                                 },
-                                Err(_) => {
-                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                    continue 'dir;
+                                Err(e) => {
+                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                    0
                                 } // Permissions Denied
                             },
                             hash: "".to_string(),
@@ -1084,21 +1090,19 @@ impl SaveResults for DuplicateFinder {
 
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
-            Err(_) => {
-                self.text_messages.errors.push(format!("Failed to create file {}", file_name));
+            Err(e) => {
+                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
                 return false;
             }
         };
         let mut writer = BufWriter::new(file_handler);
 
-        if writeln!(
+        if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-        )
-        .is_err()
-        {
-            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+        ) {
+            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
             return false;
         }
         match self.check_method {
@@ -1350,15 +1354,15 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
                 text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
                 return;
             }
-        } else if fs::create_dir_all(&cache_dir).is_err() {
-            text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
+        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
+            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
         let cache_file = cache_dir.join(CACHE_FILE_NAME.replace(".", format!("_{:?}.", type_of_hash).as_str()));
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
-            Err(_) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
+            Err(e) => {
+                text_messages.messages.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
         };
@@ -1369,8 +1373,8 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
             if file_entry.size >= minimal_cache_file_size {
                 let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
 
-                if writeln!(writer, "{}", string).is_err() {
-                    text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
+                if let Err(e) = writeln!(writer, "{}", string) {
+                    text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                     return;
                 };
             }
@@ -1386,7 +1390,7 @@ pub trait MyHasher {
 fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<(String, u64), String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
-        Err(_) => return Err(format!("Unable to check hash of file {}", file_entry.path.display())),
+        Err(e) => return Err(format!("Unable to check hash of file {}, reason {}", file_entry.path.display(), e)),
     };
     let hasher = &mut *hash_type.hasher();
     let mut current_file_read_bytes: u64 = 0;
@@ -1394,7 +1398,7 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
         let n = match file_handler.read(buffer) {
             Ok(0) => break,
             Ok(t) => t,
-            Err(_) => return Err(format!("Error happened when checking hash of file {}", file_entry.path.display())),
+            Err(e) => return Err(format!("Error happened when checking hash of file {}, reason {}", file_entry.path.display(), e)),
         };
 
         current_file_read_bytes += n as u64;
@@ -1413,7 +1417,7 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
         let cache_file = cache_dir.join(CACHE_FILE_NAME.replace(".", format!("_{:?}.", type_of_hash).as_str()));
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
-            Err(_) => {
+            Err(_inspected) => {
                 // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
                 return None;
             }
@@ -1427,8 +1431,8 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
         for (index, line) in reader.lines().enumerate() {
             let line = match line {
                 Ok(t) => t,
-                Err(_) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
+                Err(e) => {
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
                     return None;
                 }
             };
@@ -1445,15 +1449,19 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
                     path: PathBuf::from(uuu[0]),
                     size: match uuu[1].parse::<u64>() {
                         Ok(t) => t,
-                        Err(_) => {
-                            text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                        Err(e) => {
+                            text_messages
+                                .warnings
+                                .push(format!("Found invalid size value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
                             continue;
                         }
                     },
                     modified_date: match uuu[2].parse::<u64>() {
                         Ok(t) => t,
-                        Err(_) => {
-                            text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                        Err(e) => {
+                            text_messages
+                                .warnings
+                                .push(format!("Found invalid modified date value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
                             continue;
                         }
                     },

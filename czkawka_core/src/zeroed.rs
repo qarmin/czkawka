@@ -202,8 +202,8 @@ impl ZeroedFiles {
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
+                Err(e) => {
+                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                     continue;
                 } // Permissions denied
             };
@@ -212,15 +212,15 @@ impl ZeroedFiles {
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                         continue;
                     } //Permissions denied
                 };
@@ -243,7 +243,10 @@ impl ZeroedFiles {
 
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
-                        Err(_) => continue,
+                        Err(_inspected) => {
+                            println!("File {:?} has not valid UTF-8 name", entry_data);
+                            continue 'dir;
+                        }
                     }
                     .to_lowercase();
 
@@ -268,14 +271,14 @@ impl ZeroedFiles {
                         modified_date: match metadata.modified() {
                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                 Ok(d) => d.as_secs(),
-                                Err(_) => {
+                                Err(_inspected) => {
                                     self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                     0
                                 }
                             },
-                            Err(_) => {
-                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                continue;
+                            Err(e) => {
+                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                0
                             } // Permissions Denied
                         },
                     };
@@ -342,7 +345,7 @@ impl ZeroedFiles {
                 let mut n;
                 let mut file_handler: File = match File::open(&file_entry.path) {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(_inspected) => {
                         return Some(None);
                     }
                 };
@@ -351,7 +354,7 @@ impl ZeroedFiles {
                 let mut buffer = [0u8; 64];
                 n = match file_handler.read(&mut buffer) {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(_inspected) => {
                         return Some(None);
                     }
                 };
@@ -365,7 +368,7 @@ impl ZeroedFiles {
                     let mut buffer = [0u8; 1024 * 32];
                     n = match file_handler.read(&mut buffer) {
                         Ok(t) => t,
-                        Err(_) => {
+                        Err(_inspected) => {
                             return Some(None);
                         }
                     };
@@ -467,21 +470,19 @@ impl SaveResults for ZeroedFiles {
 
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
-            Err(_) => {
-                self.text_messages.errors.push(format!("Failed to create file {}", file_name));
+            Err(e) => {
+                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
                 return false;
             }
         };
         let mut writer = BufWriter::new(file_handler);
 
-        if writeln!(
+        if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-        )
-        .is_err()
-        {
-            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+        ) {
+            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
             return false;
         }
 

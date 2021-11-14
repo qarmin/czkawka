@@ -206,8 +206,8 @@ impl BrokenFiles {
             // Read current dir, if permission are denied just go to next
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
+                Err(e) => {
+                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                     continue;
                 } // Permissions denied
             };
@@ -216,15 +216,15 @@ impl BrokenFiles {
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                         continue;
                     } //Permissions denied
                 };
@@ -243,7 +243,10 @@ impl BrokenFiles {
                     atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                     let file_name_lowercase: String = match entry_data.file_name().into_string() {
                         Ok(t) => t,
-                        Err(_) => continue,
+                        Err(_inspected) => {
+                            println!("File {:?} has not valid UTF-8 name", entry_data);
+                            continue 'dir;
+                        }
                     }
                     .to_lowercase();
 
@@ -273,14 +276,14 @@ impl BrokenFiles {
                         modified_date: match metadata.modified() {
                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                 Ok(d) => d.as_secs(),
-                                Err(_) => {
+                                Err(_inspected) => {
                                     self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                     0
                                 }
                             },
-                            Err(_) => {
-                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                continue;
+                            Err(e) => {
+                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                0
                             } // Permissions Denied
                         },
                         size: metadata.len(),
@@ -401,7 +404,7 @@ impl BrokenFiles {
                                 Some(Some(file_entry))
                             }
                         },
-                        Err(_) => Some(None),
+                        Err(_inspected) => Some(None), // TODO maybe throw error or something
                     },
                     #[cfg(feature = "broken_audio")]
                     TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
@@ -414,7 +417,7 @@ impl BrokenFiles {
                                 Some(Some(file_entry))
                             }
                         },
-                        Err(_) => Some(None),
+                        Err(_inspected) => Some(None), // TODO maybe throw error or something
                     },
 
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
@@ -529,21 +532,19 @@ impl SaveResults for BrokenFiles {
 
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
-            Err(_) => {
-                self.text_messages.errors.push(format!("Failed to create file {}", file_name));
+            Err(e) => {
+                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
                 return false;
             }
         };
         let mut writer = BufWriter::new(file_handler);
 
-        if writeln!(
+        if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-        )
-        .is_err()
-        {
-            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+        ) {
+            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
             return false;
         }
 
@@ -585,15 +586,15 @@ fn save_cache_to_file(hashmap_file_entry: &BTreeMap<String, FileEntry>, text_mes
                 text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
                 return;
             }
-        } else if fs::create_dir_all(&cache_dir).is_err() {
-            text_messages.messages.push(format!("Cannot create config dir {}", cache_dir.display()));
+        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
+            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
         let cache_file = cache_dir.join(CACHE_FILE_NAME);
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
-            Err(_) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}", cache_file.display()));
+            Err(e) => {
+                text_messages.messages.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
         };
@@ -604,8 +605,8 @@ fn save_cache_to_file(hashmap_file_entry: &BTreeMap<String, FileEntry>, text_mes
             if file_entry.size > 1024 {
                 let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.error_string);
 
-                if writeln!(writer, "{}", string).is_err() {
-                    text_messages.messages.push(format!("Failed to save some data to cache file {}", cache_file.display()));
+                if let Err(e) = writeln!(writer, "{}", string) {
+                    text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                     return;
                 };
             }
@@ -617,9 +618,10 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        // TODO add before checking if cache exists(if not just return) but if exists then enable error
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
-            Err(_) => {
+            Err(_inspected) => {
                 // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
                 return None;
             }
@@ -633,8 +635,8 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
         for (index, line) in reader.lines().enumerate() {
             let line = match line {
                 Ok(t) => t,
-                Err(_) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}", index + 1, cache_file.display()));
+                Err(e) => {
+                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
                     return None;
                 }
             };
@@ -651,15 +653,19 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
                         path: PathBuf::from(uuu[0]),
                         size: match uuu[1].parse::<u64>() {
                             Ok(t) => t,
-                            Err(_) => {
-                                text_messages.warnings.push(format!("Found invalid size value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                            Err(e) => {
+                                text_messages
+                                    .warnings
+                                    .push(format!("Found invalid size value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
                                 continue;
                             }
                         },
                         modified_date: match uuu[2].parse::<u64>() {
                             Ok(t) => t,
-                            Err(_) => {
-                                text_messages.warnings.push(format!("Found invalid modified date value in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                            Err(e) => {
+                                text_messages
+                                    .warnings
+                                    .push(format!("Found invalid modified date value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
                                 continue;
                             }
                         },

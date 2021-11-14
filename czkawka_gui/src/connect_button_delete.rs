@@ -316,7 +316,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             current_folder = folders_to_check.pop().unwrap();
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
+                Err(_inspected) => {
                     error_happened = true;
                     break 'dir;
                 }
@@ -325,14 +325,14 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(_inspected) => {
                         error_happened = true;
                         break 'dir;
                     }
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(_inspected) => {
                         error_happened = true;
                         break 'dir;
                     }
@@ -343,7 +343,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
                         + "/"
                         + match &entry_data.file_name().into_string() {
                             Ok(t) => t,
-                            Err(_) => {
+                            Err(_inspected) => {
                                 error_happened = true;
                                 break 'dir;
                             }
@@ -361,14 +361,14 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
                     Ok(_) => {
                         model.remove(&iter);
                     }
-                    Err(_) => error_happened = true,
+                    Err(_inspected) => error_happened = true,
                 }
             } else {
                 match trash::delete(format!("{}/{}", path, name)) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
-                    Err(_) => error_happened = true,
+                    Err(_inspected) => error_happened = true,
                 }
             }
         }
@@ -414,14 +414,14 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                Err(e) => messages += format!("Failed to remove file {}/{}, reason {}\n", path, name, e).as_str(),
             }
         } else {
             match trash::delete(format!("{}/{}", path, name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(_) => messages += format!("Failed to remove file {}/{} because file doesn't exists or you don't have permissions.\n", path, name).as_str(),
+                Err(e) => messages += format!("Failed to remove file {}/{}, reason {}\n", path, name, e).as_str(),
             }
         }
     }
@@ -477,19 +477,11 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         vec_file_name.dedup();
         for file_name in vec_file_name {
             if !use_trash {
-                if fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
-                    messages += format!(
-                        "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
-                        path, file_name
-                    )
-                    .as_str()
+                if let Err(e) = fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())) {
+                    messages += format!("Failed to remove file {}/{}, reason {}\n", path, file_name, e).as_str()
                 }
-            } else if trash::delete(format!("{}/{}", path.clone(), file_name.clone())).is_err() {
-                messages += format!(
-                    "Failed to remove file {}/{}. It is possible that you already deleted it, because similar images shows all possible file doesn't exists or you don't have permissions.\n",
-                    path, file_name
-                )
-                .as_str()
+            } else if let Err(e) = trash::delete(format!("{}/{}", path.clone(), file_name.clone())) {
+                messages += format!("Failed to remove file {}/{}, reason {}\n", path, file_name, e).as_str()
             }
 
             vec_path_to_delete.push((path.clone(), file_name.clone()));

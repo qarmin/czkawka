@@ -32,8 +32,8 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
                 add_text_to_text_view(&text_view_errors, format!("Cannot create save file inside {} because this isn't a folder.", config_dir.display()).as_str());
                 return;
             }
-        } else if fs::create_dir_all(config_dir).is_err() {
-            add_text_to_text_view(&text_view_errors, format!("Failed configuration to create configuration folder {}", config_dir.display()).as_str());
+        } else if let Err(e) = fs::create_dir_all(config_dir) {
+            add_text_to_text_view(&text_view_errors, format!("Failed configuration to create configuration folder {}, reason {}", config_dir.display(), e).as_str());
             return;
         }
         let mut data_to_save: Vec<String> = Vec::with_capacity(16);
@@ -147,8 +147,8 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
         let mut config_file_handler = match File::create(&config_file) {
             Ok(t) => t,
-            Err(_) => {
-                add_text_to_text_view(&text_view_errors, format!("Failed to create config file {}", config_dir.display()).as_str());
+            Err(e) => {
+                add_text_to_text_view(&text_view_errors, format!("Failed to create config file {}, reason {}", config_dir.display(), e).as_str());
                 return;
             }
         };
@@ -156,10 +156,10 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         let mut data_saved: bool = false;
         for data in data_to_save {
             match writeln!(config_file_handler, "{}", data) {
-                Ok(_) => {
+                Ok(_inspected) => {
                     data_saved = true;
                 }
-                Err(_) => {
+                Err(_inspected) => {
                     data_saved = false;
                     break;
                 }
@@ -217,8 +217,8 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         // Loading Data
         let loaded_data: String = match fs::read_to_string(&config_file) {
             Ok(t) => t,
-            Err(_) => {
-                add_text_to_text_view(&text_view_errors, format!("Failed to read data from file {:?}.", config_file).as_str());
+            Err(e) => {
+                add_text_to_text_view(&text_view_errors, format!("Failed to read data from file {:?}, reason {}", config_file, e).as_str());
                 return;
             }
         };
@@ -521,7 +521,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
 
         let current_dir: String = match env::current_dir() {
             Ok(t) => t.to_str().unwrap().to_string(),
-            Err(_) => {
+            Err(_inspected) => {
                 if cfg!(target_family = "unix") {
                     add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting /home instead");
                     "/home".to_string()
