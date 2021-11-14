@@ -20,15 +20,11 @@ impl Common {
         for entry in entries {
             path = Path::new(entry);
             if path.is_dir() {
-                match fs::remove_dir_all(&entry) {
-                    Ok(_) => (),
-                    Err(_) => warnings.push("Failed to remove folder ".to_owned() + entry.as_str()),
+                if let Err(e) = fs::remove_dir_all(&entry) {
+                    warnings.push(format!("Failed to remove folder {}, reason {}", entry, e));
                 }
-            } else {
-                match fs::remove_file(&entry) {
-                    Ok(_) => (),
-                    Err(_) => warnings.push("Failed to remove file ".to_owned() + entry.as_str()),
-                }
+            } else if let Err(e) = fs::remove_file(&entry) {
+                warnings.push(format!("Failed to remove file {}, reason {}", entry, e));
             }
         }
         warnings
@@ -37,15 +33,11 @@ impl Common {
         let path: &Path = Path::new(entry);
         let mut warning: String = String::from("");
         if path.is_dir() {
-            match fs::remove_dir_all(&entry) {
-                Ok(_) => (),
-                Err(_) => warning = "Failed to remove folder ".to_owned() + entry,
+            if let Err(e) = fs::remove_dir_all(&entry) {
+                warning = format!("Failed to remove folder {}, reason {}", entry, e)
             }
-        } else {
-            match fs::remove_file(&entry) {
-                Ok(_) => (),
-                Err(_) => warning = "Failed to remove file ".to_owned() + entry,
-            }
+        } else if let Err(e) = fs::remove_file(&entry) {
+            warning = format!("Failed to remove file {}, reason {}", entry, e)
         }
         warning
     }

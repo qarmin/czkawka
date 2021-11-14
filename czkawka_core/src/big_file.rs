@@ -165,23 +165,23 @@ impl BigFile {
             let current_folder = folders_to_check.pop().unwrap();
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}", current_folder.display()));
+                Err(e) => {
+                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                     continue;
                 } // Permissions denied
             };
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                         continue;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}", current_folder.display()));
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                         continue;
                     } //Permissions denied
                 };
@@ -223,15 +223,15 @@ impl BigFile {
                         modified_date: match metadata.modified() {
                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                 Ok(d) => d.as_secs(),
-                                Err(_) => {
+                                Err(_inspected) => {
                                     self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
                                     0
                                 }
                             },
-                            Err(_) => {
-                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}", current_file_name.display()));
-                                continue;
-                            } // Permissions Denied
+                            Err(e) => {
+                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                0
+                            }
                         },
                     };
 
@@ -363,21 +363,19 @@ impl SaveResults for BigFile {
 
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
-            Err(_) => {
-                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+            Err(e) => {
+                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
                 return false;
             }
         };
         let mut writer = BufWriter::new(file_handler);
 
-        if writeln!(
+        if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
-        )
-        .is_err()
-        {
-            self.text_messages.errors.push(format!("Failed to save results to file {}", file_name));
+        ) {
+            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
             return false;
         }
 

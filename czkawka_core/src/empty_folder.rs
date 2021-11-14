@@ -195,7 +195,7 @@ impl EmptyFolder {
             // Checked folder may be deleted or we may not have permissions to open it so we assume that this folder is not be empty
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_) => {
+                Err(_inspected) => {
                     folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
                     continue;
                 }
@@ -204,14 +204,14 @@ impl EmptyFolder {
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(_inspected) => {
                         set_as_not_empty_folder(&mut folders_checked, &current_folder);
                         continue 'dir;
                     } //Permissions denied
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(_inspected) => {
                         set_as_not_empty_folder(&mut folders_checked, &current_folder);
                         continue 'dir;
                     } //Permissions denied
@@ -233,16 +233,14 @@ impl EmptyFolder {
                             modified_date: match metadata.modified() {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
-                                    Err(_) => {
+                                    Err(_inspected) => {
                                         self.text_messages.warnings.push(format!("Folder {} seems to be modified before Unix Epoch.", current_folder.display()));
                                         0
                                     }
                                 },
-                                Err(_) => {
-                                    self.text_messages.warnings.push(format!("Failed to read modification date of folder {}", current_folder.display()));
-                                    // Can't read data, so assuming that is not empty
-                                    set_as_not_empty_folder(&mut folders_checked, &current_folder);
-                                    continue 'dir;
+                                Err(e) => {
+                                    self.text_messages.warnings.push(format!("Failed to read modification date of folder {}, reason {}", current_folder.display(), e));
+                                    0
                                 }
                             },
                         },
@@ -275,7 +273,7 @@ impl EmptyFolder {
         for name in self.empty_folder_list.keys() {
             match fs::remove_dir_all(name) {
                 Ok(_) => (),
-                Err(_) => self.text_messages.warnings.push(format!("Failed to remove folder {}", name.display())),
+                Err(e) => self.text_messages.warnings.push(format!("Failed to remove folder {}, reason {}", name.display(), e)),
             };
         }
 
@@ -335,15 +333,15 @@ impl SaveResults for EmptyFolder {
 
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
-            Err(_) => {
-                self.text_messages.errors.push("Failed to create file ".to_string() + file_name.as_str());
+            Err(e) => {
+                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
                 return false;
             }
         };
         let mut writer = BufWriter::new(file_handler);
 
-        if writeln!(writer, "Results of searching {:?} with excluded directories {:?}", self.directories.included_directories, self.directories.excluded_directories).is_err() {
-            self.text_messages.errors.push("Failed to save results to file ".to_string() + file_name.as_str());
+        if let Err(e) = writeln!(writer, "Results of searching {:?} with excluded directories {:?}", self.directories.included_directories, self.directories.excluded_directories) {
+            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
             return false;
         }
 

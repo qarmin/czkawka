@@ -635,8 +635,8 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                         add_text_to_text_view(text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
                         break 'dir;
                     }
-                } else if fs::create_dir_all(cache_dir).is_err() {
-                    add_text_to_text_view(text_view_errors, format!("Failed to create dir {} needed by image preview", cache_dir.display()).as_str());
+                } else if let Err(e) = fs::create_dir_all(cache_dir) {
+                    add_text_to_text_view(text_view_errors, format!("Failed to create dir {} needed by image preview, reason {}", cache_dir.display(), e).as_str());
                     break 'dir;
                 }
                 let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
@@ -652,8 +652,8 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
 
                     let img = match image::open(&file_name) {
                         Ok(t) => t,
-                        Err(_) => {
-                            add_text_to_text_view(text_view_errors, format!("Failed to open temporary image file {}", file_name).as_str());
+                        Err(e) => {
+                            add_text_to_text_view(text_view_errors, format!("Failed to open temporary image file {}, reason {}", file_name, e).as_str());
                             break 'dir;
                         }
                     };
@@ -680,8 +680,8 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     }
                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
                     let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
-                    if img.save(&file_dir).is_err() {
-                        add_text_to_text_view(text_view_errors, format!("Failed to save temporary image file to {}", file_dir.display()).as_str());
+                    if let Err(e) = img.save(&file_dir) {
+                        add_text_to_text_view(text_view_errors, format!("Failed to save temporary image file to {}, reason {}", file_dir.display(), e).as_str());
                         break 'dir;
                     }
                     let string_dir = file_dir.to_string_lossy().to_string();
