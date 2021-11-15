@@ -523,7 +523,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let values: [(u32, &dyn ToValue); 12] = [
                                     (0, &true),
                                     (1, &false),
-                                    (2, &(similar_images::get_string_from_similarity(&file_entry.similarity).to_string())),
+                                    (2, &(similar_images::get_string_from_similarity(&file_entry.similarity, 8).to_string())), // TODO use proper hash value
                                     (3, &file_entry.size.file_size(options::BINARY).unwrap()),
                                     (4, &file_entry.size),
                                     (5, &file_entry.dimensions),
