@@ -813,14 +813,16 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
         Similarity::Similar(k) => match hash_size {
             4 => {
                 if *k < 1 {
-                    format!("High {}", *k)
+                    format!("Very High {}", *k)
                 } else if *k < 2 {
-                    format!("Medium {}", *k)
+                    format!("Very High {}", *k)
                 } else if *k < 3 {
-                    format!("Small {}", *k)
+                    format!("Medium {}", *k)
                 } else if *k < 4 {
-                    format!("Very Small {}", *k)
+                    format!("Small {}", *k)
                 } else if *k < 5 {
+                    format!("Very Small {}", *k)
+                } else if *k < 6 {
                     format!("Minimal {}", *k)
                 } else {
                     panic!();
