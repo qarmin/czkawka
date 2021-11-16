@@ -886,8 +886,8 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
     }
 }
 
-// TODO add this as option to CLI
 pub fn test_image_conversion_speed() {
+    println!("Starting to test images");
     let file_name: &str = "test.jpg";
     let file_path = Path::new(file_name);
     match image::open(file_path) {
@@ -900,11 +900,11 @@ pub fn test_image_conversion_speed() {
                         let start = SystemTime::now();
 
                         let hasher = hasher_config.to_hasher();
-                        let hash = hasher.hash_image(&img_open);
+                        let _hash = hasher.hash_image(&img_open);
 
                         let end = SystemTime::now();
 
-                        println!("{:?} us {:?} {:?} {}x{} {:?}", end.duration_since(start).unwrap().as_micros(), alg, filter, size, size, hash.as_bytes());
+                        println!("{:?} us {:?} {:?} {}x{}", end.duration_since(start).unwrap().as_micros(), alg, filter, size, size);
                     }
                 }
             }

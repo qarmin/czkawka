@@ -20,6 +20,7 @@ use czkawka_core::{
 };
 use std::process;
 use structopt::StructOpt;
+use czkawka_core::similar_images::test_image_conversion_speed;
 
 fn main() {
     let command = Commands::from_args();
@@ -211,28 +212,29 @@ fn main() {
             similarity,
             not_recursive,
         } => {
-            let mut sf = SimilarImages::new();
+                let mut sf = SimilarImages::new();
 
-            sf.set_included_directory(directories.directories);
-            sf.set_excluded_directory(excluded_directories.excluded_directories);
-            sf.set_excluded_items(excluded_items.excluded_items);
-            sf.set_minimal_file_size(minimal_file_size);
-            sf.set_maximal_file_size(maximal_file_size);
-            sf.set_recursive_search(!not_recursive.not_recursive);
-            sf.set_similarity(similarity);
+                sf.set_included_directory(directories.directories);
+                sf.set_excluded_directory(excluded_directories.excluded_directories);
+                sf.set_excluded_items(excluded_items.excluded_items);
+                sf.set_minimal_file_size(minimal_file_size);
+                sf.set_maximal_file_size(maximal_file_size);
+                sf.set_recursive_search(!not_recursive.not_recursive);
+                sf.set_similarity(similarity);
 
-            sf.find_similar_images(None, None);
+                sf.find_similar_images(None, None);
 
-            if let Some(file_name) = file_to_save.file_name() {
-                if !sf.save_results_to_file(file_name) {
-                    sf.get_text_messages().print_messages();
-                    process::exit(1);
+                if let Some(file_name) = file_to_save.file_name() {
+                    if !sf.save_results_to_file(file_name) {
+                        sf.get_text_messages().print_messages();
+                        process::exit(1);
+                    }
                 }
-            }
 
-            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-            sf.print_results();
-            sf.get_text_messages().print_messages();
+                #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+                    sf.print_results();
+                sf.get_text_messages().print_messages();
+
         }
         Commands::ZeroedFiles {
             directories,
@@ -376,6 +378,16 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             br.print_results();
             br.get_text_messages().print_messages();
+        }
+        Commands::Tester {
+            test_image
+        } => {
+            if test_image{
+                test_image_conversion_speed();
+            }
+            else{
+                println!("At least one test should be choosen!");
+            }
         }
     }
 }

@@ -198,6 +198,11 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
+    #[structopt(name = "tester", about = "Contains various test", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka tests -i")]
+    Tester {
+        #[structopt(short = "i", long = "test_image", help = "Test speed of hashing provided test.jpg image with different filters and methods.")]
+        test_image: bool,
+    }
 }
 
 #[derive(Debug, StructOpt)]
