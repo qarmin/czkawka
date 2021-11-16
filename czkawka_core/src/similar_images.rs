@@ -79,6 +79,8 @@ pub struct SimilarImages {
     similarity: Similarity,
     images_to_check: BTreeMap<String, FileEntry>,
     hash_size: u8,
+    hash_alg: HashAlg,
+    image_filter: FilterType,
     use_cache: bool,
 }
 
@@ -114,6 +116,8 @@ impl SimilarImages {
             similarity: Similarity::Similar(1),
             images_to_check: Default::default(),
             hash_size: 8,
+            hash_alg: HashAlg::Gradient,
+            image_filter: FilterType::Lanczos3,
             use_cache: true,
         }
     }
@@ -345,7 +349,7 @@ impl SimilarImages {
 
         if self.use_cache {
             // TODO Change cache size
-            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, 8) {
+            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -459,7 +463,7 @@ impl SimilarImages {
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_hashes_to_file(&all_results, &mut self.text_messages);
+            save_hashes_to_file(&all_results, &mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter);
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
@@ -664,7 +668,7 @@ impl PrintResults for SimilarImages {
     }
 }
 
-fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
+fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -680,6 +684,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
+        let cache_file_name;
         let cache_file = cache_dir.join(CACHE_FILE_NAME);
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
@@ -707,7 +712,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         }
     }
 }
-fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8) -> Option<BTreeMap<String, FileEntry>> {
+fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(CACHE_FILE_NAME);
@@ -804,6 +809,7 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8) -> Option<
     text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
 }
+
 // TODO find better values
 pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> String {
     match similarity {
@@ -815,7 +821,7 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
                 if *k < 1 {
                     format!("Very High {}", *k)
                 } else if *k < 2 {
-                    format!("Very High {}", *k)
+                    format!("High {}", *k)
                 } else if *k < 3 {
                     format!("Medium {}", *k)
                 } else if *k < 4 {
@@ -886,8 +892,30 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
     }
 }
 
+fn convert_filters_to_string(image_filter: FilterType) -> String {
+    match image_filter {
+        FilterType::Lanczos3 => "Lanczos3",
+        FilterType::Nearest => "Nearest",
+        FilterType::Triangle => "Triangle",
+        FilterType::Gaussian => "Gaussian",
+        FilterType::CatmullRom => "CatmullRom",
+    }
+    .to_string()
+}
+
+fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
+    match hash_alg {
+        HashAlg::Mean => "Mean",
+        HashAlg::Gradient => "Gradient",
+        HashAlg::Blockhash => "Blockhash",
+        HashAlg::VertGradient => "VertGradient",
+        HashAlg::DoubleGradient => "DoubleGradient",
+        HashAlg::__Nonexhaustive => panic!(),
+    }
+    .to_string()
+}
+
 pub fn test_image_conversion_speed() {
-    println!("Starting to test images");
     let file_name: &str = "test.jpg";
     let file_path = Path::new(file_name);
     match image::open(file_path) {
