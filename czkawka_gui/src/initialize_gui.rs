@@ -679,13 +679,18 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                         }
                     }
                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
-                    let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy()));
+                    let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase()));
                     if let Err(e) = img.save(&file_dir) {
                         add_text_to_text_view(text_view_errors, format!("Failed to save temporary image file to {}, reason {}", file_dir.display(), e).as_str());
+                        let _ = fs::remove_file(&file_dir);
                         break 'dir;
                     }
                     let string_dir = file_dir.to_string_lossy().to_string();
                     image_preview_similar_images.set_from_file(string_dir);
+                    if let Err(e) = fs::remove_file(&file_dir) {
+                        add_text_to_text_view(text_view_errors, format!("Failed to delete temporary image file to {}, reason {}", file_dir.display(), e).as_str());
+                        break 'dir;
+                    }
                     created_image = true;
                 }
                 break 'dir;

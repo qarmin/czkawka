@@ -1,6 +1,7 @@
 use czkawka_core::duplicate::{CheckingMethod, DeleteMethod, HashType};
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::Similarity;
+use img_hash::{FilterType, HashAlg};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -27,8 +28,7 @@ pub enum Commands {
         search_method: CheckingMethod,
         #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
-        #[structopt(short, long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type),
-            help="Hash type (BLAKE3, CRC32, XXH3)")]
+        #[structopt(short, long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help="Hash type (BLAKE3, CRC32, XXH3)")]
         hash_type: HashType,
         #[structopt(flatten)]
         file_to_save: FileToSave,
@@ -121,6 +121,8 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[structopt(short, long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help="Hash algorithm (BLAKE3, CRC32, XXH3)")]
+        hash_alg: HashAlg,
     },
     #[structopt(name = "zeroed", about = "Finds zeroed files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt")]
     ZeroedFiles {
@@ -202,7 +204,7 @@ pub enum Commands {
     Tester {
         #[structopt(short = "i", long = "test_image", help = "Test speed of hashing provided test.jpg image with different filters and methods.")]
         test_image: bool,
-    }
+    },
 }
 
 #[derive(Debug, StructOpt)]
@@ -299,7 +301,7 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
     }
 }
 
-// TODO For now it looks different
+// TODO For now it looks different - TODO customize it with specific sizes
 fn parse_similar_images_similarity(src: &str) -> Result<Similarity, &'static str> {
     match src.to_ascii_lowercase().replace('_', "").as_str() {
         "minimal" => Ok(Similarity::Similar(12)),
@@ -330,6 +332,32 @@ fn parse_maximal_file_size(src: &str) -> Result<u64, String> {
         Ok(maximal_file_size) => Ok(maximal_file_size),
         Err(e) => Err(e.to_string()),
     }
+}
+
+fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
+    let mut filter_type;
+    filter_type = match src.to_lowercase().as_str() {
+        "lanczos3" => FilterType::Lanczos3,
+        "nearest" => FilterType::Nearest,
+        "triangle" => FilterType::Triangle,
+        "faussian" => FilterType::Gaussian,
+        "catmullrom" => FilterType::CatmullRom,
+        _ => return Err("Couldn't parse the hash algorythm (allowed: lanczos3,nearest,triangle,faussian,catmullrom)".to_string()),
+    };
+    Ok(filter_type)
+}
+
+fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
+    let algorithm;
+    algorithm = match src.to_lowercase().as_str() {
+        "mean" => HashAlg::Mean,
+        "gradient" => HashAlg::Gradient,
+        "blockhash" => HashAlg::Blockhash,
+        "vertgradient" => HashAlg::VertGradient,
+        "doublegradient" => HashAlg::DoubleGradient,
+        _ => return Err("Couldn't parse the hash algorythm (allowed: mean,gradient,blockhash,vertgradient,doublegradient)".to_string()),
+    };
+    Ok(algorithm)
 }
 
 fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {

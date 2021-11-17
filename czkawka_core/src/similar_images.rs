@@ -22,8 +22,6 @@ use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
-const CACHE_FILE_NAME: &str = "cache_similar_image.txt";
-
 #[derive(Debug)]
 pub struct ProgressData {
     pub current_stage: u8,
@@ -120,6 +118,23 @@ impl SimilarImages {
             image_filter: FilterType::Lanczos3,
             use_cache: true,
         }
+    }
+
+    pub fn set_hash_size(&mut self, hash_size: u8) {
+        self.hash_size = match hash_size {
+            4 | 8 | 16 | 32 | 64 => hash_size,
+            e => {
+                panic!("Invalid value of hash size {}", e);
+            }
+        }
+    }
+
+    pub fn set_hash_alg(&mut self, hash_alg: HashAlg) {
+        self.hash_alg = hash_alg;
+    }
+
+    pub fn set_image_filter(&mut self, image_filter: FilterType) {
+        self.image_filter = image_filter;
     }
 
     pub fn get_stopped_search(&self) -> bool {
@@ -684,8 +699,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file_name;
-        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -696,12 +710,13 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         let mut writer = BufWriter::new(file_handler);
 
         for file_entry in hashmap.values() {
-            let mut string: String = "".to_string();
+            let mut string: String = String::with_capacity(100);
 
             string += format!("{}//{}//{}//{}//", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
 
             for i in 0..file_entry.hash.len() - 1 {
-                string += format!("{}//", file_entry.hash[i]).as_str();
+                string.push_str(file_entry.hash[i].to_string().as_str());
+                string.push_str("//");
             }
             string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
 
@@ -715,7 +730,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
 fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
@@ -810,7 +825,11 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: 
     None
 }
 
-// TODO find better values
+fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
+    format!("cache_similar_images_{}_{}_{}.txt", hash_size, convert_algorithm_to_string(hash_alg), convert_filters_to_string(image_filter))
+}
+
+// TODO check for better values
 pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> String {
     match similarity {
         Similarity::None => {
@@ -892,7 +911,7 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
     }
 }
 
-fn convert_filters_to_string(image_filter: FilterType) -> String {
+fn convert_filters_to_string(image_filter: &FilterType) -> String {
     match image_filter {
         FilterType::Lanczos3 => "Lanczos3",
         FilterType::Nearest => "Nearest",
@@ -903,7 +922,7 @@ fn convert_filters_to_string(image_filter: FilterType) -> String {
     .to_string()
 }
 
-fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
+fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
     match hash_alg {
         HashAlg::Mean => "Mean",
         HashAlg::Gradient => "Gradient",
