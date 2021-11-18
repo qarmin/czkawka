@@ -8,7 +8,7 @@ use crossbeam_channel::Receiver;
 use directories_next::ProjectDirs;
 use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
-use img_hash::HasherConfig;
+use img_hash::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::OpenOptions;
@@ -21,11 +21,6 @@ use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
-
-/// Type to store for each entry in the similarity BK-tree.
-type Node = [u8; 8];
-
-const CACHE_FILE_NAME: &str = "cache_similar_image.txt";
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -49,19 +44,31 @@ pub struct FileEntry {
     pub size: u64,
     pub dimensions: String,
     pub modified_date: u64,
-    pub hash: Node,
+    pub hash: Vec<u8>,
     pub similarity: Similarity,
+}
+
+// This is used by CLI tool when we cann
+#[derive(Clone, Debug)]
+pub enum SimilarityPreset {
+    VeryHigh,
+    High,
+    Medium,
+    Small,
+    VerySmall,
+    Minimal,
+    None,
 }
 
 /// Distance metric to use with the BK-tree.
 struct Hamming;
 
-impl bk_tree::Metric<Node> for Hamming {
-    fn distance(&self, a: &Node, b: &Node) -> u32 {
+impl bk_tree::Metric<Vec<u8>> for Hamming {
+    fn distance(&self, a: &Vec<u8>, b: &Vec<u8>) -> u32 {
         hamming::distance_fast(a, b).unwrap() as u32
     }
 
-    fn threshold_distance(&self, a: &Node, b: &Node, _threshold: u32) -> Option<u32> {
+    fn threshold_distance(&self, a: &Vec<u8>, b: &Vec<u8>, _threshold: u32) -> Option<u32> {
         Some(self.distance(a, b))
     }
 }
@@ -72,15 +79,18 @@ pub struct SimilarImages {
     text_messages: Messages,
     directories: Directories,
     excluded_items: ExcludedItems,
-    bktree: BKTree<Node, Hamming>,
+    bktree: BKTree<Vec<u8>, Hamming>,
     similar_vectors: Vec<Vec<FileEntry>>,
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
-    image_hashes: BTreeMap<Node, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
+    image_hashes: BTreeMap<Vec<u8>, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: Similarity,
     images_to_check: BTreeMap<String, FileEntry>,
+    hash_size: u8,
+    hash_alg: HashAlg,
+    image_filter: FilterType,
     use_cache: bool,
 }
 
@@ -115,8 +125,28 @@ impl SimilarImages {
             stopped_search: false,
             similarity: Similarity::Similar(1),
             images_to_check: Default::default(),
+            hash_size: 8,
+            hash_alg: HashAlg::Gradient,
+            image_filter: FilterType::Lanczos3,
             use_cache: true,
         }
+    }
+
+    pub fn set_hash_size(&mut self, hash_size: u8) {
+        self.hash_size = match hash_size {
+            4 | 8 | 16 | 32 | 64 => hash_size,
+            e => {
+                panic!("Invalid value of hash size {}", e);
+            }
+        }
+    }
+
+    pub fn set_hash_alg(&mut self, hash_alg: HashAlg) {
+        self.hash_alg = hash_alg;
+    }
+
+    pub fn set_image_filter(&mut self, image_filter: FilterType) {
+        self.image_filter = image_filter;
     }
 
     pub fn get_stopped_search(&self) -> bool {
@@ -313,7 +343,7 @@ impl SimilarImages {
                                 } // Permissions Denied
                             },
 
-                            hash: [0; 8],
+                            hash: Vec::new(),
                             similarity: Similarity::None,
                         };
 
@@ -345,7 +375,8 @@ impl SimilarImages {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
-            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages) {
+            // TODO Change cache size
+            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -401,7 +432,7 @@ impl SimilarImages {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
-        let mut vec_file_entry: Vec<(FileEntry, Node)> = non_cached_files_to_check
+        let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
@@ -418,23 +449,24 @@ impl SimilarImages {
                 let dimensions = image.dimensions();
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
-                let hasher = HasherConfig::with_bytes_type::<Node>().to_hasher();
+
+                let hasher_config = HasherConfig::new().hash_size(self.hash_size as u32, self.hash_size as u32).hash_alg(self.hash_alg).resize_filter(self.image_filter);
+                let hasher = hasher_config.to_hasher();
 
                 let hash = hasher.hash_image(&image);
-                let mut buf = [0u8; 8];
-                buf.copy_from_slice(hash.as_bytes());
+                let buf: Vec<u8> = hash.as_bytes().to_vec();
                 if buf.iter().all(|e| *e == 0) {
                     // A little broken image
                     return Some(None);
                 }
-                file_entry.hash = buf;
+                file_entry.hash = buf.clone();
 
                 Some(Some((file_entry, buf)))
             })
             .while_some()
             .filter(|file_entry| file_entry.is_some())
             .map(|file_entry| file_entry.unwrap())
-            .collect::<Vec<(FileEntry, Node)>>();
+            .collect::<Vec<(FileEntry, Vec<u8>)>>();
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
@@ -449,8 +481,8 @@ impl SimilarImages {
         }
 
         for (file_entry, buf) in &vec_file_entry {
-            self.bktree.add(*buf);
-            self.image_hashes.entry(*buf).or_insert_with(Vec::<FileEntry>::new);
+            self.bktree.add(buf.clone());
+            self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
             self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
         }
 
@@ -460,7 +492,7 @@ impl SimilarImages {
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_hashes_to_file(&all_results, &mut self.text_messages);
+            save_hashes_to_file(&all_results, &mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter);
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
@@ -474,11 +506,11 @@ impl SimilarImages {
         // TODO
         // Maybe also add here progress report
 
-        let mut collected_similar_images: BTreeMap<Node, Vec<FileEntry>> = Default::default();
+        let mut collected_similar_images: BTreeMap<Vec<u8>, Vec<FileEntry>> = Default::default();
 
         let mut available_hashes = self.image_hashes.clone();
         let mut this_time_check_hashes;
-        let mut master_of_group: BTreeSet<Node> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
+        let mut master_of_group: BTreeSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
 
         for current_similarity in 0..=MAX_SIMILARITY {
             this_time_check_hashes = available_hashes.clone();
@@ -506,8 +538,8 @@ impl SimilarImages {
 
                 // Jeśli jeszcze nie dodał, to dodaje teraz grupę główną do już obrobionych
                 if !master_of_group.contains(hash) {
-                    master_of_group.insert(*hash);
-                    collected_similar_images.insert(*hash, Vec::new());
+                    master_of_group.insert(hash.clone());
+                    collected_similar_images.insert(hash.clone(), Vec::new());
 
                     let mut things: Vec<FileEntry> = vec_file_entry
                         .iter()
@@ -516,7 +548,7 @@ impl SimilarImages {
                             size: fe.size,
                             dimensions: fe.dimensions.clone(),
                             modified_date: fe.modified_date,
-                            hash: fe.hash,
+                            hash: fe.hash.clone(),
                             similarity: Similarity::Similar(0),
                         })
                         .collect();
@@ -535,7 +567,7 @@ impl SimilarImages {
                                 size: fe.size,
                                 dimensions: fe.dimensions.clone(),
                                 modified_date: fe.modified_date,
-                                hash: [0; 8],
+                                hash: Vec::new(),
                                 similarity: Similarity::Similar(current_similarity),
                             })
                             .collect::<Vec<_>>();
@@ -629,7 +661,7 @@ impl SaveResults for SimilarImages {
                         file_entry.path.display(),
                         file_entry.dimensions,
                         file_entry.size.file_size(options::BINARY).unwrap(),
-                        get_string_from_similarity(&file_entry.similarity)
+                        get_string_from_similarity(&file_entry.similarity, self.hash_size)
                     )
                     .unwrap();
                 }
@@ -656,7 +688,7 @@ impl PrintResults for SimilarImages {
                         file_entry.path.display(),
                         file_entry.dimensions,
                         file_entry.size.file_size(options::BINARY).unwrap(),
-                        get_string_from_similarity(&file_entry.similarity)
+                        get_string_from_similarity(&file_entry.similarity, self.hash_size)
                     );
                 }
                 println!();
@@ -665,7 +697,7 @@ impl PrintResults for SimilarImages {
     }
 }
 
-fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
+fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -681,7 +713,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -692,12 +724,13 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         let mut writer = BufWriter::new(file_handler);
 
         for file_entry in hashmap.values() {
-            let mut string: String = "".to_string();
+            let mut string: String = String::with_capacity(100);
 
             string += format!("{}//{}//{}//{}//", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
 
             for i in 0..file_entry.hash.len() - 1 {
-                string += format!("{}//", file_entry.hash[i]).as_str();
+                string.push_str(file_entry.hash[i].to_string().as_str());
+                string.push_str("//");
             }
             string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
 
@@ -708,10 +741,10 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         }
     }
 }
-fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String, FileEntry>> {
+fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(CACHE_FILE_NAME);
+        let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
@@ -740,9 +773,9 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
             }
             // Don't load cache data if destination file not exists
             if Path::new(uuu[0]).exists() {
-                let mut hash: Node = [0u8; 8];
-                for i in 0..hash.len() {
-                    hash[i] = match uuu[4 + i].parse::<u8>() {
+                let mut hash: Vec<u8> = Vec::new();
+                for i in 0..hash_size {
+                    hash.push(match uuu[4 + i as usize].parse::<u8>() {
                         Ok(t) => t,
                         Err(e) => {
                             text_messages
@@ -750,7 +783,7 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
                                 .push(format!("Found invalid hash value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
                             continue;
                         }
-                    };
+                    });
                 }
 
                 #[cfg(debug_assertions)]
@@ -805,27 +838,189 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
     text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
 }
-pub fn get_string_from_similarity(similarity: &Similarity) -> String {
+
+fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
+    format!("cache_similar_images_{}_{}_{}.txt", hash_size, convert_algorithm_to_string(hash_alg), convert_filters_to_string(image_filter))
+}
+
+// TODO check for better values
+pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> String {
     match similarity {
         Similarity::None => {
             panic!()
         }
-        Similarity::Similar(k) => {
-            if *k < 1 {
-                format!("Very High {}", *k)
-            } else if *k < 2 {
-                format!("High {}", *k)
-            } else if *k < 4 {
-                format!("Medium {}", *k)
-            } else if *k < 6 {
-                format!("Small {}", *k)
-            } else if *k < 9 {
-                format!("Very Small {}", *k)
-            } else if *k < 13 {
-                format!("Minimal {}", *k)
-            } else {
-                panic!()
+        Similarity::Similar(h) => match hash_size {
+            4 => {
+                if *h == 0 {
+                    format!("Very High {}", *h)
+                } else if *h <= 1 {
+                    format!("High {}", *h)
+                } else if *h <= 2 {
+                    format!("Medium {}", *h)
+                } else if *h <= 3 {
+                    format!("Small {}", *h)
+                } else if *h <= 4 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 5 {
+                    format!("Minimal {}", *h)
+                } else {
+                    panic!();
+                }
             }
+            8 => {
+                if *h == 0 {
+                    format!("Very High {}", *h)
+                } else if *h <= 1 {
+                    format!("High {}", *h)
+                } else if *h <= 3 {
+                    format!("Medium {}", *h)
+                } else if *h <= 5 {
+                    format!("Small {}", *h)
+                } else if *h <= 8 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 12 {
+                    format!("Minimal {}", *h)
+                } else {
+                    panic!();
+                }
+            }
+            16 => {
+                if *h <= 2 {
+                    format!("Very High {}", *h)
+                } else if *h <= 7 {
+                    format!("High {}", *h)
+                } else if *h <= 11 {
+                    format!("Medium {}", *h)
+                } else if *h <= 17 {
+                    format!("Small {}", *h)
+                } else if *h <= 23 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 44 {
+                    format!("Minimal {}", *h)
+                } else {
+                    panic!();
+                }
+            }
+            32 => {
+                if *h <= 10 {
+                    format!("Very High {}", *h)
+                } else if *h <= 30 {
+                    format!("High {}", *h)
+                } else if *h <= 50 {
+                    format!("Medium {}", *h)
+                } else if *h <= 90 {
+                    format!("Small {}", *h)
+                } else if *h <= 120 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 180 {
+                    format!("Minimal {}", *h)
+                } else {
+                    panic!();
+                }
+            }
+            _ => {
+                panic!("Not supported hash size");
+            }
+        },
+    }
+}
+
+pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> Similarity {
+    match hash_size {
+        4 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(0),
+            SimilarityPreset::High => Similarity::Similar(1),
+            SimilarityPreset::Medium => Similarity::Similar(2),
+            SimilarityPreset::Small => Similarity::Similar(3),
+            SimilarityPreset::VerySmall => Similarity::Similar(4),
+            SimilarityPreset::Minimal => Similarity::Similar(4),
+            SimilarityPreset::None => panic!(""),
+        },
+        8 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(0),
+            SimilarityPreset::High => Similarity::Similar(1),
+            SimilarityPreset::Medium => Similarity::Similar(3),
+            SimilarityPreset::Small => Similarity::Similar(5),
+            SimilarityPreset::VerySmall => Similarity::Similar(8),
+            SimilarityPreset::Minimal => Similarity::Similar(12),
+            SimilarityPreset::None => panic!(""),
+        },
+        16 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(2),
+            SimilarityPreset::High => Similarity::Similar(7),
+            SimilarityPreset::Medium => Similarity::Similar(11),
+            SimilarityPreset::Small => Similarity::Similar(17),
+            SimilarityPreset::VerySmall => Similarity::Similar(23),
+            SimilarityPreset::Minimal => Similarity::Similar(44),
+            SimilarityPreset::None => panic!(""),
+        },
+        32 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(10),
+            SimilarityPreset::High => Similarity::Similar(30),
+            SimilarityPreset::Medium => Similarity::Similar(50),
+            SimilarityPreset::Small => Similarity::Similar(90),
+            SimilarityPreset::VerySmall => Similarity::Similar(120),
+            SimilarityPreset::Minimal => Similarity::Similar(180),
+            SimilarityPreset::None => panic!(""),
+        },
+        _ => panic!(),
+    }
+}
+
+fn convert_filters_to_string(image_filter: &FilterType) -> String {
+    match image_filter {
+        FilterType::Lanczos3 => "Lanczos3",
+        FilterType::Nearest => "Nearest",
+        FilterType::Triangle => "Triangle",
+        FilterType::Gaussian => "Gaussian",
+        FilterType::CatmullRom => "CatmullRom",
+    }
+    .to_string()
+}
+
+fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
+    match hash_alg {
+        HashAlg::Mean => "Mean",
+        HashAlg::Gradient => "Gradient",
+        HashAlg::Blockhash => "Blockhash",
+        HashAlg::VertGradient => "VertGradient",
+        HashAlg::DoubleGradient => "DoubleGradient",
+        HashAlg::__Nonexhaustive => panic!(),
+    }
+    .to_string()
+}
+
+pub fn test_image_conversion_speed() {
+    let file_name: &str = "test.jpg";
+    let file_path = Path::new(file_name);
+    match image::open(file_path) {
+        Ok(img_open) => {
+            for alg in [HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
+                for filter in [FilterType::Lanczos3, FilterType::CatmullRom, FilterType::Gaussian, FilterType::Nearest, FilterType::Triangle] {
+                    for size in [2, 4, 8, 16, 32, 64] {
+                        let hasher_config = HasherConfig::new().hash_alg(alg).resize_filter(filter).hash_size(size, size);
+
+                        let start = SystemTime::now();
+
+                        let hasher = hasher_config.to_hasher();
+                        let _hash = hasher.hash_image(&img_open);
+
+                        let end = SystemTime::now();
+
+                        println!("{:?} us {:?} {:?} {}x{}", end.duration_since(start).unwrap().as_micros(), alg, filter, size, size);
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            println!(
+                "Failed to open test file {}, reason {}",
+                match file_path.canonicalize() {
+                    Ok(t) => t.to_string_lossy().to_string(),
+                    Err(_inspected) => file_name.to_string(),
+                },
+                e
+            );
         }
     }
 }

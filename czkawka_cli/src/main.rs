@@ -5,6 +5,7 @@ use commands::Commands;
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 
+use czkawka_core::similar_images::test_image_conversion_speed;
 use czkawka_core::{
     big_file::{self, BigFile},
     broken_files::{self, BrokenFiles},
@@ -14,7 +15,7 @@ use czkawka_core::{
     invalid_symlinks,
     invalid_symlinks::InvalidSymlinks,
     same_music::SameMusic,
-    similar_images::SimilarImages,
+    similar_images::{return_similarity_from_similarity_preset, SimilarImages},
     temporary::{self, Temporary},
     zeroed::{self, ZeroedFiles},
 };
@@ -208,8 +209,11 @@ fn main() {
             file_to_save,
             minimal_file_size,
             maximal_file_size,
-            similarity,
+            similarity_preset,
             not_recursive,
+            hash_alg,
+            image_filter,
+            hash_size,
         } => {
             let mut sf = SimilarImages::new();
 
@@ -219,7 +223,11 @@ fn main() {
             sf.set_minimal_file_size(minimal_file_size);
             sf.set_maximal_file_size(maximal_file_size);
             sf.set_recursive_search(!not_recursive.not_recursive);
-            sf.set_similarity(similarity);
+            sf.set_image_filter(image_filter);
+            sf.set_hash_alg(hash_alg);
+            sf.set_hash_size(hash_size);
+
+            sf.set_similarity(return_similarity_from_similarity_preset(&similarity_preset, hash_size));
 
             sf.find_similar_images(None, None);
 
@@ -376,6 +384,13 @@ fn main() {
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             br.print_results();
             br.get_text_messages().print_messages();
+        }
+        Commands::Tester { test_image } => {
+            if test_image {
+                test_image_conversion_speed();
+            } else {
+                println!("At least one test should be choosen!");
+            }
         }
     }
 }

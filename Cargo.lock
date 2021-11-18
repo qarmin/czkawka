@@ -461,6 +461,7 @@ name = "czkawka_cli"
 version = "3.2.0"
 dependencies = [
  "czkawka_core",
+ "img_hash",
  "structopt",
 ]
 
