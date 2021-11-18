@@ -502,6 +502,7 @@ dependencies = [
  "gtk",
  "humansize",
  "image",
+ "img_hash",
  "open",
  "trash",
  "winapi",

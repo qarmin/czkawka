@@ -56,6 +56,23 @@ pub struct GuiMainNotebook {
     pub radio_button_hash_type_crc32: gtk::RadioButton,
     pub radio_button_hash_type_xxh3: gtk::RadioButton,
 
+    pub radio_button_resize_algorithm_lanczos3: gtk::RadioButton,
+    pub radio_button_resize_algorithm_nearest: gtk::RadioButton,
+    pub radio_button_resize_algorithm_triangle: gtk::RadioButton,
+    pub radio_button_resize_algorithm_gaussian: gtk::RadioButton,
+    pub radio_button_resize_algorithm_catmullrom: gtk::RadioButton,
+
+    pub radio_button_similar_hash_algorithm_gradient: gtk::RadioButton,
+    pub radio_button_similar_hash_algorithm_blockhash: gtk::RadioButton,
+    pub radio_button_similar_hash_algorithm_mean: gtk::RadioButton,
+    pub radio_button_similar_hash_algorithm_vertgradient: gtk::RadioButton,
+    pub radio_button_similar_hash_algorithm_doublegradient: gtk::RadioButton,
+
+    pub radio_button_similar_hash_size_4: gtk::RadioButton,
+    pub radio_button_similar_hash_size_8: gtk::RadioButton,
+    pub radio_button_similar_hash_size_16: gtk::RadioButton,
+    pub radio_button_similar_hash_size_32: gtk::RadioButton,
+
     pub image_preview_similar_images: gtk::Image,
     pub image_preview_duplicates: gtk::Image,
 }
@@ -114,6 +131,23 @@ impl GuiMainNotebook {
         let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
         let radio_button_hash_type_xxh3: gtk::RadioButton = builder.object("radio_button_hash_type_xxh3").unwrap();
 
+        let radio_button_resize_algorithm_lanczos3: gtk::RadioButton = builder.object("radio_button_resize_algorithm_lanczos3").unwrap();
+        let radio_button_resize_algorithm_nearest: gtk::RadioButton = builder.object("radio_button_resize_algorithm_nearest").unwrap();
+        let radio_button_resize_algorithm_triangle: gtk::RadioButton = builder.object("radio_button_resize_algorithm_triangle").unwrap();
+        let radio_button_resize_algorithm_gaussian: gtk::RadioButton = builder.object("radio_button_resize_algorithm_gaussian").unwrap();
+        let radio_button_resize_algorithm_catmullrom: gtk::RadioButton = builder.object("radio_button_resize_algorithm_catmullrom").unwrap();
+
+        let radio_button_similar_hash_algorithm_gradient: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_gradient").unwrap();
+        let radio_button_similar_hash_algorithm_blockhash: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_blockhash").unwrap();
+        let radio_button_similar_hash_algorithm_mean: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_mean").unwrap();
+        let radio_button_similar_hash_algorithm_vertgradient: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_vertgradient").unwrap();
+        let radio_button_similar_hash_algorithm_doublegradient: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_doublegradient").unwrap();
+
+        let radio_button_similar_hash_size_4: gtk::RadioButton = builder.object("radio_button_similar_hash_size_4").unwrap();
+        let radio_button_similar_hash_size_8: gtk::RadioButton = builder.object("radio_button_similar_hash_size_8").unwrap();
+        let radio_button_similar_hash_size_16: gtk::RadioButton = builder.object("radio_button_similar_hash_size_16").unwrap();
+        let radio_button_similar_hash_size_32: gtk::RadioButton = builder.object("radio_button_similar_hash_size_32").unwrap();
+
         let image_preview_similar_images: gtk::Image = builder.object("image_preview_similar_images").unwrap();
         let image_preview_duplicates: gtk::Image = builder.object("image_preview_duplicates").unwrap();
 
@@ -157,6 +191,20 @@ impl GuiMainNotebook {
             radio_button_hash_type_blake3,
             radio_button_hash_type_crc32,
             radio_button_hash_type_xxh3,
+            radio_button_resize_algorithm_lanczos3,
+            radio_button_resize_algorithm_nearest,
+            radio_button_resize_algorithm_triangle,
+            radio_button_resize_algorithm_gaussian,
+            radio_button_resize_algorithm_catmullrom,
+            radio_button_similar_hash_algorithm_gradient,
+            radio_button_similar_hash_algorithm_blockhash,
+            radio_button_similar_hash_algorithm_mean,
+            radio_button_similar_hash_algorithm_vertgradient,
+            radio_button_similar_hash_algorithm_doublegradient,
+            radio_button_similar_hash_size_4,
+            radio_button_similar_hash_size_8,
+            radio_button_similar_hash_size_16,
+            radio_button_similar_hash_size_32,
             image_preview_similar_images,
             entry_duplicate_maximal_size,
             entry_same_music_maximal_size,
