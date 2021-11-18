@@ -1,6 +1,6 @@
 use czkawka_core::duplicate::{CheckingMethod, DeleteMethod, HashType};
 use czkawka_core::same_music::MusicSimilarity;
-use czkawka_core::similar_images::Similarity;
+use czkawka_core::similar_images::SimilarityPreset;
 use img_hash::{FilterType, HashAlg};
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -28,7 +28,7 @@ pub enum Commands {
         search_method: CheckingMethod,
         #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
-        #[structopt(short, long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help="Hash type (BLAKE3, CRC32, XXH3)")]
+        #[structopt(short = "ht", long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help="Hash type (BLAKE3, CRC32, XXH3)")]
         hash_type: HashType,
         #[structopt(flatten)]
         file_to_save: FileToSave,
@@ -114,15 +114,20 @@ pub enum Commands {
         #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
         #[structopt(short, long, default_value = "High", parse(try_from_str = parse_similar_images_similarity), help = "Similairty level (Minimal, VerySmall, Small, Medium, High, VeryHigh)", long_help = "Methods to choose similarity level of images which will be considered as duplicated.")]
-        similarity: Similarity,
+        similarity_preset: SimilarityPreset,
         #[structopt(flatten)]
         excluded_items: ExcludedItems,
         #[structopt(flatten)]
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
-        #[structopt(short, long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help="Hash algorithm (BLAKE3, CRC32, XXH3)")]
+        #[structopt(short = "g", long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help="Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
         hash_alg: HashAlg,
+        #[structopt(short = "f", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help="Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
+        image_filter: FilterType,
+        #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16, 32)")]
+        hash_size: u8,
+
     },
     #[structopt(name = "zeroed", about = "Finds zeroed files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt")]
     ZeroedFiles {
@@ -301,16 +306,15 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
     }
 }
 
-// TODO For now it looks different - TODO customize it with specific sizes
-fn parse_similar_images_similarity(src: &str) -> Result<Similarity, &'static str> {
-    match src.to_ascii_lowercase().replace('_', "").as_str() {
-        "minimal" => Ok(Similarity::Similar(12)),
-        "verysmall" => Ok(Similarity::Similar(8)),
-        "small" => Ok(Similarity::Similar(5)),
-        "medium" => Ok(Similarity::Similar(3)),
-        "high" => Ok(Similarity::Similar(1)),
-        "veryhigh" => Ok(Similarity::Similar(0)),
-        _ => Err("Couldn't parse the delete method (allowed: verysmall, small, medium, high, veryhigh)"),
+fn parse_similar_images_similarity(src: &str) -> Result<SimilarityPreset, &'static str> {
+    match src.to_lowercase().replace('_', "").as_str() {
+        "minimal" => Ok(SimilarityPreset::Minimal),
+        "verysmall" => Ok(SimilarityPreset::VerySmall),
+        "small" => Ok(SimilarityPreset::Small),
+        "medium" => Ok(SimilarityPreset::Medium),
+        "high" => Ok(SimilarityPreset::High),
+        "veryhigh" => Ok(SimilarityPreset::VeryHigh),
+        _ => Err("Couldn't parse the image similarity preset (allowed: Minimal, VerySmall, Small, Medium, High, VeryHigh)"),
     }
 }
 
@@ -335,18 +339,17 @@ fn parse_maximal_file_size(src: &str) -> Result<u64, String> {
 }
 
 fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
-    let mut filter_type;
+    let filter_type;
     filter_type = match src.to_lowercase().as_str() {
         "lanczos3" => FilterType::Lanczos3,
         "nearest" => FilterType::Nearest,
         "triangle" => FilterType::Triangle,
         "faussian" => FilterType::Gaussian,
         "catmullrom" => FilterType::CatmullRom,
-        _ => return Err("Couldn't parse the hash algorythm (allowed: lanczos3,nearest,triangle,faussian,catmullrom)".to_string()),
+        _ => return Err("Couldn't parse the image resize filter (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)".to_string()),
     };
     Ok(filter_type)
 }
-
 fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
     let algorithm;
     algorithm = match src.to_lowercase().as_str() {
@@ -355,9 +358,21 @@ fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
         "blockhash" => HashAlg::Blockhash,
         "vertgradient" => HashAlg::VertGradient,
         "doublegradient" => HashAlg::DoubleGradient,
-        _ => return Err("Couldn't parse the hash algorythm (allowed: mean,gradient,blockhash,vertgradient,doublegradient)".to_string()),
+        _ => return Err("Couldn't parse the hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)".to_string()),
     };
     Ok(algorithm)
+}
+
+fn parse_image_hash_size(src: &str) -> Result<u8, String> {
+    let hash_size;
+    hash_size = match src.to_lowercase().as_str() {
+        "4" => 4,
+        "8" => 8,
+        "16" => 16,
+        "32" => 32,
+        _ => return Err("Couldn't parse the image hash size (allowed: 4, 8, 16, 32)".to_string()),
+    };
+    Ok(hash_size)
 }
 
 fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {

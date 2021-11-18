@@ -14,7 +14,7 @@ use czkawka_core::{
     invalid_symlinks,
     invalid_symlinks::InvalidSymlinks,
     same_music::SameMusic,
-    similar_images::SimilarImages,
+    similar_images::{SimilarImages,return_similarity_from_similarity_preset},
     temporary::{self, Temporary},
     zeroed::{self, ZeroedFiles},
 };
@@ -209,8 +209,11 @@ fn main() {
             file_to_save,
             minimal_file_size,
             maximal_file_size,
-            similarity,
+            similarity_preset,
             not_recursive,
+            hash_alg,
+            image_filter,
+            hash_size
         } => {
                 let mut sf = SimilarImages::new();
 
@@ -220,7 +223,11 @@ fn main() {
                 sf.set_minimal_file_size(minimal_file_size);
                 sf.set_maximal_file_size(maximal_file_size);
                 sf.set_recursive_search(!not_recursive.not_recursive);
-                sf.set_similarity(similarity);
+            sf.set_image_filter(image_filter);
+            sf.set_hash_alg(hash_alg);
+            sf.set_hash_size(hash_size);
+
+            sf.set_similarity(return_similarity_from_similarity_preset(&similarity_preset,hash_size));
 
                 sf.find_similar_images(None, None);
 

@@ -48,6 +48,18 @@ pub struct FileEntry {
     pub similarity: Similarity,
 }
 
+// This is used by CLI tool when we cann
+#[derive(Clone, Debug)]
+pub enum SimilarityPreset{
+    VeryHigh,
+    High,
+    Medium,
+    Small,
+    VerySmall,
+    Minimal,
+    None,
+}
+
 /// Distance metric to use with the BK-tree.
 struct Hamming;
 
@@ -117,6 +129,7 @@ impl SimilarImages {
             hash_alg: HashAlg::Gradient,
             image_filter: FilterType::Lanczos3,
             use_cache: true,
+
         }
     }
 
@@ -437,7 +450,9 @@ impl SimilarImages {
                 let dimensions = image.dimensions();
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
-                let hasher = HasherConfig::with_bytes_type::<Vec<u8>>().to_hasher(); // TODO Change here image
+
+                let hasher_config = HasherConfig::new().hash_size(self.hash_size as u32, self.hash_size as u32).hash_alg(self.hash_alg).resize_filter(self.image_filter);
+                let hasher = hasher_config.to_hasher();
 
                 let hash = hasher.hash_image(&image);
                 let buf: Vec<u8> = hash.as_bytes().to_vec();
@@ -835,71 +850,71 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
         Similarity::None => {
             panic!()
         }
-        Similarity::Similar(k) => match hash_size {
+        Similarity::Similar(h) => match hash_size {
             4 => {
-                if *k < 1 {
-                    format!("Very High {}", *k)
-                } else if *k < 2 {
-                    format!("High {}", *k)
-                } else if *k < 3 {
-                    format!("Medium {}", *k)
-                } else if *k < 4 {
-                    format!("Small {}", *k)
-                } else if *k < 5 {
-                    format!("Very Small {}", *k)
-                } else if *k < 6 {
-                    format!("Minimal {}", *k)
+                if *h == 0 {
+                    format!("Very High {}", *h)
+                } else if *h <= 1 {
+                    format!("High {}", *h)
+                } else if *h <= 2 {
+                    format!("Medium {}", *h)
+                } else if *h <= 3 {
+                    format!("Small {}", *h)
+                } else if *h <= 4 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 5 {
+                    format!("Minimal {}", *h)
                 } else {
                     panic!();
                 }
             }
             8 => {
-                if *k < 1 {
-                    format!("Very High {}", *k)
-                } else if *k < 2 {
-                    format!("High {}", *k)
-                } else if *k < 4 {
-                    format!("Medium {}", *k)
-                } else if *k < 6 {
-                    format!("Small {}", *k)
-                } else if *k < 9 {
-                    format!("Very Small {}", *k)
-                } else if *k < 13 {
-                    format!("Minimal {}", *k)
+                if *h == 0 {
+                    format!("Very High {}", *h)
+                } else if *h <= 1 {
+                    format!("High {}", *h)
+                } else if *h <= 3 {
+                    format!("Medium {}", *h)
+                } else if *h <= 5 {
+                    format!("Small {}", *h)
+                } else if *h <= 8 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 12 {
+                    format!("Minimal {}", *h)
                 } else {
                     panic!();
                 }
             }
             16 => {
-                if *k < 3 {
-                    format!("Very High {}", *k)
-                } else if *k < 8 {
-                    format!("High {}", *k)
-                } else if *k < 12 {
-                    format!("Medium {}", *k)
-                } else if *k < 18 {
-                    format!("Small {}", *k)
-                } else if *k < 24 {
-                    format!("Very Small {}", *k)
-                } else if *k < 45 {
-                    format!("Minimal {}", *k)
+                if *h <= 2 {
+                    format!("Very High {}", *h)
+                } else if *h <= 7 {
+                    format!("High {}", *h)
+                } else if *h <= 11 {
+                    format!("Medium {}", *h)
+                } else if *h <= 17 {
+                    format!("Small {}", *h)
+                } else if *h <= 23 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 44 {
+                    format!("Minimal {}", *h)
                 } else {
                     panic!();
                 }
             }
             32 => {
-                if *k < 10 {
-                    format!("Very High {}", *k)
-                } else if *k < 30 {
-                    format!("High {}", *k)
-                } else if *k < 50 {
-                    format!("Medium {}", *k)
-                } else if *k < 90 {
-                    format!("Small {}", *k)
-                } else if *k < 120 {
-                    format!("Very Small {}", *k)
-                } else if *k < 180 {
-                    format!("Minimal {}", *k)
+                if *h <= 10 {
+                    format!("Very High {}", *h)
+                } else if *h <= 30 {
+                    format!("High {}", *h)
+                } else if *h <= 50 {
+                    format!("Medium {}", *h)
+                } else if *h <= 90 {
+                    format!("Small {}", *h)
+                } else if *h <= 120 {
+                    format!("Very Small {}", *h)
+                } else if *h <= 180 {
+                    format!("Minimal {}", *h)
                 } else {
                     panic!();
                 }
@@ -908,6 +923,56 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
                 panic!("Not supported hash size");
             }
         },
+    }
+}
+
+pub fn return_similarity_from_similarity_preset(similarity_preset : &SimilarityPreset, hash_size : u8) -> Similarity{
+    match hash_size{
+        4 => {
+            match similarity_preset {
+                SimilarityPreset::VeryHigh => Similarity::Similar(0),
+                SimilarityPreset::High => Similarity::Similar(1),
+                SimilarityPreset::Medium => Similarity::Similar(2),
+                SimilarityPreset::Small => Similarity::Similar(3),
+                SimilarityPreset::VerySmall => Similarity::Similar(4),
+                SimilarityPreset::Minimal => Similarity::Similar(4),
+                SimilarityPreset::None => panic!("")
+            }
+        }
+        8 => {
+            match similarity_preset {
+                SimilarityPreset::VeryHigh => Similarity::Similar(0),
+                SimilarityPreset::High => Similarity::Similar(1),
+                SimilarityPreset::Medium => Similarity::Similar(3),
+                SimilarityPreset::Small => Similarity::Similar(5),
+                SimilarityPreset::VerySmall => Similarity::Similar(8),
+                SimilarityPreset::Minimal => Similarity::Similar(12),
+                SimilarityPreset::None => panic!("")
+            }
+        }
+         16=> {
+            match similarity_preset {
+                SimilarityPreset::VeryHigh => Similarity::Similar(2),
+                SimilarityPreset::High => Similarity::Similar(7),
+                SimilarityPreset::Medium => Similarity::Similar(11),
+                SimilarityPreset::Small => Similarity::Similar(17),
+                SimilarityPreset::VerySmall => Similarity::Similar(23),
+                SimilarityPreset::Minimal => Similarity::Similar(44),
+                SimilarityPreset::None => panic!("")
+            }
+        }
+        32 => {
+            match similarity_preset {
+                SimilarityPreset::VeryHigh => Similarity::Similar(10),
+                SimilarityPreset::High => Similarity::Similar(30),
+                SimilarityPreset::Medium => Similarity::Similar(50),
+                SimilarityPreset::Small => Similarity::Similar(90),
+                SimilarityPreset::VerySmall => Similarity::Similar(120),
+                SimilarityPreset::Minimal => Similarity::Similar(180),
+                SimilarityPreset::None => panic!("")
+            }
+        }
+        _ => panic!()
     }
 }
 
