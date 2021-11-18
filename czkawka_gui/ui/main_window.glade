@@ -1314,7 +1314,7 @@ Author: Rafał Mikrut
                                 <property name="receives-default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_8</property>
+                                <property name="group">radio_button_similar_hash_size_16</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1330,6 +1330,7 @@ Author: Rafał Mikrut
                                 <property name="receives-default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw-indicator">True</property>
+                                <property name="group">radio_button_similar_hash_size_16</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1345,28 +1346,11 @@ Author: Rafał Mikrut
                                 <property name="receives-default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_8</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_size_32">
-                                <property name="label" translatable="yes">32</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_8</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>

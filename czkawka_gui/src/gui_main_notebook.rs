@@ -71,7 +71,6 @@ pub struct GuiMainNotebook {
     pub radio_button_similar_hash_size_4: gtk::RadioButton,
     pub radio_button_similar_hash_size_8: gtk::RadioButton,
     pub radio_button_similar_hash_size_16: gtk::RadioButton,
-    pub radio_button_similar_hash_size_32: gtk::RadioButton,
 
     pub image_preview_similar_images: gtk::Image,
     pub image_preview_duplicates: gtk::Image,
@@ -146,7 +145,6 @@ impl GuiMainNotebook {
         let radio_button_similar_hash_size_4: gtk::RadioButton = builder.object("radio_button_similar_hash_size_4").unwrap();
         let radio_button_similar_hash_size_8: gtk::RadioButton = builder.object("radio_button_similar_hash_size_8").unwrap();
         let radio_button_similar_hash_size_16: gtk::RadioButton = builder.object("radio_button_similar_hash_size_16").unwrap();
-        let radio_button_similar_hash_size_32: gtk::RadioButton = builder.object("radio_button_similar_hash_size_32").unwrap();
 
         let image_preview_similar_images: gtk::Image = builder.object("image_preview_similar_images").unwrap();
         let image_preview_duplicates: gtk::Image = builder.object("image_preview_duplicates").unwrap();
@@ -204,7 +202,6 @@ impl GuiMainNotebook {
             radio_button_similar_hash_size_4,
             radio_button_similar_hash_size_8,
             radio_button_similar_hash_size_16,
-            radio_button_similar_hash_size_32,
             image_preview_similar_images,
             entry_duplicate_maximal_size,
             entry_same_music_maximal_size,

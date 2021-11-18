@@ -95,7 +95,6 @@ pub fn connect_button_search(
     let radio_button_similar_hash_size_4 = gui_data.main_notebook.radio_button_similar_hash_size_4.clone();
     let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
     let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
-    let radio_button_similar_hash_size_32 = gui_data.main_notebook.radio_button_similar_hash_size_32.clone();
     let radio_button_resize_algorithm_catmullrom = gui_data.main_notebook.radio_button_resize_algorithm_catmullrom.clone();
     let radio_button_resize_algorithm_lanczos3 = gui_data.main_notebook.radio_button_resize_algorithm_lanczos3.clone();
     let radio_button_resize_algorithm_nearest = gui_data.main_notebook.radio_button_resize_algorithm_nearest.clone();
@@ -290,8 +289,6 @@ pub fn connect_button_search(
                     hash_size = 8;
                 } else if radio_button_similar_hash_size_16.is_active() {
                     hash_size = 16;
-                } else if radio_button_similar_hash_size_32.is_active() {
-                    hash_size = 32;
                 } else {
                     panic!("No radio button is pressed");
                 }

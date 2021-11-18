@@ -18,6 +18,7 @@ mod connect_popovers;
 mod connect_progress_window;
 mod connect_selection_of_directories;
 mod connect_settings;
+mod connect_similar_image_size_change;
 mod create_tree_view;
 mod double_click_opening;
 mod gui_about;
@@ -58,6 +59,7 @@ use crate::connect_popovers::*;
 use crate::connect_progress_window::*;
 use crate::connect_selection_of_directories::*;
 use crate::connect_settings::*;
+use crate::connect_similar_image_size_change::*;
 use crate::gui_data::*;
 use crate::initialize_gui::*;
 use crate::saving_loading::*;
@@ -147,6 +149,7 @@ fn main() {
     connect_settings(&gui_data);
     connect_button_about(&gui_data);
     connect_about_buttons(&gui_data);
+    connect_similar_image_size_change(&gui_data);
 
     // Quit the program when X in main window was clicked
     {

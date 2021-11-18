@@ -125,7 +125,7 @@ pub enum Commands {
         hash_alg: HashAlg,
         #[structopt(short = "f", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help="Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
         image_filter: FilterType,
-        #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16, 32)")]
+        #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16)")]
         hash_size: u8,
     },
     #[structopt(name = "zeroed", about = "Finds zeroed files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt")]
@@ -368,8 +368,7 @@ fn parse_image_hash_size(src: &str) -> Result<u8, String> {
         "4" => 4,
         "8" => 8,
         "16" => 16,
-        "32" => 32,
-        _ => return Err("Couldn't parse the image hash size (allowed: 4, 8, 16, 32)".to_string()),
+        _ => return Err("Couldn't parse the image hash size (allowed: 4, 8, 16)".to_string()),
     };
     Ok(hash_size)
 }

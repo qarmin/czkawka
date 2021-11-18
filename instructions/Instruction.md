@@ -69,7 +69,7 @@ By default, all tools only write about results to console, but it is possible wi
 ## Config/Cache files
 Currently, Czkawka stores few config and cache files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file may cause app crashes.
+- `cache_similar_image_SIZE_HASH_FILTER.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file manually is not recommended, but it is allowed. Each algorithms uses its own file, because hashes are completely different in each.
 - `cache_broken_files.txt` - stores cache data of broken files
 - `cache_duplicates_Blake3.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
 
@@ -89,7 +89,7 @@ Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 - **Manually adding multiple directories**  
   You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want. After setting required values, configuration must be loaded to Czkawka.
 - **Slow checking of little number similar images**  
-  If you checked before a large number of images (several tens of thousands) and they are still present on the disk, then the required information  about all of them is loaded from and saved to the cache, even if you are working with only few image files. You can rename cache file `cache_similar_image.txt`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save a lot of faster.
+  If you checked before a large number of images (several tens of thousands) and they are still present on the disk, then the required information  about all of them is loaded from and saved to the cache, even if you are working with only few image files. You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save a lot of faster.
 - **Not all columns are visible**
   For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
     - View can be scrolled via horizontal scroll bar
@@ -163,10 +163,12 @@ For each file inside the given path its size is read and then after sorting the 
 ### Temporary Files
 Searching for temporary files only involves comparing their extensions with a previously prepared list.
 
-Currently files with these extensions are considered  temporary files -
+Currently files with these extensions are considered temporary files -
 ```
 ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"]
 ```
+
+This only removes the most basic temporary files, for more I suggest to use BleachBit.
 
 ### Zeroed Files
 Zeroed files very often are results of e.g. incorrect file downloads.
@@ -224,7 +226,21 @@ Computed hash data is then thrown into a special tree that allows to compare has
 
 Next these hashes are saved to file, to be able to open images without needing to hash it more times.
 
-Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.
+Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.  
+
+It is possible to choose one of 5 types of hashes - `Gradient`, `Mean`, `VertGradient`, `Blockhash`, `DoubleGradient`.  
+Before calculating hashes usually images are resized with specific algorithm(`Lanczos3`, `Gaussian`, `CatmullRom`, `Triangle`, `Nearest`) to e.g. 8x8 or 16x16 image(allowed sizes - `4x4`, `8x8`, `16x16`), which allows simplifying later computations. Both size and filter can be adjusted in application.
+
+Each configuration saves results to different cache files to save users from invalid results.
+
+Some images broke hash functions and create hashes full of `0` or `255`, so these images are silently excluded(probably proper error reporting should be provided). 
+
+You can test each algorithm with provided CLI tool, just put to folder `test.jpg` file and run inside this command `czkawka_cli tester -i`
+
+Some tidbits:
+- Smaller hash size not always means that calculating it will take more time
+- `Blockhash` is the only algorithm that don't resize images before hashing
+- `Nearest` resize algorithm can be faster even 5 times than any other available but provide worse results
 ### Broken Files
 This tool finds files which are corrupted or have an invalid extension.
 

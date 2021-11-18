@@ -3,6 +3,7 @@ use crate::create_tree_view::*;
 use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
+use czkawka_core::similar_images::SIMILAR_VALUES;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -54,7 +55,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
         // Set step increment
         {
-            scale_similarity.set_range(0_f64, 12_f64);
+            scale_similarity.set_range(0_f64, SIMILAR_VALUES[1][5] as f64); // This defaults to value of minimal size of hash 8
+            scale_similarity.set_fill_level(SIMILAR_VALUES[1][5] as f64);
             scale_similarity.adjustment().set_step_increment(1_f64);
         }
 

@@ -42,6 +42,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
+    let radio_button_similar_hash_size_4 = gui_data.main_notebook.radio_button_similar_hash_size_4.clone();
+    let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
+    let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
 
     let main_context = glib::MainContext::default();
     let _guard = main_context.acquire().unwrap();
@@ -55,6 +58,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
         // Restore clickability to main notebook
         notebook_main.set_sensitive(true);
+
+        let hash_size;
+        if radio_button_similar_hash_size_4.is_active() {
+            hash_size = 4;
+        } else if radio_button_similar_hash_size_8.is_active() {
+            hash_size = 8;
+        } else if radio_button_similar_hash_size_16.is_active() {
+            hash_size = 16;
+        } else {
+            panic!("No radio button is pressed");
+        }
 
         match msg {
             Message::Duplicates(df) => {
@@ -523,7 +537,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let values: [(u32, &dyn ToValue); 12] = [
                                     (0, &true),
                                     (1, &false),
-                                    (2, &(similar_images::get_string_from_similarity(&file_entry.similarity, 8).to_string())), // TODO use proper hash value
+                                    (2, &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string())),
                                     (3, &file_entry.size.file_size(options::BINARY).unwrap()),
                                     (4, &file_entry.size),
                                     (5, &file_entry.dimensions),
