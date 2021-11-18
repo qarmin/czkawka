@@ -24,9 +24,9 @@ use std::{fs, mem, thread};
 
 // TODO check for better values
 pub const SIMILAR_VALUES: [[u32; 6]; 3] = [
-    [0, 1, 2, 3, 4, 5],      // 4 - Max 16
-    [0, 2, 5, 7, 14, 20],    // 8 - Max 256
-    [2, 7, 18, 35, 80, 150], // 16 - Max 65536
+    [0, 1, 2, 3, 4, 5],     // 4 - Max 16
+    [0, 2, 5, 7, 14, 20],   // 8 - Max 256
+    [2, 5, 10, 20, 40, 80], // 16 - Max 65536
 ];
 
 #[derive(Debug)]
@@ -42,8 +42,6 @@ pub enum Similarity {
     None,
     Similar(u32),
 }
-
-const MAX_SIMILARITY: u32 = 12;
 
 #[derive(Clone, Debug)]
 pub struct FileEntry {
@@ -526,7 +524,15 @@ impl SimilarImages {
         let mut this_time_check_hashes;
         let mut master_of_group: BTreeSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
 
-        for current_similarity in 0..=MAX_SIMILARITY {
+        // TODO optimize this for big temp_max_similarity values
+        let temp_max_similarity = match self.hash_size {
+            4 => SIMILAR_VALUES[0][5],
+            8 => SIMILAR_VALUES[1][5],
+            16 => SIMILAR_VALUES[1][5],
+            _ => panic!(),
+        };
+
+        for current_similarity in 0..=temp_max_similarity {
             this_time_check_hashes = available_hashes.clone();
 
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {

@@ -1314,7 +1314,7 @@ Author: Rafał Mikrut
                                 <property name="receives-default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_16</property>
+                                <property name="group">radio_button_similar_hash_size_8</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1330,7 +1330,6 @@ Author: Rafał Mikrut
                                 <property name="receives-default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_16</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1346,6 +1345,7 @@ Author: Rafał Mikrut
                                 <property name="receives-default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw-indicator">True</property>
+                                <property name="group">radio_button_similar_hash_size_8</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>

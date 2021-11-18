@@ -162,9 +162,11 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
             }
         }
 
-        if let Err(e) = open::that(&end_path) {
-            println!("Failed to open {} - Error {}", end_path, e);
-        }
+        open::that_in_background(&end_path);
+
+        // if let Err(e) = open::that(&end_path) {
+        //     println!("Failed to open {} - Error {}", end_path, e);
+        // }
     }
 }
 
