@@ -127,7 +127,6 @@ pub enum Commands {
         image_filter: FilterType,
         #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16, 32)")]
         hash_size: u8,
-
     },
     #[structopt(name = "zeroed", about = "Finds zeroed files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt")]
     ZeroedFiles {

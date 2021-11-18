@@ -50,7 +50,7 @@ pub struct FileEntry {
 
 // This is used by CLI tool when we cann
 #[derive(Clone, Debug)]
-pub enum SimilarityPreset{
+pub enum SimilarityPreset {
     VeryHigh,
     High,
     Medium,
@@ -129,7 +129,6 @@ impl SimilarImages {
             hash_alg: HashAlg::Gradient,
             image_filter: FilterType::Lanczos3,
             use_cache: true,
-
         }
     }
 
@@ -926,53 +925,45 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
     }
 }
 
-pub fn return_similarity_from_similarity_preset(similarity_preset : &SimilarityPreset, hash_size : u8) -> Similarity{
-    match hash_size{
-        4 => {
-            match similarity_preset {
-                SimilarityPreset::VeryHigh => Similarity::Similar(0),
-                SimilarityPreset::High => Similarity::Similar(1),
-                SimilarityPreset::Medium => Similarity::Similar(2),
-                SimilarityPreset::Small => Similarity::Similar(3),
-                SimilarityPreset::VerySmall => Similarity::Similar(4),
-                SimilarityPreset::Minimal => Similarity::Similar(4),
-                SimilarityPreset::None => panic!("")
-            }
-        }
-        8 => {
-            match similarity_preset {
-                SimilarityPreset::VeryHigh => Similarity::Similar(0),
-                SimilarityPreset::High => Similarity::Similar(1),
-                SimilarityPreset::Medium => Similarity::Similar(3),
-                SimilarityPreset::Small => Similarity::Similar(5),
-                SimilarityPreset::VerySmall => Similarity::Similar(8),
-                SimilarityPreset::Minimal => Similarity::Similar(12),
-                SimilarityPreset::None => panic!("")
-            }
-        }
-         16=> {
-            match similarity_preset {
-                SimilarityPreset::VeryHigh => Similarity::Similar(2),
-                SimilarityPreset::High => Similarity::Similar(7),
-                SimilarityPreset::Medium => Similarity::Similar(11),
-                SimilarityPreset::Small => Similarity::Similar(17),
-                SimilarityPreset::VerySmall => Similarity::Similar(23),
-                SimilarityPreset::Minimal => Similarity::Similar(44),
-                SimilarityPreset::None => panic!("")
-            }
-        }
-        32 => {
-            match similarity_preset {
-                SimilarityPreset::VeryHigh => Similarity::Similar(10),
-                SimilarityPreset::High => Similarity::Similar(30),
-                SimilarityPreset::Medium => Similarity::Similar(50),
-                SimilarityPreset::Small => Similarity::Similar(90),
-                SimilarityPreset::VerySmall => Similarity::Similar(120),
-                SimilarityPreset::Minimal => Similarity::Similar(180),
-                SimilarityPreset::None => panic!("")
-            }
-        }
-        _ => panic!()
+pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> Similarity {
+    match hash_size {
+        4 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(0),
+            SimilarityPreset::High => Similarity::Similar(1),
+            SimilarityPreset::Medium => Similarity::Similar(2),
+            SimilarityPreset::Small => Similarity::Similar(3),
+            SimilarityPreset::VerySmall => Similarity::Similar(4),
+            SimilarityPreset::Minimal => Similarity::Similar(4),
+            SimilarityPreset::None => panic!(""),
+        },
+        8 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(0),
+            SimilarityPreset::High => Similarity::Similar(1),
+            SimilarityPreset::Medium => Similarity::Similar(3),
+            SimilarityPreset::Small => Similarity::Similar(5),
+            SimilarityPreset::VerySmall => Similarity::Similar(8),
+            SimilarityPreset::Minimal => Similarity::Similar(12),
+            SimilarityPreset::None => panic!(""),
+        },
+        16 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(2),
+            SimilarityPreset::High => Similarity::Similar(7),
+            SimilarityPreset::Medium => Similarity::Similar(11),
+            SimilarityPreset::Small => Similarity::Similar(17),
+            SimilarityPreset::VerySmall => Similarity::Similar(23),
+            SimilarityPreset::Minimal => Similarity::Similar(44),
+            SimilarityPreset::None => panic!(""),
+        },
+        32 => match similarity_preset {
+            SimilarityPreset::VeryHigh => Similarity::Similar(10),
+            SimilarityPreset::High => Similarity::Similar(30),
+            SimilarityPreset::Medium => Similarity::Similar(50),
+            SimilarityPreset::Small => Similarity::Similar(90),
+            SimilarityPreset::VerySmall => Similarity::Similar(120),
+            SimilarityPreset::Minimal => Similarity::Similar(180),
+            SimilarityPreset::None => panic!(""),
+        },
+        _ => panic!(),
     }
 }
 
