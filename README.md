@@ -118,8 +118,8 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.
 - [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize
-- [FSlint](https://github.com/pixelb/fslint) - A little outdated, but have a lot of helpful tools
-- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, but only in CLI
+- [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
+- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, it is written also in Rust but only in CLI
 
 ## Contributions
 Contributions to this repository are welcome.
