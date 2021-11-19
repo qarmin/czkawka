@@ -17,6 +17,7 @@ use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
 use gtk::prelude::*;
 use gtk::WindowPosition;
+use img_hash::{FilterType, HashAlg};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -91,6 +92,19 @@ pub fn connect_button_search(
     let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
     let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
     let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
+    let radio_button_similar_hash_size_4 = gui_data.main_notebook.radio_button_similar_hash_size_4.clone();
+    let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
+    let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
+    let radio_button_resize_algorithm_catmullrom = gui_data.main_notebook.radio_button_resize_algorithm_catmullrom.clone();
+    let radio_button_resize_algorithm_lanczos3 = gui_data.main_notebook.radio_button_resize_algorithm_lanczos3.clone();
+    let radio_button_resize_algorithm_nearest = gui_data.main_notebook.radio_button_resize_algorithm_nearest.clone();
+    let radio_button_resize_algorithm_triangle = gui_data.main_notebook.radio_button_resize_algorithm_triangle.clone();
+    let radio_button_resize_algorithm_gaussian = gui_data.main_notebook.radio_button_resize_algorithm_gaussian.clone();
+    let radio_button_similar_hash_algorithm_gradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_gradient.clone();
+    let radio_button_similar_hash_algorithm_blockhash = gui_data.main_notebook.radio_button_similar_hash_algorithm_blockhash.clone();
+    let radio_button_similar_hash_algorithm_mean = gui_data.main_notebook.radio_button_similar_hash_algorithm_mean.clone();
+    let radio_button_similar_hash_algorithm_vertgradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_vertgradient.clone();
+    let radio_button_similar_hash_algorithm_doublegradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_doublegradient.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -268,6 +282,47 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_similar_images_finder).clear();
 
+                let hash_size;
+                if radio_button_similar_hash_size_4.is_active() {
+                    hash_size = 4;
+                } else if radio_button_similar_hash_size_8.is_active() {
+                    hash_size = 8;
+                } else if radio_button_similar_hash_size_16.is_active() {
+                    hash_size = 16;
+                } else {
+                    panic!("No radio button is pressed");
+                }
+
+                let image_filter;
+                if radio_button_resize_algorithm_catmullrom.is_active() {
+                    image_filter = FilterType::CatmullRom;
+                } else if radio_button_resize_algorithm_lanczos3.is_active() {
+                    image_filter = FilterType::Lanczos3;
+                } else if radio_button_resize_algorithm_nearest.is_active() {
+                    image_filter = FilterType::Nearest;
+                } else if radio_button_resize_algorithm_triangle.is_active() {
+                    image_filter = FilterType::Triangle;
+                } else if radio_button_resize_algorithm_gaussian.is_active() {
+                    image_filter = FilterType::Gaussian;
+                } else {
+                    panic!("No radio button is pressed");
+                }
+
+                let hash_alg;
+                if radio_button_similar_hash_algorithm_blockhash.is_active() {
+                    hash_alg = HashAlg::Blockhash;
+                } else if radio_button_similar_hash_algorithm_gradient.is_active() {
+                    hash_alg = HashAlg::Gradient;
+                } else if radio_button_similar_hash_algorithm_mean.is_active() {
+                    hash_alg = HashAlg::Mean;
+                } else if radio_button_similar_hash_algorithm_vertgradient.is_active() {
+                    hash_alg = HashAlg::VertGradient;
+                } else if radio_button_similar_hash_algorithm_doublegradient.is_active() {
+                    hash_alg = HashAlg::DoubleGradient;
+                } else {
+                    panic!("No radio button is pressed");
+                }
+
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
                 let maximal_file_size = entry_similar_images_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
@@ -286,6 +341,9 @@ pub fn connect_button_search(
                     sf.set_maximal_file_size(maximal_file_size);
                     sf.set_similarity(similarity);
                     sf.set_use_cache(use_cache);
+                    sf.set_hash_alg(hash_alg);
+                    sf.set_hash_size(hash_size);
+                    sf.set_image_filter(image_filter);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });

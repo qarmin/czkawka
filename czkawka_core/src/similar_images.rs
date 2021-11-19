@@ -22,6 +22,13 @@ use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
+// TODO check for better values
+pub const SIMILAR_VALUES: [[u32; 6]; 3] = [
+    [0, 1, 2, 3, 4, 5],     // 4 - Max 16
+    [0, 2, 5, 7, 14, 20],   // 8 - Max 256
+    [2, 5, 10, 20, 40, 80], // 16 - Max 65536
+];
+
 #[derive(Debug)]
 pub struct ProgressData {
     pub current_stage: u8,
@@ -35,8 +42,6 @@ pub enum Similarity {
     None,
     Similar(u32),
 }
-
-const MAX_SIMILARITY: u32 = 12;
 
 #[derive(Clone, Debug)]
 pub struct FileEntry {
@@ -134,7 +139,7 @@ impl SimilarImages {
 
     pub fn set_hash_size(&mut self, hash_size: u8) {
         self.hash_size = match hash_size {
-            4 | 8 | 16 | 32 | 64 => hash_size,
+            4 | 8 | 16 => hash_size,
             e => {
                 panic!("Invalid value of hash size {}", e);
             }
@@ -313,7 +318,7 @@ impl SimilarImages {
                     .to_lowercase();
 
                     // Checking allowed image extensions
-                    let allowed_image_extensions = [".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".pnm", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi", ".webp"];
+                    let allowed_image_extensions = [".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".pnm", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]; // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
                     if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
                         continue 'dir;
                     }
@@ -455,10 +460,17 @@ impl SimilarImages {
 
                 let hash = hasher.hash_image(&image);
                 let buf: Vec<u8> = hash.as_bytes().to_vec();
-                if buf.iter().all(|e| *e == 0) {
-                    // A little broken image
-                    return Some(None);
+
+                // Images with hashes with full of 0 or 255 usually means that algorithm fails to decode them because e.g. contains a log of alpha channel
+                {
+                    if buf.iter().all(|e| *e == 0) {
+                        return Some(None);
+                    }
+                    if buf.iter().all(|e| *e == 255) {
+                        return Some(None);
+                    }
                 }
+
                 file_entry.hash = buf.clone();
 
                 Some(Some((file_entry, buf)))
@@ -512,7 +524,15 @@ impl SimilarImages {
         let mut this_time_check_hashes;
         let mut master_of_group: BTreeSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
 
-        for current_similarity in 0..=MAX_SIMILARITY {
+        // TODO optimize this for big temp_max_similarity values
+        let temp_max_similarity = match self.hash_size {
+            4 => SIMILAR_VALUES[0][5],
+            8 => SIMILAR_VALUES[1][5],
+            16 => SIMILAR_VALUES[1][5],
+            _ => panic!(),
+        };
+
+        for current_similarity in 0..=temp_max_similarity {
             this_time_check_hashes = available_hashes.clone();
 
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -757,6 +777,8 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: 
 
         let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = Default::default();
 
+        let number_of_results: usize = hash_size as usize * hash_size as usize / 8;
+
         // Read the file line by line using the lines() iterator from std::io::BufRead.
         for (index, line) in reader.lines().enumerate() {
             let line = match line {
@@ -767,14 +789,21 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: 
                 }
             };
             let uuu = line.split("//").collect::<Vec<&str>>();
-            if uuu.len() != 12 {
-                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+            if uuu.len() != (number_of_results + 4) {
+                text_messages.warnings.push(format!(
+                    "Found invalid data in line {} - ({}) in cache file {}, expected {} values, found {}",
+                    index + 1,
+                    line,
+                    cache_file.display(),
+                    uuu.len(),
+                    number_of_results + 4
+                ));
                 continue;
             }
             // Don't load cache data if destination file not exists
             if Path::new(uuu[0]).exists() {
                 let mut hash: Vec<u8> = Vec::new();
-                for i in 0..hash_size {
+                for i in 0..number_of_results {
                     hash.push(match uuu[4 + i as usize].parse::<u8>() {
                         Ok(t) => t,
                         Err(e) => {
@@ -843,127 +872,74 @@ fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType)
     format!("cache_similar_images_{}_{}_{}.txt", hash_size, convert_algorithm_to_string(hash_alg), convert_filters_to_string(image_filter))
 }
 
-// TODO check for better values
 pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> String {
+    let index_preset = match hash_size {
+        4 => 0,
+        8 => 1,
+        16 => 2,
+        _ => panic!(),
+    };
+
     match similarity {
         Similarity::None => {
             panic!()
         }
-        Similarity::Similar(h) => match hash_size {
-            4 => {
-                if *h == 0 {
+        Similarity::Similar(h) => {
+            #[cfg(debug_assertions)]
+            {
+                if *h <= SIMILAR_VALUES[index_preset][0] {
                     format!("Very High {}", *h)
-                } else if *h <= 1 {
+                } else if *h <= SIMILAR_VALUES[index_preset][1] {
                     format!("High {}", *h)
-                } else if *h <= 2 {
+                } else if *h <= SIMILAR_VALUES[index_preset][2] {
                     format!("Medium {}", *h)
-                } else if *h <= 3 {
+                } else if *h <= SIMILAR_VALUES[index_preset][3] {
                     format!("Small {}", *h)
-                } else if *h <= 4 {
+                } else if *h <= SIMILAR_VALUES[index_preset][4] {
                     format!("Very Small {}", *h)
-                } else if *h <= 5 {
+                } else if *h <= SIMILAR_VALUES[index_preset][5] {
                     format!("Minimal {}", *h)
                 } else {
                     panic!();
                 }
             }
-            8 => {
-                if *h == 0 {
-                    format!("Very High {}", *h)
-                } else if *h <= 1 {
-                    format!("High {}", *h)
-                } else if *h <= 3 {
-                    format!("Medium {}", *h)
-                } else if *h <= 5 {
-                    format!("Small {}", *h)
-                } else if *h <= 8 {
-                    format!("Very Small {}", *h)
-                } else if *h <= 12 {
-                    format!("Minimal {}", *h)
+            #[cfg(not(debug_assertions))]
+            {
+                if *h <= SIMILAR_VALUES[index_preset][0] {
+                    format!("Very High")
+                } else if *h <= SIMILAR_VALUES[index_preset][1] {
+                    format!("High")
+                } else if *h <= SIMILAR_VALUES[index_preset][2] {
+                    format!("Medium")
+                } else if *h <= SIMILAR_VALUES[index_preset][3] {
+                    format!("Small")
+                } else if *h <= SIMILAR_VALUES[index_preset][4] {
+                    format!("Very Small")
+                } else if *h <= SIMILAR_VALUES[index_preset][5] {
+                    format!("Minimal")
                 } else {
                     panic!();
                 }
             }
-            16 => {
-                if *h <= 2 {
-                    format!("Very High {}", *h)
-                } else if *h <= 7 {
-                    format!("High {}", *h)
-                } else if *h <= 11 {
-                    format!("Medium {}", *h)
-                } else if *h <= 17 {
-                    format!("Small {}", *h)
-                } else if *h <= 23 {
-                    format!("Very Small {}", *h)
-                } else if *h <= 44 {
-                    format!("Minimal {}", *h)
-                } else {
-                    panic!();
-                }
-            }
-            32 => {
-                if *h <= 10 {
-                    format!("Very High {}", *h)
-                } else if *h <= 30 {
-                    format!("High {}", *h)
-                } else if *h <= 50 {
-                    format!("Medium {}", *h)
-                } else if *h <= 90 {
-                    format!("Small {}", *h)
-                } else if *h <= 120 {
-                    format!("Very Small {}", *h)
-                } else if *h <= 180 {
-                    format!("Minimal {}", *h)
-                } else {
-                    panic!();
-                }
-            }
-            _ => {
-                panic!("Not supported hash size");
-            }
-        },
+        }
     }
 }
 
 pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> Similarity {
-    match hash_size {
-        4 => match similarity_preset {
-            SimilarityPreset::VeryHigh => Similarity::Similar(0),
-            SimilarityPreset::High => Similarity::Similar(1),
-            SimilarityPreset::Medium => Similarity::Similar(2),
-            SimilarityPreset::Small => Similarity::Similar(3),
-            SimilarityPreset::VerySmall => Similarity::Similar(4),
-            SimilarityPreset::Minimal => Similarity::Similar(4),
-            SimilarityPreset::None => panic!(""),
-        },
-        8 => match similarity_preset {
-            SimilarityPreset::VeryHigh => Similarity::Similar(0),
-            SimilarityPreset::High => Similarity::Similar(1),
-            SimilarityPreset::Medium => Similarity::Similar(3),
-            SimilarityPreset::Small => Similarity::Similar(5),
-            SimilarityPreset::VerySmall => Similarity::Similar(8),
-            SimilarityPreset::Minimal => Similarity::Similar(12),
-            SimilarityPreset::None => panic!(""),
-        },
-        16 => match similarity_preset {
-            SimilarityPreset::VeryHigh => Similarity::Similar(2),
-            SimilarityPreset::High => Similarity::Similar(7),
-            SimilarityPreset::Medium => Similarity::Similar(11),
-            SimilarityPreset::Small => Similarity::Similar(17),
-            SimilarityPreset::VerySmall => Similarity::Similar(23),
-            SimilarityPreset::Minimal => Similarity::Similar(44),
-            SimilarityPreset::None => panic!(""),
-        },
-        32 => match similarity_preset {
-            SimilarityPreset::VeryHigh => Similarity::Similar(10),
-            SimilarityPreset::High => Similarity::Similar(30),
-            SimilarityPreset::Medium => Similarity::Similar(50),
-            SimilarityPreset::Small => Similarity::Similar(90),
-            SimilarityPreset::VerySmall => Similarity::Similar(120),
-            SimilarityPreset::Minimal => Similarity::Similar(180),
-            SimilarityPreset::None => panic!(""),
-        },
+    let index_preset = match hash_size {
+        4 => 0,
+        8 => 1,
+        16 => 2,
         _ => panic!(),
+    };
+    match similarity_preset {
+        SimilarityPreset::VeryHigh => Similarity::Similar(SIMILAR_VALUES[index_preset][0]),
+        SimilarityPreset::High => Similarity::Similar(SIMILAR_VALUES[index_preset][1]),
+        SimilarityPreset::Medium => Similarity::Similar(SIMILAR_VALUES[index_preset][2]),
+        SimilarityPreset::Small => Similarity::Similar(SIMILAR_VALUES[index_preset][3]),
+        SimilarityPreset::VerySmall => Similarity::Similar(SIMILAR_VALUES[index_preset][4]),
+        SimilarityPreset::Minimal => Similarity::Similar(SIMILAR_VALUES[index_preset][5]),
+        SimilarityPreset::None => panic!(""),
     }
 }
 
