@@ -318,7 +318,7 @@ impl SimilarImages {
                     .to_lowercase();
 
                     // Checking allowed image extensions
-                    let allowed_image_extensions = [".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".pnm", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]; // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+                    let allowed_image_extensions = [".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]; // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
                     if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
                         continue 'dir;
                     }
@@ -380,7 +380,6 @@ impl SimilarImages {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
-            // TODO Change cache size
             loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter) {
                 Some(t) => t,
                 None => Default::default(),

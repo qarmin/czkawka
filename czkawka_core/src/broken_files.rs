@@ -687,9 +687,11 @@ fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     // Checking allowed image extensions
     let allowed_image_extensions = [
         ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-        ".tiff", ".tif", ".pnm", ".tga", ".ff", /*, ".gif"*/
+        ".tiff", ".tif", ".tga", ".ff", /*, ".gif"*/
+        // Gif will be reenabled in image-rs 0.24
         ".jif", ".jfi", /*, ".ico"*/
-        ".webp", ".avif",
+        // Ico and bmp crashes are not fixed yet
+        /*".webp",*/ ".avif", // Webp is not really supported in image crate
     ];
     let allowed_archive_zip_extensions = [".zip"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
     let allowed_audio_extensions = [".mp3", ".flac", ".wav", ".ogg"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working

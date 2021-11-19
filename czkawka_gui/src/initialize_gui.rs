@@ -648,7 +648,7 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                 let file_name = file_name.as_str();
 
                 if let Some(extension) = Path::new(file_name).extension() {
-                    if !["jpg", "jpeg", "png", "bmp", "tiff", "tif", "pnm", "tga", "ff", "gif", "jif", "jfi", "webp"].contains(&extension.to_string_lossy().to_string().to_lowercase().as_str()) {
+                    if !["jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "gif", "jif", "jfi"].contains(&extension.to_string_lossy().to_string().to_lowercase().as_str()) {
                         break 'dir;
                     }
 
