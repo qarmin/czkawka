@@ -524,6 +524,7 @@ impl SimilarImages {
         let mut master_of_group: BTreeSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
 
         // TODO optimize this for big temp_max_similarity values
+        // TODO maybe Simialar(u32) is enough instead SIMILAR_VALUES value?
         let temp_max_similarity = match self.hash_size {
             4 => SIMILAR_VALUES[0][5],
             8 => SIMILAR_VALUES[1][5],

@@ -1,3 +1,15 @@
+## Version 3.3.0 - 20.11.2021r
+- Select files by pressing space key [#415](https://github.com/qarmin/czkawka/pull/415)
+- Add additional info to printed errors [#446](https://github.com/qarmin/czkawka/pull/446) 
+- Add support for multiple image filters, hashes and sizes in similar images tool [#447](https://github.com/qarmin/czkawka/pull/447), [#448](https://github.com/qarmin/czkawka/pull/448)
+- Button to move files/folders to provided location [#449](https://github.com/qarmin/czkawka/pull/449)
+- Add non clickable button to fix white theme [#450](https://github.com/qarmin/czkawka/pull/450)
+- Fixed freeze when opening in same thread file/folder [#448](https://github.com/qarmin/czkawka/pull/448)
+- Tool to check performance of different image filters and hash types and sizes [#447](https://github.com/qarmin/czkawka/pull/447) 
+- Add scheduled CI and pin it to support Rust 1.53.0 [7bb](https://github.com/qarmin/czkawka/commit/7bbdf742739a513b80d0cc06ba61dfafec976b23), [#431](https://github.com/qarmin/czkawka/pull/431)
+- Update snap file to use builtin rust plugin and update gnome extension [8f2](https://github.com/qarmin/czkawka/commit/8f232285e5c34bee6d5da8e1453d7f40a0ffd08d)
+- Disable from checking in similar images `webp`, `gif`, `bmp`, `ico` extension which caused crashes [#445](https://github.com/qarmin/czkawka/pull/446), [49e](https://github.com/qarmin/czkawka/commit/49effca169adb57b33f666757966d43b244319cc)
+
 ## Version 3.2.0 - 07.08.2021r
 - Use checkbox instead selection to select files [#392](https://github.com/qarmin/czkawka/pull/392)
 - Re-enable hardlink on windows - [#410](https://github.com/qarmin/czkawka/pull/410)
