@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::gui_about::GuiAbout;
 use crate::gui_bottom_buttons::GuiBottomButtons;
 use crate::gui_header::GuiHeader;

@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::notebook_enums::*;
 use czkawka_core::common_traits::SaveResults;

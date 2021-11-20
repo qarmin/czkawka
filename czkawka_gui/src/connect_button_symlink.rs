@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::connect_button_hardlink::hardlink_symlink;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;

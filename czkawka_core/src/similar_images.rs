@@ -527,7 +527,7 @@ impl SimilarImages {
         let temp_max_similarity = match self.hash_size {
             4 => SIMILAR_VALUES[0][5],
             8 => SIMILAR_VALUES[1][5],
-            16 => SIMILAR_VALUES[1][5],
+            16 => SIMILAR_VALUES[2][5],
             _ => panic!(),
         };
 
