@@ -176,7 +176,7 @@ fn move_with_tree(tree_view: gtk::TreeView, column_file_name: i32, column_path: 
                 if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
                     selection_rows.push(model.path(&iter).unwrap());
                 } else {
-                    println!("ERROR: This should not happen model.value(&iter, column_color).get::<String>().unwrap() != MAIN_ROW_COLOR");
+                    panic!("Header row shouldn't have selected, selection button");
                 }
             }
 
