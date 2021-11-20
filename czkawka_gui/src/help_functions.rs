@@ -31,7 +31,7 @@ pub enum Message {
 #[derive(Debug)]
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
-    VisibleSelectButton = 0,
+    ActivatableSelectButton = 0,
     ActiveSelectButton,
     Name,
     Path,
@@ -72,7 +72,7 @@ pub enum ColumnsTemporaryFiles {
     Modification,
 }
 pub enum ColumnsSimilarImages {
-    VisibleSelectButton = 0,
+    ActivatableSelectButton = 0,
     ActiveSelectButton,
     Similarity,
     Size,
@@ -94,7 +94,7 @@ pub enum ColumnsZeroedFiles {
     Modification,
 }
 pub enum ColumnsSameMusic {
-    VisibleSelectButton = 0,
+    ActivatableSelectButton = 0,
     ActiveSelectButton,
     Size,
     SizeAsBytes,

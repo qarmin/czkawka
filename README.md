@@ -12,6 +12,7 @@
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions 
   or excluded items with the `*` wildcard
+- No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multiple tools to use:
   - Duplicates - Finds duplicates based on file name, size, hash, hash of just first 1 MB of a file
   - Empty Folders - Finds empty folders with the help of an advanced algorithm

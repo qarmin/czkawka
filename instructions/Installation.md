@@ -19,8 +19,7 @@ sudo xbps-install gcc pkg-config alsa-lib-devel
 ```
 
 ### macOS
-Currently, you need to manually install `GTK 3` libraries and the Adwaita theme, because they are dynamically loaded from the OS (*we need
-help in using static linking*). One very straight-forward way to do this is by using [Homebrew](https://brew.sh/). Installation in the terminal:
+Currently, you need to manually install `GTK 3` libraries and the Adwaita theme, because they are dynamically loaded from the OS (*help in linking statically these things is needed*). One very straight-forward way to do this is by using [Homebrew](https://brew.sh/). Installation in the terminal:
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install gtk+3 adwaita-icon-theme
