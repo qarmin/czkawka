@@ -22,6 +22,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
         let buttons_symlink = gui_data.bottom_buttons.buttons_symlink.clone();
         let buttons_hardlink = gui_data.bottom_buttons.buttons_hardlink.clone();
+        let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
 
         // Disable and show buttons - only search button should be visible
         buttons_search.show();
@@ -30,6 +31,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         buttons_select.hide();
         buttons_symlink.hide();
         buttons_hardlink.hide();
+        buttons_move.hide();
     }
 
     //// Initialize main scrolled view with notebook
