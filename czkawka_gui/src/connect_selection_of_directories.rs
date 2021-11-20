@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::get_list_store;
 use gtk::prelude::*;

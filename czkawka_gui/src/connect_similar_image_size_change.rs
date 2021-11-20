@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::gui_data::GuiData;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use gtk::prelude::*;

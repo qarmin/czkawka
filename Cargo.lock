@@ -496,6 +496,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "directories-next",
+ "fs_extra",
  "futures",
  "gdk",
  "glib",
@@ -627,6 +628,12 @@ name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
+
+[[package]]
+name = "fs_extra"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2022715d62ab30faffd124d40b76f4134a550a87792276512b18d63272333394"
 
 [[package]]
 name = "futures"

@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 use gtk::prelude::*;

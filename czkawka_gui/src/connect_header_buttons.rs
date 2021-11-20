@@ -1,4 +1,3 @@
-extern crate gtk;
 use crate::gui_data::GuiData;
 use gtk::prelude::*;
 use gtk::{ResponseType, WindowPosition};

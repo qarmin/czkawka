@@ -1,6 +1,5 @@
 use humansize::{file_size_opts as options, FileSize};
 
-extern crate gtk;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;

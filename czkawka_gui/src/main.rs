@@ -43,7 +43,6 @@ mod taskbar_progress_win;
 
 use czkawka_core::*;
 
-extern crate gtk;
 use crate::connect_about_buttons::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_hardlink::*;
