@@ -19,7 +19,7 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_resizable(false);
     column.set_fixed_width(30);
-    column.add_attribute(&renderer, "visible", ColumnsDuplicates::VisibleSelectButton as i32);
+    column.add_attribute(&renderer, "activatable", ColumnsDuplicates::ActivatableSelectButton as i32);
     column.add_attribute(&renderer, "active", ColumnsDuplicates::ActiveSelectButton as i32);
     column.add_attribute(&renderer, "cell-background", ColumnsDuplicates::Color as i32);
     tree_view.append_column(&column);
@@ -286,7 +286,7 @@ pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_resizable(false);
     column.set_fixed_width(30);
-    column.add_attribute(&renderer, "visible", ColumnsSimilarImages::VisibleSelectButton as i32);
+    column.add_attribute(&renderer, "activatable", ColumnsSimilarImages::ActivatableSelectButton as i32);
     column.add_attribute(&renderer, "active", ColumnsSimilarImages::ActiveSelectButton as i32);
     column.add_attribute(&renderer, "cell-background", ColumnsSimilarImages::Color as i32);
     tree_view.append_column(&column);
@@ -446,7 +446,7 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
     column.pack_start(&renderer, true);
     column.set_resizable(false);
     column.set_fixed_width(30);
-    column.add_attribute(&renderer, "visible", ColumnsSameMusic::VisibleSelectButton as i32);
+    column.add_attribute(&renderer, "activatable", ColumnsSameMusic::ActivatableSelectButton as i32);
     column.add_attribute(&renderer, "active", ColumnsSameMusic::ActiveSelectButton as i32);
     column.add_attribute(&renderer, "cell-background", ColumnsSameMusic::Color as i32);
     tree_view.append_column(&column);
