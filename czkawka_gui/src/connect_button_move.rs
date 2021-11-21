@@ -39,7 +39,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 tree_view_same_music_finder.clone(),
                 ColumnsSameMusic::Name as i32,
                 ColumnsSameMusic::Path as i32,
-                Some(ColumnsDuplicates::Color as i32),
+                Some(ColumnsSameMusic::Color as i32),
                 ColumnsSameMusic::ActiveSelectButton as i32,
                 &gui_data,
             );
@@ -49,7 +49,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 tree_view_similar_images_finder.clone(),
                 ColumnsSimilarImages::Name as i32,
                 ColumnsSimilarImages::Path as i32,
-                Some(ColumnsDuplicates::Color as i32),
+                Some(ColumnsSimilarImages::Color as i32),
                 ColumnsSimilarImages::ActiveSelectButton as i32,
                 &gui_data,
             );
