@@ -359,7 +359,6 @@ impl SaveResults for EmptyFolder {
     }
 }
 impl PrintResults for EmptyFolder {
-    /// Prints basic info about empty folders // TODO print better
     fn print_results(&self) {
         if !self.empty_folder_list.is_empty() {
             println!("Found {} empty folders", self.empty_folder_list.len());

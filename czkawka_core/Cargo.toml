@@ -34,12 +34,16 @@ futures = "0.3.17"
 zip = "0.5.13"
 rodio = { version = "0.14.0", optional = true }
 
-# Hashes
+# Hashes for duplicate files
 blake3 = "1.2.0"
 crc32fast = "1.2.1"
 xxhash-rust = { version = "0.8.2", features = ["xxh3"] }
 
 tempfile = "3.2.0"
+
+# Video Duplactes
+vid_dup_finder_lib = { git = "https://github.com/qarmin/vid_dup_finder_lib"}
+ffmpeg_cmdline_utils = "0.1.0"
 
 [features]
 default = []

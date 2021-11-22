@@ -47,9 +47,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.45"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee10e43ae4a853c0a3591d4e2ada1719e553be18199d9da9d4a83f5927c2f5c7"
+checksum = "38d9ff5d688f1c13395289f67db01d4826b46dd694e7580accdc3e8430f2d98e"
 
 [[package]]
 name = "arrayref"
@@ -476,6 +476,7 @@ dependencies = [
  "crc32fast",
  "crossbeam-channel",
  "directories-next",
+ "ffmpeg_cmdline_utils",
  "futures",
  "hamming",
  "humansize",
@@ -484,6 +485,7 @@ dependencies = [
  "rayon",
  "rodio",
  "tempfile",
+ "vid_dup_finder_lib",
  "xxhash-rust",
  "zip",
 ]
@@ -600,6 +602,19 @@ name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
+
+[[package]]
+name = "ffmpeg_cmdline_utils"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f156b1f5ba5f16135ec1efd32d9f90d0dad3ef8f8b77ca9928d4d0e3b24dd41"
+dependencies = [
+ "image",
+ "rayon",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
 
 [[package]]
 name = "field-offset"
@@ -1051,7 +1066,7 @@ checksum = "5ea4eac6fc4f64ed363d5c210732b747bfa5ddd8a25ac347d887f298c3a70b49"
 dependencies = [
  "base64",
  "image",
- "rustdct",
+ "rustdct 0.4.0",
  "serde",
  "transpose 0.2.1",
 ]
@@ -1073,6 +1088,12 @@ checksum = "69ddb889f9d0d08a67338271fa9b62996bc788c7796a5c18cf057420aaed5eaf"
 dependencies = [
  "either",
 ]
+
+[[package]]
+name = "itoa"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
 name = "jni"
@@ -1146,15 +1167,15 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.107"
+version = "0.2.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbe5e23404da5b4f555ef85ebed98fb4083e55a00c317800bc2a50ede9f3d219"
+checksum = "8521a1b57e76b1ec69af7599e75e38e7b7fad6610f037db8c79b127201b5d119"
 
 [[package]]
 name = "libloading"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0cf036d15402bea3c5d4de17b3fce76b3e4a56ebc1f577be0e7a72f7c607cf0"
+checksum = "afe203d669ec979b7128619bae5a63b7b42e9203c1b29146079ee05e2f604b52"
 dependencies = [
  "cfg-if",
  "winapi",
@@ -1336,9 +1357,9 @@ dependencies = [
 
 [[package]]
 name = "ndk-sys"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c44922cb3dbb1c70b5e5f443d63b64363a898564d739ba5198e3a9138442868d"
+checksum = "e1bcdd74c20ad5d95aacd60ef9ba40fdf77f767051040541df557b7a9b2a2121"
 
 [[package]]
 name = "nix"
@@ -1369,6 +1390,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6b19411a9719e753aff12e5187b74d60d3dc449ec3f4dc21e3989c3f554bc95"
 dependencies = [
  "autocfg",
+ "num-traits",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "747d632c0c558b87dbabbe6a82f3b4ae03720d0646ac5b7b4dae89394be5f2c5"
+dependencies = [
  "num-traits",
 ]
 
@@ -1612,6 +1642,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed0cfbc8191465bed66e1718596ee0b0b35d5ee1f41c5df2189d0fe8bde535ba"
 
 [[package]]
+name = "primal-check"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01419cee72c1a1ca944554e23d83e483e1bccf378753344e881de28b5487511d"
+dependencies = [
+ "num-integer",
+]
+
+[[package]]
 name = "proc-macro-crate"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1826,7 +1865,16 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef4d167674b4cf68c2114bdbcd34c95aa9071652b73b0f43b19298f1d2780b7d"
 dependencies = [
- "rustfft",
+ "rustfft 3.0.1",
+]
+
+[[package]]
+name = "rustdct"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fadcb505b98aa64da1dadb1498b912e3642aae4606623cb3ae952cd8da33f80d"
+dependencies = [
+ "rustfft 5.1.1",
 ]
 
 [[package]]
@@ -1835,12 +1883,32 @@ version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77008ed59a8923c8b4ac2e5eaa6d28fbe893d3b9515098a4a5fc7767d6430fe5"
 dependencies = [
- "num-complex",
+ "num-complex 0.2.4",
  "num-integer",
  "num-traits",
  "strength_reduce",
  "transpose 0.1.0",
 ]
+
+[[package]]
+name = "rustfft"
+version = "5.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1869bb2a6ff77380d52ff4bc631f165637035a55855c76aa462c85474dadc42f"
+dependencies = [
+ "num-complex 0.3.1",
+ "num-integer",
+ "num-traits",
+ "primal-check",
+ "strength_reduce",
+ "transpose 0.2.1",
+]
+
+[[package]]
+name = "ryu"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
 name = "same-file"
@@ -1899,6 +1967,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "serde_json"
+version = "1.0.71"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "063bf466a64011ac24040a49009724ee60a57da1b437617ceb32e53ad61bfb19"
+dependencies = [
+ "itoa",
+ "ryu",
+ "serde",
 ]
 
 [[package]]
@@ -2192,6 +2271,22 @@ name = "version_check"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
+
+[[package]]
+name = "vid_dup_finder_lib"
+version = "0.1.0"
+source = "git+https://github.com/qarmin/vid_dup_finder_lib#65f438269b12e0d52a2a06a8080439b3f7c7f761"
+dependencies = [
+ "ffmpeg_cmdline_utils",
+ "image",
+ "rand",
+ "rayon",
+ "rustdct 0.6.0",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "transpose 0.2.1",
+]
 
 [[package]]
 name = "walkdir"

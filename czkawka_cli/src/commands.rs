@@ -123,7 +123,7 @@ pub enum Commands {
         not_recursive: NotRecursive,
         #[structopt(short = "g", long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help="Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
         hash_alg: HashAlg,
-        #[structopt(short = "f", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help="Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
+        #[structopt(short = "z", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help="Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
         image_filter: FilterType,
         #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16)")]
         hash_size: u8,
@@ -204,6 +204,29 @@ pub enum Commands {
         #[structopt(flatten)]
         not_recursive: NotRecursive,
     },
+    #[structopt(name = "video", about = "Finds similar video files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka videos -d /home/rafal -f results.txt")]
+    SimilarVideos {
+        #[structopt(flatten)]
+        directories: Directories,
+        #[structopt(flatten)]
+        excluded_directories: ExcludedDirectories,
+        #[structopt(flatten)]
+        excluded_items: ExcludedItems,
+        // #[structopt(short = "D", long, help = "Delete found files")]
+        // delete_files: bool, TODO
+        #[structopt(flatten)]
+        file_to_save: FileToSave,
+        #[structopt(flatten)]
+        allowed_extensions: AllowedExtensions,
+        #[structopt(flatten)]
+        not_recursive: NotRecursive,
+        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        minimal_file_size: u64,
+        #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
+        maximal_file_size: u64,
+        #[structopt(short = "t", long, parse(try_from_str = parse_tolerance), default_value = "10", help = "Video maximium difference (allowed values <0,20>)", long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)")]
+        tolerance: f64,
+    },
     #[structopt(name = "tester", about = "Contains various test", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka tests -i")]
     Tester {
         #[structopt(short = "i", long = "test_image", help = "Test speed of hashing provided test.jpg image with different filters and methods.")]
@@ -280,6 +303,19 @@ fn parse_hash_type(src: &str) -> Result<HashType, &'static str> {
         "crc32" => Ok(HashType::Crc32),
         "xxh3" => Ok(HashType::Xxh3),
         _ => Err("Couldn't parse the hash type (allowed: BLAKE3, CRC32, XXH3)"),
+    }
+}
+
+fn parse_tolerance(src: &str) -> Result<f64, &'static str> {
+    match src.parse::<i32>() {
+        Ok(t) => {
+            if (0..=20).contains(&t) {
+                Ok(t as f64 / 100.0f64)
+            } else {
+                Err("Tolerance should be in range <0,20>(Higher and lower similarity )")
+            }
+        }
+        _ => Err("Failed to parse tolerance as i32 value."),
     }
 }
 
