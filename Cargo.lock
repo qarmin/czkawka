@@ -47,9 +47,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.47"
+version = "1.0.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38d9ff5d688f1c13395289f67db01d4826b46dd694e7580accdc3e8430f2d98e"
+checksum = "62e1f47f7dc0422027a4e370dd4548d4d66b26782e513e98dca1e689e058a80e"
 
 [[package]]
 name = "arrayref"
@@ -2275,7 +2275,7 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 [[package]]
 name = "vid_dup_finder_lib"
 version = "0.1.0"
-source = "git+https://github.com/qarmin/vid_dup_finder_lib#65f438269b12e0d52a2a06a8080439b3f7c7f761"
+source = "git+https://github.com/qarmin/vid_dup_finder_lib#a4809772aea8f73c9a22da6fb43df50bfdd1b31d"
 dependencies = [
  "ffmpeg_cmdline_utils",
  "image",
