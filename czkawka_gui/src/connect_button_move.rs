@@ -55,6 +55,16 @@ pub fn connect_button_move(gui_data: &GuiData) {
             );
             image_preview_similar_images.hide();
         }
+        NotebookMainEnum::SimilarVideos => {
+            move_things(
+                tree_view_similar_images_finder.clone(),
+                ColumnsSimilarVideos::Name as i32,
+                ColumnsSimilarVideos::Path as i32,
+                Some(ColumnsSimilarVideos::Color as i32),
+                ColumnsSimilarVideos::ActiveSelectButton as i32,
+                &gui_data,
+            );
+        }
         NotebookMainEnum::BigFiles => {
             move_things(
                 tree_view_big_files_finder.clone(),

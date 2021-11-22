@@ -11,6 +11,7 @@ pub struct GuiMainNotebook {
     pub scrolled_window_temporary_files_finder: gtk::ScrolledWindow,
     pub scrolled_window_big_files_finder: gtk::ScrolledWindow,
     pub scrolled_window_similar_images_finder: gtk::ScrolledWindow,
+    pub scrolled_window_similar_videos_finder: gtk::ScrolledWindow,
     pub scrolled_window_zeroed_files_finder: gtk::ScrolledWindow,
     pub scrolled_window_same_music_finder: gtk::ScrolledWindow,
     pub scrolled_window_invalid_symlinks: gtk::ScrolledWindow,
@@ -22,6 +23,7 @@ pub struct GuiMainNotebook {
     pub tree_view_temporary_files_finder: gtk::TreeView,
     pub tree_view_big_files_finder: gtk::TreeView,
     pub tree_view_similar_images_finder: gtk::TreeView,
+    pub tree_view_similar_videos_finder: gtk::TreeView,
     pub tree_view_zeroed_files_finder: gtk::TreeView,
     pub tree_view_same_music_finder: gtk::TreeView,
     pub tree_view_invalid_symlinks: gtk::TreeView,
@@ -29,6 +31,8 @@ pub struct GuiMainNotebook {
 
     pub entry_similar_images_minimal_size: gtk::Entry,
     pub entry_similar_images_maximal_size: gtk::Entry,
+    pub entry_similar_videos_minimal_size: gtk::Entry,
+    pub entry_similar_videos_maximal_size: gtk::Entry,
     pub entry_duplicate_minimal_size: gtk::Entry,
     pub entry_duplicate_maximal_size: gtk::Entry,
     pub entry_same_music_minimal_size: gtk::Entry,
@@ -51,6 +55,7 @@ pub struct GuiMainNotebook {
     pub radio_button_duplicates_hash: gtk::RadioButton,
 
     pub scale_similarity: gtk::Scale,
+    pub scale_similarity_similar_videos: gtk::Scale,
 
     pub radio_button_hash_type_blake3: gtk::RadioButton,
     pub radio_button_hash_type_crc32: gtk::RadioButton,
@@ -86,6 +91,7 @@ impl GuiMainNotebook {
         let scrolled_window_temporary_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_temporary_files_finder").unwrap();
         let scrolled_window_big_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_big_files_finder").unwrap();
         let scrolled_window_similar_images_finder: gtk::ScrolledWindow = builder.object("scrolled_window_similar_images_finder").unwrap();
+        let scrolled_window_similar_videos_finder: gtk::ScrolledWindow = builder.object("scrolled_window_similar_videos_finder").unwrap();
         let scrolled_window_zeroed_files_finder: gtk::ScrolledWindow = builder.object("scrolled_window_zeroed_files_finder").unwrap();
         let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.object("scrolled_window_same_music_finder").unwrap();
         let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.object("scrolled_window_invalid_symlinks").unwrap();
@@ -97,6 +103,7 @@ impl GuiMainNotebook {
         let tree_view_temporary_files_finder: gtk::TreeView = TreeView::new();
         let tree_view_big_files_finder: gtk::TreeView = TreeView::new();
         let tree_view_similar_images_finder: gtk::TreeView = TreeView::new();
+        let tree_view_similar_videos_finder: gtk::TreeView = TreeView::new();
         let tree_view_zeroed_files_finder: gtk::TreeView = TreeView::new();
         let tree_view_same_music_finder: gtk::TreeView = TreeView::new();
         let tree_view_invalid_symlinks: gtk::TreeView = TreeView::new();
@@ -104,6 +111,8 @@ impl GuiMainNotebook {
 
         let entry_similar_images_minimal_size: gtk::Entry = builder.object("entry_similar_images_minimal_size").unwrap();
         let entry_similar_images_maximal_size: gtk::Entry = builder.object("entry_similar_images_maximal_size").unwrap();
+        let entry_similar_videos_minimal_size: gtk::Entry = builder.object("entry_similar_videos_minimal_size").unwrap();
+        let entry_similar_videos_maximal_size: gtk::Entry = builder.object("entry_similar_videos_maximal_size").unwrap();
         let entry_duplicate_minimal_size: gtk::Entry = builder.object("entry_duplicate_minimal_size").unwrap();
         let entry_duplicate_maximal_size: gtk::Entry = builder.object("entry_duplicate_maximal_size").unwrap();
         let entry_same_music_minimal_size: gtk::Entry = builder.object("entry_same_music_minimal_size").unwrap();
@@ -125,6 +134,7 @@ impl GuiMainNotebook {
         let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
         let scale_similarity: gtk::Scale = builder.object("scale_similarity").unwrap();
+        let scale_similarity_similar_videos: gtk::Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
         let radio_button_hash_type_blake3: gtk::RadioButton = builder.object("radio_button_hash_type_blake3").unwrap();
         let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
@@ -157,6 +167,7 @@ impl GuiMainNotebook {
             scrolled_window_temporary_files_finder,
             scrolled_window_big_files_finder,
             scrolled_window_similar_images_finder,
+            scrolled_window_similar_videos_finder,
             scrolled_window_zeroed_files_finder,
             scrolled_window_same_music_finder,
             scrolled_window_invalid_symlinks,
@@ -167,12 +178,15 @@ impl GuiMainNotebook {
             tree_view_temporary_files_finder,
             tree_view_big_files_finder,
             tree_view_similar_images_finder,
+            tree_view_similar_videos_finder,
             tree_view_zeroed_files_finder,
             tree_view_same_music_finder,
             tree_view_invalid_symlinks,
             tree_view_broken_files,
             entry_similar_images_minimal_size,
             entry_similar_images_maximal_size,
+            entry_similar_videos_minimal_size,
+            entry_similar_videos_maximal_size,
             entry_duplicate_minimal_size,
             entry_big_files_number,
             entry_same_music_minimal_size,
@@ -186,6 +200,7 @@ impl GuiMainNotebook {
             radio_button_duplicates_hashmb,
             radio_button_duplicates_hash,
             scale_similarity,
+            scale_similarity_similar_videos,
             radio_button_hash_type_blake3,
             radio_button_hash_type_crc32,
             radio_button_hash_type_xxh3,

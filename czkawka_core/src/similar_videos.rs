@@ -67,7 +67,7 @@ pub struct SimilarVideos {
     stopped_search: bool,
     videos_to_check: BTreeMap<String, FileEntry>,
     use_cache: bool,
-    tolerance: f64,
+    tolerance: i32,
 }
 
 /// Info struck with helpful information's about results
@@ -101,12 +101,12 @@ impl SimilarVideos {
             stopped_search: false,
             videos_to_check: Default::default(),
             use_cache: true,
-            tolerance: 0.15,
+            tolerance: 10,
         }
     }
 
-    pub fn set_tolerance(&mut self, tolerance: f64) {
-        assert!(tolerance > 0.0 && tolerance < 0.20);
+    pub fn set_tolerance(&mut self, tolerance: i32) {
+        assert!(tolerance >= 0 && tolerance <= 20);
         self.tolerance = tolerance
     }
 
@@ -458,7 +458,7 @@ impl SimilarVideos {
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files".to_string());
         let hash_map_modification = SystemTime::now();
 
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance));
+        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
 
         let mut collected_similar_videos: Vec<Vec<FileEntry>> = Default::default();
         for i in match_group {

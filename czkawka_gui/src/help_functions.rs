@@ -8,6 +8,7 @@ use czkawka_core::invalid_symlinks;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
+use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
@@ -22,6 +23,7 @@ pub enum Message {
     BigFiles(BigFile),
     Temporary(Temporary),
     SimilarImages(SimilarImages),
+    SimilarVideos(SimilarVideos),
     ZeroedFiles(ZeroedFiles),
     SameMusic(SameMusic),
     InvalidSymlinks(InvalidSymlinks),
@@ -78,6 +80,19 @@ pub enum ColumnsSimilarImages {
     Size,
     SizeAsBytes,
     Dimensions,
+    Name,
+    Path,
+    Modification,
+    ModificationAsSecs,
+    Color,
+    TextColor,
+}
+
+pub enum ColumnsSimilarVideos {
+    ActivatableSelectButton = 0,
+    ActiveSelectButton,
+    Size,
+    SizeAsBytes,
     Name,
     Path,
     Modification,
@@ -235,6 +250,15 @@ pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_mod
 }
 pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap();
+
+    if color == HEADER_ROW_COLOR {
+        return false;
+    }
+
+    true
+}
+pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32).get::<String>().unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;

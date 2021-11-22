@@ -103,6 +103,19 @@ pub fn opening_enter_function_similar_images(tree_view: &gtk::TreeView, event: &
     handle_tree_keypress(tree_view, event, ColumnsSimilarImages::Name as u32, ColumnsSimilarImages::Path as u32, ColumnsSimilarImages::ActiveSelectButton as u32)
 }
 
+pub fn opening_double_click_function_similar_videos(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+    if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
+        common_open_function(tree_view, ColumnsSimilarVideos::Name as i32, ColumnsSimilarVideos::Path as i32, OpenMode::PathAndName);
+    } else if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 3 {
+        common_open_function(tree_view, ColumnsSimilarVideos::Name as i32, ColumnsSimilarVideos::Path as i32, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+
+pub fn opening_enter_function_similar_videos(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
+    handle_tree_keypress(tree_view, event, ColumnsSimilarVideos::Name as u32, ColumnsSimilarVideos::Path as u32, ColumnsSimilarVideos::ActiveSelectButton as u32)
+}
+
 pub fn opening_double_click_function_invalid_symlinks(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
         common_open_function(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, OpenMode::PathAndName);

@@ -12,6 +12,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
+    let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
@@ -50,6 +51,11 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 file_name = "results_similar_images.txt";
 
                 shared_similar_images_state.borrow_mut().save_results_to_file(file_name);
+            }
+            NotebookMainEnum::SimilarVideos => {
+                file_name = "results_similar_videos.txt";
+
+                shared_similar_videos_state.borrow_mut().save_results_to_file(file_name);
             }
             NotebookMainEnum::Zeroed => {
                 file_name = "results_zeroed_files.txt";

@@ -99,6 +99,8 @@ fn main() {
     let (futures_sender_same_music, futures_receiver_same_music): (futures::channel::mpsc::UnboundedSender<same_music::ProgressData>, futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>) = futures::channel::mpsc::unbounded();
     let (futures_sender_similar_images, futures_receiver_similar_images): (futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>, futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>) =
         futures::channel::mpsc::unbounded();
+    let (futures_sender_similar_videos, futures_receiver_similar_videos): (futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>, futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>) =
+        futures::channel::mpsc::unbounded();
     let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::UnboundedSender<temporary::ProgressData>, futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>) = futures::channel::mpsc::unbounded();
     let (futures_sender_zeroed, futures_receiver_zeroed): (futures::channel::mpsc::UnboundedSender<zeroed::ProgressData>, futures::channel::mpsc::UnboundedReceiver<zeroed::ProgressData>) = futures::channel::mpsc::unbounded();
     let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>, futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>) =
@@ -120,6 +122,7 @@ fn main() {
         futures_sender_big_file,
         futures_sender_same_music,
         futures_sender_similar_images,
+        futures_sender_similar_videos,
         futures_sender_temporary,
         futures_sender_zeroed,
         futures_sender_invalid_symlinks,
@@ -142,6 +145,7 @@ fn main() {
         futures_receiver_big_file,
         futures_receiver_same_music,
         futures_receiver_similar_images,
+        futures_receiver_similar_videos,
         futures_receiver_temporary,
         futures_receiver_zeroed,
         futures_receiver_invalid_symlinks,

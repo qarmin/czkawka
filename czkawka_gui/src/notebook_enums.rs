@@ -1,4 +1,4 @@
-pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = 10;
+pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = 11;
 pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 4;
 
 // Needs to be updated when changed order of notebook tabs
@@ -10,6 +10,7 @@ pub enum NotebookMainEnum {
     EmptyFiles,
     Temporary,
     SimilarImages,
+    SimilarVideos,
     SameMusic,
     Zeroed,
     Symlinks,
@@ -23,10 +24,11 @@ pub fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
         3 => NotebookMainEnum::EmptyFiles,
         4 => NotebookMainEnum::Temporary,
         5 => NotebookMainEnum::SimilarImages,
-        6 => NotebookMainEnum::SameMusic,
-        7 => NotebookMainEnum::Zeroed,
-        8 => NotebookMainEnum::Symlinks,
-        9 => NotebookMainEnum::BrokenFiles,
+        6 => NotebookMainEnum::SimilarVideos,
+        7 => NotebookMainEnum::SameMusic,
+        8 => NotebookMainEnum::Zeroed,
+        9 => NotebookMainEnum::Symlinks,
+        10 => NotebookMainEnum::BrokenFiles,
         _ => panic!("Invalid Notebook Tab"),
     }
 }
@@ -42,6 +44,7 @@ pub fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
         to_notebook_main_enum(7),
         to_notebook_main_enum(8),
         to_notebook_main_enum(9),
+        to_notebook_main_enum(10),
     ]
 }
 

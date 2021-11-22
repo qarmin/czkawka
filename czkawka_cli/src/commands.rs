@@ -225,7 +225,7 @@ pub enum Commands {
         #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
         #[structopt(short = "t", long, parse(try_from_str = parse_tolerance), default_value = "10", help = "Video maximium difference (allowed values <0,20>)", long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)")]
-        tolerance: f64,
+        tolerance: i32,
     },
     #[structopt(name = "tester", about = "Contains various test", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka tests -i")]
     Tester {
@@ -306,11 +306,11 @@ fn parse_hash_type(src: &str) -> Result<HashType, &'static str> {
     }
 }
 
-fn parse_tolerance(src: &str) -> Result<f64, &'static str> {
+fn parse_tolerance(src: &str) -> Result<i32, &'static str> {
     match src.parse::<i32>() {
         Ok(t) => {
             if (0..=20).contains(&t) {
-                Ok(t as f64 / 100.0f64)
+                Ok(t)
             } else {
                 Err("Tolerance should be in range <0,20>(Higher and lower similarity )")
             }
