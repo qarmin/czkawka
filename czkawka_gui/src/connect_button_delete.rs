@@ -448,6 +448,8 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
                 // TODO, this maybe isn't required if we will be sure that any header cannot be selected
                 if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
                     selection_rows.push(model.path(&iter).unwrap());
+                } else {
+                    panic!("Header row shouldn't have selected, selection button");
                 }
             }
 

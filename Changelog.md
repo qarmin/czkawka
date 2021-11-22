@@ -1,3 +1,6 @@
+## Version 3.3.1 - 22.11.2021r
+
+
 ## Version 3.3.0 - 20.11.2021r
 - Select files by pressing space key [#415](https://github.com/qarmin/czkawka/pull/415)
 - Add additional info to printed errors [#446](https://github.com/qarmin/czkawka/pull/446) 
