@@ -4,6 +4,7 @@ use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
 use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_videos::MAX_TOLERANCE;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -54,19 +55,20 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
 
-        let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
+        let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
         let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
 
         // Set step increment
         {
-            scale_similarity.set_range(0_f64, SIMILAR_VALUES[1][5] as f64); // This defaults to value of minimal size of hash 8
-            scale_similarity.set_fill_level(SIMILAR_VALUES[1][5] as f64);
-            scale_similarity.adjustment().set_step_increment(1_f64);
+            scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[1][5] as f64); // This defaults to value of minimal size of hash 8
+            scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[1][5] as f64);
+            scale_similarity_similar_images.adjustment().set_step_increment(1_f64);
         }
         // Set step increment
         {
-            scale_similarity_similar_videos.set_range(0_f64, 20_f64); // This defaults to value of minimal size of hash 8
-            scale_similarity_similar_videos.set_fill_level(20_f64); // TODO this should be probably some constant
+            scale_similarity_similar_videos.set_range(0_f64, MAX_TOLERANCE as f64); // This defaults to value of minimal size of hash 8
+            scale_similarity_similar_videos.set_value(15_f64);
+            scale_similarity_similar_videos.set_fill_level(MAX_TOLERANCE as f64);
             scale_similarity_similar_videos.adjustment().set_step_increment(1_f64);
         }
 

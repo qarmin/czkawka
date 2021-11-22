@@ -56,7 +56,8 @@ pub fn connect_button_search(
     let radio_button_duplicates_size = gui_data.main_notebook.radio_button_duplicates_size.clone();
     let radio_button_duplicates_hashmb = gui_data.main_notebook.radio_button_duplicates_hashmb.clone();
     let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
-    let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
+    let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
+    let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
     let entry_duplicate_minimal_size = gui_data.main_notebook.entry_duplicate_minimal_size.clone();
     let entry_duplicate_maximal_size = gui_data.main_notebook.entry_duplicate_maximal_size.clone();
     let stop_receiver = gui_data.stop_receiver.clone();
@@ -330,7 +331,7 @@ pub fn connect_button_search(
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
                 let maximal_file_size = entry_similar_images_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
-                let similarity = similar_images::Similarity::Similar(scale_similarity.value() as u32);
+                let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
 
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
@@ -362,7 +363,7 @@ pub fn connect_button_search(
                 let minimal_file_size = entry_similar_videos_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
                 let maximal_file_size = entry_similar_videos_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
-                let tolerance = scale_similarity.value() as i32;
+                let tolerance = scale_similarity_similar_videos.value() as i32;
 
                 let futures_sender_similar_videos = futures_sender_similar_videos.clone();
                 // Find similar videos

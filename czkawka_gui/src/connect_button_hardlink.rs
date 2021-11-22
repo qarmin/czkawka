@@ -15,6 +15,7 @@ pub fn connect_button_hardlink(gui_data: &GuiData) {
 
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
@@ -53,6 +54,17 @@ pub fn connect_button_hardlink(gui_data: &GuiData) {
                 &gui_data,
             );
             image_preview_similar_images.hide();
+        }
+        NotebookMainEnum::SimilarVideos => {
+            hardlink_symlink(
+                tree_view_similar_videos_finder.clone(),
+                ColumnsSimilarVideos::Name as i32,
+                ColumnsSimilarVideos::Path as i32,
+                ColumnsSimilarVideos::Color as i32,
+                ColumnsSimilarVideos::ActiveSelectButton as i32,
+                true,
+                &gui_data,
+            );
         }
         e => panic!("Not existent {:?}", e),
     });

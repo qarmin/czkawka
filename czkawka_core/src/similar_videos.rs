@@ -23,6 +23,8 @@ use std::{fs, mem, thread};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
+pub const MAX_TOLERANCE: i32 = 20;
+
 #[derive(Debug)]
 pub struct ProgressData {
     pub current_stage: u8,
@@ -106,7 +108,7 @@ impl SimilarVideos {
     }
 
     pub fn set_tolerance(&mut self, tolerance: i32) {
-        assert!(tolerance >= 0 && tolerance <= 20);
+        assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         self.tolerance = tolerance
     }
 
@@ -287,7 +289,7 @@ impl SimilarVideos {
                     }
 
                     // Checking allowed video extensions
-                    let allowed_video_extensions = [".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".ogg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv"];
+                    let allowed_video_extensions = [".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv"];
                     if !allowed_video_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
                         continue 'dir;
                     }
@@ -407,7 +409,7 @@ impl SimilarVideos {
 
                 let vhash = match VideoHash::from_path(&file_entry.path) {
                     Ok(t) => t,
-                    Err(e) => return Some(Err(format!("Failed to hash file {:?}, reason {}", file_entry.path, e))),
+                    Err(e) => return Some(Err(format!("Failed to hash file, {}", e))),
                 };
 
                 file_entry.vhash = vhash;

@@ -54,7 +54,7 @@ pub struct GuiMainNotebook {
     pub radio_button_duplicates_hashmb: gtk::RadioButton,
     pub radio_button_duplicates_hash: gtk::RadioButton,
 
-    pub scale_similarity: gtk::Scale,
+    pub scale_similarity_similar_images: gtk::Scale,
     pub scale_similarity_similar_videos: gtk::Scale,
 
     pub radio_button_hash_type_blake3: gtk::RadioButton,
@@ -133,7 +133,7 @@ impl GuiMainNotebook {
         let radio_button_duplicates_hashmb: gtk::RadioButton = builder.object("radio_button_duplicates_hashmb").unwrap();
         let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
-        let scale_similarity: gtk::Scale = builder.object("scale_similarity").unwrap();
+        let scale_similarity_similar_images: gtk::Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: gtk::Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
         let radio_button_hash_type_blake3: gtk::RadioButton = builder.object("radio_button_hash_type_blake3").unwrap();
@@ -199,7 +199,7 @@ impl GuiMainNotebook {
             radio_button_duplicates_size,
             radio_button_duplicates_hashmb,
             radio_button_duplicates_hash,
-            scale_similarity,
+            scale_similarity_similar_images,
             scale_similarity_similar_videos,
             radio_button_hash_type_blake3,
             radio_button_hash_type_crc32,

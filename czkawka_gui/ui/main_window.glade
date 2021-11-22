@@ -1467,7 +1467,7 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScale" id="scale_similarity">
+                              <object class="GtkScale" id="scale_similarity_similar_images">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="fill-level">100</property>
