@@ -102,7 +102,6 @@ fn main() {
     let (futures_sender_similar_videos, futures_receiver_similar_videos): (futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>, futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>) =
         futures::channel::mpsc::unbounded();
     let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::UnboundedSender<temporary::ProgressData>, futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>) = futures::channel::mpsc::unbounded();
-    let (futures_sender_zeroed, futures_receiver_zeroed): (futures::channel::mpsc::UnboundedSender<zeroed::ProgressData>, futures::channel::mpsc::UnboundedReceiver<zeroed::ProgressData>) = futures::channel::mpsc::unbounded();
     let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>, futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>) =
         futures::channel::mpsc::unbounded();
     let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) = futures::channel::mpsc::unbounded();
@@ -124,7 +123,6 @@ fn main() {
         futures_sender_similar_images,
         futures_sender_similar_videos,
         futures_sender_temporary,
-        futures_sender_zeroed,
         futures_sender_invalid_symlinks,
         futures_sender_broken_files,
     );
@@ -147,7 +145,6 @@ fn main() {
         futures_receiver_similar_images,
         futures_receiver_similar_videos,
         futures_receiver_temporary,
-        futures_receiver_zeroed,
         futures_receiver_invalid_symlinks,
         futures_receiver_broken_files,
     );

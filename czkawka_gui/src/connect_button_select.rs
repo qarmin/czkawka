@@ -17,6 +17,7 @@ pub fn connect_button_select(gui_data: &GuiData) {
     {
         // Remember to update connect_popovers file, because this data are connected to each others
         hashmap.insert(NotebookMainEnum::SimilarImages, vec!["all", "image_size", "reverse", "custom", "date"]);
+        hashmap.insert(NotebookMainEnum::SimilarVideos, vec!["all", "reverse", "custom", "date"]);
         hashmap.insert(NotebookMainEnum::Duplicate, vec!["all", "reverse", "custom", "date"]);
         hashmap.insert(NotebookMainEnum::SameMusic, vec!["all", "reverse", "custom", "date"]);
 
@@ -24,7 +25,6 @@ pub fn connect_button_select(gui_data: &GuiData) {
         hashmap.insert(NotebookMainEnum::EmptyDirectories, vec!["all", "reverse", "custom"]);
         hashmap.insert(NotebookMainEnum::BigFiles, vec!["all", "reverse", "custom"]);
         hashmap.insert(NotebookMainEnum::Symlinks, vec!["all", "reverse", "custom"]);
-        hashmap.insert(NotebookMainEnum::Zeroed, vec!["all", "reverse", "custom"]);
         hashmap.insert(NotebookMainEnum::Temporary, vec!["all", "reverse", "custom"]);
         hashmap.insert(NotebookMainEnum::BrokenFiles, vec!["all", "reverse", "custom"]);
     }

@@ -66,18 +66,6 @@ pub fn opening_enter_function_big_files(tree_view: &gtk::TreeView, event: &gdk::
     handle_tree_keypress(tree_view, event, ColumnsBigFiles::Name as u32, ColumnsBigFiles::Path as u32, ColumnsBigFiles::ActiveSelectButton as u32)
 }
 
-pub fn opening_double_click_function_zeroed_files(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
-    if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
-        common_open_function(tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, OpenMode::PathAndName);
-    } else if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 3 {
-        common_open_function(tree_view, ColumnsZeroedFiles::Name as i32, ColumnsZeroedFiles::Path as i32, OpenMode::OnlyPath);
-    }
-    gtk::Inhibit(false)
-}
-pub fn opening_enter_function_zeroed_files(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
-    handle_tree_keypress(tree_view, event, ColumnsZeroedFiles::Name as u32, ColumnsZeroedFiles::Path as u32, ColumnsZeroedFiles::ActiveSelectButton as u32)
-}
-
 pub fn opening_double_click_function_same_music(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
         common_open_function(tree_view, ColumnsSameMusic::Name as i32, ColumnsSameMusic::Path as i32, OpenMode::PathAndName);

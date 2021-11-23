@@ -10,7 +10,6 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
 use gtk::{ListStore, TextView};
 use std::collections::HashMap;
@@ -24,7 +23,6 @@ pub enum Message {
     Temporary(Temporary),
     SimilarImages(SimilarImages),
     SimilarVideos(SimilarVideos),
-    ZeroedFiles(ZeroedFiles),
     SameMusic(SameMusic),
     InvalidSymlinks(InvalidSymlinks),
     BrokenFiles(BrokenFiles),
@@ -99,14 +97,6 @@ pub enum ColumnsSimilarVideos {
     ModificationAsSecs,
     Color,
     TextColor,
-}
-pub enum ColumnsZeroedFiles {
-    ActiveSelectButton = 0,
-    Size,
-    SizeAsBytes,
-    Name,
-    Path,
-    Modification,
 }
 pub enum ColumnsSameMusic {
     ActivatableSelectButton = 0,
