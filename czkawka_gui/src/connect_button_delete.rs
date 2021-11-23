@@ -20,6 +20,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
@@ -103,6 +104,26 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                         &gui_data,
                     );
                     image_preview_similar_images.hide();
+                }
+            }
+            NotebookMainEnum::SimilarVideos => {
+                if !check_button_settings_confirm_group_deletion.is_active()
+                    || !check_if_deleting_all_files_in_group(
+                        &tree_view_similar_videos_finder.clone(),
+                        ColumnsSimilarVideos::Color as i32,
+                        ColumnsSimilarVideos::ActiveSelectButton as i32,
+                        &window_main,
+                        &check_button_settings_confirm_group_deletion,
+                    )
+                {
+                    tree_remove(
+                        &tree_view_similar_videos_finder.clone(),
+                        ColumnsSimilarVideos::Name as i32,
+                        ColumnsSimilarVideos::Path as i32,
+                        ColumnsSimilarVideos::Color as i32,
+                        ColumnsSimilarVideos::ActiveSelectButton as i32,
+                        &gui_data,
+                    );
                 }
             }
             NotebookMainEnum::Zeroed => {

@@ -4,6 +4,7 @@ use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
 use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_videos::MAX_TOLERANCE;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -42,6 +43,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let scrolled_window_temporary_files_finder = gui_data.main_notebook.scrolled_window_temporary_files_finder.clone();
         let scrolled_window_big_files_finder = gui_data.main_notebook.scrolled_window_big_files_finder.clone();
         let scrolled_window_similar_images_finder = gui_data.main_notebook.scrolled_window_similar_images_finder.clone();
+        let scrolled_window_similar_videos_finder = gui_data.main_notebook.scrolled_window_similar_videos_finder.clone();
         let scrolled_window_same_music_finder = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
         let scrolled_window_invalid_symlinks = gui_data.main_notebook.scrolled_window_invalid_symlinks.clone();
         let scrolled_window_zeroed_files_finder = gui_data.main_notebook.scrolled_window_zeroed_files_finder.clone();
@@ -53,13 +55,21 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
 
-        let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
+        let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
+        let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
 
         // Set step increment
         {
-            scale_similarity.set_range(0_f64, SIMILAR_VALUES[1][5] as f64); // This defaults to value of minimal size of hash 8
-            scale_similarity.set_fill_level(SIMILAR_VALUES[1][5] as f64);
-            scale_similarity.adjustment().set_step_increment(1_f64);
+            scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[1][5] as f64); // This defaults to value of minimal size of hash 8
+            scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[1][5] as f64);
+            scale_similarity_similar_images.adjustment().set_step_increment(1_f64);
+        }
+        // Set step increment
+        {
+            scale_similarity_similar_videos.set_range(0_f64, MAX_TOLERANCE as f64); // This defaults to value of minimal size of hash 8
+            scale_similarity_similar_videos.set_value(15_f64);
+            scale_similarity_similar_videos.set_fill_level(MAX_TOLERANCE as f64);
+            scale_similarity_similar_videos.adjustment().set_step_increment(1_f64);
         }
 
         // Set Main Scrolled Window Treeviews
@@ -360,6 +370,71 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                         ColumnsSimilarImages::Path as i32,
                         ColumnsSimilarImages::Name as i32,
                     );
+                    gtk::Inhibit(false)
+                });
+            }
+            // Similar Videos
+            {
+                let col_types: [glib::types::Type; 10] = [
+                    glib::types::Type::BOOL,   // ActivatableSelectButton
+                    glib::types::Type::BOOL,   // ActiveSelectButton
+                    glib::types::Type::STRING, // Size
+                    glib::types::Type::U64,    // SizeAsBytes
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                    glib::types::Type::STRING, // Color
+                    glib::types::Type::STRING, // TextColor
+                ];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
+
+                tree_view.selection().set_mode(SelectionMode::Multiple);
+                tree_view.selection().set_select_function(Some(Box::new(select_function_similar_videos)));
+
+                create_tree_view_similar_videos(&mut tree_view);
+
+                tree_view.connect_button_press_event(opening_double_click_function_similar_videos);
+                tree_view.connect_key_press_event(opening_enter_function_similar_videos);
+
+                gui_data.main_notebook.tree_view_similar_videos_finder = tree_view.clone();
+                scrolled_window_similar_videos_finder.add(&tree_view);
+                scrolled_window_similar_videos_finder.show_all();
+
+                let gui_data = gui_data.clone();
+                tree_view.connect_key_release_event(move |tree_view, e| {
+                    if let Some(button_number) = e.keycode() {
+                        // Handle delete button
+                        if button_number == 119 {
+                            if tree_view.selection().selected_rows().0.is_empty() {
+                                return gtk::Inhibit(false);
+                            }
+                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                                return gtk::Inhibit(false);
+                            }
+                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
+                                && check_if_deleting_all_files_in_group(
+                                    &tree_view.clone(),
+                                    ColumnsSimilarVideos::Color as i32,
+                                    ColumnsSimilarVideos::ActiveSelectButton as i32,
+                                    &gui_data.window_main,
+                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
+                                )
+                            {
+                                return gtk::Inhibit(false);
+                            }
+                            tree_remove(
+                                tree_view,
+                                ColumnsSimilarVideos::Name as i32,
+                                ColumnsSimilarVideos::Path as i32,
+                                ColumnsSimilarVideos::Color as i32,
+                                ColumnsSimilarVideos::ActiveSelectButton as i32,
+                                &gui_data,
+                            );
+                        }
+                    }
                     gtk::Inhibit(false)
                 });
             }

@@ -669,7 +669,7 @@ impl DebugPrint for SameMusic {
         println!("Found duplicated files music - {}", self.duplicated_music_entries.len());
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
-        println!("Recursive search - {}", self.recursive_search.to_string());
+        println!("Recursive search - {}", self.recursive_search);
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }

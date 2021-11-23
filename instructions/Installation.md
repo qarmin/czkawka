@@ -1,28 +1,34 @@
 # Installation
 ## Requirements
 ### Linux
-If you use Snap, Flatpak or Appimage, you may skip this section.
+If you use Snap, Flatpak or Appimage, you need to only install ffmpeg if you want to use Similar Videos tool.
 
 For Czkawka GUI you are required to have at least `GTK 3.22` and also `Alsa` installed (for finding broken music files, but it is disabled by default).  
+`FFmpeg` in Similar Videos is non required dependency - app will work, but this tool will throw errors, so I recommend to install it.  
 It should be installed by default on all the most popular distros.
-#### Ubuntu/Debian
+#### Ubuntu/Debian/Linux Mint
 ```
-sudo apt install libgtk-3-dev
+sudo apt install libgtk-3-dev ffmpeg
 ```
-#### Fedora/CentOS
+#### Fedora/Rocky Linux
 ```
 sudo yum install gtk3-devel glib2-devel
+sudo dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf -y install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf -y install ffmpeg
 ```
 #### Void Linux (CLI only)
 ```
-sudo xbps-install gcc pkg-config alsa-lib-devel
+sudo xbps-install gcc pkg-config alsa-lib-devel ffpmeg
 ```
 
 ### macOS
-Currently, you need to manually install `GTK 3` libraries and the Adwaita theme, because they are dynamically loaded from the OS (*help in linking statically these things is needed*). One very straight-forward way to do this is by using [Homebrew](https://brew.sh/). Installation in the terminal:
+Currently, you need to manually install `GTK 3` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS (*help in linking statically these things is needed*).  
+One very straight-forward way to do this is by using [Homebrew](https://brew.sh/).  
+Installation in the terminal:
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk+3 adwaita-icon-theme
+brew install gtk+3 adwaita-icon-theme ffmpeg
 ```
 After that, go to the location where you downloaded Czkawka and add the `executable` permission to this file.
 ```shell
@@ -37,6 +43,8 @@ At the end execute it:
 By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 3`
 runtime from [**here**](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
 
+FFmpeg to be able to use Similar Videos, you can download and install from this [**link**](https://ffmpeg.org/).
+
 ## Installation
 ### Precompiled binaries
 Ready-to-go executables for Linux, Windows and macOS are available [**here**](https://github.com/qarmin/czkawka/releases/).  
@@ -49,7 +57,7 @@ Artifacts from each commit can be downloaded [**here**](https://github.com/qarmi
 ### Appimage
 Appimage files are available in release page - [**GitHub releases**](https://github.com/qarmin/czkawka/releases/)  
 This version is bundled with its own theme.  
-There is also a small problem with not being able to open 2 images at once.
+There is also minimal appimage which use system theme.
 
 ### Cargo
 The easiest method to install Czkawka is using the `cargo` command. To compile it, you need to get all the
@@ -93,10 +101,13 @@ sudo apt-get update
 sudo apt-get install czkawka
 ```
 
+alternatively you can use instruction from this [xtradeb site](https://xtradeb.net/wiki/how-to-install-applications-from-this-web-site/)
+
 ### AUR - Arch Linux Package (unofficial)
 Czkawka is also available in Arch Linux's AUR from which it can be easily installed.
 ```
-yay -Syu czkawka-git
+yay -Syu czkawka-gui
+yay -Syu czkawka-cli
 ```
 or
 ```

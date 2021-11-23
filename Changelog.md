@@ -1,5 +1,6 @@
 ## Version 3.3.1 - 22.11.2021r
-
+- Fix crash when moving buttons [#457](https://github.com/qarmin/czkawka/pull/457)
+- Hide move button at start [c9ca230](https://github.com/qarmin/czkawka/commit/c9ca230dfd05e2166b2d68683b091cfd45037edd)
 
 ## Version 3.3.0 - 20.11.2021r
 - Select files by pressing space key [#415](https://github.com/qarmin/czkawka/pull/415)

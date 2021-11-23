@@ -11,6 +11,7 @@ use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images::SimilarImages;
+use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
@@ -33,6 +34,7 @@ pub fn connect_button_search(
     futures_sender_big_file: futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
     futures_sender_same_music: futures::channel::mpsc::UnboundedSender<same_music::ProgressData>,
     futures_sender_similar_images: futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
+    futures_sender_similar_videos: futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
     futures_sender_temporary: futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
     futures_sender_zeroed: futures::channel::mpsc::UnboundedSender<zeroed::ProgressData>,
     futures_sender_invalid_symlinks: futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>,
@@ -54,13 +56,16 @@ pub fn connect_button_search(
     let radio_button_duplicates_size = gui_data.main_notebook.radio_button_duplicates_size.clone();
     let radio_button_duplicates_hashmb = gui_data.main_notebook.radio_button_duplicates_hashmb.clone();
     let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
-    let scale_similarity = gui_data.main_notebook.scale_similarity.clone();
+    let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
+    let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
     let entry_duplicate_minimal_size = gui_data.main_notebook.entry_duplicate_minimal_size.clone();
     let entry_duplicate_maximal_size = gui_data.main_notebook.entry_duplicate_maximal_size.clone();
     let stop_receiver = gui_data.stop_receiver.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
     let entry_similar_images_minimal_size = gui_data.main_notebook.entry_similar_images_minimal_size.clone();
     let entry_similar_images_maximal_size = gui_data.main_notebook.entry_similar_images_maximal_size.clone();
+    let entry_similar_videos_minimal_size = gui_data.main_notebook.entry_similar_videos_minimal_size.clone();
+    let entry_similar_videos_maximal_size = gui_data.main_notebook.entry_similar_videos_maximal_size.clone();
     let check_button_music_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
     let check_button_music_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_album_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_album_title.clone();
@@ -74,6 +79,7 @@ pub fn connect_button_search(
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
@@ -325,7 +331,7 @@ pub fn connect_button_search(
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
                 let maximal_file_size = entry_similar_images_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
-                let similarity = similar_images::Similarity::Similar(scale_similarity.value() as u32);
+                let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
 
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
@@ -345,6 +351,35 @@ pub fn connect_button_search(
                     sf.set_image_filter(image_filter);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
+                });
+            }
+            NotebookMainEnum::SimilarVideos => {
+                label_stage.show();
+                grid_progress_stages.show_all();
+                window_progress.resize(1, 1);
+
+                get_list_store(&tree_view_similar_videos_finder).clear();
+
+                let minimal_file_size = entry_similar_videos_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
+                let maximal_file_size = entry_similar_videos_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+
+                let tolerance = scale_similarity_similar_videos.value() as i32;
+
+                let futures_sender_similar_videos = futures_sender_similar_videos.clone();
+                // Find similar videos
+                thread::spawn(move || {
+                    let mut sf = SimilarVideos::new();
+
+                    sf.set_included_directory(included_directories);
+                    sf.set_excluded_directory(excluded_directories);
+                    sf.set_recursive_search(recursive_search);
+                    sf.set_excluded_items(excluded_items);
+                    sf.set_minimal_file_size(minimal_file_size);
+                    sf.set_maximal_file_size(maximal_file_size);
+                    sf.set_use_cache(use_cache);
+                    sf.set_tolerance(tolerance);
+                    sf.find_similar_videos(Some(&stop_receiver), Some(&futures_sender_similar_videos));
+                    let _ = glib_stop_sender.send(Message::SimilarVideos(sf));
                 });
             }
             NotebookMainEnum::Zeroed => {

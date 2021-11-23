@@ -17,6 +17,7 @@ use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
+use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::zeroed::ZeroedFiles;
 use gtk::prelude::*;
@@ -59,6 +60,7 @@ pub struct GuiData {
     pub shared_temporary_files_state: Rc<RefCell<Temporary>>,
     pub shared_big_files_state: Rc<RefCell<BigFile>>,
     pub shared_similar_images_state: Rc<RefCell<SimilarImages>>,
+    pub shared_similar_videos_state: Rc<RefCell<SimilarVideos>>,
     pub shared_zeroed_files_state: Rc<RefCell<ZeroedFiles>>,
     pub shared_same_music_state: Rc<RefCell<SameMusic>>,
     pub shared_same_invalid_symlinks: Rc<RefCell<InvalidSymlinks>>,
@@ -139,6 +141,7 @@ impl GuiData {
         let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(Temporary::new()));
         let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
         let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
+        let shared_similar_videos_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarVideos::new()));
         let shared_zeroed_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(ZeroedFiles::new()));
         let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
         let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(InvalidSymlinks::new()));
@@ -176,6 +179,7 @@ impl GuiData {
             shared_temporary_files_state,
             shared_big_files_state,
             shared_similar_images_state,
+            shared_similar_videos_state,
             shared_zeroed_files_state,
             shared_same_music_state,
             shared_same_invalid_symlinks,

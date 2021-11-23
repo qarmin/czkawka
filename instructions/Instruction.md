@@ -7,8 +7,6 @@
 - [Tools](#tools)
 
 Czkawka for now contains two independent frontends - the terminal and graphical interface which share the core module.
-Using Rust language without unsafe code helps to create safe, fast, and low resources requirements app.
-This code also has good support for multi-threading.
 
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
@@ -93,9 +91,10 @@ Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 - **Not all columns are visible**
   For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
     - View can be scrolled via horizontal scroll bar
-    - Size of other columns can be slimmed 
-  
-  This is handled via https://github.com/qarmin/czkawka/issues/169
+    - Size of other columns can be slimmed
+  This is checked if is possible to do in https://github.com/qarmin/czkawka/issues/169
+- **Opening parent folders**
+    - It is possible to open parent folder of selected items with double click with right mouse button(RMB) - it is also possible to open such item with double click with left mouse buttom(LMB).
 
 ![AA](https://user-images.githubusercontent.com/41945903/125684641-728e264a-34ab-41b1-9853-ab45dc25551f.png)
 
@@ -241,6 +240,20 @@ Some tidbits:
 - Smaller hash size not always means that calculating it will take more time
 - `Blockhash` is the only algorithm that don't resize images before hashing
 - `Nearest` resize algorithm can be faster even 5 times than any other available but provide worse results
+
+### Similar Videos
+Tool works similar as Similar Images.  
+
+To work require `FFmpeg`, so it will show an error when it is not found in OS.  
+Also only checks files which are longer than 30s.
+
+At first, it collects video files by extension (`mp4`, `mpv`, `avi` etc.).  
+Next each file is hashed. Implementation is hidden in library but looks that generate 10 images from this video and hash them with help of perceptual hash.
+
+Such hashes are saved to cache to be able to use them later.
+
+Next, with provided by user tolerance, they are compared to each other and group of similar hashes are returned.
+
 ### Broken Files
 This tool finds files which are corrupted or have an invalid extension.
 

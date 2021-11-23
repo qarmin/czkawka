@@ -360,6 +360,75 @@ pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
+pub fn create_tree_view_similar_videos(tree_view: &mut gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsSimilarVideos::ActiveSelectButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsSimilarVideos::ActiveSelectButton as u32, &fixed.to_value());
+    });
+    let column = gtk::TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_resizable(false);
+    column.set_fixed_width(30);
+    column.add_attribute(&renderer, "activatable", ColumnsSimilarVideos::ActivatableSelectButton as i32);
+    column.add_attribute(&renderer, "active", ColumnsSimilarVideos::ActiveSelectButton as i32);
+    column.add_attribute(&renderer, "cell-background", ColumnsSimilarVideos::Color as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Size");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSimilarVideos::Size as i32);
+    column.add_attribute(&renderer, "background", ColumnsSimilarVideos::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSimilarVideos::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("File Name");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSimilarVideos::Name as i32);
+    column.add_attribute(&renderer, "background", ColumnsSimilarVideos::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSimilarVideos::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Path");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSimilarVideos::Path as i32);
+    column.add_attribute(&renderer, "background", ColumnsSimilarVideos::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSimilarVideos::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Modification Date");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSimilarVideos::Modification as i32);
+    column.add_attribute(&renderer, "background", ColumnsSimilarVideos::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSimilarVideos::TextColor as i32);
+    tree_view.append_column(&column);
+
+    tree_view.set_vexpand(true);
+}
+
 pub fn create_tree_view_directories(tree_view: &mut gtk::TreeView) {
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();

@@ -19,6 +19,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();
@@ -35,6 +36,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
+    let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
@@ -147,7 +149,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (1, &false),
                                             (2, &file),
                                             (3, &directory),
-                                            (4, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap()))),
+                                            (4, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0), entry.size.file_size(options::BINARY).unwrap()))),
                                             (5, &(entry.modified_date)),
                                             (6, &(MAIN_ROW_COLOR.to_string())),
                                             (7, &(TEXT_COLOR.to_string())),
@@ -584,6 +586,96 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("move").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap(), &buttons_array, &buttons_names);
+                    }
+                }
+            }
+            Message::SimilarVideos(ff) => {
+                if ff.get_stopped_search() {
+                    entry_info.set_text("Searching for similar videos was stopped by user");
+                } else {
+                    //let information = ff.get_information();
+                    let text_messages = ff.get_text_messages();
+
+                    let base_videos_size = ff.get_similar_videos().len();
+
+                    entry_info.set_text(format!("Found similar videos for {} videos.", base_videos_size).as_str());
+
+                    // Create GUI
+                    {
+                        let list_store = get_list_store(&tree_view_similar_videos_finder);
+
+                        let vec_struct_similar = ff.get_similar_videos();
+
+                        for vec_file_entry in vec_struct_similar.iter() {
+                            // Sort
+                            let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                let mut vec_file_entry = vec_file_entry.clone();
+                                vec_file_entry.sort_by_key(|e| {
+                                    let t = split_path(e.path.as_path());
+                                    (t.0, t.1)
+                                });
+                                vec_file_entry
+                            } else {
+                                vec_file_entry.clone()
+                            };
+
+                            // Header
+                            let values: [(u32, &dyn ToValue); 10] = [
+                                (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
+                                (ColumnsSimilarVideos::ActiveSelectButton as u32, &false),
+                                (ColumnsSimilarVideos::Size as u32, &"".to_string()),
+                                (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
+                                (ColumnsSimilarVideos::Name as u32, &"".to_string()),
+                                (ColumnsSimilarVideos::Path as u32, &"".to_string()),
+                                (ColumnsSimilarVideos::Modification as u32, &"".to_string()),
+                                (ColumnsSimilarVideos::ModificationAsSecs as u32, &(0)),
+                                (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                            ];
+                            list_store.set(&list_store.append(), &values);
+
+                            // Meat
+                            for file_entry in vec_file_entry.iter() {
+                                let (directory, file) = split_path(&file_entry.path);
+                                let values: [(u32, &dyn ToValue); 10] = [
+                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSimilarVideos::ActiveSelectButton as u32, &false),
+                                    (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSimilarVideos::Name as u32, &file),
+                                    (ColumnsSimilarVideos::Path as u32, &directory),
+                                    (ColumnsSimilarVideos::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                    (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                ];
+                                list_store.set(&list_store.append(), &values);
+                            }
+                        }
+
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_similar_videos_state.borrow_mut() = ff;
+
+                        if base_videos_size > 0 {
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("save").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("delete").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("select").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("symlink").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("hardlink").unwrap() = true;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("move").unwrap() = true;
+                        } else {
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("save").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("delete").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("select").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("symlink").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("hardlink").unwrap() = false;
+                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("move").unwrap() = false;
+                        }
+                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }
