@@ -21,7 +21,6 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
     let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
-    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
@@ -125,15 +124,6 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                         &gui_data,
                     );
                 }
-            }
-            NotebookMainEnum::Zeroed => {
-                basic_remove(
-                    &tree_view_zeroed_files_finder.clone(),
-                    ColumnsZeroedFiles::Name as i32,
-                    ColumnsZeroedFiles::Path as i32,
-                    ColumnsZeroedFiles::ActiveSelectButton as i32,
-                    &gui_data,
-                );
             }
             NotebookMainEnum::SameMusic => {
                 if !check_button_settings_confirm_group_deletion.is_active()

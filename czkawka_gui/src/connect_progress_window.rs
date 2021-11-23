@@ -1,7 +1,7 @@
 use crate::gui_data::GuiData;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
-use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, similar_videos, temporary, zeroed};
+use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, similar_videos, temporary};
 
 use futures::StreamExt;
 
@@ -18,7 +18,6 @@ pub fn connect_progress_window(
     mut futures_receiver_similar_images: futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
     mut futures_receiver_similar_videos: futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
     mut futures_receiver_temporary: futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
-    mut futures_receiver_zeroed: futures::channel::mpsc::UnboundedReceiver<zeroed::ProgressData>,
     mut futures_receiver_invalid_symlinks: futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>,
     mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
 ) {
@@ -275,41 +274,6 @@ pub fn connect_progress_window(
             while let Some(item) = futures_receiver_temporary.next().await {
                 label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-            }
-        };
-        main_context.spawn_local(future);
-    }
-    {
-        // Zeroed Files
-        let label_stage = gui_data.progress_window.label_stage.clone();
-        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-        let taskbar_state = gui_data.taskbar_state.clone();
-        let future = async move {
-            while let Some(item) = futures_receiver_zeroed.next().await {
-                match item.current_stage {
-                    0 => {
-                        progress_bar_current_stage.hide();
-                        label_stage.set_text(format!("Scanned {} files", item.files_checked).as_str());
-                        taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-                    }
-                    1 => {
-                        progress_bar_current_stage.show();
-                        if item.files_to_check != 0 {
-                            progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
-                            progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
-                            taskbar_state.borrow().set_progress_value((item.files_to_check + item.files_checked) as u64, item.files_to_check as u64 * (item.max_stage + 1) as u64);
-                        } else {
-                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
-                            progress_bar_current_stage.set_fraction(0f64);
-                            taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
-                        }
-                        label_stage.set_text(format!("Checking {}/{} file", item.files_checked, item.files_to_check).as_str());
-                    }
-                    _ => {
-                        panic!();
-                    }
-                }
             }
         };
         main_context.spawn_local(future);

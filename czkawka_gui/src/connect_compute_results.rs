@@ -24,7 +24,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let text_view_errors = gui_data.text_view_errors.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
-    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
     let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
@@ -37,7 +36,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
-    let shared_zeroed_files_state = gui_data.shared_zeroed_files_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
@@ -676,64 +674,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("move").unwrap() = false;
                         }
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap(), &buttons_array, &buttons_names);
-                    }
-                }
-            }
-            Message::ZeroedFiles(zf) => {
-                if zf.get_stopped_search() {
-                    entry_info.set_text("Searching for zeroed files was stopped by user");
-                } else {
-                    let information = zf.get_information();
-                    let text_messages = zf.get_text_messages();
-
-                    let zeroed_files_number: usize = information.number_of_zeroed_files;
-
-                    entry_info.set_text(format!("Found {} zeroed files.", zeroed_files_number).as_str());
-
-                    // Create GUI
-                    {
-                        let list_store = get_list_store(&tree_view_zeroed_files_finder);
-
-                        let vector = zf.get_zeroed_files();
-
-                        // Sort
-                        let mut vector = vector.clone();
-                        vector.sort_by_key(|e| {
-                            let t = split_path(e.path.as_path());
-                            (t.0, t.1)
-                        });
-
-                        for file_entry in vector {
-                            let (directory, file) = split_path(&file_entry.path);
-                            let values: [(u32, &dyn ToValue); 6] = [
-                                (0, &false),
-                                (1, &(file_entry.size.file_size(options::BINARY).unwrap())),
-                                (2, &(file_entry.size)),
-                                (3, &file),
-                                (4, &directory),
-                                (5, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
-                            ];
-                            list_store.set(&list_store.append(), &values);
-                        }
-                        print_text_messages_to_text_view(text_messages, &text_view_errors);
-                    }
-
-                    // Set state
-                    {
-                        *shared_zeroed_files_state.borrow_mut() = zf;
-
-                        if zeroed_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap().get_mut("move").unwrap() = false;
-                        }
-                        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Zeroed).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
             }

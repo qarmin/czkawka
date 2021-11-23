@@ -128,27 +128,6 @@ pub enum Commands {
         #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16)")]
         hash_size: u8,
     },
-    #[structopt(name = "zeroed", about = "Finds zeroed files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka zeroed -d /home/rafal -e /home/rafal/Pulpit -f results.txt")]
-    ZeroedFiles {
-        #[structopt(flatten)]
-        directories: Directories,
-        #[structopt(flatten)]
-        excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
-        excluded_items: ExcludedItems,
-        #[structopt(flatten)]
-        allowed_extensions: AllowedExtensions,
-        #[structopt(short = "D", long, help = "Delete found files")]
-        delete_files: bool,
-        #[structopt(flatten)]
-        file_to_save: FileToSave,
-        #[structopt(flatten)]
-        not_recursive: NotRecursive,
-        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
-        minimal_file_size: u64,
-        #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
-        maximal_file_size: u64,
-    },
     #[structopt(name = "music", about = "Finds same music by tags", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka music -d /home/rafal -f results.txt")]
     SameMusic {
         #[structopt(flatten)]
@@ -464,7 +443,6 @@ EXAMPLES:
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
     {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
     {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
-    {bin} zeroed -d /home/rafal -e /home/krzak -f results.txt"
     {bin} music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;

@@ -16,7 +16,6 @@ pub fn connect_button_move(gui_data: &GuiData) {
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
-    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
@@ -72,16 +71,6 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsBigFiles::Path as i32,
                 None,
                 ColumnsBigFiles::ActiveSelectButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::Zeroed => {
-            move_things(
-                tree_view_zeroed_files_finder.clone(),
-                ColumnsZeroedFiles::Name as i32,
-                ColumnsZeroedFiles::Path as i32,
-                None,
-                ColumnsZeroedFiles::ActiveSelectButton as i32,
                 &gui_data,
             );
         }

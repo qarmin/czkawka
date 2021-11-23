@@ -169,14 +169,6 @@ Currently files with these extensions are considered temporary files -
 
 This only removes the most basic temporary files, for more I suggest to use BleachBit.
 
-### Zeroed Files
-Zeroed files very often are results of e.g. incorrect file downloads.
-
-Their search consists of 3 steps:
-- Collecting a list of all files with a size greater than 0
-- At start, 64 bytes of each file are checked to discard the vast majority of non-zero files without major performance losses.
-- The next step is to check the rest of the file with bigger parts(32KB)
-
 ### Invalid Symlinks
 To find invalid symlinks we must first find symlnks.
 

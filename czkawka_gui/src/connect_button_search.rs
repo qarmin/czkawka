@@ -13,7 +13,6 @@ use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use czkawka_core::zeroed::ZeroedFiles;
 use glib::Sender;
 use gtk::prelude::*;
 use gtk::WindowPosition;
@@ -36,7 +35,6 @@ pub fn connect_button_search(
     futures_sender_similar_images: futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
     futures_sender_similar_videos: futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
     futures_sender_temporary: futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
-    futures_sender_zeroed: futures::channel::mpsc::UnboundedSender<zeroed::ProgressData>,
     futures_sender_invalid_symlinks: futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>,
     futures_sender_broken_files: futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
 ) {
@@ -80,7 +78,6 @@ pub fn connect_button_search(
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
     let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
-    let tree_view_zeroed_files_finder = gui_data.main_notebook.tree_view_zeroed_files_finder.clone();
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
@@ -380,27 +377,6 @@ pub fn connect_button_search(
                     sf.set_tolerance(tolerance);
                     sf.find_similar_videos(Some(&stop_receiver), Some(&futures_sender_similar_videos));
                     let _ = glib_stop_sender.send(Message::SimilarVideos(sf));
-                });
-            }
-            NotebookMainEnum::Zeroed => {
-                label_stage.show();
-                grid_progress_stages.show_all();
-                window_progress.resize(1, 1);
-
-                get_list_store(&tree_view_zeroed_files_finder).clear();
-
-                let futures_sender_zeroed = futures_sender_zeroed.clone();
-                // Find zeroed files
-                thread::spawn(move || {
-                    let mut zf = ZeroedFiles::new();
-
-                    zf.set_included_directory(included_directories);
-                    zf.set_excluded_directory(excluded_directories);
-                    zf.set_recursive_search(recursive_search);
-                    zf.set_excluded_items(excluded_items);
-                    zf.set_allowed_extensions(allowed_extensions);
-                    zf.find_zeroed_files(Some(&stop_receiver), Some(&futures_sender_zeroed));
-                    let _ = glib_stop_sender.send(Message::ZeroedFiles(zf));
                 });
             }
             NotebookMainEnum::SameMusic => {

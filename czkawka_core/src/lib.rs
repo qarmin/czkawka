@@ -11,7 +11,6 @@ pub mod same_music;
 pub mod similar_images;
 pub mod similar_videos;
 pub mod temporary;
-pub mod zeroed;
 
 pub mod common;
 pub mod common_directory;

@@ -1927,42 +1927,6 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkScrolledWindow" id="scrolled_window_zeroed_files_finder">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="shadow-type">in</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">8</property>
-                  </packing>
-                </child>
-                <child type="tab">
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Zeroed Files</property>
-                  </object>
-                  <packing>
-                    <property name="position">8</property>
-                    <property name="tab-fill">False</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_invalid_symlinks">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -1972,7 +1936,7 @@ Author: Rafał Mikrut
                     </child>
                   </object>
                   <packing>
-                    <property name="position">9</property>
+                    <property name="position">8</property>
                   </packing>
                 </child>
                 <child type="tab">
@@ -1982,7 +1946,7 @@ Author: Rafał Mikrut
                     <property name="label" translatable="yes">Invalid Symlinks</property>
                   </object>
                   <packing>
-                    <property name="position">9</property>
+                    <property name="position">8</property>
                     <property name="tab-fill">False</property>
                   </packing>
                 </child>
@@ -1996,7 +1960,7 @@ Author: Rafał Mikrut
                     </child>
                   </object>
                   <packing>
-                    <property name="position">10</property>
+                    <property name="position">9</property>
                   </packing>
                 </child>
                 <child type="tab">
@@ -2006,7 +1970,7 @@ Author: Rafał Mikrut
                     <property name="label" translatable="yes">Broken Files</property>
                   </object>
                   <packing>
-                    <property name="position">10</property>
+                    <property name="position">9</property>
                     <property name="tab-fill">False</property>
                   </packing>
                 </child>
