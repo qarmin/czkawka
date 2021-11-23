@@ -20,6 +20,7 @@
   - Empty Files - Looks for empty files across the drive
   - Temporary Files - Finds temporary files
   - Similar Images - Finds images which are not exactly the same (different resolution, watermarks)
+  - Similar Videos - Looks for similar visually videos
   - Zeroed Files - Finds files which are filled with zeros (usually corrupted)
   - Same Music - Searches for music with the same artist, album etc.
   - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
@@ -101,10 +102,11 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 | Temporary files        | •           | •          |                   | •           |
 | Big files              | •           |            |                   |             |
 | Similar images         | •           |            | •                 |             |
-| Zeroed Files           | •           |            |                   |             |
+| Similar videos         | •           |            |                   |             |
+| Zeroed files           | •           |            |                   |             |
 | Music duplicates(tags) | •           |            | •                 |             |
 | Invalid symlinks       | •           | •          |                   |             |
-| Broken Files           | •           |            |                   |             |
+| Broken files           | •           |            |                   |             |
 | Names conflict         | •           | •          |                   |             |
 | Installed packages     |             | •          |                   |             |
 | Invalid names          |             | •          |                   |             |

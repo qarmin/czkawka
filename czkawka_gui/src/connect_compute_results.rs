@@ -149,7 +149,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (1, &false),
                                             (2, &file),
                                             (3, &directory),
-                                            (4, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string(), entry.size.file_size(options::BINARY).unwrap()))),
+                                            (4, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0), entry.size.file_size(options::BINARY).unwrap()))),
                                             (5, &(entry.modified_date)),
                                             (6, &(MAIN_ROW_COLOR.to_string())),
                                             (7, &(TEXT_COLOR.to_string())),

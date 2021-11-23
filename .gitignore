@@ -6,3 +6,4 @@
 results*.txt
 TestSuite*
 *.snap
+flatpak/
