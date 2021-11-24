@@ -99,8 +99,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_duplicates(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_duplicates);
-                tree_view.connect_key_press_event(opening_enter_function_duplicates);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
                     show_preview(
                         tree_view,
@@ -175,8 +175,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_empty_folders(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_empty_folders);
-                tree_view.connect_key_press_event(opening_enter_function_empty_folders);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_empty_folder_finder");
                 gui_data.main_notebook.tree_view_empty_folder_finder = tree_view.clone();
@@ -205,8 +205,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_empty_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_empty_files);
-                tree_view.connect_key_press_event(opening_enter_function_empty_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_empty_files_finder");
                 gui_data.main_notebook.tree_view_empty_files_finder = tree_view.clone();
@@ -235,8 +235,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_temporary_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_temporary_files);
-                tree_view.connect_key_press_event(opening_enter_function_temporary_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_temporary_files_finder");
                 gui_data.main_notebook.tree_view_temporary_files_finder = tree_view.clone();
@@ -265,8 +265,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_big_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_big_files);
-                tree_view.connect_key_press_event(opening_enter_function_big_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_big_files_finder");
                 gui_data.main_notebook.tree_view_big_files_finder = tree_view.clone();
@@ -312,8 +312,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_similar_images(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_similar_images);
-                tree_view.connect_key_press_event(opening_enter_function_similar_images);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
                     show_preview(
                         tree_view,
@@ -401,8 +401,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_similar_videos(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_similar_videos);
-                tree_view.connect_key_press_event(opening_enter_function_similar_videos);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_similar_videos_finder");
                 gui_data.main_notebook.tree_view_similar_videos_finder = tree_view.clone();
@@ -472,8 +472,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_same_music(&mut tree_view);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_same_music)));
 
-                tree_view.connect_button_press_event(opening_double_click_function_same_music);
-                tree_view.connect_key_press_event(opening_enter_function_same_music);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_same_music_finder");
                 gui_data.main_notebook.tree_view_same_music_finder = tree_view.clone();
@@ -533,8 +533,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_invalid_symlinks(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_invalid_symlinks);
-                tree_view.connect_key_press_event(opening_enter_function_invalid_symlinks);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_invalid_symlinks");
                 gui_data.main_notebook.tree_view_invalid_symlinks = tree_view.clone();
@@ -563,8 +563,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_broken_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_broken_files);
-                tree_view.connect_key_press_event(opening_enter_function_broken_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_broken_files");
                 gui_data.main_notebook.tree_view_broken_files = tree_view.clone();

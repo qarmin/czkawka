@@ -25,9 +25,10 @@ pub enum PopoverTypes {
     None,
 }
 
-pub struct ThingObject {
+pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,
     pub available_modes: [PopoverTypes; 4],
+    pub column_activatable_button: Option<i32>,
     pub column_path: i32,
     pub column_name: i32,
     pub column_selection: i32,
@@ -38,10 +39,11 @@ pub struct ThingObject {
     pub column_modification_as_secs: Option<i32>,
 }
 
-pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
-    ThingObject {
+pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
+    NotebookObject {
         notebook_type: NotebookMainEnum::Duplicate,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
         column_path: ColumnsDuplicates::Path as i32,
         column_name: ColumnsDuplicates::Name as i32,
         column_selection: ColumnsDuplicates::ActiveSelectButton as i32,
@@ -51,9 +53,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::EmptyDirectories,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
         column_path: ColumnsEmptyFolders::Path as i32,
         column_name: ColumnsEmptyFolders::Name as i32,
         column_selection: ColumnsEmptyFolders::ActiveSelectButton as i32,
@@ -63,9 +66,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: None,
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::BigFiles,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
         column_path: ColumnsBigFiles::Path as i32,
         column_name: ColumnsBigFiles::Name as i32,
         column_selection: ColumnsBigFiles::ActiveSelectButton as i32,
@@ -75,9 +79,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: None,
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::EmptyFiles,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
         column_path: ColumnsEmptyFiles::Path as i32,
         column_name: ColumnsEmptyFiles::Name as i32,
         column_selection: ColumnsEmptyFiles::ActiveSelectButton as i32,
@@ -87,9 +92,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: None,
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::Temporary,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
         column_path: ColumnsTemporaryFiles::Path as i32,
         column_name: ColumnsTemporaryFiles::Name as i32,
         column_selection: ColumnsTemporaryFiles::ActiveSelectButton as i32,
@@ -99,9 +105,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: None,
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::SimilarImages,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarImages::Path as i32,
         column_name: ColumnsSimilarImages::Name as i32,
         column_selection: ColumnsSimilarImages::ActiveSelectButton as i32,
@@ -111,9 +118,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::SimilarVideos,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarVideos::Path as i32,
         column_name: ColumnsSimilarVideos::Name as i32,
         column_selection: ColumnsSimilarVideos::ActiveSelectButton as i32,
@@ -123,9 +131,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSimilarVideos::ModificationAsSecs as i32),
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::SameMusic,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
         column_path: ColumnsSameMusic::Path as i32,
         column_name: ColumnsSameMusic::Name as i32,
         column_selection: ColumnsSameMusic::ActiveSelectButton as i32,
@@ -135,9 +144,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::Symlinks,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
         column_path: ColumnsInvalidSymlinks::Path as i32,
         column_name: ColumnsInvalidSymlinks::Name as i32,
         column_selection: ColumnsInvalidSymlinks::ActiveSelectButton as i32,
@@ -147,9 +157,10 @@ pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: None,
     },
-    ThingObject {
+    NotebookObject {
         notebook_type: NotebookMainEnum::BrokenFiles,
         available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
         column_path: ColumnsBrokenFiles::Path as i32,
         column_name: ColumnsBrokenFiles::Name as i32,
         column_selection: ColumnsBrokenFiles::ActiveSelectButton as i32,
@@ -440,7 +451,7 @@ pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     (number1, number2)
 }
 
-pub fn get_notebook_name_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMainEnum {
+pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMainEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
         "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
@@ -454,6 +465,10 @@ pub fn get_notebook_name_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
         "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
         _ => panic!(),
     }
+}
+pub fn get_notebook_object_from_tree_view(tree_view: &gtk::TreeView) -> &NotebookObject {
+    let nb_enum = get_notebook_enum_from_tree_view(tree_view);
+    &NOTEBOOKS_INFOS[nb_enum as usize]
 }
 pub fn validate_notebook_data(gui_data: &GuiData) {
     // Test treeviews names, each treeview should have set name same as variable name
@@ -472,7 +487,7 @@ pub fn validate_notebook_data(gui_data: &GuiData) {
     for (_i, item) in tree_view_arr.iter().enumerate() {
         // println!("Checking {} element", i);
 
-        get_notebook_name_from_tree_view(item);
+        get_notebook_enum_from_tree_view(item);
     }
 
     // This test main info about notebooks
