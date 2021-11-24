@@ -10,125 +10,33 @@ pub fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
 
-    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
-    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
-    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
-    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
-    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
-    buttons_move.connect_clicked(move |_| match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
-        NotebookMainEnum::Duplicate => {
-            move_things(
-                tree_view_duplicate_finder.clone(),
-                ColumnsDuplicates::Name as i32,
-                ColumnsDuplicates::Path as i32,
-                Some(ColumnsDuplicates::Color as i32),
-                ColumnsDuplicates::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::SameMusic => {
-            move_things(
-                tree_view_same_music_finder.clone(),
-                ColumnsSameMusic::Name as i32,
-                ColumnsSameMusic::Path as i32,
-                Some(ColumnsSameMusic::Color as i32),
-                ColumnsSameMusic::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::SimilarImages => {
-            move_things(
-                tree_view_similar_images_finder.clone(),
-                ColumnsSimilarImages::Name as i32,
-                ColumnsSimilarImages::Path as i32,
-                Some(ColumnsSimilarImages::Color as i32),
-                ColumnsSimilarImages::SelectionButton as i32,
-                &gui_data,
-            );
-            image_preview_similar_images.hide();
-        }
-        NotebookMainEnum::SimilarVideos => {
-            move_things(
-                tree_view_similar_images_finder.clone(),
-                ColumnsSimilarVideos::Name as i32,
-                ColumnsSimilarVideos::Path as i32,
-                Some(ColumnsSimilarVideos::Color as i32),
-                ColumnsSimilarVideos::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::BigFiles => {
-            move_things(
-                tree_view_big_files_finder.clone(),
-                ColumnsBigFiles::Name as i32,
-                ColumnsBigFiles::Path as i32,
-                None,
-                ColumnsBigFiles::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::BrokenFiles => {
-            move_things(
-                tree_view_broken_files.clone(),
-                ColumnsBrokenFiles::Name as i32,
-                ColumnsBrokenFiles::Path as i32,
-                None,
-                ColumnsBrokenFiles::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::EmptyDirectories => {
-            move_things(
-                tree_view_empty_folder_finder.clone(),
-                ColumnsEmptyFolders::Name as i32,
-                ColumnsEmptyFolders::Path as i32,
-                None,
-                ColumnsEmptyFolders::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::EmptyFiles => {
-            move_things(
-                tree_view_empty_files_finder.clone(),
-                ColumnsEmptyFiles::Name as i32,
-                ColumnsEmptyFiles::Path as i32,
-                None,
-                ColumnsEmptyFiles::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::Symlinks => {
-            move_things(
-                tree_view_invalid_symlinks.clone(),
-                ColumnsInvalidSymlinks::Name as i32,
-                ColumnsInvalidSymlinks::Path as i32,
-                None,
-                ColumnsInvalidSymlinks::SelectionButton as i32,
-                &gui_data,
-            );
-        }
-        NotebookMainEnum::Temporary => {
-            move_things(
-                tree_view_temporary_files_finder.clone(),
-                ColumnsTemporaryFiles::Name as i32,
-                ColumnsTemporaryFiles::Path as i32,
-                None,
-                ColumnsTemporaryFiles::SelectionButton as i32,
-                &gui_data,
-            );
+    buttons_move.connect_clicked(move |_| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        move_things(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_color, nb_object.column_selection, &gui_data);
+
+        match &nb_object.notebook_type {
+            NotebookMainEnum::SimilarImages => {
+                image_preview_similar_images.hide();
+            }
+            NotebookMainEnum::Duplicate => {
+                image_preview_duplicates.hide();
+            }
+            _ => {}
         }
     });
 }
 
 // TODO create and show folder chooser where user can select path
-fn move_things(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, column_color: Option<i32>, column_selection: i32, gui_data: &GuiData) {
+// TODO Remove gui_data
+fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: Option<i32>, column_selection: i32, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
     let window_main = gui_data.window_main.clone();
 
@@ -158,11 +66,11 @@ fn move_things(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32
     }
     chooser.close();
 }
-fn move_with_tree(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, gui_data: &GuiData, destination_folder: PathBuf) {
+fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, gui_data: &GuiData, destination_folder: PathBuf) {
     let text_view_errors = gui_data.text_view_errors.clone();
     let entry_info = gui_data.entry_info.clone();
 
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     let mut messages: String = "".to_string();
 
@@ -284,11 +192,11 @@ fn move_with_tree(tree_view: gtk::TreeView, column_file_name: i32, column_path: 
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }
-fn move_with_list(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, gui_data: &GuiData, destination_folder: PathBuf) {
+fn move_with_list(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, gui_data: &GuiData, destination_folder: PathBuf) {
     let text_view_errors = gui_data.text_view_errors.clone();
     let entry_info = gui_data.entry_info.clone();
 
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     let mut messages: String = "".to_string();
 
