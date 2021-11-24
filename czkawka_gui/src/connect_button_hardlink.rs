@@ -7,12 +7,13 @@ use gtk::{TreeIter, TreePath};
 use std::fs;
 use std::path::PathBuf;
 
-pub fn connect_button_hardlink(gui_data: &GuiData) {
+pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
+    let gui_data_clone = gui_data.clone();
     let gui_data = gui_data.clone();
 
     let buttons_hardlink = gui_data.bottom_buttons.buttons_hardlink.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
 
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
@@ -23,8 +24,34 @@ pub fn connect_button_hardlink(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        let column_color = nb_object.column_color.expect("Hardinkning/Symlinking can be only used for tree views with grouped results");
-        hardlink_symlink(tree_view.clone(), nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, true, &gui_data);
+        let column_color = nb_object.column_color.expect("Hardinkning can be only used for tree views with grouped results");
+        hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, true, &gui_data_clone);
+
+        match &nb_object.notebook_type {
+            NotebookMainEnum::SimilarImages => {
+                image_preview_similar_images.hide();
+            }
+            NotebookMainEnum::Duplicate => {
+                image_preview_duplicates.hide();
+            }
+            _ => {}
+        }
+    });
+
+    let buttons_symlink = gui_data.bottom_buttons.buttons_symlink.clone();
+
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
+    buttons_symlink.connect_clicked(move |_| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        let column_color = nb_object.column_color.expect("Symlinking can be only used for tree views with grouped results");
+        hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, false, &gui_data);
 
         match &nb_object.notebook_type {
             NotebookMainEnum::SimilarImages => {
@@ -37,12 +64,13 @@ pub fn connect_button_hardlink(gui_data: &GuiData) {
         }
     });
 }
+
 // TODO remove gui_data from arguments
-pub fn hardlink_symlink(tree_view: gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, hardlinking: bool, gui_data: &GuiData) {
+pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, hardlinking: bool, gui_data: &GuiData) {
     let text_view_errors = gui_data.text_view_errors.clone();
     reset_text_view(&text_view_errors);
 
-    let model = get_list_store(&tree_view);
+    let model = get_list_store(tree_view);
 
     #[derive(Debug)]
     struct SymHardlinkData {
