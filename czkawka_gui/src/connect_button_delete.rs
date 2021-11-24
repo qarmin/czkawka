@@ -345,11 +345,10 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
     if let Some(iter) = model.iter_first() {
         loop {
             if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                // TODO, this maybe isn't required if we will be sure that any header cannot be selected
                 if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
                     selection_rows.push(model.path(&iter).unwrap());
                 } else {
-                    panic!("Header row shouldn't have selected, selection button");
+                    panic!("Header row shouldn't be selected, please report bug.");
                 }
             }
 
@@ -389,74 +388,7 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         }
     }
 
-    // Remove only child from header
-    if let Some(first_iter) = model.iter_first() {
-        let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
-        let mut current_iter = first_iter;
-        if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
-            panic!("First deleted element, should be a header"); // First element should be header
-        };
-
-        let mut next_iter;
-        let mut next_next_iter;
-        'main: loop {
-            if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
-                panic!("First deleted element, should be a header"); // First element should be header
-            };
-
-            next_iter = current_iter.clone();
-            if !model.iter_next(&next_iter) {
-                // There is only single header left (H1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                break 'main;
-            }
-
-            if model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                current_iter = next_iter.clone();
-                continue 'main;
-            }
-
-            next_next_iter = next_iter.clone();
-            if !model.iter_next(&next_next_iter) {
-                // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
-                break 'main;
-            }
-
-            if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
-                current_iter = next_next_iter.clone();
-                continue 'main;
-            }
-
-            loop {
-                // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                if !model.iter_next(&next_next_iter) {
-                    break 'main;
-                }
-                // Move to next header
-                if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                    current_iter = next_next_iter.clone();
-                    continue 'main;
-                }
-            }
-        }
-        for tree_path in vec_tree_path_to_delete.iter().rev() {
-            model.remove(&model.iter(tree_path).unwrap());
-        }
-    }
-
-    // Last step, remove orphan header if exists
-    if let Some(iter) = model.iter_first() {
-        if !model.iter_next(&iter) {
-            model.clear();
-        }
-    }
+    clean_invalid_headers(&model, column_color);
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }
