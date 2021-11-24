@@ -2,7 +2,7 @@ use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use czkawka_core::common::Common;
 use gtk::prelude::*;
-use gtk::TreeIter;
+use gtk::{TreeIter, Window};
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
@@ -75,16 +75,19 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_but
     popover.popdown();
 }
 
-fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
+fn popover_all_except_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32, except_oldest: bool) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
         loop {
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-            let mut oldest_index: Option<usize> = None;
+            let mut used_index: Option<usize> = None;
             let mut current_index: usize = 0;
-            let mut oldest_modification_time: u64 = u64::MAX;
+            let mut modification_time_min_max: u64 = match except_oldest {
+                true => u64::MAX,
+                false => 0,
+            };
 
             let mut file_length: usize = 0;
 
@@ -99,68 +102,19 @@ fn popover_all_except_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
                 tree_iter_array.push(iter.clone());
                 let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
                 let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
-                if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length < file_length) {
-                    file_length = current_file_length;
-                    oldest_modification_time = modification;
-                    oldest_index = Some(current_index);
-                }
-
-                current_index += 1;
-
-                if !model.iter_next(&iter) {
-                    end = true;
-                    break;
-                }
-            }
-            if oldest_index == None {
-                continue;
-            }
-            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-                if index != oldest_index.unwrap() {
-                    model.set_value(tree_iter, column_button_selection, &true.to_value());
+                if except_oldest {
+                    if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
+                        file_length = current_file_length;
+                        modification_time_min_max = modification;
+                        used_index = Some(current_index);
+                    }
                 } else {
-                    model.set_value(tree_iter, column_button_selection, &false.to_value());
-                }
-            }
-
-            if end {
-                break;
-            }
-        }
-    }
-
-    popover.popdown();
-}
-fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(tree_view);
-
-    if let Some(iter) = model.iter_first() {
-        let mut end: bool = false;
-        loop {
-            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-            let mut newest_index: Option<usize> = None;
-            let mut current_index: usize = 0;
-            let mut newest_modification_time: u64 = 0;
-
-            let mut file_length: usize = 0;
-
-            loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&iter) {
-                        end = true;
+                    if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
+                        file_length = current_file_length;
+                        modification_time_min_max = modification;
+                        used_index = Some(current_index);
                     }
-                    break;
                 }
-                tree_iter_array.push(iter.clone());
-                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
-                if modification > newest_modification_time || (modification == newest_modification_time && current_file_length < file_length) {
-                    file_length = current_file_length;
-                    newest_modification_time = modification;
-                    newest_index = Some(current_index);
-                }
-
                 current_index += 1;
 
                 if !model.iter_next(&iter) {
@@ -168,122 +122,11 @@ fn popover_all_except_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
                     break;
                 }
             }
-            if newest_index == None {
+            if used_index == None {
                 continue;
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-                if index != newest_index.unwrap() {
-                    model.set_value(tree_iter, column_button_selection, &true.to_value());
-                } else {
-                    model.set_value(tree_iter, column_button_selection, &false.to_value());
-                }
-            }
-
-            if end {
-                break;
-            }
-        }
-    }
-
-    popover.popdown();
-}
-fn popover_one_oldest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(tree_view);
-
-    if let Some(iter) = model.iter_first() {
-        let mut end: bool = false;
-        loop {
-            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-            let mut oldest_index: Option<usize> = None;
-            let mut current_index: usize = 0;
-            let mut oldest_modification_time: u64 = u64::MAX;
-
-            let mut file_length: usize = 0;
-
-            loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&iter) {
-                        end = true;
-                    }
-                    break;
-                }
-                tree_iter_array.push(iter.clone());
-                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
-                if modification < oldest_modification_time || (modification == oldest_modification_time && current_file_length > file_length) {
-                    file_length = current_file_length;
-                    oldest_modification_time = modification;
-                    oldest_index = Some(current_index);
-                }
-
-                current_index += 1;
-
-                if !model.iter_next(&iter) {
-                    end = true;
-                    break;
-                }
-            }
-            if oldest_index == None {
-                continue;
-            }
-            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-                if index == oldest_index.unwrap() {
-                    model.set_value(tree_iter, column_button_selection, &true.to_value());
-                } else {
-                    model.set_value(tree_iter, column_button_selection, &false.to_value());
-                }
-            }
-
-            if end {
-                break;
-            }
-        }
-    }
-
-    popover.popdown();
-}
-fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32) {
-    let model = get_list_store(tree_view);
-
-    if let Some(iter) = model.iter_first() {
-        let mut end: bool = false;
-        loop {
-            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-            let mut newest_index: Option<usize> = None;
-            let mut current_index: usize = 0;
-            let mut newest_modification_time: u64 = 0;
-
-            let mut file_length: usize = 0;
-            loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&iter) {
-                        end = true;
-                    }
-                    break;
-                }
-                tree_iter_array.push(iter.clone());
-                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
-                if modification > newest_modification_time || (modification == newest_modification_time && current_file_length > file_length) {
-                    file_length = current_file_length;
-                    newest_modification_time = modification;
-                    newest_index = Some(current_index);
-                }
-
-                current_index += 1;
-
-                if !model.iter_next(&iter) {
-                    end = true;
-                    break;
-                }
-            }
-            if newest_index == None {
-                continue;
-            }
-            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-                if index == newest_index.unwrap() {
+                if index != used_index.unwrap() {
                     model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
                     model.set_value(tree_iter, column_button_selection, &false.to_value());
@@ -299,7 +142,75 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 
-fn popover_custom_select_unselect(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
+fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32, check_oldest: bool) {
+    let model = get_list_store(tree_view);
+
+    if let Some(iter) = model.iter_first() {
+        let mut end: bool = false;
+        loop {
+            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+            let mut used_index: Option<usize> = None;
+            let mut current_index: usize = 0;
+            let mut modification_time_min_max: u64 = match check_oldest {
+                true => u64::MAX,
+                false => 0,
+            };
+
+            let mut file_length: usize = 0;
+
+            loop {
+                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                if color == HEADER_ROW_COLOR {
+                    if !model.iter_next(&iter) {
+                        end = true;
+                    }
+                    break;
+                }
+                tree_iter_array.push(iter.clone());
+                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
+                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
+                if check_oldest {
+                    if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                        file_length = current_file_length;
+                        modification_time_min_max = modification;
+                        used_index = Some(current_index);
+                    }
+                } else {
+                    if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                        file_length = current_file_length;
+                        modification_time_min_max = modification;
+                        used_index = Some(current_index);
+                    }
+                }
+
+                current_index += 1;
+
+                if !model.iter_next(&iter) {
+                    end = true;
+                    break;
+                }
+            }
+            if used_index == None {
+                continue;
+            }
+            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                if index == used_index.unwrap() {
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
+                } else {
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
+                }
+            }
+
+            if end {
+                break;
+            }
+        }
+    }
+
+    popover.popdown();
+}
+
+fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
     let wildcard: String;
@@ -317,8 +228,7 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, gui_data: &GuiData, tr
 
     // Accept Dialog
     {
-        let window_main = gui_data.window_main.clone();
-        let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some(window_title), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
+        let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some(window_title), Some(window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
         let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
 
         let radio_path = gtk::RadioButton::with_label("Path");
@@ -423,17 +333,23 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, gui_data: &GuiData, tr
     }
 }
 
-fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, column_button_selection: u32) {
+fn popover_all_except_biggest_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, column_button_selection: u32, except_biggest: bool) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
         loop {
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-            let mut biggest_index: Option<usize> = None;
+            let mut used_index: Option<usize> = None;
             let mut current_index: usize = 0;
-            let mut biggest_size_as_bytes: u64 = 0;
-            let mut biggest_number_of_pixels: u64 = 0;
+            let mut size_as_bytes_min_max: u64 = match except_biggest {
+                true => 0,
+                false => u64::MAX,
+            };
+            let mut number_of_pixels_min_max: u64 = match except_biggest {
+                true => 0,
+                false => u64::MAX,
+            };
 
             loop {
                 let color = model.value(&iter, column_color).get::<String>().unwrap();
@@ -450,69 +366,18 @@ fn popover_all_except_biggest(popover: &gtk::Popover, tree_view: &gtk::TreeView,
                 let dimensions = change_dimension_to_krotka(dimensions_string);
                 let number_of_pixels = dimensions.0 * dimensions.1;
 
-                if number_of_pixels > biggest_number_of_pixels || (number_of_pixels == biggest_number_of_pixels && size_as_bytes > biggest_size_as_bytes) {
-                    biggest_number_of_pixels = number_of_pixels;
-                    biggest_size_as_bytes = size_as_bytes;
-                    biggest_index = Some(current_index);
-                }
-
-                current_index += 1;
-
-                if !model.iter_next(&iter) {
-                    end = true;
-                    break;
-                }
-            }
-            if biggest_index == None {
-                continue;
-            }
-            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-                if index != biggest_index.unwrap() {
-                    model.set_value(tree_iter, column_button_selection, &true.to_value());
+                if except_biggest {
+                    if number_of_pixels > number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes > size_as_bytes_min_max) {
+                        number_of_pixels_min_max = number_of_pixels;
+                        size_as_bytes_min_max = size_as_bytes;
+                        used_index = Some(current_index);
+                    }
                 } else {
-                    model.set_value(tree_iter, column_button_selection, &false.to_value());
-                }
-            }
-
-            if end {
-                break;
-            }
-        }
-    }
-
-    popover.popdown();
-}
-fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, column_button_selection: u32) {
-    let model = get_list_store(tree_view);
-
-    if let Some(iter) = model.iter_first() {
-        let mut end: bool = false;
-        loop {
-            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
-            let mut smallest_index: Option<usize> = None;
-            let mut current_index: usize = 0;
-            let mut smallest_size_as_bytes: u64 = u64::MAX;
-            let mut smallest_number_of_pixels: u64 = u64::MAX;
-
-            loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&iter) {
-                        end = true;
+                    if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
+                        number_of_pixels_min_max = number_of_pixels;
+                        size_as_bytes_min_max = size_as_bytes;
+                        used_index = Some(current_index);
                     }
-                    break;
-                }
-                tree_iter_array.push(iter.clone());
-                let size_as_bytes = model.value(&iter, column_size_as_bytes).get::<u64>().unwrap();
-                let dimensions_string = model.value(&iter, column_dimensions).get::<String>().unwrap();
-
-                let dimensions = change_dimension_to_krotka(dimensions_string);
-                let number_of_pixels = dimensions.0 * dimensions.1;
-
-                if number_of_pixels < smallest_number_of_pixels || (number_of_pixels == smallest_number_of_pixels && size_as_bytes < smallest_size_as_bytes) {
-                    smallest_number_of_pixels = number_of_pixels;
-                    smallest_size_as_bytes = size_as_bytes;
-                    smallest_index = Some(current_index);
                 }
 
                 current_index += 1;
@@ -522,11 +387,11 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
                     break;
                 }
             }
-            if smallest_index == None {
+            if used_index == None {
                 continue;
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
-                if index != smallest_index.unwrap() {
+                if index != used_index.unwrap() {
                     model.set_value(tree_iter, column_button_selection, &true.to_value());
                 } else {
                     model.set_value(tree_iter, column_button_selection, &false.to_value());
@@ -589,13 +454,14 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_all_except_oldest(
+        popover_all_except_oldest_newest(
             &popover_select,
             tree_view,
             nb_object.column_color.expect("AEO can't be used without headers"),
             nb_object.column_modification_as_secs.expect("AEO needs modification as secs column"),
             nb_object.column_name,
             nb_object.column_selection as u32,
+            true,
         );
     });
 
@@ -608,13 +474,14 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_all_except_newest(
+        popover_all_except_oldest_newest(
             &popover_select,
             tree_view,
             nb_object.column_color.expect("AEN can't be used without headers"),
             nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
             nb_object.column_name,
             nb_object.column_selection as u32,
+            false,
         );
     });
 
@@ -627,13 +494,14 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_one_oldest(
+        popover_one_oldest_newest(
             &popover_select,
             tree_view,
             nb_object.column_color.expect("OO can't be used without headers"),
             nb_object.column_modification_as_secs.expect("OO needs modification as secs column"),
             nb_object.column_name,
             nb_object.column_selection as u32,
+            true,
         );
     });
 
@@ -646,22 +514,22 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_one_newest(
+        popover_one_oldest_newest(
             &popover_select,
             tree_view,
             nb_object.column_color.expect("ON can't be used without headers"),
             nb_object.column_modification_as_secs.expect("ON needs modification as secs column"),
             nb_object.column_name,
             nb_object.column_selection as u32,
+            false,
         );
     });
 
-    // TODO Remove gui data clone
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_custom = gui_data.popovers.buttons_popover_select_custom.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    let gui_data_clone = gui_data.clone();
+    let window_main = gui_data.window_main.clone();
     buttons_popover_select_custom.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
@@ -669,7 +537,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
 
         popover_custom_select_unselect(
             &popover_select,
-            &gui_data_clone,
+            &window_main,
             tree_view,
             nb_object.column_color,
             nb_object.column_name,
@@ -679,12 +547,11 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    // TODO Remove gui data clone
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_unselect_custom = gui_data.popovers.buttons_popover_unselect_custom.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    let gui_data_clone = gui_data.clone();
+    let window_main = gui_data.window_main.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
@@ -692,7 +559,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
 
         popover_custom_select_unselect(
             &popover_select,
-            &gui_data_clone,
+            &window_main,
             tree_view,
             nb_object.column_color,
             nb_object.column_name,
@@ -711,13 +578,14 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_all_except_biggest(
+        popover_all_except_biggest_smallest(
             &popover_select,
             tree_view,
             nb_object.column_color.expect("AEB can't be used without headers"),
             nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
             nb_object.column_dimensions.expect("AEB needs dimensions column"),
             nb_object.column_selection as u32,
+            true,
         );
     });
 
@@ -730,13 +598,14 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_all_except_smallest(
+        popover_all_except_biggest_smallest(
             &popover_select,
             tree_view,
             nb_object.column_color.expect("AES can't be used without headers"),
             nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
             nb_object.column_dimensions.expect("AES needs dimensions column"),
             nb_object.column_selection as u32,
+            false,
         );
     });
 }
