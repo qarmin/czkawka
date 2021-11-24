@@ -2,6 +2,7 @@
 #![windows_subsystem = "windows"]
 #![allow(clippy::collapsible_else_if)]
 
+mod compute_results;
 mod connect_about_buttons;
 mod connect_button_delete;
 mod connect_button_hardlink;
@@ -10,7 +11,6 @@ mod connect_button_save;
 mod connect_button_search;
 mod connect_button_select;
 mod connect_button_stop;
-mod connect_compute_results;
 mod connect_header_buttons;
 mod connect_hide_text_view_errors;
 mod connect_notebook_tabs;
@@ -43,6 +43,7 @@ mod tests;
 
 use czkawka_core::*;
 
+use crate::compute_results::*;
 use crate::connect_about_buttons::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_hardlink::*;
@@ -51,7 +52,6 @@ use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
-use crate::connect_compute_results::*;
 use crate::connect_header_buttons::*;
 use crate::connect_hide_text_view_errors::*;
 use crate::connect_notebook_tabs::*;

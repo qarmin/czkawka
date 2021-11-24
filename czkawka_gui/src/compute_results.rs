@@ -1,4 +1,6 @@
 use humansize::{file_size_opts as options, FileSize};
+use std::cell::RefCell;
+use std::collections::HashMap;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
@@ -10,6 +12,7 @@ use czkawka_core::similar_images;
 use glib::Receiver;
 use gtk::prelude::*;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
@@ -129,28 +132,31 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     };
 
                                     let values: [(u32, &dyn ToValue); 8] = [
-                                        (0, &false),
-                                        (1, &false),
-                                        (2, &name),
-                                        (3, (&(format!("{} results", vector.len())))),
-                                        (4, (&"".to_string())), // No text in 3 column
-                                        (5, (&(0))),            // Not used here
-                                        (6, &(HEADER_ROW_COLOR.to_string())),
-                                        (7, &(TEXT_COLOR.to_string())),
+                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                        (ColumnsDuplicates::SelectionButton as u32, &false),
+                                        (ColumnsDuplicates::Name as u32, &name),
+                                        (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
+                                        (ColumnsDuplicates::Modification as u32, (&"".to_string())), // No text in 3 column
+                                        (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),      // Not used here
+                                        (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                     ];
 
                                     list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
                                         let values: [(u32, &dyn ToValue); 8] = [
-                                            (0, &true),
-                                            (1, &false),
-                                            (2, &file),
-                                            (3, &directory),
-                                            (4, &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0), entry.size.file_size(options::BINARY).unwrap()))),
-                                            (5, &(entry.modified_date)),
-                                            (6, &(MAIN_ROW_COLOR.to_string())),
-                                            (7, &(TEXT_COLOR.to_string())),
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Name as u32, &file),
+                                            (ColumnsDuplicates::Path as u32, &directory),
+                                            (
+                                                ColumnsDuplicates::Modification as u32,
+                                                &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0), entry.size.file_size(options::BINARY).unwrap())),
+                                            ),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                            (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                         ];
                                         list_store.set(&list_store.append(), &values);
                                     }
@@ -174,17 +180,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         };
 
                                         let values: [(u32, &dyn ToValue); 8] = [
-                                            (0, &false),
-                                            (1, &false),
-                                            (2, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
                                             (
-                                                3,
+                                                ColumnsDuplicates::Path as u32,
                                                 &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
                                             ),
-                                            (4, &"".to_string()), // No text in 3 column
-                                            (5, &(0)),
-                                            (6, &(HEADER_ROW_COLOR.to_string())),
-                                            (7, &(TEXT_COLOR.to_string())),
+                                            (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                         ];
 
                                         list_store.set(&list_store.append(), &values);
@@ -192,14 +198,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             let (directory, file) = split_path(&entry.path);
 
                                             let values: [(u32, &dyn ToValue); 8] = [
-                                                (0, &true),
-                                                (1, &false),
-                                                (2, &file),
-                                                (3, &directory),
-                                                (4, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
-                                                (5, &(entry.modified_date)),
-                                                (6, &(MAIN_ROW_COLOR.to_string())),
-                                                (7, &(TEXT_COLOR.to_string())),
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (ColumnsDuplicates::Modification as u32, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                             ];
 
                                             list_store.set(&list_store.append(), &values);
@@ -223,31 +229,31 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         vector.clone()
                                     };
                                     let values: [(u32, &dyn ToValue); 8] = [
-                                        (0, &false),
-                                        (1, &false),
-                                        (2, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                        (ColumnsDuplicates::SelectionButton as u32, &false),
+                                        (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
                                         (
-                                            3,
+                                            ColumnsDuplicates::Path as u32,
                                             &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
                                         ),
-                                        (4, &"".to_string()), // No text in 3 column
-                                        (5, &(0)),            // Not used here
-                                        (6, &(HEADER_ROW_COLOR.to_string())),
-                                        (7, &(TEXT_COLOR.to_string())),
+                                        (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
+                                        (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
+                                        (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                     ];
 
                                     list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
                                         let values: [(u32, &dyn ToValue); 8] = [
-                                            (0, &true),
-                                            (1, &false),
-                                            (2, &file),
-                                            (3, &directory),
-                                            (4, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
-                                            (5, &(entry.modified_date)),
-                                            (6, &(MAIN_ROW_COLOR.to_string())),
-                                            (7, &(TEXT_COLOR.to_string())),
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Name as u32, &file),
+                                            (ColumnsDuplicates::Path as u32, &directory),
+                                            (ColumnsDuplicates::Modification as u32, &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string())),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                            (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                         ];
                                         list_store.set(&list_store.append(), &values);
                                     }
@@ -265,21 +271,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_duplication_state.borrow_mut() = df;
 
-                        if duplicates_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("symlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("hardlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("symlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("hardlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::Duplicate, &["save", "delete", "select", "symlink", "hardlink", "move"], duplicates_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -309,7 +302,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for path in vector {
                             let (directory, file) = split_path(&path);
-                            let values: [(u32, &dyn ToValue); 4] = [(0, &false), (1, &file), (2, &directory), (3, &(NaiveDateTime::from_timestamp(hashmap.get(&path).unwrap().modified_date as i64, 0).to_string()))];
+                            let values: [(u32, &dyn ToValue); 4] = [
+                                (ColumnsEmptyFolders::SelectionButton as u32, &false),
+                                (ColumnsEmptyFolders::Name as u32, &file),
+                                (ColumnsEmptyFolders::Path as u32, &directory),
+                                (ColumnsEmptyFolders::Modification as u32, &(NaiveDateTime::from_timestamp(hashmap.get(&path).unwrap().modified_date as i64, 0).to_string())),
+                            ];
                             list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -319,17 +317,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_empty_folders_state.borrow_mut() = ef;
 
-                        if empty_folder_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::EmptyDirectories, &["save", "delete", "select", "move"], empty_folder_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -360,7 +349,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [(u32, &dyn ToValue); 4] = [(0, &false), (1, &file), (2, &directory), (3, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()))];
+                            let values: [(u32, &dyn ToValue); 4] = [
+                                (ColumnsEmptyFiles::SelectionButton as u32, &false),
+                                (ColumnsEmptyFiles::Name as u32, &file),
+                                (ColumnsEmptyFiles::Path as u32, &directory),
+                                (ColumnsEmptyFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                            ];
                             list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -370,17 +364,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_empty_files_state.borrow_mut() = vf;
 
-                        if empty_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::EmptyFiles, &["save", "delete", "select", "move"], empty_files_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -411,11 +396,11 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             for file_entry in vector {
                                 let (directory, file) = split_path(&file_entry.path);
                                 let values: [(u32, &dyn ToValue); 5] = [
-                                    (0, &false),
-                                    (1, &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size))),
-                                    (2, &file),
-                                    (3, &directory),
-                                    (4, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (ColumnsBigFiles::SelectionButton as u32, &false),
+                                    (ColumnsBigFiles::Size as u32, &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size))),
+                                    (ColumnsBigFiles::Name as u32, &file),
+                                    (ColumnsBigFiles::Path as u32, &directory),
+                                    (ColumnsBigFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
                             }
@@ -427,17 +412,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_big_files_state.borrow_mut() = bf;
 
-                        if biggest_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::BigFiles, &["save", "delete", "select", "move"], biggest_files_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -468,7 +444,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [(u32, &dyn ToValue); 4] = [(0, &false), (1, &file), (2, &directory), (3, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()))];
+                            let values: [(u32, &dyn ToValue); 4] = [
+                                (ColumnsTemporaryFiles::SelectionButton as u32, &false),
+                                (ColumnsTemporaryFiles::Name as u32, &file),
+                                (ColumnsTemporaryFiles::Path as u32, &directory),
+                                (ColumnsTemporaryFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                            ];
                             list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -478,17 +459,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_temporary_files_state.borrow_mut() = tf;
 
-                        if temporary_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::Temporary, &["save", "delete", "select", "move"], temporary_files_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -525,18 +497,18 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                             // Header
                             let values: [(u32, &dyn ToValue); 12] = [
-                                (0, &false),
-                                (1, &false),
-                                (2, &"".to_string()),
-                                (3, &"".to_string()),
-                                (4, &(0)),
-                                (5, &"".to_string()),
-                                (6, &"".to_string()),
-                                (7, &"".to_string()),
-                                (8, &"".to_string()),
-                                (9, &(0)),
-                                (10, &(HEADER_ROW_COLOR.to_string())),
-                                (11, &(TEXT_COLOR.to_string())),
+                                (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
+                                (ColumnsSimilarImages::SelectionButton as u32, &false),
+                                (ColumnsSimilarImages::Similarity as u32, &"".to_string()),
+                                (ColumnsSimilarImages::Size as u32, &"".to_string()),
+                                (ColumnsSimilarImages::SizeAsBytes as u32, &(0)),
+                                (ColumnsSimilarImages::Dimensions as u32, &"".to_string()),
+                                (ColumnsSimilarImages::Name as u32, &"".to_string()),
+                                (ColumnsSimilarImages::Path as u32, &"".to_string()),
+                                (ColumnsSimilarImages::Modification as u32, &"".to_string()),
+                                (ColumnsSimilarImages::ModificationAsSecs as u32, &(0)),
+                                (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
                             ];
                             list_store.set(&list_store.append(), &values);
 
@@ -544,18 +516,18 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             for file_entry in vec_file_entry.iter() {
                                 let (directory, file) = split_path(&file_entry.path);
                                 let values: [(u32, &dyn ToValue); 12] = [
-                                    (0, &true),
-                                    (1, &false),
-                                    (2, &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string())),
-                                    (3, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (4, &file_entry.size),
-                                    (5, &file_entry.dimensions),
-                                    (6, &file),
-                                    (7, &directory),
-                                    (8, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
-                                    (9, &(file_entry.modified_date)),
-                                    (10, &(MAIN_ROW_COLOR.to_string())),
-                                    (11, &(TEXT_COLOR.to_string())),
+                                    (ColumnsSimilarImages::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSimilarImages::SelectionButton as u32, &false),
+                                    (ColumnsSimilarImages::Similarity as u32, &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string())),
+                                    (ColumnsSimilarImages::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
+                                    (ColumnsSimilarImages::Name as u32, &file),
+                                    (ColumnsSimilarImages::Path as u32, &directory),
+                                    (ColumnsSimilarImages::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                    (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
                             }
@@ -568,21 +540,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_similar_images_state.borrow_mut() = sf;
 
-                        if base_images_size > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("symlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("hardlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("symlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("hardlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::SimilarImages, &["save", "delete", "select", "symlink", "hardlink", "move"], base_images_size > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -658,21 +617,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_similar_videos_state.borrow_mut() = ff;
 
-                        if base_videos_size > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("symlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("hardlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("symlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("hardlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::SimilarVideos, &["save", "delete", "select", "symlink", "hardlink", "move"], base_videos_size > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -718,71 +664,71 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             };
 
                             let values: [(u32, &dyn ToValue); 15] = [
-                                (0, &false),
-                                (1, &false),
-                                (2, &"".to_string()),
-                                (3, &(0)),
-                                (4, &"".to_string()),
-                                (5, &"".to_string()),
+                                (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
+                                (ColumnsSameMusic::SelectionButton as u32, &false),
+                                (ColumnsSameMusic::Size as u32, &"".to_string()),
+                                (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
+                                (ColumnsSameMusic::Name as u32, &"".to_string()),
+                                (ColumnsSameMusic::Path as u32, &"".to_string()),
                                 (
-                                    6,
+                                    ColumnsSameMusic::Title as u32,
                                     &(match is_title {
                                         true => text.clone(),
                                         false => "".to_string(),
                                     }),
                                 ),
                                 (
-                                    7,
+                                    ColumnsSameMusic::Artist as u32,
                                     &(match is_artist {
                                         true => text.clone(),
                                         false => "".to_string(),
                                     }),
                                 ),
                                 (
-                                    8,
+                                    ColumnsSameMusic::AlbumTitle as u32,
                                     &(match is_album_title {
                                         true => text.clone(),
                                         false => "".to_string(),
                                     }),
                                 ),
                                 (
-                                    9,
+                                    ColumnsSameMusic::AlbumArtist as u32,
                                     &(match is_album_artist {
                                         true => text.clone(),
                                         false => "".to_string(),
                                     }),
                                 ),
                                 (
-                                    10,
+                                    ColumnsSameMusic::Year as u32,
                                     &(match is_year {
                                         true => text.clone(),
                                         false => "".to_string(),
                                     }),
                                 ),
-                                (11, &"".to_string()),
-                                (12, &(0)),
-                                (13, &(HEADER_ROW_COLOR.to_string())),
-                                (14, &(TEXT_COLOR.to_string())),
+                                (ColumnsSameMusic::Modification as u32, &"".to_string()),
+                                (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
+                                (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
                             ];
                             list_store.set(&list_store.append(), &values);
                             for file_entry in vec_file_entry {
                                 let (directory, file) = split_path(&file_entry.path);
                                 let values: [(u32, &dyn ToValue); 15] = [
-                                    (0, &true),
-                                    (1, &false),
-                                    (2, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (3, &file_entry.size),
-                                    (4, &file),
-                                    (5, &directory),
-                                    (6, &file_entry.title),
-                                    (7, &file_entry.artist),
-                                    (8, &file_entry.album_title),
-                                    (9, &file_entry.album_artist),
-                                    (10, &file_entry.year.to_string()),
-                                    (11, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
-                                    (12, &(file_entry.modified_date)),
-                                    (13, &(MAIN_ROW_COLOR.to_string())),
-                                    (14, &(TEXT_COLOR.to_string())),
+                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSameMusic::SelectionButton as u32, &false),
+                                    (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSameMusic::Name as u32, &file),
+                                    (ColumnsSameMusic::Path as u32, &directory),
+                                    (ColumnsSameMusic::Title as u32, &file_entry.title),
+                                    (ColumnsSameMusic::Artist as u32, &file_entry.artist),
+                                    (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
+                                    (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
+                                    (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                    (ColumnsSameMusic::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                    (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
                             }
@@ -794,21 +740,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_same_music_state.borrow_mut() = mf;
 
-                        if same_music_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("symlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("hardlink").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("symlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("hardlink").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::SameMusic, &["save", "delete", "select", "symlink", "hardlink", "move"], same_music_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -841,12 +774,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.symlink_path);
                             let values: [(u32, &dyn ToValue); 6] = [
-                                (0, &false),
-                                (1, &file),
-                                (2, &directory),
-                                (3, &file_entry.destination_path.to_string_lossy().to_string()),
-                                (4, &get_text_from_invalid_symlink_cause(&file_entry.type_of_error)),
-                                (5, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
+                                (ColumnsInvalidSymlinks::Name as u32, &file),
+                                (ColumnsInvalidSymlinks::Path as u32, &directory),
+                                (ColumnsInvalidSymlinks::DestinationPath as u32, &file_entry.destination_path.to_string_lossy().to_string()),
+                                (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(&file_entry.type_of_error)),
+                                (ColumnsInvalidSymlinks::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }
@@ -857,17 +790,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_same_invalid_symlinks.borrow_mut() = ifs;
 
-                        if invalid_symlinks > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::Symlinks, &["save", "delete", "select", "move"], invalid_symlinks > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -899,11 +823,11 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [(u32, &dyn ToValue); 5] = [
-                                (0, &false),
-                                (1, &file),
-                                (2, &directory),
-                                (3, &file_entry.error_string),
-                                (4, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                (ColumnsBrokenFiles::SelectionButton as u32, &false),
+                                (ColumnsBrokenFiles::Name as u32, &file),
+                                (ColumnsBrokenFiles::Path as u32, &directory),
+                                (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
+                                (ColumnsBrokenFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }
@@ -914,17 +838,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_broken_files_state.borrow_mut() = br;
 
-                        if broken_files_number > 0 {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("save").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("delete").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("select").unwrap() = true;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("move").unwrap() = true;
-                        } else {
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("save").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("delete").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("select").unwrap() = false;
-                            *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap().get_mut("move").unwrap() = false;
-                        }
+                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::BrokenFiles, &["save", "delete", "select", "move"], broken_files_number > 0);
+
                         set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(), &buttons_array, &buttons_names);
                     }
                 }
@@ -933,4 +848,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
         // Returning false here would close the receiver and have senders fail
         glib::Continue(true)
     });
+}
+
+fn set_specific_buttons_as_active(buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>, notebook_enum: &NotebookMainEnum, buttons: &[&str], value_to_set: bool) {
+    for i in buttons {
+        *buttons_array.borrow_mut().get_mut(notebook_enum).unwrap().get_mut(*i).unwrap() = value_to_set;
+    }
 }
