@@ -7,22 +7,32 @@ use gtk::TreeIter;
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
-// TODO - this also selects headers
-fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
+fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        loop {
-            model.set_value(&iter, column_button_selection, &true.to_value());
+        if let Some(column_color) = column_color {
+            loop {
+                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    model.set_value(&iter, column_button_selection, &true.to_value());
+                }
+                if !model.iter_next(&iter) {
+                    break;
+                }
+            }
+        } else {
+            loop {
+                model.set_value(&iter, column_button_selection, &true.to_value());
 
-            if !model.iter_next(&iter) {
-                break;
+                if !model.iter_next(&iter) {
+                    break;
+                }
             }
         }
     }
     popover.popdown();
 }
-// TODO - this also selects headers
+
 fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
@@ -37,16 +47,28 @@ fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, colum
     }
     popover.popdown();
 }
-fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
+fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        loop {
-            let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
-            model.set_value(&iter, column_button_selection, &(!current_value).to_value());
+        if let Some(column_color) = column_color {
+            loop {
+                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                    model.set_value(&iter, column_button_selection, &(!current_value).to_value());
+                }
+                if !model.iter_next(&iter) {
+                    break;
+                }
+            }
+        } else {
+            loop {
+                let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                model.set_value(&iter, column_button_selection, &(!current_value).to_value());
 
-            if !model.iter_next(&iter) {
-                break;
+                if !model.iter_next(&iter) {
+                    break;
+                }
             }
         }
     }
@@ -277,7 +299,7 @@ fn popover_one_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 
-fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32) {
+fn popover_custom_select_unselect(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
     let wildcard: String;
@@ -288,130 +310,15 @@ fn popover_select_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: 
     }
     let wildcard_type: WildcardType;
 
-    // Accept Dialog
-    {
-        let window_main = gui_data.window_main.clone();
-        let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some("Select custom"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
-        let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
-
-        let radio_path = gtk::RadioButton::with_label("Path");
-        let radio_name = gtk::RadioButton::with_label_from_widget(&radio_path, "Name");
-        let radio_name_path = gtk::RadioButton::with_label_from_widget(&radio_path, "Path + Name");
-
-        let entry_path = gtk::Entry::new();
-        let entry_name = gtk::Entry::new();
-        let entry_name_path = gtk::Entry::new();
-
-        label.set_margin_bottom(5);
-        label.set_margin_end(5);
-        label.set_margin_start(5);
-
-        // TODO Label should have const width, and rest should fill entry, but for now is 50%-50%
-        let grid = gtk::Grid::new();
-        grid.set_row_homogeneous(true);
-        grid.set_column_homogeneous(true);
-
-        grid.attach(&label, 0, 0, 2, 1);
-
-        grid.attach(&radio_path, 0, 1, 1, 1);
-        grid.attach(&radio_name, 0, 2, 1, 1);
-        grid.attach(&radio_name_path, 0, 3, 1, 1);
-
-        grid.attach(&entry_path, 1, 1, 1, 1);
-        grid.attach(&entry_name, 1, 2, 1, 1);
-        grid.attach(&entry_name_path, 1, 3, 1, 1);
-
-        for widgets in confirmation_dialog_delete.children() {
-            // By default GtkBox is child of dialog, so we can easily add other things to it
-            widgets.downcast::<gtk::Box>().unwrap().add(&grid);
-        }
-
-        confirmation_dialog_delete.show_all();
-
-        let response_type = confirmation_dialog_delete.run();
-        if response_type == gtk::ResponseType::Ok {
-            if radio_path.is_active() {
-                wildcard_type = WildcardType::Path;
-                wildcard = entry_path.text().to_string();
-            } else if radio_name.is_active() {
-                wildcard_type = WildcardType::Name;
-                wildcard = entry_name.text().to_string();
-            } else if radio_name_path.is_active() {
-                wildcard_type = WildcardType::PathName;
-                wildcard = entry_name_path.text().to_string();
-            } else {
-                panic!("Non handled option in select wildcard");
-            }
-        } else {
-            confirmation_dialog_delete.close();
-            return;
-        }
-        confirmation_dialog_delete.close();
-    }
-    if !wildcard.is_empty() {
-        let wildcard = wildcard.trim();
-
-        #[cfg(target_family = "windows")]
-        let wildcard = wildcard.replace("/", "\\");
-        #[cfg(target_family = "windows")]
-        let wildcard = wildcard.as_str();
-
-        let model = get_list_store(tree_view);
-
-        let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
-
-        loop {
-            if let Some(column_color) = column_color {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&iter) {
-                        break;
-                    }
-                    continue;
-                }
-            }
-
-            let path = model.value(&iter, column_path).get::<String>().unwrap();
-            let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-            match wildcard_type {
-                WildcardType::Path => {
-                    if Common::regex_check(wildcard, path) {
-                        model.set_value(&iter, column_button_selection, &true.to_value());
-                    }
-                }
-                WildcardType::Name => {
-                    if Common::regex_check(wildcard, name) {
-                        model.set_value(&iter, column_button_selection, &true.to_value());
-                    }
-                }
-                WildcardType::PathName => {
-                    if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                        model.set_value(&iter, column_button_selection, &true.to_value());
-                    }
-                }
-            }
-
-            if !model.iter_next(&iter) {
-                break;
-            }
-        }
-    }
-}
-fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32) {
-    popover.popdown();
-
-    let wildcard: String;
-    enum WildcardType {
-        Path,
-        Name,
-        PathName,
-    }
-    let wildcard_type: WildcardType;
+    let window_title = match select_things {
+        false => "Unselect Custom",
+        true => "Select Custom",
+    };
 
     // Accept Dialog
     {
         let window_main = gui_data.window_main.clone();
-        let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some("Unselect custom"), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
+        let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some(window_title), Some(&window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
         let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
 
         let radio_path = gtk::RadioButton::with_label("Path");
@@ -458,7 +365,7 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
                 wildcard_type = WildcardType::PathName;
                 wildcard = entry_name_path.text().to_string();
             } else {
-                panic!("Non handled option in unselect wildcard");
+                panic!("Non handled option in wildcard");
             }
         } else {
             confirmation_dialog_delete.close();
@@ -494,17 +401,17 @@ fn popover_unselect_custom(popover: &gtk::Popover, gui_data: &GuiData, tree_view
             match wildcard_type {
                 WildcardType::Path => {
                     if Common::regex_check(wildcard, path) {
-                        model.set_value(&iter, column_button_selection, &false.to_value());
+                        model.set_value(&iter, column_button_selection, &select_things.to_value());
                     }
                 }
                 WildcardType::Name => {
                     if Common::regex_check(wildcard, name) {
-                        model.set_value(&iter, column_button_selection, &false.to_value());
+                        model.set_value(&iter, column_button_selection, &select_things.to_value());
                     }
                 }
                 WildcardType::PathName => {
                     if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                        model.set_value(&iter, column_button_selection, &false.to_value());
+                        model.set_value(&iter, column_button_selection, &select_things.to_value());
                     }
                 }
             }
@@ -646,7 +553,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32);
+        popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_color);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
@@ -670,7 +577,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32);
+        popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_color);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
@@ -760,7 +667,16 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_select_custom(&popover_select, &gui_data_clone, tree_view, nb_object.column_color, nb_object.column_name, nb_object.column_path, nb_object.column_selection as u32);
+        popover_custom_select_unselect(
+            &popover_select,
+            &gui_data_clone,
+            tree_view,
+            nb_object.column_color,
+            nb_object.column_name,
+            nb_object.column_path,
+            nb_object.column_selection as u32,
+            true,
+        );
     });
 
     // TODO Remove gui data clone
@@ -774,7 +690,16 @@ pub fn connect_popovers(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_unselect_custom(&popover_select, &gui_data_clone, tree_view, nb_object.column_color, nb_object.column_name, nb_object.column_path, nb_object.column_selection as u32);
+        popover_custom_select_unselect(
+            &popover_select,
+            &gui_data_clone,
+            tree_view,
+            nb_object.column_color,
+            nb_object.column_name,
+            nb_object.column_path,
+            nb_object.column_selection as u32,
+            false,
+        );
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
