@@ -620,7 +620,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             // Header
                             let values: [(u32, &dyn ToValue); 10] = [
                                 (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
-                                (ColumnsSimilarVideos::ActiveSelectButton as u32, &false),
+                                (ColumnsSimilarVideos::SelectionButton as u32, &false),
                                 (ColumnsSimilarVideos::Size as u32, &"".to_string()),
                                 (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
                                 (ColumnsSimilarVideos::Name as u32, &"".to_string()),
@@ -637,7 +637,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let (directory, file) = split_path(&file_entry.path);
                                 let values: [(u32, &dyn ToValue); 10] = [
                                     (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
-                                    (ColumnsSimilarVideos::ActiveSelectButton as u32, &false),
+                                    (ColumnsSimilarVideos::SelectionButton as u32, &false),
                                     (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
                                     (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
                                     (ColumnsSimilarVideos::Name as u32, &file),

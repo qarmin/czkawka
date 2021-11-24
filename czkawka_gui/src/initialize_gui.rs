@@ -135,7 +135,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 && check_if_deleting_all_files_in_group(
                                     &tree_view.clone(),
                                     ColumnsDuplicates::Color as i32,
-                                    ColumnsDuplicates::ActiveSelectButton as i32,
+                                    ColumnsDuplicates::SelectionButton as i32,
                                     &gui_data.window_main,
                                     &gui_data.settings.check_button_settings_confirm_group_deletion,
                                 )
@@ -147,7 +147,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 ColumnsDuplicates::Name as i32,
                                 ColumnsDuplicates::Path as i32,
                                 ColumnsDuplicates::Color as i32,
-                                ColumnsDuplicates::ActiveSelectButton as i32,
+                                ColumnsDuplicates::SelectionButton as i32,
                                 &gui_data,
                             );
                             image_preview_duplicates.hide();
@@ -188,7 +188,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            empty_folder_remover(tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, ColumnsEmptyFolders::ActiveSelectButton as i32, &gui_data);
+                            empty_folder_remover(tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, ColumnsEmptyFolders::SelectionButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -218,7 +218,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, ColumnsEmptyFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, ColumnsEmptyFiles::SelectionButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -248,7 +248,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, ColumnsTemporaryFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, ColumnsTemporaryFiles::SelectionButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -278,7 +278,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::SelectionButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -349,7 +349,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 && check_if_deleting_all_files_in_group(
                                     &tree_view.clone(),
                                     ColumnsSimilarImages::Color as i32,
-                                    ColumnsSimilarImages::ActiveSelectButton as i32,
+                                    ColumnsSimilarImages::SelectionButton as i32,
                                     &gui_data.window_main,
                                     &gui_data.settings.check_button_settings_confirm_group_deletion,
                                 )
@@ -361,7 +361,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 ColumnsSimilarImages::Name as i32,
                                 ColumnsSimilarImages::Path as i32,
                                 ColumnsSimilarImages::Color as i32,
-                                ColumnsSimilarImages::ActiveSelectButton as i32,
+                                ColumnsSimilarImages::SelectionButton as i32,
                                 &gui_data,
                             );
                             image_preview_similar_images_clone.hide();
@@ -382,7 +382,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             {
                 let col_types: [glib::types::Type; 10] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
-                    glib::types::Type::BOOL,   // ActiveSelectButton
+                    glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Size
                     glib::types::Type::U64,    // SizeAsBytes
                     glib::types::Type::STRING, // Name
@@ -424,7 +424,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 && check_if_deleting_all_files_in_group(
                                     &tree_view.clone(),
                                     ColumnsSimilarVideos::Color as i32,
-                                    ColumnsSimilarVideos::ActiveSelectButton as i32,
+                                    ColumnsSimilarVideos::SelectionButton as i32,
                                     &gui_data.window_main,
                                     &gui_data.settings.check_button_settings_confirm_group_deletion,
                                 )
@@ -436,7 +436,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 ColumnsSimilarVideos::Name as i32,
                                 ColumnsSimilarVideos::Path as i32,
                                 ColumnsSimilarVideos::Color as i32,
-                                ColumnsSimilarVideos::ActiveSelectButton as i32,
+                                ColumnsSimilarVideos::SelectionButton as i32,
                                 &gui_data,
                             );
                         }
@@ -495,7 +495,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 && check_if_deleting_all_files_in_group(
                                     &tree_view.clone(),
                                     ColumnsSameMusic::Color as i32,
-                                    ColumnsSameMusic::ActiveSelectButton as i32,
+                                    ColumnsSameMusic::SelectionButton as i32,
                                     &gui_data.window_main,
                                     &gui_data.settings.check_button_settings_confirm_group_deletion,
                                 )
@@ -507,7 +507,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                                 ColumnsSameMusic::Name as i32,
                                 ColumnsSameMusic::Path as i32,
                                 ColumnsSameMusic::Color as i32,
-                                ColumnsSameMusic::ActiveSelectButton as i32,
+                                ColumnsSameMusic::SelectionButton as i32,
                                 &gui_data,
                             );
                         }
@@ -546,7 +546,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, ColumnsInvalidSymlinks::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, ColumnsInvalidSymlinks::SelectionButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)
@@ -576,7 +576,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
                         if button_number == 119 {
-                            basic_remove(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, ColumnsBrokenFiles::ActiveSelectButton as i32, &gui_data);
+                            basic_remove(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, ColumnsBrokenFiles::SelectionButton as i32, &gui_data);
                         }
                     }
                     gtk::Inhibit(false)

@@ -46,7 +46,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
         column_path: ColumnsDuplicates::Path as i32,
         column_name: ColumnsDuplicates::Name as i32,
-        column_selection: ColumnsDuplicates::ActiveSelectButton as i32,
+        column_selection: ColumnsDuplicates::SelectionButton as i32,
         column_color: Some(ColumnsDuplicates::Color as i32),
         column_dimensions: None,
         column_size: None,
@@ -59,7 +59,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: None,
         column_path: ColumnsEmptyFolders::Path as i32,
         column_name: ColumnsEmptyFolders::Name as i32,
-        column_selection: ColumnsEmptyFolders::ActiveSelectButton as i32,
+        column_selection: ColumnsEmptyFolders::SelectionButton as i32,
         column_color: None,
         column_dimensions: None,
         column_size: None,
@@ -72,7 +72,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: None,
         column_path: ColumnsBigFiles::Path as i32,
         column_name: ColumnsBigFiles::Name as i32,
-        column_selection: ColumnsBigFiles::ActiveSelectButton as i32,
+        column_selection: ColumnsBigFiles::SelectionButton as i32,
         column_color: None,
         column_dimensions: None,
         column_size: None,
@@ -85,7 +85,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: None,
         column_path: ColumnsEmptyFiles::Path as i32,
         column_name: ColumnsEmptyFiles::Name as i32,
-        column_selection: ColumnsEmptyFiles::ActiveSelectButton as i32,
+        column_selection: ColumnsEmptyFiles::SelectionButton as i32,
         column_color: None,
         column_dimensions: None,
         column_size: None,
@@ -98,7 +98,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: None,
         column_path: ColumnsTemporaryFiles::Path as i32,
         column_name: ColumnsTemporaryFiles::Name as i32,
-        column_selection: ColumnsTemporaryFiles::ActiveSelectButton as i32,
+        column_selection: ColumnsTemporaryFiles::SelectionButton as i32,
         column_color: None,
         column_dimensions: None,
         column_size: None,
@@ -111,7 +111,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarImages::Path as i32,
         column_name: ColumnsSimilarImages::Name as i32,
-        column_selection: ColumnsSimilarImages::ActiveSelectButton as i32,
+        column_selection: ColumnsSimilarImages::SelectionButton as i32,
         column_color: Some(ColumnsSimilarImages::Color as i32),
         column_dimensions: Some(ColumnsSimilarImages::Dimensions as i32),
         column_size: Some(ColumnsSimilarImages::Size as i32),
@@ -124,7 +124,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarVideos::Path as i32,
         column_name: ColumnsSimilarVideos::Name as i32,
-        column_selection: ColumnsSimilarVideos::ActiveSelectButton as i32,
+        column_selection: ColumnsSimilarVideos::SelectionButton as i32,
         column_color: Some(ColumnsSimilarVideos::Color as i32),
         column_dimensions: None,
         column_size: Some(ColumnsSimilarVideos::Size as i32),
@@ -137,7 +137,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
         column_path: ColumnsSameMusic::Path as i32,
         column_name: ColumnsSameMusic::Name as i32,
-        column_selection: ColumnsSameMusic::ActiveSelectButton as i32,
+        column_selection: ColumnsSameMusic::SelectionButton as i32,
         column_color: Some(ColumnsSameMusic::Color as i32),
         column_dimensions: None,
         column_size: None,
@@ -150,7 +150,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: None,
         column_path: ColumnsInvalidSymlinks::Path as i32,
         column_name: ColumnsInvalidSymlinks::Name as i32,
-        column_selection: ColumnsInvalidSymlinks::ActiveSelectButton as i32,
+        column_selection: ColumnsInvalidSymlinks::SelectionButton as i32,
         column_color: None,
         column_dimensions: None,
         column_size: None,
@@ -163,7 +163,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_activatable_button: None,
         column_path: ColumnsBrokenFiles::Path as i32,
         column_name: ColumnsBrokenFiles::Name as i32,
-        column_selection: ColumnsBrokenFiles::ActiveSelectButton as i32,
+        column_selection: ColumnsBrokenFiles::SelectionButton as i32,
         column_color: None,
         column_dimensions: None,
         column_size: None,
@@ -188,7 +188,7 @@ pub enum Message {
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Name,
     Path,
     Modification,
@@ -199,7 +199,7 @@ pub enum ColumnsDuplicates {
 
 pub enum ColumnsEmptyFolders {
     // Columns for empty folder treeview
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     Modification,
@@ -209,27 +209,27 @@ pub enum ColumnsDirectory {
     Path = 0,
 }
 pub enum ColumnsBigFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Size,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsEmptyFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsTemporaryFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsSimilarImages {
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Similarity,
     Size,
     SizeAsBytes,
@@ -244,7 +244,7 @@ pub enum ColumnsSimilarImages {
 
 pub enum ColumnsSimilarVideos {
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Size,
     SizeAsBytes,
     Name,
@@ -256,7 +256,7 @@ pub enum ColumnsSimilarVideos {
 }
 pub enum ColumnsSameMusic {
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Size,
     SizeAsBytes,
     Name,
@@ -272,7 +272,7 @@ pub enum ColumnsSameMusic {
     TextColor,
 }
 pub enum ColumnsInvalidSymlinks {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     DestinationPath,
@@ -281,7 +281,7 @@ pub enum ColumnsInvalidSymlinks {
 }
 
 pub enum ColumnsBrokenFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     ErrorType,
@@ -495,5 +495,11 @@ pub fn validate_notebook_data(gui_data: &GuiData) {
     for (i, item) in NOTEBOOKS_INFOS.iter().enumerate() {
         let en = to_notebook_main_enum(i as u32);
         assert_eq!(item.notebook_type, en);
+    }
+
+    // Tests if data returned from array get_notebook_enum_from_tree_view are in right
+    for (i, item) in gui_data.main_notebook.get_main_tree_views().iter().enumerate() {
+        let nb_en = get_notebook_enum_from_tree_view(item);
+        assert_eq!(to_notebook_main_enum(i as u32), nb_en);
     }
 }

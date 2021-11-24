@@ -29,7 +29,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsDuplicates::Name as i32,
                 ColumnsDuplicates::Path as i32,
                 Some(ColumnsDuplicates::Color as i32),
-                ColumnsDuplicates::ActiveSelectButton as i32,
+                ColumnsDuplicates::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -39,7 +39,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsSameMusic::Name as i32,
                 ColumnsSameMusic::Path as i32,
                 Some(ColumnsSameMusic::Color as i32),
-                ColumnsSameMusic::ActiveSelectButton as i32,
+                ColumnsSameMusic::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -49,7 +49,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsSimilarImages::Name as i32,
                 ColumnsSimilarImages::Path as i32,
                 Some(ColumnsSimilarImages::Color as i32),
-                ColumnsSimilarImages::ActiveSelectButton as i32,
+                ColumnsSimilarImages::SelectionButton as i32,
                 &gui_data,
             );
             image_preview_similar_images.hide();
@@ -60,7 +60,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsSimilarVideos::Name as i32,
                 ColumnsSimilarVideos::Path as i32,
                 Some(ColumnsSimilarVideos::Color as i32),
-                ColumnsSimilarVideos::ActiveSelectButton as i32,
+                ColumnsSimilarVideos::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -70,7 +70,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsBigFiles::Name as i32,
                 ColumnsBigFiles::Path as i32,
                 None,
-                ColumnsBigFiles::ActiveSelectButton as i32,
+                ColumnsBigFiles::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -80,7 +80,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsBrokenFiles::Name as i32,
                 ColumnsBrokenFiles::Path as i32,
                 None,
-                ColumnsBrokenFiles::ActiveSelectButton as i32,
+                ColumnsBrokenFiles::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -90,7 +90,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsEmptyFolders::Name as i32,
                 ColumnsEmptyFolders::Path as i32,
                 None,
-                ColumnsEmptyFolders::ActiveSelectButton as i32,
+                ColumnsEmptyFolders::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -100,7 +100,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsEmptyFiles::Name as i32,
                 ColumnsEmptyFiles::Path as i32,
                 None,
-                ColumnsEmptyFiles::ActiveSelectButton as i32,
+                ColumnsEmptyFiles::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -110,7 +110,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsInvalidSymlinks::Name as i32,
                 ColumnsInvalidSymlinks::Path as i32,
                 None,
-                ColumnsInvalidSymlinks::ActiveSelectButton as i32,
+                ColumnsInvalidSymlinks::SelectionButton as i32,
                 &gui_data,
             );
         }
@@ -120,7 +120,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 ColumnsTemporaryFiles::Name as i32,
                 ColumnsTemporaryFiles::Path as i32,
                 None,
-                ColumnsTemporaryFiles::ActiveSelectButton as i32,
+                ColumnsTemporaryFiles::SelectionButton as i32,
                 &gui_data,
             );
         }

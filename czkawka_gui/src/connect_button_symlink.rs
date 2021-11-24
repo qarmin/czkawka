@@ -25,7 +25,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
                 ColumnsDuplicates::Name as i32,
                 ColumnsDuplicates::Path as i32,
                 ColumnsDuplicates::Color as i32,
-                ColumnsDuplicates::ActiveSelectButton as i32,
+                ColumnsDuplicates::SelectionButton as i32,
                 false,
                 &gui_data,
             );
@@ -37,7 +37,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
                 ColumnsSameMusic::Name as i32,
                 ColumnsSameMusic::Path as i32,
                 ColumnsSameMusic::Color as i32,
-                ColumnsSameMusic::ActiveSelectButton as i32,
+                ColumnsSameMusic::SelectionButton as i32,
                 false,
                 &gui_data,
             );
@@ -48,7 +48,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
                 ColumnsSimilarImages::Name as i32,
                 ColumnsSimilarImages::Path as i32,
                 ColumnsSimilarImages::Color as i32,
-                ColumnsSimilarImages::ActiveSelectButton as i32,
+                ColumnsSimilarImages::SelectionButton as i32,
                 false,
                 &gui_data,
             );
@@ -60,7 +60,7 @@ pub fn connect_button_symlink(gui_data: &GuiData) {
                 ColumnsSimilarVideos::Name as i32,
                 ColumnsSimilarVideos::Path as i32,
                 ColumnsSimilarVideos::Color as i32,
-                ColumnsSimilarVideos::ActiveSelectButton as i32,
+                ColumnsSimilarVideos::SelectionButton as i32,
                 false,
                 &gui_data,
             );

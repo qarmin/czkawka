@@ -1,3 +1,4 @@
+use crate::notebook_enums::NUMBER_OF_NOTEBOOK_MAIN_TABS;
 use gtk::prelude::*;
 use gtk::TreeView;
 
@@ -216,5 +217,20 @@ impl GuiMainNotebook {
             entry_same_music_maximal_size,
             image_preview_duplicates,
         }
+    }
+
+    pub fn get_main_tree_views(&self) -> [TreeView; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
+        [
+            self.tree_view_duplicate_finder.clone(),
+            self.tree_view_empty_folder_finder.clone(),
+            self.tree_view_big_files_finder.clone(),
+            self.tree_view_empty_files_finder.clone(),
+            self.tree_view_temporary_files_finder.clone(),
+            self.tree_view_similar_images_finder.clone(),
+            self.tree_view_similar_videos_finder.clone(),
+            self.tree_view_same_music_finder.clone(),
+            self.tree_view_invalid_symlinks.clone(),
+            self.tree_view_broken_files.clone(),
+        ]
     }
 }

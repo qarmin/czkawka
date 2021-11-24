@@ -39,7 +39,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     || !check_if_deleting_all_files_in_group(
                         &tree_view_duplicate_finder.clone(),
                         ColumnsDuplicates::Color as i32,
-                        ColumnsDuplicates::ActiveSelectButton as i32,
+                        ColumnsDuplicates::SelectionButton as i32,
                         &window_main,
                         &check_button_settings_confirm_group_deletion,
                     )
@@ -49,7 +49,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                         ColumnsDuplicates::Name as i32,
                         ColumnsDuplicates::Path as i32,
                         ColumnsDuplicates::Color as i32,
-                        ColumnsDuplicates::ActiveSelectButton as i32,
+                        ColumnsDuplicates::SelectionButton as i32,
                         &gui_data,
                     );
                 }
@@ -59,7 +59,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     &tree_view_empty_folder_finder.clone(),
                     ColumnsEmptyFolders::Name as i32,
                     ColumnsEmptyFolders::Path as i32,
-                    ColumnsEmptyFolders::ActiveSelectButton as i32,
+                    ColumnsEmptyFolders::SelectionButton as i32,
                     &gui_data,
                 );
             }
@@ -68,7 +68,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     &tree_view_empty_files_finder.clone(),
                     ColumnsEmptyFiles::Name as i32,
                     ColumnsEmptyFiles::Path as i32,
-                    ColumnsEmptyFiles::ActiveSelectButton as i32,
+                    ColumnsEmptyFiles::SelectionButton as i32,
                     &gui_data,
                 );
             }
@@ -77,19 +77,19 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     &tree_view_temporary_files_finder.clone(),
                     ColumnsTemporaryFiles::Name as i32,
                     ColumnsTemporaryFiles::Path as i32,
-                    ColumnsTemporaryFiles::ActiveSelectButton as i32,
+                    ColumnsTemporaryFiles::SelectionButton as i32,
                     &gui_data,
                 );
             }
             NotebookMainEnum::BigFiles => {
-                basic_remove(&tree_view_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::ActiveSelectButton as i32, &gui_data);
+                basic_remove(&tree_view_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::SelectionButton as i32, &gui_data);
             }
             NotebookMainEnum::SimilarImages => {
                 if !check_button_settings_confirm_group_deletion.is_active()
                     || !check_if_deleting_all_files_in_group(
                         &tree_view_similar_images_finder.clone(),
                         ColumnsSimilarImages::Color as i32,
-                        ColumnsSimilarImages::ActiveSelectButton as i32,
+                        ColumnsSimilarImages::SelectionButton as i32,
                         &window_main,
                         &check_button_settings_confirm_group_deletion,
                     )
@@ -99,7 +99,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                         ColumnsSimilarImages::Name as i32,
                         ColumnsSimilarImages::Path as i32,
                         ColumnsSimilarImages::Color as i32,
-                        ColumnsSimilarImages::ActiveSelectButton as i32,
+                        ColumnsSimilarImages::SelectionButton as i32,
                         &gui_data,
                     );
                     image_preview_similar_images.hide();
@@ -110,7 +110,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     || !check_if_deleting_all_files_in_group(
                         &tree_view_similar_videos_finder.clone(),
                         ColumnsSimilarVideos::Color as i32,
-                        ColumnsSimilarVideos::ActiveSelectButton as i32,
+                        ColumnsSimilarVideos::SelectionButton as i32,
                         &window_main,
                         &check_button_settings_confirm_group_deletion,
                     )
@@ -120,7 +120,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                         ColumnsSimilarVideos::Name as i32,
                         ColumnsSimilarVideos::Path as i32,
                         ColumnsSimilarVideos::Color as i32,
-                        ColumnsSimilarVideos::ActiveSelectButton as i32,
+                        ColumnsSimilarVideos::SelectionButton as i32,
                         &gui_data,
                     );
                 }
@@ -130,7 +130,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     || !check_if_deleting_all_files_in_group(
                         &tree_view_same_music_finder.clone(),
                         ColumnsSameMusic::Color as i32,
-                        ColumnsSameMusic::ActiveSelectButton as i32,
+                        ColumnsSameMusic::SelectionButton as i32,
                         &window_main,
                         &check_button_settings_confirm_group_deletion,
                     )
@@ -140,7 +140,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                         ColumnsSameMusic::Name as i32,
                         ColumnsSameMusic::Path as i32,
                         ColumnsSameMusic::Color as i32,
-                        ColumnsSameMusic::ActiveSelectButton as i32,
+                        ColumnsSameMusic::SelectionButton as i32,
                         &gui_data,
                     );
                 }
@@ -150,7 +150,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     &tree_view_invalid_symlinks.clone(),
                     ColumnsInvalidSymlinks::Name as i32,
                     ColumnsInvalidSymlinks::Path as i32,
-                    ColumnsInvalidSymlinks::ActiveSelectButton as i32,
+                    ColumnsInvalidSymlinks::SelectionButton as i32,
                     &gui_data,
                 );
             }
@@ -159,7 +159,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
                     &tree_view_broken_files.clone(),
                     ColumnsBrokenFiles::Name as i32,
                     ColumnsBrokenFiles::Path as i32,
-                    ColumnsInvalidSymlinks::ActiveSelectButton as i32,
+                    ColumnsInvalidSymlinks::SelectionButton as i32,
                     &gui_data,
                 );
             }
