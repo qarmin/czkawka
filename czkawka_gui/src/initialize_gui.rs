@@ -15,6 +15,8 @@ use std::cmp::Ordering;
 use std::fs;
 use std::path::Path;
 
+const KEY_DELETE: u16 = 119;
+
 pub fn initialize_gui(gui_data: &mut GuiData) {
     //// Initialize button
     {
@@ -131,7 +133,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
@@ -190,7 +192,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::EmptyDirectories as usize];
                             empty_folder_remover(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
@@ -222,7 +224,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::EmptyFiles as usize];
                             basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
@@ -254,7 +256,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Temporary as usize];
                             basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
@@ -286,7 +288,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::BigFiles as usize];
                             basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
@@ -354,7 +356,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
@@ -428,7 +430,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarVideos as usize];
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
@@ -498,7 +500,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SameMusic as usize];
 
                             if tree_view.selection().selected_rows().0.is_empty() {
@@ -557,7 +559,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Symlinks as usize];
                             basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
@@ -589,7 +591,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::BrokenFiles as usize];
                             basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
@@ -623,7 +625,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             tree_view.connect_key_release_event(move |tree_view, e| {
                 if let Some(button_number) = e.keycode() {
                     // Handle delete button
-                    if button_number == 119 {
+                    if button_number == KEY_DELETE {
                         let list_store = get_list_store(tree_view);
                         let selection = tree_view.selection();
 
@@ -655,7 +657,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             tree_view.connect_key_release_event(move |tree_view, e| {
                 if let Some(button_number) = e.keycode() {
                     // Handle delete button
-                    if button_number == 119 {
+                    if button_number == KEY_DELETE {
                         let list_store = get_list_store(tree_view);
                         let selection = tree_view.selection();
 
