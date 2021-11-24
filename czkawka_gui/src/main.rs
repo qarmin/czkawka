@@ -62,6 +62,7 @@ use crate::connect_selection_of_directories::*;
 use crate::connect_settings::*;
 use crate::connect_similar_image_size_change::*;
 use crate::gui_data::*;
+use crate::help_functions::validate_notebook_data;
 use crate::initialize_gui::*;
 use crate::saving_loading::*;
 use gtk::prelude::*;
@@ -107,6 +108,7 @@ fn main() {
     let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) = futures::channel::mpsc::unbounded();
 
     initialize_gui(&mut gui_data);
+    validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
     reset_configuration(&gui_data, false); // Fallback for invalid loading setting project
     load_configuration(&gui_data, false);
 

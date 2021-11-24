@@ -1,3 +1,5 @@
+use crate::notebook_enums::{to_notebook_main_enum, NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
+use crate::GuiData;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_messages::Messages;
@@ -15,6 +17,150 @@ use gtk::{ListStore, TextView};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+pub enum PopoverTypes {
+    All,
+    Reverse,
+    Custom,
+    Date,
+    None,
+}
+
+pub struct ThingObject {
+    pub notebook_type: NotebookMainEnum,
+    pub available_modes: [PopoverTypes; 4],
+    pub column_path: i32,
+    pub column_name: i32,
+    pub column_selection: i32,
+    pub column_color: Option<i32>,
+    pub column_dimensions: Option<i32>,
+    pub column_size: Option<i32>,
+    pub column_size_as_bytes: Option<i32>,
+    pub column_modification_as_secs: Option<i32>,
+}
+
+pub static NOTEBOOKS_INFOS: [ThingObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
+    ThingObject {
+        notebook_type: NotebookMainEnum::Duplicate,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_path: ColumnsDuplicates::Path as i32,
+        column_name: ColumnsDuplicates::Name as i32,
+        column_selection: ColumnsDuplicates::ActiveSelectButton as i32,
+        column_color: Some(ColumnsDuplicates::Color as i32),
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::EmptyDirectories,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_path: ColumnsEmptyFolders::Path as i32,
+        column_name: ColumnsEmptyFolders::Name as i32,
+        column_selection: ColumnsEmptyFolders::ActiveSelectButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::BigFiles,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_path: ColumnsBigFiles::Path as i32,
+        column_name: ColumnsBigFiles::Name as i32,
+        column_selection: ColumnsBigFiles::ActiveSelectButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::EmptyFiles,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_path: ColumnsEmptyFiles::Path as i32,
+        column_name: ColumnsEmptyFiles::Name as i32,
+        column_selection: ColumnsEmptyFiles::ActiveSelectButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::Temporary,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_path: ColumnsTemporaryFiles::Path as i32,
+        column_name: ColumnsTemporaryFiles::Name as i32,
+        column_selection: ColumnsTemporaryFiles::ActiveSelectButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::SimilarImages,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_path: ColumnsSimilarImages::Path as i32,
+        column_name: ColumnsSimilarImages::Name as i32,
+        column_selection: ColumnsSimilarImages::ActiveSelectButton as i32,
+        column_color: Some(ColumnsSimilarImages::Color as i32),
+        column_dimensions: Some(ColumnsSimilarImages::Dimensions as i32),
+        column_size: Some(ColumnsSimilarImages::Size as i32),
+        column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
+        column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::SimilarVideos,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_path: ColumnsSimilarVideos::Path as i32,
+        column_name: ColumnsSimilarVideos::Name as i32,
+        column_selection: ColumnsSimilarVideos::ActiveSelectButton as i32,
+        column_color: Some(ColumnsSimilarVideos::Color as i32),
+        column_dimensions: None,
+        column_size: Some(ColumnsSimilarVideos::Size as i32),
+        column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
+        column_modification_as_secs: Some(ColumnsSimilarVideos::ModificationAsSecs as i32),
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::SameMusic,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_path: ColumnsSameMusic::Path as i32,
+        column_name: ColumnsSameMusic::Name as i32,
+        column_selection: ColumnsSameMusic::ActiveSelectButton as i32,
+        column_color: Some(ColumnsSameMusic::Color as i32),
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
+        column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::Symlinks,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_path: ColumnsInvalidSymlinks::Path as i32,
+        column_name: ColumnsInvalidSymlinks::Name as i32,
+        column_selection: ColumnsInvalidSymlinks::ActiveSelectButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    ThingObject {
+        notebook_type: NotebookMainEnum::BrokenFiles,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_path: ColumnsBrokenFiles::Path as i32,
+        column_name: ColumnsBrokenFiles::Name as i32,
+        column_selection: ColumnsBrokenFiles::ActiveSelectButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+];
+
 pub enum Message {
     Duplicates(DuplicateFinder),
     EmptyFolders(EmptyFolder),
@@ -28,7 +174,6 @@ pub enum Message {
     BrokenFiles(BrokenFiles),
 }
 
-#[derive(Debug)]
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
     ActivatableSelectButton = 0,
@@ -293,4 +438,47 @@ pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     let number1 = vec[0].parse::<u64>().expect("Invalid data in image dimension in position 0");
     let number2 = vec[1].parse::<u64>().expect("Invalid data in image dimension in position 1");
     (number1, number2)
+}
+
+pub fn get_notebook_name_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMainEnum {
+    match (*tree_view).widget_name().to_string().as_str() {
+        "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
+        "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
+        "tree_view_empty_files_finder" => NotebookMainEnum::EmptyFiles,
+        "tree_view_temporary_files_finder" => NotebookMainEnum::Temporary,
+        "tree_view_big_files_finder" => NotebookMainEnum::BigFiles,
+        "tree_view_similar_images_finder" => NotebookMainEnum::SimilarImages,
+        "tree_view_similar_videos_finder" => NotebookMainEnum::SimilarVideos,
+        "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
+        "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
+        "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
+        _ => panic!(),
+    }
+}
+pub fn validate_notebook_data(gui_data: &GuiData) {
+    // Test treeviews names, each treeview should have set name same as variable name
+    let tree_view_arr: [&gtk::TreeView; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
+        &gui_data.main_notebook.tree_view_duplicate_finder,
+        &gui_data.main_notebook.tree_view_similar_videos_finder,
+        &gui_data.main_notebook.tree_view_temporary_files_finder,
+        &gui_data.main_notebook.tree_view_big_files_finder,
+        &gui_data.main_notebook.tree_view_empty_files_finder,
+        &gui_data.main_notebook.tree_view_broken_files,
+        &gui_data.main_notebook.tree_view_empty_folder_finder,
+        &gui_data.main_notebook.tree_view_same_music_finder,
+        &gui_data.main_notebook.tree_view_similar_images_finder,
+        &gui_data.main_notebook.tree_view_invalid_symlinks,
+    ];
+    for (_i, item) in tree_view_arr.iter().enumerate() {
+        // println!("Checking {} element", i);
+
+        get_notebook_name_from_tree_view(item);
+    }
+
+    // This test main info about notebooks
+    // Should have same order as notebook enum types
+    for (i, item) in NOTEBOOKS_INFOS.iter().enumerate() {
+        let en = to_notebook_main_enum(i as u32);
+        assert_eq!(item.notebook_type, en);
+    }
 }
