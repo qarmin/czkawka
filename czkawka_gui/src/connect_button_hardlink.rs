@@ -69,6 +69,10 @@ pub fn hardlink_symlink(tree_view: gtk::TreeView, column_file_name: i32, column_
         }
     }
 
+    if selected_rows.is_empty() {
+        return; // No selected rows
+    }
+
     let mut current_symhardlink_data: Option<SymHardlinkData> = None;
     let mut current_selected_index = 0;
     loop {
