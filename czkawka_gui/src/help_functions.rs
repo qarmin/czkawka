@@ -17,8 +17,10 @@ use gtk::{ListStore, TextView};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+#[derive(Eq, PartialEq)]
 pub enum PopoverTypes {
     All,
+    ImageSize,
     Reverse,
     Custom,
     Date,

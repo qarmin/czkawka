@@ -1,6 +1,5 @@
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::notebook_enums::*;
 use czkawka_core::common::Common;
 use gtk::prelude::*;
 use gtk::TreeIter;
@@ -8,6 +7,7 @@ use gtk::TreeIter;
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
+// TODO - this also selects headers
 fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
@@ -22,6 +22,7 @@ fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     }
     popover.popdown();
 }
+// TODO - this also selects headers
 fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
@@ -634,320 +635,183 @@ fn popover_all_except_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView
     popover.popdown();
 }
 
-#[derive(Clone)]
-pub struct PopoverObject {
-    pub notebook_type: NotebookMainEnum,
-    pub available_modes: Vec<String>,
-    pub tree_view: gtk::TreeView,
-    pub column_path: i32,
-    pub column_name: i32,
-    pub column_selection: u32, // TODo Change this to i32 after properly implement all things
-    pub column_color: Option<i32>,
-    pub column_dimensions: Option<i32>,
-    pub column_size: Option<i32>,
-    pub column_size_as_bytes: Option<i32>,
-    pub column_modification_as_secs: Option<i32>,
-}
-
-pub fn find_name(notebook_type: &NotebookMainEnum, vec: &[PopoverObject]) -> Option<PopoverObject> {
-    for e in vec {
-        if e.notebook_type == *notebook_type {
-            return Some(e.clone());
-        }
-    }
-    None
-}
-
 pub fn connect_popovers(gui_data: &GuiData) {
-    let popover_objects = vec![
-        PopoverObject {
-            notebook_type: NotebookMainEnum::Duplicate,
-            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_duplicate_finder.clone(),
-            column_path: ColumnsDuplicates::Path as i32,
-            column_name: ColumnsDuplicates::Name as i32,
-            column_selection: ColumnsDuplicates::SelectionButton as u32,
-            column_color: Some(ColumnsDuplicates::Color as i32),
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::SameMusic,
-            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_same_music_finder.clone(),
-            column_path: ColumnsSameMusic::Path as i32,
-            column_name: ColumnsSameMusic::Name as i32,
-            column_selection: ColumnsSameMusic::SelectionButton as u32,
-            column_color: Some(ColumnsSameMusic::Color as i32),
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
-            column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::SimilarImages,
-            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_similar_images_finder.clone(),
-            column_path: ColumnsSimilarImages::Path as i32,
-            column_name: ColumnsSimilarImages::Name as i32,
-            column_selection: ColumnsSimilarImages::SelectionButton as u32,
-            column_color: Some(ColumnsSimilarImages::Color as i32),
-            column_dimensions: Some(ColumnsSimilarImages::Dimensions as i32),
-            column_size: Some(ColumnsSimilarImages::Size as i32),
-            column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
-            column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::SimilarVideos,
-            available_modes: vec!["all", "reverse", "custom", "date"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_similar_videos_finder.clone(),
-            column_path: ColumnsSimilarVideos::Path as i32,
-            column_name: ColumnsSimilarVideos::Name as i32,
-            column_selection: ColumnsSimilarVideos::SelectionButton as u32,
-            column_color: Some(ColumnsSimilarVideos::Color as i32),
-            column_dimensions: None,
-            column_size: Some(ColumnsSimilarVideos::Size as i32),
-            column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
-            column_modification_as_secs: Some(ColumnsSimilarVideos::ModificationAsSecs as i32),
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::EmptyDirectories,
-            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_empty_folder_finder.clone(),
-            column_path: ColumnsEmptyFolders::Path as i32,
-            column_name: ColumnsEmptyFolders::Name as i32,
-            column_selection: ColumnsEmptyFolders::SelectionButton as u32,
-            column_color: None,
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: None,
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::EmptyFiles,
-            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_empty_files_finder.clone(),
-            column_path: ColumnsEmptyFiles::Path as i32,
-            column_name: ColumnsEmptyFiles::Name as i32,
-            column_selection: ColumnsEmptyFiles::SelectionButton as u32,
-            column_color: None,
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: None,
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::Temporary,
-            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_temporary_files_finder.clone(),
-            column_path: ColumnsTemporaryFiles::Path as i32,
-            column_name: ColumnsTemporaryFiles::Name as i32,
-            column_selection: ColumnsTemporaryFiles::SelectionButton as u32,
-            column_color: None,
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: None,
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::BigFiles,
-            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_big_files_finder.clone(),
-            column_path: ColumnsBigFiles::Path as i32,
-            column_name: ColumnsBigFiles::Name as i32,
-            column_selection: ColumnsBigFiles::SelectionButton as u32,
-            column_color: None,
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: None,
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::BrokenFiles,
-            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_broken_files.clone(),
-            column_path: ColumnsBrokenFiles::Path as i32,
-            column_name: ColumnsBrokenFiles::Name as i32,
-            column_selection: ColumnsBrokenFiles::SelectionButton as u32,
-            column_color: None,
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: None,
-        },
-        PopoverObject {
-            notebook_type: NotebookMainEnum::Symlinks,
-            available_modes: vec!["all", "reverse", "custom"].iter().map(|e| e.to_string()).collect(),
-            tree_view: gui_data.main_notebook.tree_view_invalid_symlinks.clone(),
-            column_path: ColumnsInvalidSymlinks::Path as i32,
-            column_name: ColumnsInvalidSymlinks::Name as i32,
-            column_selection: ColumnsInvalidSymlinks::SelectionButton as u32,
-            column_color: None,
-            column_dimensions: None,
-            column_size: None,
-            column_size_as_bytes: None,
-            column_modification_as_secs: None,
-        },
-    ];
-
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_all = gui_data.popovers.buttons_popover_select_all.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
     buttons_popover_select_all.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_select_all(&popover_select, &object_popover.tree_view, object_popover.column_selection);
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_unselect_all = gui_data.popovers.buttons_popover_unselect_all.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_unselect_all.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_unselect_all(&popover_select, &object_popover.tree_view, object_popover.column_selection);
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        popover_unselect_all(&popover_select, tree_view, nb_object.column_selection as u32);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_reverse = gui_data.popovers.buttons_popover_reverse.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_reverse.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_reverse(&popover_select, &object_popover.tree_view, object_popover.column_selection);
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_all_except_oldest = gui_data.popovers.buttons_popover_select_all_except_oldest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
         popover_all_except_oldest(
             &popover_select,
-            &object_popover.tree_view,
-            object_popover.column_color.unwrap(),
-            object_popover.column_modification_as_secs.unwrap(),
-            object_popover.column_name,
-            object_popover.column_selection,
+            tree_view,
+            nb_object.column_color.expect("AEO can't be used without headers"),
+            nb_object.column_modification_as_secs.expect("AEO needs modification as secs column"),
+            nb_object.column_name,
+            nb_object.column_selection as u32,
         );
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_all_except_newest = gui_data.popovers.buttons_popover_select_all_except_newest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
         popover_all_except_newest(
             &popover_select,
-            &object_popover.tree_view,
-            object_popover.column_color.unwrap(),
-            object_popover.column_modification_as_secs.unwrap(),
-            object_popover.column_name,
-            object_popover.column_selection,
+            tree_view,
+            nb_object.column_color.expect("AEN can't be used without headers"),
+            nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
+            nb_object.column_name,
+            nb_object.column_selection as u32,
         );
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_one_oldest = gui_data.popovers.buttons_popover_select_one_oldest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
         popover_one_oldest(
             &popover_select,
-            &object_popover.tree_view,
-            object_popover.column_color.unwrap(),
-            object_popover.column_modification_as_secs.unwrap(),
-            object_popover.column_name,
-            object_popover.column_selection,
+            tree_view,
+            nb_object.column_color.expect("OO can't be used without headers"),
+            nb_object.column_modification_as_secs.expect("OO needs modification as secs column"),
+            nb_object.column_name,
+            nb_object.column_selection as u32,
         );
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_one_newest = gui_data.popovers.buttons_popover_select_one_newest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_one_newest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
         popover_one_newest(
             &popover_select,
-            &object_popover.tree_view,
-            object_popover.column_color.unwrap(),
-            object_popover.column_modification_as_secs.unwrap(),
-            object_popover.column_name,
-            object_popover.column_selection,
+            tree_view,
+            nb_object.column_color.expect("ON can't be used without headers"),
+            nb_object.column_modification_as_secs.expect("ON needs modification as secs column"),
+            nb_object.column_name,
+            nb_object.column_selection as u32,
         );
     });
 
+    // TODO Remove gui data clone
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_custom = gui_data.popovers.buttons_popover_select_custom.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let gui_data_clone = gui_data.clone();
     buttons_popover_select_custom.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_select_custom(
-            &popover_select,
-            &gui_data_clone,
-            &object_popover.tree_view,
-            object_popover.column_color,
-            object_popover.column_name,
-            object_popover.column_path,
-            object_popover.column_selection,
-        );
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        popover_select_custom(&popover_select, &gui_data_clone, tree_view, nb_object.column_color, nb_object.column_name, nb_object.column_path, nb_object.column_selection as u32);
     });
 
+    // TODO Remove gui data clone
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_unselect_custom = gui_data.popovers.buttons_popover_unselect_custom.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let gui_data_clone = gui_data.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_unselect_custom(
-            &popover_select,
-            &gui_data_clone,
-            &object_popover.tree_view,
-            object_popover.column_color,
-            object_popover.column_name,
-            object_popover.column_path,
-            object_popover.column_selection,
-        );
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        popover_unselect_custom(&popover_select, &gui_data_clone, tree_view, nb_object.column_color, nb_object.column_name, nb_object.column_path, nb_object.column_selection as u32);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_all_images_except_biggest = gui_data.popovers.buttons_popover_select_all_images_except_biggest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
         popover_all_except_biggest(
             &popover_select,
-            &object_popover.tree_view,
-            object_popover.column_color.unwrap(),
-            object_popover.column_size_as_bytes.unwrap(),
-            object_popover.column_dimensions.unwrap(),
-            object_popover.column_selection,
+            tree_view,
+            nb_object.column_color.expect("AEB can't be used without headers"),
+            nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
+            nb_object.column_dimensions.expect("AEB needs dimensions column"),
+            nb_object.column_selection as u32,
         );
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_all_images_except_smallest = gui_data.popovers.buttons_popover_select_all_images_except_smallest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let vec_popover_objects = popover_objects; //.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
-        let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
         popover_all_except_smallest(
             &popover_select,
-            &object_popover.tree_view,
-            object_popover.column_color.unwrap(),
-            object_popover.column_size_as_bytes.unwrap(),
-            object_popover.column_dimensions.unwrap(),
-            object_popover.column_selection,
+            tree_view,
+            nb_object.column_color.expect("AES can't be used without headers"),
+            nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
+            nb_object.column_dimensions.expect("AES needs dimensions column"),
+            nb_object.column_selection as u32,
         );
     });
 }
