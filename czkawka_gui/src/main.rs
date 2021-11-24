@@ -40,6 +40,7 @@ mod taskbar_progress;
 mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
+mod tests;
 
 use czkawka_core::*;
 
@@ -62,9 +63,9 @@ use crate::connect_selection_of_directories::*;
 use crate::connect_settings::*;
 use crate::connect_similar_image_size_change::*;
 use crate::gui_data::*;
-use crate::help_functions::validate_notebook_data;
 use crate::initialize_gui::*;
 use crate::saving_loading::*;
+use crate::tests::validate_notebook_data;
 use gtk::prelude::*;
 use std::{env, process};
 
