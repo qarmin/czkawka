@@ -15,154 +15,43 @@ pub fn connect_button_delete(gui_data: &GuiData) {
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
-    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
-    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
-    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
-    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
-    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
     let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
     let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
+
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     buttons_delete.connect_clicked(move |_| {
+        // TODO maybe add to this dialog info how much things will be deleted
         if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main) {
             return;
         }
 
-        match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
-            NotebookMainEnum::Duplicate => {
-                if !check_button_settings_confirm_group_deletion.is_active()
-                    || !check_if_deleting_all_files_in_group(
-                        &tree_view_duplicate_finder.clone(),
-                        ColumnsDuplicates::Color as i32,
-                        ColumnsDuplicates::SelectionButton as i32,
-                        &window_main,
-                        &check_button_settings_confirm_group_deletion,
-                    )
-                {
-                    tree_remove(
-                        &tree_view_duplicate_finder.clone(),
-                        ColumnsDuplicates::Name as i32,
-                        ColumnsDuplicates::Path as i32,
-                        ColumnsDuplicates::Color as i32,
-                        ColumnsDuplicates::SelectionButton as i32,
-                        &gui_data,
-                    );
-                }
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        if let Some(column_color) = nb_object.column_color {
+            if !check_button_settings_confirm_group_deletion.is_active() || !check_if_deleting_all_files_in_group(tree_view, column_color, nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion) {
+                tree_remove(&tree_view_duplicate_finder.clone(), nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, &gui_data);
             }
-            NotebookMainEnum::EmptyDirectories => {
-                empty_folder_remover(
-                    &tree_view_empty_folder_finder.clone(),
-                    ColumnsEmptyFolders::Name as i32,
-                    ColumnsEmptyFolders::Path as i32,
-                    ColumnsEmptyFolders::SelectionButton as i32,
-                    &gui_data,
-                );
+        } else {
+            if nb_number == NotebookMainEnum::EmptyDirectories as u32 {
+                empty_folder_remover(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &gui_data);
+            } else {
+                basic_remove(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &gui_data);
             }
-            NotebookMainEnum::EmptyFiles => {
-                basic_remove(
-                    &tree_view_empty_files_finder.clone(),
-                    ColumnsEmptyFiles::Name as i32,
-                    ColumnsEmptyFiles::Path as i32,
-                    ColumnsEmptyFiles::SelectionButton as i32,
-                    &gui_data,
-                );
-            }
-            NotebookMainEnum::Temporary => {
-                basic_remove(
-                    &tree_view_temporary_files_finder.clone(),
-                    ColumnsTemporaryFiles::Name as i32,
-                    ColumnsTemporaryFiles::Path as i32,
-                    ColumnsTemporaryFiles::SelectionButton as i32,
-                    &gui_data,
-                );
-            }
-            NotebookMainEnum::BigFiles => {
-                basic_remove(&tree_view_big_files_finder.clone(), ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::SelectionButton as i32, &gui_data);
-            }
+        }
+
+        match &nb_object.notebook_type {
             NotebookMainEnum::SimilarImages => {
-                if !check_button_settings_confirm_group_deletion.is_active()
-                    || !check_if_deleting_all_files_in_group(
-                        &tree_view_similar_images_finder.clone(),
-                        ColumnsSimilarImages::Color as i32,
-                        ColumnsSimilarImages::SelectionButton as i32,
-                        &window_main,
-                        &check_button_settings_confirm_group_deletion,
-                    )
-                {
-                    tree_remove(
-                        &tree_view_similar_images_finder.clone(),
-                        ColumnsSimilarImages::Name as i32,
-                        ColumnsSimilarImages::Path as i32,
-                        ColumnsSimilarImages::Color as i32,
-                        ColumnsSimilarImages::SelectionButton as i32,
-                        &gui_data,
-                    );
-                    image_preview_similar_images.hide();
-                }
+                image_preview_similar_images.hide();
             }
-            NotebookMainEnum::SimilarVideos => {
-                if !check_button_settings_confirm_group_deletion.is_active()
-                    || !check_if_deleting_all_files_in_group(
-                        &tree_view_similar_videos_finder.clone(),
-                        ColumnsSimilarVideos::Color as i32,
-                        ColumnsSimilarVideos::SelectionButton as i32,
-                        &window_main,
-                        &check_button_settings_confirm_group_deletion,
-                    )
-                {
-                    tree_remove(
-                        &tree_view_similar_videos_finder.clone(),
-                        ColumnsSimilarVideos::Name as i32,
-                        ColumnsSimilarVideos::Path as i32,
-                        ColumnsSimilarVideos::Color as i32,
-                        ColumnsSimilarVideos::SelectionButton as i32,
-                        &gui_data,
-                    );
-                }
+            NotebookMainEnum::Duplicate => {
+                image_preview_duplicates.hide();
             }
-            NotebookMainEnum::SameMusic => {
-                if !check_button_settings_confirm_group_deletion.is_active()
-                    || !check_if_deleting_all_files_in_group(
-                        &tree_view_same_music_finder.clone(),
-                        ColumnsSameMusic::Color as i32,
-                        ColumnsSameMusic::SelectionButton as i32,
-                        &window_main,
-                        &check_button_settings_confirm_group_deletion,
-                    )
-                {
-                    tree_remove(
-                        &tree_view_same_music_finder.clone(),
-                        ColumnsSameMusic::Name as i32,
-                        ColumnsSameMusic::Path as i32,
-                        ColumnsSameMusic::Color as i32,
-                        ColumnsSameMusic::SelectionButton as i32,
-                        &gui_data,
-                    );
-                }
-            }
-            NotebookMainEnum::Symlinks => {
-                basic_remove(
-                    &tree_view_invalid_symlinks.clone(),
-                    ColumnsInvalidSymlinks::Name as i32,
-                    ColumnsInvalidSymlinks::Path as i32,
-                    ColumnsInvalidSymlinks::SelectionButton as i32,
-                    &gui_data,
-                );
-            }
-            NotebookMainEnum::BrokenFiles => {
-                basic_remove(
-                    &tree_view_broken_files.clone(),
-                    ColumnsBrokenFiles::Name as i32,
-                    ColumnsBrokenFiles::Path as i32,
-                    ColumnsInvalidSymlinks::SelectionButton as i32,
-                    &gui_data,
-                );
-            }
+            _ => {}
         }
     });
 }

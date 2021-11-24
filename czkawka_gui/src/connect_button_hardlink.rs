@@ -16,6 +16,7 @@ pub fn connect_button_hardlink(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
     buttons_hardlink.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
@@ -25,8 +26,14 @@ pub fn connect_button_hardlink(gui_data: &GuiData) {
         let column_color = nb_object.column_color.expect("Hardinkning/Symlinking can be only used for tree views with grouped results");
         hardlink_symlink(tree_view.clone(), nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, true, &gui_data);
 
-        if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
-            image_preview_similar_images.hide();
+        match &nb_object.notebook_type {
+            NotebookMainEnum::SimilarImages => {
+                image_preview_similar_images.hide();
+            }
+            NotebookMainEnum::Duplicate => {
+                image_preview_duplicates.hide();
+            }
+            _ => {}
         }
     });
 }
