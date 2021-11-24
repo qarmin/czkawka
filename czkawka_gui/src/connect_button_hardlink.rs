@@ -3,14 +3,11 @@ use crate::help_functions::*;
 use crate::notebook_enums::*;
 use czkawka_core::duplicate::make_hard_link;
 use gtk::prelude::*;
-use gtk::{TreeIter, TreePath};
+use gtk::{TextView, TreeIter, TreePath};
 use std::fs;
 use std::path::PathBuf;
 
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
-    let gui_data_clone = gui_data.clone();
-    let gui_data = gui_data.clone();
-
     let buttons_hardlink = gui_data.bottom_buttons.buttons_hardlink.clone();
 
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
@@ -19,13 +16,15 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
+    let text_view_errors = gui_data.text_view_errors.clone();
+
     buttons_hardlink.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
         let column_color = nb_object.column_color.expect("Hardinkning can be only used for tree views with grouped results");
-        hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, true, &gui_data_clone);
+        hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, true, &text_view_errors);
 
         match &nb_object.notebook_type {
             NotebookMainEnum::SimilarImages => {
@@ -45,13 +44,16 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
+
+    let text_view_errors = gui_data.text_view_errors.clone();
+
     buttons_symlink.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
         let column_color = nb_object.column_color.expect("Symlinking can be only used for tree views with grouped results");
-        hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, false, &gui_data);
+        hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, false, &text_view_errors);
 
         match &nb_object.notebook_type {
             NotebookMainEnum::SimilarImages => {
@@ -65,10 +67,8 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     });
 }
 
-// TODO remove gui_data from arguments
-pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, hardlinking: bool, gui_data: &GuiData) {
-    let text_view_errors = gui_data.text_view_errors.clone();
-    reset_text_view(&text_view_errors);
+pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, hardlinking: bool, text_view_errors: &TextView) {
+    reset_text_view(text_view_errors);
 
     let model = get_list_store(tree_view);
 
@@ -88,8 +88,12 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
     let mut selected_rows = Vec::new();
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR && model.value(&iter, column_selection).get::<bool>().unwrap() {
-                selected_rows.push(model.path(&iter).unwrap());
+            if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    selected_rows.push(model.path(&iter).unwrap());
+                } else {
+                    panic!("Header row shouldn't be selected, please report bug.");
+                }
             }
             if !model.iter_next(&iter) {
                 break;
@@ -165,7 +169,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
                 match make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     Ok(_) => (),
                     Err(e) => {
-                        add_text_to_text_view(&text_view_errors, format!("Failed to hardlink {}, reason {}", file_to_hardlink, e).as_str());
+                        add_text_to_text_view(text_view_errors, format!("Failed to hardlink {}, reason {}", file_to_hardlink, e).as_str());
                         continue;
                     }
                 }
@@ -177,7 +181,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
                 match fs::remove_file(&file_to_symlink) {
                     Ok(_) => (),
                     Err(e) => {
-                        add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
+                        add_text_to_text_view(text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
                         continue;
                     }
                 };
@@ -187,7 +191,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
                     match std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
                         Ok(_) => (),
                         Err(e) => {
-                            add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
+                            add_text_to_text_view(text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
                             continue;
                         }
                     };
@@ -209,66 +213,5 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
         model.remove(&model.iter(tree_path).unwrap());
     }
 
-    // TODO move this to different function
-    // Remove only child from header
-    if let Some(first_iter) = model.iter_first() {
-        let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
-        let mut current_iter = first_iter;
-        if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
-            panic!(); // First element should be header
-        };
-
-        let mut next_iter;
-        let mut next_next_iter;
-        'main: loop {
-            if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
-                panic!(); // First element should be header
-            };
-
-            next_iter = current_iter.clone();
-            if !model.iter_next(&next_iter) {
-                // There is only single header left (H1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                break 'main;
-            }
-
-            if model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                current_iter = next_iter.clone();
-                continue 'main;
-            }
-
-            next_next_iter = next_iter.clone();
-            if !model.iter_next(&next_next_iter) {
-                // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
-                break 'main;
-            }
-
-            if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
-                current_iter = next_next_iter.clone();
-                continue 'main;
-            }
-
-            loop {
-                // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                if !model.iter_next(&next_next_iter) {
-                    break 'main;
-                }
-                // Move to next header
-                if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                    current_iter = next_next_iter.clone();
-                    continue 'main;
-                }
-            }
-        }
-        for tree_path in vec_tree_path_to_delete.iter().rev() {
-            model.remove(&model.iter(tree_path).unwrap());
-        }
-    }
+    clean_invalid_headers(&model, column_color);
 }

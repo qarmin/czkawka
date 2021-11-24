@@ -78,13 +78,13 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
 fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, destination_folder: PathBuf, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
     let model = get_list_store(tree_view);
 
-    let mut selection_rows = Vec::new();
+    let mut selected_rows = Vec::new();
 
     if let Some(iter) = model.iter_first() {
         loop {
             if model.value(&iter, column_selection).get::<bool>().unwrap() {
                 if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    selection_rows.push(model.path(&iter).unwrap());
+                    selected_rows.push(model.path(&iter).unwrap());
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
                 }
@@ -96,7 +96,11 @@ fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path:
         }
     }
 
-    move_files_common(&selection_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors);
+    if selected_rows.is_empty() {
+        return; // No selected rows
+    }
+
+    move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors);
 
     clean_invalid_headers(&model, column_color);
 }
@@ -104,12 +108,12 @@ fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path:
 fn move_with_list(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, destination_folder: PathBuf, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
     let model = get_list_store(tree_view);
 
-    let mut selection_rows = Vec::new();
+    let mut selected_rows = Vec::new();
 
     if let Some(iter) = model.iter_first() {
         loop {
             if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                selection_rows.push(model.path(&iter).unwrap());
+                selected_rows.push(model.path(&iter).unwrap());
             }
 
             if !model.iter_next(&iter) {
@@ -118,16 +122,20 @@ fn move_with_list(tree_view: &gtk::TreeView, column_file_name: i32, column_path:
         }
     }
 
-    move_files_common(&selection_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors)
+    if selected_rows.is_empty() {
+        return; // No selected rows
+    }
+
+    move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors)
 }
 
-fn move_files_common(selection_rows: &[TreePath], model: &gtk::ListStore, column_file_name: i32, column_path: i32, destination_folder: &Path, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
+fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_file_name: i32, column_path: i32, destination_folder: &Path, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
     let mut messages: String = "".to_string();
 
     let mut moved_files: u32 = 0;
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
-    'next_result: for tree_path in selection_rows.iter().rev() {
+    'next_result: for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
         let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();
@@ -149,7 +157,7 @@ fn move_files_common(selection_rows: &[TreePath], model: &gtk::ListStore, column
         model.remove(&iter);
         moved_files += 1;
     }
-    entry_info.set_text(format!("Properly moved {}/{} files/folders", moved_files, selection_rows.len()).as_str());
+    entry_info.set_text(format!("Properly moved {}/{} files/folders", moved_files, selected_rows.len()).as_str());
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }

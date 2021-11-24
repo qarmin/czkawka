@@ -2,7 +2,7 @@ use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use gtk::prelude::*;
-use gtk::Align;
+use gtk::{Align, CheckButton, TextView};
 use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
@@ -22,6 +22,10 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
+    let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+
+    let text_view_errors = gui_data.text_view_errors;
+
     buttons_delete.connect_clicked(move |_| {
         // TODO maybe add to this dialog info how much things will be deleted
         if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main) {
@@ -34,13 +38,21 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
         if let Some(column_color) = nb_object.column_color {
             if !check_button_settings_confirm_group_deletion.is_active() || !check_if_deleting_all_files_in_group(tree_view, column_color, nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion) {
-                tree_remove(&tree_view_duplicate_finder.clone(), nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, &gui_data);
+                tree_remove(
+                    &tree_view_duplicate_finder.clone(),
+                    nb_object.column_name,
+                    nb_object.column_path,
+                    column_color,
+                    nb_object.column_selection,
+                    &check_button_settings_use_trash,
+                    &text_view_errors,
+                );
             }
         } else {
             if nb_number == NotebookMainEnum::EmptyDirectories as u32 {
-                empty_folder_remover(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &gui_data);
+                empty_folder_remover(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
             } else {
-                basic_remove(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &gui_data);
+                basic_remove(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
             }
         }
 
@@ -178,9 +190,8 @@ pub fn check_if_deleting_all_files_in_group(tree_view: &gtk::TreeView, column_co
     false
 }
 
-pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, gui_data: &GuiData) {
-    let text_view_errors = gui_data.text_view_errors.clone();
-    let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
+pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
+    let use_trash = check_button_settings_use_trash.is_active();
 
     let model = get_list_store(tree_view);
 
@@ -195,6 +206,10 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
                 break;
             }
         }
+    }
+
+    if selected_rows.is_empty() {
+        return; // No selected rows
     }
 
     let mut messages: String = "".to_string();
@@ -279,20 +294,19 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }
 
-pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, gui_data: &GuiData) {
-    let text_view_errors = gui_data.text_view_errors.clone();
-    let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
+pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
+    let use_trash = check_button_settings_use_trash.is_active();
 
     let model = get_list_store(tree_view);
 
     let mut messages: String = "".to_string();
 
-    let mut selection_rows = Vec::new();
+    let mut selected_rows = Vec::new();
 
     if let Some(iter) = model.iter_first() {
         loop {
             if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                selection_rows.push(model.path(&iter).unwrap());
+                selected_rows.push(model.path(&iter).unwrap());
             }
 
             if !model.iter_next(&iter) {
@@ -301,8 +315,12 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
         }
     }
 
+    if selected_rows.is_empty() {
+        return; // No selected rows
+    }
+
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selection_rows.iter().rev() {
+    for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
@@ -329,9 +347,8 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
 }
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
-pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, gui_data: &GuiData) {
-    let text_view_errors = gui_data.text_view_errors.clone();
-    let use_trash = gui_data.settings.check_button_settings_use_trash.clone().is_active();
+pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
+    let use_trash = check_button_settings_use_trash.is_active();
 
     let model = get_list_store(tree_view);
 
@@ -340,13 +357,13 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
     let mut vec_path_to_delete: Vec<(String, String)> = Vec::new();
     let mut map_with_path_to_delete: BTreeMap<String, Vec<String>> = Default::default(); // BTreeMap<Path,Vec<FileName>>
 
-    let mut selection_rows = Vec::new();
+    let mut selected_rows = Vec::new();
 
     if let Some(iter) = model.iter_first() {
         loop {
             if model.value(&iter, column_selection).get::<bool>().unwrap() {
                 if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    selection_rows.push(model.path(&iter).unwrap());
+                    selected_rows.push(model.path(&iter).unwrap());
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
                 }
@@ -358,8 +375,12 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         }
     }
 
+    if selected_rows.is_empty() {
+        return; // No selected rows
+    }
+
     // Save to variable paths of files, and remove it when not removing all occurrences.
-    for tree_path in selection_rows.iter().rev() {
+    for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
         let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();

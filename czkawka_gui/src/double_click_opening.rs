@@ -27,11 +27,11 @@ enum OpenMode {
 
 fn common_mark_function(tree_view: &gtk::TreeView, column_name: i32) {
     let selection = tree_view.selection();
-    let (selection_rows, tree_model) = selection.selected_rows();
+    let (selected_rows, tree_model) = selection.selected_rows();
 
     let model = get_list_store(tree_view);
 
-    for tree_path in selection_rows.iter().rev() {
+    for tree_path in selected_rows.iter().rev() {
         let value = !tree_model.value(&tree_model.iter(tree_path).unwrap(), column_name).get::<bool>().unwrap();
         model.set_value(&tree_model.iter(tree_path).unwrap(), column_name as u32, &value.to_value());
     }
@@ -39,9 +39,9 @@ fn common_mark_function(tree_view: &gtk::TreeView, column_name: i32) {
 
 fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path: i32, opening_mode: OpenMode) {
     let selection = tree_view.selection();
-    let (selection_rows, tree_model) = selection.selected_rows();
+    let (selected_rows, tree_model) = selection.selected_rows();
 
-    for tree_path in selection_rows.iter().rev() {
+    for tree_path in selected_rows.iter().rev() {
         let end_path;
         let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_name).get::<String>().unwrap();
         let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
