@@ -1,3 +1,4 @@
+use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_messages::Messages;
@@ -15,6 +16,163 @@ use gtk::{ListStore, TextView};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+#[derive(Eq, PartialEq)]
+pub enum PopoverTypes {
+    All,
+    ImageSize,
+    Reverse,
+    Custom,
+    Date,
+    None,
+}
+
+pub struct NotebookObject {
+    pub notebook_type: NotebookMainEnum,
+    pub available_modes: [PopoverTypes; 4],
+    pub column_activatable_button: Option<i32>,
+    pub column_path: i32,
+    pub column_name: i32,
+    pub column_selection: i32,
+    pub column_color: Option<i32>,
+    pub column_dimensions: Option<i32>,
+    pub column_size: Option<i32>,
+    pub column_size_as_bytes: Option<i32>,
+    pub column_modification_as_secs: Option<i32>,
+}
+
+pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
+    NotebookObject {
+        notebook_type: NotebookMainEnum::Duplicate,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
+        column_path: ColumnsDuplicates::Path as i32,
+        column_name: ColumnsDuplicates::Name as i32,
+        column_selection: ColumnsDuplicates::SelectionButton as i32,
+        column_color: Some(ColumnsDuplicates::Color as i32),
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::EmptyDirectories,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsEmptyFolders::Path as i32,
+        column_name: ColumnsEmptyFolders::Name as i32,
+        column_selection: ColumnsEmptyFolders::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::BigFiles,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsBigFiles::Path as i32,
+        column_name: ColumnsBigFiles::Name as i32,
+        column_selection: ColumnsBigFiles::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::EmptyFiles,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsEmptyFiles::Path as i32,
+        column_name: ColumnsEmptyFiles::Name as i32,
+        column_selection: ColumnsEmptyFiles::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::Temporary,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsTemporaryFiles::Path as i32,
+        column_name: ColumnsTemporaryFiles::Name as i32,
+        column_selection: ColumnsTemporaryFiles::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::SimilarImages,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
+        column_path: ColumnsSimilarImages::Path as i32,
+        column_name: ColumnsSimilarImages::Name as i32,
+        column_selection: ColumnsSimilarImages::SelectionButton as i32,
+        column_color: Some(ColumnsSimilarImages::Color as i32),
+        column_dimensions: Some(ColumnsSimilarImages::Dimensions as i32),
+        column_size: Some(ColumnsSimilarImages::Size as i32),
+        column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
+        column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::SimilarVideos,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
+        column_path: ColumnsSimilarVideos::Path as i32,
+        column_name: ColumnsSimilarVideos::Name as i32,
+        column_selection: ColumnsSimilarVideos::SelectionButton as i32,
+        column_color: Some(ColumnsSimilarVideos::Color as i32),
+        column_dimensions: None,
+        column_size: Some(ColumnsSimilarVideos::Size as i32),
+        column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
+        column_modification_as_secs: Some(ColumnsSimilarVideos::ModificationAsSecs as i32),
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::SameMusic,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
+        column_path: ColumnsSameMusic::Path as i32,
+        column_name: ColumnsSameMusic::Name as i32,
+        column_selection: ColumnsSameMusic::SelectionButton as i32,
+        column_color: Some(ColumnsSameMusic::Color as i32),
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
+        column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::Symlinks,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsInvalidSymlinks::Path as i32,
+        column_name: ColumnsInvalidSymlinks::Name as i32,
+        column_selection: ColumnsInvalidSymlinks::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::BrokenFiles,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsBrokenFiles::Path as i32,
+        column_name: ColumnsBrokenFiles::Name as i32,
+        column_selection: ColumnsBrokenFiles::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
+];
+
 pub enum Message {
     Duplicates(DuplicateFinder),
     EmptyFolders(EmptyFolder),
@@ -28,11 +186,10 @@ pub enum Message {
     BrokenFiles(BrokenFiles),
 }
 
-#[derive(Debug)]
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Name,
     Path,
     Modification,
@@ -43,7 +200,7 @@ pub enum ColumnsDuplicates {
 
 pub enum ColumnsEmptyFolders {
     // Columns for empty folder treeview
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     Modification,
@@ -53,27 +210,27 @@ pub enum ColumnsDirectory {
     Path = 0,
 }
 pub enum ColumnsBigFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Size,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsEmptyFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsTemporaryFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     Modification,
 }
 pub enum ColumnsSimilarImages {
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Similarity,
     Size,
     SizeAsBytes,
@@ -88,7 +245,7 @@ pub enum ColumnsSimilarImages {
 
 pub enum ColumnsSimilarVideos {
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Size,
     SizeAsBytes,
     Name,
@@ -100,7 +257,7 @@ pub enum ColumnsSimilarVideos {
 }
 pub enum ColumnsSameMusic {
     ActivatableSelectButton = 0,
-    ActiveSelectButton,
+    SelectionButton,
     Size,
     SizeAsBytes,
     Name,
@@ -116,7 +273,7 @@ pub enum ColumnsSameMusic {
     TextColor,
 }
 pub enum ColumnsInvalidSymlinks {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     DestinationPath,
@@ -125,7 +282,7 @@ pub enum ColumnsInvalidSymlinks {
 }
 
 pub enum ColumnsBrokenFiles {
-    ActiveSelectButton = 0,
+    SelectionButton = 0,
     Name,
     Path,
     ErrorType,
@@ -217,46 +374,6 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
 }
 
-pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    // let name = tree_model.value(&tree_model.iter(tree_path).unwrap(),ColumnsDuplicates::Name as i32).get::<String>().unwrap();
-    // let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap();
-    // let modification = tree_model.value(&tree_model.iter(tree_path).unwrap(),ColumnsDuplicates::Modification as i32).get::<String>().unwrap();
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-
 pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(button_names[index].as_str()).unwrap() {
@@ -293,4 +410,97 @@ pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     let number1 = vec[0].parse::<u64>().expect("Invalid data in image dimension in position 0");
     let number2 = vec[1].parse::<u64>().expect("Invalid data in image dimension in position 1");
     (number1, number2)
+}
+
+pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMainEnum {
+    match (*tree_view).widget_name().to_string().as_str() {
+        "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
+        "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
+        "tree_view_empty_files_finder" => NotebookMainEnum::EmptyFiles,
+        "tree_view_temporary_files_finder" => NotebookMainEnum::Temporary,
+        "tree_view_big_files_finder" => NotebookMainEnum::BigFiles,
+        "tree_view_similar_images_finder" => NotebookMainEnum::SimilarImages,
+        "tree_view_similar_videos_finder" => NotebookMainEnum::SimilarVideos,
+        "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
+        "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
+        "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
+        _ => panic!(),
+    }
+}
+
+pub fn get_notebook_object_from_tree_view(tree_view: &gtk::TreeView) -> &NotebookObject {
+    let nb_enum = get_notebook_enum_from_tree_view(tree_view);
+    &NOTEBOOKS_INFOS[nb_enum as usize]
+}
+
+// After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
+pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
+    // Remove only child from header
+    if let Some(first_iter) = model.iter_first() {
+        let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
+        let mut current_iter = first_iter;
+        if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+            panic!("First deleted element, should be a header"); // First element should be header
+        };
+
+        let mut next_iter;
+        let mut next_next_iter;
+        'main: loop {
+            if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+                panic!("First deleted element, should be a header"); // First element should be header
+            };
+
+            next_iter = current_iter.clone();
+            if !model.iter_next(&next_iter) {
+                // There is only single header left (H1 -> END) -> (NOTHING)
+                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                break 'main;
+            }
+
+            if model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
+                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                current_iter = next_iter.clone();
+                continue 'main;
+            }
+
+            next_next_iter = next_iter.clone();
+            if !model.iter_next(&next_next_iter) {
+                // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
+                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
+                break 'main;
+            }
+
+            if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
+                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
+                current_iter = next_next_iter.clone();
+                continue 'main;
+            }
+
+            loop {
+                // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
+                if !model.iter_next(&next_next_iter) {
+                    break 'main;
+                }
+                // Move to next header
+                if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    current_iter = next_next_iter.clone();
+                    continue 'main;
+                }
+            }
+        }
+        for tree_path in vec_tree_path_to_delete.iter().rev() {
+            model.remove(&model.iter(tree_path).unwrap());
+        }
+    }
+
+    // Last step, remove orphan header if exists
+    if let Some(iter) = model.iter_first() {
+        if !model.iter_next(&iter) {
+            model.clear();
+        }
+    }
 }

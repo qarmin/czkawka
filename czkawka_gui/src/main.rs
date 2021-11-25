@@ -1,7 +1,9 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
 #![allow(clippy::collapsible_else_if)]
+#![allow(clippy::too_many_arguments)]
 
+mod compute_results;
 mod connect_about_buttons;
 mod connect_button_delete;
 mod connect_button_hardlink;
@@ -10,8 +12,6 @@ mod connect_button_save;
 mod connect_button_search;
 mod connect_button_select;
 mod connect_button_stop;
-mod connect_button_symlink;
-mod connect_compute_results;
 mod connect_header_buttons;
 mod connect_hide_text_view_errors;
 mod connect_notebook_tabs;
@@ -21,7 +21,6 @@ mod connect_selection_of_directories;
 mod connect_settings;
 mod connect_similar_image_size_change;
 mod create_tree_view;
-mod double_click_opening;
 mod gui_about;
 mod gui_bottom_buttons;
 mod gui_data;
@@ -34,15 +33,18 @@ mod gui_upper_notepad;
 mod help_functions;
 mod initialize_gui;
 mod notebook_enums;
+mod opening_selecting_records;
 mod saving_loading;
 mod taskbar_progress;
 #[cfg(not(target_os = "windows"))]
 mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
+mod tests;
 
 use czkawka_core::*;
 
+use crate::compute_results::*;
 use crate::connect_about_buttons::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_hardlink::*;
@@ -51,8 +53,6 @@ use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
-use crate::connect_button_symlink::*;
-use crate::connect_compute_results::*;
 use crate::connect_header_buttons::*;
 use crate::connect_hide_text_view_errors::*;
 use crate::connect_notebook_tabs::*;
@@ -64,6 +64,7 @@ use crate::connect_similar_image_size_change::*;
 use crate::gui_data::*;
 use crate::initialize_gui::*;
 use crate::saving_loading::*;
+use crate::tests::validate_notebook_data;
 use gtk::prelude::*;
 use std::{env, process};
 
@@ -107,8 +108,9 @@ fn main() {
     let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) = futures::channel::mpsc::unbounded();
 
     initialize_gui(&mut gui_data);
-    reset_configuration(&gui_data, false); // Fallback for invalid loading setting project
-    load_configuration(&gui_data, false);
+    validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
+    reset_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
+    load_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors, &gui_data.scrolled_window_errors);
 
     connect_button_delete(&gui_data);
     connect_button_save(&gui_data);
@@ -128,8 +130,7 @@ fn main() {
     );
     connect_button_select(&gui_data);
     connect_button_stop(&gui_data);
-    connect_button_symlink(&gui_data);
-    connect_button_hardlink(&gui_data);
+    connect_button_hardlink_symlink(&gui_data);
     connect_button_move(&gui_data);
     connect_notebook_tabs(&gui_data);
     connect_selection_of_directories(&gui_data);
@@ -159,7 +160,7 @@ fn main() {
         let window_main = gui_data.window_main.clone();
         let taskbar_state = gui_data.taskbar_state.clone();
         window_main.connect_delete_event(move |_, _| {
-            save_configuration(&gui_data, false); // Save configuration at exit
+            save_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Save configuration at exit
             gtk::main_quit();
             taskbar_state.borrow_mut().release();
             Inhibit(false)

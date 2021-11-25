@@ -1,8 +1,9 @@
 use crate::connect_button_delete::{basic_remove, check_if_can_delete_files, check_if_deleting_all_files_in_group, empty_folder_remover, tree_remove};
 use crate::create_tree_view::*;
-use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
+use crate::notebook_enums::NotebookMainEnum;
+use crate::opening_selecting_records::*;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 use directories_next::ProjectDirs;
@@ -13,6 +14,8 @@ use image::GenericImageView;
 use std::cmp::Ordering;
 use std::fs;
 use std::path::Path;
+
+const KEY_DELETE: u16 = 119;
 
 pub fn initialize_gui(gui_data: &mut GuiData) {
     //// Initialize button
@@ -99,55 +102,57 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_duplicates(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_duplicates);
-                tree_view.connect_key_press_event(opening_enter_function_duplicates);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
+                    let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
                     show_preview(
                         tree_view,
                         &text_view_errors_cloned,
                         &check_button_settings_show_preview_duplicates_cloned,
                         &image_preview_duplicates_cloned,
-                        ColumnsDuplicates::Path as i32,
-                        ColumnsDuplicates::Name as i32,
+                        nb_object.column_path,
+                        nb_object.column_name,
                     );
                     gtk::Inhibit(false)
                 });
 
+                tree_view.set_widget_name("tree_view_duplicate_finder");
                 gui_data.main_notebook.tree_view_duplicate_finder = tree_view.clone();
                 scrolled_window_duplicate_finder.add(&tree_view);
                 scrolled_window_duplicate_finder.show_all();
 
                 let text_view_errors_cloned = text_view_errors.clone();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
+                let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
+                let window_main = gui_data.window_main.clone();
+
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
+                    let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
-                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                            if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(
-                                    &tree_view.clone(),
-                                    ColumnsDuplicates::Color as i32,
-                                    ColumnsDuplicates::ActiveSelectButton as i32,
-                                    &gui_data.window_main,
-                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
-                                )
+                            if check_button_settings_confirm_group_deletion.is_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), nb_object.column_color.unwrap(), nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
                                 tree_view,
-                                ColumnsDuplicates::Name as i32,
-                                ColumnsDuplicates::Path as i32,
-                                ColumnsDuplicates::Color as i32,
-                                ColumnsDuplicates::ActiveSelectButton as i32,
-                                &gui_data,
+                                nb_object.column_name,
+                                nb_object.column_path,
+                                nb_object.column_color.unwrap(),
+                                nb_object.column_selection,
+                                &check_button_settings_use_trash,
+                                &text_view_errors,
                             );
                             image_preview_duplicates.hide();
                         }
@@ -157,8 +162,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                         &text_view_errors_cloned,
                         &check_button_settings_show_preview_duplicates,
                         &image_preview_duplicates,
-                        ColumnsDuplicates::Path as i32,
-                        ColumnsDuplicates::Name as i32,
+                        nb_object.column_path,
+                        nb_object.column_name,
                     );
                     gtk::Inhibit(false)
                 });
@@ -174,19 +179,22 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_empty_folders(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_empty_folders);
-                tree_view.connect_key_press_event(opening_enter_function_empty_folders);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_empty_folder_finder");
                 gui_data.main_notebook.tree_view_empty_folder_finder = tree_view.clone();
                 scrolled_window_empty_folder_finder.add(&tree_view);
                 scrolled_window_empty_folder_finder.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
-                            empty_folder_remover(tree_view, ColumnsEmptyFolders::Name as i32, ColumnsEmptyFolders::Path as i32, ColumnsEmptyFolders::ActiveSelectButton as i32, &gui_data);
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::EmptyDirectories as usize];
+                            empty_folder_remover(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
                     }
                     gtk::Inhibit(false)
@@ -203,19 +211,22 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_empty_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_empty_files);
-                tree_view.connect_key_press_event(opening_enter_function_empty_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_empty_files_finder");
                 gui_data.main_notebook.tree_view_empty_files_finder = tree_view.clone();
                 scrolled_window_empty_files_finder.add(&tree_view);
                 scrolled_window_empty_files_finder.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
-                            basic_remove(tree_view, ColumnsEmptyFiles::Name as i32, ColumnsEmptyFiles::Path as i32, ColumnsEmptyFiles::ActiveSelectButton as i32, &gui_data);
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::EmptyFiles as usize];
+                            basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
                     }
                     gtk::Inhibit(false)
@@ -232,19 +243,22 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_temporary_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_temporary_files);
-                tree_view.connect_key_press_event(opening_enter_function_temporary_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_temporary_files_finder");
                 gui_data.main_notebook.tree_view_temporary_files_finder = tree_view.clone();
                 scrolled_window_temporary_files_finder.add(&tree_view);
                 scrolled_window_temporary_files_finder.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
-                            basic_remove(tree_view, ColumnsTemporaryFiles::Name as i32, ColumnsTemporaryFiles::Path as i32, ColumnsTemporaryFiles::ActiveSelectButton as i32, &gui_data);
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Temporary as usize];
+                            basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
                     }
                     gtk::Inhibit(false)
@@ -261,19 +275,22 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_big_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_big_files);
-                tree_view.connect_key_press_event(opening_enter_function_big_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_big_files_finder");
                 gui_data.main_notebook.tree_view_big_files_finder = tree_view.clone();
                 scrolled_window_big_files_finder.add(&tree_view);
                 scrolled_window_big_files_finder.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
-                            basic_remove(tree_view, ColumnsBigFiles::Name as i32, ColumnsBigFiles::Path as i32, ColumnsBigFiles::ActiveSelectButton as i32, &gui_data);
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::BigFiles as usize];
+                            basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
                     }
                     gtk::Inhibit(false)
@@ -307,56 +324,58 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_similar_images(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_similar_images);
-                tree_view.connect_key_press_event(opening_enter_function_similar_images);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_button_release_event(move |tree_view, _event| {
+                    let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
                     show_preview(
                         tree_view,
                         &text_view_errors,
                         &check_button_settings_show_preview_similar_images,
                         &image_preview_similar_images,
-                        ColumnsSimilarImages::Path as i32,
-                        ColumnsSimilarImages::Name as i32,
+                        nb_object.column_path,
+                        nb_object.column_name,
                     );
                     gtk::Inhibit(false)
                 });
 
+                tree_view.set_widget_name("tree_view_similar_images_finder");
                 gui_data.main_notebook.tree_view_similar_images_finder = tree_view.clone();
                 scrolled_window_similar_images_finder.add(&tree_view);
                 scrolled_window_similar_images_finder.show_all();
 
                 let image_preview_similar_images = image_preview_similar_images_clone.clone();
-                let text_view_errors = gui_data.text_view_errors.clone();
                 let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
-                let gui_data = gui_data.clone();
+                let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
+                let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
+                let window_main = gui_data.window_main.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
+                    let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
-                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                            if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(
-                                    &tree_view.clone(),
-                                    ColumnsSimilarImages::Color as i32,
-                                    ColumnsSimilarImages::ActiveSelectButton as i32,
-                                    &gui_data.window_main,
-                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
-                                )
+                            if check_button_settings_confirm_group_deletion.is_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), nb_object.column_color.unwrap(), nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
                                 tree_view,
-                                ColumnsSimilarImages::Name as i32,
-                                ColumnsSimilarImages::Path as i32,
-                                ColumnsSimilarImages::Color as i32,
-                                ColumnsSimilarImages::ActiveSelectButton as i32,
-                                &gui_data,
+                                nb_object.column_name,
+                                nb_object.column_path,
+                                nb_object.column_color.unwrap(),
+                                nb_object.column_selection,
+                                &check_button_settings_use_trash,
+                                &text_view_errors,
                             );
                             image_preview_similar_images_clone.hide();
                         }
@@ -366,8 +385,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                         &text_view_errors,
                         &check_button_settings_show_preview_similar_images,
                         &image_preview_similar_images,
-                        ColumnsSimilarImages::Path as i32,
-                        ColumnsSimilarImages::Name as i32,
+                        nb_object.column_path,
+                        nb_object.column_name,
                     );
                     gtk::Inhibit(false)
                 });
@@ -376,7 +395,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             {
                 let col_types: [glib::types::Type; 10] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
-                    glib::types::Type::BOOL,   // ActiveSelectButton
+                    glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Size
                     glib::types::Type::U64,    // SizeAsBytes
                     glib::types::Type::STRING, // Name
@@ -395,42 +414,43 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_similar_videos(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_similar_videos);
-                tree_view.connect_key_press_event(opening_enter_function_similar_videos);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_similar_videos_finder");
                 gui_data.main_notebook.tree_view_similar_videos_finder = tree_view.clone();
                 scrolled_window_similar_videos_finder.add(&tree_view);
                 scrolled_window_similar_videos_finder.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
+                let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
+                let window_main = gui_data.window_main.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarVideos as usize];
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
-                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                            if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(
-                                    &tree_view.clone(),
-                                    ColumnsSimilarVideos::Color as i32,
-                                    ColumnsSimilarVideos::ActiveSelectButton as i32,
-                                    &gui_data.window_main,
-                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
-                                )
+                            if check_button_settings_confirm_group_deletion.is_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), nb_object.column_color.unwrap(), nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
                                 tree_view,
-                                ColumnsSimilarVideos::Name as i32,
-                                ColumnsSimilarVideos::Path as i32,
-                                ColumnsSimilarVideos::Color as i32,
-                                ColumnsSimilarVideos::ActiveSelectButton as i32,
-                                &gui_data,
+                                nb_object.column_name,
+                                nb_object.column_path,
+                                nb_object.column_color.unwrap(),
+                                nb_object.column_selection,
+                                &check_button_settings_use_trash,
+                                &text_view_errors,
                             );
                         }
                     }
@@ -465,42 +485,43 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_same_music(&mut tree_view);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_same_music)));
 
-                tree_view.connect_button_press_event(opening_double_click_function_same_music);
-                tree_view.connect_key_press_event(opening_enter_function_same_music);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_same_music_finder");
                 gui_data.main_notebook.tree_view_same_music_finder = tree_view.clone();
                 scrolled_window_same_music_finder.add(&tree_view);
                 scrolled_window_same_music_finder.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
+                let window_main = gui_data.window_main.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SameMusic as usize];
+
                             if tree_view.selection().selected_rows().0.is_empty() {
                                 return gtk::Inhibit(false);
                             }
-                            if !check_if_can_delete_files(&gui_data.settings.check_button_settings_confirm_deletion, &gui_data.window_main) {
+                            if !check_if_can_delete_files(&check_button_settings_confirm_group_deletion, &window_main) {
                                 return gtk::Inhibit(false);
                             }
-                            if gui_data.settings.check_button_settings_confirm_group_deletion.is_active()
-                                && check_if_deleting_all_files_in_group(
-                                    &tree_view.clone(),
-                                    ColumnsSameMusic::Color as i32,
-                                    ColumnsSameMusic::ActiveSelectButton as i32,
-                                    &gui_data.window_main,
-                                    &gui_data.settings.check_button_settings_confirm_group_deletion,
-                                )
+                            if check_button_settings_confirm_group_deletion.is_active()
+                                && check_if_deleting_all_files_in_group(&tree_view.clone(), nb_object.column_color.unwrap(), nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion)
                             {
                                 return gtk::Inhibit(false);
                             }
                             tree_remove(
                                 tree_view,
-                                ColumnsSameMusic::Name as i32,
-                                ColumnsSameMusic::Path as i32,
-                                ColumnsSameMusic::Color as i32,
-                                ColumnsSameMusic::ActiveSelectButton as i32,
-                                &gui_data,
+                                nb_object.column_name,
+                                nb_object.column_path,
+                                nb_object.column_color.unwrap(),
+                                nb_object.column_selection,
+                                &check_button_settings_use_trash,
+                                &text_view_errors,
                             );
                         }
                     }
@@ -525,19 +546,22 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_invalid_symlinks(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_invalid_symlinks);
-                tree_view.connect_key_press_event(opening_enter_function_invalid_symlinks);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_invalid_symlinks");
                 gui_data.main_notebook.tree_view_invalid_symlinks = tree_view.clone();
                 scrolled_window_invalid_symlinks.add(&tree_view);
                 scrolled_window_invalid_symlinks.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
-                            basic_remove(tree_view, ColumnsInvalidSymlinks::Name as i32, ColumnsInvalidSymlinks::Path as i32, ColumnsInvalidSymlinks::ActiveSelectButton as i32, &gui_data);
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Symlinks as usize];
+                            basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
                     }
                     gtk::Inhibit(false)
@@ -554,19 +578,22 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_broken_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function_broken_files);
-                tree_view.connect_key_press_event(opening_enter_function_broken_files);
+                tree_view.connect_button_press_event(opening_double_click_function);
+                tree_view.connect_key_press_event(opening_enter_function);
 
+                tree_view.set_widget_name("tree_view_broken_files");
                 gui_data.main_notebook.tree_view_broken_files = tree_view.clone();
                 scrolled_window_broken_files.add(&tree_view);
                 scrolled_window_broken_files.show_all();
 
-                let gui_data = gui_data.clone();
+                let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+                let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_key_release_event(move |tree_view, e| {
                     if let Some(button_number) = e.keycode() {
                         // Handle delete button
-                        if button_number == 119 {
-                            basic_remove(tree_view, ColumnsBrokenFiles::Name as i32, ColumnsBrokenFiles::Path as i32, ColumnsBrokenFiles::ActiveSelectButton as i32, &gui_data);
+                        if button_number == KEY_DELETE {
+                            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::BrokenFiles as usize];
+                            basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
                         }
                     }
                     gtk::Inhibit(false)
@@ -598,7 +625,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             tree_view.connect_key_release_event(move |tree_view, e| {
                 if let Some(button_number) = e.keycode() {
                     // Handle delete button
-                    if button_number == 119 {
+                    if button_number == KEY_DELETE {
                         let list_store = get_list_store(tree_view);
                         let selection = tree_view.selection();
 
@@ -630,7 +657,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             tree_view.connect_key_release_event(move |tree_view, e| {
                 if let Some(button_number) = e.keycode() {
                     // Handle delete button
-                    if button_number == 119 {
+                    if button_number == KEY_DELETE {
                         let list_store = get_list_store(tree_view);
                         let selection = tree_view.selection();
 
@@ -659,6 +686,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         });
     }
 }
+
 fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview: &CheckButton, image_preview_similar_images: &Image, column_path: i32, column_name: i32) {
     let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
