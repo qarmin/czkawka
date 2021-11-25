@@ -1,4 +1,5 @@
 use crate::gui_data::GuiData;
+use crate::gui_popovers::GuiPopovers;
 use crate::help_functions::PopoverTypes;
 use crate::notebook_enums::*;
 use gtk::prelude::*;
@@ -22,36 +23,36 @@ pub fn connect_button_select(gui_data: &GuiData) {
     }
     assert_eq!(hashmap.len(), NUMBER_OF_NOTEBOOK_MAIN_TABS);
 
-    let gui_data = gui_data.clone();
+    let popovers = gui_data.popovers.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let buttons_select_clone = gui_data.bottom_buttons.buttons_select.clone();
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
 
     buttons_select_clone.connect_clicked(move |_| {
-        show_required_popovers(&gui_data, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &hashmap);
+        show_required_popovers(&popovers, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &hashmap);
         popover_select.set_relative_to(Some(&buttons_select));
         popover_select.popup();
     });
 }
 
-fn show_required_popovers(gui_data: &GuiData, current_mode: &NotebookMainEnum, hashmap: &HashMap<NotebookMainEnum, Vec<PopoverTypes>>) {
-    let buttons_popover_select_all = gui_data.popovers.buttons_popover_select_all.clone();
-    let buttons_popover_unselect_all = gui_data.popovers.buttons_popover_unselect_all.clone();
-    let buttons_popover_reverse = gui_data.popovers.buttons_popover_reverse.clone();
-    let buttons_popover_select_all_except_oldest = gui_data.popovers.buttons_popover_select_all_except_oldest.clone();
-    let buttons_popover_select_all_except_newest = gui_data.popovers.buttons_popover_select_all_except_newest.clone();
-    let buttons_popover_select_one_oldest = gui_data.popovers.buttons_popover_select_one_oldest.clone();
-    let buttons_popover_select_one_newest = gui_data.popovers.buttons_popover_select_one_newest.clone();
-    let buttons_popover_select_custom = gui_data.popovers.buttons_popover_select_custom.clone();
-    let buttons_popover_unselect_custom = gui_data.popovers.buttons_popover_unselect_custom.clone();
-    let buttons_popover_select_all_images_except_biggest = gui_data.popovers.buttons_popover_select_all_images_except_biggest.clone();
-    let buttons_popover_select_all_images_except_smallest = gui_data.popovers.buttons_popover_select_all_images_except_smallest.clone();
+fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnum, hashmap: &HashMap<NotebookMainEnum, Vec<PopoverTypes>>) {
+    let buttons_popover_select_all = popovers.buttons_popover_select_all.clone();
+    let buttons_popover_unselect_all = popovers.buttons_popover_unselect_all.clone();
+    let buttons_popover_reverse = popovers.buttons_popover_reverse.clone();
+    let buttons_popover_select_all_except_oldest = popovers.buttons_popover_select_all_except_oldest.clone();
+    let buttons_popover_select_all_except_newest = popovers.buttons_popover_select_all_except_newest.clone();
+    let buttons_popover_select_one_oldest = popovers.buttons_popover_select_one_oldest.clone();
+    let buttons_popover_select_one_newest = popovers.buttons_popover_select_one_newest.clone();
+    let buttons_popover_select_custom = popovers.buttons_popover_select_custom.clone();
+    let buttons_popover_unselect_custom = popovers.buttons_popover_unselect_custom.clone();
+    let buttons_popover_select_all_images_except_biggest = popovers.buttons_popover_select_all_images_except_biggest.clone();
+    let buttons_popover_select_all_images_except_smallest = popovers.buttons_popover_select_all_images_except_smallest.clone();
 
-    let separator_select_custom = gui_data.popovers.separator_select_custom.clone();
-    let separator_select_date = gui_data.popovers.separator_select_date.clone();
-    let separator_select_image_size = gui_data.popovers.separator_select_image_size.clone();
-    let separator_select_reverse = gui_data.popovers.separator_select_reverse.clone();
+    let separator_select_custom = popovers.separator_select_custom.clone();
+    let separator_select_date = popovers.separator_select_date.clone();
+    let separator_select_image_size = popovers.separator_select_image_size.clone();
+    let separator_select_reverse = popovers.separator_select_reverse.clone();
 
     let vec = hashmap.get(current_mode).unwrap();
 

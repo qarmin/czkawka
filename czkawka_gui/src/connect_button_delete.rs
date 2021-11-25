@@ -10,7 +10,6 @@ use std::fs::Metadata;
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
 pub fn connect_button_delete(gui_data: &GuiData) {
-    let gui_data = gui_data.clone();
     let buttons_delete = gui_data.bottom_buttons.buttons_delete.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
@@ -24,7 +23,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 
     let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
 
-    let text_view_errors = gui_data.text_view_errors;
+    let text_view_errors = gui_data.text_view_errors.clone();
 
     buttons_delete.connect_clicked(move |_| {
         // TODO maybe add to this dialog info how much things will be deleted

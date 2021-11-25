@@ -1,7 +1,9 @@
-use crate::gui_data::*;
+use crate::gui_settings::GuiSettings;
+use crate::gui_upper_notepad::GuiUpperNotebook;
 use crate::help_functions::*;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
+use gtk::{ScrolledWindow, TextView};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -11,9 +13,9 @@ use std::{env, fs};
 
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";
 
-pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
-    let check_button_settings_save_at_exit = gui_data.settings.check_button_settings_save_at_exit.clone();
-    let text_view_errors = gui_data.text_view_errors.clone();
+pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+    let check_button_settings_save_at_exit = settings.check_button_settings_save_at_exit.clone();
+    let text_view_errors = text_view_errors.clone();
 
     reset_text_view(&text_view_errors);
 
@@ -40,7 +42,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
         //// Included Directories
         data_to_save.push("--included_directories:".to_string());
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+        let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
         let list_store = get_list_store(&tree_view_included_directories);
         if let Some(iter) = list_store.iter_first() {
             loop {
@@ -53,7 +55,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
         //// Excluded Directories
         data_to_save.push("--excluded_directories:".to_string());
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
+        let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
         if let Some(iter) = list_store.iter_first() {
             loop {
@@ -67,7 +69,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
         {
             //// Excluded Items
             data_to_save.push("--excluded_items:".to_string());
-            let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
+            let entry_excluded_items = upper_notebook.entry_excluded_items.clone();
             for item in entry_excluded_items.text().split(',') {
                 if item.trim().is_empty() {
                     continue;
@@ -77,7 +79,7 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
             //// Allowed extensions
             data_to_save.push("--allowed_extensions:".to_string());
-            let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
+            let entry_allowed_extensions = upper_notebook.entry_allowed_extensions.clone();
             for extension in entry_allowed_extensions.text().split(',') {
                 if extension.trim().is_empty() {
                     continue;
@@ -87,57 +89,57 @@ pub fn save_configuration(gui_data: &GuiData, manual_execution: bool) {
 
             //// Save at exit
             data_to_save.push("--save_at_exit:".to_string());
-            let check_button_settings_save_at_exit = gui_data.settings.check_button_settings_save_at_exit.clone();
+            let check_button_settings_save_at_exit = settings.check_button_settings_save_at_exit.clone();
             data_to_save.push(check_button_settings_save_at_exit.is_active().to_string());
 
             //// Load at start
             data_to_save.push("--load_at_start:".to_string());
-            let check_button_settings_load_at_start = gui_data.settings.check_button_settings_load_at_start.clone();
+            let check_button_settings_load_at_start = settings.check_button_settings_load_at_start.clone();
             data_to_save.push(check_button_settings_load_at_start.is_active().to_string());
 
             //// Confirm deletion of files
             data_to_save.push("--confirm_deletion:".to_string());
-            let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
+            let check_button_settings_confirm_deletion = settings.check_button_settings_confirm_deletion.clone();
             data_to_save.push(check_button_settings_confirm_deletion.is_active().to_string());
 
             //// Confirm deletion of all files in group
             data_to_save.push("--confirm_group_deletion:".to_string());
-            let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
+            let check_button_settings_confirm_group_deletion = settings.check_button_settings_confirm_group_deletion.clone();
             data_to_save.push(check_button_settings_confirm_group_deletion.is_active().to_string());
 
             //// Show image previews in similar images
             data_to_save.push("--show_previews_similar_images:".to_string());
-            let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
+            let check_button_settings_show_preview_similar_images = settings.check_button_settings_show_preview_similar_images.clone();
             data_to_save.push(check_button_settings_show_preview_similar_images.is_active().to_string());
 
             //// Show image previews in duplicates
             data_to_save.push("--show_previews_duplicates:".to_string());
-            let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
+            let check_button_settings_show_preview_duplicates = settings.check_button_settings_show_preview_duplicates.clone();
             data_to_save.push(check_button_settings_show_preview_duplicates.is_active().to_string());
 
             //// Show bottom text panel with errors
             data_to_save.push("--bottom_text_panel:".to_string());
-            let check_button_settings_show_text_view = gui_data.settings.check_button_settings_show_text_view.clone();
+            let check_button_settings_show_text_view = settings.check_button_settings_show_text_view.clone();
             data_to_save.push(check_button_settings_show_text_view.is_active().to_string());
 
             //// Hide/Show hard linked files, with same inodes
             data_to_save.push("--hide_hard_links:".to_string());
-            let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
+            let check_button_settings_hide_hard_links = settings.check_button_settings_hide_hard_links.clone();
             data_to_save.push(check_button_settings_hide_hard_links.is_active().to_string());
 
             //// Use cache system
             data_to_save.push("--use_cache:".to_string());
-            let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
+            let check_button_settings_use_cache = settings.check_button_settings_use_cache.clone();
             data_to_save.push(check_button_settings_use_cache.is_active().to_string());
 
             //// Delete to trash
             data_to_save.push("--use_trash:".to_string());
-            let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
+            let check_button_settings_use_trash = settings.check_button_settings_use_trash.clone();
             data_to_save.push(check_button_settings_use_trash.is_active().to_string());
 
             //// minimal cache file size
             data_to_save.push("--cache_minimal_file_size:".to_string());
-            let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
+            let entry_settings_cache_file_minimal_size = settings.entry_settings_cache_file_minimal_size.clone();
             data_to_save.push(entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024).to_string());
         }
 
@@ -194,8 +196,8 @@ enum TypeOfLoadedData {
     CacheMinimalSize,
 }
 
-pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
-    let text_view_errors = gui_data.text_view_errors.clone();
+pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView, scrolled_window_errors: &ScrolledWindow) {
+    let text_view_errors = text_view_errors.clone();
 
     reset_text_view(&text_view_errors);
 
@@ -450,7 +452,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
         // Setting data
         if manual_execution || loading_at_start {
             //// Included Directories
-            let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+            let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
             let list_store = get_list_store(&tree_view_included_directories);
             list_store.clear();
 
@@ -460,7 +462,7 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
 
             //// Exclude Directories
-            let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
+            let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
             let list_store = get_list_store(&tree_view_excluded_directories);
             list_store.clear();
 
@@ -470,33 +472,33 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
             }
 
             //// Excluded Items
-            let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
+            let entry_excluded_items = upper_notebook.entry_excluded_items.clone();
             entry_excluded_items.set_text(excluded_items.iter().map(|e| e.to_string() + ",").collect::<String>().as_str());
 
             //// Allowed extensions
-            let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
+            let entry_allowed_extensions = upper_notebook.entry_allowed_extensions.clone();
             entry_allowed_extensions.set_text(allowed_extensions.iter().map(|e| e.to_string() + ",").collect::<String>().as_str());
 
             //// Buttons
-            gui_data.settings.check_button_settings_load_at_start.set_active(loading_at_start);
-            gui_data.settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
-            gui_data.settings.check_button_settings_confirm_deletion.set_active(confirm_deletion);
-            gui_data.settings.check_button_settings_confirm_group_deletion.set_active(confirm_group_deletion);
-            gui_data.settings.check_button_settings_show_preview_similar_images.set_active(show_previews_similar_images);
-            gui_data.settings.check_button_settings_show_preview_duplicates.set_active(show_previews_duplicates);
+            settings.check_button_settings_load_at_start.set_active(loading_at_start);
+            settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
+            settings.check_button_settings_confirm_deletion.set_active(confirm_deletion);
+            settings.check_button_settings_confirm_group_deletion.set_active(confirm_group_deletion);
+            settings.check_button_settings_show_preview_similar_images.set_active(show_previews_similar_images);
+            settings.check_button_settings_show_preview_duplicates.set_active(show_previews_duplicates);
 
-            gui_data.settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
+            settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
             if !bottom_text_panel {
-                gui_data.scrolled_window_errors.hide();
+                scrolled_window_errors.hide();
             } else {
-                gui_data.scrolled_window_errors.show();
+                scrolled_window_errors.show();
             }
-            gui_data.settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
-            gui_data.settings.check_button_settings_use_cache.set_active(use_cache);
-            gui_data.settings.check_button_settings_use_trash.set_active(use_trash);
-            gui_data.settings.entry_settings_cache_file_minimal_size.set_text(cache_minimal_size.to_string().as_str());
+            settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
+            settings.check_button_settings_use_cache.set_active(use_cache);
+            settings.check_button_settings_use_trash.set_active(use_trash);
+            settings.entry_settings_cache_file_minimal_size.set_text(cache_minimal_size.to_string().as_str());
         } else {
-            gui_data.settings.check_button_settings_load_at_start.set_active(false);
+            settings.check_button_settings_load_at_start.set_active(false);
         }
 
         if manual_execution {
@@ -507,15 +509,15 @@ pub fn load_configuration(gui_data: &GuiData, manual_execution: bool) {
     }
 }
 
-pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
+pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     // TODO Maybe add popup dialog to confirm resetting
-    let text_view_errors = gui_data.text_view_errors.clone();
+    let text_view_errors = text_view_errors.clone();
 
     reset_text_view(&text_view_errors);
 
     // Resetting included directories
     {
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+        let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
         let list_store = get_list_store(&tree_view_included_directories);
         list_store.clear();
 
@@ -539,7 +541,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     }
     // Resetting excluded directories
     {
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
+        let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
         list_store.clear();
         if cfg!(target_family = "unix") {
@@ -551,7 +553,7 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     }
     // Resetting excluded items
     {
-        let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
+        let entry_excluded_items = upper_notebook.entry_excluded_items.clone();
         if cfg!(target_family = "unix") {
             entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*");
         }
@@ -561,23 +563,23 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
     }
     // Resetting allowed extensions
     {
-        let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
+        let entry_allowed_extensions = upper_notebook.entry_allowed_extensions.clone();
         entry_allowed_extensions.set_text("");
     }
 
     // Set settings
     {
-        gui_data.settings.check_button_settings_save_at_exit.set_active(true);
-        gui_data.settings.check_button_settings_load_at_start.set_active(true);
-        gui_data.settings.check_button_settings_confirm_deletion.set_active(true);
-        gui_data.settings.check_button_settings_confirm_group_deletion.set_active(true);
-        gui_data.settings.check_button_settings_show_preview_similar_images.set_active(true);
-        gui_data.settings.check_button_settings_show_preview_duplicates.set_active(true);
-        gui_data.settings.check_button_settings_show_text_view.set_active(true);
-        gui_data.settings.check_button_settings_hide_hard_links.set_active(true);
-        gui_data.settings.check_button_settings_use_cache.set_active(true);
-        gui_data.settings.check_button_settings_use_trash.set_active(false);
-        gui_data.settings.entry_settings_cache_file_minimal_size.set_text("2097152");
+        settings.check_button_settings_save_at_exit.set_active(true);
+        settings.check_button_settings_load_at_start.set_active(true);
+        settings.check_button_settings_confirm_deletion.set_active(true);
+        settings.check_button_settings_confirm_group_deletion.set_active(true);
+        settings.check_button_settings_show_preview_similar_images.set_active(true);
+        settings.check_button_settings_show_preview_duplicates.set_active(true);
+        settings.check_button_settings_show_text_view.set_active(true);
+        settings.check_button_settings_hide_hard_links.set_active(true);
+        settings.check_button_settings_use_cache.set_active(true);
+        settings.check_button_settings_use_trash.set_active(false);
+        settings.entry_settings_cache_file_minimal_size.set_text("2097152");
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");

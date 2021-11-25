@@ -2,10 +2,14 @@ use crate::gui_data::GuiData;
 use crate::notebook_enums::*;
 use czkawka_core::common_traits::SaveResults;
 use gtk::prelude::*;
+use gtk::{Button, Entry};
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 
 pub fn connect_button_save(gui_data: &GuiData) {
-    let gui_data = gui_data.clone();
     let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
+    let buttons_save_clone = gui_data.bottom_buttons.buttons_save.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
@@ -16,6 +20,8 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
     let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
+    let shared_buttons = gui_data.shared_buttons.clone();
+    let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     buttons_save.connect_clicked(move |_| {
         let file_name;
@@ -72,14 +78,10 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 shared_broken_files_state.borrow_mut().save_results_to_file(file_name);
             }
         }
-        post_save_things(file_name, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &gui_data);
+        post_save_things(file_name, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &shared_buttons, &entry_info, &buttons_save_clone);
     });
 }
-fn post_save_things(file_name: &str, type_of_tab: &NotebookMainEnum, gui_data: &GuiData) {
-    let entry_info = gui_data.entry_info.clone();
-    let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
-    let shared_buttons = gui_data.shared_buttons.clone();
-
+fn post_save_things(file_name: &str, type_of_tab: &NotebookMainEnum, shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>, entry_info: &Entry, buttons_save: &Button) {
     entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
     // Set state
     {
