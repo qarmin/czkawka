@@ -374,46 +374,6 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
 }
 
-pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    // let name = tree_model.value(&tree_model.iter(tree_path).unwrap(),ColumnsDuplicates::Name as i32).get::<String>().unwrap();
-    // let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Path as i32).get::<String>().unwrap();
-    // let modification = tree_model.value(&tree_model.iter(tree_path).unwrap(),ColumnsDuplicates::Modification as i32).get::<String>().unwrap();
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32).get::<String>().unwrap();
-
-    if color == HEADER_ROW_COLOR {
-        return false;
-    }
-
-    true
-}
-
 pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(button_names[index].as_str()).unwrap() {

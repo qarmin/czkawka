@@ -21,7 +21,6 @@ mod connect_selection_of_directories;
 mod connect_settings;
 mod connect_similar_image_size_change;
 mod create_tree_view;
-mod double_click_opening;
 mod gui_about;
 mod gui_bottom_buttons;
 mod gui_data;
@@ -34,6 +33,7 @@ mod gui_upper_notepad;
 mod help_functions;
 mod initialize_gui;
 mod notebook_enums;
+mod opening_selecting_records;
 mod saving_loading;
 mod taskbar_progress;
 #[cfg(not(target_os = "windows"))]

@@ -1,9 +1,9 @@
 use crate::connect_button_delete::{basic_remove, check_if_can_delete_files, check_if_deleting_all_files_in_group, empty_folder_remover, tree_remove};
 use crate::create_tree_view::*;
-use crate::double_click_opening::*;
 use crate::gui_data::*;
 use crate::help_functions::*;
 use crate::notebook_enums::NotebookMainEnum;
+use crate::opening_selecting_records::*;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 use directories_next::ProjectDirs;
