@@ -22,12 +22,12 @@ sudo yum install gtk3-devel glib2-devel alsa-lib-devel # Latest is optional
 ```
 
 #### macOS
-You need to install Rust via Homebrew and GTK Libraries
+You need to install Rust via Homebrew and GTK Libraries(ffmpeg is optional dependency)
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install rust gtk+3
+brew install rust gtk+3 adwaita-icon-theme librsvg ffmpeg
 ```
 
 ### Windows
@@ -42,6 +42,11 @@ After that the latest GTK 3 runtime must be installed from https://github.com/ts
 -->
 
 ## Compilation
+
+Czkawka can be installed with Debug or Release build.  
+With Debug build additional checks e.g. for variables overflow are available but depends of the usage it works very slow so should be using only to develop this app.    
+Compilation with `--release` flag will optimize binaries, so they can be used with good performance(official binaries are build with this flag)
+
 
 - Download the source
 ```

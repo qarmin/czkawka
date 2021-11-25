@@ -9,8 +9,7 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, fs};
 
-// TODO add more settings, maybe to different dialog window
-
+// TODO organize this better, add specific functions that will allow to load from files specific strings
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";
 
 pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView) {

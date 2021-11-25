@@ -23,12 +23,12 @@ sudo xbps-install gcc pkg-config alsa-lib-devel ffpmeg
 ```
 
 ### macOS
-Currently, you need to manually install `GTK 3` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS (*help in linking statically these things is needed*).  
+Currently, you need to manually install `GTK 3` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS.  
 One very straight-forward way to do this is by using [Homebrew](https://brew.sh/).  
 Installation in the terminal:
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk+3 adwaita-icon-theme ffmpeg
+brew install gtk+3 adwaita-icon-theme ffmpeg librsvg
 ```
 After that, go to the location where you downloaded Czkawka and add the `executable` permission to this file.
 ```shell
@@ -38,6 +38,9 @@ At the end execute it:
 ```shell
 ./mac_czkawka_gui
 ```
+
+**Warning**  
+If you use want to use app on ARM machine e.g. Mac M1, you can't use prebuilt binaries, because they were compiled for x86_64 architecture. You need to compile Czkawka manually to get proper binaries.
 
 ### Windows
 By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 3`
@@ -119,3 +122,6 @@ Package info's - https://aur.archlinux.org/packages/?O=0&SeB=nd&K=czkawka&outdat
 
 ### Docker image (unofficial)
 Czkawka docker image is available [**here**](https://github.com/jlesage/docker-czkawka)
+
+### Chocolatey (unofficial)
+Windows Chocolatey binaries are available [**here**](https://community.chocolatey.org/packages/czkawka)
