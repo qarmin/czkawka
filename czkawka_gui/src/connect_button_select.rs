@@ -8,7 +8,6 @@ use std::collections::HashMap;
 pub fn connect_button_select(gui_data: &GuiData) {
     let mut hashmap: HashMap<NotebookMainEnum, Vec<PopoverTypes>> = Default::default();
     {
-        // Remember to update connect_popovers file, because this data are connected to each others
         hashmap.insert(NotebookMainEnum::SimilarImages, vec![PopoverTypes::All, PopoverTypes::ImageSize, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
         hashmap.insert(NotebookMainEnum::SimilarVideos, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
         hashmap.insert(NotebookMainEnum::Duplicate, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
