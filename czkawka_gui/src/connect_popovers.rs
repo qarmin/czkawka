@@ -213,13 +213,11 @@ fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
 fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
-    let wildcard: String;
     enum WildcardType {
         Path,
         Name,
         PathName,
     }
-    let wildcard_type: WildcardType;
 
     let window_title = match select_things {
         false => "Unselect Custom",
@@ -263,73 +261,79 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
 
         confirmation_dialog_delete.show_all();
 
-        let response_type = confirmation_dialog_delete.run();
-        if response_type == gtk::ResponseType::Ok {
-            if radio_path.is_active() {
-                wildcard_type = WildcardType::Path;
-                wildcard = entry_path.text().to_string();
-            } else if radio_name.is_active() {
-                wildcard_type = WildcardType::Name;
-                wildcard = entry_name.text().to_string();
-            } else if radio_name_path.is_active() {
-                wildcard_type = WildcardType::PathName;
-                wildcard = entry_name_path.text().to_string();
+        let tree_view = tree_view.clone();
+        confirmation_dialog_delete.connect_response(move |confirmation_dialog_delete, response_type| {
+            let wildcard_type: WildcardType;
+            let wildcard: String;
+
+            if response_type == gtk::ResponseType::Ok {
+                if radio_path.is_active() {
+                    wildcard_type = WildcardType::Path;
+                    wildcard = entry_path.text().to_string();
+                } else if radio_name.is_active() {
+                    wildcard_type = WildcardType::Name;
+                    wildcard = entry_name.text().to_string();
+                } else if radio_name_path.is_active() {
+                    wildcard_type = WildcardType::PathName;
+                    wildcard = entry_name_path.text().to_string();
+                } else {
+                    panic!("Non handled option in wildcard");
+                }
+
+                if !wildcard.is_empty() {
+                    let wildcard = wildcard.trim();
+
+                    #[cfg(target_family = "windows")]
+                    let wildcard = wildcard.replace("/", "\\");
+                    #[cfg(target_family = "windows")]
+                    let wildcard = wildcard.as_str();
+
+                    let model = get_list_store(&tree_view);
+
+                    let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
+
+                    loop {
+                        if let Some(column_color) = column_color {
+                            let color = model.value(&iter, column_color).get::<String>().unwrap();
+                            if color == HEADER_ROW_COLOR {
+                                if !model.iter_next(&iter) {
+                                    break;
+                                }
+                                continue;
+                            }
+                        }
+
+                        let path = model.value(&iter, column_path).get::<String>().unwrap();
+                        let name = model.value(&iter, column_file_name).get::<String>().unwrap();
+                        match wildcard_type {
+                            WildcardType::Path => {
+                                if Common::regex_check(wildcard, path) {
+                                    model.set_value(&iter, column_button_selection, &select_things.to_value());
+                                }
+                            }
+                            WildcardType::Name => {
+                                if Common::regex_check(wildcard, name) {
+                                    model.set_value(&iter, column_button_selection, &select_things.to_value());
+                                }
+                            }
+                            WildcardType::PathName => {
+                                if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
+                                    model.set_value(&iter, column_button_selection, &select_things.to_value());
+                                }
+                            }
+                        }
+
+                        if !model.iter_next(&iter) {
+                            break;
+                        }
+                    }
+                }
             } else {
-                panic!("Non handled option in wildcard");
+                confirmation_dialog_delete.close();
+                return;
             }
-        } else {
             confirmation_dialog_delete.close();
-            return;
-        }
-        confirmation_dialog_delete.close();
-    }
-    if !wildcard.is_empty() {
-        let wildcard = wildcard.trim();
-
-        #[cfg(target_family = "windows")]
-        let wildcard = wildcard.replace("/", "\\");
-        #[cfg(target_family = "windows")]
-        let wildcard = wildcard.as_str();
-
-        let model = get_list_store(tree_view);
-
-        let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
-
-        loop {
-            if let Some(column_color) = column_color {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
-                if color == HEADER_ROW_COLOR {
-                    if !model.iter_next(&iter) {
-                        break;
-                    }
-                    continue;
-                }
-            }
-
-            let path = model.value(&iter, column_path).get::<String>().unwrap();
-            let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-            match wildcard_type {
-                WildcardType::Path => {
-                    if Common::regex_check(wildcard, path) {
-                        model.set_value(&iter, column_button_selection, &select_things.to_value());
-                    }
-                }
-                WildcardType::Name => {
-                    if Common::regex_check(wildcard, name) {
-                        model.set_value(&iter, column_button_selection, &select_things.to_value());
-                    }
-                }
-                WildcardType::PathName => {
-                    if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                        model.set_value(&iter, column_button_selection, &select_things.to_value());
-                    }
-                }
-            }
-
-            if !model.iter_next(&iter) {
-                break;
-            }
-        }
+        });
     }
 }
 
