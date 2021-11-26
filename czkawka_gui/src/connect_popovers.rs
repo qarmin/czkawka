@@ -8,20 +8,32 @@ use gtk::TreeIter;
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
-fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
+fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        loop {
-            model.set_value(&iter, column_button_selection, &true.to_value());
+        if let Some(column_color) = column_color {
+            loop {
+                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    model.set_value(&iter, column_button_selection, &true.to_value());
+                }
+                if !model.iter_next(&iter) {
+                    break;
+                }
+            }
+        } else {
+            loop {
+                model.set_value(&iter, column_button_selection, &true.to_value());
 
-            if !model.iter_next(&iter) {
-                break;
+                if !model.iter_next(&iter) {
+                    break;
+                }
             }
         }
     }
     popover.popdown();
 }
+
 fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
@@ -36,16 +48,28 @@ fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, colum
     }
     popover.popdown();
 }
-fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
+fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        loop {
-            let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
-            model.set_value(&iter, column_button_selection, &(!current_value).to_value());
+        if let Some(column_color) = column_color {
+            loop {
+                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                    model.set_value(&iter, column_button_selection, &(!current_value).to_value());
+                }
+                if !model.iter_next(&iter) {
+                    break;
+                }
+            }
+        } else {
+            loop {
+                let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                model.set_value(&iter, column_button_selection, &(!current_value).to_value());
 
-            if !model.iter_next(&iter) {
-                break;
+                if !model.iter_next(&iter) {
+                    break;
+                }
             }
         }
     }
@@ -798,7 +822,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_select_all(&popover_select, &object_popover.tree_view, object_popover.column_selection);
+        popover_select_all(&popover_select, &object_popover.tree_view, object_popover.column_selection, object_popover.column_color);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
@@ -816,7 +840,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     let vec_popover_objects = popover_objects.clone();
     buttons_popover_reverse.connect_clicked(move |_| {
         let object_popover = find_name(&to_notebook_main_enum(notebook_main.current_page().unwrap()), &vec_popover_objects).unwrap();
-        popover_reverse(&popover_select, &object_popover.tree_view, object_popover.column_selection);
+        popover_reverse(&popover_select, &object_popover.tree_view, object_popover.column_selection, object_popover.column_color);
     });
 
     let popover_select = gui_data.popovers.popover_select.clone();
