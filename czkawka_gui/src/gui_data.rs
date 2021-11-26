@@ -77,7 +77,7 @@ pub struct GuiData {
 }
 
 impl GuiData {
-    pub fn new() -> Self {
+    pub fn new_with_application(application: &gtk::Application) -> Self {
         //// Loading glade file content and build with it help UI
         let glade_src = include_str!("../ui/main_window.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
@@ -87,6 +87,7 @@ impl GuiData {
         window_main.show_all();
         window_main.set_title("Czkawka");
         window_main.set_position(WindowPosition::Center);
+        window_main.set_application(Some(application));
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
