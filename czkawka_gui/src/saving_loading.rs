@@ -542,22 +542,11 @@ pub fn reset_configuration(gui_data: &GuiData, manual_clearing: bool) {
         let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
         list_store.clear();
-        if cfg!(target_family = "unix") {
-            for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
-                let values: [(u32, &dyn ToValue); 1] = [(0, &i)];
-                list_store.set(&list_store.append(), &values);
-            }
-        }
+
     }
     // Resetting excluded items
     {
         let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
-        if cfg!(target_family = "unix") {
-            entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*");
-        }
-        if cfg!(target_family = "windows") {
-            entry_excluded_items.set_text("*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*");
-        }
     }
     // Resetting allowed extensions
     {
