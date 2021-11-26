@@ -57,23 +57,28 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
         gtk::FileChooserAction::SelectFolder,
         &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
     );
-    chooser.set_select_multiple(true);
+    chooser.set_select_multiple(false);
     chooser.show_all();
-    let response_type = chooser.run();
-    if response_type == gtk::ResponseType::Ok {
-        let folders = chooser.filenames();
-        if folders.len() != 1 {
-            add_text_to_text_view(text_view_errors, format!("Only 1 path must be selected to be able to copy there duplicated files, found {:?}", folders).as_str());
-        } else {
-            let folder = folders[0].clone();
-            if let Some(column_color) = column_color {
-                move_with_tree(tree_view, column_file_name, column_path, column_color, column_selection, folder, entry_info, text_view_errors);
+
+    let entry_info = entry_info.clone();
+    let text_view_errors = text_view_errors.clone();
+    let tree_view = tree_view.clone();
+    chooser.connect_response(move |file_chooser, response_type| {
+        if response_type == gtk::ResponseType::Ok {
+            let folders = file_chooser.filenames();
+            if folders.len() != 1 {
+                add_text_to_text_view(&text_view_errors, format!("Only 1 path must be selected to be able to copy there duplicated files, found {:?}", folders).as_str());
             } else {
-                move_with_list(tree_view, column_file_name, column_path, column_selection, folder, entry_info, text_view_errors);
+                let folder = folders[0].clone();
+                if let Some(column_color) = column_color {
+                    move_with_tree(&tree_view, column_file_name, column_path, column_color, column_selection, folder, &entry_info, &text_view_errors);
+                } else {
+                    move_with_list(&tree_view, column_file_name, column_path, column_selection, folder, &entry_info, &text_view_errors);
+                }
             }
         }
-    }
-    chooser.close();
+        file_chooser.close();
+    });
 }
 fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, destination_folder: PathBuf, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
     let model = get_list_store(tree_view);
