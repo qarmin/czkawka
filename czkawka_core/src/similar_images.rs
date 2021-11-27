@@ -745,13 +745,12 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         for file_entry in hashmap.values() {
             let mut string: String = String::with_capacity(100);
 
-            string += format!("{}//{}//{}//{}//", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
+            string += format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
 
             for i in 0..file_entry.hash.len() - 1 {
-                string.push_str(file_entry.hash[i].to_string().as_str());
                 string.push_str("//");
+                string.push_str(file_entry.hash[i].to_string().as_str());
             }
-            string += file_entry.hash[file_entry.hash.len() - 1].to_string().as_str();
 
             if let Err(e) = writeln!(writer, "{}", string) {
                 text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));

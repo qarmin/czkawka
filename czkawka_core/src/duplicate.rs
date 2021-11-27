@@ -28,8 +28,6 @@ use std::thread::sleep;
 
 const HASH_MB_LIMIT_BYTES: u64 = 1024 * 1024; // 1MB
 
-const CACHE_FILE_NAME: &str = "cache_duplicates.txt";
-
 #[derive(Debug)]
 pub struct ProgressData {
     pub checking_method: CheckingMethod,
@@ -1358,7 +1356,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join(CACHE_FILE_NAME.replace(".", format!("_{:?}.", type_of_hash).as_str()));
+        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash).as_str());
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -1411,14 +1409,17 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
     Ok((hasher.finalize(), current_file_read_bytes))
 }
 
+fn get_file_hash_name(type_of_hash: &HashType) -> String {
+    format!("cache_duplicates_{:?}.txt", type_of_hash)
+}
+
 fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(CACHE_FILE_NAME.replace(".", format!("_{:?}.", type_of_hash).as_str()));
+        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash).as_str());
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
                 return None;
             }
         };
