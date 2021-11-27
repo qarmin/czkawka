@@ -131,11 +131,7 @@ fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButt
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
-    let button_box = confirmation_dialog_group_delete.children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
-        .clone()
-        .downcast::<gtk::Box>()
-        .unwrap()
-        .children()[0]
+    let button_box = get_dialog_box_child(&confirmation_dialog_group_delete).children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
         .clone()
         .downcast::<gtk::ButtonBox>()
         .unwrap();
@@ -143,7 +139,7 @@ fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButt
     let button_ok = button_box.children()[0].clone();
     button_ok.grab_focus();
 
-    let internal_box = confirmation_dialog_group_delete.children()[0].clone().downcast::<gtk::Box>().unwrap();
+    let internal_box = get_dialog_box_child(&confirmation_dialog_group_delete);
     internal_box.add(&label);
     internal_box.add(&label2);
     internal_box.add(&check_button);

@@ -229,9 +229,11 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
         let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some(window_title), Some(window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
         let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
 
-        let radio_path = gtk::RadioButton::with_label("Path");
-        let radio_name = gtk::RadioButton::with_label_from_widget(&radio_path, "Name");
-        let radio_name_path = gtk::RadioButton::with_label_from_widget(&radio_path, "Path + Name");
+        let radio_path = gtk::RadioButton::builder().label("Path").build();
+        let radio_name_path = gtk::RadioButton::builder().label("Path + Name").build();
+        radio_name_path.join_group(Some(&radio_path));
+        let radio_name = gtk::RadioButton::builder().label("Name").build();
+        radio_name.join_group(Some(&radio_path)); // TODO, not sure why this not exists for builder, but should
 
         let entry_path = gtk::Entry::new();
         let entry_name = gtk::Entry::new();

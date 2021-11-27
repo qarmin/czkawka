@@ -20,7 +20,7 @@ use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use gtk::prelude::*;
-use gtk::{Builder};
+use gtk::Builder;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
