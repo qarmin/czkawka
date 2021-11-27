@@ -55,6 +55,7 @@ pub struct EmptyFolder {
 pub struct Info {
     pub number_of_empty_folders: usize,
 }
+
 impl Info {
     pub fn new() -> Self {
         Default::default()
@@ -325,6 +326,7 @@ impl DebugPrint for EmptyFolder {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for EmptyFolder {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
@@ -360,6 +362,7 @@ impl SaveResults for EmptyFolder {
         true
     }
 }
+
 impl PrintResults for EmptyFolder {
     fn print_results(&self) {
         if !self.empty_folder_list.is_empty() {

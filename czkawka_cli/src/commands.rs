@@ -30,7 +30,7 @@ pub enum Commands {
         search_method: CheckingMethod,
         #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
-        #[structopt(short = "ht", long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help="Hash type (BLAKE3, CRC32, XXH3)")]
+        #[structopt(short = "ht", long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help = "Hash type (BLAKE3, CRC32, XXH3)")]
         hash_type: HashType,
         #[structopt(flatten)]
         file_to_save: FileToSave,
@@ -123,11 +123,11 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
-        #[structopt(short = "g", long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help="Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
+        #[structopt(short = "g", long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
         hash_alg: HashAlg,
-        #[structopt(short = "z", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help="Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
+        #[structopt(short = "z", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
         image_filter: FilterType,
-        #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help="Hash size (allowed: 4, 8, 16)")]
+        #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help = "Hash size (allowed: 4, 8, 16)")]
         hash_size: u8,
     },
     #[structopt(name = "music", about = "Finds same music by tags", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka music -d /home/rafal -f results.txt")]
@@ -366,6 +366,7 @@ fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
     };
     Ok(filter_type)
 }
+
 fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
     let algorithm;
     algorithm = match src.to_lowercase().as_str() {

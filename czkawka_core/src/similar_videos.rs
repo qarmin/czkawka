@@ -81,6 +81,7 @@ pub struct Info {
     pub number_of_failed_to_remove_files: usize,
     pub gained_space: u64,
 }
+
 impl Info {
     pub fn new() -> Self {
         Default::default()
@@ -498,6 +499,7 @@ impl SimilarVideos {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 }
+
 impl Default for SimilarVideos {
     fn default() -> Self {
         Self::new()
@@ -518,6 +520,7 @@ impl DebugPrint for SimilarVideos {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for SimilarVideos {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
@@ -562,6 +565,7 @@ impl SaveResults for SimilarVideos {
         true
     }
 }
+
 impl PrintResults for SimilarVideos {
     fn print_results(&self) {
         if !self.similar_vectors.is_empty() {
@@ -624,6 +628,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         }
     }
 }
+
 fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());

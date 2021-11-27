@@ -38,6 +38,7 @@ pub enum DeleteMethod {
     None,
     Delete,
 }
+
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {

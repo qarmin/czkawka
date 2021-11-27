@@ -49,6 +49,7 @@ fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, colum
     }
     popover.popdown();
 }
+
 fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 

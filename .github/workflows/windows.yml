@@ -54,9 +54,9 @@ jobs:
           path: target/release/czkawka_cli.exe
         if: ${{ matrix.type == 'release' }}
 
-# Duplicate finder checks included and excluded directories
-# Others are just check delete files number
-# Windows build have some elements changed like powershell before wget and unzip, python instead python3, rm -r  instead rm -r and one (at the top) additional test which check size of characyers
+      # Duplicate finder checks included and excluded directories
+      # Others are just check delete files number
+      # Windows build have some elements changed like powershell before wget and unzip, python instead python3, rm -r  instead rm -r and one (at the top) additional test which check size of characyers
       - name: test
         run: |
           powershell wget https://github.com/qarmin/czkawka/releases/download/1.1.0/TestSuite.zip -O TestSuite.zip

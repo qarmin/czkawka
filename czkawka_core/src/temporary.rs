@@ -42,6 +42,7 @@ pub struct Info {
     pub number_of_removed_files: usize,
     pub number_of_failed_to_remove_files: usize,
 }
+
 impl Info {
     pub fn new() -> Self {
         Default::default()
@@ -277,6 +278,7 @@ impl Temporary {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
+
 impl Default for Temporary {
     fn default() -> Self {
         Self::new()
@@ -311,6 +313,7 @@ impl DebugPrint for Temporary {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for Temporary {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
@@ -349,6 +352,7 @@ impl SaveResults for Temporary {
         true
     }
 }
+
 impl PrintResults for Temporary {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();

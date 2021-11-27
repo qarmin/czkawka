@@ -43,6 +43,7 @@ pub struct Info {
     pub number_of_removed_files: usize,
     pub number_of_failed_to_remove_files: usize,
 }
+
 impl Info {
     pub fn new() -> Self {
         Default::default()
@@ -290,6 +291,7 @@ impl EmptyFiles {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
+
 impl Default for EmptyFiles {
     fn default() -> Self {
         Self::new()
@@ -326,6 +328,7 @@ impl DebugPrint for EmptyFiles {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for EmptyFiles {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
@@ -364,6 +367,7 @@ impl SaveResults for EmptyFiles {
         true
     }
 }
+
 impl PrintResults for EmptyFiles {
     /// Print information's about duplicated entries
     /// Only needed for CLI

@@ -17,11 +17,11 @@ parts:
       - curl
       - gcc
       - git
-    rust-path: ["czkawka_gui"]
+    rust-path: [ "czkawka_gui" ]
 apps:
   czkawka:
     command: bin/czkawka_gui
-    extensions: [gnome-3-38]
+    extensions: [ gnome-3-38 ]
     plugs:
       - home
       - removable-media

@@ -55,8 +55,8 @@ jobs:
           path: target/release/czkawka_cli
         if: ${{ matrix.type == 'release' }}
 
-# Duplicate finder checks included and excluded directories
-# Others are just check delete files number
+      # Duplicate finder checks included and excluded directories
+      # Others are just check delete files number
       - name: Linux Regression Test
         run: |
           wget https://github.com/qarmin/czkawka/releases/download/1.1.0/TestSuite.zip

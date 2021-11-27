@@ -73,6 +73,7 @@ pub struct Info {
     pub number_of_failed_to_remove_files: usize,
     pub number_of_duplicates_music_files: usize,
 }
+
 impl Info {
     pub fn new() -> Self {
         Default::default()
@@ -637,6 +638,7 @@ impl SameMusic {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
+
 impl Default for SameMusic {
     fn default() -> Self {
         Self::new()
@@ -675,6 +677,7 @@ impl DebugPrint for SameMusic {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for SameMusic {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
@@ -713,6 +716,7 @@ impl SaveResults for SameMusic {
         true
     }
 }
+
 impl PrintResults for SameMusic {
     /// Print information's about duplicated entries
     /// Only needed for CLI

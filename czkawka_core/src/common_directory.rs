@@ -9,6 +9,7 @@ pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,
 }
+
 impl Directories {
     pub fn new() -> Self {
         Default::default()

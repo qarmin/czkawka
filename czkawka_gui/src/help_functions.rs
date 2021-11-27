@@ -208,10 +208,12 @@ pub enum ColumnsEmptyFolders {
     Path,
     Modification,
 }
+
 pub enum ColumnsDirectory {
     // Columns for Included and Excluded Directories in upper Notebook
     Path = 0,
 }
+
 pub enum ColumnsBigFiles {
     SelectionButton = 0,
     Size,
@@ -219,18 +221,21 @@ pub enum ColumnsBigFiles {
     Path,
     Modification,
 }
+
 pub enum ColumnsEmptyFiles {
     SelectionButton = 0,
     Name,
     Path,
     Modification,
 }
+
 pub enum ColumnsTemporaryFiles {
     SelectionButton = 0,
     Name,
     Path,
     Modification,
 }
+
 pub enum ColumnsSimilarImages {
     ActivatableSelectButton = 0,
     SelectionButton,
@@ -258,6 +263,7 @@ pub enum ColumnsSimilarVideos {
     Color,
     TextColor,
 }
+
 pub enum ColumnsSameMusic {
     ActivatableSelectButton = 0,
     SelectionButton,
@@ -275,6 +281,7 @@ pub enum ColumnsSameMusic {
     Color,
     TextColor,
 }
+
 pub enum ColumnsInvalidSymlinks {
     SelectionButton = 0,
     Name,
@@ -316,6 +323,7 @@ pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
         }
     }
 }
+
 pub fn get_path_buf_from_vector_of_strings(vec_string: Vec<String>) -> Vec<PathBuf> {
     vec_string.iter().map(PathBuf::from).collect()
 }
@@ -386,6 +394,7 @@ pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Bu
         }
     }
 }
+
 pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
     for button in buttons_array {
         button.hide();
@@ -402,6 +411,7 @@ pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) 
 pub fn get_list_store(tree_view: &gtk::TreeView) -> ListStore {
     tree_view.model().unwrap().downcast::<gtk::ListStore>().unwrap()
 }
+
 pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
     dialog.child().unwrap().downcast::<gtk::Box>().unwrap()
 }

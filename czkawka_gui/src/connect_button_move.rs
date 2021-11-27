@@ -82,6 +82,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
         file_chooser.close();
     });
 }
+
 fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, destination_folder: PathBuf, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
     let model = get_list_store(tree_view);
 

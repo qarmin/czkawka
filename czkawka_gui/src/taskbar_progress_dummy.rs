@@ -4,6 +4,7 @@
 use std::convert::From;
 
 enum HWND__ {}
+
 type HWND = *mut HWND__;
 
 #[allow(non_camel_case_types, dead_code)]

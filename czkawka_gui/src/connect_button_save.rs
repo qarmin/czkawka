@@ -84,6 +84,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
         post_save_things(file_name, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &shared_buttons, &entry_info, &buttons_save_clone);
     });
 }
+
 fn post_save_things(file_name: &str, type_of_tab: &NotebookMainEnum, shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>, entry_info: &Entry, buttons_save: &Button) {
     entry_info.set_text(format!("Saved results to file {}", file_name).as_str());
     // Set state

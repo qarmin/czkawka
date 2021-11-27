@@ -6,6 +6,7 @@ use std::time::SystemTime;
 /// Class for common functions used across other class/functions
 
 pub struct Common();
+
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
     #[allow(unused_variables)]
@@ -157,6 +158,7 @@ mod test {
             assert!(Common::regex_check("*/home", "C:\\home"));
         }
     }
+
     #[test]
     fn test_windows_path() {
         assert_eq!(PathBuf::from("C:\\path.txt"), Common::normalize_windows_path("c:/PATH.tXt"));

@@ -1016,6 +1016,7 @@ impl DuplicateFinder {
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
 }
+
 impl Default for DuplicateFinder {
     fn default() -> Self {
         Self::new()
@@ -1079,6 +1080,7 @@ impl DebugPrint for DuplicateFinder {
         println!("-----------------------------------------");
     }
 }
+
 impl SaveResults for DuplicateFinder {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let start_time: SystemTime = SystemTime::now();
@@ -1177,6 +1179,7 @@ impl SaveResults for DuplicateFinder {
         true
     }
 }
+
 impl PrintResults for DuplicateFinder {
     /// Print information's about duplicated entries
     /// Only needed for CLI
@@ -1496,6 +1499,7 @@ mod tests {
     fn assert_inode(before: &Metadata, after: &Metadata) {
         assert_eq!(before.ino(), after.ino());
     }
+
     #[cfg(target_family = "windows")]
     fn assert_inode(_: &Metadata, _: &Metadata) {}
 

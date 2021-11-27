@@ -15,6 +15,7 @@ pub enum NotebookMainEnum {
     Symlinks,
     BrokenFiles,
 }
+
 pub fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     match notebook_number {
         0 => NotebookMainEnum::Duplicate,
@@ -30,6 +31,7 @@ pub fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
         _ => panic!("Invalid Notebook Tab"),
     }
 }
+
 pub fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
     [
         to_notebook_main_enum(0),
@@ -52,6 +54,7 @@ pub enum NotebookUpperEnum {
     ExcludedItems,
     AllowedExtensions,
 }
+
 pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
     match notebook_number {
         0 => NotebookUpperEnum::IncludedDirectories,
@@ -61,6 +64,7 @@ pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
         _ => panic!("Invalid Upper Notebook Tab"),
     }
 }
+
 pub fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
     [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2), to_notebook_upper_enum(3)]
 }

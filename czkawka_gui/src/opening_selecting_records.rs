@@ -16,6 +16,7 @@ pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::Eve
     }
     gtk::Inhibit(false)
 }
+
 pub fn opening_enter_function(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
     let nt_object = get_notebook_object_from_tree_view(tree_view);
     handle_tree_keypress(tree_view, event, nt_object.column_name, nt_object.column_path, nt_object.column_selection)
@@ -91,6 +92,7 @@ pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_mod
 
     true
 }
+
 pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap();
 
@@ -100,6 +102,7 @@ pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_mod
 
     true
 }
+
 pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap();
 
@@ -109,6 +112,7 @@ pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree
 
     true
 }
+
 pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32).get::<String>().unwrap();
 

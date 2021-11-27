@@ -92,6 +92,7 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
     }
     true
 }
+
 fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let confirmation_dialog_delete = gtk::Dialog::with_buttons(
         Some("Delete confirmation"),
