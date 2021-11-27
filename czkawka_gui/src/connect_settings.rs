@@ -1,6 +1,7 @@
 use crate::gui_data::GuiData;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 use gtk::prelude::*;
+use gtk::WindowPosition;
 
 pub fn connect_settings(gui_data: &GuiData) {
     // Connect button settings
@@ -9,6 +10,7 @@ pub fn connect_settings(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
         button_settings.connect_clicked(move |_| {
+            window_main.set_position(WindowPosition::Center);
             window_main.set_sensitive(false);
             window_settings.show();
         });
