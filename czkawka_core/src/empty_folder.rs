@@ -1,9 +1,3 @@
-use crate::common::Common;
-use crate::common_directory::Directories;
-use crate::common_items::ExcludedItems;
-use crate::common_messages::Messages;
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-use crossbeam_channel::Receiver;
 use std::collections::BTreeMap;
 use std::fs::{File, Metadata};
 use std::io::{BufWriter, Write};
@@ -13,6 +7,14 @@ use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
+
+use crossbeam_channel::Receiver;
+
+use crate::common::Common;
+use crate::common_directory::Directories;
+use crate::common_items::ExcludedItems;
+use crate::common_messages::Messages;
+use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 #[derive(Debug)]
 pub struct ProgressData {

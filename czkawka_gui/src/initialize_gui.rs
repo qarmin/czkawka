@@ -1,3 +1,16 @@
+use std::cmp::Ordering;
+use std::fs;
+use std::path::Path;
+
+use directories_next::ProjectDirs;
+use gtk::prelude::*;
+use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use image::imageops::FilterType;
+use image::GenericImageView;
+
+use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_videos::MAX_TOLERANCE;
+
 use crate::connect_button_delete::{basic_remove, empty_folder_remover};
 use crate::create_tree_view::*;
 use crate::delete_things;
@@ -5,16 +18,6 @@ use crate::gui_data::*;
 use crate::help_functions::*;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
-use czkawka_core::similar_images::SIMILAR_VALUES;
-use czkawka_core::similar_videos::MAX_TOLERANCE;
-use directories_next::ProjectDirs;
-use gtk::prelude::*;
-use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
-use image::imageops::FilterType;
-use image::GenericImageView;
-use std::cmp::Ordering;
-use std::fs;
-use std::path::Path;
 
 const KEY_DELETE: u16 = 119;
 

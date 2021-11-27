@@ -3,6 +3,32 @@
 #![allow(clippy::collapsible_else_if)]
 #![allow(clippy::too_many_arguments)]
 
+use gtk::prelude::*;
+
+use czkawka_core::*;
+
+use crate::compute_results::*;
+use crate::connect_about_buttons::*;
+use crate::connect_button_delete::*;
+use crate::connect_button_hardlink::*;
+use crate::connect_button_move::*;
+use crate::connect_button_save::*;
+use crate::connect_button_search::*;
+use crate::connect_button_select::*;
+use crate::connect_button_stop::*;
+use crate::connect_header_buttons::*;
+use crate::connect_hide_text_view_errors::*;
+use crate::connect_notebook_tabs::*;
+use crate::connect_popovers::*;
+use crate::connect_progress_window::*;
+use crate::connect_selection_of_directories::*;
+use crate::connect_settings::*;
+use crate::connect_similar_image_size_change::*;
+use crate::gui_data::*;
+use crate::initialize_gui::*;
+use crate::saving_loading::*;
+use crate::tests::validate_notebook_data;
+
 mod compute_results;
 mod connect_about_buttons;
 mod connect_button_delete;
@@ -41,31 +67,6 @@ mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
 mod tests;
-
-use czkawka_core::*;
-
-use crate::compute_results::*;
-use crate::connect_about_buttons::*;
-use crate::connect_button_delete::*;
-use crate::connect_button_hardlink::*;
-use crate::connect_button_move::*;
-use crate::connect_button_save::*;
-use crate::connect_button_search::*;
-use crate::connect_button_select::*;
-use crate::connect_button_stop::*;
-use crate::connect_header_buttons::*;
-use crate::connect_hide_text_view_errors::*;
-use crate::connect_notebook_tabs::*;
-use crate::connect_popovers::*;
-use crate::connect_progress_window::*;
-use crate::connect_selection_of_directories::*;
-use crate::connect_settings::*;
-use crate::connect_similar_image_size_change::*;
-use crate::gui_data::*;
-use crate::initialize_gui::*;
-use crate::saving_loading::*;
-use crate::tests::validate_notebook_data;
-use gtk::prelude::*;
 
 fn main() {
     let application = gtk::Application::builder().application_id("com.github.qarmin").build();

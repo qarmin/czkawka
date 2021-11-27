@@ -1,13 +1,15 @@
-use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notepad::GuiUpperNotebook;
-use crate::help_functions::*;
-use directories_next::ProjectDirs;
-use gtk::prelude::*;
-use gtk::{ScrolledWindow, TextView};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::{env, fs};
+
+use directories_next::ProjectDirs;
+use gtk::prelude::*;
+use gtk::{ScrolledWindow, TextView};
+
+use crate::gui_settings::GuiSettings;
+use crate::gui_upper_notepad::GuiUpperNotebook;
+use crate::help_functions::*;
 
 // TODO organize this better, add specific functions that will allow to load from files specific strings
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";

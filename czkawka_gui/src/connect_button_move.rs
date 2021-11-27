@@ -1,9 +1,11 @@
+use std::path::{Path, PathBuf};
+
+use gtk::prelude::*;
+use gtk::TreePath;
+
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use gtk::prelude::*;
-use gtk::TreePath;
-use std::path::{Path, PathBuf};
 
 pub fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();

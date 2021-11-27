@@ -1,16 +1,24 @@
-use crossbeam_channel::Receiver;
-use humansize::{file_size_opts as options, FileSize};
 use std::collections::BTreeMap;
 #[cfg(target_family = "unix")]
 use std::collections::HashSet;
 use std::fs::{File, Metadata, OpenOptions};
+use std::hash::Hasher;
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
+use std::io::{BufReader, BufWriter};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
+
+use crossbeam_channel::Receiver;
+use directories_next::ProjectDirs;
+use humansize::{file_size_opts as options, FileSize};
+use rayon::prelude::*;
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -18,13 +26,6 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use directories_next::ProjectDirs;
-use rayon::prelude::*;
-use std::hash::Hasher;
-use std::io::{BufReader, BufWriter};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::thread::sleep;
 
 const HASH_MB_LIMIT_BYTES: u64 = 1024 * 1024; // 1MB
 
@@ -1482,13 +1483,14 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::fs::{read_dir, File};
     use std::io;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;
     #[cfg(target_family = "unix")]
     use std::os::unix::fs::MetadataExt;
+
+    use super::*;
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {

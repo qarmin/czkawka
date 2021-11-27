@@ -1,8 +1,12 @@
-use czkawka_core::*;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread;
 
-use crate::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
+use glib::Sender;
+use gtk::prelude::*;
+use gtk::WindowPosition;
+use img_hash::{FilterType, HashAlg};
+
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::{DuplicateFinder, HashType};
@@ -13,15 +17,11 @@ use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use glib::Sender;
-use gtk::prelude::*;
+use czkawka_core::*;
 
-use gtk::WindowPosition;
-use img_hash::{FilterType, HashAlg};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use std::thread;
-
+use crate::gui_data::GuiData;
+use crate::help_functions::*;
+use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 
 #[allow(clippy::too_many_arguments)]

@@ -1,8 +1,10 @@
 #![cfg(target_os = "windows")]
 extern crate winapi;
+
 use std::cell::RefCell;
 use std::convert::From;
 use std::ptr;
+
 use winapi::ctypes::c_void;
 use winapi::shared::windef::HWND;
 use winapi::shared::winerror::{E_POINTER, S_OK};

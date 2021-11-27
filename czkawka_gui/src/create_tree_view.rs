@@ -1,6 +1,7 @@
-use crate::help_functions::*;
 use gtk::prelude::*;
 use gtk::TreeViewColumn;
+
+use crate::help_functions::*;
 
 pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
     let model = get_list_store(tree_view);

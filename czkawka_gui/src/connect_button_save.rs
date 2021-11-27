@@ -1,11 +1,14 @@
-use crate::gui_data::GuiData;
-use crate::notebook_enums::*;
-use czkawka_core::common_traits::SaveResults;
-use gtk::prelude::*;
-use gtk::{Button, Entry};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+
+use gtk::prelude::*;
+use gtk::{Button, Entry};
+
+use czkawka_core::common_traits::SaveResults;
+
+use crate::gui_data::GuiData;
+use crate::notebook_enums::*;
 
 pub fn connect_button_save(gui_data: &GuiData) {
     let buttons_save = gui_data.bottom_buttons.buttons_save.clone();

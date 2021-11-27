@@ -1,10 +1,11 @@
-use crate::gui_data::GuiData;
-use crate::help_functions::{get_list_store, ColumnsDirectory};
 use gtk::prelude::*;
 use gtk::{TreeView, Window};
 
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
+
+use crate::gui_data::GuiData;
+use crate::help_functions::{get_list_store, ColumnsDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory

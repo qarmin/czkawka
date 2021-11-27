@@ -1,7 +1,8 @@
+use gtk::prelude::*;
+
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use gtk::prelude::*;
 
 pub fn connect_notebook_tabs(gui_data: &GuiData) {
     let shared_buttons = gui_data.shared_buttons.clone();

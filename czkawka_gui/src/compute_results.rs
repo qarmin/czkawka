@@ -1,18 +1,20 @@
-use humansize::{file_size_opts as options, FileSize};
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::path::PathBuf;
+use std::rc::Rc;
+
+use chrono::NaiveDateTime;
+use glib::Receiver;
+use gtk::prelude::*;
+use humansize::{file_size_opts as options, FileSize};
+
+use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::same_music::MusicSimilarity;
+use czkawka_core::similar_images;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use chrono::NaiveDateTime;
-use czkawka_core::duplicate::CheckingMethod;
-use czkawka_core::same_music::MusicSimilarity;
-use czkawka_core::similar_images;
-use glib::Receiver;
-use gtk::prelude::*;
-use std::path::PathBuf;
-use std::rc::Rc;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();

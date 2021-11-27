@@ -1,7 +1,8 @@
-use crate::common::Common;
-use crate::common_messages::Messages;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+
+use crate::common::Common;
+use crate::common_messages::Messages;
 
 #[derive(Default)]
 pub struct Directories {

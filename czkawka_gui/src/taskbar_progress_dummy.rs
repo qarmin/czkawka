@@ -1,5 +1,6 @@
 #![allow(clippy::upper_case_acronyms)]
 #![cfg(not(target_os = "windows"))]
+
 use std::convert::From;
 
 enum HWND__ {}

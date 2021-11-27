@@ -1,11 +1,10 @@
-use crate::gui_data::GuiData;
-use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
+use futures::StreamExt;
+use gtk::prelude::*;
 
 use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, similar_videos, temporary};
 
-use futures::StreamExt;
-
-use gtk::prelude::*;
+use crate::gui_data::GuiData;
+use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(

@@ -1,7 +1,8 @@
-use crate::gui_data::GuiData;
-use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 use gtk::prelude::*;
 use gtk::WindowPosition;
+
+use crate::gui_data::GuiData;
+use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 
 pub fn connect_settings(gui_data: &GuiData) {
     // Connect button settings

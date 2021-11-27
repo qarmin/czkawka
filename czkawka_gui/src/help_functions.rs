@@ -1,4 +1,9 @@
-use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+
+use gtk::prelude::*;
+use gtk::{ListStore, TextView};
+
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_messages::Messages;
@@ -11,10 +16,8 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use gtk::prelude::*;
-use gtk::{ListStore, TextView};
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+
+use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[derive(Eq, PartialEq)]
 pub enum PopoverTypes {

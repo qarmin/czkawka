@@ -1,11 +1,13 @@
-use crate::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
-use gtk::prelude::*;
-use gtk::{Align, CheckButton, Dialog, TextView};
 use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
+
+use gtk::prelude::*;
+use gtk::{Align, CheckButton, Dialog, TextView};
+
+use crate::gui_data::GuiData;
+use crate::help_functions::*;
+use crate::notebook_enums::*;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 

@@ -1,14 +1,3 @@
-use crate::common::Common;
-use crate::common_directory::Directories;
-use crate::common_extensions::Extensions;
-use crate::common_items::ExcludedItems;
-use crate::common_messages::Messages;
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
-use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
-use humansize::{file_size_opts as options, FileSize};
-use rayon::prelude::*;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
@@ -20,8 +9,21 @@ use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
+
+use crossbeam_channel::Receiver;
+use directories_next::ProjectDirs;
+use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
+use humansize::{file_size_opts as options, FileSize};
+use rayon::prelude::*;
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
+
+use crate::common::Common;
+use crate::common_directory::Directories;
+use crate::common_extensions::Extensions;
+use crate::common_items::ExcludedItems;
+use crate::common_messages::Messages;
+use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 pub const MAX_TOLERANCE: i32 = 20;
 

@@ -1,22 +1,23 @@
+use std::collections::BTreeMap;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
+use std::io::BufWriter;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
+
+use audiotags::Tag;
+use crossbeam_channel::Receiver;
+use rayon::prelude::*;
 
 use crate::common::Common;
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use audiotags::Tag;
-use crossbeam_channel::Receiver;
-use rayon::prelude::*;
-use std::collections::BTreeMap;
-use std::io::BufWriter;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::thread::sleep;
 
 #[derive(Debug)]
 pub struct ProgressData {

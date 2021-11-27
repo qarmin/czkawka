@@ -1,6 +1,7 @@
-use crate::notebook_enums::NUMBER_OF_NOTEBOOK_MAIN_TABS;
 use gtk::prelude::*;
 use gtk::TreeView;
+
+use crate::notebook_enums::NUMBER_OF_NOTEBOOK_MAIN_TABS;
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {

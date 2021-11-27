@@ -1,11 +1,14 @@
+use std::fs;
+use std::path::PathBuf;
+
+use gtk::prelude::*;
+use gtk::{TextView, TreeIter, TreePath};
+
+use czkawka_core::duplicate::make_hard_link;
+
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use czkawka_core::duplicate::make_hard_link;
-use gtk::prelude::*;
-use gtk::{TextView, TreeIter, TreePath};
-use std::fs;
-use std::path::PathBuf;
 
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     let buttons_hardlink = gui_data.bottom_buttons.buttons_hardlink.clone();

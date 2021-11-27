@@ -126,8 +126,9 @@ impl Common {
 
 #[cfg(test)]
 mod test {
-    use crate::common::Common;
     use std::path::PathBuf;
+
+    use crate::common::Common;
 
     #[test]
     fn test_regex() {

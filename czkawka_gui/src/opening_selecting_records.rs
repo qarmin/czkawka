@@ -1,5 +1,6 @@
-use crate::help_functions::*;
 use gtk::prelude::*;
+
+use crate::help_functions::*;
 
 const KEY_ENTER: u16 = 36;
 const KEY_SPACE: u16 = 65;

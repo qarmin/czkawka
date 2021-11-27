@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
+use gtk::prelude::*;
+
 use crate::gui_data::GuiData;
 use crate::gui_popovers::GuiPopovers;
 use crate::help_functions::PopoverTypes;
 use crate::notebook_enums::*;
-use gtk::prelude::*;
-use std::collections::HashMap;
 
 pub fn connect_button_select(gui_data: &GuiData) {
     let mut hashmap: HashMap<NotebookMainEnum, Vec<PopoverTypes>> = Default::default();

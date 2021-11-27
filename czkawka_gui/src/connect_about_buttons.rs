@@ -1,5 +1,6 @@
-use crate::gui_data::GuiData;
 use gtk::prelude::*;
+
+use crate::gui_data::GuiData;
 
 const SPONSOR_SITE: &str = "https://github.com/sponsors/qarmin";
 const REPOSITORY_SITE: &str = "https://github.com/qarmin/czkawka";

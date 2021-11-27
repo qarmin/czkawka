@@ -1,6 +1,8 @@
-use crate::gui_data::GuiData;
-use czkawka_core::similar_images::SIMILAR_VALUES;
 use gtk::prelude::*;
+
+use czkawka_core::similar_images::SIMILAR_VALUES;
+
+use crate::gui_data::GuiData;
 
 pub fn connect_similar_image_size_change(gui_data: &GuiData) {
     // This should set values to max possible value like in return_similarity_from_similarity_preset and get_string_from_similarity

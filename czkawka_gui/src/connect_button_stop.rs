@@ -1,5 +1,6 @@
-use crate::gui_data::GuiData;
 use gtk::prelude::*;
+
+use crate::gui_data::GuiData;
 
 pub fn connect_button_stop(gui_data: &GuiData) {
     let button_stop_in_dialog = gui_data.progress_window.button_stop_in_dialog.clone();

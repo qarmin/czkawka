@@ -1,14 +1,11 @@
-use crate::gui_about::GuiAbout;
-use crate::gui_bottom_buttons::GuiBottomButtons;
-use crate::gui_header::GuiHeader;
-use crate::gui_main_notebook::GuiMainNotebook;
-use crate::gui_popovers::GuiPopovers;
-use crate::gui_progress_dialog::GuiProgressDialog;
-use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notepad::GuiUpperNotebook;
-use crate::notebook_enums::*;
-use crate::taskbar_progress::TaskbarProgress;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
+
 use crossbeam_channel::unbounded;
+use gtk::prelude::*;
+use gtk::{Builder, WindowPosition};
+
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -19,11 +16,17 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use gtk::prelude::*;
-use gtk::{Builder, WindowPosition};
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
+
+use crate::gui_about::GuiAbout;
+use crate::gui_bottom_buttons::GuiBottomButtons;
+use crate::gui_header::GuiHeader;
+use crate::gui_main_notebook::GuiMainNotebook;
+use crate::gui_popovers::GuiPopovers;
+use crate::gui_progress_dialog::GuiProgressDialog;
+use crate::gui_settings::GuiSettings;
+use crate::gui_upper_notepad::GuiUpperNotebook;
+use crate::notebook_enums::*;
+use crate::taskbar_progress::TaskbarProgress;
 
 #[derive(Clone)]
 pub struct GuiData {

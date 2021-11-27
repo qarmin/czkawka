@@ -1,10 +1,10 @@
-mod commands;
+use std::process;
+
+use structopt::StructOpt;
 
 use commands::Commands;
-
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
-
 use czkawka_core::similar_images::test_image_conversion_speed;
 use czkawka_core::{
     big_file::{self, BigFile},
@@ -19,8 +19,8 @@ use czkawka_core::{
     similar_videos::SimilarVideos,
     temporary::{self, Temporary},
 };
-use std::process;
-use structopt::StructOpt;
+
+mod commands;
 
 fn main() {
     let command = Commands::from_args();

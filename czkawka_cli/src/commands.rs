@@ -1,9 +1,11 @@
+use std::path::PathBuf;
+
+use img_hash::{FilterType, HashAlg};
+use structopt::StructOpt;
+
 use czkawka_core::duplicate::{CheckingMethod, DeleteMethod, HashType};
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
-use img_hash::{FilterType, HashAlg};
-use std::path::PathBuf;
-use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
