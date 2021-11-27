@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{Builder};
+use gtk::Builder;
 
 #[derive(Clone)]
 pub struct GuiAbout {
