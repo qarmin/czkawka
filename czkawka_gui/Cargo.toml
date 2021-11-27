@@ -46,5 +46,5 @@ winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_cor
 [dependencies.gtk]
 version = "0.14.3"
 default-features = false # just in case
-features = ["v3_22"]
+features = ["v3_24_9"]
 

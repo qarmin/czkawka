@@ -4,7 +4,7 @@ use std::path::Path;
 
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
-use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use gtk::{CheckButton, EventControllerKey, Image, SelectionMode, TextView, TreeView};
 use image::imageops::FilterType;
 use image::GenericImageView;
 
@@ -106,8 +106,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_duplicates(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
                     let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
                     show_preview(

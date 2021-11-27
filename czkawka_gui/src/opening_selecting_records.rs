@@ -1,12 +1,25 @@
-use gtk::prelude::*;
-
 use crate::help_functions::*;
+use gdk::ModifierType;
+use gtk::prelude::*;
 
 const KEY_ENTER: u16 = 36;
 const KEY_SPACE: u16 = 65;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
+pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey, key_value: u32, key_code: u32, modifier_state: ModifierType) -> bool {
+    println!("key_value {}", key_value);
+    println!("key_code {}", key_code);
+    println!("modifier_stat {:?}", modifier_state);
+    // let nt_object = get_notebook_object_from_tree_view(tree_view);
+    // if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
+    //     common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::PathAndName);
+    // } else if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 3 {
+    //     common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::OnlyPath);
+    // }
+    // gtk::Inhibit(false)
+    true
+}
 pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     let nt_object = get_notebook_object_from_tree_view(tree_view);
     if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
