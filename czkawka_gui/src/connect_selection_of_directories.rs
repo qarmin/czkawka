@@ -80,18 +80,21 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
     let chooser = gtk::FileChooserDialog::with_buttons(Some(folders_to), Some(window_main), gtk::FileChooserAction::SelectFolder, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
     chooser.set_select_multiple(true);
     chooser.show_all();
-    let response_type = chooser.run();
-    if response_type == gtk::ResponseType::Ok {
-        let folder = chooser.filenames();
 
-        let list_store = get_list_store(tree_view);
+    let tree_view = tree_view.clone();
+    chooser.connect_response(move |chooser, response_type| {
+        if response_type == gtk::ResponseType::Ok {
+            let folder = chooser.filenames();
 
-        for file_entry in &folder {
-            let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
-            list_store.set(&list_store.append(), &values);
+            let list_store = get_list_store(&tree_view);
+
+            for file_entry in &folder {
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
+                list_store.set(&list_store.append(), &values);
+            }
         }
-    }
-    chooser.close();
+        chooser.close();
+    });
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
@@ -105,22 +108,24 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
 
     dialog_manual_add_directory.show_all();
 
-    let response_type = dialog_manual_add_directory.run();
-    if response_type == gtk::ResponseType::Ok {
-        let text = entry.text().to_string().trim().to_string();
+    let tree_view = tree_view.clone();
+    dialog_manual_add_directory.connect_response(move |dialog_manual_add_directory, response_type| {
+        if response_type == gtk::ResponseType::Ok {
+            let text = entry.text().to_string().trim().to_string();
 
-        #[cfg(target_family = "windows")]
-        let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
+            #[cfg(target_family = "windows")]
+            let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
-        if !text.is_empty() {
-            let list_store = get_list_store(tree_view);
+            if !text.is_empty() {
+                let list_store = get_list_store(&tree_view);
 
-            let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &text)];
-            list_store.set(&list_store.append(), &values);
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &text)];
+                list_store.set(&list_store.append(), &values);
+            }
+        } else {
+            dialog_manual_add_directory.close();
+            return;
         }
-    } else {
         dialog_manual_add_directory.close();
-        return;
-    }
-    dialog_manual_add_directory.close();
+    });
 }

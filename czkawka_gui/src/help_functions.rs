@@ -400,7 +400,7 @@ pub fn get_list_store(tree_view: &gtk::TreeView) -> ListStore {
     tree_view.model().unwrap().downcast::<gtk::ListStore>().unwrap()
 }
 pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
-    dialog.children()[0].clone().downcast::<gtk::Box>().unwrap()
+    dialog.child().unwrap().downcast::<gtk::Box>().unwrap()
 }
 
 pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {

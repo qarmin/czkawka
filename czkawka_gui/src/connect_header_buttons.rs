@@ -1,6 +1,6 @@
 use crate::gui_data::GuiData;
 use gtk::prelude::*;
-use gtk::{ResponseType, WindowPosition};
+use gtk::WindowPosition;
 
 pub fn connect_button_about(gui_data: &GuiData) {
     let about_dialog = gui_data.about.about_dialog.clone();
@@ -8,9 +8,11 @@ pub fn connect_button_about(gui_data: &GuiData) {
     button_app_info.connect_clicked(move |_| {
         about_dialog.set_position(WindowPosition::Center);
         about_dialog.show();
-        let response = about_dialog.run();
-        if response != ResponseType::None {
-            about_dialog.hide();
-        }
+
+        // Prevent from deleting dialog after close
+        about_dialog.connect_delete_event(|e, _f| {
+            e.hide();
+            Inhibit(true)
+        });
     });
 }

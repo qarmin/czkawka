@@ -11,7 +11,7 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsDuplicates::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsDuplicates::SelectionButton as u32, &fixed.to_value());
     });
@@ -69,7 +69,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsEmptyFolders::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsEmptyFolders::SelectionButton as u32, &fixed.to_value());
     });
@@ -119,7 +119,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsBigFiles::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsBigFiles::SelectionButton as u32, &fixed.to_value());
     });
@@ -178,7 +178,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsTemporaryFiles::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsTemporaryFiles::SelectionButton as u32, &fixed.to_value());
     });
@@ -228,7 +228,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsEmptyFiles::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsEmptyFiles::SelectionButton as u32, &fixed.to_value());
     });
@@ -278,7 +278,7 @@ pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsSimilarImages::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsSimilarImages::SelectionButton as u32, &fixed.to_value());
     });
@@ -369,7 +369,7 @@ pub fn create_tree_view_similar_videos(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsSimilarVideos::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsSimilarVideos::SelectionButton as u32, &fixed.to_value());
     });
@@ -448,7 +448,7 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsSameMusic::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsSameMusic::SelectionButton as u32, &fixed.to_value());
     });
@@ -572,7 +572,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsInvalidSymlinks::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsInvalidSymlinks::SelectionButton as u32, &fixed.to_value());
     });
@@ -640,7 +640,7 @@ pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
         let mut fixed = model
             .value(&iter, ColumnsBrokenFiles::SelectionButton as i32)
             .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {}: {}", path, err));
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
         fixed = !fixed;
         model.set_value(&iter, ColumnsBrokenFiles::SelectionButton as u32, &fixed.to_value());
     });

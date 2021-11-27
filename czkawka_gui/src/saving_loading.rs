@@ -456,7 +456,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             list_store.clear();
 
             for directory in included_directories {
-                let values: [(u32, &dyn ToValue); 1] = [(0, &directory)];
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &directory)];
                 list_store.set(&list_store.append(), &values);
             }
 
@@ -466,7 +466,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             list_store.clear();
 
             for directory in excluded_directories {
-                let values: [(u32, &dyn ToValue); 1] = [(0, &directory)];
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &directory)];
                 list_store.set(&list_store.append(), &values);
             }
 
@@ -535,7 +535,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
             }
         };
 
-        let values: [(u32, &dyn ToValue); 1] = [(0, &current_dir)];
+        let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &current_dir)];
         list_store.set(&list_store.append(), &values);
     }
     // Resetting excluded directories
@@ -545,7 +545,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         list_store.clear();
         if cfg!(target_family = "unix") {
             for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
-                let values: [(u32, &dyn ToValue); 1] = [(0, &i)];
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &i)];
                 list_store.set(&list_store.append(), &values);
             }
         }

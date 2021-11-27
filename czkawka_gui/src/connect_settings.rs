@@ -10,15 +10,13 @@ pub fn connect_settings(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
         button_settings.connect_clicked(move |_| {
+            window_main.set_position(WindowPosition::Center);
             window_main.set_sensitive(false);
             window_settings.show();
-            window_settings.set_position(WindowPosition::Center);
         });
 
         let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
-
-        window_settings.hide_on_delete();
 
         window_settings.connect_delete_event(move |window, _y| {
             window.hide();

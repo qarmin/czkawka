@@ -15,6 +15,7 @@ use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use glib::Sender;
 use gtk::prelude::*;
+
 use gtk::WindowPosition;
 use img_hash::{FilterType, HashAlg};
 use std::sync::atomic::{AtomicBool, Ordering};
