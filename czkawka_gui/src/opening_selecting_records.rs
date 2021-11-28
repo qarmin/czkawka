@@ -2,9 +2,6 @@ use crate::help_functions::*;
 use gdk::ModifierType;
 use gtk::prelude::*;
 
-const KEY_ENTER: u32 = 36;
-const KEY_SPACE: u32 = 65;
-
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
 pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
