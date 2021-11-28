@@ -19,7 +19,7 @@ use crate::help_functions::*;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
 
-const KEY_DELETE: u16 = 119;
+const KEY_DELETE: u32 = 119;
 
 pub fn initialize_gui(gui_data: &mut GuiData) {
     //// Initialize button
@@ -108,6 +108,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 let evk = EventControllerKey::new(&tree_view);
                 evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_duplicate_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
                 tree_view.connect_button_release_event(move |tree_view, _event| {
                     let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
@@ -152,8 +154,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_empty_folders(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_empty_folder_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_empty_folder_finder");
                 gui_data.main_notebook.tree_view_empty_folder_finder = tree_view.clone();
@@ -184,8 +189,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_empty_files(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_empty_files_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_empty_files_finder");
                 gui_data.main_notebook.tree_view_empty_files_finder = tree_view.clone();
@@ -216,8 +224,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_temporary_files(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_temporary_files_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_temporary_files_finder");
                 gui_data.main_notebook.tree_view_temporary_files_finder = tree_view.clone();
@@ -248,8 +259,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_big_files(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_big_files_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_big_files_finder");
                 gui_data.main_notebook.tree_view_big_files_finder = tree_view.clone();
@@ -296,8 +310,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_similar_images(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_similar_images_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
                 let text_view_errors = gui_data.text_view_errors.clone();
                 tree_view.connect_button_release_event(move |tree_view, _event| {
                     let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
@@ -363,8 +380,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_similar_videos(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_similar_videos_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_similar_videos_finder");
                 gui_data.main_notebook.tree_view_similar_videos_finder = tree_view.clone();
@@ -406,12 +426,15 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
 
                 tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_same_music(&mut tree_view);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_same_music)));
 
+                create_tree_view_same_music(&mut tree_view);
+
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_same_music_finder = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_same_music_finder");
                 gui_data.main_notebook.tree_view_same_music_finder = tree_view.clone();
@@ -447,8 +470,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_invalid_symlinks(&mut tree_view);
 
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_invalid_symlinks = evk;
+
                 tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
 
                 tree_view.set_widget_name("tree_view_invalid_symlinks");
                 gui_data.main_notebook.tree_view_invalid_symlinks = tree_view.clone();
@@ -479,8 +505,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 create_tree_view_broken_files(&mut tree_view);
 
-                tree_view.connect_button_press_event(opening_double_click_function);
-                tree_view.connect_key_press_event(opening_enter_function);
+                let evk = EventControllerKey::new(&tree_view);
+                evk.connect_key_pressed(opening_enter_function_ported);
+                gui_data.main_notebook.evk_tree_view_broken_files = evk;
 
                 tree_view.set_widget_name("tree_view_broken_files");
                 gui_data.main_notebook.tree_view_broken_files = tree_view.clone();
