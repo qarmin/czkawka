@@ -108,6 +108,7 @@ impl GuiMainNotebook {
         let scrolled_window_broken_files: gtk::ScrolledWindow = builder.object("scrolled_window_broken_files").unwrap();
 
         let tree_view_duplicate_finder: gtk::TreeView = TreeView::new();
+        tree_view_duplicate_finder.set_widget_name("PIERD");
         let tree_view_empty_folder_finder: gtk::TreeView = TreeView::new();
         let tree_view_empty_files_finder: gtk::TreeView = TreeView::new();
         let tree_view_temporary_files_finder: gtk::TreeView = TreeView::new();

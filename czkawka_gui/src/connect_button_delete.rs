@@ -8,6 +8,7 @@ use gtk::{Align, CheckButton, Dialog, TextView};
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
+use crate::validate_notebook_data;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
@@ -22,6 +23,8 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 }
 
 pub async fn delete_things(gui_data: GuiData) {
+    validate_notebook_data(&gui_data); // TODO, disable this - only used as test if ever
+
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
     let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();

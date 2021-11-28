@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::TreeView;
+use gtk::{EventControllerKey, TreeView};
 
 #[derive(Clone)]
 pub struct GuiUpperNotebook {
@@ -10,6 +10,9 @@ pub struct GuiUpperNotebook {
 
     pub tree_view_included_directories: gtk::TreeView,
     pub tree_view_excluded_directories: gtk::TreeView,
+
+    pub evk_tree_view_included_directories: gtk::EventControllerKey,
+    pub evk_tree_view_excluded_directories: gtk::EventControllerKey,
 
     pub entry_excluded_items: gtk::Entry,
     pub entry_allowed_extensions: gtk::Entry,
@@ -34,6 +37,9 @@ impl GuiUpperNotebook {
         let tree_view_included_directories: gtk::TreeView = TreeView::new();
         let tree_view_excluded_directories: gtk::TreeView = TreeView::new();
 
+        let evk_tree_view_included_directories: gtk::EventControllerKey = EventControllerKey::new(&tree_view_included_directories);
+        let evk_tree_view_excluded_directories: gtk::EventControllerKey = EventControllerKey::new(&tree_view_excluded_directories);
+
         let entry_allowed_extensions: gtk::Entry = builder.object("entry_allowed_extensions").unwrap();
         let entry_excluded_items: gtk::Entry = builder.object("entry_excluded_items").unwrap();
 
@@ -52,6 +58,8 @@ impl GuiUpperNotebook {
             scrolled_window_excluded_directories,
             tree_view_included_directories,
             tree_view_excluded_directories,
+            evk_tree_view_included_directories,
+            evk_tree_view_excluded_directories,
             entry_excluded_items,
             entry_allowed_extensions,
             check_button_recursive,
