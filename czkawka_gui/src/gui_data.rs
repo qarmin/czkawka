@@ -6,6 +6,7 @@ use crossbeam_channel::unbounded;
 use gtk::prelude::*;
 use gtk::Builder;
 
+use crate::fl;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -91,6 +92,8 @@ impl GuiData {
         let window_main: gtk::Window = builder.object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
+        window_main.set_title(&fl!("potato-error"));
+
         window_main.set_application(Some(application));
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);

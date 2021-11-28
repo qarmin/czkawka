@@ -4,6 +4,8 @@
 #![allow(clippy::too_many_arguments)]
 
 use gtk::prelude::*;
+use i18n_embed::fluent::{fluent_language_loader, FluentLanguageLoader};
+use i18n_embed::DesktopLanguageRequester;
 
 use czkawka_core::*;
 
@@ -60,6 +62,7 @@ mod gui_settings;
 mod gui_upper_notepad;
 mod help_functions;
 mod initialize_gui;
+mod localizer;
 mod notebook_enums;
 mod opening_selecting_records;
 mod saving_loading;
@@ -71,6 +74,18 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
+    // Use the language requester for the desktop platform (linux, windows, mac).
+    // There is also a requester available for the web-sys WASM platform called
+    // WebLanguageRequester, or you can implement your own.
+    let requested_languages = DesktopLanguageRequester::requested_languages();
+    let localizers = vec![("czkawka_gui", crate::localizer::localizer())];
+
+    for (lib, localizer) in localizers {
+        if let Err(error) = localizer.select(&requested_languages) {
+            eprintln!("Error while loading languages for {} {:?}", lib, error);
+        }
+    }
+
     let application = gtk::Application::builder().application_id("com.github.qarmin").build();
     application.connect_activate(|application| {
         let mut gui_data: GuiData = GuiData::new_with_application(application);
