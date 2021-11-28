@@ -607,7 +607,6 @@ fn connect_event_buttons(gui_data: &GuiData) {
 }
 
 fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview: &CheckButton, image_preview_similar_images: &Image, column_path: i32, column_name: i32) {
-    println!("Generationg preview");
     let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
     let mut created_image = false;

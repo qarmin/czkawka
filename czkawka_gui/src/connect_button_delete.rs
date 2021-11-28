@@ -108,7 +108,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckBu
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
-    let button_box = confirmation_dialog_delete.children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
+    let button_box = get_dialog_box_child(&confirmation_dialog_delete).children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
         .clone()
         .downcast::<gtk::ButtonBox>()
         .unwrap();
@@ -116,7 +116,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckBu
     let button_ok = button_box.children()[0].clone();
     button_ok.grab_focus();
 
-    let internal_box = confirmation_dialog_delete.children()[0].clone().downcast::<gtk::Box>().unwrap();
+    let internal_box = get_dialog_box_child(&confirmation_dialog_delete);
     internal_box.add(&label);
     internal_box.add(&check_button);
 

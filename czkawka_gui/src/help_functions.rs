@@ -427,6 +427,10 @@ pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
     dialog.child().unwrap().downcast::<gtk::Box>().unwrap()
 }
 
+// pub fn get_box_child_from_box(box_main: &gtk::Box) -> gtk::Box {
+//     box_main.first_child().unwrap().downcast::<gtk::Box>().unwrap() // TODO Probably fist_child will be proper replacement for childrens()
+// }
+
 pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]
     let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
