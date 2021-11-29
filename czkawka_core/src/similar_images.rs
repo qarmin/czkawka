@@ -99,6 +99,7 @@ pub struct SimilarImages {
     hash_alg: HashAlg,
     image_filter: FilterType,
     use_cache: bool,
+    delete_outdated_cache: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -137,6 +138,7 @@ impl SimilarImages {
             hash_alg: HashAlg::Gradient,
             image_filter: FilterType::Lanczos3,
             use_cache: true,
+            delete_outdated_cache: true,
         }
     }
 
@@ -147,6 +149,10 @@ impl SimilarImages {
                 panic!("Invalid value of hash size {}", e);
             }
         }
+    }
+
+    pub fn set_delete_outdated_cache(&mut self, delete_outdated_cache: bool) {
+        self.delete_outdated_cache = delete_outdated_cache;
     }
 
     pub fn set_hash_alg(&mut self, hash_alg: HashAlg) {
@@ -369,7 +375,7 @@ impl SimilarImages {
 
     // Cache algorithm:
     // - Load data from file
-    // - Remove from data to search this already loaded entries(size of image must match)
+    // - Remove from data to search, already loaded entries from cache(size and modified datamust match)
     // - Check hash of files which doesn't have saved entry
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
@@ -383,7 +389,7 @@ impl SimilarImages {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
-            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter) {
+            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, self.hash_size, self.hash_alg, self.image_filter) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -494,6 +500,7 @@ impl SimilarImages {
             vec_file_entry.push((file_entry.clone(), file_entry.hash));
         }
 
+        // All valid entries are used to create bktree used to check for hash similarity
         for (file_entry, buf) in &vec_file_entry {
             // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
             if !(buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
@@ -752,7 +759,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         let mut writer = BufWriter::new(file_handler);
 
         for file_entry in hashmap.values() {
-            let mut string: String = String::with_capacity(100);
+            let mut string: String = String::with_capacity(128);
 
             string += format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
 
@@ -769,7 +776,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
     }
 }
 
-fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
+fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
@@ -809,7 +816,7 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: 
                 continue;
             }
             // Don't load cache data if destination file not exists
-            if Path::new(uuu[0]).exists() {
+            if !delete_outdated_cache || Path::new(uuu[0]).exists() {
                 let mut hash: Vec<u8> = Vec::new();
                 for i in 0..number_of_results {
                     hash.push(match uuu[4 + i as usize].parse::<u8>() {

@@ -153,6 +153,7 @@ pub struct DuplicateFinder {
     stopped_search: bool,
     use_cache: bool,
     minimal_cache_file_size: u64,
+    delete_outdated_cache: bool,
 }
 
 impl DuplicateFinder {
@@ -177,6 +178,7 @@ impl DuplicateFinder {
             dryrun: false,
             use_cache: true,
             minimal_cache_file_size: 2 * 1024 * 1024, // By default cache only >= 1MB files
+            delete_outdated_cache: true,
         }
     }
 
@@ -212,6 +214,10 @@ impl DuplicateFinder {
         }
         self.delete_files();
         self.debug_print();
+    }
+
+    pub fn set_delete_outdated_cache(&mut self, delete_outdated_cache: bool) {
+        self.delete_outdated_cache = delete_outdated_cache;
     }
 
     pub const fn get_check_method(&self) -> &CheckingMethod {
@@ -826,7 +832,7 @@ impl DuplicateFinder {
                 let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
                 if self.use_cache {
-                    loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, &self.hash_type) {
+                    loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type) {
                         Some(t) => t,
                         None => Default::default(),
                     };
@@ -1417,7 +1423,7 @@ fn get_file_hash_name(type_of_hash: &HashType) -> String {
     format!("cache_duplicates_{:?}.txt", type_of_hash)
 }
 
-fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
+fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(get_file_hash_name(type_of_hash).as_str());
@@ -1449,7 +1455,7 @@ fn load_hashes_from_file(text_messages: &mut Messages, type_of_hash: &HashType) 
                 continue;
             }
             // Don't load cache data if destination file not exists
-            if Path::new(uuu[0]).exists() {
+            if !delete_outdated_cache || Path::new(uuu[0]).exists() {
                 let file_entry = FileEntry {
                     path: PathBuf::from(uuu[0]),
                     size: match uuu[1].parse::<u64>() {
