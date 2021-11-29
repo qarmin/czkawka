@@ -451,7 +451,17 @@ impl SimilarImages {
 
                 let image = match image::open(file_entry.path.clone()) {
                     Ok(t) => t,
-                    Err(_inspected) => return Some(None), // Something is wrong with image
+                    // Err(_inspected) => return Some(None), // Something is wrong with image,
+                    // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
+                    // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
+                    Err(_inspected) => {
+                        let mut buf = Vec::new();
+                        for _i in 0..(self.hash_size * self.hash_size / 8) {
+                            buf.push(0);
+                        }
+                        file_entry.hash = buf.clone();
+                        return Some(Some((file_entry, buf)));
+                    }
                 };
                 let dimensions = image.dimensions();
 
@@ -462,16 +472,6 @@ impl SimilarImages {
 
                 let hash = hasher.hash_image(&image);
                 let buf: Vec<u8> = hash.as_bytes().to_vec();
-
-                // Images with hashes with full of 0 or 255 usually means that algorithm fails to decode them because e.g. contains a log of alpha channel
-                {
-                    if buf.iter().all(|e| *e == 0) {
-                        return Some(None);
-                    }
-                    if buf.iter().all(|e| *e == 255) {
-                        return Some(None);
-                    }
-                }
 
                 file_entry.hash = buf.clone();
 
@@ -495,9 +495,12 @@ impl SimilarImages {
         }
 
         for (file_entry, buf) in &vec_file_entry {
-            self.bktree.add(buf.clone());
-            self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
-            self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
+            // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
+            if !(buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
+                self.bktree.add(buf.clone());
+                self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
+                self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
+            }
         }
 
         if self.use_cache {
@@ -753,9 +756,9 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
 
             string += format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
 
-            for i in 0..file_entry.hash.len() - 1 {
+            for hash in &file_entry.hash {
                 string.push_str("//");
-                string.push_str(file_entry.hash[i].to_string().as_str());
+                string.push_str(hash.to_string().as_str());
             }
 
             if let Err(e) = writeln!(writer, "{}", string) {
@@ -800,8 +803,8 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: 
                     index + 1,
                     line,
                     cache_file.display(),
-                    uuu.len(),
-                    number_of_results + 4
+                    number_of_results + 4,
+                    uuu.len()
                 ));
                 continue;
             }
@@ -818,22 +821,6 @@ fn load_hashes_from_file(text_messages: &mut Messages, hash_size: u8, hash_alg: 
                             continue;
                         }
                     });
-                }
-
-                #[cfg(debug_assertions)]
-                {
-                    let mut have_at_least: u8 = 0;
-                    for i in hash.iter() {
-                        if *i == 0 {
-                            have_at_least += 1;
-                        }
-                    }
-                    if have_at_least == hash.len() as u8 {
-                        println!("ERROR START - {}", line);
-                        println!("have_at_least == hash.len() as u8");
-                        println!("ERROR END hash.len() - {} == have_at_least - {}", hash.len(), have_at_least);
-                        continue; // Just skip this entry, it is very very unlikelly that something have this hash, but if it has, then just ignore it
-                    }
                 }
 
                 hashmap_loaded_entries.insert(
