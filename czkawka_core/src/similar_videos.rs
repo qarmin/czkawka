@@ -27,6 +27,8 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 pub const MAX_TOLERANCE: i32 = 20;
 
+const HASH_SIZE: usize = 19;
+
 #[derive(Debug)]
 pub struct ProgressData {
     pub current_stage: u8,
@@ -41,6 +43,7 @@ pub struct FileEntry {
     pub size: u64,
     pub modified_date: u64,
     pub vhash: VideoHash,
+    pub error: String,
 }
 
 /// Distance metric to use with the BK-tree.
@@ -321,6 +324,7 @@ impl SimilarVideos {
                                 } // Permissions Denied
                             },
                             vhash: Default::default(),
+                            error: "".to_string(),
                         };
 
                         self.videos_to_check.insert(current_file_name.to_string_lossy().to_string(), fe);
@@ -400,7 +404,7 @@ impl SimilarVideos {
             progress_thread_handle = thread::spawn(|| {});
         }
         //// PROGRESS THREAD END
-        let old_vec_file_entry: Vec<std::result::Result<FileEntry, String>> = non_cached_files_to_check
+        let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
@@ -412,29 +416,24 @@ impl SimilarVideos {
 
                 let vhash = match VideoHash::from_path(&file_entry.path) {
                     Ok(t) => t,
-                    Err(e) => return Some(Err(format!("Failed to hash file, {}", e))),
+                    Err(e) => {
+                        return {
+                            file_entry.error = format!("Failed to hash file, {}", e);
+                            Some(file_entry)
+                        }
+                    }
                 };
 
                 file_entry.vhash = vhash;
 
-                Some(Ok(file_entry))
+                Some(file_entry)
             })
             .while_some()
-            .collect::<Vec<std::result::Result<FileEntry, String>>>();
+            .collect::<Vec<FileEntry>>();
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
-
-        let mut vec_file_entry = Vec::new();
-        for result in old_vec_file_entry {
-            match result {
-                Ok(t) => vec_file_entry.push(t),
-                Err(e) => {
-                    self.text_messages.errors.push(e);
-                }
-            }
-        }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from files in parallel".to_string());
         let hash_map_modification = SystemTime::now();
@@ -446,9 +445,14 @@ impl SimilarVideos {
 
         let mut hashmap_with_file_entries: HashMap<String, FileEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
-        for i in &vec_file_entry {
-            hashmap_with_file_entries.insert(i.vhash.src_path().to_string_lossy().to_string(), i.clone());
-            vector_of_hashes.push(i.vhash.clone());
+        for file_entry in &vec_file_entry {
+            // 0 means that images was not hashed correctly, e.g. could be improperly
+            if file_entry.error.is_empty() {
+                hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry.clone());
+                vector_of_hashes.push(file_entry.vhash.clone());
+            } else {
+                self.text_messages.errors.push(file_entry.error.clone());
+            }
         }
 
         if self.use_cache {
@@ -614,7 +618,16 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
         for file_entry in hashmap.values() {
             let mut string: String = String::with_capacity(256);
 
-            string += format!("{}//{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.vhash.num_frames(), file_entry.vhash.duration()).as_str();
+            string += format!(
+                "{}//{}//{}//{}//{}//{}",
+                file_entry.path.display(),
+                file_entry.size,
+                file_entry.modified_date,
+                file_entry.vhash.num_frames(),
+                file_entry.vhash.duration(),
+                file_entry.error
+            )
+            .as_str();
 
             for i in file_entry.vhash.hash() {
                 string.push_str("//");
@@ -655,15 +668,14 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
                 }
             };
             let uuu = line.split("//").collect::<Vec<&str>>();
-            let hash_size = 19;
             // Hash size + other things
-            if uuu.len() != (hash_size + 5) {
+            if uuu.len() != (HASH_SIZE + 6) {
                 text_messages.warnings.push(format!(
                     "Found invalid data in line {} - ({}) in cache file {}, expected {} values, found {}",
                     index + 1,
                     line,
                     cache_file.display(),
-                    hash_size + 5,
+                    HASH_SIZE + 6,
                     uuu.len(),
                 ));
                 continue;
@@ -671,8 +683,8 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
             // Don't load cache data if destination file not exists
             if Path::new(uuu[0]).exists() {
                 let mut hash: [u64; 19] = [0; 19];
-                for i in 0..hash_size {
-                    hash[i] = match uuu[5 + i as usize].parse::<u64>() {
+                for i in 0..HASH_SIZE {
+                    hash[i] = match uuu[6 + i as usize].parse::<u64>() {
                         Ok(t) => t,
                         Err(e) => {
                             text_messages
@@ -706,6 +718,7 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
                             }
                         },
                         vhash: VideoHash::with_start_data(uuu[4].parse::<u32>().unwrap_or(0), uuu[0], hash, uuu[3].parse::<u32>().unwrap_or(10)),
+                        error: uuu[5].to_string(),
                     },
                 );
             }
