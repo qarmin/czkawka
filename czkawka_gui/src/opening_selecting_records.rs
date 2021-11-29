@@ -1,12 +1,20 @@
-use gtk::prelude::*;
-
 use crate::help_functions::*;
-
-const KEY_ENTER: u16 = 36;
-const KEY_SPACE: u16 = 65;
+use gdk::ModifierType;
+use gtk::prelude::*;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
+pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
+    let tree_view = event_controller.widget().unwrap().downcast::<gtk::TreeView>().unwrap();
+    #[cfg(debug_assertions)]
+    {
+        println!("key_code {}", key_code);
+    }
+
+    let nt_object = get_notebook_object_from_tree_view(&tree_view);
+    handle_tree_keypress(&tree_view, key_code, nt_object.column_name, nt_object.column_path, nt_object.column_selection);
+    false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
+}
 pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     let nt_object = get_notebook_object_from_tree_view(tree_view);
     if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
@@ -15,11 +23,6 @@ pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::Eve
         common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::OnlyPath);
     }
     gtk::Inhibit(false)
-}
-
-pub fn opening_enter_function(tree_view: &gtk::TreeView, event: &gdk::EventKey) -> gtk::Inhibit {
-    let nt_object = get_notebook_object_from_tree_view(tree_view);
-    handle_tree_keypress(tree_view, event, nt_object.column_name, nt_object.column_path, nt_object.column_selection)
 }
 
 enum OpenMode {
@@ -65,19 +68,18 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
     }
 }
 
-fn handle_tree_keypress(tree_view: &gtk::TreeView, event: &gdk::EventKey, name_column: i32, path_column: i32, mark_column: i32) -> gtk::Inhibit {
-    match event.keycode() {
-        Some(KEY_ENTER) => {
+fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32) {
+    match key_code {
+        KEY_ENTER => {
             // Enter
             common_open_function(tree_view, name_column, path_column, OpenMode::PathAndName);
         }
-        Some(KEY_SPACE) => {
+        KEY_SPACE => {
             // Space
             common_mark_function(tree_view, mark_column);
         }
         _ => {}
     }
-    gtk::Inhibit(false)
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {

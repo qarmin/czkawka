@@ -19,6 +19,17 @@ use czkawka_core::temporary::Temporary;
 
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
+pub const KEY_DELETE: u32 = 119;
+pub const KEY_ENTER: u32 = 36;
+pub const KEY_SPACE: u32 = 65;
+
+pub const KEY_DOWN: u32 = 116;
+pub const KEY_UP: u32 = 111;
+pub const KEY_PG_DOWN: u32 = 117;
+pub const KEY_PG_UP: u32 = 112;
+pub const KEY_HOME: u32 = 115;
+pub const KEY_END: u32 = 110;
+
 #[derive(Eq, PartialEq)]
 pub enum PopoverTypes {
     All,
@@ -416,6 +427,10 @@ pub fn get_dialog_box_child(dialog: &gtk::Dialog) -> gtk::Box {
     dialog.child().unwrap().downcast::<gtk::Box>().unwrap()
 }
 
+// pub fn get_box_child_from_box(box_main: &gtk::Box) -> gtk::Box {
+//     box_main.first_child().unwrap().downcast::<gtk::Box>().unwrap() // TODO Probably fist_child will be proper replacement for childrens()
+// }
+
 pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]
     let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
@@ -437,7 +452,10 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
         "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
         "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
         "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
-        _ => panic!(),
+        e => {
+            eprintln!("{}", e);
+            panic!()
+        }
     }
 }
 

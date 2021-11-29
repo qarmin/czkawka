@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::TreeView;
+use gtk::{EventControllerKey, TreeView};
 
 use crate::notebook_enums::NUMBER_OF_NOTEBOOK_MAIN_TABS;
 
@@ -28,6 +28,17 @@ pub struct GuiMainNotebook {
     pub tree_view_same_music_finder: gtk::TreeView,
     pub tree_view_invalid_symlinks: gtk::TreeView,
     pub tree_view_broken_files: gtk::TreeView,
+
+    pub evk_tree_view_duplicate_finder: gtk::EventControllerKey, // TODO, in GTK4 this can be changed to e.g. add_widget - https://discourse.gnome.org/t/how-to-convert-code-to-use-eventcontrollerkey/8198/2
+    pub evk_tree_view_empty_folder_finder: gtk::EventControllerKey,
+    pub evk_tree_view_empty_files_finder: gtk::EventControllerKey,
+    pub evk_tree_view_temporary_files_finder: gtk::EventControllerKey,
+    pub evk_tree_view_big_files_finder: gtk::EventControllerKey,
+    pub evk_tree_view_similar_images_finder: gtk::EventControllerKey,
+    pub evk_tree_view_similar_videos_finder: gtk::EventControllerKey,
+    pub evk_tree_view_same_music_finder: gtk::EventControllerKey,
+    pub evk_tree_view_invalid_symlinks: gtk::EventControllerKey,
+    pub evk_tree_view_broken_files: gtk::EventControllerKey,
 
     pub entry_similar_images_minimal_size: gtk::Entry,
     pub entry_similar_images_maximal_size: gtk::Entry,
@@ -97,6 +108,7 @@ impl GuiMainNotebook {
         let scrolled_window_broken_files: gtk::ScrolledWindow = builder.object("scrolled_window_broken_files").unwrap();
 
         let tree_view_duplicate_finder: gtk::TreeView = TreeView::new();
+        tree_view_duplicate_finder.set_widget_name("PIERD");
         let tree_view_empty_folder_finder: gtk::TreeView = TreeView::new();
         let tree_view_empty_files_finder: gtk::TreeView = TreeView::new();
         let tree_view_temporary_files_finder: gtk::TreeView = TreeView::new();
@@ -106,6 +118,17 @@ impl GuiMainNotebook {
         let tree_view_same_music_finder: gtk::TreeView = TreeView::new();
         let tree_view_invalid_symlinks: gtk::TreeView = TreeView::new();
         let tree_view_broken_files: gtk::TreeView = TreeView::new();
+
+        let evk_tree_view_duplicate_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_duplicate_finder);
+        let evk_tree_view_empty_folder_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_empty_folder_finder);
+        let evk_tree_view_empty_files_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_empty_files_finder);
+        let evk_tree_view_temporary_files_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_temporary_files_finder);
+        let evk_tree_view_big_files_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_big_files_finder);
+        let evk_tree_view_similar_images_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_similar_images_finder);
+        let evk_tree_view_similar_videos_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_similar_videos_finder);
+        let evk_tree_view_same_music_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_same_music_finder);
+        let evk_tree_view_invalid_symlinks: gtk::EventControllerKey = EventControllerKey::new(&tree_view_invalid_symlinks);
+        let evk_tree_view_broken_files: gtk::EventControllerKey = EventControllerKey::new(&tree_view_broken_files);
 
         let entry_similar_images_minimal_size: gtk::Entry = builder.object("entry_similar_images_minimal_size").unwrap();
         let entry_similar_images_maximal_size: gtk::Entry = builder.object("entry_similar_images_maximal_size").unwrap();
@@ -179,6 +202,16 @@ impl GuiMainNotebook {
             tree_view_same_music_finder,
             tree_view_invalid_symlinks,
             tree_view_broken_files,
+            evk_tree_view_duplicate_finder,
+            evk_tree_view_empty_folder_finder,
+            evk_tree_view_empty_files_finder,
+            evk_tree_view_temporary_files_finder,
+            evk_tree_view_big_files_finder,
+            evk_tree_view_similar_images_finder,
+            evk_tree_view_similar_videos_finder,
+            evk_tree_view_same_music_finder,
+            evk_tree_view_invalid_symlinks,
+            evk_tree_view_broken_files,
             entry_similar_images_minimal_size,
             entry_similar_images_maximal_size,
             entry_similar_videos_minimal_size,

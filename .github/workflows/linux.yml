@@ -14,7 +14,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -132,7 +132,7 @@ jobs:
       matrix:
         toolchain: [ stable, 1.53.0 ]
         type: [ release ]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -196,7 +196,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
