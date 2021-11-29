@@ -650,7 +650,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_hide_hard_links.set_active(true);
         settings.check_button_settings_use_cache.set_active(true);
         settings.check_button_settings_use_trash.set_active(false);
-        settings.entry_settings_cache_file_minimal_size.set_text("2097152");
+        settings.entry_settings_cache_file_minimal_size.set_text("524288");
         settings.check_button_settings_similar_videos_delete_outdated_cache.set_active(false);
         settings.check_button_settings_similar_images_delete_outdated_cache.set_active(true);
         settings.check_button_settings_duplicates_delete_outdated_cache.set_active(true);

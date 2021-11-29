@@ -314,7 +314,7 @@ Author: Rafał Mikrut
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="max-length">15</property>
-                        <property name="text" translatable="yes">2097152</property>
+                        <property name="text" translatable="yes">524288</property>
                         <property name="caps-lock-warning">False</property>
                         <property name="input-purpose">number</property>
                       </object>
