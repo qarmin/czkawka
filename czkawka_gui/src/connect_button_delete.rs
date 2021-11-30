@@ -3,7 +3,7 @@ use std::fs;
 use std::fs::Metadata;
 
 use gtk::prelude::*;
-use gtk::{Align, CheckButton, Dialog, TextView};
+use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
@@ -96,24 +96,16 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
     true
 }
 
-fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let confirmation_dialog_delete = gtk::Dialog::with_buttons(
-        Some("Delete confirmation"),
-        Some(window_main),
-        gtk::DialogFlags::DESTROY_WITH_PARENT,
-        &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
-    );
+fn create_dialog_ask_for_deletion(_window_main: &gtk::Window) -> (Dialog, CheckButton) {
+    let confirmation_dialog_delete = gtk::Dialog::builder().title("Delete confirmation").build();
+    let button_ok = confirmation_dialog_delete.add_button("Ok", ResponseType::Ok);
+    confirmation_dialog_delete.add_button("Close", ResponseType::Cancel);
+
     let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
     let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
-    let button_box = get_dialog_box_child(&confirmation_dialog_delete).children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
-        .clone()
-        .downcast::<gtk::ButtonBox>()
-        .unwrap();
-
-    let button_ok = button_box.children()[0].clone();
     button_ok.grab_focus();
 
     let internal_box = get_dialog_box_child(&confirmation_dialog_delete);
@@ -124,25 +116,17 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckBu
     (confirmation_dialog_delete, check_button)
 }
 
-fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let confirmation_dialog_group_delete = gtk::Dialog::with_buttons(
-        Some("Confirmation of deleting all files in group"),
-        Some(window_main),
-        gtk::DialogFlags::MODAL,
-        &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
-    );
+fn create_dialog_group_deletion(_window_main: &gtk::Window) -> (Dialog, CheckButton) {
+    let confirmation_dialog_group_delete = gtk::Dialog::builder().title("Confirmation of deleting all files in group").build();
+    let button_ok = confirmation_dialog_group_delete.add_button("Ok", ResponseType::Ok);
+    confirmation_dialog_group_delete.add_button("Close", ResponseType::Cancel);
+
     let label: gtk::Label = gtk::Label::new(Some("In some groups there are selected all records."));
     let label2: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete them?"));
     let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
-    let button_box = get_dialog_box_child(&confirmation_dialog_group_delete).children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
-        .clone()
-        .downcast::<gtk::ButtonBox>()
-        .unwrap();
-
-    let button_ok = button_box.children()[0].clone();
     button_ok.grab_focus();
 
     let internal_box = get_dialog_box_child(&confirmation_dialog_group_delete);
