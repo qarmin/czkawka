@@ -98,7 +98,7 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
 
 fn create_dialog_ask_for_deletion(_window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let confirmation_dialog_delete = gtk::Dialog::builder().title("Delete confirmation").build();
-    confirmation_dialog_delete.add_button("Ok", ResponseType::Ok);
+    let button_ok = confirmation_dialog_delete.add_button("Ok", ResponseType::Ok);
     confirmation_dialog_delete.add_button("Close", ResponseType::Cancel);
 
     let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
@@ -106,12 +106,6 @@ fn create_dialog_ask_for_deletion(_window_main: &gtk::Window) -> (Dialog, CheckB
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
-    let button_box = get_dialog_box_child(&confirmation_dialog_delete).children()[0].clone().downcast::<gtk::Box>().unwrap().children()[0]
-        .clone()
-        .downcast::<gtk::ButtonBox>()
-        .unwrap();
-
-    let button_ok = button_box.children()[0].clone();
     button_ok.grab_focus();
 
     let internal_box = get_dialog_box_child(&confirmation_dialog_delete);

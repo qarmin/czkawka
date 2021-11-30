@@ -5,7 +5,7 @@ use gtk::{ResponseType, TreeView, Window};
 use czkawka_core::common::Common;
 
 use crate::gui_data::GuiData;
-use crate::help_functions::{get_list_store, ColumnsDirectory};
+use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
@@ -115,10 +115,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
 
     let entry: gtk::Entry = gtk::Entry::new();
 
-    for widgets in dialog_manual_add_directory.children() {
-        // By default GtkBox is child of dialog, so we can easily add other things to it
-        widgets.clone().downcast::<gtk::Box>().unwrap().add(&entry);
-    }
+    get_dialog_box_child(&dialog_manual_add_directory).add(&entry);
 
     dialog_manual_add_directory.show_all();
 
