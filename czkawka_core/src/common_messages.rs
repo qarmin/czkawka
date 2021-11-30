@@ -10,30 +10,37 @@ impl Messages {
         Default::default()
     }
     pub fn print_messages(&self) {
+        println!("{}", self.create_messages_text());
+    }
+    pub fn create_messages_text(&self) -> String {
+        let mut text_to_return: String = "".to_string();
+
         if !self.messages.is_empty() {
-            println!("-------------------------------MESSAGES--------------------------------");
+            text_to_return += "-------------------------------MESSAGES--------------------------------\n";
             for i in &self.messages {
-                println!("{}", i);
+                text_to_return += format!("{}\n", i).as_str();
             }
-            println!("---------------------------END OF MESSAGES-----------------------------");
+            text_to_return += "---------------------------END OF MESSAGES-----------------------------\n";
         }
 
         if !self.warnings.is_empty() {
-            println!("-------------------------------WARNINGS--------------------------------");
+            text_to_return += "-------------------------------WARNINGS--------------------------------\n";
 
             for i in &self.warnings {
-                println!("{}", i);
+                text_to_return += format!("{}\n", i).as_str();
             }
-            println!("---------------------------END OF WARNINGS-----------------------------");
+            text_to_return += "---------------------------END OF WARNINGS-----------------------------\n";
         }
 
         if !self.errors.is_empty() {
-            println!("--------------------------------ERRORS---------------------------------");
+            text_to_return += "--------------------------------ERRORS---------------------------------\n";
 
             for i in &self.errors {
-                println!("{}", i);
+                text_to_return += format!("{}\n", i).as_str();
             }
-            println!("----------------------------END OF ERRORS------------------------------");
+            text_to_return += "----------------------------END OF ERRORS------------------------------\n";
         }
+
+        text_to_return
     }
 }

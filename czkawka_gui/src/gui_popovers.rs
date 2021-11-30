@@ -51,7 +51,7 @@ impl GuiPopovers {
 
         let popover_select: gtk::Popover = builder.object("popover_select").unwrap();
 
-        // Popover right click
+        // Popover right click(not implemented for now)
         let glade_src = include_str!("../ui/popover_right_click.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 

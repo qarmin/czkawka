@@ -75,6 +75,7 @@ pub struct SimilarVideos {
     videos_to_check: BTreeMap<String, FileEntry>,
     use_cache: bool,
     tolerance: i32,
+    delete_outdated_cache: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -110,7 +111,12 @@ impl SimilarVideos {
             videos_to_check: Default::default(),
             use_cache: true,
             tolerance: 10,
+            delete_outdated_cache: false,
         }
+    }
+
+    pub fn set_delete_outdated_cache(&mut self, delete_outdated_cache: bool) {
+        self.delete_outdated_cache = delete_outdated_cache;
     }
 
     pub fn set_tolerance(&mut self, tolerance: i32) {
@@ -348,7 +354,7 @@ impl SimilarVideos {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
-            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages) {
+            loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -585,7 +591,7 @@ impl PrintResults for SimilarVideos {
     }
 }
 
-fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
+pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -642,7 +648,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
     }
 }
 
-fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String, FileEntry>> {
+pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join("cache_similar_videos.txt");
@@ -681,7 +687,7 @@ fn load_hashes_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String
                 continue;
             };
             // Don't load cache data if destination file not exists
-            if Path::new(uuu[0]).exists() {
+            if !delete_outdated_cache || Path::new(uuu[0]).exists() {
                 let mut hash: [u64; 19] = [0; 19];
                 for i in 0..HASH_SIZE {
                     hash[i] = match uuu[6 + i as usize].parse::<u64>() {

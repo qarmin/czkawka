@@ -44,6 +44,7 @@ impl GuiUpperNotebook {
         let entry_excluded_items: gtk::Entry = builder.object("entry_excluded_items").unwrap();
 
         let check_button_recursive: gtk::CheckButton = builder.object("check_button_recursive").unwrap();
+        check_button_recursive.set_tooltip_text(Some("If selected, search also for files which are not placed directly under chosen folders"));
 
         let buttons_manual_add_directory: gtk::Button = builder.object("buttons_manual_add_directory").unwrap();
         let buttons_add_included_directory: gtk::Button = builder.object("buttons_add_included_directory").unwrap();
@@ -51,6 +52,13 @@ impl GuiUpperNotebook {
         let buttons_manual_add_excluded_directory: gtk::Button = builder.object("buttons_manual_add_excluded_directory").unwrap();
         let buttons_add_excluded_directory: gtk::Button = builder.object("buttons_add_excluded_directory").unwrap();
         let buttons_remove_excluded_directory: gtk::Button = builder.object("buttons_remove_excluded_directory").unwrap();
+
+        buttons_manual_add_directory.set_tooltip_text(Some("Allows to add directory name by hand"));
+        buttons_add_included_directory.set_tooltip_text(Some("Add new directory to search"));
+        buttons_remove_included_directory.set_tooltip_text(Some("Delete directory from search"));
+        buttons_manual_add_excluded_directory.set_tooltip_text(Some("Allows to add directory name by hand"));
+        buttons_add_excluded_directory.set_tooltip_text(Some("Add directory to be excluded in search"));
+        buttons_remove_excluded_directory.set_tooltip_text(Some("Delete directory from excluded list"));
 
         Self {
             notebook_upper,

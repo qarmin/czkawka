@@ -142,6 +142,21 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             data_to_save.push("--cache_minimal_file_size:".to_string());
             let entry_settings_cache_file_minimal_size = settings.entry_settings_cache_file_minimal_size.clone();
             data_to_save.push(entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024).to_string());
+
+            //// Duplicates, delete outdated entries to trash
+            data_to_save.push("--delete_outdated_entries_duplicates:".to_string());
+            let check_button_settings_duplicates_delete_outdated_cache = settings.check_button_settings_duplicates_delete_outdated_cache.clone();
+            data_to_save.push(check_button_settings_duplicates_delete_outdated_cache.is_active().to_string());
+
+            //// Similar Images, delete outdated entries to trash
+            data_to_save.push("--delete_outdated_entries_similar_images:".to_string());
+            let check_button_settings_similar_images_delete_outdated_cache = settings.check_button_settings_similar_images_delete_outdated_cache.clone();
+            data_to_save.push(check_button_settings_similar_images_delete_outdated_cache.is_active().to_string());
+
+            //// Similar Videos, delete outdated entries to trash
+            data_to_save.push("--delete_outdated_entries_similar_videos:".to_string());
+            let check_button_settings_similar_videos_delete_outdated_cache = settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
+            data_to_save.push(check_button_settings_similar_videos_delete_outdated_cache.is_active().to_string());
         }
 
         // Creating/Opening config file
@@ -195,6 +210,9 @@ enum TypeOfLoadedData {
     UseCache,
     UseTrash,
     CacheMinimalSize,
+    DeleteCacheDuplicates,
+    DeleteCacheSimilarImages,
+    DeleteCacheSimilarVideos,
 }
 
 pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView, scrolled_window_errors: &ScrolledWindow) {
@@ -243,6 +261,9 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let mut use_cache: bool = true;
         let mut use_trash: bool = false;
         let mut cache_minimal_size: u64 = 2 * 1024 * 1024;
+        let mut delete_outdated_cache_dupliactes: bool = true;
+        let mut delete_outdated_cache_similar_images: bool = true;
+        let mut delete_outdated_cache_similar_videos: bool = false;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -280,6 +301,12 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                 current_type = TypeOfLoadedData::UseTrash;
             } else if line.starts_with("--cache_minimal_file_size") {
                 current_type = TypeOfLoadedData::CacheMinimalSize;
+            } else if line.starts_with("--delete_outdated_entries_duplicates") {
+                current_type = TypeOfLoadedData::DeleteCacheDuplicates;
+            } else if line.starts_with("--delete_outdated_entries_similar_videos") {
+                current_type = TypeOfLoadedData::DeleteCacheSimilarVideos;
+            } else if line.starts_with("--delete_outdated_entries_similar_images") {
+                current_type = TypeOfLoadedData::DeleteCacheSimilarImages;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -446,6 +473,45 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                             );
                         }
                     }
+                    TypeOfLoadedData::DeleteCacheDuplicates => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            delete_outdated_cache_dupliactes = true;
+                        } else if line == "0" || line == "false" {
+                            delete_outdated_cache_dupliactes = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
+                    TypeOfLoadedData::DeleteCacheSimilarImages => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            delete_outdated_cache_similar_images = true;
+                        } else if line == "0" || line == "false" {
+                            delete_outdated_cache_similar_images = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
+                    TypeOfLoadedData::DeleteCacheSimilarVideos => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            delete_outdated_cache_similar_videos = true;
+                        } else if line == "0" || line == "false" {
+                            delete_outdated_cache_similar_videos = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -487,6 +553,10 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             settings.check_button_settings_confirm_group_deletion.set_active(confirm_group_deletion);
             settings.check_button_settings_show_preview_similar_images.set_active(show_previews_similar_images);
             settings.check_button_settings_show_preview_duplicates.set_active(show_previews_duplicates);
+
+            settings.check_button_settings_similar_videos_delete_outdated_cache.set_active(delete_outdated_cache_similar_videos);
+            settings.check_button_settings_similar_images_delete_outdated_cache.set_active(delete_outdated_cache_similar_images);
+            settings.check_button_settings_duplicates_delete_outdated_cache.set_active(delete_outdated_cache_dupliactes);
 
             settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
             if !bottom_text_panel {
@@ -568,7 +638,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         entry_allowed_extensions.set_text("");
     }
 
-    // Set settings
+    // Set default settings
     {
         settings.check_button_settings_save_at_exit.set_active(true);
         settings.check_button_settings_load_at_start.set_active(true);
@@ -580,7 +650,10 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_hide_hard_links.set_active(true);
         settings.check_button_settings_use_cache.set_active(true);
         settings.check_button_settings_use_trash.set_active(false);
-        settings.entry_settings_cache_file_minimal_size.set_text("2097152");
+        settings.entry_settings_cache_file_minimal_size.set_text("524288");
+        settings.check_button_settings_similar_videos_delete_outdated_cache.set_active(false);
+        settings.check_button_settings_similar_images_delete_outdated_cache.set_active(true);
+        settings.check_button_settings_duplicates_delete_outdated_cache.set_active(true);
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");

@@ -19,8 +19,11 @@ impl GuiAbout {
         about_dialog.set_position(WindowPosition::Center);
 
         let button_repository: gtk::Button = builder.object("button_repository").unwrap();
+        button_repository.set_tooltip_text(Some("Link to repository page with source code."));
         let button_donation: gtk::Button = builder.object("button_donation").unwrap();
+        button_donation.set_tooltip_text(Some("Link to donation page."));
         let button_instruction: gtk::Button = builder.object("button_instruction").unwrap();
+        button_instruction.set_tooltip_text(Some("Link to instruction page."));
 
         Self {
             about_dialog,

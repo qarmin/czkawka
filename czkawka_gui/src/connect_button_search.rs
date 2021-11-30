@@ -108,6 +108,9 @@ pub fn connect_button_search(
     let radio_button_similar_hash_algorithm_mean = gui_data.main_notebook.radio_button_similar_hash_algorithm_mean.clone();
     let radio_button_similar_hash_algorithm_vertgradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_vertgradient.clone();
     let radio_button_similar_hash_algorithm_doublegradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_doublegradient.clone();
+    let check_button_settings_duplicates_delete_outdated_cache = gui_data.settings.check_button_settings_duplicates_delete_outdated_cache.clone();
+    let check_button_settings_similar_videos_delete_outdated_cache = gui_data.settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
+    let check_button_settings_similar_images_delete_outdated_cache = gui_data.settings.check_button_settings_similar_images_delete_outdated_cache.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -174,6 +177,8 @@ pub fn connect_button_search(
                     panic!("No radio button is pressed");
                 }
 
+                let delete_outdated_cache = check_button_settings_duplicates_delete_outdated_cache.is_active();
+
                 let futures_sender_duplicate_files = futures_sender_duplicate_files.clone();
                 // Find duplicates
                 thread::spawn(move || {
@@ -190,6 +195,7 @@ pub fn connect_button_search(
                     df.set_hash_type(hash_type);
                     df.set_ignore_hard_links(hide_hard_links);
                     df.set_use_cache(use_cache);
+                    df.set_delete_outdated_cache(delete_outdated_cache);
                     df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
                     let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });
@@ -331,6 +337,8 @@ pub fn connect_button_search(
 
                 let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
 
+                let delete_outdated_cache = check_button_settings_similar_images_delete_outdated_cache.is_active();
+
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
                 thread::spawn(move || {
@@ -347,6 +355,7 @@ pub fn connect_button_search(
                     sf.set_hash_alg(hash_alg);
                     sf.set_hash_size(hash_size);
                     sf.set_image_filter(image_filter);
+                    sf.set_delete_outdated_cache(delete_outdated_cache);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });
@@ -363,6 +372,8 @@ pub fn connect_button_search(
 
                 let tolerance = scale_similarity_similar_videos.value() as i32;
 
+                let delete_outdated_cache = check_button_settings_similar_videos_delete_outdated_cache.is_active();
+
                 let futures_sender_similar_videos = futures_sender_similar_videos.clone();
                 // Find similar videos
                 thread::spawn(move || {
@@ -376,6 +387,7 @@ pub fn connect_button_search(
                     sf.set_maximal_file_size(maximal_file_size);
                     sf.set_use_cache(use_cache);
                     sf.set_tolerance(tolerance);
+                    sf.set_delete_outdated_cache(delete_outdated_cache);
                     sf.find_similar_videos(Some(&stop_receiver), Some(&futures_sender_similar_videos));
                     let _ = glib_stop_sender.send(Message::SimilarVideos(sf));
                 });
