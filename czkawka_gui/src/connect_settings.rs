@@ -1,3 +1,4 @@
+use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::WindowPosition;
 
@@ -55,6 +56,26 @@ pub fn connect_settings(gui_data: &GuiData) {
         let button_settings_reset_configuration = gui_data.settings.button_settings_reset_configuration.clone();
         button_settings_reset_configuration.connect_clicked(move |_| {
             reset_configuration(true, &upper_notebook, &settings, &text_view_errors);
+        });
+    }
+    // Connect button for opening cache
+    {
+        let button_settings_open_cache_folder = gui_data.settings.button_settings_open_cache_folder.clone();
+        button_settings_open_cache_folder.connect_clicked(move |_| {
+            if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+                let cache_dir = proj_dirs.cache_dir();
+                open::that_in_background(cache_dir);
+            }
+        });
+    }
+    // Connect button for opening settings
+    {
+        let button_settings_open_settings_folder = gui_data.settings.button_settings_open_settings_folder.clone();
+        button_settings_open_settings_folder.connect_clicked(move |_| {
+            if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+                let config_dir = proj_dirs.config_dir();
+                open::that_in_background(config_dir);
+            }
         });
     }
 }
