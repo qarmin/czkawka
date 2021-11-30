@@ -1354,7 +1354,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     result
 }
 
-fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, minimal_cache_file_size: u64) {
+pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, minimal_cache_file_size: u64) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
@@ -1423,7 +1423,7 @@ fn get_file_hash_name(type_of_hash: &HashType) -> String {
     format!("cache_duplicates_{:?}.txt", type_of_hash)
 }
 
-fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
+pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(get_file_hash_name(type_of_hash).as_str());

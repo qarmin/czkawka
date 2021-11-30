@@ -278,7 +278,7 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="check_button_settings_duplicates_delete_outdated_cache">
-                    <property name="label" translatable="yes">Delete outdated cache entries (faster cache operations but need to rescan missing entries)</property>
+                    <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -332,6 +332,20 @@ Author: Rafał Mikrut
                     <property name="position">3</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkButton" id="button_settings_duplicates_clear_cache">
+                    <property name="label" translatable="yes">Remove outdated results from duplicates cache</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -370,7 +384,7 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="check_button_settings_similar_images_delete_outdated_cache">
-                    <property name="label" translatable="yes">Delete outdated cache entries (faster cache operations but need to rescan missing entries)</property>
+                    <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -381,6 +395,20 @@ Author: Rafał Mikrut
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="button_settings_similar_images_clear_cache">
+                    <property name="label" translatable="yes">Remove outdated results from images cache</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -405,8 +433,22 @@ Author: Rafał Mikrut
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
+                  <object class="GtkButton" id="button_settings_similar_videos_clear_cache">
+                    <property name="label" translatable="yes">Remove outdated results from videos cache</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkCheckButton" id="check_button_settings_similar_videos_delete_outdated_cache">
-                    <property name="label" translatable="yes">Delete outdated cache entries (faster cache operations but need to rescan missing entries)</property>
+                    <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>

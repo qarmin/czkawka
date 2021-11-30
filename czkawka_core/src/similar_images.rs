@@ -732,7 +732,7 @@ impl PrintResults for SimilarImages {
     }
 }
 
-fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
+pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         // Lin: /home/username/.cache/czkawka
         // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
@@ -776,7 +776,7 @@ fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mu
     }
 }
 
-fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
+pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));

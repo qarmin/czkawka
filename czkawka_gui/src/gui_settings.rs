@@ -19,13 +19,16 @@ pub struct GuiSettings {
     pub entry_settings_cache_file_minimal_size: gtk::Entry,
     pub check_button_settings_show_preview_duplicates: gtk::CheckButton,
     pub check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton,
+    pub button_settings_duplicates_clear_cache: gtk::Button,
 
     // Similar Images
     pub check_button_settings_show_preview_similar_images: gtk::CheckButton,
     pub check_button_settings_similar_images_delete_outdated_cache: gtk::CheckButton,
+    pub button_settings_similar_images_clear_cache: gtk::Button,
 
     // Similar Videos
     pub check_button_settings_similar_videos_delete_outdated_cache: gtk::CheckButton,
+    pub button_settings_similar_videos_clear_cache: gtk::Button,
 
     // Buttons
     pub button_settings_save_configuration: gtk::Button,
@@ -67,6 +70,7 @@ impl GuiSettings {
         let entry_settings_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
         let check_button_settings_show_preview_duplicates: gtk::CheckButton = builder.object("check_button_settings_show_preview_duplicates").unwrap();
         let check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_duplicates_delete_outdated_cache").unwrap();
+        let button_settings_duplicates_clear_cache: gtk::Button = builder.object("button_settings_duplicates_clear_cache").unwrap();
 
         check_button_settings_hide_hard_links.set_tooltip_text(Some(
             "Hides all files except one, if are points to same data(are hardlinked).\n\nE.g. in case where on disk there is 7 files which are hardlinked to specific data and one different file with same data but different inode, then in duplicate finder will be visible only one unique file and one file from hardlinked ones.",
@@ -76,17 +80,23 @@ impl GuiSettings {
         ));
         check_button_settings_show_preview_duplicates.set_tooltip_text(Some("Shows preview at right side, when selecting image file."));
         check_button_settings_duplicates_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
+        button_settings_duplicates_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\nShould be used only if automatic clearing was disabled."));
 
         // Similar Images
         let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
         let check_button_settings_similar_images_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_similar_images_delete_outdated_cache").unwrap();
+        let button_settings_similar_images_clear_cache: gtk::Button = builder.object("button_settings_similar_images_clear_cache").unwrap();
 
         check_button_settings_show_preview_similar_images.set_tooltip_text(Some("Shows preview at right side, when selecting image file."));
         check_button_settings_similar_images_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
+        button_settings_similar_images_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\nShould be used only if automatic clearing was disabled."));
 
         // Similar Videos
         let check_button_settings_similar_videos_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_similar_videos_delete_outdated_cache").unwrap();
+        let button_settings_similar_videos_clear_cache: gtk::Button = builder.object("button_settings_similar_videos_clear_cache").unwrap();
+
         check_button_settings_similar_videos_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
+        button_settings_similar_videos_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\nShould be used only if automatic clearing was disabled."));
 
         // Saving/Loading/Resetting configuration
         let button_settings_save_configuration: gtk::Button = builder.object("button_settings_save_configuration").unwrap();
@@ -118,9 +128,12 @@ impl GuiSettings {
             entry_settings_cache_file_minimal_size,
             check_button_settings_show_preview_duplicates,
             check_button_settings_duplicates_delete_outdated_cache,
+            button_settings_duplicates_clear_cache,
             check_button_settings_show_preview_similar_images,
             check_button_settings_similar_images_delete_outdated_cache,
+            button_settings_similar_images_clear_cache,
             check_button_settings_similar_videos_delete_outdated_cache,
+            button_settings_similar_videos_clear_cache,
             button_settings_save_configuration,
             button_settings_load_configuration,
             button_settings_reset_configuration,
