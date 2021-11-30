@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use gtk::prelude::*;
-use gtk::TreePath;
+use gtk::{ResponseType, TreePath};
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
@@ -53,18 +53,22 @@ pub fn connect_button_move(gui_data: &GuiData) {
 fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: Option<i32>, column_selection: i32, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView, window_main: &gtk::Window) {
     reset_text_view(text_view_errors);
 
-    let chooser = gtk::FileChooserDialog::with_buttons(
-        Some("Choose folder to which you want to move duplicated files"),
-        Some(window_main),
-        gtk::FileChooserAction::SelectFolder,
-        &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)],
-    );
+    let chooser = gtk::FileChooserDialog::builder()
+        .title("Choose folder to which you want to move duplicated files")
+        .action(gtk::FileChooserAction::SelectFolder)
+        .build();
+    chooser.add_button("Ok", ResponseType::Ok);
+    chooser.add_button("Close", ResponseType::Cancel);
+
     chooser.set_select_multiple(false);
     chooser.show_all();
+
+    window_main.set_sensitive(false);
 
     let entry_info = entry_info.clone();
     let text_view_errors = text_view_errors.clone();
     let tree_view = tree_view.clone();
+    let window_main = window_main.clone();
     chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
             let folders = file_chooser.filenames();
@@ -80,6 +84,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
             }
         }
         file_chooser.close();
+        window_main.set_sensitive(true);
     });
 }
 

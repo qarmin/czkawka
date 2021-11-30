@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{TreeIter, Window};
+use gtk::{ResponseType, TreeIter, Window};
 
 use czkawka_core::common::Common;
 
@@ -213,7 +213,7 @@ fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 
-fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
+fn popover_custom_select_unselect(popover: &gtk::Popover, _window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
     enum WildcardType {
@@ -229,7 +229,10 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
 
     // Accept Dialog
     {
-        let confirmation_dialog_delete = gtk::Dialog::with_buttons(Some(window_title), Some(window_main), gtk::DialogFlags::MODAL, &[("Ok", gtk::ResponseType::Ok), ("Close", gtk::ResponseType::Cancel)]);
+        let confirmation_dialog_select_unselect = gtk::Dialog::builder().title(window_title).build();
+        confirmation_dialog_select_unselect.add_button("Ok", ResponseType::Ok);
+        confirmation_dialog_select_unselect.add_button("Close", ResponseType::Cancel);
+
         let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
 
         let radio_path = gtk::RadioButton::builder().label("Path").build();
@@ -261,13 +264,13 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
         grid.attach(&entry_name, 1, 2, 1, 1);
         grid.attach(&entry_name_path, 1, 3, 1, 1);
 
-        let box_widget = get_dialog_box_child(&confirmation_dialog_delete);
+        let box_widget = get_dialog_box_child(&confirmation_dialog_select_unselect);
         box_widget.add(&grid);
 
-        confirmation_dialog_delete.show_all();
+        confirmation_dialog_select_unselect.show_all();
 
         let tree_view = tree_view.clone();
-        confirmation_dialog_delete.connect_response(move |confirmation_dialog_delete, response_type| {
+        confirmation_dialog_select_unselect.connect_response(move |confirmation_dialog_select_unselect, response_type| {
             let wildcard_type: WildcardType;
             let wildcard: String;
 
@@ -334,10 +337,10 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
                     }
                 }
             } else {
-                confirmation_dialog_delete.close();
+                confirmation_dialog_select_unselect.close();
                 return;
             }
-            confirmation_dialog_delete.close();
+            confirmation_dialog_select_unselect.close();
         });
     }
 }
