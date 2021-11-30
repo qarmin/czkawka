@@ -96,8 +96,8 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
     true
 }
 
-fn create_dialog_ask_for_deletion(_window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let confirmation_dialog_delete = gtk::Dialog::builder().title("Delete confirmation").build();
+fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
+    let confirmation_dialog_delete = gtk::Dialog::builder().title("Delete confirmation").transient_for(window_main).build();
     let button_ok = confirmation_dialog_delete.add_button("Ok", ResponseType::Ok);
     confirmation_dialog_delete.add_button("Close", ResponseType::Cancel);
 
@@ -116,8 +116,8 @@ fn create_dialog_ask_for_deletion(_window_main: &gtk::Window) -> (Dialog, CheckB
     (confirmation_dialog_delete, check_button)
 }
 
-fn create_dialog_group_deletion(_window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let confirmation_dialog_group_delete = gtk::Dialog::builder().title("Confirmation of deleting all files in group").build();
+fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
+    let confirmation_dialog_group_delete = gtk::Dialog::builder().title("Confirmation of deleting all files in group").transient_for(window_main).build();
     let button_ok = confirmation_dialog_group_delete.add_button("Ok", ResponseType::Ok);
     confirmation_dialog_group_delete.add_button("Close", ResponseType::Cancel);
 

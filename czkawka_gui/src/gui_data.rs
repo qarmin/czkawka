@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use crossbeam_channel::unbounded;
 use gtk::prelude::*;
-use gtk::{Builder, WindowPosition};
+use gtk::Builder;
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -89,7 +89,6 @@ impl GuiData {
         let window_main: gtk::Window = builder.object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
-        window_main.set_position(WindowPosition::Center);
         window_main.set_application(Some(application));
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
@@ -97,7 +96,7 @@ impl GuiData {
         let popovers = GuiPopovers::create_from_builder();
         let bottom_buttons = GuiBottomButtons::create_from_builder(&builder);
         let progress_window = GuiProgressDialog::create_from_builder(&window_main);
-        let about = GuiAbout::create_from_builder();
+        let about = GuiAbout::create_from_builder(&window_main);
         let header = GuiHeader::create_from_builder(&builder);
         let settings = GuiSettings::create_from_builder(&window_main);
 

@@ -213,7 +213,7 @@ fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 
-fn popover_custom_select_unselect(popover: &gtk::Popover, _window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
+fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
     enum WildcardType {
@@ -229,7 +229,7 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, _window_main: &Window,
 
     // Accept Dialog
     {
-        let confirmation_dialog_select_unselect = gtk::Dialog::builder().title(window_title).build();
+        let confirmation_dialog_select_unselect = gtk::Dialog::builder().title(window_title).transient_for(window_main).build();
         confirmation_dialog_select_unselect.add_button("Ok", ResponseType::Ok);
         confirmation_dialog_select_unselect.add_button("Close", ResponseType::Cancel);
 

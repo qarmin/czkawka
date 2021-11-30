@@ -29,7 +29,7 @@ pub struct GuiMainNotebook {
     pub tree_view_invalid_symlinks: gtk::TreeView,
     pub tree_view_broken_files: gtk::TreeView,
 
-    pub evk_tree_view_duplicate_finder: gtk::EventControllerKey, // TODO, in GTK4 this can be changed to e.g. add_widget - https://discourse.gnome.org/t/how-to-convert-code-to-use-eventcontrollerkey/8198/2
+    pub evk_tree_view_duplicate_finder: gtk::EventControllerKey, // TODO, in GTK4 this can be changed to e.g. add_controller which is not 100% compatible with this  - https://discourse.gnome.org/t/how-to-convert-code-to-use-eventcontrollerkey/8198/2
     pub evk_tree_view_empty_folder_finder: gtk::EventControllerKey,
     pub evk_tree_view_empty_files_finder: gtk::EventControllerKey,
     pub evk_tree_view_temporary_files_finder: gtk::EventControllerKey,

@@ -22,7 +22,6 @@ impl GuiProgressDialog {
 
         let window_progress: gtk::Window = builder.object("window_progress").unwrap();
         window_progress.set_transient_for(Some(window_main));
-        window_progress.set_modal(true);
 
         let progress_bar_current_stage: gtk::ProgressBar = builder.object("progress_bar_current_stage").unwrap();
         let progress_bar_all_stages: gtk::ProgressBar = builder.object("progress_bar_all_stages").unwrap();

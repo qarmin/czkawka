@@ -79,17 +79,14 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let folders_to = if excluded_items { "Folders to exclude" } else { "Folders to include" };
 
-    let chooser = gtk::FileChooserDialog::builder().title(folders_to).action(gtk::FileChooserAction::SelectFolder).build();
+    let chooser = gtk::FileChooserDialog::builder().title(folders_to).action(gtk::FileChooserAction::SelectFolder).transient_for(window_main).build();
     chooser.add_button("Ok", ResponseType::Ok);
     chooser.add_button("Close", ResponseType::Cancel);
 
     chooser.set_select_multiple(true);
     chooser.show_all();
 
-    window_main.set_sensitive(false);
-
     let tree_view = tree_view.clone();
-    let window_main = window_main.clone();
     chooser.connect_response(move |chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
             let folder = chooser.filenames();
@@ -102,16 +99,13 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
             }
         }
         chooser.close();
-        window_main.set_sensitive(true);
     });
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
-    let dialog_manual_add_directory = gtk::Dialog::builder().title("Add directory manually").build();
+    let dialog_manual_add_directory = gtk::Dialog::builder().title("Add directory manually").transient_for(window_main).build();
     dialog_manual_add_directory.add_button("Ok", ResponseType::Ok);
     dialog_manual_add_directory.add_button("Close", ResponseType::Cancel);
-
-    window_main.set_sensitive(false);
 
     let entry: gtk::Entry = gtk::Entry::new();
 
@@ -120,7 +114,6 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
     dialog_manual_add_directory.show_all();
 
     let tree_view = tree_view.clone();
-    let window_main = window_main.clone();
     dialog_manual_add_directory.connect_response(move |dialog_manual_add_directory, response_type| {
         if response_type == gtk::ResponseType::Ok {
             let text = entry.text().to_string().trim().to_string();
@@ -136,6 +129,5 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
             }
         }
         dialog_manual_add_directory.close();
-        window_main.set_sensitive(true);
     });
 }
