@@ -26,7 +26,7 @@ pub fn connect_settings(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
 
-        window_settings.connect_delete_event(move |window, _y| {
+        window_settings.connect_delete_event(move |window, _| {
             window.hide();
             window_main.set_sensitive(true);
             gtk::Inhibit(true)

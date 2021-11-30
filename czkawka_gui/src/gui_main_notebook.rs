@@ -130,6 +130,28 @@ impl GuiMainNotebook {
         let evk_tree_view_invalid_symlinks: gtk::EventControllerKey = EventControllerKey::new(&tree_view_invalid_symlinks);
         let evk_tree_view_broken_files: gtk::EventControllerKey = EventControllerKey::new(&tree_view_broken_files);
 
+        // TODO GTK 4
+        // let evk_tree_view_duplicate_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_duplicate_finder.add_controller(&evk_tree_view_duplicate_finder);
+        // let evk_tree_view_empty_folder_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_empty_folder_finder.add_controller(&evk_tree_view_empty_folder_finder);
+        // let evk_tree_view_empty_files_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_empty_files_finder.add_controller(&evk_tree_view_empty_files_finder);
+        // let evk_tree_view_temporary_files_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_temporary_files_finder.add_controller(&evk_tree_view_temporary_files_finder);
+        // let evk_tree_view_big_files_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_big_files_finder.add_controller(&evk_tree_view_big_files_finder);
+        // let evk_tree_view_similar_images_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_similar_images_finder.add_controller(&evk_tree_view_similar_images_finder);
+        // let evk_tree_view_similar_videos_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_similar_videos_finder.add_controller(&evk_tree_view_similar_videos_finder);
+        // let evk_tree_view_same_music_finder: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_same_music_finder.add_controller(&evk_tree_view_same_music_finder);
+        // let evk_tree_view_invalid_symlinks: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_invalid_symlinks.add_controller(&evk_tree_view_invalid_symlinks);
+        // let evk_tree_view_broken_files: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_broken_files.add_controller(&evk_tree_view_broken_files);
+
         let entry_similar_images_minimal_size: gtk::Entry = builder.object("entry_similar_images_minimal_size").unwrap();
         let entry_similar_images_maximal_size: gtk::Entry = builder.object("entry_similar_images_maximal_size").unwrap();
         let entry_similar_videos_minimal_size: gtk::Entry = builder.object("entry_similar_videos_minimal_size").unwrap();

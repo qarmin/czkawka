@@ -103,18 +103,18 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
-    let dialog_manual_add_directory = gtk::Dialog::builder().title("Add directory manually").transient_for(window_main).build();
-    dialog_manual_add_directory.add_button("Ok", ResponseType::Ok);
-    dialog_manual_add_directory.add_button("Close", ResponseType::Cancel);
+    let dialog = gtk::Dialog::builder().title("Add directory manually").transient_for(window_main).build();
+    dialog.add_button("Ok", ResponseType::Ok);
+    dialog.add_button("Close", ResponseType::Cancel);
 
     let entry: gtk::Entry = gtk::Entry::new();
 
-    get_dialog_box_child(&dialog_manual_add_directory).add(&entry);
+    get_dialog_box_child(&dialog).add(&entry);
 
-    dialog_manual_add_directory.show_all();
+    dialog.show_all();
 
     let tree_view = tree_view.clone();
-    dialog_manual_add_directory.connect_response(move |dialog_manual_add_directory, response_type| {
+    dialog.connect_response(move |dialog, response_type| {
         if response_type == gtk::ResponseType::Ok {
             let text = entry.text().to_string().trim().to_string();
 
@@ -128,6 +128,6 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
                 list_store.set(&list_store.append(), &values);
             }
         }
-        dialog_manual_add_directory.close();
+        dialog.close();
     });
 }

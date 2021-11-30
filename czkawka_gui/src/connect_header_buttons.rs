@@ -9,8 +9,8 @@ pub fn connect_button_about(gui_data: &GuiData) {
         about_dialog.show();
 
         // Prevent from deleting dialog after close
-        about_dialog.connect_delete_event(|e, _f| {
-            e.hide();
+        about_dialog.connect_delete_event(|dialog, _| {
+            dialog.hide();
             Inhibit(true)
         });
     });
