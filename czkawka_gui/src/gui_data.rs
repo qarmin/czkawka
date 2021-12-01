@@ -94,7 +94,7 @@ impl GuiData {
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
         let popovers = GuiPopovers::create_from_builder();
-        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder);
+        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers.popover_select);
         let progress_window = GuiProgressDialog::create_from_builder(&window_main);
         let about = GuiAbout::create_from_builder(&window_main);
         let header = GuiHeader::create_from_builder(&builder);

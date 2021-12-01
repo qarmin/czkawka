@@ -2078,9 +2078,10 @@ Author: Rafał Mikrut
                 <property name="can-focus">False</property>
                 <property name="spacing">2</property>
                 <child>
-                  <object class="GtkButton" id="buttons_select">
+                  <object class="GtkMenuButton" id="buttons_select">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
                     <child>
                       <object class="GtkBox">
@@ -2162,7 +2163,7 @@ Author: Rafał Mikrut
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -2206,7 +2207,7 @@ Author: Rafał Mikrut
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -2250,7 +2251,7 @@ Author: Rafał Mikrut
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -2294,7 +2295,7 @@ Author: Rafał Mikrut
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -2338,7 +2339,7 @@ Author: Rafał Mikrut
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
               </object>
