@@ -52,7 +52,6 @@ pub fn connect_button_search(
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let radio_button_duplicates_name = gui_data.main_notebook.radio_button_duplicates_name.clone();
     let radio_button_duplicates_size = gui_data.main_notebook.radio_button_duplicates_size.clone();
-    let radio_button_duplicates_hashmb = gui_data.main_notebook.radio_button_duplicates_hashmb.clone();
     let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
     let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
     let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
@@ -152,8 +151,6 @@ pub fn connect_button_search(
                     check_method = duplicate::CheckingMethod::Name;
                 } else if radio_button_duplicates_size.is_active() {
                     check_method = duplicate::CheckingMethod::Size;
-                } else if radio_button_duplicates_hashmb.is_active() {
-                    check_method = duplicate::CheckingMethod::HashMb;
                 } else if radio_button_duplicates_hash.is_active() {
                     check_method = duplicate::CheckingMethod::Hash;
                 } else {

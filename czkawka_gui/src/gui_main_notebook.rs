@@ -62,7 +62,6 @@ pub struct GuiMainNotebook {
     // Duplicates
     pub radio_button_duplicates_name: gtk::RadioButton,
     pub radio_button_duplicates_size: gtk::RadioButton,
-    pub radio_button_duplicates_hashmb: gtk::RadioButton,
     pub radio_button_duplicates_hash: gtk::RadioButton,
 
     pub scale_similarity_similar_images: gtk::Scale,
@@ -173,7 +172,6 @@ impl GuiMainNotebook {
         //// Radio Buttons
         let radio_button_duplicates_name: gtk::RadioButton = builder.object("radio_button_duplicates_name").unwrap();
         let radio_button_duplicates_size: gtk::RadioButton = builder.object("radio_button_duplicates_size").unwrap();
-        let radio_button_duplicates_hashmb: gtk::RadioButton = builder.object("radio_button_duplicates_hashmb").unwrap();
         let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
         let scale_similarity_similar_images: gtk::Scale = builder.object("scale_similarity_similar_images").unwrap();
@@ -248,7 +246,6 @@ impl GuiMainNotebook {
             check_button_music_year,
             radio_button_duplicates_name,
             radio_button_duplicates_size,
-            radio_button_duplicates_hashmb,
             radio_button_duplicates_hash,
             scale_similarity_similar_images,
             scale_similarity_similar_videos,

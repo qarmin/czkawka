@@ -305,7 +305,6 @@ fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
         "name" => Ok(CheckingMethod::Name),
         "size" => Ok(CheckingMethod::Size),
         "hash" => Ok(CheckingMethod::Hash),
-        "hashmb" => Ok(CheckingMethod::HashMb),
         _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH, HASHMB)"),
     }
 }
