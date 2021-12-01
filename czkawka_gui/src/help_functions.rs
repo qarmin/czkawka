@@ -33,7 +33,7 @@ pub const KEY_END: u32 = 110;
 #[derive(Eq, PartialEq)]
 pub enum PopoverTypes {
     All,
-    ImageSize,
+    Size,
     Reverse,
     Custom,
     Date,

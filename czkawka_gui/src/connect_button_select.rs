@@ -10,10 +10,10 @@ use crate::notebook_enums::*;
 pub fn connect_button_select(gui_data: &GuiData) {
     let mut hashmap: HashMap<NotebookMainEnum, Vec<PopoverTypes>> = Default::default();
     {
-        hashmap.insert(NotebookMainEnum::SimilarImages, vec![PopoverTypes::All, PopoverTypes::ImageSize, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
-        hashmap.insert(NotebookMainEnum::SimilarVideos, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
+        hashmap.insert(NotebookMainEnum::SimilarImages, vec![PopoverTypes::All, PopoverTypes::Size, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
+        hashmap.insert(NotebookMainEnum::SimilarVideos, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size]);
         hashmap.insert(NotebookMainEnum::Duplicate, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
-        hashmap.insert(NotebookMainEnum::SameMusic, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
+        hashmap.insert(NotebookMainEnum::SameMusic, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size]);
 
         hashmap.insert(NotebookMainEnum::EmptyFiles, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
         hashmap.insert(NotebookMainEnum::EmptyDirectories, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
@@ -63,7 +63,7 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
         buttons_popover_unselect_all.hide();
     }
 
-    if vec.contains(&PopoverTypes::ImageSize) {
+    if vec.contains(&PopoverTypes::Size) {
         buttons_popover_select_all_images_except_biggest.show();
         buttons_popover_select_all_images_except_smallest.show();
         separator_select_image_size.show();

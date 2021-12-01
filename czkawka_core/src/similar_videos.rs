@@ -457,7 +457,7 @@ impl SimilarVideos {
                 hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry.clone());
                 vector_of_hashes.push(file_entry.vhash.clone());
             } else {
-                self.text_messages.errors.push(file_entry.error.clone());
+                self.text_messages.warnings.push(file_entry.error.clone());
             }
         }
 

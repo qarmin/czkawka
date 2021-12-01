@@ -17,6 +17,8 @@ pub struct GuiSettings {
     // Duplicates
     pub check_button_settings_hide_hard_links: gtk::CheckButton,
     pub entry_settings_cache_file_minimal_size: gtk::Entry,
+    pub entry_settings_prehash_cache_file_minimal_size: gtk::Entry,
+    pub check_button_duplicates_use_prehash_cache: gtk::CheckButton,
     pub check_button_settings_show_preview_duplicates: gtk::CheckButton,
     pub check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton,
     pub button_settings_duplicates_clear_cache: gtk::Button,
@@ -71,6 +73,8 @@ impl GuiSettings {
         let check_button_settings_show_preview_duplicates: gtk::CheckButton = builder.object("check_button_settings_show_preview_duplicates").unwrap();
         let check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_duplicates_delete_outdated_cache").unwrap();
         let button_settings_duplicates_clear_cache: gtk::Button = builder.object("button_settings_duplicates_clear_cache").unwrap();
+        let check_button_duplicates_use_prehash_cache: gtk::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").unwrap();
+        let entry_settings_prehash_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").unwrap();
 
         check_button_settings_hide_hard_links.set_tooltip_text(Some(
             "Hides all files except one, if are points to same data(are hardlinked).\n\nE.g. in case where on disk there is 7 files which are hardlinked to specific data and one different file with same data but different inode, then in duplicate finder will be visible only one unique file and one file from hardlinked ones.",
@@ -80,7 +84,10 @@ impl GuiSettings {
         ));
         check_button_settings_show_preview_duplicates.set_tooltip_text(Some("Shows preview at right side, when selecting image file."));
         check_button_settings_duplicates_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
-        button_settings_duplicates_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\nShould be used only if automatic clearing was disabled."));
+        button_settings_duplicates_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\n\nShould be used only if automatic clearing was disabled."));
+        check_button_duplicates_use_prehash_cache.set_tooltip_text(Some(
+            "Enables caching of prehash(hash computed from small part of file) which allows to earlier throw out non duplicated results.\n\nIt is disabled by default because can cause in some situations slowdowns.\n\nIt is heavily recommended to use it when scanning hundred of thousands or million files, because it can speedup search multiple times.",
+        ));
 
         // Similar Images
         let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
@@ -126,6 +133,8 @@ impl GuiSettings {
             check_button_settings_use_trash,
             check_button_settings_hide_hard_links,
             entry_settings_cache_file_minimal_size,
+            entry_settings_prehash_cache_file_minimal_size,
+            check_button_duplicates_use_prehash_cache,
             check_button_settings_show_preview_duplicates,
             check_button_settings_duplicates_delete_outdated_cache,
             button_settings_duplicates_clear_cache,

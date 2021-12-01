@@ -117,9 +117,6 @@ pub struct Info {
     pub number_of_duplicated_files_by_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
-    pub bytes_read_when_hashing: u64,
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
     pub gained_space: u64,
 }
 
@@ -149,7 +146,9 @@ pub struct DuplicateFinder {
     dryrun: bool,
     stopped_search: bool,
     use_cache: bool,
+    use_prehash_cache: bool,
     minimal_cache_file_size: u64,
+    minimal_prehash_cache_file_size: u64,
     delete_outdated_cache: bool,
 }
 
@@ -174,7 +173,9 @@ impl DuplicateFinder {
             hash_type: HashType::Blake3,
             dryrun: false,
             use_cache: true,
-            minimal_cache_file_size: 2 * 1024 * 1024, // By default cache only >= 1MB files
+            use_prehash_cache: true,
+            minimal_cache_file_size: 1024 * 1024 / 4, // By default cache only >= 256 KB files
+            minimal_prehash_cache_file_size: 0,
             delete_outdated_cache: true,
         }
     }
@@ -229,12 +230,20 @@ impl DuplicateFinder {
         self.minimal_cache_file_size = minimal_cache_file_size;
     }
 
+    pub fn set_minimal_prehash_cache_file_size(&mut self, minimal_prehash_cache_file_size: u64) {
+        self.minimal_prehash_cache_file_size = minimal_prehash_cache_file_size;
+    }
+
     pub const fn get_files_sorted_by_names(&self) -> &BTreeMap<String, Vec<FileEntry>> {
         &self.files_with_identical_names
     }
 
     pub fn set_use_cache(&mut self, use_cache: bool) {
         self.use_cache = use_cache;
+    }
+
+    pub fn set_use_prehash_cache(&mut self, use_prehash_cache: bool) {
+        self.use_prehash_cache = use_prehash_cache;
     }
 
     pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
@@ -659,6 +668,8 @@ impl DuplicateFinder {
 
     /// The slowest checking type, which must be applied after checking for size
     fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        assert_eq!(self.check_method, CheckingMethod::Hash);
+
         let check_type = Arc::new(self.hash_type);
 
         let start_time: SystemTime = SystemTime::now();
@@ -699,56 +710,135 @@ impl DuplicateFinder {
 
         //// PROGRESS THREAD END
 
-        #[allow(clippy::type_complexity)]
-        let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>, u64)> = self
-            .files_with_identical_size
-            .par_iter()
-            .map(|(size, vec_file_entry)| {
-                let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
-                let mut errors: Vec<String> = Vec::new();
-                let mut bytes_read: u64 = 0;
-                let mut buffer = [0u8; 1024 * 2];
+        ///////////////////////////////////////////////////////////////////////////// PREHASHING START
+        {
+            let loaded_hash_map;
+            let mut records_already_cached: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+            let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-                atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                for file_entry in vec_file_entry {
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                        check_was_breaked.store(true, Ordering::Relaxed);
-                        return None;
-                    }
-                    match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
-                        Ok((hash_string, bytes)) => {
-                            bytes_read += bytes;
-                            hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
-                            hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.clone());
-                        }
-                        Err(s) => errors.push(s),
+            // Cache algorithm
+            // - Load data from cache
+            // - Convert from BT<u64,Vec<FileEntry>> to BT<String,FileEntry>
+            // - Save to proper values
+            if self.use_prehash_cache {
+                loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type, true) {
+                    Some(t) => t,
+                    None => Default::default(),
+                };
+
+                let mut loaded_hash_map2: BTreeMap<String, FileEntry> = Default::default();
+                for vec_file_entry in loaded_hash_map.values() {
+                    for file_entry in vec_file_entry {
+                        loaded_hash_map2.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
                     }
                 }
-                Some((*size, hashmap_with_hash, errors, bytes_read))
-            })
-            .while_some()
-            .collect();
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+                #[allow(clippy::if_same_then_else)]
+                for vec_file_entry in self.files_with_identical_size.values() {
+                    for file_entry in vec_file_entry {
+                        let name = file_entry.path.to_string_lossy().to_string();
+                        if !loaded_hash_map2.contains_key(&name) {
+                            // If loaded data doesn't contains current image info
+                            non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
+                            non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry.clone());
+                        } else if file_entry.size != loaded_hash_map2.get(&name).unwrap().size || file_entry.modified_date != loaded_hash_map2.get(&name).unwrap().modified_date {
+                            // When size or modification date of image changed, then it is clear that is different image
+                            non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
+                            non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry.clone());
+                        } else {
+                            // Checking may be omitted when already there is entry with same size and modification date
+                            records_already_cached.entry(file_entry.size).or_insert_with(Vec::new);
+                            records_already_cached.get_mut(&file_entry.size).unwrap().push(file_entry.clone());
+                        }
+                    }
+                }
+            } else {
+                loaded_hash_map = Default::default();
+                mem::swap(&mut self.files_with_identical_size, &mut non_cached_files_to_check);
+            }
 
-        // Check if user aborted search(only from GUI)
-        if check_was_breaked.load(Ordering::Relaxed) {
-            return false;
-        }
+            #[allow(clippy::type_complexity)]
+            let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)> = non_cached_files_to_check
+                .par_iter()
+                .map(|(size, vec_file_entry)| {
+                    let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                    let mut errors: Vec<String> = Vec::new();
+                    let mut buffer = [0u8; 1024 * 2];
 
-        // Check results
-        for (size, hash_map, mut errors, bytes_read) in pre_hash_results {
-            self.information.bytes_read_when_hashing += bytes_read;
-            self.text_messages.warnings.append(&mut errors);
-            for (_hash, mut vec_file_entry) in hash_map {
-                if vec_file_entry.len() > 1 {
-                    pre_checked_map.entry(size).or_insert_with(Vec::new);
-                    pre_checked_map.get_mut(&size).unwrap().append(&mut vec_file_entry);
+                    atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                    for file_entry in vec_file_entry {
+                        if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                            check_was_breaked.store(true, Ordering::Relaxed);
+                            return None;
+                        }
+                        match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
+                            Ok(hash_string) => {
+                                hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
+                                hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.clone());
+                            }
+                            Err(s) => errors.push(s),
+                        }
+                    }
+                    Some((*size, hashmap_with_hash, errors))
+                })
+                .while_some()
+                .collect();
+
+            // End thread which send info to gui
+            progress_thread_run.store(false, Ordering::Relaxed);
+            progress_thread_handle.join().unwrap();
+
+            // Check if user aborted search(only from GUI)
+            if check_was_breaked.load(Ordering::Relaxed) {
+                return false;
+            }
+
+            // Add data from cache
+            for (size, vec_file_entry) in &records_already_cached {
+                pre_checked_map.entry(*size).or_insert_with(Vec::new);
+                pre_checked_map.get_mut(size).unwrap().append(&mut vec_file_entry.clone());
+            }
+
+            // Check results
+            for (size, hash_map, errors) in &pre_hash_results {
+                self.text_messages.warnings.append(&mut errors.clone());
+                for vec_file_entry in hash_map.values() {
+                    if vec_file_entry.len() > 1 {
+                        pre_checked_map.entry(*size).or_insert_with(Vec::new);
+                        pre_checked_map.get_mut(size).unwrap().append(&mut vec_file_entry.clone());
+                    }
                 }
             }
+
+            if self.use_prehash_cache {
+                println!("non cached - {}", non_cached_files_to_check.values().map(|e| e.len()).sum::<usize>());
+                println!("cached - {}", records_already_cached.values().map(|e| e.len()).sum::<usize>());
+                // All results = records already cached + computed results
+                let mut save_cache_to_hashmap: BTreeMap<String, FileEntry> = Default::default();
+
+                for (size, vec_file_entry) in loaded_hash_map {
+                    if size >= self.minimal_prehash_cache_file_size {
+                        for file_entry in vec_file_entry {
+                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                        }
+                    }
+                }
+
+                for (size, hash_map, _errors) in &pre_hash_results {
+                    if *size >= self.minimal_prehash_cache_file_size {
+                        for vec_file_entry in hash_map.values() {
+                            for file_entry in vec_file_entry {
+                                save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                            }
+                        }
+                    }
+                }
+
+                save_hashes_to_file(&save_cache_to_hashmap, &mut self.text_messages, &self.hash_type, true, self.minimal_prehash_cache_file_size);
+            }
         }
+
+        ///////////////////////////////////////////////////////////////////////////// PREHASHING END
 
         Common::print_time(start_time, SystemTime::now(), "check_files_hash - prehash".to_string());
         let start_time: SystemTime = SystemTime::now();
@@ -766,7 +856,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = pre_checked_map.iter().map(|e| e.1.len()).sum();
+            let files_to_check = pre_checked_map.iter().map(|(_size, vec_file_entry)| vec_file_entry.len()).sum();
             let checking_method = self.check_method.clone();
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
@@ -789,154 +879,151 @@ impl DuplicateFinder {
 
         //// PROGRESS THREAD END
 
-        #[allow(clippy::type_complexity)]
-        let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>, u64)>;
+        ///////////////////////////////////////////////////////////////////////////// HASHING START
+        {
+            #[allow(clippy::type_complexity)]
+            let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)>;
 
-        match self.check_method {
-            CheckingMethod::Hash => {
-                let loaded_hash_map;
+            let loaded_hash_map;
 
-                let mut records_already_cached: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-                let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+            let mut records_already_cached: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+            let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-                if self.use_cache {
-                    loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type, false) {
-                        Some(t) => t,
-                        None => Default::default(),
-                    };
+            if self.use_cache {
+                loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type, false) {
+                    Some(t) => t,
+                    None => Default::default(),
+                };
 
-                    for (size, vec_file_entry) in pre_checked_map {
-                        #[allow(clippy::collapsible_if)]
-                        if !loaded_hash_map.contains_key(&size) {
-                            // If loaded data doesn't contains current info
-                            non_cached_files_to_check.insert(size, vec_file_entry);
-                        } else {
-                            let loaded_vec_file_entry = loaded_hash_map.get(&size).unwrap();
+                for (size, vec_file_entry) in pre_checked_map {
+                    #[allow(clippy::collapsible_if)]
+                    if !loaded_hash_map.contains_key(&size) {
+                        // If loaded data doesn't contains current info
+                        non_cached_files_to_check.insert(size, vec_file_entry);
+                    } else {
+                        let loaded_vec_file_entry = loaded_hash_map.get(&size).unwrap();
 
+                        for file_entry in vec_file_entry {
+                            let mut found: bool = false;
+                            for loaded_file_entry in loaded_vec_file_entry {
+                                if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
+                                    records_already_cached.entry(file_entry.size).or_insert_with(Vec::new);
+                                    records_already_cached.get_mut(&file_entry.size).unwrap().push(loaded_file_entry.clone());
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if !found {
+                                non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
+                                non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry);
+                            }
+                        }
+                    }
+                }
+            } else {
+                loaded_hash_map = Default::default();
+                mem::swap(&mut pre_checked_map, &mut non_cached_files_to_check);
+            }
+
+            full_hash_results = non_cached_files_to_check
+                .par_iter()
+                .map(|(size, vec_file_entry)| {
+                    let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                    let mut errors: Vec<String> = Vec::new();
+                    let mut buffer = [0u8; 1024 * 128];
+
+                    atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                    for file_entry in vec_file_entry {
+                        if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                            check_was_breaked.store(true, Ordering::Relaxed);
+                            return None;
+                        }
+
+                        match hash_calculation(&mut buffer, file_entry, &check_type, u64::MAX) {
+                            Ok(hash_string) => {
+                                let mut file_entry = file_entry.clone();
+                                file_entry.hash = hash_string.clone();
+                                hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
+                                hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry);
+                            }
+                            Err(s) => errors.push(s),
+                        }
+                    }
+                    Some((*size, hashmap_with_hash, errors))
+                })
+                .while_some()
+                .collect();
+
+            if self.use_cache {
+                'main: for (size, vec_file_entry) in records_already_cached {
+                    // Check if size already exists, if exists we must to change it outside because cannot have mut and non mut reference to full_hash_results
+                    for (full_size, full_hashmap, _errors) in &mut full_hash_results {
+                        if size == *full_size {
                             for file_entry in vec_file_entry {
-                                let mut found: bool = false;
-                                for loaded_file_entry in loaded_vec_file_entry {
-                                    if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
-                                        records_already_cached.entry(file_entry.size).or_insert_with(Vec::new);
-                                        records_already_cached.get_mut(&file_entry.size).unwrap().push(loaded_file_entry.clone());
-                                        found = true;
-                                        break;
-                                    }
-                                }
-
-                                if !found {
-                                    non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new);
-                                    non_cached_files_to_check.get_mut(&file_entry.size).unwrap().push(file_entry);
-                                }
+                                full_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
+                                full_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
                             }
+                            continue 'main;
                         }
                     }
-                } else {
-                    loaded_hash_map = Default::default();
-                    mem::swap(&mut pre_checked_map, &mut non_cached_files_to_check);
+                    // Size doesn't exists add results to files
+                    let mut temp_hashmap: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                    for file_entry in vec_file_entry {
+                        temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
+                        temp_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
+                    }
+                    full_hash_results.push((size, temp_hashmap, Vec::new()));
                 }
 
-                full_hash_results = non_cached_files_to_check
-                    .par_iter()
-                    .map(|(size, vec_file_entry)| {
-                        let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
-                        let mut errors: Vec<String> = Vec::new();
-                        let mut bytes_read: u64 = 0;
-                        let mut buffer = [0u8; 1024 * 128];
-
-                        atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                        for file_entry in vec_file_entry {
-                            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                                check_was_breaked.store(true, Ordering::Relaxed);
-                                return None;
-                            }
-
-                            match hash_calculation(&mut buffer, file_entry, &check_type, u64::MAX) {
-                                Ok((hash_string, bytes)) => {
-                                    bytes_read += bytes;
-                                    let mut file_entry = file_entry.clone();
-                                    file_entry.hash = hash_string.clone();
-                                    hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
-                                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry);
-                                }
-                                Err(s) => errors.push(s),
-                            }
-                        }
-                        Some((*size, hashmap_with_hash, errors, bytes_read))
-                    })
-                    .while_some()
-                    .collect();
-
-                if self.use_cache {
-                    'main: for (size, vec_file_entry) in records_already_cached {
-                        // Check if size already exists, if exists we must to change it outside because cannot have mut and non mut reference to full_hash_results
-                        for (full_size, full_hashmap, _errors, _bytes_read) in &mut full_hash_results {
-                            if size == *full_size {
-                                for file_entry in vec_file_entry {
-                                    full_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
-                                    full_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
-                                }
-                                continue 'main;
-                            }
-                        }
-                        // Size doesn't exists add results to files
-                        let mut temp_hashmap: BTreeMap<String, Vec<FileEntry>> = Default::default();
-                        for file_entry in vec_file_entry {
-                            temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new);
-                            temp_hashmap.get_mut(&file_entry.hash).unwrap().push(file_entry);
-                        }
-                        full_hash_results.push((size, temp_hashmap, Vec::new(), 0));
+                // Must save all results to file, old loaded from file with all currently counted results
+                let mut all_results: BTreeMap<String, FileEntry> = Default::default();
+                for (_size, vec_file_entry) in loaded_hash_map {
+                    for file_entry in vec_file_entry {
+                        all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
                     }
-
-                    // Must save all results to file, old loaded from file with all currently counted results
-                    let mut all_results: BTreeMap<String, FileEntry> = Default::default();
-                    for (_size, vec_file_entry) in loaded_hash_map {
+                }
+                for (_size, hashmap, _errors) in &full_hash_results {
+                    for vec_file_entry in hashmap.values() {
                         for file_entry in vec_file_entry {
-                            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
                         }
                     }
-                    for (_size, hashmap, _errors, _bytes_read) in &full_hash_results {
-                        for vec_file_entry in hashmap.values() {
-                            for file_entry in vec_file_entry {
-                                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
-                            }
-                        }
+                }
+                save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
+            }
+
+            // End thread which send info to gui
+            progress_thread_run.store(false, Ordering::Relaxed);
+            progress_thread_handle.join().unwrap();
+
+            // Check if user aborted search(only from GUI)
+            if check_was_breaked.load(Ordering::Relaxed) {
+                return false;
+            }
+
+            for (size, hash_map, mut errors) in full_hash_results {
+                self.text_messages.warnings.append(&mut errors);
+                for (_hash, vec_file_entry) in hash_map {
+                    if vec_file_entry.len() > 1 {
+                        self.files_with_identical_hashes.entry(size).or_insert_with(Vec::new);
+                        self.files_with_identical_hashes.get_mut(&size).unwrap().push(vec_file_entry);
                     }
-                    save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
                 }
             }
-            _ => panic!("What"),
-        }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+            /////////////////////////
 
-        // Check if user aborted search(only from GUI)
-        if check_was_breaked.load(Ordering::Relaxed) {
-            return false;
-        }
-
-        for (size, hash_map, mut errors, bytes_read) in full_hash_results {
-            self.information.bytes_read_when_hashing += bytes_read;
-            self.text_messages.warnings.append(&mut errors);
-            for (_hash, vec_file_entry) in hash_map {
-                if vec_file_entry.len() > 1 {
-                    self.files_with_identical_hashes.entry(size).or_insert_with(Vec::new);
-                    self.files_with_identical_hashes.get_mut(&size).unwrap().push(vec_file_entry);
+            for (size, vector_vectors) in &self.files_with_identical_hashes {
+                for vector in vector_vectors {
+                    self.information.number_of_duplicated_files_by_hash += vector.len() - 1;
+                    self.information.number_of_groups_by_hash += 1;
+                    self.information.lost_space_by_hash += (vector.len() as u64 - 1) * size;
                 }
             }
         }
 
-        /////////////////////////
-
-        for (size, vector_vectors) in &self.files_with_identical_hashes {
-            for vector in vector_vectors {
-                self.information.number_of_duplicated_files_by_hash += vector.len() - 1;
-                self.information.number_of_groups_by_hash += 1;
-                self.information.lost_space_by_hash += (vector.len() as u64 - 1) * size;
-            }
-        }
+        ///////////////////////////////////////////////////////////////////////////// HASHING END
 
         Common::print_time(start_time, SystemTime::now(), "check_files_hash - full hash".to_string());
 
@@ -959,8 +1046,6 @@ impl DuplicateFinder {
                 for vector in self.files_with_identical_names.values() {
                     let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                     self.information.gained_space += tuple.0;
-                    self.information.number_of_removed_files += tuple.1;
-                    self.information.number_of_failed_to_remove_files += tuple.2;
                 }
             }
             CheckingMethod::Hash => {
@@ -968,8 +1053,6 @@ impl DuplicateFinder {
                     for vector in vector_vectors.iter() {
                         let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                         self.information.gained_space += tuple.0;
-                        self.information.number_of_removed_files += tuple.1;
-                        self.information.number_of_failed_to_remove_files += tuple.2;
                     }
                 }
             }
@@ -977,8 +1060,6 @@ impl DuplicateFinder {
                 for vector in self.files_with_identical_size.values() {
                     let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                     self.information.gained_space += tuple.0;
-                    self.information.number_of_removed_files += tuple.1;
-                    self.information.number_of_failed_to_remove_files += tuple.2;
                 }
             }
             CheckingMethod::None => {
@@ -1031,13 +1112,6 @@ impl DebugPrint for DuplicateFinder {
             self.information.gained_space.file_size(options::BINARY).unwrap(),
             self.information.gained_space
         );
-        println!(
-            "Bytes read when hashing - {} ({} bytes)",
-            self.information.bytes_read_when_hashing.file_size(options::BINARY).unwrap(),
-            self.information.bytes_read_when_hashing
-        );
-        println!("Number of removed files - {}", self.information.number_of_removed_files);
-        println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
 
         println!("### Other");
 
@@ -1363,7 +1437,7 @@ pub trait MyHasher {
     fn finalize(&self) -> String;
 }
 
-fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<(String, u64), String> {
+fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<String, String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
         Err(e) => return Err(format!("Unable to check hash of file {}, reason {}", file_entry.path.display(), e)),
@@ -1384,7 +1458,7 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
             break;
         }
     }
-    Ok((hasher.finalize(), current_file_read_bytes))
+    Ok(hasher.finalize())
 }
 
 fn get_file_hash_name(type_of_hash: &HashType, is_prehash: bool) -> String {
@@ -1560,8 +1634,7 @@ mod tests {
         file.write_all(b"aa")?;
         let e = FileEntry { path: src, ..Default::default() };
         let r = hash_calculation(&mut buf, &e, &HashType::Blake3, 0).unwrap();
-        assert_eq!(2, r.1);
-        assert!(!r.0.is_empty());
+        assert!(!r.is_empty());
         Ok(())
     }
 
