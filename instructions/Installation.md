@@ -40,7 +40,10 @@ At the end execute it:
 ```
 
 **Warning**  
-If you use want to use app on ARM machine e.g. Mac M1, you can't use prebuilt binaries, because they were compiled for x86_64 architecture. You need to compile Czkawka manually to get proper binaries.
+Prebuilt binaries are available only for x86_64, so if you use ARM machine like e.g. Mac M1, you need to compile manually app or install special version of required libraries which can be done via this:
+```shell
+arch -x86_64 /usr/local/bin/brew install gtk+3 adwaita-icon-theme ffmpeg librsvg
+```
 
 ### Windows
 By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 3`

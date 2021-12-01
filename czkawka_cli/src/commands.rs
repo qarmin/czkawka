@@ -26,7 +26,7 @@ pub enum Commands {
         minimal_cached_file_size: u64,
         #[structopt(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (NAME, SIZE, HASH, HASHMB)", long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASHMB - More accurate but slower, checking by the hash of the file's first mebibyte\nHASH - The slowest method, checking by the hash of the entire file")]
+        #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (NAME, SIZE, HASH)", long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file")]
         search_method: CheckingMethod,
         #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
@@ -305,7 +305,7 @@ fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
         "name" => Ok(CheckingMethod::Name),
         "size" => Ok(CheckingMethod::Size),
         "hash" => Ok(CheckingMethod::Hash),
-        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH, HASHMB)"),
+        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
     }
 }
 

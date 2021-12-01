@@ -85,18 +85,23 @@ Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 
 ## Tips, Tricks and Known Bugs
 - **Manually adding multiple directories**  
-  You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want. After setting required values, configuration must be loaded to Czkawka.
-- **Slow checking of little number similar images**  
-  If you checked before a large number of images (several tens of thousands) and they are still present on the disk, then the required information  about all of them is loaded from and saved to the cache, even if you are working with only few image files. You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save a lot of faster.
-- **Not all columns are visible**
+  You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want. After set required values, configuration must be loaded to Czkawka.
+- **Slow checking of little number similar images/duplicates/broken files**  
+  If you checked before a large number of files (several tens of thousands), then the required information about all of them are loaded and saved to the cache, even if you are working with only few files. You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save cache faster.
+- **Not all columns are always visible**
   For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
-    - View can be scrolled via horizontal scroll bar
-    - Size of other columns can be slimmed
+    - View can be scrolled via horizontal scroll bar (1 on image)
+    - Size of other columns can be slimmed (2 )
   This is checked if is possible to do in https://github.com/qarmin/czkawka/issues/169
-- **Opening parent folders**
-    - It is possible to open parent folder of selected items with double click with right mouse button(RMB) - it is also possible to open such item with double click with left mouse buttom(LMB).
-
 ![AA](https://user-images.githubusercontent.com/41945903/125684641-728e264a-34ab-41b1-9853-ab45dc25551f.png)
+- **Opening parent folders**
+    - It is possible to open parent folder of selected items with double click with right mouse button(RMB)
+  it is also possible to open such item with double click with left mouse button(LMB).
+- **Faster scanning for big number of duplicates**  
+  By default for all files grouped by same size are computed partial hash(hash from only of 2KB each file). Such hash is computed usually very fast, especially on SSD and fast multicore processors. But when scanning a hundred of thousands or millions of files with HDD or slow processor, usually this step can take much time. In settings exists option `Use prehash cache` which enables caching such things. It is disabled by default because can increase time of loading/saving cache, with big number of entries.
+- **Permanent store of cache entries**  
+  After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed. This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again. In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled. Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
+
 
 # Tools
 
@@ -237,7 +242,8 @@ Some tidbits:
 Tool works similar as Similar Images.  
 
 To work require `FFmpeg`, so it will show an error when it is not found in OS.  
-Also only checks files which are longer than 30s.
+Also only checks files which are longer than 30s.  
+For now it is limiting to check video files with almost equal length.
 
 At first, it collects video files by extension (`mp4`, `mpv`, `avi` etc.).  
 Next each file is hashed. Implementation is hidden in library but looks that generate 10 images from this video and hash them with help of perceptual hash.
@@ -249,8 +255,8 @@ Next, with provided by user tolerance, they are compared to each other and group
 ### Broken Files
 This tool finds files which are corrupted or have an invalid extension.
 
-At first files from specific group (image,archive,audio) are collected and then these files are opened.
+At first files from specific group (image,archive,audio) are collected and then these files are opened(due to additional dependencies, audio files are disabled by default).
 
 If an error happens when opening such file it means that this file is corrupted or unsupported.
 
-Only some file extensions are supported, because I rely on external crates. Also, some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.
+Only some file extensions are handled, because I rely on external crates. Also, some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.

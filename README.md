@@ -14,7 +14,7 @@
   or excluded items with the `*` wildcard
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multiple tools to use:
-  - Duplicates - Finds duplicates based on file name, size, hash, hash of just first 1 MB of a file
+  - Duplicates - Finds duplicates based on file name, size or hash
   - Empty Folders - Finds empty folders with the help of an advanced algorithm
   - Big Files - Finds the provided number of the biggest files in given location
   - Empty Files - Looks for empty files across the drive
@@ -30,6 +30,8 @@
 
 ## How do I use it?
 You can find the instructions on how to use Czkawka [**here**](instructions/Instruction.md).
+
+Some helpful tricks you can find [**here**](instructions/Instruction.md#tips-tricks-and-known-bugs)
 
 ## Installation
 Installation instructions with download links you can find [**here**](instructions/Installation.md).
@@ -118,7 +120,7 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.
-- [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize
+- [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize, great photo compare tool
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
 - [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, it is written also in Rust but only in CLI
 
