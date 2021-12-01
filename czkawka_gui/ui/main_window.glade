@@ -685,21 +685,6 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_duplicates_hashmb">
-                                <property name="label" translatable="yes">HashMb</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_duplicates_hash</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkRadioButton" id="radio_button_duplicates_size">
                                 <property name="label" translatable="yes">Size</property>
                                 <property name="visible">True</property>

@@ -10,7 +10,7 @@ use czkawka_core::similar_images::SimilarityPreset;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
 pub enum Commands {
-    #[structopt(name = "dup", about = "Finds duplicate files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hashmb -f results.txt -D aeo")]
+    #[structopt(name = "dup", about = "Finds duplicate files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo")]
     Duplicates {
         #[structopt(flatten)]
         directories: Directories,
@@ -439,7 +439,7 @@ SUBCOMMANDS:
     try "{usage} -h" to get more info about a specific tool
 
 EXAMPLES:
-    {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hashmb -f results.txt -D aeo
+    {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo
     {bin} empty-folders -d /home/rafal/rr /home/gateway -f results.txt
     {bin} big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
