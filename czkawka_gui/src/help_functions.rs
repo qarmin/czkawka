@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use gtk::prelude::*;
-use gtk::{ListStore, TextView};
+use gtk::{ListStore, TextView, Widget};
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -396,7 +396,7 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
 }
 
-pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Button], button_names: &[String]) {
+pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Widget], button_names: &[String]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(button_names[index].as_str()).unwrap() {
             button.show();
@@ -406,7 +406,7 @@ pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Bu
     }
 }
 
-pub fn hide_all_buttons(buttons_array: &[gtk::Button]) {
+pub fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
         button.hide();
     }
@@ -449,8 +449,7 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
         "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
         "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
         e => {
-            eprintln!("{}", e);
-            panic!()
+            panic!("{}", e)
         }
     }
 }

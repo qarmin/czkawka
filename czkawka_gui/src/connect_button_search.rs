@@ -4,7 +4,6 @@ use std::thread;
 
 use glib::Sender;
 use gtk::prelude::*;
-use gtk::WindowPosition;
 use img_hash::{FilterType, HashAlg};
 
 use czkawka_core::big_file::BigFile;
@@ -130,9 +129,6 @@ pub fn connect_button_search(
         notebook_main.set_sensitive(false);
 
         entry_info.set_text("Searching data, it may take a while, please wait...");
-
-        // Set dialog to center to current screen(it is impossible to center it to main window)
-        window_progress.set_position(WindowPosition::Center);
 
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);

@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{Builder, Window};
+use gtk::{Builder, EventControllerKey, Window};
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
@@ -13,6 +13,7 @@ pub struct GuiProgressDialog {
     pub grid_progress_stages: gtk::Grid,
 
     pub button_stop_in_dialog: gtk::Button,
+    pub evk_button_stop_in_dialog: gtk::EventControllerKey,
 }
 
 impl GuiProgressDialog {
@@ -22,7 +23,6 @@ impl GuiProgressDialog {
 
         let window_progress: gtk::Window = builder.object("window_progress").unwrap();
         window_progress.set_transient_for(Some(window_main));
-        window_progress.set_modal(true);
 
         let progress_bar_current_stage: gtk::ProgressBar = builder.object("progress_bar_current_stage").unwrap();
         let progress_bar_all_stages: gtk::ProgressBar = builder.object("progress_bar_all_stages").unwrap();
@@ -32,6 +32,7 @@ impl GuiProgressDialog {
         let grid_progress_stages: gtk::Grid = builder.object("grid_progress_stages").unwrap();
 
         let button_stop_in_dialog: gtk::Button = builder.object("button_stop_in_dialog").unwrap();
+        let evk_button_stop_in_dialog = EventControllerKey::new(&button_stop_in_dialog);
 
         Self {
             window_progress,
@@ -40,6 +41,7 @@ impl GuiProgressDialog {
             label_stage,
             grid_progress_stages,
             button_stop_in_dialog,
+            evk_button_stop_in_dialog,
         }
     }
 }

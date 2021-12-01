@@ -2,7 +2,7 @@ use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::HashType;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
-use gtk::{LabelBuilder, ResponseType, WindowPosition};
+use gtk::{LabelBuilder, ResponseType, Window};
 use image::imageops::FilterType;
 use img_hash::HashAlg;
 use std::collections::BTreeMap;
@@ -19,7 +19,6 @@ pub fn connect_settings(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
         button_settings.connect_clicked(move |_| {
-            window_main.set_position(WindowPosition::Center);
             window_main.set_sensitive(false);
             window_settings.show();
         });
@@ -27,7 +26,7 @@ pub fn connect_settings(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
 
-        window_settings.connect_delete_event(move |window, _y| {
+        window_settings.connect_delete_event(move |window, _| {
             window.hide();
             window_main.set_sensitive(true);
             gtk::Inhibit(true)
@@ -94,11 +93,9 @@ pub fn connect_settings(gui_data: &GuiData) {
             let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
 
             button_settings_duplicates_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog("duplicates");
+                let dialog = create_clear_cache_dialog("duplicates", &settings_window);
                 dialog.show_all();
-                settings_window.set_sensitive(false);
 
-                let settings_window = settings_window.clone();
                 let text_view_errors = text_view_errors.clone();
                 let entry_settings_cache_file_minimal_size = entry_settings_cache_file_minimal_size.clone();
 
@@ -121,7 +118,6 @@ pub fn connect_settings(gui_data: &GuiData) {
                         text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
                     }
                     dialog.close();
-                    settings_window.set_sensitive(true);
                 });
             });
         }
@@ -131,11 +127,9 @@ pub fn connect_settings(gui_data: &GuiData) {
             let text_view_errors = gui_data.text_view_errors.clone();
 
             button_settings_similar_images_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog("similar images");
+                let dialog = create_clear_cache_dialog("similar images", &settings_window);
                 dialog.show_all();
-                settings_window.set_sensitive(false);
 
-                let settings_window = settings_window.clone();
                 let text_view_errors = text_view_errors.clone();
 
                 dialog.connect_response(move |dialog, response_type| {
@@ -155,7 +149,6 @@ pub fn connect_settings(gui_data: &GuiData) {
                         text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
                     }
                     dialog.close();
-                    settings_window.set_sensitive(true);
                 });
             });
         }
@@ -165,11 +158,9 @@ pub fn connect_settings(gui_data: &GuiData) {
             let text_view_errors = gui_data.text_view_errors.clone();
 
             button_settings_similar_videos_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog("similar videos");
+                let dialog = create_clear_cache_dialog("similar videos", &settings_window);
                 dialog.show_all();
-                settings_window.set_sensitive(false);
 
-                let settings_window = settings_window.clone();
                 let text_view_errors = text_view_errors.clone();
 
                 dialog.connect_response(move |dialog, response_type| {
@@ -183,15 +174,14 @@ pub fn connect_settings(gui_data: &GuiData) {
                         text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
                     }
                     dialog.close();
-                    settings_window.set_sensitive(true);
                 });
             });
         }
     }
 }
 
-fn create_clear_cache_dialog(title_str: &str) -> gtk::Dialog {
-    let dialog = gtk::Dialog::builder().title(format!("Clearing {} cache", title_str).as_str()).build();
+fn create_clear_cache_dialog(title_str: &str, window_settings: &Window) -> gtk::Dialog {
+    let dialog = gtk::Dialog::builder().title(format!("Clearing {} cache", title_str).as_str()).transient_for(window_settings).build();
     dialog.add_button("OK", ResponseType::Ok);
     dialog.add_button("Cancel", ResponseType::Cancel);
 

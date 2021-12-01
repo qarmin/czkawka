@@ -213,7 +213,7 @@ fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 
-fn popover_custom_select_unselect(popover: &gtk::Popover, _window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
+fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
     enum WildcardType {
@@ -227,11 +227,11 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, _window_main: &Window,
         true => "Select Custom",
     };
 
-    // Accept Dialog
+    // Dialog for select/unselect items
     {
-        let confirmation_dialog_select_unselect = gtk::Dialog::builder().title(window_title).build();
-        confirmation_dialog_select_unselect.add_button("Ok", ResponseType::Ok);
-        confirmation_dialog_select_unselect.add_button("Close", ResponseType::Cancel);
+        let dialog = gtk::Dialog::builder().title(window_title).transient_for(window_main).build();
+        dialog.add_button("Ok", ResponseType::Ok);
+        dialog.add_button("Close", ResponseType::Cancel);
 
         let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
 
@@ -264,13 +264,13 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, _window_main: &Window,
         grid.attach(&entry_name, 1, 2, 1, 1);
         grid.attach(&entry_name_path, 1, 3, 1, 1);
 
-        let box_widget = get_dialog_box_child(&confirmation_dialog_select_unselect);
+        let box_widget = get_dialog_box_child(&dialog);
         box_widget.add(&grid);
 
-        confirmation_dialog_select_unselect.show_all();
+        dialog.show_all();
 
         let tree_view = tree_view.clone();
-        confirmation_dialog_select_unselect.connect_response(move |confirmation_dialog_select_unselect, response_type| {
+        dialog.connect_response(move |confirmation_dialog_select_unselect, response_type| {
             let wildcard_type: WildcardType;
             let wildcard: String;
 
