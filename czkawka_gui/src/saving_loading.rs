@@ -141,7 +141,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             //// minimal cache file size
             data_to_save.push("--cache_minimal_file_size:".to_string());
             let entry_settings_cache_file_minimal_size = settings.entry_settings_cache_file_minimal_size.clone();
-            data_to_save.push(entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024).to_string());
+            data_to_save.push(entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 / 4).to_string());
 
             //// Duplicates, delete outdated entries to trash
             data_to_save.push("--delete_outdated_entries_duplicates:".to_string());
@@ -157,6 +157,16 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             data_to_save.push("--delete_outdated_entries_similar_videos:".to_string());
             let check_button_settings_similar_videos_delete_outdated_cache = settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
             data_to_save.push(check_button_settings_similar_videos_delete_outdated_cache.is_active().to_string());
+
+            //// Use prehash cache system
+            data_to_save.push("--use_prehash_cache:".to_string());
+            let check_button_duplicates_use_prehash_cache = settings.check_button_duplicates_use_prehash_cache.clone();
+            data_to_save.push(check_button_duplicates_use_prehash_cache.is_active().to_string());
+
+            //// minimal prehash cache file size
+            data_to_save.push("--cache_prehash_minimal_file_size:".to_string());
+            let entry_settings_prehash_cache_file_minimal_size = settings.entry_settings_prehash_cache_file_minimal_size.clone();
+            data_to_save.push(entry_settings_prehash_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(0).to_string());
         }
 
         // Creating/Opening config file
@@ -213,6 +223,8 @@ enum TypeOfLoadedData {
     DeleteCacheDuplicates,
     DeleteCacheSimilarImages,
     DeleteCacheSimilarVideos,
+    UsePrehashCache,
+    CachePrehashMinimalSize,
 }
 
 pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView, scrolled_window_errors: &ScrolledWindow) {
@@ -264,6 +276,8 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let mut delete_outdated_cache_dupliactes: bool = true;
         let mut delete_outdated_cache_similar_images: bool = true;
         let mut delete_outdated_cache_similar_videos: bool = false;
+        let mut use_prehash_cache: bool = false;
+        let mut cache_prehash_minimal_size: u64 = 0;
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -307,6 +321,10 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                 current_type = TypeOfLoadedData::DeleteCacheSimilarVideos;
             } else if line.starts_with("--delete_outdated_entries_similar_images") {
                 current_type = TypeOfLoadedData::DeleteCacheSimilarImages;
+            } else if line.starts_with("--use_prehash_cache") {
+                current_type = TypeOfLoadedData::UsePrehashCache;
+            } else if line.starts_with("--cache_prehash_minimal_file_size") {
+                current_type = TypeOfLoadedData::CachePrehashMinimalSize;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -512,6 +530,29 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                             );
                         }
                     }
+                    TypeOfLoadedData::UsePrehashCache => {
+                        let line = line.to_lowercase();
+                        if line == "1" || line == "true" {
+                            use_prehash_cache = true;
+                        } else if line == "0" || line == "false" {
+                            use_prehash_cache = false;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
+                    TypeOfLoadedData::CachePrehashMinimalSize => {
+                        if let Ok(number) = line.parse::<u64>() {
+                            cache_prehash_minimal_size = number;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper value(u64) when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -566,8 +607,10 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             }
             settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
             settings.check_button_settings_use_cache.set_active(use_cache);
+            settings.check_button_duplicates_use_prehash_cache.set_active(use_prehash_cache);
             settings.check_button_settings_use_trash.set_active(use_trash);
             settings.entry_settings_cache_file_minimal_size.set_text(cache_minimal_size.to_string().as_str());
+            settings.entry_settings_prehash_cache_file_minimal_size.set_text(cache_prehash_minimal_size.to_string().as_str());
         } else {
             settings.check_button_settings_load_at_start.set_active(false);
         }
@@ -650,10 +693,12 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_hide_hard_links.set_active(true);
         settings.check_button_settings_use_cache.set_active(true);
         settings.check_button_settings_use_trash.set_active(false);
-        settings.entry_settings_cache_file_minimal_size.set_text("524288");
+        settings.entry_settings_cache_file_minimal_size.set_text("257144");
         settings.check_button_settings_similar_videos_delete_outdated_cache.set_active(false);
         settings.check_button_settings_similar_images_delete_outdated_cache.set_active(true);
         settings.check_button_settings_duplicates_delete_outdated_cache.set_active(true);
+        settings.check_button_duplicates_use_prehash_cache.set_active(false);
+        settings.entry_settings_prehash_cache_file_minimal_size.set_text("0");
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");

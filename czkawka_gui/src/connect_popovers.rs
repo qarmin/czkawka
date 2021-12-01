@@ -345,7 +345,7 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
     }
 }
 
-fn popover_all_except_biggest_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: i32, column_button_selection: u32, except_biggest: bool) {
+fn popover_all_except_biggest_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: Option<i32>, column_button_selection: u32, except_biggest: bool) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
@@ -373,22 +373,38 @@ fn popover_all_except_biggest_smallest(popover: &gtk::Popover, tree_view: &gtk::
                 }
                 tree_iter_array.push(iter.clone());
                 let size_as_bytes = model.value(&iter, column_size_as_bytes).get::<u64>().unwrap();
-                let dimensions_string = model.value(&iter, column_dimensions).get::<String>().unwrap();
 
-                let dimensions = change_dimension_to_krotka(dimensions_string);
-                let number_of_pixels = dimensions.0 * dimensions.1;
+                // If dimension exists, then needs to be checked images
+                if let Some(column_dimensions) = column_dimensions {
+                    let dimensions_string = model.value(&iter, column_dimensions).get::<String>().unwrap();
 
-                if except_biggest {
-                    if number_of_pixels > number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes > size_as_bytes_min_max) {
-                        number_of_pixels_min_max = number_of_pixels;
-                        size_as_bytes_min_max = size_as_bytes;
-                        used_index = Some(current_index);
+                    let dimensions = change_dimension_to_krotka(dimensions_string);
+                    let number_of_pixels = dimensions.0 * dimensions.1;
+
+                    if except_biggest {
+                        if number_of_pixels > number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes > size_as_bytes_min_max) {
+                            number_of_pixels_min_max = number_of_pixels;
+                            size_as_bytes_min_max = size_as_bytes;
+                            used_index = Some(current_index);
+                        }
+                    } else {
+                        if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
+                            number_of_pixels_min_max = number_of_pixels;
+                            size_as_bytes_min_max = size_as_bytes;
+                            used_index = Some(current_index);
+                        }
                     }
                 } else {
-                    if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
-                        number_of_pixels_min_max = number_of_pixels;
-                        size_as_bytes_min_max = size_as_bytes;
-                        used_index = Some(current_index);
+                    if except_biggest {
+                        if size_as_bytes > size_as_bytes_min_max {
+                            size_as_bytes_min_max = size_as_bytes;
+                            used_index = Some(current_index);
+                        }
+                    } else {
+                        if size_as_bytes < size_as_bytes_min_max {
+                            size_as_bytes_min_max = size_as_bytes;
+                            used_index = Some(current_index);
+                        }
                     }
                 }
 
@@ -593,9 +609,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_all_except_biggest_smallest(
             &popover_select,
             tree_view,
-            nb_object.column_color.expect("AEB can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
-            nb_object.column_dimensions.expect("AEB needs dimensions column"),
+            nb_object.column_color.expect("AEBI can't be used without headers"),
+            nb_object.column_size_as_bytes.expect("AEBI needs size as bytes column"),
+            nb_object.column_dimensions,
             nb_object.column_selection as u32,
             true,
         );
@@ -613,9 +629,9 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_all_except_biggest_smallest(
             &popover_select,
             tree_view,
-            nb_object.column_color.expect("AES can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
-            nb_object.column_dimensions.expect("AES needs dimensions column"),
+            nb_object.column_color.expect("AESI can't be used without headers"),
+            nb_object.column_size_as_bytes.expect("AESI needs size as bytes column"),
+            nb_object.column_dimensions,
             nb_object.column_selection as u32,
             false,
         );

@@ -301,7 +301,7 @@ Author: Rafał Mikrut
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Minimal cached file size in bytes</property>
+                        <property name="label" translatable="yes">Minimal size of files in bytes saved to cache</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -314,7 +314,7 @@ Author: Rafał Mikrut
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="max-length">15</property>
-                        <property name="text" translatable="yes">524288</property>
+                        <property name="text" translatable="yes">257144</property>
                         <property name="caps-lock-warning">False</property>
                         <property name="input-purpose">number</property>
                       </object>
@@ -333,6 +333,20 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkCheckButton" id="check_button_duplicates_use_prehash_cache">
+                    <property name="label" translatable="yes">Use prehash cache</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButton" id="button_settings_duplicates_clear_cache">
                     <property name="label" translatable="yes">Remove outdated results from duplicates cache</property>
                     <property name="visible">True</property>
@@ -343,7 +357,50 @@ Author: Rafał Mikrut
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="pack-type">end</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-left">4</property>
+                    <property name="margin-right">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-end">4</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Minimal size of files in bytes saved to prehash cache</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="entry_settings_prehash_cache_file_minimal_size">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="max-length">15</property>
+                        <property name="text" translatable="yes">1</property>
+                        <property name="caps-lock-warning">False</property>
+                        <property name="input-purpose">number</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
               </object>
