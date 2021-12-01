@@ -62,7 +62,6 @@ pub struct GuiMainNotebook {
     // Duplicates
     pub radio_button_duplicates_name: gtk::RadioButton,
     pub radio_button_duplicates_size: gtk::RadioButton,
-    pub radio_button_duplicates_hashmb: gtk::RadioButton,
     pub radio_button_duplicates_hash: gtk::RadioButton,
 
     pub scale_similarity_similar_images: gtk::Scale,
@@ -173,8 +172,13 @@ impl GuiMainNotebook {
         //// Radio Buttons
         let radio_button_duplicates_name: gtk::RadioButton = builder.object("radio_button_duplicates_name").unwrap();
         let radio_button_duplicates_size: gtk::RadioButton = builder.object("radio_button_duplicates_size").unwrap();
-        let radio_button_duplicates_hashmb: gtk::RadioButton = builder.object("radio_button_duplicates_hashmb").unwrap();
         let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
+
+        radio_button_duplicates_name.set_tooltip_text(Some("Finds files which have same name.\n\nThis mode not checking what file contain inside, so be carefully when using it."));
+        radio_button_duplicates_size.set_tooltip_text(Some("Finds files which have same size.\n\nThis mode not checking what file contain inside, so be carefully when using it."));
+        radio_button_duplicates_hash.set_tooltip_text(Some(
+            "Finds files which have the same content.\n\nThis mode hashes file and later compare this hashes to find duplicates.\n\nTool heavily uses cache, so second and further scans of same data should be a lot of faster that first.",
+        ));
 
         let scale_similarity_similar_images: gtk::Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: gtk::Scale = builder.object("scale_similarity_similar_videos").unwrap();
@@ -248,7 +252,6 @@ impl GuiMainNotebook {
             check_button_music_year,
             radio_button_duplicates_name,
             radio_button_duplicates_size,
-            radio_button_duplicates_hashmb,
             radio_button_duplicates_hash,
             scale_similarity_similar_images,
             scale_similarity_similar_videos,

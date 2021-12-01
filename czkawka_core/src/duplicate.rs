@@ -27,8 +27,6 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 
-const HASH_MB_LIMIT_BYTES: u64 = 1024 * 1024; // 1MB
-
 #[derive(Debug)]
 pub struct ProgressData {
     pub checking_method: CheckingMethod,
@@ -44,7 +42,6 @@ pub enum CheckingMethod {
     Name,
     Size,
     Hash,
-    HashMb,
 }
 
 impl MyHasher for blake3::Hasher {
@@ -198,7 +195,7 @@ impl DuplicateFinder {
                     return;
                 }
             }
-            CheckingMethod::HashMb | CheckingMethod::Hash => {
+            CheckingMethod::Hash => {
                 if !self.check_files_size(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
@@ -499,7 +496,7 @@ impl DuplicateFinder {
             let checking_method = self.check_method.clone();
             let max_stage = match self.check_method {
                 CheckingMethod::Size => 0,
-                CheckingMethod::HashMb | CheckingMethod::Hash => 2,
+                CheckingMethod::Hash => 2,
                 _ => 255,
             };
             progress_thread_handle = thread::spawn(move || loop {
@@ -796,35 +793,6 @@ impl DuplicateFinder {
         let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>, u64)>;
 
         match self.check_method {
-            CheckingMethod::HashMb => {
-                full_hash_results = pre_checked_map
-                    .par_iter()
-                    .map(|(size, vec_file_entry)| {
-                        let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
-                        let mut errors: Vec<String> = Vec::new();
-                        let mut bytes_read: u64 = 0;
-                        let mut buffer = [0u8; 1024 * 128];
-                        atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                        for file_entry in vec_file_entry {
-                            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                                check_was_breaked.store(true, Ordering::Relaxed);
-                                return None;
-                            }
-
-                            match hash_calculation(&mut buffer, file_entry, &check_type, HASH_MB_LIMIT_BYTES) {
-                                Ok((hash_string, bytes)) => {
-                                    bytes_read += bytes;
-                                    hashmap_with_hash.entry(hash_string.to_string()).or_insert_with(Vec::new);
-                                    hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry.to_owned());
-                                }
-                                Err(s) => errors.push(s),
-                            }
-                        }
-                        Some((*size, hashmap_with_hash, errors, bytes_read))
-                    })
-                    .while_some()
-                    .collect();
-            }
             CheckingMethod::Hash => {
                 let loaded_hash_map;
 
@@ -832,7 +800,7 @@ impl DuplicateFinder {
                 let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
                 if self.use_cache {
-                    loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type) {
+                    loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type, false) {
                         Some(t) => t,
                         None => Default::default(),
                     };
@@ -934,7 +902,7 @@ impl DuplicateFinder {
                             }
                         }
                     }
-                    save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, self.minimal_cache_file_size);
+                    save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
                 }
             }
             _ => panic!("What"),
@@ -995,7 +963,7 @@ impl DuplicateFinder {
                     self.information.number_of_failed_to_remove_files += tuple.2;
                 }
             }
-            CheckingMethod::Hash | CheckingMethod::HashMb => {
+            CheckingMethod::Hash => {
                 for vector_vectors in self.files_with_identical_hashes.values() {
                     for vector in vector_vectors.iter() {
                         let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
@@ -1154,7 +1122,7 @@ impl SaveResults for DuplicateFinder {
                     write!(writer, "Not found any duplicates.").unwrap();
                 }
             }
-            CheckingMethod::Hash | CheckingMethod::HashMb => {
+            CheckingMethod::Hash => {
                 if !self.files_with_identical_hashes.is_empty() {
                     writeln!(writer, "-------------------------------------------------Files with same hashes-------------------------------------------------").unwrap();
                     writeln!(
@@ -1209,7 +1177,7 @@ impl PrintResults for DuplicateFinder {
                     println!();
                 }
             }
-            CheckingMethod::Hash | CheckingMethod::HashMb => {
+            CheckingMethod::Hash => {
                 for (_size, vector) in self.files_with_identical_hashes.iter() {
                     for j in vector {
                         number_of_files += j.len() as u64;
@@ -1354,7 +1322,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     result
 }
 
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, minimal_cache_file_size: u64) {
+pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, is_prehash: bool, minimal_cache_file_size: u64) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
@@ -1366,7 +1334,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash).as_str());
+        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash, is_prehash).as_str());
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -1419,14 +1387,15 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
     Ok((hasher.finalize(), current_file_read_bytes))
 }
 
-fn get_file_hash_name(type_of_hash: &HashType) -> String {
-    format!("cache_duplicates_{:?}.txt", type_of_hash)
+fn get_file_hash_name(type_of_hash: &HashType, is_prehash: bool) -> String {
+    let prehash_str = if is_prehash { "_prehash" } else { "" };
+    format!("cache_duplicates_{:?}{}.txt", type_of_hash, prehash_str)
 }
 
-pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
+pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash).as_str());
+        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash, is_prehash).as_str());
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {

@@ -102,20 +102,28 @@ pub fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
-                        for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32].iter() {
-                            if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash) {
-                                let mut hashmap_to_save: BTreeMap<String, czkawka_core::duplicate::FileEntry> = Default::default();
-                                for (_, vec_file_entry) in cache_entries {
-                                    for file_entry in vec_file_entry {
-                                        hashmap_to_save.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                        for use_prehash in [true, false] {
+                            for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32].iter() {
+                                if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash, use_prehash) {
+                                    let mut hashmap_to_save: BTreeMap<String, czkawka_core::duplicate::FileEntry> = Default::default();
+                                    for (_, vec_file_entry) in cache_entries {
+                                        for file_entry in vec_file_entry {
+                                            hashmap_to_save.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                                        }
                                     }
+                                    czkawka_core::duplicate::save_hashes_to_file(
+                                        &hashmap_to_save,
+                                        &mut messages,
+                                        type_of_hash,
+                                        use_prehash,
+                                        entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024),
+                                    )
                                 }
-                                czkawka_core::duplicate::save_hashes_to_file(&hashmap_to_save, &mut messages, type_of_hash, entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024))
                             }
-                        }
 
-                        messages.messages.push("Properly cleared cache".to_string());
-                        text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
+                            messages.messages.push("Properly cleared cache".to_string());
+                            text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
+                        }
                     }
                     dialog.close();
                 });
