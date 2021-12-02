@@ -83,9 +83,12 @@ pub struct GuiMainNotebook {
     pub radio_button_similar_hash_algorithm_vertgradient: gtk::RadioButton,
     pub radio_button_similar_hash_algorithm_doublegradient: gtk::RadioButton,
 
-    pub radio_button_similar_hash_size_4: gtk::RadioButton,
     pub radio_button_similar_hash_size_8: gtk::RadioButton,
     pub radio_button_similar_hash_size_16: gtk::RadioButton,
+    pub radio_button_similar_hash_size_32: gtk::RadioButton,
+    pub radio_button_similar_hash_size_64: gtk::RadioButton,
+
+    pub label_similar_images_minimal_similarity: gtk::Label,
 
     pub image_preview_similar_images: gtk::Image,
     pub image_preview_duplicates: gtk::Image,
@@ -187,6 +190,10 @@ impl GuiMainNotebook {
         let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
         let radio_button_hash_type_xxh3: gtk::RadioButton = builder.object("radio_button_hash_type_xxh3").unwrap();
 
+        radio_button_hash_type_blake3.set_tooltip_text(Some("Blake3 is cryptographic hash function. It is used as default hash algorithm, because it is very fast."));
+        radio_button_hash_type_crc32.set_tooltip_text(Some("CRC32 is simple hash function. It should be faster than Blake3, but probably may have very rarely some collisions."));
+        radio_button_hash_type_xxh3.set_tooltip_text(Some("XXH3 is very similar in case of performance and hash quality to Blake3, so such modes can be easily used ."));
+
         let radio_button_resize_algorithm_lanczos3: gtk::RadioButton = builder.object("radio_button_resize_algorithm_lanczos3").unwrap();
         let radio_button_resize_algorithm_nearest: gtk::RadioButton = builder.object("radio_button_resize_algorithm_nearest").unwrap();
         let radio_button_resize_algorithm_triangle: gtk::RadioButton = builder.object("radio_button_resize_algorithm_triangle").unwrap();
@@ -199,9 +206,17 @@ impl GuiMainNotebook {
         let radio_button_similar_hash_algorithm_vertgradient: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_vertgradient").unwrap();
         let radio_button_similar_hash_algorithm_doublegradient: gtk::RadioButton = builder.object("radio_button_similar_hash_algorithm_doublegradient").unwrap();
 
-        let radio_button_similar_hash_size_4: gtk::RadioButton = builder.object("radio_button_similar_hash_size_4").unwrap();
         let radio_button_similar_hash_size_8: gtk::RadioButton = builder.object("radio_button_similar_hash_size_8").unwrap();
         let radio_button_similar_hash_size_16: gtk::RadioButton = builder.object("radio_button_similar_hash_size_16").unwrap();
+        let radio_button_similar_hash_size_32: gtk::RadioButton = builder.object("radio_button_similar_hash_size_32").unwrap();
+        let radio_button_similar_hash_size_64: gtk::RadioButton = builder.object("radio_button_similar_hash_size_64").unwrap();
+
+        radio_button_similar_hash_size_8.set_tooltip_text(Some("Default hash size, with very high similarity it produce quite good results and don't save too much data too cache."));
+        radio_button_similar_hash_size_16.set_tooltip_text(Some("More precise than 8, so can be used to find very similar pictures, but create bigger cache entries."));
+        radio_button_similar_hash_size_32.set_tooltip_text(Some("Hash of this size provide very big similarity which is more than enough for most usages."));
+        radio_button_similar_hash_size_64.set_tooltip_text(Some("Paranoid mode, such tool create really big cache files and will catch almost same images."));
+
+        let label_similar_images_minimal_similarity: gtk::Label = builder.object("label_similar_images_minimal_similarity").unwrap();
 
         let image_preview_similar_images: gtk::Image = builder.object("image_preview_similar_images").unwrap();
         let image_preview_duplicates: gtk::Image = builder.object("image_preview_duplicates").unwrap();
@@ -268,9 +283,11 @@ impl GuiMainNotebook {
             radio_button_similar_hash_algorithm_mean,
             radio_button_similar_hash_algorithm_vertgradient,
             radio_button_similar_hash_algorithm_doublegradient,
-            radio_button_similar_hash_size_4,
             radio_button_similar_hash_size_8,
             radio_button_similar_hash_size_16,
+            radio_button_similar_hash_size_32,
+            radio_button_similar_hash_size_64,
+            label_similar_images_minimal_similarity,
             image_preview_similar_images,
             entry_duplicate_maximal_size,
             entry_same_music_maximal_size,

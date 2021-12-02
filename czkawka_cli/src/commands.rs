@@ -382,10 +382,11 @@ fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
 fn parse_image_hash_size(src: &str) -> Result<u8, String> {
     let hash_size;
     hash_size = match src.to_lowercase().as_str() {
-        "4" => 4,
         "8" => 8,
         "16" => 16,
-        _ => return Err("Couldn't parse the image hash size (allowed: 4, 8, 16)".to_string()),
+        "32" => 32,
+        "64" => 64,
+        _ => return Err("Couldn't parse the image hash size (allowed: 8, 16, 32, 64)".to_string()),
     };
     Ok(hash_size)
 }
