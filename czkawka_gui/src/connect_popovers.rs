@@ -1,5 +1,6 @@
 use gtk::prelude::*;
 use gtk::{ResponseType, TreeIter, Window};
+use regex::Regex;
 
 use czkawka_core::common::Common;
 
@@ -216,12 +217,6 @@ fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
 fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
     popover.popdown();
 
-    enum WildcardType {
-        Path,
-        Name,
-        PathName,
-    }
-
     let window_title = match select_things {
         false => "Unselect Custom",
         true => "Select Custom",
@@ -233,112 +228,232 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
         dialog.add_button("Ok", ResponseType::Ok);
         dialog.add_button("Close", ResponseType::Cancel);
 
-        let label: gtk::Label = gtk::Label::new(Some("Usage: */folder-nr*/* or name-version-*.txt"));
+        let check_button_path = gtk::CheckButton::builder().label("Path").build();
+        let check_button_name = gtk::CheckButton::builder().label("Name").build();
+        let check_button_rust_regex = gtk::CheckButton::builder().label("Regex Path + Name").build();
 
-        let radio_path = gtk::RadioButton::builder().label("Path").build();
-        let radio_name_path = gtk::RadioButton::builder().label("Path + Name").build();
-        radio_name_path.join_group(Some(&radio_path));
-        let radio_name = gtk::RadioButton::builder().label("Name").build();
-        radio_name.join_group(Some(&radio_path)); // TODO, not sure why this not exists for builder, but should
+        let check_button_select_not_all_results = gtk::CheckButton::builder().label("Don't select all records in group").build();
+        check_button_select_not_all_results.set_active(true);
 
         let entry_path = gtk::Entry::new();
         let entry_name = gtk::Entry::new();
-        let entry_name_path = gtk::Entry::new();
+        let entry_rust_regex = gtk::Entry::new();
+        entry_rust_regex.set_sensitive(false); // By default check button regex is disabled
 
-        label.set_margin_bottom(5);
-        label.set_margin_end(5);
-        label.set_margin_start(5);
+        let label_regex_valid = gtk::Label::new(None);
 
-        // TODO Label should have const width, and rest should fill entry, but for now is 50%-50%
-        let grid = gtk::Grid::new();
-        grid.set_row_homogeneous(true);
-        grid.set_column_homogeneous(true);
+        // Tooltips
+        {
+            let tooltip_path = "Allows to select records by its path.\n\nExample usage:\n/home/pimpek/rzecz.txt can be found with /home/pim*";
+            let tooltip_name = "Allows to select records by file names.\n\nExample usage:\n/usr/ping/pong.txt can be found with *ong*";
+            let tooltip_regex = "Allows to select records by specified Regex.\n\nWith this mode, searched text is Path with Name\n\nExample usage:\n/usr/bin/ziemniak.txt can be found with /ziem[a-z]+\n\nThis use default Rust regex implementation, so you can read more about it in https://docs.rs/regex.";
+            let tooltip_group_button = "Prevents from selecting all records in group.\n\n This is enabled by default, because in most of situations user don't want to delete both original and duplicates files, but want to leave at least one file.\n\nWarning: This setting don't work if already user selected all results in group manually.";
 
-        grid.attach(&label, 0, 0, 2, 1);
+            check_button_path.set_tooltip_text(Some(tooltip_path));
+            entry_path.set_tooltip_text(Some(tooltip_path));
 
-        grid.attach(&radio_path, 0, 1, 1, 1);
-        grid.attach(&radio_name, 0, 2, 1, 1);
-        grid.attach(&radio_name_path, 0, 3, 1, 1);
+            check_button_name.set_tooltip_text(Some(tooltip_name));
+            entry_name.set_tooltip_text(Some(tooltip_name));
 
-        grid.attach(&entry_path, 1, 1, 1, 1);
-        grid.attach(&entry_name, 1, 2, 1, 1);
-        grid.attach(&entry_name_path, 1, 3, 1, 1);
+            check_button_rust_regex.set_tooltip_text(Some(tooltip_regex));
+            entry_rust_regex.set_tooltip_text(Some(tooltip_regex));
 
-        let box_widget = get_dialog_box_child(&dialog);
-        box_widget.add(&grid);
+            check_button_select_not_all_results.set_tooltip_text(Some(tooltip_group_button));
+        }
+        {
+            let label_regex_valid = label_regex_valid.clone();
+            entry_rust_regex.connect_changed(move |entry_rust_regex| {
+                let message;
+                let text_to_check = entry_rust_regex.text().to_string();
+                if text_to_check.is_empty() {
+                    message = "";
+                } else {
+                    match Regex::new(&text_to_check) {
+                        Ok(_) => message = "Regex is valid",
+                        Err(_) => message = "Regex is invalid",
+                    }
+                }
 
-        dialog.show_all();
+                // TODO add red and green color to text
+                // let attributes_list = AttrList::new();
+                // let p_a = PangoAttribute::init();
+                // let attribute = PangoAttrFontDesc { attr };
+                // attributes_list.insert(attribute);
+                // label_regex_valid.set_attributes(Some(&attributes_list));
+                label_regex_valid.set_text(message);
+            });
+        }
+
+        // Disable other modes when Rust Regex is enabled
+        {
+            let check_button_path = check_button_path.clone();
+            let check_button_name = check_button_name.clone();
+            let check_button_rust_regex = check_button_rust_regex.clone();
+            let entry_path = entry_path.clone();
+            let entry_name = entry_name.clone();
+            let entry_rust_regex = entry_rust_regex.clone();
+            check_button_rust_regex.connect_toggled(move |check_button_rust_regex| {
+                if check_button_rust_regex.is_active() {
+                    check_button_path.set_sensitive(false);
+                    check_button_name.set_sensitive(false);
+                    entry_path.set_sensitive(false);
+                    entry_name.set_sensitive(false);
+                    entry_rust_regex.set_sensitive(true);
+                } else {
+                    check_button_path.set_sensitive(true);
+                    check_button_name.set_sensitive(true);
+                    entry_path.set_sensitive(true);
+                    entry_name.set_sensitive(true);
+                    entry_rust_regex.set_sensitive(false);
+                }
+            });
+        }
+
+        // Configure look of things
+        {
+            // TODO Label should have const width, and rest should fill entry, but for now is 50%-50%
+            let grid = gtk::Grid::new();
+            grid.set_row_homogeneous(true);
+            grid.set_column_homogeneous(true);
+
+            grid.attach(&check_button_name, 0, 1, 1, 1);
+            grid.attach(&check_button_path, 0, 2, 1, 1);
+            grid.attach(&check_button_rust_regex, 0, 3, 1, 1);
+
+            grid.attach(&entry_name, 1, 1, 1, 1);
+            grid.attach(&entry_path, 1, 2, 1, 1);
+            grid.attach(&entry_rust_regex, 1, 3, 1, 1);
+
+            grid.attach(&label_regex_valid, 0, 4, 2, 1);
+
+            if select_things {
+                grid.attach(&check_button_select_not_all_results, 0, 5, 2, 1);
+            }
+
+            let box_widget = get_dialog_box_child(&dialog);
+            box_widget.add(&grid);
+
+            dialog.show_all();
+        }
 
         let tree_view = tree_view.clone();
         dialog.connect_response(move |confirmation_dialog_select_unselect, response_type| {
-            let wildcard_type: WildcardType;
-            let wildcard: String;
+            let name_widcard = entry_name.text().trim().to_string();
+            let path_widcard = entry_path.text().trim().to_string();
+            let regex_widcard = entry_rust_regex.text().trim().to_string();
+
+            #[cfg(target_family = "windows")]
+            let name_widcard = name_widcard.replace("/", "\\");
+            #[cfg(target_family = "windows")]
+            let path_widcard = name_widcard.replace("/", "\\");
 
             if response_type == gtk::ResponseType::Ok {
-                if radio_path.is_active() {
-                    wildcard_type = WildcardType::Path;
-                    wildcard = entry_path.text().to_string();
-                } else if radio_name.is_active() {
-                    wildcard_type = WildcardType::Name;
-                    wildcard = entry_name.text().to_string();
-                } else if radio_name_path.is_active() {
-                    wildcard_type = WildcardType::PathName;
-                    wildcard = entry_name_path.text().to_string();
-                } else {
-                    panic!("Non handled option in wildcard");
-                }
+                let check_path = check_button_path.is_active();
+                let check_name = check_button_name.is_active();
+                let check_regex = check_button_rust_regex.is_active();
 
-                if !wildcard.is_empty() {
-                    let wildcard = wildcard.trim();
+                let check_all_selected = check_button_select_not_all_results.is_active();
 
-                    #[cfg(target_family = "windows")]
-                    let wildcard = wildcard.replace("/", "\\");
-                    #[cfg(target_family = "windows")]
-                    let wildcard = wildcard.as_str();
+                if check_button_path.is_active() || check_button_name.is_active() || check_button_rust_regex.is_active() {
+                    let compiled_regex = match check_regex {
+                        true => match Regex::new(&regex_widcard) {
+                            Ok(t) => t,
+                            Err(_) => {
+                                eprintln!("What? Regex should compile properly.");
+                                confirmation_dialog_select_unselect.close();
+                                return;
+                            }
+                        },
+                        false => Regex::new("").unwrap(),
+                    };
 
                     let model = get_list_store(&tree_view);
 
                     let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
 
+                    let mut number_of_all_things = 0;
+                    let mut number_of_already_selected_things = 0;
+                    let mut vec_of_iters: Vec<TreeIter> = Vec::new();
                     loop {
                         if let Some(column_color) = column_color {
                             let color = model.value(&iter, column_color).get::<String>().unwrap();
                             if color == HEADER_ROW_COLOR {
+                                if select_things {
+                                    if check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
+                                        vec_of_iters.pop();
+                                    }
+                                    for iter in vec_of_iters {
+                                        model.set_value(&iter, column_button_selection, &true.to_value());
+                                    }
+                                } else {
+                                    for iter in vec_of_iters {
+                                        model.set_value(&iter, column_button_selection, &false.to_value());
+                                    }
+                                }
+
                                 if !model.iter_next(&iter) {
                                     break;
                                 }
+
+                                number_of_all_things = 0;
+                                number_of_already_selected_things = 0;
+                                vec_of_iters = Vec::new();
                                 continue;
                             }
                         }
 
+                        let is_selected = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
                         let path = model.value(&iter, column_path).get::<String>().unwrap();
                         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-                        match wildcard_type {
-                            WildcardType::Path => {
-                                if Common::regex_check(wildcard, path) {
-                                    model.set_value(&iter, column_button_selection, &select_things.to_value());
-                                }
+                        #[cfg(not(target_family = "windows"))]
+                        let character = "/";
+                        #[cfg(target_family = "windows")]
+                        let character = "\\";
+                        let path_and_name = format!("{}{}{}", path, character, name);
+
+                        let mut need_to_change_thing: bool = false;
+
+                        number_of_all_things += 1;
+                        if check_regex && compiled_regex.find(&path_and_name).is_some() {
+                            need_to_change_thing = true;
+                        } else {
+                            if check_name && Common::regex_check(&name_widcard, &name) {
+                                need_to_change_thing = true;
                             }
-                            WildcardType::Name => {
-                                if Common::regex_check(wildcard, name) {
-                                    model.set_value(&iter, column_button_selection, &select_things.to_value());
-                                }
+                            if check_path && Common::regex_check(&path_widcard, &path) {
+                                need_to_change_thing = true;
                             }
-                            WildcardType::PathName => {
-                                if Common::regex_check(wildcard, format!("{}/{}", path, name)) {
-                                    model.set_value(&iter, column_button_selection, &select_things.to_value());
+                        }
+
+                        if need_to_change_thing {
+                            if select_things {
+                                if is_selected {
+                                    number_of_already_selected_things += 1;
+                                } else {
+                                    vec_of_iters.push(iter.clone());
                                 }
+                            } else {
+                                vec_of_iters.push(iter.clone());
                             }
                         }
 
                         if !model.iter_next(&iter) {
+                            if select_things {
+                                if check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
+                                    vec_of_iters.pop();
+                                }
+                                for iter in vec_of_iters {
+                                    model.set_value(&iter, column_button_selection, &true.to_value());
+                                }
+                            } else {
+                                for iter in vec_of_iters {
+                                    model.set_value(&iter, column_button_selection, &false.to_value());
+                                }
+                            }
                             break;
                         }
                     }
                 }
-            } else {
-                confirmation_dialog_select_unselect.close();
-                return;
             }
             confirmation_dialog_select_unselect.close();
         });
@@ -609,8 +724,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_all_except_biggest_smallest(
             &popover_select,
             tree_view,
-            nb_object.column_color.expect("AEBI can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AEBI needs size as bytes column"),
+            nb_object.column_color.expect("AEB can't be used without headers"),
+            nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
             nb_object.column_dimensions,
             nb_object.column_selection as u32,
             true,
@@ -629,8 +744,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_all_except_biggest_smallest(
             &popover_select,
             tree_view,
-            nb_object.column_color.expect("AESI can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AESI needs size as bytes column"),
+            nb_object.column_color.expect("AES can't be used without headers"),
+            nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
             nb_object.column_dimensions,
             nb_object.column_selection as u32,
             false,

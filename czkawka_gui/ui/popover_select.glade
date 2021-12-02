@@ -27,7 +27,7 @@ Author: Rafał Mikrut
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
+  <requires lib="gtk+" version="3.24"/>
   <!-- interface-license-type mit -->
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
