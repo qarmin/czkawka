@@ -143,7 +143,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
-                        for hash_size in [8, 16, 32].iter() {
+                        for hash_size in [8, 16, 32, 64].iter() {
                             for image_filter in [FilterType::Lanczos3, FilterType::CatmullRom, FilterType::Gaussian, FilterType::Nearest, FilterType::Triangle].iter() {
                                 for hash_alg in [HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean].iter() {
                                     if let Some(cache_entries) = czkawka_core::similar_images::load_hashes_from_file(&mut messages, true, *hash_size, *hash_alg, *image_filter) {

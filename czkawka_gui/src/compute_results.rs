@@ -46,9 +46,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
-    let radio_button_similar_hash_size_4 = gui_data.main_notebook.radio_button_similar_hash_size_4.clone();
     let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
     let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
+    let radio_button_similar_hash_size_32 = gui_data.main_notebook.radio_button_similar_hash_size_32.clone();
+    let radio_button_similar_hash_size_64 = gui_data.main_notebook.radio_button_similar_hash_size_64.clone();
 
     let main_context = glib::MainContext::default();
     let _guard = main_context.acquire().unwrap();
@@ -64,12 +65,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
         notebook_main.set_sensitive(true);
 
         let hash_size;
-        if radio_button_similar_hash_size_4.is_active() {
-            hash_size = 4;
-        } else if radio_button_similar_hash_size_8.is_active() {
+        if radio_button_similar_hash_size_8.is_active() {
             hash_size = 8;
         } else if radio_button_similar_hash_size_16.is_active() {
             hash_size = 16;
+        } else if radio_button_similar_hash_size_32.is_active() {
+            hash_size = 32;
+        } else if radio_button_similar_hash_size_64.is_active() {
+            hash_size = 64;
         } else {
             panic!("No radio button is pressed");
         }

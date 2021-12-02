@@ -811,8 +811,6 @@ impl DuplicateFinder {
             }
 
             if self.use_prehash_cache {
-                println!("non cached - {}", non_cached_files_to_check.values().map(|e| e.len()).sum::<usize>());
-                println!("cached - {}", records_already_cached.values().map(|e| e.len()).sum::<usize>());
                 // All results = records already cached + computed results
                 let mut save_cache_to_hashmap: BTreeMap<String, FileEntry> = Default::default();
 

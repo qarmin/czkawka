@@ -95,9 +95,10 @@ pub fn connect_button_search(
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
     let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
     let entry_settings_prehash_cache_file_minimal_size = gui_data.settings.entry_settings_prehash_cache_file_minimal_size.clone();
-    let radio_button_similar_hash_size_4 = gui_data.main_notebook.radio_button_similar_hash_size_4.clone();
     let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
     let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
+    let radio_button_similar_hash_size_32 = gui_data.main_notebook.radio_button_similar_hash_size_32.clone();
+    let radio_button_similar_hash_size_64 = gui_data.main_notebook.radio_button_similar_hash_size_64.clone();
     let radio_button_resize_algorithm_catmullrom = gui_data.main_notebook.radio_button_resize_algorithm_catmullrom.clone();
     let radio_button_resize_algorithm_lanczos3 = gui_data.main_notebook.radio_button_resize_algorithm_lanczos3.clone();
     let radio_button_resize_algorithm_nearest = gui_data.main_notebook.radio_button_resize_algorithm_nearest.clone();
@@ -292,12 +293,14 @@ pub fn connect_button_search(
                 get_list_store(&tree_view_similar_images_finder).clear();
 
                 let hash_size;
-                if radio_button_similar_hash_size_4.is_active() {
-                    hash_size = 4;
-                } else if radio_button_similar_hash_size_8.is_active() {
+                if radio_button_similar_hash_size_8.is_active() {
                     hash_size = 8;
                 } else if radio_button_similar_hash_size_16.is_active() {
                     hash_size = 16;
+                } else if radio_button_similar_hash_size_32.is_active() {
+                    hash_size = 32;
+                } else if radio_button_similar_hash_size_64.is_active() {
+                    hash_size = 64;
                 } else {
                     panic!("No radio button is pressed");
                 }

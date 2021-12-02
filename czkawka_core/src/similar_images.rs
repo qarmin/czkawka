@@ -25,10 +25,11 @@ use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 // TODO check for better values
-pub const SIMILAR_VALUES: [[u32; 6]; 3] = [
-    [0, 1, 2, 3, 4, 5],     // 4 - Max 16
-    [0, 2, 5, 7, 14, 20],   // 8 - Max 256
-    [2, 5, 10, 20, 40, 80], // 16 - Max 65536
+pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
+    [0, 2, 5, 7, 14, 20],    // 8
+    [2, 5, 15, 30, 40, 40],  // 16
+    [4, 10, 20, 40, 40, 40], // 32
+    [6, 20, 40, 40, 40, 40], // 64
 ];
 
 #[derive(Debug)]
@@ -144,7 +145,7 @@ impl SimilarImages {
 
     pub fn set_hash_size(&mut self, hash_size: u8) {
         self.hash_size = match hash_size {
-            4 | 8 | 16 => hash_size,
+            8 | 16 | 32 | 64 => hash_size,
             e => {
                 panic!("Invalid value of hash size {}", e);
             }
@@ -539,9 +540,10 @@ impl SimilarImages {
         // TODO optimize this for big temp_max_similarity values
         // TODO maybe Simialar(u32) is enough instead SIMILAR_VALUES value?
         let temp_max_similarity = match self.hash_size {
-            4 => SIMILAR_VALUES[0][5],
-            8 => SIMILAR_VALUES[1][5],
-            16 => SIMILAR_VALUES[2][5],
+            8 => SIMILAR_VALUES[0][5],
+            16 => SIMILAR_VALUES[1][4],
+            32 => SIMILAR_VALUES[2][3],
+            64 => SIMILAR_VALUES[3][2],
             _ => panic!(),
         };
 
@@ -759,9 +761,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
         let mut writer = BufWriter::new(file_handler);
 
         for file_entry in hashmap.values() {
-            let mut string: String = String::with_capacity(128);
-
-            string += format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date).as_str();
+            let mut string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date);
 
             for hash in &file_entry.hash {
                 string.push_str("//");
@@ -873,9 +873,10 @@ fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType)
 
 pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> String {
     let index_preset = match hash_size {
-        4 => 0,
-        8 => 1,
-        16 => 2,
+        8 => 0,
+        16 => 1,
+        32 => 2,
+        64 => 3,
         _ => panic!(),
     };
 
@@ -926,9 +927,10 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
 
 pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> Similarity {
     let index_preset = match hash_size {
-        4 => 0,
-        8 => 1,
-        16 => 2,
+        8 => 0,
+        16 => 1,
+        32 => 2,
+        64 => 3,
         _ => panic!(),
     };
     match similarity_preset {
@@ -972,7 +974,7 @@ pub fn test_image_conversion_speed() {
         Ok(img_open) => {
             for alg in [HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
                 for filter in [FilterType::Lanczos3, FilterType::CatmullRom, FilterType::Gaussian, FilterType::Nearest, FilterType::Triangle] {
-                    for size in [2, 4, 8, 16, 32, 64] {
+                    for size in [8, 16, 32, 64] {
                         let hasher_config = HasherConfig::new().hash_alg(alg).resize_filter(filter).hash_size(size, size);
 
                         let start = SystemTime::now();
