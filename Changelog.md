@@ -1,3 +1,18 @@
+## Version 4.0.0 - ?
+- Add support for finding similar videos - [#460](https://github.com/qarmin/czkawka/pull/460)
+- GUI code refactoring(could fix some bugs) - [#462](https://github.com/qarmin/czkawka/pull/462)
+- Fixed crash when trying to hard/symlink 0 files - [#462](https://github.com/qarmin/czkawka/pull/462)
+- GTK 4 compatibility improvements for future change of toolkit - [#467](https://github.com/qarmin/czkawka/pull/467), [#468](https://github.com/qarmin/czkawka/pull/468), [#473](https://github.com/qarmin/czkawka/pull/473), [#474](https://github.com/qarmin/czkawka/pull/474)
+- Change minimal supported OS to Ubuntu 20.04(needed by GTK) - [#468](https://github.com/qarmin/czkawka/pull/468)
+- Increased performance when using image previews - [#468](https://github.com/qarmin/czkawka/pull/468)
+- Improved performance due caching hash of broken/not supported images/videos = [#471](https://github.com/qarmin/czkawka/pull/471)
+- Option to not remove cache from non existent files(e.g. from unplugged pendrive) - [#472](https://github.com/qarmin/czkawka/pull/472)
+- Add multiple tooltips with helpful messages - [#472](https://github.com/qarmin/czkawka/pull/472)
+- Allow to cache prehash - [#477](https://github.com/qarmin/czkawka/pull/477)
+- Improve custom selecting of records(allows to use Rust red regex) - [#489](https://github.com/qarmin/czkawka/pull/478)
+- Remove support for finding zeroed files - [#461](https://github.com/qarmin/czkawka/pull/461)
+- Remove HashMB mode - [#476](https://github.com/qarmin/czkawka/pull/476)
+
 ## Version 3.3.1 - 22.11.2021r
 - Fix crash when moving buttons [#457](https://github.com/qarmin/czkawka/pull/457)
 - Hide move button at start [c9ca230](https://github.com/qarmin/czkawka/commit/c9ca230dfd05e2166b2d68683b091cfd45037edd)
@@ -199,7 +214,7 @@ This version is only needed to test flatpak build
 - Added support for finding similar pictures in GUI [#69](https://github.com/qarmin/czkawka/issues/69)
 
 ## Version 1.0.0 - 02.10.2020r
-- Added confirmation button to delete button
+- Added confirmation dialog to delete button
 - Updated Readme
 - Tested a lot app, so I think that it version 1.0.0 can be freely released
 
