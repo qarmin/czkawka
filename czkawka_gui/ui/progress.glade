@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 
+<!-- Generated with glade 3.39.0 
 
 The MIT License (MIT)
 
@@ -27,7 +27,7 @@ Author: Rafał Mikrut
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
+  <requires lib="gtk+" version="3.24"/>
   <!-- interface-license-type mit -->
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
@@ -50,6 +50,10 @@ Author: Rafał Mikrut
           <object class="GtkGrid" id="grid_progress_stages">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="valign">center</property>
+            <property name="margin-start">2</property>
+            <property name="margin-end">2</property>
+            <property name="margin-top">2</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
@@ -121,6 +125,7 @@ Author: Rafał Mikrut
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
             <property name="halign">end</property>
+            <property name="margin-end">2</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>

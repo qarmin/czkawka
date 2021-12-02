@@ -27,7 +27,7 @@ Author: Rafał Mikrut
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
+  <requires lib="gtk+" version="3.24"/>
   <!-- interface-license-type mit -->
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
@@ -229,6 +229,7 @@ Author: Rafał Mikrut
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
+                        <property name="margin-end">5</property>
                         <property name="active">True</property>
                         <property name="draw-indicator">True</property>
                       </object>
@@ -479,6 +480,8 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel">
@@ -585,6 +588,8 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel">
@@ -657,6 +662,9 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-top">2</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -725,6 +733,8 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -793,6 +803,9 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-top">2</property>
                             <property name="spacing">8</property>
                             <child>
                               <object class="GtkLabel">
@@ -871,6 +884,7 @@ Author: Rafał Mikrut
                           <object class="GtkScrolledWindow" id="scrolled_window_duplicate_finder">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
+                            <property name="margin-end">5</property>
                             <property name="shadow-type">in</property>
                             <child>
                               <placeholder/>
@@ -948,6 +962,9 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-top">2</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
@@ -1075,6 +1092,9 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-top">2</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -1177,6 +1197,8 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -1279,6 +1301,8 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -1349,6 +1373,8 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
                             <property name="spacing">8</property>
                             <child>
                               <object class="GtkLabel">
@@ -1427,6 +1453,9 @@ Author: Rafał Mikrut
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-bottom">2</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -1489,6 +1518,7 @@ Author: Rafał Mikrut
                           <object class="GtkScrolledWindow" id="scrolled_window_similar_images_finder">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
+                            <property name="margin-end">5</property>
                             <property name="shadow-type">in</property>
                             <child>
                               <placeholder/>
@@ -1546,6 +1576,9 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-top">2</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
@@ -1624,6 +1657,9 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-bottom">2</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
@@ -1722,6 +1758,9 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-top">2</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel">
@@ -1800,6 +1839,9 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-bottom">2</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_title">
@@ -1884,6 +1926,7 @@ Author: Rafał Mikrut
                       <object class="GtkScrolledWindow" id="scrolled_window_same_music_finder">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="margin-end">5</property>
                         <property name="shadow-type">in</property>
                         <child>
                           <placeholder/>

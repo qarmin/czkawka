@@ -45,13 +45,9 @@ impl Common {
 
     /// Function to check if directory match expression
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
-        // if !expression.contains('*') {
-        //     #[cfg(debug_assertions)]
-        //     {
-        //         println!("Invalid expression Warning: Expression should have *,");
-        //     }
-        //     //return false;
-        // }
+        if expression == "*" {
+            return true;
+        }
 
         let temp_splits: Vec<&str> = expression.split('*').collect();
         let mut splits: Vec<&str> = Vec::new();
