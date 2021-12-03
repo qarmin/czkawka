@@ -16,6 +16,7 @@ impl GuiAbout {
         let builder = Builder::from_string(glade_src.as_str());
 
         let about_dialog: gtk::AboutDialog = builder.object("about_dialog").unwrap();
+        about_dialog.set_modal(true);
         about_dialog.set_transient_for(Some(window_main));
 
         let button_repository: gtk::Button = builder.object("button_repository").unwrap();

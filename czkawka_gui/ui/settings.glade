@@ -32,55 +32,247 @@ Author: Rafał Mikrut
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
-  <object class="GtkWindow" id="window_settings">
+  <object class="GtkDialog" id="window_settings">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Czkawka Options</property>
-    <child>
+    <property name="modal">True</property>
+    <property name="type-hint">dialog</property>
+    <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkComboBoxText">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkNotebook">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="tab-pos">left</property>
-            <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkComboBoxText">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkNotebook">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="tab-pos">left</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_load_at_start">
-                        <property name="label" translatable="yes">Load configuration at start</property>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_load_at_start">
+                            <property name="label" translatable="yes">Load configuration at start</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_save_at_exit">
+                            <property name="label" translatable="yes">Save configuration at exit</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_confirm_deletion">
+                            <property name="label" translatable="yes">Show confirm dialog when deleting any files</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_confirm_group_deletion">
+                            <property name="label" translatable="yes">Show confirm dialog when deleting all files in group</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_show_text_view">
+                            <property name="label" translatable="yes">Show bottom text panel</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_use_cache">
+                            <property name="label" translatable="yes">Use cache</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_use_trash">
+                            <property name="label" translatable="yes">Move deleted files to trash</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkButton" id="button_settings_open_cache_folder">
+                            <property name="label" translatable="yes">Open cache folder</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button_settings_open_settings_folder">
+                            <property name="label" translatable="yes">Open settings folder</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack-type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">General</property>
+                  </object>
+                  <packing>
+                    <property name="tab-fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkCheckButton" id="check_button_settings_hide_hard_links">
+                        <property name="label" translatable="yes">Hide hard links(only Linux and MacOS)</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
@@ -94,8 +286,8 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_save_at_exit">
-                        <property name="label" translatable="yes">Save configuration at exit</property>
+                      <object class="GtkCheckButton" id="check_button_settings_show_preview_duplicates">
+                        <property name="label" translatable="yes">Show image preview</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
@@ -109,8 +301,8 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_confirm_deletion">
-                        <property name="label" translatable="yes">Show confirm dialog when deleting any files</property>
+                      <object class="GtkCheckButton" id="check_button_settings_duplicates_delete_outdated_cache">
+                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
@@ -124,13 +316,41 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_confirm_group_deletion">
-                        <property name="label" translatable="yes">Show confirm dialog when deleting all files in group</property>
+                      <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="active">True</property>
-                        <property name="draw-indicator">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-left">4</property>
+                        <property name="margin-right">4</property>
+                        <property name="margin-start">4</property>
+                        <property name="margin-end">4</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Minimal size of files in bytes saved to cache</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_settings_cache_file_minimal_size">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="max-length">15</property>
+                            <property name="text" translatable="yes">257144</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="pack-type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -139,43 +359,69 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_show_text_view">
-                        <property name="label" translatable="yes">Show bottom text panel</property>
+                      <object class="GtkCheckButton" id="check_button_duplicates_use_prehash_cache">
+                        <property name="label" translatable="yes">Use prehash cache</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
-                        <property name="active">True</property>
-                        <property name="draw-indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="check_button_settings_use_cache">
-                        <property name="label" translatable="yes">Use cache</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="active">True</property>
                         <property name="draw-indicator">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_settings_duplicates_clear_cache">
+                        <property name="label" translatable="yes">Remove outdated results from duplicates cache</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack-type">end</property>
                         <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_use_trash">
-                        <property name="label" translatable="yes">Move deleted files to trash</property>
+                      <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="active">True</property>
-                        <property name="draw-indicator">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-left">4</property>
+                        <property name="margin-right">4</property>
+                        <property name="margin-start">4</property>
+                        <property name="margin-end">4</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Minimal size of files in bytes saved to prehash cache</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_settings_prehash_cache_file_minimal_size">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="max-length">15</property>
+                            <property name="text" translatable="yes">1</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="pack-type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -185,21 +431,33 @@ Author: Rafał Mikrut
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Duplicate Finder</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkButton" id="button_settings_open_cache_folder">
-                        <property name="label" translatable="yes">Open cache folder</property>
+                      <object class="GtkCheckButton" id="check_button_settings_show_preview_similar_images">
+                        <property name="label" translatable="yes">Show image preview</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -208,147 +466,118 @@ Author: Rafał Mikrut
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button_settings_open_settings_folder">
-                        <property name="label" translatable="yes">Open settings folder</property>
+                      <object class="GtkCheckButton" id="check_button_settings_similar_images_delete_outdated_cache">
+                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="pack-type">end</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="pack-type">end</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">General</property>
-              </object>
-              <packing>
-                <property name="tab-fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkCheckButton" id="check_button_settings_hide_hard_links">
-                    <property name="label" translatable="yes">Hide hard links(only Linux and MacOS)</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="check_button_settings_show_preview_duplicates">
-                    <property name="label" translatable="yes">Show image preview</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="check_button_settings_duplicates_delete_outdated_cache">
-                    <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-start">4</property>
-                    <property name="margin-end">4</property>
                     <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Minimal size of files in bytes saved to cache</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="entry_settings_cache_file_minimal_size">
+                      <object class="GtkButton" id="button_settings_similar_images_clear_cache">
+                        <property name="label" translatable="yes">Remove outdated results from images cache</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="max-length">15</property>
-                        <property name="text" translatable="yes">257144</property>
-                        <property name="caps-lock-warning">False</property>
-                        <property name="input-purpose">number</property>
+                        <property name="receives-default">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack-type">end</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Similar Images</property>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                    <property name="tab-fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkButton" id="button_settings_similar_videos_clear_cache">
+                        <property name="label" translatable="yes">Remove outdated results from videos cache</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="check_button_settings_similar_videos_delete_outdated_cache">
+                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
-                <child>
-                  <object class="GtkCheckButton" id="check_button_duplicates_use_prehash_cache">
-                    <property name="label" translatable="yes">Use prehash cache</property>
+                <child type="tab">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Similar Videos</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">3</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-left">3</property>
+                <property name="margin-right">3</property>
+                <property name="margin-start">3</property>
+                <property name="margin-end">3</property>
+                <property name="spacing">3</property>
                 <child>
-                  <object class="GtkButton" id="button_settings_duplicates_clear_cache">
-                    <property name="label" translatable="yes">Remove outdated results from duplicates cache</property>
+                  <object class="GtkButton" id="button_settings_load_configuration">
+                    <property name="label" translatable="yes">Load configuration</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -356,107 +585,25 @@ Author: Rafał Mikrut
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="pack-type">end</property>
-                    <property name="position">5</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-left">4</property>
-                    <property name="margin-right">4</property>
-                    <property name="margin-start">4</property>
-                    <property name="margin-end">4</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Minimal size of files in bytes saved to prehash cache</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="entry_settings_prehash_cache_file_minimal_size">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="max-length">15</property>
-                        <property name="text" translatable="yes">1</property>
-                        <property name="caps-lock-warning">False</property>
-                        <property name="input-purpose">number</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="pack-type">end</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">6</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Duplicate Finder</property>
-              </object>
-              <packing>
-                <property name="position">1</property>
-                <property name="tab-fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkCheckButton" id="check_button_settings_show_preview_similar_images">
-                    <property name="label" translatable="yes">Show image preview</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="check_button_settings_similar_images_delete_outdated_cache">
-                    <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
+                  <object class="GtkButton" id="button_settings_reset_configuration">
+                    <property name="label" translatable="yes">Reset configuration</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="expand">True</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button_settings_similar_images_clear_cache">
-                    <property name="label" translatable="yes">Remove outdated results from images cache</property>
+                  <object class="GtkButton" id="button_settings_save_configuration">
+                    <property name="label" translatable="yes">Save configuration</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -470,67 +617,10 @@ Author: Rafał Mikrut
                 </child>
               </object>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">3</property>
                 <property name="position">2</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Similar Images</property>
-              </object>
-              <packing>
-                <property name="position">2</property>
-                <property name="tab-fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkButton" id="button_settings_similar_videos_clear_cache">
-                    <property name="label" translatable="yes">Remove outdated results from videos cache</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="pack-type">end</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="check_button_settings_similar_videos_delete_outdated_cache">
-                    <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Similar Videos</property>
-              </object>
-              <packing>
-                <property name="position">3</property>
-                <property name="tab-fill">False</property>
               </packing>
             </child>
           </object>
@@ -538,61 +628,6 @@ Author: Rafał Mikrut
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-start">3</property>
-            <property name="margin-end">3</property>
-            <property name="spacing">3</property>
-            <child>
-              <object class="GtkButton" id="button_settings_load_configuration">
-                <property name="label" translatable="yes">Load configuration</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_settings_reset_configuration">
-                <property name="label" translatable="yes">Reset configuration</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_settings_save_configuration">
-                <property name="label" translatable="yes">Save configuration</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack-type">end</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="padding">3</property>
-            <property name="position">2</property>
           </packing>
         </child>
       </object>
