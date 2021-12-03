@@ -23,12 +23,12 @@ pub const KEY_DELETE: u32 = 119;
 pub const KEY_ENTER: u32 = 36;
 pub const KEY_SPACE: u32 = 65;
 
-pub const KEY_DOWN: u32 = 116;
-pub const KEY_UP: u32 = 111;
-pub const KEY_PG_DOWN: u32 = 117;
-pub const KEY_PG_UP: u32 = 112;
-pub const KEY_HOME: u32 = 115;
-pub const KEY_END: u32 = 110;
+// pub const KEY_DOWN: u32 = 116;
+// pub const KEY_UP: u32 = 111;
+// pub const KEY_PG_DOWN: u32 = 117;
+// pub const KEY_PG_UP: u32 = 112;
+// pub const KEY_HOME: u32 = 115;
+// pub const KEY_END: u32 = 110;
 
 #[derive(Eq, PartialEq)]
 pub enum PopoverTypes {

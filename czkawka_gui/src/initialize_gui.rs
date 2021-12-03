@@ -509,20 +509,16 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
             }
             let preview_path = preview_path.clone();
-            // Allowed keys for generating preview,
-            // LEFT, UP, RIGHT, DOWN, Pageup, pagedown, home, end
-            if [KEY_DOWN, KEY_UP, KEY_PG_DOWN, KEY_PG_UP, KEY_HOME, KEY_END].iter().any(|any_key| *any_key == key_code) {
-                let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
-                show_preview(
-                    &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
-                    &text_view_errors,
-                    &check_button_settings_show_preview_duplicates,
-                    &image_preview_duplicates,
-                    preview_path,
-                    nb_object.column_path,
-                    nb_object.column_name,
-                );
-            }
+            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
+            show_preview(
+                &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
+                &text_view_errors,
+                &check_button_settings_show_preview_duplicates,
+                &image_preview_duplicates,
+                preview_path,
+                nb_object.column_path,
+                nb_object.column_name,
+            );
         });
     }
     // Empty Folder
@@ -574,21 +570,16 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
             }
             let preview_path = preview_path.clone();
-
-            // Allowed keys for generating preview,
-            // LEFT, UP, RIGHT, DOWN, Pageup, pagedown, home, end
-            if [KEY_DOWN, KEY_UP, KEY_PG_DOWN, KEY_PG_UP, KEY_HOME, KEY_END].iter().any(|any_key| *any_key == key_code) {
-                let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
-                show_preview(
-                    &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
-                    &text_view_errors,
-                    &check_button_settings_show_preview_similar_images,
-                    &image_preview_similar_images,
-                    preview_path,
-                    nb_object.column_path,
-                    nb_object.column_name,
-                );
-            }
+            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
+            show_preview(
+                &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
+                &text_view_errors,
+                &check_button_settings_show_preview_similar_images,
+                &image_preview_similar_images,
+                preview_path,
+                nb_object.column_path,
+                nb_object.column_name,
+            );
         });
     }
     // Empty Folder
