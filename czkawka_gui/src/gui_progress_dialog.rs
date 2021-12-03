@@ -3,7 +3,7 @@ use gtk::{Builder, EventControllerKey, Window};
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
-    pub window_progress: gtk::Window,
+    pub window_progress: gtk::Dialog,
 
     pub progress_bar_current_stage: gtk::ProgressBar,
     pub progress_bar_all_stages: gtk::ProgressBar,
@@ -21,7 +21,7 @@ impl GuiProgressDialog {
         let glade_src = include_str!("../ui/progress.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let window_progress: gtk::Window = builder.object("window_progress").unwrap();
+        let window_progress: gtk::Dialog = builder.object("window_progress").unwrap();
         window_progress.set_transient_for(Some(window_main));
 
         let progress_bar_current_stage: gtk::ProgressBar = builder.object("progress_bar_current_stage").unwrap();

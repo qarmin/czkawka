@@ -16,19 +16,15 @@ pub fn connect_settings(gui_data: &GuiData) {
     // Connect button settings
     {
         let button_settings = gui_data.header.button_settings.clone();
-        let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
         button_settings.connect_clicked(move |_| {
-            window_main.set_sensitive(false);
             window_settings.show();
         });
 
-        let window_main = gui_data.window_main.clone();
         let window_settings = gui_data.settings.window_settings.clone();
 
         window_settings.connect_delete_event(move |window, _| {
             window.hide();
-            window_main.set_sensitive(true);
             gtk::Inhibit(true)
         });
     }

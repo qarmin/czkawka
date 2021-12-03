@@ -50,6 +50,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
     let radio_button_similar_hash_size_32 = gui_data.main_notebook.radio_button_similar_hash_size_32.clone();
     let radio_button_similar_hash_size_64 = gui_data.main_notebook.radio_button_similar_hash_size_64.clone();
+    let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
+    let button_settings = gui_data.header.button_settings.clone();
+    let button_app_info = gui_data.header.button_app_info.clone();
 
     let main_context = glib::MainContext::default();
     let _guard = main_context.acquire().unwrap();
@@ -57,12 +60,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     glib_stop_receiver.attach(None, move |msg| {
         buttons_search.show();
 
+        notebook_main.set_sensitive(true);
+        notebook_upper.set_sensitive(true);
+        button_settings.set_sensitive(true);
+        button_app_info.set_sensitive(true);
+
         window_progress.hide();
 
         taskbar_state.borrow().hide();
-
-        // Restore clickability to main notebook
-        notebook_main.set_sensitive(true);
 
         let hash_size;
         if radio_button_similar_hash_size_8.is_active() {
