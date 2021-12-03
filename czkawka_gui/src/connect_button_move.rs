@@ -21,6 +21,8 @@ pub fn connect_button_move(gui_data: &GuiData) {
 
     let window_main = gui_data.window_main.clone();
 
+    let preview_path = gui_data.preview_path.clone();
+
     buttons_move.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
@@ -38,11 +40,13 @@ pub fn connect_button_move(gui_data: &GuiData) {
         );
 
         match &nb_object.notebook_type {
-            NotebookMainEnum::SimilarImages => {
-                image_preview_similar_images.hide();
-            }
-            NotebookMainEnum::Duplicate => {
-                image_preview_duplicates.hide();
+            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
+                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+                    image_preview_similar_images.hide();
+                } else {
+                    image_preview_duplicates.hide();
+                }
+                *preview_path.borrow_mut() = "".to_string();
             }
             _ => {}
         }

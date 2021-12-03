@@ -20,6 +20,7 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
     let text_view_errors = gui_data.text_view_errors.clone();
+    let preview_path = gui_data.preview_path.clone();
 
     buttons_hardlink.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
@@ -30,11 +31,13 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
         hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, true, &text_view_errors);
 
         match &nb_object.notebook_type {
-            NotebookMainEnum::SimilarImages => {
-                image_preview_similar_images.hide();
-            }
-            NotebookMainEnum::Duplicate => {
-                image_preview_duplicates.hide();
+            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
+                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+                    image_preview_similar_images.hide();
+                } else {
+                    image_preview_duplicates.hide();
+                }
+                *preview_path.borrow_mut() = "".to_string();
             }
             _ => {}
         }
@@ -50,6 +53,8 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
 
     let text_view_errors = gui_data.text_view_errors.clone();
 
+    let preview_path = gui_data.preview_path.clone();
+
     buttons_symlink.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
@@ -59,11 +64,13 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
         hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, false, &text_view_errors);
 
         match &nb_object.notebook_type {
-            NotebookMainEnum::SimilarImages => {
-                image_preview_similar_images.hide();
-            }
-            NotebookMainEnum::Duplicate => {
-                image_preview_duplicates.hide();
+            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
+                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+                    image_preview_similar_images.hide();
+                } else {
+                    image_preview_duplicates.hide();
+                }
+                *preview_path.borrow_mut() = "".to_string();
             }
             _ => {}
         }

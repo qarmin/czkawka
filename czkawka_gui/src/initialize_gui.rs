@@ -1,6 +1,9 @@
+use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::fs;
+use std::ops::Deref;
 use std::path::Path;
+use std::rc::Rc;
 
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
@@ -108,11 +111,21 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                     let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
                     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
+                    let preview_path = gui_data.preview_path.clone();
 
                     tree_view.connect_button_press_event(opening_double_click_function);
                     tree_view.connect_button_release_event(move |tree_view, _event| {
                         let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
-                        show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview_duplicates, &image_preview_duplicates, nb_object.column_path, nb_object.column_name);
+                        let preview_path = preview_path.clone();
+                        show_preview(
+                            tree_view,
+                            &text_view_errors,
+                            &check_button_settings_show_preview_duplicates,
+                            &image_preview_duplicates,
+                            preview_path,
+                            nb_object.column_path,
+                            nb_object.column_name,
+                        );
 
                         gtk::Inhibit(false)
                     });
@@ -248,16 +261,19 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 {
                     // Other connects
                     let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
+                    let preview_path = gui_data.preview_path.clone();
 
                     tree_view.connect_button_press_event(opening_double_click_function);
                     let text_view_errors = gui_data.text_view_errors.clone();
                     tree_view.connect_button_release_event(move |tree_view, _event| {
                         let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
+                        let preview_path = preview_path.clone();
                         show_preview(
                             tree_view,
                             &text_view_errors,
                             &check_button_settings_show_preview_similar_images,
                             &image_preview_similar_images,
+                            preview_path,
                             nb_object.column_path,
                             nb_object.column_name,
                         );
@@ -387,6 +403,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 evk.connect_key_pressed(opening_enter_function_ported);
                 gui_data.main_notebook.evk_tree_view_broken_files = evk;
 
+                tree_view.connect_button_press_event(opening_double_click_function);
+
                 tree_view.set_widget_name("tree_view_broken_files");
                 gui_data.main_notebook.tree_view_broken_files = tree_view.clone();
                 scrolled_window_broken_files.add(&tree_view);
@@ -484,11 +502,13 @@ fn connect_event_buttons(gui_data: &GuiData) {
         let text_view_errors = gui_data.text_view_errors.clone();
         let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
         let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
+        let preview_path = gui_data.preview_path.clone();
+
         gui_data.main_notebook.evk_tree_view_duplicate_finder.connect_key_released(move |event_controller_key, _key_value, key_code, _modifier_type| {
             if key_code == KEY_DELETE {
                 glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
             }
-
+            let preview_path = preview_path.clone();
             // Allowed keys for generating preview,
             // LEFT, UP, RIGHT, DOWN, Pageup, pagedown, home, end
             if [KEY_DOWN, KEY_UP, KEY_PG_DOWN, KEY_PG_UP, KEY_HOME, KEY_END].iter().any(|any_key| *any_key == key_code) {
@@ -498,6 +518,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                     &text_view_errors,
                     &check_button_settings_show_preview_duplicates,
                     &image_preview_duplicates,
+                    preview_path,
                     nb_object.column_path,
                     nb_object.column_name,
                 );
@@ -546,11 +567,13 @@ fn connect_event_buttons(gui_data: &GuiData) {
         let text_view_errors = gui_data.text_view_errors.clone();
         let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
         let gui_data_clone = gui_data.clone();
+        let preview_path = gui_data.preview_path.clone();
 
         gui_data.main_notebook.evk_tree_view_similar_images_finder.connect_key_released(move |event_controller_key, _key_value, key_code, _modifier_type| {
             if key_code == KEY_DELETE {
                 glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
             }
+            let preview_path = preview_path.clone();
 
             // Allowed keys for generating preview,
             // LEFT, UP, RIGHT, DOWN, Pageup, pagedown, home, end
@@ -561,6 +584,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                     &text_view_errors,
                     &check_button_settings_show_preview_similar_images,
                     &image_preview_similar_images,
+                    preview_path,
                     nb_object.column_path,
                     nb_object.column_name,
                 );
@@ -606,7 +630,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
     }
 }
 
-fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview: &CheckButton, image_preview_similar_images: &Image, column_path: i32, column_name: i32) {
+fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview: &CheckButton, image_preview_similar_images: &Image, preview_path: Rc<RefCell<String>>, column_path: i32, column_name: i32) {
     let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
     let mut created_image = false;
@@ -637,6 +661,14 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                 if let Some(extension) = Path::new(file_name).extension() {
                     if !["jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "gif", "jif", "jfi"].contains(&extension.to_string_lossy().to_string().to_lowercase().as_str()) {
                         break 'dir;
+                    }
+
+                    {
+                        let preview_path = preview_path.borrow();
+                        let preview_path = preview_path.deref();
+                        if file_name == preview_path {
+                            return; // Preview is already created, no need to recreate it
+                        }
                     }
 
                     let img = match image::open(&file_name) {
@@ -676,6 +708,12 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     }
                     let string_dir = file_dir.to_string_lossy().to_string();
                     image_preview_similar_images.set_from_file(string_dir);
+
+                    {
+                        let mut preview_path = preview_path.borrow_mut();
+                        *preview_path = file_name.to_string();
+                    }
+
                     if let Err(e) = fs::remove_file(&file_dir) {
                         add_text_to_text_view(text_view_errors, format!("Failed to delete temporary image file to {}, reason {}", file_dir.display(), e).as_str());
                         break 'dir;

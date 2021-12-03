@@ -36,6 +36,8 @@ pub async fn delete_things(gui_data: GuiData) {
 
     let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
 
+    let preview_path = gui_data.preview_path.clone();
+
     let text_view_errors = gui_data.text_view_errors.clone();
     if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main).await {
         return;
@@ -66,11 +68,13 @@ pub async fn delete_things(gui_data: GuiData) {
     }
 
     match &nb_object.notebook_type {
-        NotebookMainEnum::SimilarImages => {
-            image_preview_similar_images.hide();
-        }
-        NotebookMainEnum::Duplicate => {
-            image_preview_duplicates.hide();
+        NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
+            if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+                image_preview_similar_images.hide();
+            } else {
+                image_preview_duplicates.hide();
+            }
+            *preview_path.borrow_mut() = "".to_string();
         }
         _ => {}
     }

@@ -67,6 +67,8 @@ pub struct GuiData {
     pub shared_same_invalid_symlinks: Rc<RefCell<InvalidSymlinks>>,
     pub shared_broken_files_state: Rc<RefCell<BrokenFiles>>,
 
+    pub preview_path: Rc<RefCell<String>>,
+
     //// Entry
     pub entry_info: gtk::Entry,
 
@@ -147,6 +149,8 @@ impl GuiData {
         let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(InvalidSymlinks::new()));
         let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BrokenFiles::new()));
 
+        let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new("".to_string()));
+
         //// Entry
         let entry_info: gtk::Entry = builder.object("entry_info").unwrap();
 
@@ -183,6 +187,7 @@ impl GuiData {
             shared_same_music_state,
             shared_same_invalid_symlinks,
             shared_broken_files_state,
+            preview_path,
             entry_info,
             text_view_errors,
             scrolled_window_errors,
