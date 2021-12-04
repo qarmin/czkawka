@@ -57,6 +57,7 @@ pub struct GuiMainNotebook {
     pub check_button_music_album_title: gtk::CheckButton,
     pub check_button_music_album_artist: gtk::CheckButton,
     pub check_button_music_year: gtk::CheckButton,
+    pub check_button_music_approximate_comparison: gtk::CheckButton,
 
     //// Radio Buttons
     // Duplicates
@@ -171,6 +172,7 @@ impl GuiMainNotebook {
         let check_button_music_album_title: gtk::CheckButton = builder.object("check_button_music_album_title").unwrap();
         let check_button_music_album_artist: gtk::CheckButton = builder.object("check_button_music_album_artist").unwrap();
         let check_button_music_year: gtk::CheckButton = builder.object("check_button_music_year").unwrap();
+        let check_button_music_approximate_comparison: gtk::CheckButton = builder.object("check_button_music_approximate_comparison").unwrap();
 
         //// Radio Buttons
         let radio_button_duplicates_name: gtk::RadioButton = builder.object("radio_button_duplicates_name").unwrap();
@@ -265,6 +267,7 @@ impl GuiMainNotebook {
             check_button_music_album_title,
             check_button_music_album_artist,
             check_button_music_year,
+            check_button_music_approximate_comparison,
             radio_button_duplicates_name,
             radio_button_duplicates_size,
             radio_button_duplicates_hash,

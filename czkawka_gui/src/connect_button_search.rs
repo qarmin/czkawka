@@ -115,6 +115,7 @@ pub fn connect_button_search(
     let entry_info = gui_data.entry_info.clone();
     let button_settings = gui_data.header.button_settings.clone();
     let button_app_info = gui_data.header.button_app_info.clone();
+    let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
@@ -409,6 +410,7 @@ pub fn connect_button_search(
 
                 let minimal_file_size = entry_same_music_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
                 let maximal_file_size = entry_same_music_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+                let approximate_comparison = check_button_music_approximate_comparison.is_active();
 
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
 
@@ -441,6 +443,7 @@ pub fn connect_button_search(
                         mf.set_maximal_file_size(maximal_file_size);
                         mf.set_recursive_search(recursive_search);
                         mf.set_music_similarity(music_similarity);
+                        mf.set_approximate_comparison(approximate_comparison);
                         mf.find_same_music(Some(&stop_receiver), Some(&futures_sender_same_music));
                         let _ = glib_stop_sender.send(Message::SameMusic(mf));
                     });
