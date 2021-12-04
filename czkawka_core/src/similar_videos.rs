@@ -621,7 +621,6 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 
         if let Err(e) = serde_json::to_writer_pretty(BufWriter::new(file_handler), hashmap) {
             text_messages.messages.push(format!("cannot write data to cache file {}, reason {}", cache_file.display(), e));
-            return;
         }
     }
 }
