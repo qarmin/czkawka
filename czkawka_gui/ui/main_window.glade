@@ -1855,7 +1855,6 @@ Author: Rafał Mikrut
                         <property name="can-focus">False</property>
                         <property name="margin-start">5</property>
                         <property name="margin-end">5</property>
-                        <property name="margin-bottom">2</property>
                         <property name="spacing">8</property>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_title">
@@ -1940,6 +1939,9 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-bottom">2</property>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_approximate_comparison">
                             <property name="label" translatable="yes">Approximate Comparison</property>

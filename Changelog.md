@@ -12,6 +12,7 @@
 - Improve custom selecting of records(allows to use Rust red regex) - [#489](https://github.com/qarmin/czkawka/pull/478)
 - Remove support for finding zeroed files - [#461](https://github.com/qarmin/czkawka/pull/461)
 - Remove HashMB mode - [#476](https://github.com/qarmin/czkawka/pull/476)
+- Approximate comparison of music - [#483](https://github.com/qarmin/czkawka/pull/483)
 
 ## Version 3.3.1 - 22.11.2021r
 - Fix crash when moving buttons [#457](https://github.com/qarmin/czkawka/pull/457)
