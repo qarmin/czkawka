@@ -95,6 +95,7 @@ pub struct SameMusic {
     delete_method: DeleteMethod,
     music_similarity: MusicSimilarity,
     stopped_search: bool,
+    approximate_comparison: bool,
 }
 
 impl SameMusic {
@@ -113,6 +114,7 @@ impl SameMusic {
             maximal_file_size: u64::MAX,
             duplicated_music_entries: vec![],
             music_to_check: Vec::with_capacity(2048),
+            approximate_comparison: true,
         }
     }
 
@@ -155,6 +157,10 @@ impl SameMusic {
 
     pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
         self.delete_method = delete_method;
+    }
+
+    pub fn set_approximate_comparison(&mut self, approximate_comparison: bool) {
+        self.approximate_comparison = approximate_comparison;
     }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
@@ -470,8 +476,13 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let title = file_entry.title.to_lowercase().trim().to_string();
+                    let mut title = file_entry.title.to_lowercase().trim().to_string();
                     if !title.is_empty() {
+                        if self.approximate_comparison {
+                            if let Some(index) = title.find('(') {
+                                title = title[0..index].trim().to_string();
+                            }
+                        }
                         hash_map.entry(title.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(title.as_str()).unwrap().push(file_entry);
                     }
@@ -497,7 +508,12 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let artist = file_entry.artist.to_lowercase().trim().to_string();
+                    let mut artist = file_entry.artist.to_lowercase().trim().to_string();
+                    if self.approximate_comparison {
+                        if let Some(index) = artist.find('(') {
+                            artist = artist[0..index].trim().to_string();
+                        }
+                    }
                     if !artist.is_empty() {
                         hash_map.entry(artist.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(artist.as_str()).unwrap().push(file_entry);
@@ -524,7 +540,12 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let album_title = file_entry.album_title.to_lowercase().trim().to_string();
+                    let mut album_title = file_entry.album_title.to_lowercase().trim().to_string();
+                    if self.approximate_comparison {
+                        if let Some(index) = album_title.find('(') {
+                            album_title = album_title[0..index].trim().to_string();
+                        }
+                    }
                     if !album_title.is_empty() {
                         hash_map.entry(album_title.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(album_title.as_str()).unwrap().push(file_entry);
@@ -551,7 +572,12 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let album_artist = file_entry.album_artist.to_lowercase().trim().to_string();
+                    let mut album_artist = file_entry.album_artist.to_lowercase().trim().to_string();
+                    if self.approximate_comparison {
+                        if let Some(index) = album_artist.find('(') {
+                            album_artist = album_artist[0..index].trim().to_string();
+                        }
+                    }
                     if !album_artist.is_empty() {
                         hash_map.entry(album_artist.clone()).or_insert_with(Vec::new);
                         hash_map.get_mut(album_artist.as_str()).unwrap().push(file_entry);
