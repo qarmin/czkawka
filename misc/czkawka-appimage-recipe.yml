@@ -7,5 +7,5 @@ ingredients:
 script:
   - pwd
   - cp ../../czkawka_gui ./usr/bin/czkawka_gui
-  - cp ../../pkgs/com.github.qarmin.czkawka.desktop .
+  - cp ../../data/com.github.qarmin.czkawka.desktop .
   - cp ../../data/icons/com.github.qarmin.czkawka.svg .
