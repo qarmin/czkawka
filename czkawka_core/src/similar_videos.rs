@@ -15,6 +15,7 @@ use directories_next::ProjectDirs;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
@@ -27,8 +28,6 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 pub const MAX_TOLERANCE: i32 = 20;
 
-const HASH_SIZE: usize = 19;
-
 #[derive(Debug)]
 pub struct ProgressData {
     pub current_stage: u8,
@@ -37,7 +36,7 @@ pub struct ProgressData {
     pub videos_to_check: usize,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -611,7 +610,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join("cache_similar_videos.txt");
+        let cache_file = cache_dir.join("cache_similar_videos.json");
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -619,31 +618,10 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
                 return;
             }
         };
-        let mut writer = BufWriter::new(file_handler);
 
-        for file_entry in hashmap.values() {
-            let mut string: String = String::with_capacity(256);
-
-            string += format!(
-                "{}//{}//{}//{}//{}//{}",
-                file_entry.path.display(),
-                file_entry.size,
-                file_entry.modified_date,
-                file_entry.vhash.num_frames(),
-                file_entry.vhash.duration(),
-                file_entry.error
-            )
-            .as_str();
-
-            for i in file_entry.vhash.hash() {
-                string.push_str("//");
-                string.push_str(i.to_string().as_str());
-            }
-
-            if let Err(e) = writeln!(writer, "{}", string) {
-                text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            };
+        if let Err(e) = serde_json::to_writer_pretty(BufWriter::new(file_handler), hashmap) {
+            text_messages.messages.push(format!("cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            return;
         }
     }
 }
@@ -651,7 +629,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join("cache_similar_videos.txt");
+        let cache_file = cache_dir.join("cache_similar_videos.json");
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
@@ -660,75 +638,16 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             }
         };
 
-        let reader = BufReader::new(file_handler);
-
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = Default::default();
-
-        // Read the file line by line using the lines() iterator from std::io::BufRead.
-        for (index, line) in reader.lines().enumerate() {
-            let line = match line {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
-                    return None;
-                }
-            };
-            let uuu = line.split("//").collect::<Vec<&str>>();
-            // Hash size + other things
-            if uuu.len() != (HASH_SIZE + 6) {
-                text_messages.warnings.push(format!(
-                    "Found invalid data in line {} - ({}) in cache file {}, expected {} values, found {}",
-                    index + 1,
-                    line,
-                    cache_file.display(),
-                    HASH_SIZE + 6,
-                    uuu.len(),
-                ));
-                continue;
-            };
-            // Don't load cache data if destination file not exists
-            if !delete_outdated_cache || Path::new(uuu[0]).exists() {
-                let mut hash: [u64; 19] = [0; 19];
-                for i in 0..HASH_SIZE {
-                    hash[i] = match uuu[6 + i as usize].parse::<u64>() {
-                        Ok(t) => t,
-                        Err(e) => {
-                            text_messages
-                                .warnings
-                                .push(format!("Found invalid hash value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
-                            continue;
-                        }
-                    };
-                }
-
-                hashmap_loaded_entries.insert(
-                    uuu[0].to_string(),
-                    FileEntry {
-                        path: PathBuf::from(uuu[0]),
-                        size: match uuu[1].parse::<u64>() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                text_messages
-                                    .warnings
-                                    .push(format!("Found invalid size value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
-                                continue;
-                            }
-                        },
-                        modified_date: match uuu[2].parse::<u64>() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                text_messages
-                                    .warnings
-                                    .push(format!("Found invalid modified date value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
-                                continue;
-                            }
-                        },
-                        vhash: VideoHash::with_start_data(uuu[4].parse::<u32>().unwrap_or(0), uuu[0], hash, uuu[3].parse::<u32>().unwrap_or(10)),
-                        error: uuu[5].to_string(),
-                    },
-                );
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(BufReader::new(file_handler)) {
+            Ok(t) => t,
+            Err(e) => {
+                text_messages.warnings.push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                return None;
             }
-        }
+        };
+
+        // Don't load cache data if destination file not exists
+        hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists() && !delete_outdated_cache);
 
         return Some(hashmap_loaded_entries);
     }

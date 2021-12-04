@@ -493,6 +493,8 @@ dependencies = [
  "img_hash",
  "rayon",
  "rodio",
+ "serde",
+ "serde_json",
  "tempfile",
  "vid_dup_finder_lib",
  "xxhash-rust",
@@ -2270,7 +2272,8 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 [[package]]
 name = "vid_dup_finder_lib"
 version = "0.1.0"
-source = "git+https://github.com/qarmin/vid_dup_finder_lib#a4809772aea8f73c9a22da6fb43df50bfdd1b31d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64bf85b5022ad9df9ec55750118ec38f33406165fcf9edf19c71eb2bd6823232"
 dependencies = [
  "ffmpeg_cmdline_utils",
  "image",
