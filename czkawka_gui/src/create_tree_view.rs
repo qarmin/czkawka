@@ -520,6 +520,17 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
+    column.set_title("Year");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsSameMusic::Year as i32);
+    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
     column.set_title("Album Title");
     column.set_resizable(true);
     column.set_min_width(50);
@@ -535,17 +546,6 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsSameMusic::AlbumArtist as i32);
-    column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
-    column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
-    tree_view.append_column(&column);
-
-    let renderer = gtk::CellRendererText::new();
-    let column: gtk::TreeViewColumn = TreeViewColumn::new();
-    column.pack_start(&renderer, true);
-    column.set_title("Year");
-    column.set_resizable(true);
-    column.set_min_width(50);
-    column.add_attribute(&renderer, "text", ColumnsSameMusic::Year as i32);
     column.add_attribute(&renderer, "background", ColumnsSameMusic::Color as i32);
     column.add_attribute(&renderer, "foreground", ColumnsSameMusic::TextColor as i32);
     tree_view.append_column(&column);
