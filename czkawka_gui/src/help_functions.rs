@@ -218,6 +218,7 @@ pub enum ColumnsEmptyFolders {
     Name,
     Path,
     Modification,
+    ModificationAsSecs,
 }
 
 pub enum ColumnsDirectory {
@@ -231,6 +232,8 @@ pub enum ColumnsBigFiles {
     Name,
     Path,
     Modification,
+    SizeAsBytes,
+    ModificationAsSecs,
 }
 
 pub enum ColumnsEmptyFiles {
@@ -238,6 +241,7 @@ pub enum ColumnsEmptyFiles {
     Name,
     Path,
     Modification,
+    ModificationAsSecs,
 }
 
 pub enum ColumnsTemporaryFiles {
@@ -245,6 +249,7 @@ pub enum ColumnsTemporaryFiles {
     Name,
     Path,
     Modification,
+    ModificationAsSecs,
 }
 
 pub enum ColumnsSimilarImages {
@@ -300,6 +305,7 @@ pub enum ColumnsInvalidSymlinks {
     DestinationPath,
     TypeOfError,
     Modification,
+    ModificationAsSecs,
 }
 
 pub enum ColumnsBrokenFiles {
@@ -308,6 +314,7 @@ pub enum ColumnsBrokenFiles {
     Path,
     ErrorType,
     Modification,
+    ModificationAsSecs,
 }
 
 pub const TEXT_COLOR: &str = "#ffffff";

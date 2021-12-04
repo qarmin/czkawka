@@ -312,11 +312,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for path in vector {
                             let (directory, file) = split_path(&path);
-                            let values: [(u32, &dyn ToValue); 4] = [
+                            let values: [(u32, &dyn ToValue); 5] = [
                                 (ColumnsEmptyFolders::SelectionButton as u32, &false),
                                 (ColumnsEmptyFolders::Name as u32, &file),
                                 (ColumnsEmptyFolders::Path as u32, &directory),
                                 (ColumnsEmptyFolders::Modification as u32, &(NaiveDateTime::from_timestamp(hashmap.get(&path).unwrap().modified_date as i64, 0).to_string())),
+                                (ColumnsEmptyFolders::ModificationAsSecs as u32, &(hashmap.get(&path).unwrap().modified_date as u64)),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }
@@ -359,11 +360,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [(u32, &dyn ToValue); 4] = [
+                            let values: [(u32, &dyn ToValue); 5] = [
                                 (ColumnsEmptyFiles::SelectionButton as u32, &false),
                                 (ColumnsEmptyFiles::Name as u32, &file),
                                 (ColumnsEmptyFiles::Path as u32, &directory),
                                 (ColumnsEmptyFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }
@@ -405,12 +407,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             });
                             for file_entry in vector {
                                 let (directory, file) = split_path(&file_entry.path);
-                                let values: [(u32, &dyn ToValue); 5] = [
+                                let values: [(u32, &dyn ToValue); 7] = [
                                     (ColumnsBigFiles::SelectionButton as u32, &false),
                                     (ColumnsBigFiles::Size as u32, &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size))),
                                     (ColumnsBigFiles::Name as u32, &file),
                                     (ColumnsBigFiles::Path as u32, &directory),
                                     (ColumnsBigFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                    (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+                                    (ColumnsBigFiles::SizeAsBytes as u32, &(size)),
                                 ];
                                 list_store.set(&list_store.append(), &values);
                             }
@@ -454,11 +458,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [(u32, &dyn ToValue); 4] = [
+                            let values: [(u32, &dyn ToValue); 5] = [
                                 (ColumnsTemporaryFiles::SelectionButton as u32, &false),
                                 (ColumnsTemporaryFiles::Name as u32, &file),
                                 (ColumnsTemporaryFiles::Path as u32, &directory),
                                 (ColumnsTemporaryFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }
@@ -783,13 +788,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.symlink_path);
-                            let values: [(u32, &dyn ToValue); 6] = [
+                            let values: [(u32, &dyn ToValue); 7] = [
                                 (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
                                 (ColumnsInvalidSymlinks::Name as u32, &file),
                                 (ColumnsInvalidSymlinks::Path as u32, &directory),
                                 (ColumnsInvalidSymlinks::DestinationPath as u32, &file_entry.destination_path.to_string_lossy().to_string()),
                                 (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(&file_entry.type_of_error)),
                                 (ColumnsInvalidSymlinks::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }
@@ -832,12 +838,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         for file_entry in vector {
                             let (directory, file) = split_path(&file_entry.path);
-                            let values: [(u32, &dyn ToValue); 5] = [
+                            let values: [(u32, &dyn ToValue); 6] = [
                                 (ColumnsBrokenFiles::SelectionButton as u32, &false),
                                 (ColumnsBrokenFiles::Name as u32, &file),
                                 (ColumnsBrokenFiles::Path as u32, &directory),
                                 (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
                                 (ColumnsBrokenFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),
+                                (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }

@@ -82,14 +82,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 image_preview_duplicates.hide();
 
                 let col_types: [glib::types::Type; 8] = [
-                    glib::types::Type::BOOL,
-                    glib::types::Type::BOOL,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::U64,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
+                    glib::types::Type::BOOL,   // ActivatableSelectButton
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                    glib::types::Type::STRING, // Color
+                    glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
@@ -137,7 +137,13 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Empty Folders
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 5] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -160,7 +166,13 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Empty Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 5] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -182,7 +194,13 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Temporary Files
             {
-                let col_types: [glib::types::Type; 4] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 5] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -204,7 +222,15 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Big Files
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 7] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Size
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // SizeAsBytes
+                    glib::types::Type::U64,    // ModificationAsSecs
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
@@ -230,18 +256,18 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 image_preview_similar_images.hide();
 
                 let col_types: [glib::types::Type; 12] = [
-                    glib::types::Type::BOOL,
-                    glib::types::Type::BOOL,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::U64,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::U64,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
+                    glib::types::Type::BOOL,   // ActivatableSelectButton
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Similarity
+                    glib::types::Type::STRING, // Size
+                    glib::types::Type::U64,    // SizeAsBytes
+                    glib::types::Type::STRING, // Dimensions
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                    glib::types::Type::STRING, // Color
+                    glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
@@ -323,21 +349,21 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             // Same Music
             {
                 let col_types: [glib::types::Type; 15] = [
-                    glib::types::Type::BOOL,
-                    glib::types::Type::BOOL,
-                    glib::types::Type::STRING,
-                    glib::types::Type::U64,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::U64,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
+                    glib::types::Type::BOOL,   // ActivatableSelectButton
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Size
+                    glib::types::Type::U64,    // SizeAsBytes
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // Title
+                    glib::types::Type::STRING, // Artist
+                    glib::types::Type::STRING, // AlbumTitle
+                    glib::types::Type::STRING, // AlbumArtist
+                    glib::types::Type::STRING, // Year
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                    glib::types::Type::STRING, // Color
+                    glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
@@ -361,13 +387,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Invalid Symlinks
             {
-                let col_types: [glib::types::Type; 6] = [
-                    glib::types::Type::BOOL,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
-                    glib::types::Type::STRING,
+                let col_types: [glib::types::Type; 7] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // DestinationPath
+                    glib::types::Type::STRING, // TypeOfError
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
                 ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
@@ -390,7 +417,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             }
             // Broken Files
             {
-                let col_types: [glib::types::Type; 5] = [glib::types::Type::BOOL, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING, glib::types::Type::STRING];
+                let col_types: [glib::types::Type; 6] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // ErrorType
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                ];
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 let mut tree_view: gtk::TreeView = TreeView::with_model(&list_store);
