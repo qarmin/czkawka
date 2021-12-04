@@ -88,6 +88,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFolders::Name as i32);
+    column.set_sort_column_id(ColumnsEmptyFolders::Name as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -97,6 +98,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFolders::Path as i32);
+    column.set_sort_column_id(ColumnsEmptyFolders::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -106,6 +108,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFolders::Modification as i32);
+    column.set_sort_column_id(ColumnsEmptyFolders::ModificationAsSecs as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
@@ -138,8 +141,9 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBigFiles::Size as i32);
-
+    column.set_sort_column_id(ColumnsBigFiles::SizeAsBytes as i32);
     tree_view.append_column(&column);
+
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -147,6 +151,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBigFiles::Name as i32);
+    column.set_sort_column_id(ColumnsBigFiles::Name as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -156,6 +161,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBigFiles::Path as i32);
+    column.set_sort_column_id(ColumnsBigFiles::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -165,6 +171,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBigFiles::Modification as i32);
+    column.set_sort_column_id(ColumnsBigFiles::ModificationAsSecs as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
@@ -197,6 +204,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsTemporaryFiles::Name as i32);
+    column.set_sort_column_id(ColumnsTemporaryFiles::Name as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -206,6 +214,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsTemporaryFiles::Path as i32);
+    column.set_sort_column_id(ColumnsTemporaryFiles::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -215,6 +224,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsTemporaryFiles::Modification as i32);
+    column.set_sort_column_id(ColumnsTemporaryFiles::ModificationAsSecs as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
@@ -247,6 +257,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFiles::Name as i32);
+    column.set_sort_column_id(ColumnsEmptyFiles::Name as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -256,6 +267,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFiles::Path as i32);
+    column.set_sort_column_id(ColumnsEmptyFiles::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -265,6 +277,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsEmptyFiles::Modification as i32);
+    column.set_sort_column_id(ColumnsEmptyFiles::ModificationAsSecs as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
@@ -591,6 +604,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::Name as i32);
+    column.set_sort_column_id(ColumnsInvalidSymlinks::Name as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -600,6 +614,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::Path as i32);
+    column.set_sort_column_id(ColumnsInvalidSymlinks::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -609,6 +624,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::DestinationPath as i32);
+    column.set_sort_column_id(ColumnsInvalidSymlinks::DestinationPath as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -618,6 +634,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::TypeOfError as i32);
+    column.set_sort_column_id(ColumnsInvalidSymlinks::TypeOfError as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -627,6 +644,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsInvalidSymlinks::Modification as i32);
+    column.set_sort_column_id(ColumnsInvalidSymlinks::ModificationAsSecs as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
@@ -659,6 +677,7 @@ pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBrokenFiles::Name as i32);
+    column.set_sort_column_id(ColumnsBrokenFiles::Name as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -668,6 +687,7 @@ pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBrokenFiles::Path as i32);
+    column.set_sort_column_id(ColumnsBrokenFiles::Path as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -677,6 +697,7 @@ pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBrokenFiles::ErrorType as i32);
+    column.set_sort_column_id(ColumnsBrokenFiles::ErrorType as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -686,6 +707,7 @@ pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
     column.set_resizable(true);
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", ColumnsBrokenFiles::Modification as i32);
+    column.set_sort_column_id(ColumnsBrokenFiles::ModificationAsSecs as i32);
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
