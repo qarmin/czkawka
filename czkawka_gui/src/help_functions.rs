@@ -42,7 +42,7 @@ pub enum PopoverTypes {
 
 pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,
-    pub available_modes: [PopoverTypes; 4],
+    pub available_modes: [PopoverTypes; 5],
     pub column_activatable_button: Option<i32>,
     pub column_path: i32,
     pub column_name: i32,
@@ -57,7 +57,7 @@ pub struct NotebookObject {
 pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     NotebookObject {
         notebook_type: NotebookMainEnum::Duplicate,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::None],
         column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
         column_path: ColumnsDuplicates::Path as i32,
         column_name: ColumnsDuplicates::Name as i32,
@@ -70,7 +70,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::EmptyDirectories,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
         column_activatable_button: None,
         column_path: ColumnsEmptyFolders::Path as i32,
         column_name: ColumnsEmptyFolders::Name as i32,
@@ -83,7 +83,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BigFiles,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
         column_activatable_button: None,
         column_path: ColumnsBigFiles::Path as i32,
         column_name: ColumnsBigFiles::Name as i32,
@@ -96,7 +96,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::EmptyFiles,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
         column_activatable_button: None,
         column_path: ColumnsEmptyFiles::Path as i32,
         column_name: ColumnsEmptyFiles::Name as i32,
@@ -109,7 +109,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::Temporary,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
         column_activatable_button: None,
         column_path: ColumnsTemporaryFiles::Path as i32,
         column_name: ColumnsTemporaryFiles::Name as i32,
@@ -122,7 +122,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SimilarImages,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
         column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarImages::Path as i32,
         column_name: ColumnsSimilarImages::Name as i32,
@@ -135,7 +135,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SimilarVideos,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
         column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarVideos::Path as i32,
         column_name: ColumnsSimilarVideos::Name as i32,
@@ -148,7 +148,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SameMusic,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
         column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
         column_path: ColumnsSameMusic::Path as i32,
         column_name: ColumnsSameMusic::Name as i32,
@@ -161,7 +161,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::Symlinks,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
         column_activatable_button: None,
         column_path: ColumnsInvalidSymlinks::Path as i32,
         column_name: ColumnsInvalidSymlinks::Name as i32,
@@ -174,7 +174,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BrokenFiles,
-        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None],
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
         column_activatable_button: None,
         column_path: ColumnsBrokenFiles::Path as i32,
         column_name: ColumnsBrokenFiles::Name as i32,
@@ -357,33 +357,37 @@ pub fn split_path(path: &Path) -> (String, String) {
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk::TextView) {
     let mut messages: String = String::from("");
     if !text_messages.messages.is_empty() {
-        messages += "############### MESSAGES ###############\n";
+        messages += format!("############### MESSAGES({}) ###############\n", text_messages.messages.len()).as_str();
     }
     for text in &text_messages.messages {
         messages += text.as_str();
         messages += "\n";
     }
-    if !text_messages.messages.is_empty() {
-        messages += "\n";
-    }
+    // if !text_messages.messages.is_empty() {
+    //     messages += "\n";
+    // }
     if !text_messages.warnings.is_empty() {
-        messages += "############### WARNINGS ###############\n";
+        messages += format!("############### WARNINGS({}) ###############\n", text_messages.warnings.len()).as_str();
     }
     for text in &text_messages.warnings {
         messages += text.as_str();
         messages += "\n";
     }
-    if !text_messages.warnings.is_empty() {
-        messages += "\n";
-    }
+    // if !text_messages.warnings.is_empty() {
+    //     messages += "\n";
+    // }
     if !text_messages.errors.is_empty() {
-        messages += "############### ERRORS ###############\n";
+        messages += format!("############### ERRORS({}) ###############\n", text_messages.errors.len()).as_str();
     }
     for text in &text_messages.errors {
         messages += text.as_str();
         messages += "\n";
     }
-    if !text_messages.errors.is_empty() {
+    // if !text_messages.errors.is_empty() {
+    //     messages += "\n";
+    // }
+
+    if !text_messages.messages.is_empty() || !text_messages.warnings.is_empty() || !text_messages.errors.is_empty() {
         messages += "\n";
     }
 

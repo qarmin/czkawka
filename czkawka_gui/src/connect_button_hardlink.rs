@@ -11,15 +11,18 @@ use crate::help_functions::*;
 use crate::notebook_enums::*;
 
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
+    // Hardlinking
     {
         let buttons_hardlink = gui_data.bottom_buttons.buttons_hardlink.clone();
 
         let gui_data = gui_data.clone();
 
         buttons_hardlink.connect_clicked(move |_| {
-            glib::MainContext::default().spawn_local(sym_hard_link_things(gui_data.clone(), false));
+            glib::MainContext::default().spawn_local(sym_hard_link_things(gui_data.clone(), true));
         });
     }
+
+    // Symlinking
     {
         let buttons_symlink = gui_data.bottom_buttons.buttons_symlink.clone();
 
@@ -46,7 +49,7 @@ pub async fn sym_hard_link_things(gui_data: GuiData, hardlinking: bool) {
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-    let column_color = nb_object.column_color.expect("Symlinking can be only used for tree views with grouped results");
+    let column_color = nb_object.column_color.expect("Linking can be only used for tree views with grouped results");
 
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
@@ -57,6 +60,7 @@ pub async fn sym_hard_link_things(gui_data: GuiData, hardlinking: bool) {
     if !check_if_can_link_files(&check_button_settings_confirm_link, &window_main).await {
         return;
     }
+
     if !check_if_changing_one_item_in_group_and_continue(tree_view, column_color, nb_object.column_selection, &window_main).await {
         return;
     }

@@ -1,41 +1,23 @@
-use std::collections::HashMap;
-
 use gtk::prelude::*;
 
 use crate::gui_data::GuiData;
 use crate::gui_popovers::GuiPopovers;
-use crate::help_functions::PopoverTypes;
+use crate::help_functions::{PopoverTypes, NOTEBOOKS_INFOS};
 use crate::notebook_enums::*;
 
 pub fn connect_button_select(gui_data: &GuiData) {
-    let mut hashmap: HashMap<NotebookMainEnum, Vec<PopoverTypes>> = Default::default();
-    {
-        hashmap.insert(NotebookMainEnum::SimilarImages, vec![PopoverTypes::All, PopoverTypes::Size, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
-        hashmap.insert(NotebookMainEnum::SimilarVideos, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size]);
-        hashmap.insert(NotebookMainEnum::Duplicate, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date]);
-        hashmap.insert(NotebookMainEnum::SameMusic, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size]);
-
-        hashmap.insert(NotebookMainEnum::EmptyFiles, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
-        hashmap.insert(NotebookMainEnum::EmptyDirectories, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
-        hashmap.insert(NotebookMainEnum::BigFiles, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
-        hashmap.insert(NotebookMainEnum::Symlinks, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
-        hashmap.insert(NotebookMainEnum::Temporary, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
-        hashmap.insert(NotebookMainEnum::BrokenFiles, vec![PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom]);
-    }
-    assert_eq!(hashmap.len(), NUMBER_OF_NOTEBOOK_MAIN_TABS);
-
     let popovers = gui_data.popovers.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
 
     buttons_select.connect_clicked(move |_| {
-        show_required_popovers(&popovers, &to_notebook_main_enum(notebook_main.current_page().unwrap()), &hashmap);
+        show_required_popovers(&popovers, &to_notebook_main_enum(notebook_main.current_page().unwrap()));
         popover_select.popup();
     });
 }
 
-fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnum, hashmap: &HashMap<NotebookMainEnum, Vec<PopoverTypes>>) {
+fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnum) {
     let buttons_popover_select_all = popovers.buttons_popover_select_all.clone();
     let buttons_popover_unselect_all = popovers.buttons_popover_unselect_all.clone();
     let buttons_popover_reverse = popovers.buttons_popover_reverse.clone();
@@ -53,9 +35,9 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
     let separator_select_image_size = popovers.separator_select_image_size.clone();
     let separator_select_reverse = popovers.separator_select_reverse.clone();
 
-    let vec = hashmap.get(current_mode).unwrap();
+    let arr = &NOTEBOOKS_INFOS[current_mode.clone() as usize].available_modes;
 
-    if vec.contains(&PopoverTypes::All) {
+    if arr.contains(&PopoverTypes::All) {
         buttons_popover_select_all.show();
         buttons_popover_unselect_all.show();
     } else {
@@ -63,7 +45,7 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
         buttons_popover_unselect_all.hide();
     }
 
-    if vec.contains(&PopoverTypes::Size) {
+    if arr.contains(&PopoverTypes::Size) {
         buttons_popover_select_all_images_except_biggest.show();
         buttons_popover_select_all_images_except_smallest.show();
         separator_select_image_size.show();
@@ -73,7 +55,7 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
         separator_select_image_size.hide();
     }
 
-    if vec.contains(&PopoverTypes::Reverse) {
+    if arr.contains(&PopoverTypes::Reverse) {
         buttons_popover_reverse.show();
         separator_select_reverse.show();
     } else {
@@ -81,7 +63,7 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
         separator_select_reverse.hide();
     }
 
-    if vec.contains(&PopoverTypes::Custom) {
+    if arr.contains(&PopoverTypes::Custom) {
         buttons_popover_select_custom.show();
         buttons_popover_unselect_custom.show();
         separator_select_custom.show();
@@ -91,7 +73,7 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
         separator_select_custom.hide();
     }
 
-    if vec.contains(&PopoverTypes::Date) {
+    if arr.contains(&PopoverTypes::Date) {
         buttons_popover_select_all_except_oldest.show();
         buttons_popover_select_all_except_newest.show();
         buttons_popover_select_one_oldest.show();

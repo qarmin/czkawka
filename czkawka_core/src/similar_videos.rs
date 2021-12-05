@@ -423,7 +423,7 @@ impl SimilarVideos {
                     Ok(t) => t,
                     Err(e) => {
                         return {
-                            file_entry.error = format!("Failed to hash file, {}", e);
+                            file_entry.error = format!("Failed to hash file, reason {}", e);
                             Some(file_entry)
                         }
                     }
@@ -592,14 +592,6 @@ impl PrintResults for SimilarVideos {
 
 pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        // Lin: /home/username/.cache/czkawka
-        // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
-        // Mac: /Users/Username/Library/Caches/pl.Qarmin.Czkawka
-
-        // Saves data
-        // path//file_size//modified_date//num_frames//duration//hash1//hash2 etc.
-        // number of hashes is equal to HASH_QWORDS(19 at this moment)
-
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
             if !cache_dir.is_dir() {
@@ -610,7 +602,8 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join("cache_similar_videos.bin");
+
+        let cache_file = cache_dir.join(cache_dir.join(get_cache_file()));
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -620,25 +613,43 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
         };
 
         let writer = BufWriter::new(file_handler);
+        #[cfg(not(debug_assertions))]
         if let Err(e) = bincode::serialize_into(writer, hashmap) {
-            text_messages.messages.push(format!("cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            text_messages.messages.push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            return;
         }
+        #[cfg(debug_assertions)]
+        if let Err(e) = serde_json::to_writer(writer, hashmap) {
+            text_messages.messages.push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            return;
+        }
+
+        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
     }
 }
 
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join("cache_similar_videos.bin");
+        let cache_file = cache_dir.join(get_cache_file());
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error warning
                 return None;
             }
         };
 
         let reader = BufReader::new(file_handler);
+        #[cfg(debug_assertions)]
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(reader) {
+            Ok(t) => t,
+            Err(e) => {
+                text_messages.warnings.push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                return None;
+            }
+        };
+        #[cfg(not(debug_assertions))]
         let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match bincode::deserialize_from(reader) {
             Ok(t) => t,
             Err(e) => {
@@ -648,13 +659,31 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
         };
 
         // Don't load cache data if destination file not exists
-        hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists() && !delete_outdated_cache);
+        if delete_outdated_cache {
+            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
+        }
+
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
 
         return Some(hashmap_loaded_entries);
     }
 
-    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
+    text_messages.messages.push("Cannot find or open system config dir to save cache file.".to_string());
     None
+}
+
+fn get_cache_file() -> String {
+    let extension;
+    #[cfg(debug_assertions)]
+    {
+        extension = "json";
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        extension = "bin";
+    }
+
+    format!("cache_similar_videos.{}", extension)
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {
