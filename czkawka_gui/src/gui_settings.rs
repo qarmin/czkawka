@@ -9,6 +9,7 @@ pub struct GuiSettings {
     pub check_button_settings_save_at_exit: gtk::CheckButton,
     pub check_button_settings_load_at_start: gtk::CheckButton,
     pub check_button_settings_confirm_deletion: gtk::CheckButton,
+    pub check_button_settings_confirm_link: gtk::CheckButton,
     pub check_button_settings_confirm_group_deletion: gtk::CheckButton,
     pub check_button_settings_show_text_view: gtk::CheckButton,
     pub check_button_settings_use_cache: gtk::CheckButton,
@@ -54,6 +55,7 @@ impl GuiSettings {
         let check_button_settings_save_at_exit: gtk::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
         let check_button_settings_load_at_start: gtk::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
         let check_button_settings_confirm_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_deletion").unwrap();
+        let check_button_settings_confirm_link: gtk::CheckButton = builder.object("check_button_settings_confirm_link").unwrap();
         let check_button_settings_confirm_group_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_group_deletion").unwrap();
         let check_button_settings_show_text_view: gtk::CheckButton = builder.object("check_button_settings_show_text_view").unwrap();
         let check_button_settings_use_cache: gtk::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
@@ -62,6 +64,7 @@ impl GuiSettings {
         check_button_settings_save_at_exit.set_tooltip_text(Some("Saves configuration to file when closing app."));
         check_button_settings_load_at_start.set_tooltip_text(Some("Loading at start configuration from file.\n\nNot selecting this option will load default settings."));
         check_button_settings_confirm_deletion.set_tooltip_text(Some("Shows confirmation dialog when clicking at delete button."));
+        check_button_settings_confirm_link.set_tooltip_text(Some("Shows confirmation dialog when clicking at hard/symlink button."));
         check_button_settings_confirm_group_deletion.set_tooltip_text(Some("Shows dialog when trying to remove all records from group."));
         check_button_settings_show_text_view.set_tooltip_text(Some("Shows error panel at bottom."));
         check_button_settings_use_cache.set_tooltip_text(Some("Option to which allows to not use cache feature."));
@@ -127,6 +130,7 @@ impl GuiSettings {
             check_button_settings_save_at_exit,
             check_button_settings_load_at_start,
             check_button_settings_confirm_deletion,
+            check_button_settings_confirm_link,
             check_button_settings_confirm_group_deletion,
             check_button_settings_show_text_view,
             check_button_settings_use_cache,

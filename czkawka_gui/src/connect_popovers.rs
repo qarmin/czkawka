@@ -224,7 +224,7 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
 
     // Dialog for select/unselect items
     {
-        let dialog = gtk::Dialog::builder().title(window_title).transient_for(window_main).build();
+        let dialog = gtk::Dialog::builder().title(window_title).transient_for(window_main).modal(true).build();
         dialog.add_button("Ok", ResponseType::Ok);
         dialog.add_button("Close", ResponseType::Cancel);
 
