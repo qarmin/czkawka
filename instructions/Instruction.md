@@ -70,6 +70,7 @@ Currently, Czkawka stores few config and cache files on disk:
 - `cache_similar_image_SIZE_HASH_FILTER.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file manually is not recommended, but it is allowed. Each algorithms uses its own file, because hashes are completely different in each.
 - `cache_broken_files.txt` - stores cache data of broken files
 - `cache_duplicates_Blake3.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
+- `cache_similar_videos.bin/json` - stores cache data of video files. Depending on usage(debug/release build) it will produce bin file(fast, but unable to change) or json(slow, but well formatted).
 
 Config files are located in this path:
 
@@ -203,7 +204,7 @@ It is a tool for finding similar images that differ e.g. in watermark, size etc.
 The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp", ".avif"]`.
 
 Next cached data is loaded from file to prevent hashing twice the same file.  
-The cache which points to non existing data is deleted automatically.
+The cache which points to non existing data, by default is deleted automatically.
 
 Then a perceptual hash is created for each image which isn't available in cache.
 
@@ -229,7 +230,7 @@ Before calculating hashes usually images are resized with specific algorithm(`La
 
 Each configuration saves results to different cache files to save users from invalid results.
 
-Some images broke hash functions and create hashes full of `0` or `255`, so these images are silently excluded(probably proper error reporting should be provided). 
+Some images broke hash functions and create hashes full of `0` or `255`, so these images are silently excluded from end results(but still are saved to cache). 
 
 You can test each algorithm with provided CLI tool, just put to folder `test.jpg` file and run inside this command `czkawka_cli tester -i`
 

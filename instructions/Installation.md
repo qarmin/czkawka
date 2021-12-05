@@ -3,7 +3,7 @@
 ### Linux
 If you use Snap, Flatpak or Appimage, you need to only install ffmpeg if you want to use Similar Videos tool.
 
-For Czkawka GUI you are required to have at least `GTK 3.22` and also `Alsa` installed (for finding broken music files, but it is disabled by default).  
+For Czkawka GUI you are required to have at least `GTK 3.24` and also `Alsa` installed (for finding broken music files, but it is disabled by default).  
 `FFmpeg` in Similar Videos is non required dependency - app will work, but this tool will throw errors, so I recommend to install it.  
 It should be installed by default on all the most popular distros.
 #### Ubuntu/Debian/Linux Mint
@@ -78,7 +78,7 @@ You can update the package with the same command.
 ```
 sudo snap install czkawka
 ```
-By default, Snap can only access the files in your home directory. You have to allow czkawka access to all the drives:
+By default, Snap can only access the files in your home directory. You have to allow Czkawka access to all the drives:
 
 ```
 sudo snap connect czkawka:removable-media
