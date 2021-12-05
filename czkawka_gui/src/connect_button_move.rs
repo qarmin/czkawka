@@ -61,6 +61,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
         .title("Choose folder to which you want to move duplicated files")
         .action(gtk::FileChooserAction::SelectFolder)
         .transient_for(window_main)
+        .modal(true)
         .build();
     chooser.add_button("Ok", ResponseType::Ok);
     chooser.add_button("Close", ResponseType::Cancel);
