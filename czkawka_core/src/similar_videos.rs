@@ -610,7 +610,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join("cache_similar_videos.json");
+        let cache_file = cache_dir.join("cache_similar_videos.bin");
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -619,7 +619,8 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             }
         };
 
-        if let Err(e) = serde_json::to_writer_pretty(BufWriter::new(file_handler), hashmap) {
+        let writer = BufWriter::new(file_handler);
+        if let Err(e) = bincode::serialize_into(writer, hashmap) {
             text_messages.messages.push(format!("cannot write data to cache file {}, reason {}", cache_file.display(), e));
         }
     }
@@ -628,7 +629,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join("cache_similar_videos.json");
+        let cache_file = cache_dir.join("cache_similar_videos.bin");
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
@@ -637,7 +638,8 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             }
         };
 
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(BufReader::new(file_handler)) {
+        let reader = BufReader::new(file_handler);
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match bincode::deserialize_from(reader) {
             Ok(t) => t,
             Err(e) => {
                 text_messages.warnings.push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
