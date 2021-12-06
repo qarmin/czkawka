@@ -2142,6 +2142,27 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="buttons_show_upper_notebook">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="icon-name">text-x-script</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkBox" id="action_buttons">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -2416,7 +2437,7 @@ Author: Rafał Mikrut
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack-type">end</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>

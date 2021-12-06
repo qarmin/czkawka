@@ -18,12 +18,12 @@ use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
 use crate::connect_duplicate_buttons::*;
 use crate::connect_header_buttons::*;
-use crate::connect_hide_text_view_errors::*;
 use crate::connect_notebook_tabs::*;
 use crate::connect_popovers::*;
 use crate::connect_progress_window::*;
 use crate::connect_selection_of_directories::*;
 use crate::connect_settings::*;
+use crate::connect_show_hide_ui::*;
 use crate::connect_similar_image_size_change::*;
 use crate::gui_data::*;
 use crate::initialize_gui::*;
@@ -41,12 +41,12 @@ mod connect_button_select;
 mod connect_button_stop;
 mod connect_duplicate_buttons;
 mod connect_header_buttons;
-mod connect_hide_text_view_errors;
 mod connect_notebook_tabs;
 mod connect_popovers;
 mod connect_progress_window;
 mod connect_selection_of_directories;
 mod connect_settings;
+mod connect_show_hide_ui;
 mod connect_similar_image_size_change;
 mod create_tree_view;
 mod gui_about;
@@ -139,7 +139,7 @@ fn main() {
             futures_receiver_invalid_symlinks,
             futures_receiver_broken_files,
         );
-        connect_hide_text_view_errors(&gui_data);
+        connect_show_hide_ui(&gui_data);
         connect_settings(&gui_data);
         connect_button_about(&gui_data);
         connect_about_buttons(&gui_data);
