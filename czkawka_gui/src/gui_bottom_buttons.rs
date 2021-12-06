@@ -11,6 +11,7 @@ pub struct GuiBottomButtons {
     pub buttons_hardlink: gtk::Button,
     pub buttons_move: gtk::Button,
     pub buttons_show_errors: gtk::Button,
+    pub buttons_show_upper_notebook: gtk::Button,
     pub buttons_names: [String; 7],
     pub buttons_array: [Widget; 7],
 }
@@ -38,7 +39,9 @@ impl GuiBottomButtons {
         ));
 
         let buttons_show_errors: gtk::Button = builder.object("buttons_show_errors").unwrap();
-        buttons_show_errors.set_tooltip_text(Some("Show/Hide bottom error panel"));
+        buttons_show_errors.set_tooltip_text(Some("Show/Hide bottom error panel."));
+        let buttons_show_upper_notebook: gtk::Button = builder.object("buttons_show_upper_notebook").unwrap();
+        buttons_show_upper_notebook.set_tooltip_text(Some("Show/Hide upper notebook panel."));
 
         let buttons_names = [
             "search".to_string(),
@@ -70,6 +73,7 @@ impl GuiBottomButtons {
             buttons_hardlink,
             buttons_move,
             buttons_show_errors,
+            buttons_show_upper_notebook,
             buttons_names,
             buttons_array,
         }
