@@ -39,6 +39,7 @@ pub fn connect_button_search(
     futures_sender_broken_files: futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
 ) {
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
+    let check_button_image_ignore_same_size = gui_data.main_notebook.check_button_image_ignore_same_size.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
@@ -344,6 +345,8 @@ pub fn connect_button_search(
                 let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
                 let maximal_file_size = entry_similar_images_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
+                let ignore_same_size = check_button_image_ignore_same_size.is_active();
+
                 let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
 
                 let delete_outdated_cache = check_button_settings_similar_images_delete_outdated_cache.is_active();
@@ -365,6 +368,7 @@ pub fn connect_button_search(
                     sf.set_hash_size(hash_size);
                     sf.set_image_filter(image_filter);
                     sf.set_delete_outdated_cache(delete_outdated_cache);
+                    sf.set_exclude_images_with_same_size(ignore_same_size);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });

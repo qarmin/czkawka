@@ -89,6 +89,8 @@ pub struct GuiMainNotebook {
     pub radio_button_similar_hash_size_32: gtk::RadioButton,
     pub radio_button_similar_hash_size_64: gtk::RadioButton,
 
+    pub check_button_image_ignore_same_size: gtk::CheckButton,
+
     pub label_similar_images_minimal_similarity: gtk::Label,
 
     pub image_preview_similar_images: gtk::Image,
@@ -218,6 +220,8 @@ impl GuiMainNotebook {
         radio_button_similar_hash_size_32.set_tooltip_text(Some("Hash of this size provide very big similarity which is more than enough for most usages."));
         radio_button_similar_hash_size_64.set_tooltip_text(Some("Paranoid mode, such tool create really big cache files and will catch almost same images."));
 
+        let check_button_image_ignore_same_size: gtk::CheckButton = builder.object("check_button_image_ignore_same_size").unwrap();
+
         let label_similar_images_minimal_similarity: gtk::Label = builder.object("label_similar_images_minimal_similarity").unwrap();
 
         let image_preview_similar_images: gtk::Image = builder.object("image_preview_similar_images").unwrap();
@@ -290,6 +294,7 @@ impl GuiMainNotebook {
             radio_button_similar_hash_size_16,
             radio_button_similar_hash_size_32,
             radio_button_similar_hash_size_64,
+            check_button_image_ignore_same_size,
             label_similar_images_minimal_similarity,
             image_preview_similar_images,
             entry_duplicate_maximal_size,

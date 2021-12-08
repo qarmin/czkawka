@@ -753,5 +753,9 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
         image_preview_similar_images.show();
     } else {
         image_preview_similar_images.hide();
+        {
+            let mut preview_path = preview_path.borrow_mut();
+            *preview_path = "".to_string();
+        }
     }
 }
