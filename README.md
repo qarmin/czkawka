@@ -10,8 +10,6 @@
 - Cache support - second and further scans should be a lot faster than the first one
 - CLI frontend - for easy automation
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
-- Rich search option - allows setting absolute included and excluded directories, set of allowed file extensions 
-  or excluded items with the `*` wildcard
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multiple tools to use:
   - Duplicates - Finds duplicates based on file name, size or hash
@@ -26,7 +24,7 @@
   - Broken Files - Finds files with an invalid extension or that are corrupted
 
 <!-- The GIF thingy -->
-![Czkawka](https://user-images.githubusercontent.com/41945903/104711404-9cbb7400-5721-11eb-904d-9677c189f7ab.gif)
+![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
 ## How do I use it?
 You can find the instructions on how to use Czkawka [**here**](instructions/Instruction.md).

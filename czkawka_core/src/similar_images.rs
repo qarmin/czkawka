@@ -101,6 +101,7 @@ pub struct SimilarImages {
     image_filter: FilterType,
     use_cache: bool,
     delete_outdated_cache: bool,
+    exclude_images_with_same_size: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -140,6 +141,7 @@ impl SimilarImages {
             image_filter: FilterType::Lanczos3,
             use_cache: true,
             delete_outdated_cache: true,
+            exclude_images_with_same_size: false,
         }
     }
 
@@ -154,6 +156,10 @@ impl SimilarImages {
 
     pub fn set_delete_outdated_cache(&mut self, delete_outdated_cache: bool) {
         self.delete_outdated_cache = delete_outdated_cache;
+    }
+
+    pub fn set_exclude_images_with_same_size(&mut self, exclude_images_with_same_size: bool) {
+        self.exclude_images_with_same_size = exclude_images_with_same_size;
     }
 
     pub fn set_hash_alg(&mut self, hash_alg: HashAlg) {
@@ -383,6 +389,21 @@ impl SimilarImages {
 
     fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
+
+        if self.exclude_images_with_same_size {
+            let mut old_hash_map = Default::default();
+            mem::swap(&mut self.images_to_check, &mut old_hash_map);
+
+            let mut new_hash_map: BTreeMap<u64, FileEntry> = Default::default();
+
+            for (_name, file_entry) in old_hash_map {
+                new_hash_map.insert(file_entry.size, file_entry);
+            }
+            self.images_to_check = Default::default();
+            for (_size, file_entry) in new_hash_map {
+                self.images_to_check.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+        }
 
         let loaded_hash_map;
 
@@ -736,10 +757,6 @@ impl PrintResults for SimilarImages {
 
 pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        // Lin: /home/username/.cache/czkawka
-        // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
-        // Mac: /Users/Username/Library/Caches/pl.Qarmin.Czkawka
-
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
             if !cache_dir.is_dir() {
