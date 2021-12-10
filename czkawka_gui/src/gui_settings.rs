@@ -1,3 +1,4 @@
+use crate::fl;
 use gtk::prelude::*;
 use gtk::{Builder, Window};
 
@@ -61,15 +62,6 @@ impl GuiSettings {
         let check_button_settings_use_cache: gtk::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
         let check_button_settings_use_trash: gtk::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
 
-        check_button_settings_save_at_exit.set_tooltip_text(Some("Saves configuration to file when closing app."));
-        check_button_settings_load_at_start.set_tooltip_text(Some("Loading at start configuration from file.\n\nNot selecting this option will load default settings."));
-        check_button_settings_confirm_deletion.set_tooltip_text(Some("Shows confirmation dialog when clicking at delete button."));
-        check_button_settings_confirm_link.set_tooltip_text(Some("Shows confirmation dialog when clicking at hard/symlink button."));
-        check_button_settings_confirm_group_deletion.set_tooltip_text(Some("Shows dialog when trying to remove all records from group."));
-        check_button_settings_show_text_view.set_tooltip_text(Some("Shows error panel at bottom."));
-        check_button_settings_use_cache.set_tooltip_text(Some("Option to which allows to not use cache feature."));
-        check_button_settings_use_trash.set_tooltip_text(Some("When enabled it moves files to trash instead deleting them permanently."));
-
         // Duplicates
         let check_button_settings_hide_hard_links: gtk::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
         let entry_settings_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
@@ -79,51 +71,22 @@ impl GuiSettings {
         let check_button_duplicates_use_prehash_cache: gtk::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").unwrap();
         let entry_settings_prehash_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").unwrap();
 
-        check_button_settings_hide_hard_links.set_tooltip_text(Some(
-            "Hides all files except one, if are points to same data(are hardlinked).\n\nE.g. in case where on disk there is 7 files which are hardlinked to specific data and one different file with same data but different inode, then in duplicate finder will be visible only one unique file and one file from hardlinked ones.",
-        ));
-        entry_settings_cache_file_minimal_size.set_tooltip_text(Some(
-            "Allows to set minimal size of file, which will be cached.\n\nChoosing smaller value, will generate more records which will speedup search, but slowdown cache loading/saving.",
-        ));
-        check_button_settings_show_preview_duplicates.set_tooltip_text(Some("Shows preview at right side, when selecting image file."));
-        check_button_settings_duplicates_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
-        button_settings_duplicates_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\n\nShould be used only if automatic clearing was disabled."));
-        check_button_duplicates_use_prehash_cache.set_tooltip_text(Some(
-            "Enables caching of prehash(hash computed from small part of file) which allows to earlier throw out non duplicated results.\n\nIt is disabled by default because can cause in some situations slowdowns.\n\nIt is heavily recommended to use it when scanning hundred of thousands or million files, because it can speedup search multiple times.",
-        ));
-
         // Similar Images
         let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
         let check_button_settings_similar_images_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_similar_images_delete_outdated_cache").unwrap();
         let button_settings_similar_images_clear_cache: gtk::Button = builder.object("button_settings_similar_images_clear_cache").unwrap();
 
-        check_button_settings_show_preview_similar_images.set_tooltip_text(Some("Shows preview at right side, when selecting image file."));
-        check_button_settings_similar_images_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
-        button_settings_similar_images_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\nShould be used only if automatic clearing was disabled."));
-
         // Similar Videos
         let check_button_settings_similar_videos_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_similar_videos_delete_outdated_cache").unwrap();
         let button_settings_similar_videos_clear_cache: gtk::Button = builder.object("button_settings_similar_videos_clear_cache").unwrap();
-
-        check_button_settings_similar_videos_delete_outdated_cache.set_tooltip_text(Some("Allows to delete outdated cache results which points to non-existent files.\n\nWhen enabled, app make sure when loading records, that all points to valid files and ignore broken ones.\n\nDisabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.\n\nIn case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan."));
-        button_settings_similar_videos_clear_cache.set_tooltip_text(Some("Manually clear cache from outdated entries.\nShould be used only if automatic clearing was disabled."));
 
         // Saving/Loading/Resetting configuration
         let button_settings_save_configuration: gtk::Button = builder.object("button_settings_save_configuration").unwrap();
         let button_settings_load_configuration: gtk::Button = builder.object("button_settings_load_configuration").unwrap();
         let button_settings_reset_configuration: gtk::Button = builder.object("button_settings_reset_configuration").unwrap();
 
-        button_settings_save_configuration.set_tooltip_text(Some("Save current settings configuration to file."));
-        button_settings_load_configuration.set_tooltip_text(Some("Load settings from file and replace current configuration with them."));
-        button_settings_reset_configuration.set_tooltip_text(Some("Reset current configuration to default one."));
-
         let button_settings_open_cache_folder: gtk::Button = builder.object("button_settings_open_cache_folder").unwrap();
         let button_settings_open_settings_folder: gtk::Button = builder.object("button_settings_open_settings_folder").unwrap();
-
-        button_settings_open_cache_folder.set_tooltip_text(Some(
-            "Opens folder where are stored txt files with cache.\n\nModifying them may cause to show invalid results but also modifying e.g. path may save time when moving big amount of files to different place.\n\nYou can copy this files between computers to save time on scanning again for files(of course if they have similar directory structure).\n\nIn case of problems with cache, this files can be removed, so app will automatically regenerate them.",
-        ));
-        button_settings_open_settings_folder.set_tooltip_text(Some("Opens folder where Czkawka config are stored.\n\nModifying them, may cause to show."));
 
         Self {
             window_settings,
@@ -153,5 +116,70 @@ impl GuiSettings {
             button_settings_open_cache_folder,
             button_settings_open_settings_folder,
         }
+    }
+
+    pub fn update_language(&self) {
+        self.check_button_settings_save_at_exit.set_label(&fl!("settings_save_at_exit_button"));
+        self.check_button_settings_load_at_start.set_label(&fl!("settings_load_at_start_button"));
+        self.check_button_settings_confirm_deletion.set_label(&fl!("settings_confirm_deletion_button"));
+        self.check_button_settings_confirm_link.set_label(&fl!("settings_confirm_link_button"));
+        self.check_button_settings_confirm_group_deletion.set_label(&fl!("settings_confirm_group_deletion_button"));
+        self.check_button_settings_show_text_view.set_label(&fl!("settings_show_text_view_button"));
+        self.check_button_settings_use_cache.set_label(&fl!("settings_use_cache_button"));
+        self.check_button_settings_use_trash.set_label(&fl!("settings_use_trash_button"));
+
+        self.check_button_settings_save_at_exit.set_tooltip_text(Some(&fl!("settings_save_at_exit_button_tooltip")));
+        self.check_button_settings_load_at_start.set_tooltip_text(Some(&fl!("settings_load_at_start_button_tooltip")));
+        self.check_button_settings_confirm_deletion.set_tooltip_text(Some(&fl!("settings_confirm_deletion_button_tooltip")));
+        self.check_button_settings_confirm_link.set_tooltip_text(Some(&fl!("settings_confirm_link_button_tooltip")));
+        self.check_button_settings_confirm_group_deletion.set_tooltip_text(Some(&fl!("settings_confirm_group_deletion_button_tooltip")));
+        self.check_button_settings_show_text_view.set_tooltip_text(Some(&fl!("settings_show_text_view_button_tooltip")));
+        self.check_button_settings_use_cache.set_tooltip_text(Some(&fl!("settings_use_cache_button_tooltip")));
+        self.check_button_settings_use_trash.set_tooltip_text(Some(&fl!("settings_use_trash_button_tooltip")));
+
+        self.check_button_settings_hide_hard_links.set_label(&fl!("settings_duplicates_hide_hard_link_button"));
+        self.check_button_settings_show_preview_duplicates.set_label(&fl!("settings_multiple_image_preview_checkbutton"));
+        self.check_button_settings_duplicates_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
+        self.button_settings_duplicates_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
+        self.check_button_duplicates_use_prehash_cache.set_label(&fl!("settings_duplicates_prehash_checkbutton"));
+
+        self.check_button_settings_hide_hard_links.set_tooltip_text(Some(&fl!("settings_duplicates_hide_hard_link_button_tooltip")));
+        self.entry_settings_cache_file_minimal_size.set_tooltip_text(Some(&fl!("settings_duplicates_minimal_size_entry_tooltip")));
+        self.check_button_settings_show_preview_duplicates.set_tooltip_text(Some(&fl!("settings_multiple_image_preview_checkbutton_tooltip")));
+        self.check_button_settings_duplicates_delete_outdated_cache
+            .set_tooltip_text(Some(&fl!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
+        self.button_settings_duplicates_clear_cache.set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
+        self.check_button_duplicates_use_prehash_cache.set_tooltip_text(Some(&fl!("settings_duplicates_prehash_checkbutton_tooltip")));
+        self.entry_settings_prehash_cache_file_minimal_size.set_tooltip_text(Some(&fl!("settings_duplicates_prehash_minimal_entry_tooltip")));
+
+        self.check_button_settings_show_preview_similar_images.set_label(&fl!("settings_multiple_image_preview_checkbutton"));
+        self.check_button_settings_similar_images_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
+        self.button_settings_similar_images_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
+
+        self.check_button_settings_show_preview_similar_images.set_tooltip_text(Some(&fl!("settings_multiple_image_preview_checkbutton_tooltip")));
+        self.check_button_settings_similar_images_delete_outdated_cache
+            .set_tooltip_text(Some(&fl!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
+        self.button_settings_similar_images_clear_cache.set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
+
+        self.check_button_settings_similar_videos_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
+        self.button_settings_similar_videos_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
+
+        self.check_button_settings_similar_videos_delete_outdated_cache
+            .set_tooltip_text(Some(&fl!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
+        self.button_settings_similar_videos_clear_cache.set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
+
+        self.button_settings_save_configuration.set_label(&fl!("settings_saving_button"));
+        self.button_settings_load_configuration.set_label(&fl!("settings_loading_button"));
+        self.button_settings_reset_configuration.set_label(&fl!("settings_reset_button"));
+
+        self.button_settings_save_configuration.set_tooltip_text(Some(&fl!("settings_saving_button_tooltip")));
+        self.button_settings_load_configuration.set_tooltip_text(Some(&fl!("settings_loading_button_tooltip")));
+        self.button_settings_reset_configuration.set_tooltip_text(Some(&fl!("settings_reset_button_tooltip")));
+
+        self.button_settings_open_cache_folder.set_label(&fl!("settings_folder_cache_open"));
+        self.button_settings_open_settings_folder.set_label(&fl!("settings_folder_settings_open"));
+
+        self.button_settings_open_cache_folder.set_tooltip_text(Some(&fl!("settings_folder_cache_open_tooltip")));
+        self.button_settings_open_settings_folder.set_tooltip_text(Some(&fl!("settings_folder_settings_open_tooltip")));
     }
 }

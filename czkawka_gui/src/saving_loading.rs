@@ -8,7 +8,7 @@ use gtk::prelude::*;
 use gtk::{ScrolledWindow, TextView};
 
 use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notepad::GuiUpperNotebook;
+use crate::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_functions::*;
 
 // TODO organize this better, add specific functions that will allow to load from files specific strings

@@ -59,7 +59,7 @@ mod gui_main_notebook;
 mod gui_popovers;
 mod gui_progress_dialog;
 mod gui_settings;
-mod gui_upper_notepad;
+mod gui_upper_notebook;
 mod help_functions;
 mod initialize_gui;
 mod localizer;

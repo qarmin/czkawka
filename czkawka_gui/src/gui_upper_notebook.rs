@@ -1,5 +1,8 @@
+use crate::fl;
+use crate::help_functions::get_custom_label_from_label_with_image;
+use crate::notebook_enums::NotebookUpperEnum;
 use gtk::prelude::*;
-use gtk::{EventControllerKey, TreeView};
+use gtk::{Bin, EventControllerKey, TreeView};
 
 #[derive(Clone)]
 pub struct GuiUpperNotebook {
@@ -19,7 +22,7 @@ pub struct GuiUpperNotebook {
 
     pub check_button_recursive: gtk::CheckButton,
 
-    pub buttons_manual_add_directory: gtk::Button,
+    pub buttons_manual_add_included_directory: gtk::Button,
     pub buttons_add_included_directory: gtk::Button,
     pub buttons_remove_included_directory: gtk::Button,
     pub buttons_manual_add_excluded_directory: gtk::Button,
@@ -44,21 +47,13 @@ impl GuiUpperNotebook {
         let entry_excluded_items: gtk::Entry = builder.object("entry_excluded_items").unwrap();
 
         let check_button_recursive: gtk::CheckButton = builder.object("check_button_recursive").unwrap();
-        check_button_recursive.set_tooltip_text(Some("If selected, search also for files which are not placed directly under chosen folders"));
 
-        let buttons_manual_add_directory: gtk::Button = builder.object("buttons_manual_add_directory").unwrap();
+        let buttons_manual_add_included_directory: gtk::Button = builder.object("buttons_manual_add_included_directory").unwrap();
         let buttons_add_included_directory: gtk::Button = builder.object("buttons_add_included_directory").unwrap();
         let buttons_remove_included_directory: gtk::Button = builder.object("buttons_remove_included_directory").unwrap();
         let buttons_manual_add_excluded_directory: gtk::Button = builder.object("buttons_manual_add_excluded_directory").unwrap();
         let buttons_add_excluded_directory: gtk::Button = builder.object("buttons_add_excluded_directory").unwrap();
         let buttons_remove_excluded_directory: gtk::Button = builder.object("buttons_remove_excluded_directory").unwrap();
-
-        buttons_manual_add_directory.set_tooltip_text(Some("Allows to add directory name by hand"));
-        buttons_add_included_directory.set_tooltip_text(Some("Add new directory to search"));
-        buttons_remove_included_directory.set_tooltip_text(Some("Delete directory from search"));
-        buttons_manual_add_excluded_directory.set_tooltip_text(Some("Allows to add directory name by hand"));
-        buttons_add_excluded_directory.set_tooltip_text(Some("Add directory to be excluded in search"));
-        buttons_remove_excluded_directory.set_tooltip_text(Some("Delete directory from excluded list"));
 
         Self {
             notebook_upper,
@@ -71,12 +66,41 @@ impl GuiUpperNotebook {
             entry_excluded_items,
             entry_allowed_extensions,
             check_button_recursive,
-            buttons_manual_add_directory,
+            buttons_manual_add_included_directory,
             buttons_add_included_directory,
             buttons_remove_included_directory,
             buttons_manual_add_excluded_directory,
             buttons_add_excluded_directory,
             buttons_remove_excluded_directory,
+        }
+    }
+    pub fn update_language(&self) {
+        self.check_button_recursive.set_label(&fl!("upper_recursive_button"));
+        self.check_button_recursive.set_tooltip_text(Some(&fl!("upper_recursive_button_tooltip")));
+
+        get_custom_label_from_label_with_image(&self.buttons_manual_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_included_button"));
+        get_custom_label_from_label_with_image(&self.buttons_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_included_button"));
+        get_custom_label_from_label_with_image(&self.buttons_remove_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_included_button"));
+        get_custom_label_from_label_with_image(&self.buttons_manual_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_excluded_button"));
+        get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_excluded_button"));
+        get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_excluded_button"));
+
+        self.buttons_manual_add_included_directory.set_tooltip_text(Some(&fl!("upper_manual_add_included_button_tooltip")));
+        self.buttons_add_included_directory.set_tooltip_text(Some(&fl!("upper_add_included_button_tooltip")));
+        self.buttons_remove_included_directory.set_tooltip_text(Some(&fl!("upper_remove_included_button_tooltip")));
+        self.buttons_manual_add_excluded_directory.set_tooltip_text(Some(&fl!("upper_manual_add_excluded_button_tooltip")));
+        self.buttons_add_excluded_directory.set_tooltip_text(Some(&fl!("upper_add_excluded_button_tooltip")));
+        self.buttons_remove_excluded_directory.set_tooltip_text(Some(&fl!("upper_remove_excluded_button_tooltip")));
+
+        let vec_children: Vec<gtk::Widget> = self.notebook_upper.children().into_iter().map(|e| e).collect();
+
+        for (upper_enum, fl_thing) in [
+            (NotebookUpperEnum::AllowedExtensions as usize, fl!("upper_notebook_allowed_extension")),
+            (NotebookUpperEnum::ExcludedItems as usize, fl!("upper_notebook_excluded_items")),
+            (NotebookUpperEnum::ExcludedDirectories as usize, fl!("upper_notebook_excluded_directories")),
+            (NotebookUpperEnum::IncludedDirectories as usize, fl!("upper_notebook_included_directories")),
+        ] {
+            self.notebook_upper.tab_label(&vec_children[upper_enum]).unwrap().downcast::<gtk::Label>().unwrap().set_text(&fl_thing);
         }
     }
 }

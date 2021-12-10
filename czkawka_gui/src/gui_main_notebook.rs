@@ -2,7 +2,7 @@ use crate::fl;
 use gtk::prelude::*;
 use gtk::{EventControllerKey, TreeView};
 
-use crate::notebook_enums::NUMBER_OF_NOTEBOOK_MAIN_TABS;
+use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {
@@ -182,22 +182,12 @@ impl GuiMainNotebook {
         let radio_button_duplicates_size: gtk::RadioButton = builder.object("radio_button_duplicates_size").unwrap();
         let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
-        radio_button_duplicates_name.set_tooltip_text(Some("Finds files which have same name.\n\nThis mode not checking what file contain inside, so be carefully when using it."));
-        radio_button_duplicates_size.set_tooltip_text(Some("Finds files which have same size.\n\nThis mode not checking what file contain inside, so be carefully when using it."));
-        radio_button_duplicates_hash.set_tooltip_text(Some(
-            "Finds files which have the same content.\n\nThis mode hashes file and later compare this hashes to find duplicates.\n\nTool heavily uses cache, so second and further scans of same data should be a lot of faster that first.",
-        ));
-
         let scale_similarity_similar_images: gtk::Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: gtk::Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
         let radio_button_hash_type_blake3: gtk::RadioButton = builder.object("radio_button_hash_type_blake3").unwrap();
         let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
         let radio_button_hash_type_xxh3: gtk::RadioButton = builder.object("radio_button_hash_type_xxh3").unwrap();
-
-        radio_button_hash_type_blake3.set_tooltip_text(Some("Blake3 is cryptographic hash function. It is used as default hash algorithm, because it is very fast."));
-        radio_button_hash_type_crc32.set_tooltip_text(Some("CRC32 is simple hash function. It should be faster than Blake3, but probably may have very rarely some collisions."));
-        radio_button_hash_type_xxh3.set_tooltip_text(Some("XXH3 is very similar in case of performance and hash quality to Blake3, so such modes can be easily used ."));
 
         let radio_button_resize_algorithm_lanczos3: gtk::RadioButton = builder.object("radio_button_resize_algorithm_lanczos3").unwrap();
         let radio_button_resize_algorithm_nearest: gtk::RadioButton = builder.object("radio_button_resize_algorithm_nearest").unwrap();
@@ -215,11 +205,6 @@ impl GuiMainNotebook {
         let radio_button_similar_hash_size_16: gtk::RadioButton = builder.object("radio_button_similar_hash_size_16").unwrap();
         let radio_button_similar_hash_size_32: gtk::RadioButton = builder.object("radio_button_similar_hash_size_32").unwrap();
         let radio_button_similar_hash_size_64: gtk::RadioButton = builder.object("radio_button_similar_hash_size_64").unwrap();
-
-        radio_button_similar_hash_size_8.set_tooltip_text(Some("Default hash size, with very high similarity it produce quite good results and don't save too much data too cache."));
-        radio_button_similar_hash_size_16.set_tooltip_text(Some("More precise than 8, so can be used to find very similar pictures, but create bigger cache entries."));
-        radio_button_similar_hash_size_32.set_tooltip_text(Some("Hash of this size provide very big similarity which is more than enough for most usages."));
-        radio_button_similar_hash_size_64.set_tooltip_text(Some("Paranoid mode, such tool create really big cache files and will catch almost same images."));
 
         let check_button_image_ignore_same_size: gtk::CheckButton = builder.object("check_button_image_ignore_same_size").unwrap();
 
@@ -343,5 +328,22 @@ impl GuiMainNotebook {
         self.radio_button_similar_hash_size_16.set_tooltip_text(Some(&fl!("image_hash_checkbox_16")));
         self.radio_button_similar_hash_size_32.set_tooltip_text(Some(&fl!("image_hash_checkbox_32")));
         self.radio_button_similar_hash_size_64.set_tooltip_text(Some(&fl!("image_hash_checkbox_64")));
+
+        let vec_children: Vec<gtk::Widget> = self.notebook_main.children().into_iter().map(|e| e).collect();
+
+        for (main_enum, fl_thing) in [
+            (NotebookMainEnum::Duplicate as usize, fl!("main_notebook_duplicates")),
+            (NotebookMainEnum::EmptyDirectories as usize, fl!("main_notebook_empty_directories")),
+            (NotebookMainEnum::BigFiles as usize, fl!("main_notebook_big_files")),
+            (NotebookMainEnum::EmptyFiles as usize, fl!("main_notebook_empty_files")),
+            (NotebookMainEnum::Temporary as usize, fl!("main_notebook_temporary")),
+            (NotebookMainEnum::SimilarImages as usize, fl!("main_notebook_similar_images")),
+            (NotebookMainEnum::SimilarVideos as usize, fl!("main_notebook_similar_videos")),
+            (NotebookMainEnum::SameMusic as usize, fl!("main_notebook_same_music")),
+            (NotebookMainEnum::Symlinks as usize, fl!("main_notebook_symlinks")),
+            (NotebookMainEnum::BrokenFiles as usize, fl!("main_notebook_broken_files")),
+        ] {
+            self.notebook_main.tab_label(&vec_children[main_enum]).unwrap().downcast::<gtk::Label>().unwrap().set_text(&fl_thing);
+        }
     }
 }

@@ -12,8 +12,8 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     {
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
         let window_main = gui_data.window_main.clone();
-        let buttons_manual_add_directory = gui_data.upper_notebook.buttons_manual_add_directory.clone();
-        buttons_manual_add_directory.connect_clicked(move |_| {
+        let buttons_manual_add_included_directory = gui_data.upper_notebook.buttons_manual_add_included_directory.clone();
+        buttons_manual_add_included_directory.connect_clicked(move |_| {
             add_manually_directories(&window_main, &tree_view_included_directories);
         });
     }

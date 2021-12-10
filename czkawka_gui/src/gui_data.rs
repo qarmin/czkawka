@@ -6,7 +6,6 @@ use crossbeam_channel::unbounded;
 use gtk::prelude::*;
 use gtk::Builder;
 
-use crate::fl;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -25,7 +24,7 @@ use crate::gui_main_notebook::GuiMainNotebook;
 use crate::gui_popovers::GuiPopovers;
 use crate::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notepad::GuiUpperNotebook;
+use crate::gui_upper_notebook::GuiUpperNotebook;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
@@ -92,7 +91,6 @@ impl GuiData {
         let window_main: gtk::Window = builder.object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
-        window_main.set_title(&fl!("potato-error"));
 
         window_main.set_application(Some(application));
 
@@ -200,7 +198,13 @@ impl GuiData {
     }
 
     pub fn update_language(&self) {
-        self.window_main.set_title(&fl!("potato-error"));
         self.main_notebook.update_language();
+        self.upper_notebook.update_language();
+        self.popovers.update_language();
+        self.bottom_buttons.update_language();
+        self.progress_window.update_language();
+        self.about.update_language();
+        self.header.update_language();
+        self.settings.update_language();
     }
 }

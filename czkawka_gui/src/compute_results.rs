@@ -8,6 +8,7 @@ use glib::Receiver;
 use gtk::prelude::*;
 use humansize::{file_size_opts as options, FileSize};
 
+use crate::fl;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
@@ -85,7 +86,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
         match msg {
             Message::Duplicates(df) => {
                 if df.get_stopped_search() {
-                    entry_info.set_text("Searching for duplicates was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = df.get_information();
                     let text_messages = df.get_text_messages();
@@ -94,31 +95,56 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let duplicates_size: u64;
                     let duplicates_group: usize;
 
+                    let fl_found = fl!("compute_found");
+                    let fl_groups = fl!("compute_groups");
+                    let fl_groups_which_took = fl!("compute_groups_which_took");
+                    let fl_duplicated_files_in = fl!("compute_duplicated_files_in");
+
                     match df.get_check_method() {
                         CheckingMethod::Name => {
                             duplicates_number = information.number_of_duplicated_files_by_name;
-                            duplicates_size = 0;
+                            // duplicates_size = 0;
                             duplicates_group = information.number_of_groups_by_name;
-                            entry_info.set_text(format!("Found {} files in {} groups which have same names.", duplicates_number, duplicates_group).as_str());
+                            entry_info.set_text(format!("{} {} {} {} {}", fl_found, duplicates_number, fl_duplicated_files_in, duplicates_group, fl_groups).as_str());
                         }
                         CheckingMethod::Hash => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
-                            entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
+                            entry_info.set_text(
+                                format!(
+                                    "{} {} {} {} {} {}.",
+                                    fl_found,
+                                    duplicates_number,
+                                    fl_duplicated_files_in,
+                                    duplicates_group,
+                                    fl_groups_which_took,
+                                    duplicates_size.file_size(options::BINARY).unwrap()
+                                )
+                                .as_str(),
+                            );
                         }
                         CheckingMethod::Size => {
                             duplicates_number = information.number_of_duplicated_files_by_size;
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
-                            entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
+                            entry_info.set_text(
+                                format!(
+                                    "{} {} {} {} {} {}.",
+                                    fl_found,
+                                    duplicates_number,
+                                    fl_duplicated_files_in,
+                                    duplicates_group,
+                                    fl_groups_which_took,
+                                    duplicates_size.file_size(options::BINARY).unwrap()
+                                )
+                                .as_str(),
+                            );
                         }
                         CheckingMethod::None => {
                             panic!();
                         }
                     }
-
-                    entry_info.set_text(format!("Found {} duplicates files in {} groups which took {}.", duplicates_number, duplicates_group, duplicates_size.file_size(options::BINARY).unwrap()).as_str());
 
                     // Create GUI
                     {
@@ -195,7 +221,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
                                             (
                                                 ColumnsDuplicates::Path as u32,
-                                                &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                                &(format!(
+                                                    "{} ({} {}) {}",
+                                                    ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(),
+                                                    (vector.len() - 1) as u64 * *size as u64,
+                                                    fl!("general_bytes"),
+                                                    fl!("general_lost")
+                                                )),
                                             ),
                                             (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
                                             (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
@@ -241,10 +273,16 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     let values: [(u32, &dyn ToValue); 8] = [
                                         (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                         (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                        (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} {})", vector.len(), size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes")))),
                                         (
                                             ColumnsDuplicates::Path as u32,
-                                            &(format!("{} ({} bytes) lost", ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(), (vector.len() - 1) as u64 * *size as u64)),
+                                            &(format!(
+                                                "{} ({} {}) {}",
+                                                ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(),
+                                                (vector.len() - 1) as u64 * *size as u64,
+                                                fl!("general_bytes"),
+                                                fl!("general_lost")
+                                            )),
                                         ),
                                         (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
                                         (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
@@ -289,14 +327,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::EmptyFolders(ef) => {
                 if ef.get_stopped_search() {
-                    entry_info.set_text("Searching for empty folders was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = ef.get_information();
                     let text_messages = ef.get_text_messages();
 
                     let empty_folder_number: usize = information.number_of_empty_folders;
 
-                    entry_info.set_text(format!("Found {} empty folders.", empty_folder_number).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), empty_folder_number, fl!("compute_empty_folders")).as_str());
 
                     // Create GUI
                     {
@@ -336,14 +374,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::EmptyFiles(vf) => {
                 if vf.get_stopped_search() {
-                    entry_info.set_text("Searching for empty files was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = vf.get_information();
                     let text_messages = vf.get_text_messages();
 
                     let empty_files_number: usize = information.number_of_empty_files;
 
-                    entry_info.set_text(format!("Found {} empty files.", empty_files_number).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), empty_files_number, fl!("compute_empty_files")).as_str());
 
                     // Create GUI
                     {
@@ -384,14 +422,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::BigFiles(bf) => {
                 if bf.get_stopped_search() {
-                    entry_info.set_text("Searching for big files was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = bf.get_information();
                     let text_messages = bf.get_text_messages();
 
                     let biggest_files_number: usize = information.number_of_real_files;
 
-                    entry_info.set_text(format!("Found {} biggest files.", biggest_files_number).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), biggest_files_number, fl!("compute_biggest_files")).as_str());
 
                     // Create GUI
                     {
@@ -434,14 +472,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::Temporary(tf) => {
                 if tf.get_stopped_search() {
-                    entry_info.set_text("Searching for temporary files was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = tf.get_information();
                     let text_messages = tf.get_text_messages();
 
                     let temporary_files_number: usize = information.number_of_temporary_files;
-
-                    entry_info.set_text(format!("Found {} temporary files.", temporary_files_number).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), temporary_files_number, fl!("compute_temporary_files")).as_str());
 
                     // Create GUI
                     {
@@ -482,14 +519,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SimilarImages(sf) => {
                 if sf.get_stopped_search() {
-                    entry_info.set_text("Searching for similar images was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     //let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
 
                     let base_images_size = sf.get_similar_images().len();
 
-                    entry_info.set_text(format!("Found similar pictures for {} images.", base_images_size).as_str());
+                    entry_info.set_text(format!("{} {} {} {}.", fl!("compute_found"), fl!("compute_duplicates_for"), base_images_size, fl!("compute_similar_image")).as_str());
 
                     // Create GUI
                     {
@@ -563,14 +600,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SimilarVideos(ff) => {
                 if ff.get_stopped_search() {
-                    entry_info.set_text("Searching for similar videos was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     //let information = ff.get_information();
                     let text_messages = ff.get_text_messages();
 
                     let base_videos_size = ff.get_similar_videos().len();
 
-                    entry_info.set_text(format!("Found similar videos for {} videos.", base_videos_size).as_str());
+                    entry_info.set_text(format!("{} {} {} {}.", fl!("compute_found"), fl!("compute_duplicates_for"), base_videos_size, fl!("compute_similar_videos")).as_str());
 
                     // Create GUI
                     {
@@ -640,14 +677,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SameMusic(mf) => {
                 if mf.get_stopped_search() {
-                    entry_info.set_text("Searching for same music was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
 
                     let same_music_number: usize = information.number_of_duplicates_music_files;
 
-                    entry_info.set_text(format!("Found {} duplicated music files.", same_music_number).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), same_music_number, fl!("compute_music_files")).as_str());
 
                     // Create GUI
                     {
@@ -763,14 +800,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::InvalidSymlinks(ifs) => {
                 if ifs.get_stopped_search() {
-                    entry_info.set_text("Searching for invalid symlink was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = ifs.get_information();
                     let text_messages = ifs.get_text_messages();
 
                     let invalid_symlinks: usize = information.number_of_invalid_symlinks;
 
-                    entry_info.set_text(format!("Found {} invalid symlinks.", invalid_symlinks).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), invalid_symlinks, fl!("compute_symlinks")).as_str());
 
                     // Create GUI
                     {
@@ -814,14 +851,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::BrokenFiles(br) => {
                 if br.get_stopped_search() {
-                    entry_info.set_text("Searching for broken files was stopped by user");
+                    entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
                     let information = br.get_information();
                     let text_messages = br.get_text_messages();
 
                     let broken_files_number: usize = information.number_of_broken_files;
 
-                    entry_info.set_text(format!("Found {} broken files.", broken_files_number).as_str());
+                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), broken_files_number, fl!("compute_broken_files")).as_str());
 
                     // Create GUI
                     {
