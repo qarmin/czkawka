@@ -198,4 +198,9 @@ impl GuiData {
             stop_receiver,
         }
     }
+
+    pub fn update_language(&self) {
+        self.window_main.set_title(&fl!("potato-error"));
+        self.main_notebook.update_language();
+    }
 }

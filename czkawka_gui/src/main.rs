@@ -4,8 +4,6 @@
 #![allow(clippy::too_many_arguments)]
 
 use gtk::prelude::*;
-use i18n_embed::fluent::{fluent_language_loader, FluentLanguageLoader};
-use i18n_embed::DesktopLanguageRequester;
 
 use czkawka_core::*;
 
@@ -18,6 +16,7 @@ use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
+use crate::connect_change_language::*;
 use crate::connect_duplicate_buttons::*;
 use crate::connect_header_buttons::*;
 use crate::connect_notebook_tabs::*;
@@ -41,6 +40,7 @@ mod connect_button_save;
 mod connect_button_search;
 mod connect_button_select;
 mod connect_button_stop;
+mod connect_change_language;
 mod connect_duplicate_buttons;
 mod connect_header_buttons;
 mod connect_notebook_tabs;
@@ -74,18 +74,6 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    // Use the language requester for the desktop platform (linux, windows, mac).
-    // There is also a requester available for the web-sys WASM platform called
-    // WebLanguageRequester, or you can implement your own.
-    let requested_languages = DesktopLanguageRequester::requested_languages();
-    let localizers = vec![("czkawka_gui", crate::localizer::localizer())];
-
-    for (lib, localizer) in localizers {
-        if let Err(error) = localizer.select(&requested_languages) {
-            eprintln!("Error while loading languages for {} {:?}", lib, error);
-        }
-    }
-
     let application = gtk::Application::builder().application_id("com.github.qarmin").build();
     application.connect_activate(|application| {
         let mut gui_data: GuiData = GuiData::new_with_application(application);
@@ -110,6 +98,9 @@ fn main() {
             futures::channel::mpsc::unbounded();
         let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) =
             futures::channel::mpsc::unbounded();
+
+        // Needs to run before initializing GUI?
+        connect_change_language(&gui_data);
 
         initialize_gui(&mut gui_data);
         validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup

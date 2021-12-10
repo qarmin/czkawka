@@ -1,3 +1,4 @@
+use crate::fl;
 use gtk::prelude::*;
 use gtk::{EventControllerKey, TreeView};
 
@@ -316,5 +317,31 @@ impl GuiMainNotebook {
             self.tree_view_invalid_symlinks.clone(),
             self.tree_view_broken_files.clone(),
         ]
+    }
+
+    pub fn update_language(&self) {
+        self.check_button_music_title.set_label(&fl!("music_title_checkbox"));
+        self.check_button_music_artist.set_label(&fl!("music_artist_checkbox"));
+        self.check_button_music_album_title.set_label(&fl!("music_album_title_checkbox"));
+        self.check_button_music_album_artist.set_label(&fl!("music_album_artist_checkbox"));
+        self.check_button_music_year.set_label(&fl!("music_year_checkbox"));
+        self.check_button_music_approximate_comparison.set_label(&fl!("music_comparison_checkbox"));
+
+        self.radio_button_duplicates_name.set_label(&fl!("duplicate_mode_name_checkbox"));
+        self.radio_button_duplicates_size.set_label(&fl!("duplicate_mode_size_checkbox"));
+        self.radio_button_duplicates_hash.set_label(&fl!("duplicate_mode_hash_checkbox"));
+
+        self.radio_button_duplicates_name.set_tooltip_text(Some(&fl!("duplicate_mode_name_checkbox_tooltip")));
+        self.radio_button_duplicates_size.set_tooltip_text(Some(&fl!("duplicate_mode_size_checkbox_tooltip")));
+        self.radio_button_duplicates_hash.set_tooltip_text(Some(&fl!("duplicate_mode_hash_checkbox_tooltip")));
+
+        self.radio_button_hash_type_blake3.set_tooltip_text(Some(&fl!("duplicate_hash_checkbox_blake3")));
+        self.radio_button_hash_type_crc32.set_tooltip_text(Some(&fl!("duplicate_hash_checkbox_crc32")));
+        self.radio_button_hash_type_xxh3.set_tooltip_text(Some(&fl!("duplicate_hash_checkbox_xxh3")));
+
+        self.radio_button_similar_hash_size_8.set_tooltip_text(Some(&fl!("image_hash_checkbox_8")));
+        self.radio_button_similar_hash_size_16.set_tooltip_text(Some(&fl!("image_hash_checkbox_16")));
+        self.radio_button_similar_hash_size_32.set_tooltip_text(Some(&fl!("image_hash_checkbox_32")));
+        self.radio_button_similar_hash_size_64.set_tooltip_text(Some(&fl!("image_hash_checkbox_64")));
     }
 }
