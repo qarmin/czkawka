@@ -1,3 +1,4 @@
+use crate::language_functions::get_language_from_combo_box_text;
 use crate::GuiData;
 use gtk::prelude::*;
 use i18n_embed::unic_langid::LanguageIdentifier;
@@ -6,24 +7,19 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 pub fn connect_change_language(gui_data: &GuiData) {
     change_language(gui_data);
 
-    let check_button_language = gui_data.header.check_button_language.clone();
+    let combo_box_settings_language = gui_data.settings.combo_box_settings_language.clone();
     let gui_data = gui_data.clone();
-    check_button_language.connect_clicked(move |_| {
+    combo_box_settings_language.connect_changed(move |_| {
         change_language(&gui_data);
     });
 }
 
 fn change_language(gui_data: &GuiData) {
-    // Alg
-    // Use
-
     let localizers = vec![("czkawka_gui", czkawka_core::localizer::localizer())];
-    let lang_byte = match gui_data.header.check_button_language.is_active() {
-        true => "pl",
-        false => "en",
-    }
-    .as_bytes();
-    let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_byte).unwrap()];
+
+    let lang_short = get_language_from_combo_box_text(gui_data.settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text;
+
+    let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).unwrap()];
     // let available_languages = Localizer::available_languages();
     // println!("{:?}", available_languages);
     for (lib, localizer) in localizers {

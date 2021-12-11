@@ -114,8 +114,10 @@ upper_notebook_included_directories = Included Directories
 
 upper_allowed_extensions_tooltip = 
         Allowed extensions must be separated by commas(by default all are available)
-        Macros IMAGE, VIDEO, MUSIC, TEXT which adds multiple extensions at once are also available
-        Usage example  ".exe, IMAGE, VIDEO, .rar, 7z" - this means that image(e.g. jpg, png), video(e.g. avi, mp4), exe, rar and 7z files will be scanned
+
+        Macros IMAGE, VIDEO, MUSIC, TEXT which adds multiple extensions at once are also available.
+
+        Usage example  ".exe, IMAGE, VIDEO, .rar, 7z" - this means that image(e.g. jpg, png), video(e.g. avi, mp4), exe, rar and 7z files will be scanned.
 
 upper_excluded_items_tooltip = 
         Excluded items must contains * wildcard and should be separated by commas.
@@ -223,7 +225,6 @@ about_instruction_button = Instruction
 # Header
 header_setting_button_tooltip = Opens settings dialog.
 header_about_button_tooltip = Opens dialog with info about app.
-header_language_button_tooltip = Use Polish or English language in runtime.
 
 # Settings
 ## General
@@ -238,6 +239,7 @@ settings_confirm_group_deletion_button_tooltip = Shows dialog when trying to rem
 settings_show_text_view_button_tooltip = Shows error panel at bottom.
 settings_use_cache_button_tooltip = Option to which allows to not use cache feature.
 settings_use_trash_button_tooltip = When enabled it moves files to trash instead deleting them permanently.
+settings_language_label_tooltip = Allows to choose language of interface from available ones.
 
 settings_save_at_exit_button = Save configuration at exit
 settings_load_at_start_button = Load configuration at start
@@ -247,6 +249,7 @@ settings_confirm_group_deletion_button = Show confirm dialog when deleting all f
 settings_show_text_view_button = Show bottom text panel
 settings_use_cache_button = Use cache
 settings_use_trash_button = Move deleted files to trash
+settings_language_label = Language
 
 settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
 settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
@@ -362,6 +365,11 @@ progress_size = size
 progress_name = name
 progress_analyzed_full_hash = Analyzed full hash of 
 progress_analyzed_partial_hash = Analyzed partial hash of 
+
+# Saving loading 
+saving_loading_saving_success = Saved configuration to file 
+saving_loading_reset_configuration = Current configuration was cleared.
+saving_loading_loading_success = Properly loaded configuration from file
 
 progress_current_stage = Current Stage:{"  "}
 progress_all_stages = All Stages:{"  "}

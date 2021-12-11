@@ -218,7 +218,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         let values: [(u32, &dyn ToValue); 8] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} bytes)", vector.len(), size.file_size(options::BINARY).unwrap(), size))),
+                                            (ColumnsDuplicates::Name as u32, &(format!("{} x {} ({} {})", vector.len(), size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes")))),
                                             (
                                                 ColumnsDuplicates::Path as u32,
                                                 &(format!(

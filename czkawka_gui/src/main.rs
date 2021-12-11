@@ -62,6 +62,7 @@ mod gui_settings;
 mod gui_upper_notebook;
 mod help_functions;
 mod initialize_gui;
+mod language_functions;
 mod notebook_enums;
 mod opening_selecting_records;
 mod saving_loading;

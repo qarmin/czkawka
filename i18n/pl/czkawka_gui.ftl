@@ -114,7 +114,9 @@ upper_notebook_included_directories = Przeszukiwane Foldery
 
 upper_allowed_extensions_tooltip = 
         Dozwolone rozszerzenia muszą być oddzielone za pomocą przecinków - brak rozszerzeń oznacza ż wszystkie rozszerzenia są używane.
+
         Makra IMAGE, VIDEO, MUSIC, TEXT które dodają rozrzerzenia w paczkach, również są wspierane
+
         Przykładowe użycie ".exe, IMAGE, VIDEO, .rar, 7z" oznacza że obrazy(np. jpg, png), widea(np. avi, mp4) oraz pliki z roszerzeniami exe, rar i 7z będą przeskanowane 
 
 upper_excluded_items_tooltip = 
@@ -223,7 +225,6 @@ about_instruction_button = Instrukcja(ENG)
 # Header
 header_setting_button_tooltip = Otwórz okno z ustawieniami programu.
 header_about_button_tooltip = Otwórz okno z informacjami o programie.
-header_language_button_tooltip = Używaj języka Polskiego lub Angielskiego.
 
 # Settings
 ## General
@@ -358,3 +359,8 @@ progress_all_stages = Wszystkie Etapy:{"  "}
 
 # Other
 searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę czekać...
+
+# Saving loading 
+saving_loading_saving_success = Zapisano konfigurację do pliku
+saving_loading_reset_configuration = Przywrócono domyślą konfigurację.
+saving_loading_loading_success = Poprawnie załadowano konfigurację z pliku
