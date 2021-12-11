@@ -1,5 +1,7 @@
+use crate::fl;
+use crate::help_functions::get_custom_label_from_label_with_image;
 use gtk::prelude::*;
-use gtk::Widget;
+use gtk::{Bin, Widget};
 
 #[derive(Clone)]
 pub struct GuiBottomButtons {
@@ -26,22 +28,8 @@ impl GuiBottomButtons {
         let buttons_hardlink: gtk::Button = builder.object("buttons_hardlink").unwrap();
         let buttons_move: gtk::Button = builder.object("buttons_move").unwrap();
 
-        buttons_search.set_tooltip_text(Some("Start to search for files/folders"));
-        buttons_select.set_tooltip_text(Some("Selects records\nOnly selected files/folders can be later processed."));
-        buttons_delete.set_tooltip_text(Some("Delete selected files/folders"));
-        buttons_save.set_tooltip_text(Some("Save data about search to file"));
-        buttons_symlink.set_tooltip_text(Some(
-            "Creates symbolic links\nOnly works when at least 2 results in group are selected\nFirst is unchanged and second and later are symlinked to first",
-        ));
-        buttons_hardlink.set_tooltip_text(Some("Creates hardlinks\nOnly works when at least 2 results in group are selected\nFirst is unchanged and second and later are hardlinked to first"));
-        buttons_move.set_tooltip_text(Some(
-            "Moves files to chosen folder\nIt copy all files to folder without preserving directory tree\nWhen trying to move 2 files with identical name to folder, second will fail and show error",
-        ));
-
         let buttons_show_errors: gtk::Button = builder.object("buttons_show_errors").unwrap();
-        buttons_show_errors.set_tooltip_text(Some("Show/Hide bottom error panel."));
         let buttons_show_upper_notebook: gtk::Button = builder.object("buttons_show_upper_notebook").unwrap();
-        buttons_show_upper_notebook.set_tooltip_text(Some("Show/Hide upper notebook panel."));
 
         let buttons_names = [
             "search".to_string(),
@@ -77,5 +65,25 @@ impl GuiBottomButtons {
             buttons_names,
             buttons_array,
         }
+    }
+    pub fn update_language(&self) {
+        get_custom_label_from_label_with_image(&self.buttons_search.clone().upcast::<Bin>()).set_text(&fl!("bottom_search_button"));
+        get_custom_label_from_label_with_image(&self.buttons_select.clone().upcast::<Bin>()).set_text(&fl!("bottom_select_button"));
+        get_custom_label_from_label_with_image(&self.buttons_delete.clone().upcast::<Bin>()).set_text(&fl!("bottom_delete_button"));
+        get_custom_label_from_label_with_image(&self.buttons_save.clone().upcast::<Bin>()).set_text(&fl!("bottom_save_button"));
+        get_custom_label_from_label_with_image(&self.buttons_symlink.clone().upcast::<Bin>()).set_text(&fl!("bottom_symlink_button"));
+        get_custom_label_from_label_with_image(&self.buttons_hardlink.clone().upcast::<Bin>()).set_text(&fl!("bottom_hardlink_button"));
+        get_custom_label_from_label_with_image(&self.buttons_move.clone().upcast::<Bin>()).set_text(&fl!("bottom_move_button"));
+
+        self.buttons_search.set_tooltip_text(Some(&fl!("bottom_search_button_tooltip")));
+        self.buttons_select.set_tooltip_text(Some(&fl!("bottom_select_button_tooltip")));
+        self.buttons_delete.set_tooltip_text(Some(&fl!("bottom_delete_button_tooltip")));
+        self.buttons_save.set_tooltip_text(Some(&fl!("bottom_save_button_tooltip")));
+        self.buttons_symlink.set_tooltip_text(Some(&fl!("bottom_symlink_button_tooltip")));
+        self.buttons_hardlink.set_tooltip_text(Some(&fl!("bottom_hardlink_button_tooltip")));
+        self.buttons_move.set_tooltip_text(Some(&fl!("bottom_move_button_tooltip")));
+
+        self.buttons_show_errors.set_tooltip_text(Some(&fl!("bottom_show_errors_tooltip")));
+        self.buttons_show_upper_notebook.set_tooltip_text(Some(&fl!("bottom_show_upper_notebook_tooltip")));
     }
 }

@@ -1,3 +1,4 @@
+use crate::fl;
 use gtk::prelude::*;
 
 #[derive(Clone)]
@@ -11,9 +12,11 @@ impl GuiHeader {
         let button_settings: gtk::Button = builder.object("button_settings").unwrap();
         let button_app_info: gtk::Button = builder.object("button_app_info").unwrap();
 
-        button_settings.set_tooltip_text(Some("Opens settings dialog"));
-        button_app_info.set_tooltip_text(Some("Opens dialog with info about app"));
-
         Self { button_settings, button_app_info }
+    }
+
+    pub fn update_language(&self) {
+        self.button_settings.set_tooltip_text(Some(&fl!("header_setting_button_tooltip")));
+        self.button_app_info.set_tooltip_text(Some(&fl!("header_about_button_tooltip")));
     }
 }

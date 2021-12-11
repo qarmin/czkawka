@@ -5,6 +5,7 @@ use gtk::prelude::*;
 use gtk::{Align, CheckButton, Dialog, ResponseType, TextView, TreeIter, TreePath};
 
 use czkawka_core::duplicate::make_hard_link;
+use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
@@ -220,7 +221,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
 fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
     let dialog = gtk::Dialog::builder().title("Invalid selection with some groups").transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button("Ok", ResponseType::Ok);
-    dialog.add_button("Close", ResponseType::Cancel);
+    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk::Label = gtk::Label::new(Some("In some groups there is only 1 record selected and it will be ignored."));
     let label2: gtk::Label = gtk::Label::new(Some("To be able to hard/sym link this files, at least 2 results in group needs to be selected."));
@@ -324,7 +325,7 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk::C
 fn create_dialog_ask_for_linking(window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let dialog = gtk::Dialog::builder().title("Link confirmation").transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button("Ok", ResponseType::Ok);
-    dialog.add_button("Close", ResponseType::Cancel);
+    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to link this files?"));
     let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");

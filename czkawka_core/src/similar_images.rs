@@ -23,6 +23,7 @@ use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::fl;
 
 // TODO check for better values
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
@@ -905,17 +906,17 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
             #[cfg(debug_assertions)]
             {
                 if *h <= SIMILAR_VALUES[index_preset][0] {
-                    format!("Very High {}", *h)
+                    format!("{} {}", fl!("core_similarity_very_high"), *h)
                 } else if *h <= SIMILAR_VALUES[index_preset][1] {
-                    format!("High {}", *h)
+                    format!("{} {}", fl!("core_similarity_high"), *h)
                 } else if *h <= SIMILAR_VALUES[index_preset][2] {
-                    format!("Medium {}", *h)
+                    format!("{} {}", fl!("core_similarity_medium"), *h)
                 } else if *h <= SIMILAR_VALUES[index_preset][3] {
-                    format!("Small {}", *h)
+                    format!("{} {}", fl!("core_similarity_small"), *h)
                 } else if *h <= SIMILAR_VALUES[index_preset][4] {
-                    format!("Very Small {}", *h)
+                    format!("{} {}", fl!("core_similarity_very_small"), *h)
                 } else if *h <= SIMILAR_VALUES[index_preset][5] {
-                    format!("Minimal {}", *h)
+                    format!("{} {}", fl!("core_similarity_minimal"), *h)
                 } else {
                     panic!();
                 }
@@ -923,17 +924,17 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
             #[cfg(not(debug_assertions))]
             {
                 if *h <= SIMILAR_VALUES[index_preset][0] {
-                    format!("Very High")
+                    fl!("core_similarity_very_high")
                 } else if *h <= SIMILAR_VALUES[index_preset][1] {
-                    format!("High")
+                    fl!("core_similarity_high")
                 } else if *h <= SIMILAR_VALUES[index_preset][2] {
-                    format!("Medium")
+                    fl!("core_similarity_medium")
                 } else if *h <= SIMILAR_VALUES[index_preset][3] {
-                    format!("Small")
+                    fl!("core_similarity_small")
                 } else if *h <= SIMILAR_VALUES[index_preset][4] {
-                    format!("Very Small")
+                    fl!("core_similarity_very_small")
                 } else if *h <= SIMILAR_VALUES[index_preset][5] {
-                    format!("Minimal")
+                    fl!("core_similarity_minimal")
                 } else {
                     panic!();
                 }

@@ -3,13 +3,15 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, fs};
 
+use czkawka_core::fl;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{ScrolledWindow, TextView};
 
 use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notepad::GuiUpperNotebook;
+use crate::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_functions::*;
+use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
 
 // TODO organize this better, add specific functions that will allow to load from files specific strings
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";
@@ -167,6 +169,11 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             data_to_save.push("--cache_prehash_minimal_file_size:".to_string());
             let entry_settings_prehash_cache_file_minimal_size = settings.entry_settings_prehash_cache_file_minimal_size.clone();
             data_to_save.push(entry_settings_prehash_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(0).to_string());
+
+            //// language
+            data_to_save.push("--language:".to_string());
+            let combo_box_settings_language = settings.combo_box_settings_language.clone();
+            data_to_save.push(get_language_from_combo_box_text(combo_box_settings_language.active_text().unwrap().to_string()).short_text.to_string());
         }
 
         // Creating/Opening config file
@@ -194,7 +201,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             }
         }
         if data_saved {
-            add_text_to_text_view(&text_view_errors, format!("Saved configuration to file {}", config_file.display()).as_str());
+            add_text_to_text_view(&text_view_errors, format!("{} {}", fl!("saving_loading_saving_success"), config_file.display()).as_str());
         } else {
             add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_file.display()).as_str());
         }
@@ -225,6 +232,7 @@ enum TypeOfLoadedData {
     DeleteCacheSimilarVideos,
     UsePrehashCache,
     CachePrehashMinimalSize,
+    Language,
 }
 
 pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView, scrolled_window_errors: &ScrolledWindow) {
@@ -278,6 +286,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let mut delete_outdated_cache_similar_videos: bool = false;
         let mut use_prehash_cache: bool = false;
         let mut cache_prehash_minimal_size: u64 = 0;
+        let mut short_language: String = "en".to_string();
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {
@@ -325,6 +334,8 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                 current_type = TypeOfLoadedData::UsePrehashCache;
             } else if line.starts_with("--cache_prehash_minimal_file_size") {
                 current_type = TypeOfLoadedData::CachePrehashMinimalSize;
+            } else if line.starts_with("--language") {
+                current_type = TypeOfLoadedData::Language;
             } else if line.starts_with("--") {
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
@@ -553,6 +564,16 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                             );
                         }
                     }
+                    TypeOfLoadedData::Language => {
+                        if LANGUAGES_ALL.iter().any(|e| e.short_text == line) {
+                            short_language = line;
+                        } else {
+                            add_text_to_text_view(
+                                &text_view_errors,
+                                format!("Found invalid data in line {} \"{}\" isn't proper language value when loading file {:?}", line_number, line, config_file).as_str(),
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -587,6 +608,15 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             let entry_allowed_extensions = upper_notebook.entry_allowed_extensions.clone();
             entry_allowed_extensions.set_text(allowed_extensions.iter().map(|e| e.to_string() + ",").collect::<String>().as_str());
 
+            //// ComboText
+            {
+                for (index, lang) in LANGUAGES_ALL.iter().enumerate() {
+                    if short_language == lang.short_text {
+                        settings.combo_box_settings_language.set_active(Some(index as u32));
+                    }
+                }
+            }
+
             //// Buttons
             settings.check_button_settings_load_at_start.set_active(loading_at_start);
             settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
@@ -616,7 +646,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         }
 
         if manual_execution {
-            add_text_to_text_view(&text_view_errors, format!("Properly loaded configuration from file {:?}", config_file).as_str());
+            add_text_to_text_view(&text_view_errors, format!("{} {:?}", &fl!("saving_loading_reset_configuration"), config_file).as_str());
         }
     } else {
         add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't load file.");
@@ -699,8 +729,9 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_duplicates_delete_outdated_cache.set_active(true);
         settings.check_button_duplicates_use_prehash_cache.set_active(false);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text("0");
+        settings.combo_box_settings_language.set_active(Some(0));
     }
     if manual_clearing {
-        add_text_to_text_view(&text_view_errors, "Current configuration was cleared.");
+        add_text_to_text_view(&text_view_errors, &fl!("saving_loading_reset_configuration"));
     }
 }

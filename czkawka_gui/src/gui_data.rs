@@ -24,7 +24,7 @@ use crate::gui_main_notebook::GuiMainNotebook;
 use crate::gui_popovers::GuiPopovers;
 use crate::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notepad::GuiUpperNotebook;
+use crate::gui_upper_notebook::GuiUpperNotebook;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
@@ -51,9 +51,6 @@ pub struct GuiData {
 
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
-
-    // Upper Notebook state
-    pub shared_upper_notebooks: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<NotebookUpperEnum, bool>>>>,
 
     // State of search results
     pub shared_duplication_state: Rc<RefCell<DuplicateFinder>>,
@@ -91,6 +88,7 @@ impl GuiData {
         let window_main: gtk::Window = builder.object("window_main").unwrap();
         window_main.show_all();
         window_main.set_title("Czkawka");
+
         window_main.set_application(Some(application));
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
@@ -122,19 +120,6 @@ impl GuiData {
             }
             shared_buttons.borrow_mut().insert(i.clone(), temp_hashmap);
         }
-
-        // Upper Notebook state
-        let shared_upper_notebooks: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<NotebookUpperEnum, bool>>::new()));
-
-        for i in get_all_main_tabs().iter() {
-            let mut temp_hashmap: HashMap<NotebookUpperEnum, bool> = Default::default();
-            for j in get_all_upper_tabs().iter() {
-                temp_hashmap.insert(j.clone(), true);
-            }
-            shared_upper_notebooks.borrow_mut().insert(i.clone(), temp_hashmap);
-        }
-        // Some upper notebook tabs are disabled
-        *shared_upper_notebooks.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut(&NotebookUpperEnum::AllowedExtensions).unwrap() = false;
 
         // State of search results
 
@@ -176,7 +161,6 @@ impl GuiData {
             header,
             taskbar_state,
             shared_buttons,
-            shared_upper_notebooks,
             shared_duplication_state,
             shared_empty_folders_state,
             shared_empty_files_state,
@@ -194,5 +178,16 @@ impl GuiData {
             stop_sender,
             stop_receiver,
         }
+    }
+
+    pub fn update_language(&self) {
+        self.main_notebook.update_language();
+        self.upper_notebook.update_language();
+        self.popovers.update_language();
+        self.bottom_buttons.update_language();
+        self.progress_window.update_language();
+        self.about.update_language();
+        self.header.update_language();
+        self.settings.update_language();
     }
 }

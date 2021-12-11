@@ -103,6 +103,42 @@ Author: Rafał Mikrut
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <child>
+                              <object class="GtkLabel" id="label_settings_general_language">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">10</property>
+                                <property name="label" translatable="yes">Language</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="combo_box_settings_language">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkCheckButton" id="check_button_settings_load_at_start">
                             <property name="label" translatable="yes">Load configuration at start</property>
                             <property name="visible">True</property>
@@ -114,7 +150,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -129,7 +165,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -144,7 +180,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -159,7 +195,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -174,7 +210,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                         <child>
@@ -189,7 +225,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">5</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
@@ -204,7 +240,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -219,7 +255,7 @@ Author: Rafał Mikrut
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                       </object>
@@ -334,12 +370,10 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-left">4</property>
-                        <property name="margin-right">4</property>
                         <property name="margin-start">4</property>
                         <property name="margin-end">4</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="label_settings_duplicate_minimal_size_cache">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimal size of files in bytes saved to cache</property>
@@ -405,12 +439,10 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-left">4</property>
-                        <property name="margin-right">4</property>
                         <property name="margin-start">4</property>
                         <property name="margin-end">4</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="label_settings_duplicate_minimal_size_cache_prehash">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimal size of files in bytes saved to prehash cache</property>
@@ -585,8 +617,6 @@ Author: Rafał Mikrut
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="margin-left">3</property>
-                <property name="margin-right">3</property>
                 <property name="margin-start">3</property>
                 <property name="margin-end">3</property>
                 <property name="spacing">3</property>

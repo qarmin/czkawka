@@ -6,6 +6,7 @@ use glib::Sender;
 use gtk::prelude::*;
 use img_hash::{FilterType, HashAlg};
 
+use crate::fl;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::{DuplicateFinder, HashType};
@@ -137,7 +138,7 @@ pub fn connect_button_search(
         button_settings.set_sensitive(false);
         button_app_info.set_sensitive(false);
 
-        entry_info.set_text("Searching data, it may take a while, please wait...");
+        entry_info.set_text(&fl!("searching_for_data"));
 
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);

@@ -18,6 +18,7 @@ use crate::create_tree_view::*;
 use crate::delete_things;
 use crate::gui_data::*;
 use crate::help_functions::*;
+use crate::language_functions::LANGUAGES_ALL;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
 
@@ -40,6 +41,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         buttons_symlink.hide();
         buttons_hardlink.hide();
         buttons_move.hide();
+    }
+    //// Initialize language combobox
+    {
+        let combo_box_settings_language = gui_data.settings.combo_box_settings_language.clone();
+        for lang in LANGUAGES_ALL {
+            combo_box_settings_language.append_text(lang.combo_box_text);
+        }
+        combo_box_settings_language.set_active(Some(0));
     }
 
     //// Initialize main scrolled view with notebook

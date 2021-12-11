@@ -16,6 +16,7 @@ use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
+use crate::connect_change_language::*;
 use crate::connect_duplicate_buttons::*;
 use crate::connect_header_buttons::*;
 use crate::connect_notebook_tabs::*;
@@ -39,6 +40,7 @@ mod connect_button_save;
 mod connect_button_search;
 mod connect_button_select;
 mod connect_button_stop;
+mod connect_change_language;
 mod connect_duplicate_buttons;
 mod connect_header_buttons;
 mod connect_notebook_tabs;
@@ -57,9 +59,10 @@ mod gui_main_notebook;
 mod gui_popovers;
 mod gui_progress_dialog;
 mod gui_settings;
-mod gui_upper_notepad;
+mod gui_upper_notebook;
 mod help_functions;
 mod initialize_gui;
+mod language_functions;
 mod notebook_enums;
 mod opening_selecting_records;
 mod saving_loading;
@@ -100,6 +103,9 @@ fn main() {
         validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
         reset_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
         load_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors, &gui_data.scrolled_window_errors);
+
+        // Needs to run when entire GUI is initialized and
+        connect_change_language(&gui_data);
 
         connect_button_delete(&gui_data);
         connect_button_save(&gui_data);

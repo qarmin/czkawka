@@ -2,6 +2,7 @@ use gtk::prelude::*;
 use gtk::{ResponseType, TreeIter, Window};
 use regex::Regex;
 
+use crate::fl;
 use czkawka_core::common::Common;
 
 use crate::gui_data::GuiData;
@@ -218,21 +219,21 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
     popover.popdown();
 
     let window_title = match select_things {
-        false => "Unselect Custom",
-        true => "Select Custom",
+        false => fl!("popover_custom_mode_unselect"),
+        true => fl!("popover_custom_mode_select"),
     };
 
     // Dialog for select/unselect items
     {
-        let dialog = gtk::Dialog::builder().title(window_title).transient_for(window_main).modal(true).build();
-        dialog.add_button("Ok", ResponseType::Ok);
-        dialog.add_button("Close", ResponseType::Cancel);
+        let dialog = gtk::Dialog::builder().title(&window_title).transient_for(window_main).modal(true).build();
+        dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
+        dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
-        let check_button_path = gtk::CheckButton::builder().label("Path").build();
-        let check_button_name = gtk::CheckButton::builder().label("Name").build();
-        let check_button_rust_regex = gtk::CheckButton::builder().label("Regex Path + Name").build();
+        let check_button_path = gtk::CheckButton::builder().label(&fl!("popover_custom_regex_path_label")).build();
+        let check_button_name = gtk::CheckButton::builder().label(&fl!("popover_custom_regex_name_label")).build();
+        let check_button_rust_regex = gtk::CheckButton::builder().label(&fl!("popover_custom_regex_regex_label")).build();
 
-        let check_button_select_not_all_results = gtk::CheckButton::builder().label("Don't select all records in group").build();
+        let check_button_select_not_all_results = gtk::CheckButton::builder().label(&fl!("popover_custom_all_in_group_label")).build();
         check_button_select_not_all_results.set_active(true);
 
         let entry_path = gtk::Entry::new();
@@ -244,21 +245,16 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
 
         // Tooltips
         {
-            let tooltip_path = "Allows to select records by its path.\n\nExample usage:\n/home/pimpek/rzecz.txt can be found with /home/pim*";
-            let tooltip_name = "Allows to select records by file names.\n\nExample usage:\n/usr/ping/pong.txt can be found with *ong*";
-            let tooltip_regex = "Allows to select records by specified Regex.\n\nWith this mode, searched text is Path with Name\n\nExample usage:\n/usr/bin/ziemniak.txt can be found with /ziem[a-z]+\n\nThis use default Rust regex implementation, so you can read more about it in https://docs.rs/regex.";
-            let tooltip_group_button = "Prevents from selecting all records in group.\n\n This is enabled by default, because in most of situations user don't want to delete both original and duplicates files, but want to leave at least one file.\n\nWarning: This setting don't work if already user selected all results in group manually.";
+            check_button_path.set_tooltip_text(Some(&fl!("popover_custom_path_check_button_entry_tooltip")));
+            entry_path.set_tooltip_text(Some(&fl!("popover_custom_path_check_button_entry_tooltip")));
 
-            check_button_path.set_tooltip_text(Some(tooltip_path));
-            entry_path.set_tooltip_text(Some(tooltip_path));
+            check_button_name.set_tooltip_text(Some(&fl!("popover_custom_name_check_button_entry_tooltip")));
+            entry_name.set_tooltip_text(Some(&fl!("popover_custom_name_check_button_entry_tooltip")));
 
-            check_button_name.set_tooltip_text(Some(tooltip_name));
-            entry_name.set_tooltip_text(Some(tooltip_name));
+            check_button_rust_regex.set_tooltip_text(Some(&fl!("popover_custom_regex_check_button_entry_tooltip")));
+            entry_rust_regex.set_tooltip_text(Some(&fl!("popover_custom_regex_check_button_entry_tooltip")));
 
-            check_button_rust_regex.set_tooltip_text(Some(tooltip_regex));
-            entry_rust_regex.set_tooltip_text(Some(tooltip_regex));
-
-            check_button_select_not_all_results.set_tooltip_text(Some(tooltip_group_button));
+            check_button_select_not_all_results.set_tooltip_text(Some(&fl!("popover_custom_not_all_check_button_tooltip")));
         }
         {
             let label_regex_valid = label_regex_valid.clone();
@@ -266,11 +262,11 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
                 let message;
                 let text_to_check = entry_rust_regex.text().to_string();
                 if text_to_check.is_empty() {
-                    message = "";
+                    message = "".to_string();
                 } else {
                     match Regex::new(&text_to_check) {
-                        Ok(_) => message = "Regex is valid",
-                        Err(_) => message = "Regex is invalid",
+                        Ok(_) => message = fl!("popover_valid_regex"),
+                        Err(_) => message = fl!("popover_invalid_regex"),
                     }
                 }
 
@@ -280,7 +276,7 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
                 // let attribute = PangoAttrFontDesc { attr };
                 // attributes_list.insert(attribute);
                 // label_regex_valid.set_attributes(Some(&attributes_list));
-                label_regex_valid.set_text(message);
+                label_regex_valid.set_text(&message);
             });
         }
 
