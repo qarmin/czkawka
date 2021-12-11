@@ -3,6 +3,7 @@ use gtk::{ResponseType, TreeView, Window};
 
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
+use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsDirectory};
@@ -81,7 +82,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 
     let chooser = gtk::FileChooserDialog::builder().title(folders_to).action(gtk::FileChooserAction::SelectFolder).transient_for(window_main).modal(true).build();
     chooser.add_button("Ok", ResponseType::Ok);
-    chooser.add_button("Close", ResponseType::Cancel);
+    chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     chooser.set_select_multiple(true);
     chooser.show_all();
@@ -105,7 +106,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
     let dialog = gtk::Dialog::builder().title("Add directory manually").transient_for(window_main).modal(true).build();
     dialog.add_button("Ok", ResponseType::Ok);
-    dialog.add_button("Close", ResponseType::Cancel);
+    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     let entry: gtk::Entry = gtk::Entry::new();
 

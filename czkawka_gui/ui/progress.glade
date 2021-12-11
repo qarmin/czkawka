@@ -78,7 +78,8 @@ Author: Rafał Mikrut
                 <property name="margin-end">2</property>
                 <property name="margin-top">2</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="label_progress_all_stages">
+                    <property name="name">label_progress_all_stages</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">All stages: </property>
@@ -102,7 +103,8 @@ Author: Rafał Mikrut
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="label_progress_current_stage">
+                    <property name="name">label_progress_current_stage</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Current stage:  </property>

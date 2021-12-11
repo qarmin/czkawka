@@ -221,8 +221,7 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
     let window_title = match select_things {
         false => fl!("popover_custom_mode_unselect"),
         true => fl!("popover_custom_mode_select"),
-    }
-    .to_string();
+    };
 
     // Dialog for select/unselect items
     {

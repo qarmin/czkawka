@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use czkawka_core::fl;
 use gtk::prelude::*;
 use gtk::{ResponseType, TreePath};
 
@@ -64,7 +65,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
         .modal(true)
         .build();
     chooser.add_button("Ok", ResponseType::Ok);
-    chooser.add_button("Close", ResponseType::Cancel);
+    chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     chooser.set_select_multiple(false);
     chooser.show_all();

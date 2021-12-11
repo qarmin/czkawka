@@ -62,7 +62,6 @@ mod gui_settings;
 mod gui_upper_notebook;
 mod help_functions;
 mod initialize_gui;
-mod localizer;
 mod notebook_enums;
 mod opening_selecting_records;
 mod saving_loading;
@@ -99,13 +98,13 @@ fn main() {
         let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) =
             futures::channel::mpsc::unbounded();
 
-        // Needs to run before initializing GUI?
-        connect_change_language(&gui_data);
-
         initialize_gui(&mut gui_data);
         validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
         reset_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
         load_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors, &gui_data.scrolled_window_errors);
+
+        // Needs to run when entire GUI is initialized and
+        connect_change_language(&gui_data);
 
         connect_button_delete(&gui_data);
         connect_button_save(&gui_data);

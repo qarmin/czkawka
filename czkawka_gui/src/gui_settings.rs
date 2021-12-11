@@ -24,6 +24,8 @@ pub struct GuiSettings {
     pub check_button_settings_show_preview_duplicates: gtk::CheckButton,
     pub check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton,
     pub button_settings_duplicates_clear_cache: gtk::Button,
+    pub label_settings_duplicate_minimal_size_cache: gtk::Label,
+    pub label_settings_duplicate_minimal_size_cache_prehash: gtk::Label,
 
     // Similar Images
     pub check_button_settings_show_preview_similar_images: gtk::CheckButton,
@@ -70,6 +72,8 @@ impl GuiSettings {
         let button_settings_duplicates_clear_cache: gtk::Button = builder.object("button_settings_duplicates_clear_cache").unwrap();
         let check_button_duplicates_use_prehash_cache: gtk::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").unwrap();
         let entry_settings_prehash_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").unwrap();
+        let label_settings_duplicate_minimal_size_cache: gtk::Label = builder.object("label_settings_duplicate_minimal_size_cache").unwrap();
+        let label_settings_duplicate_minimal_size_cache_prehash: gtk::Label = builder.object("label_settings_duplicate_minimal_size_cache_prehash").unwrap();
 
         // Similar Images
         let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
@@ -105,6 +109,8 @@ impl GuiSettings {
             check_button_settings_show_preview_duplicates,
             check_button_settings_duplicates_delete_outdated_cache,
             button_settings_duplicates_clear_cache,
+            label_settings_duplicate_minimal_size_cache,
+            label_settings_duplicate_minimal_size_cache_prehash,
             check_button_settings_show_preview_similar_images,
             check_button_settings_similar_images_delete_outdated_cache,
             button_settings_similar_images_clear_cache,
@@ -142,6 +148,8 @@ impl GuiSettings {
         self.check_button_settings_duplicates_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
         self.button_settings_duplicates_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
         self.check_button_duplicates_use_prehash_cache.set_label(&fl!("settings_duplicates_prehash_checkbutton"));
+        self.label_settings_duplicate_minimal_size_cache.set_label(&fl!("settings_duplicates_minimal_size_cache_label"));
+        self.label_settings_duplicate_minimal_size_cache_prehash.set_label(&fl!("settings_duplicates_minimal_size_cache_prehash_label"));
 
         self.check_button_settings_hide_hard_links.set_tooltip_text(Some(&fl!("settings_duplicates_hide_hard_link_button_tooltip")));
         self.entry_settings_cache_file_minimal_size.set_tooltip_text(Some(&fl!("settings_duplicates_minimal_size_entry_tooltip")));

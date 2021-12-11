@@ -334,12 +334,10 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-left">4</property>
-                        <property name="margin-right">4</property>
                         <property name="margin-start">4</property>
                         <property name="margin-end">4</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="label_settings_duplicate_minimal_size_cache">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimal size of files in bytes saved to cache</property>
@@ -405,12 +403,10 @@ Author: Rafał Mikrut
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-left">4</property>
-                        <property name="margin-right">4</property>
                         <property name="margin-start">4</property>
                         <property name="margin-end">4</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="label_settings_duplicate_minimal_size_cache_prehash">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Minimal size of files in bytes saved to prehash cache</property>
@@ -585,8 +581,6 @@ Author: Rafał Mikrut
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="margin-left">3</property>
-                <property name="margin-right">3</property>
                 <property name="margin-start">3</property>
                 <property name="margin-end">3</property>
                 <property name="spacing">3</property>

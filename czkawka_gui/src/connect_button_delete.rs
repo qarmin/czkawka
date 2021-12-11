@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
 
+use czkawka_core::fl;
 use gtk::prelude::*;
 use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
 
@@ -103,7 +104,7 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
 fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let dialog = gtk::Dialog::builder().title("Delete confirmation").transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button("Ok", ResponseType::Ok);
-    dialog.add_button("Close", ResponseType::Cancel);
+    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
     let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
@@ -123,7 +124,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckBu
 fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let dialog = gtk::Dialog::builder().title("Confirmation of deleting all files in group").transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button("Ok", ResponseType::Ok);
-    dialog.add_button("Close", ResponseType::Cancel);
+    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk::Label = gtk::Label::new(Some("In some groups there are selected all records."));
     let label2: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete them?"));

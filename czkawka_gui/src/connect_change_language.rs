@@ -16,7 +16,8 @@ pub fn connect_change_language(gui_data: &GuiData) {
 fn change_language(gui_data: &GuiData) {
     // Alg
     // Use
-    let localizers = vec![("czkawka_gui", crate::localizer::localizer())];
+
+    let localizers = vec![("czkawka_gui", czkawka_core::localizer::localizer())];
     let lang_byte = match gui_data.header.check_button_language.is_active() {
         true => "pl",
         false => "en",

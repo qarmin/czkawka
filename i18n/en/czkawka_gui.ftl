@@ -1,3 +1,11 @@
+# Core
+core_similarity_very_high = Very High
+core_similarity_high = High
+core_similarity_medium = Medium
+core_similarity_small = Small
+core_similarity_very_small = Very Small
+core_similarity_minimal = Minimal
+
 # General
 general_ok_button = Ok
 general_close_button = Close
@@ -55,6 +63,33 @@ main_notebook_same_music = Music Duplicates
 main_notebook_symlinks = Invalid Symlinks
 main_notebook_broken_files = Broken Files
 
+main_tree_view_column_file_name = File Name
+main_tree_view_column_folder_name = Folder Name
+main_tree_view_column_path = Path
+main_tree_view_column_modification = Modification Date
+main_tree_view_column_size = Size
+main_tree_view_column_similarity = Similarity
+main_tree_view_column_dimensions = Dimensions
+main_tree_view_column_title = Title
+main_tree_view_column_artist = Artist
+main_tree_view_column_year = Year
+main_tree_view_column_album_title = Album Title
+main_tree_view_column_album_artist = Album Artist
+main_tree_view_column_symlink_file_name = Symlink File Name
+main_tree_view_column_symlink_folder = Symlnik Folder
+main_tree_view_column_destination_path = Destination Path
+main_tree_view_column_type_of_error = Type Of Error
+
+main_label_check_method = Check method:
+main_label_hash_type = Hash type:
+main_label_hash_size = Hash size:
+main_label_size_bytes = Size(bytes)
+main_label_min_size = Min:
+main_label_max_size = Max:
+main_label_shown_files = Number of shown files:
+main_label_resize_algorithm = Resize algorithm:
+main_label_similarity = Similarity{"   "}
+
 # Upper window
 upper_recursive_button = Recursive
 upper_recursive_button_tooltip = If selected, search also for files which are not placed directly under chosen folders
@@ -73,10 +108,22 @@ upper_manual_add_excluded_button_tooltip = Allows to add excluded directory name
 upper_add_excluded_button_tooltip = Add directory to be excluded in search
 upper_remove_excluded_button_tooltip = Delete directory from excluded
 
-upper_notebook_allowed_extension = Allowed Extensions
-upper_notebook_excluded_items = Excluded Items
+upper_notebook_items_configuration = Items Configuration
 upper_notebook_excluded_directories = Excluded Directories
 upper_notebook_included_directories = Included Directories
+
+upper_allowed_extensions_tooltip = 
+        Allowed extensions must be separated by commas(by default all are available)
+        Macros IMAGE, VIDEO, MUSIC, TEXT which adds multiple extensions at once are also available
+        Usage example  ".exe, IMAGE, VIDEO, .rar, 7z" - this means that image(e.g. jpg, png), video(e.g. avi, mp4), exe, rar and 7z files will be scanned
+
+upper_excluded_items_tooltip = 
+        Excluded items must contains * wildcard and should be separated by commas.
+        This is slower than Excluded Directories, so use it carefully.
+
+upper_excluded_items = Excluded Items:
+upper_allowed_extensions = Allowed Extensions:
+
 
 # Popovers
 popover_select_all = Select all
@@ -254,6 +301,9 @@ settings_duplicates_prehash_minimal_entry_tooltip = Minimal size of cached entry
 settings_duplicates_hide_hard_link_button = Hide hard links(only Linux and MacOS)
 settings_duplicates_prehash_checkbutton = Use prehash cache
 
+settings_duplicates_minimal_size_cache_label = Minimal size of files in bytes saved to cache
+settings_duplicates_minimal_size_cache_prehash_label = Minimal size of files in bytes saved to prehash cache
+
 ## Saving/Loading settings
 settings_saving_button_tooltip = Save current settings configuration to file.
 settings_loading_button_tooltip = Load settings from file and replace current configuration with them.
@@ -313,6 +363,8 @@ progress_name = name
 progress_analyzed_full_hash = Analyzed full hash of 
 progress_analyzed_partial_hash = Analyzed partial hash of 
 
+progress_current_stage = Current Stage:{"  "}
+progress_all_stages = All Stages:{"  "}
 
 # Other
 searching_for_data = Searching data, it may take a while, please wait...

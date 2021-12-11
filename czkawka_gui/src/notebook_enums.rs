@@ -1,5 +1,5 @@
 pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = 10;
-pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 4;
+// pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 3;
 
 // Needs to be updated when changed order of notebook tabs
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
@@ -51,20 +51,18 @@ pub fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
 pub enum NotebookUpperEnum {
     IncludedDirectories = 0,
     ExcludedDirectories,
-    ExcludedItems,
-    AllowedExtensions,
+    ItemsConfiguration,
 }
 
-pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
-    match notebook_number {
-        0 => NotebookUpperEnum::IncludedDirectories,
-        1 => NotebookUpperEnum::ExcludedDirectories,
-        2 => NotebookUpperEnum::ExcludedItems,
-        3 => NotebookUpperEnum::AllowedExtensions,
-        _ => panic!("Invalid Upper Notebook Tab"),
-    }
-}
-
-pub fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
-    [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2), to_notebook_upper_enum(3)]
-}
+// pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
+//     match notebook_number {
+//         0 => NotebookUpperEnum::IncludedDirectories,
+//         1 => NotebookUpperEnum::ExcludedDirectories,
+//         2 => NotebookUpperEnum::ItemsConfiguration,
+//         _ => panic!("Invalid Upper Notebook Tab"),
+//     }
+// }
+//
+// pub fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
+//     [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2)]
+// }

@@ -11,6 +11,7 @@
 - CLI frontend - for easy automation
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
+- Multilingual - app support multiple languages
 - Multiple tools to use:
   - Duplicates - Finds duplicates based on file name, size or hash
   - Empty Folders - Finds empty folders with the help of an advanced algorithm
@@ -131,6 +132,7 @@ You can help by creating:
 - Pull Requests - implementing a new feature yourself or fixing bugs.
   If the change is bigger, then it's a good idea to open a new issue to discuss changes.
 - Documentation - There is an [instruction](instructions/Instruction.md) which you can improve.
+- Translations - 
 
 You can also help by doing different things:
 - Creating text articles - [LinuxUprising](https://www.linuxuprising.com/2021/03/find-and-remove-duplicate-files-similar.html) or [Ubunlog](https://ubunlog.com/en/czkawka-finds-and-removes-empty-and-broken-duplicate-files/)

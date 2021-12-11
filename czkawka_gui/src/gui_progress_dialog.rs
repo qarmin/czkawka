@@ -11,6 +11,8 @@ pub struct GuiProgressDialog {
     pub progress_bar_all_stages: gtk::ProgressBar,
 
     pub label_stage: gtk::Label,
+    pub label_progress_current_stage: gtk::Label,
+    pub label_progress_all_stages: gtk::Label,
 
     pub grid_progress_stages: gtk::Grid,
 
@@ -31,6 +33,8 @@ impl GuiProgressDialog {
         let progress_bar_all_stages: gtk::ProgressBar = builder.object("progress_bar_all_stages").unwrap();
 
         let label_stage: gtk::Label = builder.object("label_stage").unwrap();
+        let label_progress_current_stage: gtk::Label = builder.object("label_progress_current_stage").unwrap();
+        let label_progress_all_stages: gtk::Label = builder.object("label_progress_all_stages").unwrap();
 
         let grid_progress_stages: gtk::Grid = builder.object("grid_progress_stages").unwrap();
 
@@ -42,6 +46,8 @@ impl GuiProgressDialog {
             progress_bar_current_stage,
             progress_bar_all_stages,
             label_stage,
+            label_progress_current_stage,
+            label_progress_all_stages,
             grid_progress_stages,
             button_stop_in_dialog,
             evk_button_stop_in_dialog,
@@ -49,5 +55,8 @@ impl GuiProgressDialog {
     }
     pub fn update_language(&self) {
         get_custom_label_from_label_with_image(&self.button_stop_in_dialog.clone().upcast::<Bin>()).set_text(&fl!("progress_stop_button"));
+
+        self.label_progress_current_stage.set_label(&fl!("progress_current_stage"));
+        self.label_progress_all_stages.set_label(&fl!("progress_all_stages"));
     }
 }

@@ -52,9 +52,6 @@ pub struct GuiData {
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
 
-    // Upper Notebook state
-    pub shared_upper_notebooks: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<NotebookUpperEnum, bool>>>>,
-
     // State of search results
     pub shared_duplication_state: Rc<RefCell<DuplicateFinder>>,
     pub shared_empty_folders_state: Rc<RefCell<EmptyFolder>>,
@@ -124,19 +121,6 @@ impl GuiData {
             shared_buttons.borrow_mut().insert(i.clone(), temp_hashmap);
         }
 
-        // Upper Notebook state
-        let shared_upper_notebooks: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<NotebookUpperEnum, bool>>::new()));
-
-        for i in get_all_main_tabs().iter() {
-            let mut temp_hashmap: HashMap<NotebookUpperEnum, bool> = Default::default();
-            for j in get_all_upper_tabs().iter() {
-                temp_hashmap.insert(j.clone(), true);
-            }
-            shared_upper_notebooks.borrow_mut().insert(i.clone(), temp_hashmap);
-        }
-        // Some upper notebook tabs are disabled
-        *shared_upper_notebooks.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap().get_mut(&NotebookUpperEnum::AllowedExtensions).unwrap() = false;
-
         // State of search results
 
         let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
@@ -177,7 +161,6 @@ impl GuiData {
             header,
             taskbar_state,
             shared_buttons,
-            shared_upper_notebooks,
             shared_duplication_state,
             shared_empty_folders_state,
             shared_empty_files_state,

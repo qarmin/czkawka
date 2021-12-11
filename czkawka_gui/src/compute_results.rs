@@ -447,7 +447,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let (directory, file) = split_path(&file_entry.path);
                                 let values: [(u32, &dyn ToValue); 7] = [
                                     (ColumnsBigFiles::SelectionButton as u32, &false),
-                                    (ColumnsBigFiles::Size as u32, &(format!("{} ({} bytes)", size.file_size(options::BINARY).unwrap(), size))),
+                                    (ColumnsBigFiles::Size as u32, &(format!("{} ({} {})", size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes")))),
                                     (ColumnsBigFiles::Name as u32, &file),
                                     (ColumnsBigFiles::Path as u32, &directory),
                                     (ColumnsBigFiles::Modification as u32, &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string())),

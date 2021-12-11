@@ -1,3 +1,11 @@
+# Core
+core_similarity_very_high = Bardzo Duże
+core_similarity_high = Duże
+core_similarity_medium = Średnie
+core_similarity_small = Małe
+core_similarity_very_small = Bardzo Małe
+core_similarity_minimal = Minimalne
+
 # Różne
 general_ok_button = Ok
 general_close_button = Zamknij
@@ -55,6 +63,33 @@ main_notebook_similar_videos = Podobne Wideo
 main_notebook_same_music = Podobna Muzyka
 main_notebook_symlinks = Niepoprawne Symlinki
 main_notebook_broken_files = Zepsute Pliki
+
+main_tree_view_column_file_name = Nazwa
+main_tree_view_column_folder_name = Nazwa
+main_tree_view_column_path = Ścieżka
+main_tree_view_column_modification = Data Modyfikacji
+main_tree_view_column_size = Rozmiar
+main_tree_view_column_similarity = Podobieństwo
+main_tree_view_column_dimensions = Wymiary
+main_tree_view_column_title = Tytuł
+main_tree_view_column_artist = Wykonawca
+main_tree_view_column_year = Rok
+main_tree_view_column_album_title = Tytuł Albumu
+main_tree_view_column_album_artist = Wykonawca Albumu
+main_tree_view_column_symlink_file_name = Nazwa Symlinka
+main_tree_view_column_symlink_folder = Folder Symlinka
+main_tree_view_column_destination_path = Docelowa Ścieżka
+main_tree_view_column_type_of_error = Typ Błędu
+
+main_label_check_method = Metoda sprawdzania:
+main_label_hash_type = Typ hashu:
+main_label_hash_size = Rozmiar hashu:
+main_label_size_bytes = Rozmiar(bajty)
+main_label_min_size = Min:
+main_label_max_size = Max:
+main_label_shown_files = Liczba wyświetlanych plików:
+main_label_resize_algorithm = Algorytm zmiany rozmiaru:
+main_label_similarity = Podobieństwo{"   "}
 # Górne okno
 upper_recursive_button = Rekursywnie
 upper_recursive_button_tooltip = Jeśli zaznaczony, szuka plików i folderów również w katalogach wewnątrz, nawet jeśli nie znajdują się one bezpośrednio w tym folderze.
@@ -73,10 +108,21 @@ upper_manual_add_excluded_button_tooltip = Pozwala ręcznie dodać foldery do ig
 upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych
 upper_remove_excluded_button_tooltip =  Usuwa zaznaczony folder z ignorowanych
 
-upper_notebook_allowed_extension = Dozwolone Rozszerzenia
-upper_notebook_excluded_items = Ignorowane Elementy
+upper_notebook_items_configuration = Konfiguracja Skanowania
 upper_notebook_excluded_directories = Ignorowane Foldery
 upper_notebook_included_directories = Przeszukiwane Foldery
+
+upper_allowed_extensions_tooltip = 
+        Dozwolone rozszerzenia muszą być oddzielone za pomocą przecinków - brak rozszerzeń oznacza ż wszystkie rozszerzenia są używane.
+        Makra IMAGE, VIDEO, MUSIC, TEXT które dodają rozrzerzenia w paczkach, również są wspierane
+        Przykładowe użycie ".exe, IMAGE, VIDEO, .rar, 7z" oznacza że obrazy(np. jpg, png), widea(np. avi, mp4) oraz pliki z roszerzeniami exe, rar i 7z będą przeskanowane 
+
+upper_excluded_items_tooltip = 
+        Ignorowane obiekty mogą zawierać *(oznaczający dowolny ciąg znaków) i muszą być oddzielone za pomocą przecinków.
+        Działa o wiele wolniej niż Ignorowane Foldery, dlatego należy używać tego ostrożnie.
+
+upper_excluded_items = Ignorowane Obiekty:
+upper_allowed_extensions = Dozwolone Rozszerzenia:
 
 # Zaznaczanie elementów
 popover_select_all = Zaznacz wszystko
@@ -246,6 +292,9 @@ settings_duplicates_prehash_minimal_entry_tooltip = Minimalny rozmiar pliku, kt�
 settings_duplicates_hide_hard_link_button = Ukrywaj twarde dowiązania(nie działa na Windowsie)
 settings_duplicates_prehash_checkbutton = Używaj pamięci podręcznej dla hashy cząstkowych
 
+settings_duplicates_minimal_size_cache_label = Wielkość pliku, od którego hash będzie zapisywany w pamięci podręcznej
+settings_duplicates_minimal_size_cache_prehash_label = Wielkość pliku, od którego cząstkowy hash będzie zapisywany w pamięci podręcznej
+
 ## Saving/Loading settings
 settings_saving_button_tooltip = Zapisuje aktualne ustawienia do pliku.
 settings_loading_button_tooltip = Ładuje ustawienia z pliku.
@@ -293,15 +342,18 @@ compute_broken_files = zepsutych plików
 
 # Progress window
 progress_scanned = Przeskanowano
-progress_files = pliku
-progress_folders = folderu
-progress_tags = Zczytywanie tagów z 
-progress_hashing = Hashowanie
-progress_checking = Sprawdzanie
+progress_files = plików
+progress_folders = folderów
+progress_tags = Sczytano tagi z
+progress_hashing = Przehashowano
+progress_checking = Sprawdzono
 progress_size = rozmiar
 progress_name = nazwa
 progress_analyzed_full_hash = Przeanalizowano pełny hash
 progress_analyzed_partial_hash = Przeanalizowano częściowy hash 
+
+progress_current_stage = Aktualny Etap:{"  "}
+progress_all_stages = Wszystkie Etapy:{"  "}
 
 
 # Other

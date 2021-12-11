@@ -28,6 +28,9 @@ pub struct GuiUpperNotebook {
     pub buttons_manual_add_excluded_directory: gtk::Button,
     pub buttons_add_excluded_directory: gtk::Button,
     pub buttons_remove_excluded_directory: gtk::Button,
+
+    pub label_excluded_items: gtk::Label,
+    pub label_allowed_extensions: gtk::Label,
 }
 
 impl GuiUpperNotebook {
@@ -55,6 +58,9 @@ impl GuiUpperNotebook {
         let buttons_add_excluded_directory: gtk::Button = builder.object("buttons_add_excluded_directory").unwrap();
         let buttons_remove_excluded_directory: gtk::Button = builder.object("buttons_remove_excluded_directory").unwrap();
 
+        let label_excluded_items: gtk::Label = builder.object("label_excluded_items").unwrap();
+        let label_allowed_extensions: gtk::Label = builder.object("label_allowed_extensions").unwrap();
+
         Self {
             notebook_upper,
             scrolled_window_included_directories,
@@ -72,6 +78,8 @@ impl GuiUpperNotebook {
             buttons_manual_add_excluded_directory,
             buttons_add_excluded_directory,
             buttons_remove_excluded_directory,
+            label_excluded_items,
+            label_allowed_extensions,
         }
     }
     pub fn update_language(&self) {
@@ -92,11 +100,18 @@ impl GuiUpperNotebook {
         self.buttons_add_excluded_directory.set_tooltip_text(Some(&fl!("upper_add_excluded_button_tooltip")));
         self.buttons_remove_excluded_directory.set_tooltip_text(Some(&fl!("upper_remove_excluded_button_tooltip")));
 
-        let vec_children: Vec<gtk::Widget> = self.notebook_upper.children().into_iter().map(|e| e).collect();
+        self.label_allowed_extensions.set_tooltip_text(Some(&fl!("upper_allowed_extensions_tooltip")));
+        self.entry_allowed_extensions.set_tooltip_text(Some(&fl!("upper_allowed_extensions_tooltip")));
+        self.label_excluded_items.set_tooltip_text(Some(&fl!("upper_excluded_items_tooltip")));
+        self.entry_excluded_items.set_tooltip_text(Some(&fl!("upper_excluded_items_tooltip")));
+
+        self.label_excluded_items.set_label(&fl!("upper_excluded_items"));
+        self.label_allowed_extensions.set_label(&fl!("upper_allowed_extensions"));
+
+        let vec_children: Vec<gtk::Widget> = self.notebook_upper.children();
 
         for (upper_enum, fl_thing) in [
-            (NotebookUpperEnum::AllowedExtensions as usize, fl!("upper_notebook_allowed_extension")),
-            (NotebookUpperEnum::ExcludedItems as usize, fl!("upper_notebook_excluded_items")),
+            (NotebookUpperEnum::ItemsConfiguration as usize, fl!("upper_notebook_items_configuration")),
             (NotebookUpperEnum::ExcludedDirectories as usize, fl!("upper_notebook_excluded_directories")),
             (NotebookUpperEnum::IncludedDirectories as usize, fl!("upper_notebook_included_directories")),
         ] {
