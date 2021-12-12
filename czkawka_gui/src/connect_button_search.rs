@@ -454,7 +454,7 @@ pub fn connect_button_search(
                     });
                 } else {
                     set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(), &buttons_array, &buttons_names);
-                    entry_info.set_text("ERROR: You must select at least one checkbox with music searching types.");
+                    entry_info.set_text(&fl!("search_not_choosing_any_music"));
                     show_dialog.store(false, Ordering::Relaxed);
                 }
             }

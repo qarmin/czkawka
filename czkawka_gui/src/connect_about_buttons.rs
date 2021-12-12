@@ -10,6 +10,7 @@ pub fn connect_about_buttons(gui_data: &GuiData) {
     let button_donation = gui_data.about.button_donation.clone();
     button_donation.connect_clicked(move |_| {
         open::that_in_background(SPONSOR_SITE);
+        // TODO find way to handle errors when opening this sites
         // if let Err(e) = open::that(SPONSOR_SITE) {
         //     println!("Failed to open sponsor site: {}, reason {}", SPONSOR_SITE, e)
         // };

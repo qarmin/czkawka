@@ -59,12 +59,12 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
     reset_text_view(text_view_errors);
 
     let chooser = gtk::FileChooserDialog::builder()
-        .title("Choose folder to which you want to move duplicated files")
+        .title(&fl!("move_files_title_dialog"))
         .action(gtk::FileChooserAction::SelectFolder)
         .transient_for(window_main)
         .modal(true)
         .build();
-    chooser.add_button("Ok", ResponseType::Ok);
+    chooser.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     chooser.set_select_multiple(false);
@@ -77,7 +77,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
         if response_type == gtk::ResponseType::Ok {
             let folders = file_chooser.filenames();
             if folders.len() != 1 {
-                add_text_to_text_view(&text_view_errors, format!("Only 1 path must be selected to be able to copy there duplicated files, found {:?}", folders).as_str());
+                add_text_to_text_view(&text_view_errors, format!("{} {:?}", &fl!("move_files_choose_more_than_1_path"), folders).as_str());
             } else {
                 let folder = folders[0].clone();
                 if let Some(column_color) = column_color {
@@ -161,19 +161,19 @@ fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_
         let destination_file = destination_folder.join(file_name);
         if Path::new(&thing).is_dir() {
             if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &fs_extra::dir::CopyOptions::new()) {
-                messages += format!("Failed to move folder, reason {}\n", e).as_str();
+                messages += format!("{}, reason {}\n", fl!("move_folder_failed"), e).as_str();
                 continue 'next_result;
             }
         } else {
             if let Err(e) = fs_extra::file::move_file(&thing, &destination_file, &fs_extra::file::CopyOptions::new()) {
-                messages += format!("Failed to move file, reason {}\n", e).as_str();
+                messages += format!("{}, reason {}\n", fl!("move_file_failed"), e).as_str();
                 continue 'next_result;
             }
         }
         model.remove(&iter);
         moved_files += 1;
     }
-    entry_info.set_text(format!("Properly moved {}/{} files/folders", moved_files, selected_rows.len()).as_str());
+    entry_info.set_text(format!("{} {}/{} {}", fl!("move_stats_1"), moved_files, selected_rows.len(), fl!("move_stats_2")).as_str());
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }

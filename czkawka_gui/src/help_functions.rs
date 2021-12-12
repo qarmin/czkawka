@@ -10,12 +10,12 @@ use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
-use czkawka_core::invalid_symlinks;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
+use czkawka_core::{fl, invalid_symlinks};
 
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
@@ -357,7 +357,7 @@ pub fn split_path(path: &Path) -> (String, String) {
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk::TextView) {
     let mut messages: String = String::from("");
     if !text_messages.messages.is_empty() {
-        messages += format!("############### MESSAGES({}) ###############\n", text_messages.messages.len()).as_str();
+        messages += format!("############### {}({}) ###############\n", fl!("text_view_messages"), text_messages.messages.len()).as_str();
     }
     for text in &text_messages.messages {
         messages += text.as_str();
@@ -367,7 +367,7 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     //     messages += "\n";
     // }
     if !text_messages.warnings.is_empty() {
-        messages += format!("############### WARNINGS({}) ###############\n", text_messages.warnings.len()).as_str();
+        messages += format!("############### {}({}) ###############\n", fl!("text_view_warnings"), text_messages.warnings.len()).as_str();
     }
     for text in &text_messages.warnings {
         messages += text.as_str();
@@ -377,7 +377,7 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     //     messages += "\n";
     // }
     if !text_messages.errors.is_empty() {
-        messages += format!("############### ERRORS({}) ###############\n", text_messages.errors.len()).as_str();
+        messages += format!("############### {}({}) ###############\n", fl!("text_view_errors"), text_messages.errors.len()).as_str();
     }
     for text in &text_messages.errors {
         messages += text.as_str();
@@ -423,10 +423,10 @@ pub fn hide_all_buttons(buttons_array: &[Widget]) {
     }
 }
 
-pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) -> &str {
+pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) -> String {
     match error {
-        invalid_symlinks::ErrorType::InfiniteRecursion => "Infinite recursion",
-        invalid_symlinks::ErrorType::NonExistentFile => "Non existent destination file",
+        invalid_symlinks::ErrorType::InfiniteRecursion => fl!("invalid_symlink_infinite_recursion"),
+        invalid_symlinks::ErrorType::NonExistentFile => fl!("invalid_symlink_non_existent_destination"),
     }
 }
 

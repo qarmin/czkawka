@@ -9,7 +9,6 @@ use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use crate::validate_notebook_data;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
@@ -24,7 +23,7 @@ pub fn connect_button_delete(gui_data: &GuiData) {
 }
 
 pub async fn delete_things(gui_data: GuiData) {
-    validate_notebook_data(&gui_data); // TODO, disable this - only used as test if ever
+    // validate_notebook_data(&gui_data);
 
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
@@ -102,12 +101,12 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
 }
 
 fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder().title("Delete confirmation").transient_for(window_main).modal(true).build();
-    let button_ok = dialog.add_button("Ok", ResponseType::Ok);
+    let dialog = gtk::Dialog::builder().title(&fl!("delete_title_dialog")).transient_for(window_main).modal(true).build();
+    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete files?"));
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
+    let label: gtk::Label = gtk::Label::new(Some(&fl!("delete_question_label")));
+    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&fl!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
@@ -122,13 +121,13 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckBu
 }
 
 fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder().title("Confirmation of deleting all files in group").transient_for(window_main).modal(true).build();
-    let button_ok = dialog.add_button("Ok", ResponseType::Ok);
+    let dialog = gtk::Dialog::builder().title(&fl!("delete_all_files_in_group_title")).transient_for(window_main).modal(true).build();
+    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some("In some groups there are selected all records."));
-    let label2: gtk::Label = gtk::Label::new(Some("Are you sure that you want to delete them?"));
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
+    let label: gtk::Label = gtk::Label::new(Some(&fl!("delete_all_files_in_group_label1")));
+    let label2: gtk::Label = gtk::Label::new(Some(&fl!("delete_all_files_in_group_label2")));
+    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&fl!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
@@ -290,7 +289,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             }
         }
         if error_happened {
-            messages += format!("Failed to remove folder {}/{} because folder doesn't exists, you don't have permissions or isn't empty.\n", path, name).as_str()
+            messages += format!("{} {}/{} {}\n", fl!("delete_folder_failed_1"), path, name, fl!("delete_folder_failed_2")).as_str()
         }
     }
 
@@ -334,14 +333,14 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(e) => messages += format!("Failed to remove file {}/{}, reason {}\n", path, name, e).as_str(),
+                Err(e) => messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, name, e).as_str(),
             }
         } else {
             match trash::delete(format!("{}/{}", path, name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(e) => messages += format!("Failed to remove file {}/{}, reason {}\n", path, name, e).as_str(),
+                Err(e) => messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, name, e).as_str(),
             }
         }
     }
@@ -402,10 +401,10 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         for file_name in vec_file_name {
             if !use_trash {
                 if let Err(e) = fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())) {
-                    messages += format!("Failed to remove file {}/{}, reason {}\n", path, file_name, e).as_str()
+                    messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, file_name, e).as_str()
                 }
             } else if let Err(e) = trash::delete(format!("{}/{}", path.clone(), file_name.clone())) {
-                messages += format!("Failed to remove file {}/{}, reason {}\n", path, file_name, e).as_str()
+                messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, file_name, e).as_str()
             }
 
             vec_path_to_delete.push((path.clone(), file_name.clone()));
