@@ -374,6 +374,59 @@ saving_loading_loading_success = Properly loaded configuration from file
 progress_current_stage = Current Stage:{"  "}
 progress_all_stages = All Stages:{"  "}
 
+# Invalid symlinks
+invalid_symlink_infinite_recursion = Infinite recursion
+invalid_symlink_non_existent_destination = Non existent destination file
+
 # Other
 searching_for_data = Searching data, it may take a while, please wait...
+text_view_messages = MESSAGES
+text_view_warnings = WARNINGS
+text_view_errors = ERRORS
 
+# Various dialog
+dialogs_ask_next_time = Ask next time
+reason_of_error = reason
+
+delete_file_failed = Failed to remove file
+
+delete_title_dialog = Delete confirmation
+delete_question_label = Are you sure that you want to delete files?
+delete_all_files_in_group_title = Confirmation of deleting all files in group
+delete_all_files_in_group_label1 = In some groups there are selected all records.
+delete_all_files_in_group_label2 = Are you sure that you want to delete them?
+delete_folder_failed_1 = Failed to remove folder
+delete_folder_failed_2 = because folder doesn't exists, you don't have permissions or isn't empty.
+
+hardlink_failed = Failed to hardlink
+hard_sym_invalid_selection_title_dialog = Invalid selection with some groups
+hard_sym_invalid_selection_label_1 = In some groups there is only 1 record selected and it will be ignored.
+hard_sym_invalid_selection_label_2 = To be able to hard/sym link this files, at least 2 results in group needs to be selected.
+hard_sym_invalid_selection_label_3 = First in group is recognized as original and is not changed but second and later are modified.
+hard_sym_link_title_dialog = Link confirmation
+hard_sym_link_label = Are you sure that you want to link this files?
+
+move_folder_failed = Failed to move folder
+move_file_failed = Failed to move file
+move_files_title_dialog = Choose folder to which you want to move duplicated files
+move_files_choose_more_than_1_path = Only 1 path must be selected to be able to copy there duplicated files, found
+move_stats_1 = Properly moved
+move_stats_2 = items
+
+save_results_to_file = Saved results to file
+
+search_not_choosing_any_music = ERROR: You must select at least one checkbox with music searching types.
+
+include_folders_dialog_title = Folders to include
+exclude_folders_dialog_title = Folders to exclude
+
+include_manually_directories_dialog_title = Add directory manually
+
+cache_properly_cleared = Properly cleared cache
+cache_clear_duplicates_title = Clearing duplicates cache
+cache_clear_similar_images_title = Clearing similar images cache
+cache_clear_similar_videos_title = Clearing similar videos cache
+cache_clear_message_label_1 = Do you want to clear cache from outdated entries?
+cache_clear_message_label_2 = This operation will remove all cache entries which points to invalid files.
+cache_clear_message_label_3 = This may speedup a little loading/saving to cache.
+cache_clear_message_label_4 = WARNING: Operation will remove all cached data from unplugged external drives, so hash will need to be generated again.

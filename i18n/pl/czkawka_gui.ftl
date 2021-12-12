@@ -356,11 +356,64 @@ progress_analyzed_partial_hash = Przeanalizowano częściowy hash
 progress_current_stage = Aktualny Etap:{"  "}
 progress_all_stages = Wszystkie Etapy:{"  "}
 
-
-# Other
-searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę czekać...
-
 # Saving loading 
 saving_loading_saving_success = Zapisano konfigurację do pliku
 saving_loading_reset_configuration = Przywrócono domyślą konfigurację.
 saving_loading_loading_success = Poprawnie załadowano konfigurację z pliku
+
+# Invalid symlinks
+invalid_symlink_infinite_recursion = Nieskończona rekurencja
+invalid_symlink_non_existent_destination = Nie istniejący docelowy plik
+
+# Other
+searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę czekać...
+text_view_messages = WIADOMOŚCI
+text_view_warnings = OSTRZEŻENIA
+text_view_errors = BŁĘDY
+
+# Various dialog
+dialogs_ask_next_time = Pytaj następnym razem
+reason_of_error = powód
+
+delete_file_failed = Nie udało się usunąć pliku
+
+delete_title_dialog = Potwierdzenie usunięcia
+delete_question_label = Czy na pewno usunąć te pliki?
+delete_all_files_in_group_title = Potwierdzenie usunięcia wszystkich plików w grupie
+delete_all_files_in_group_label1 = W niektórych grupach zaznaczono wszystkie rekordy.
+delete_all_files_in_group_label2 = Czy na pewno je usunąć?
+delete_folder_failed_1 = Nie udało się usunąć folderu
+delete_folder_failed_2 = ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
+
+hardlink_failed = Nie udało się utworzyć twardego dowiązania
+hard_sym_invalid_selection_title_dialog = Niepoprawne zaznaczenie w niektórych grupach
+hard_sym_invalid_selection_label_1 = W niektórych grupach zaznaczono tylko 1 rekord który zostanie zignorowany.
+hard_sym_invalid_selection_label_2 = Aby móc używać dowiązań, należy zaznaczyć przynajmniej 2 obiekty w danej grupie.
+hard_sym_invalid_selection_label_3 = Pierwszy pozostaje nienaruszony a drugi i kolejne są dowiązywane do tego pierwszego.
+hard_sym_link_title_dialog = Potwierdzenie dowiązania
+hard_sym_link_label = Czy na pewno dowiązać te pliki?
+
+move_folder_failed = Nie można przenieść folderu
+move_file_failed = Nie można przenieść pliku
+move_files_title_dialog = Wybierz folder do którego zostaną przeniesione pliki
+move_files_choose_more_than_1_path = Można przenieść elementy tylko do 1 folderu, zaznaczono 
+move_stats_1 = Poprawnie przeniesiono
+move_stats_2 = elementów
+
+save_results_to_file = Zapisano wyniki do pliku
+
+search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
+
+include_folders_dialog_title = Foldery do przeszukiwania
+exclude_folders_dialog_title = Foldery do ignorowania
+
+include_manually_directories_dialog_title = Dodaj katalogi ręcznie
+
+cache_properly_cleared = Poprawnie wyczyszczono pamięc podręczną
+cache_clear_duplicates_title = Czyszczenie pamięci podręcznej duplikatów
+cache_clear_similar_images_title = Czyszczenie pamięci podręcznej podobnych obrazów
+cache_clear_similar_videos_title = Czyszczenie pamięci podręcznej podobnych plików Wideo
+cache_clear_message_label_1 = Czy na pewno chcesz oczyścić pamięć podręczną z przestarzałych wpisów?
+cache_clear_message_label_2 = Ta operacja usunie wszystkie rekordy, które wskazują na nieistniejące pliki.
+cache_clear_message_label_3 = Może spowodować to przyspieszenie ładowania i zapisywania danych do pamięci w trakcie skanowania.
+cache_clear_message_label_4 = OSTRZEŻENIE: Usunięte zostaną wszystkie rekordy z odpiętych dyskach zewnętrznych i konieczne będzie ich ponowne sprawdzenie po podpięciu.

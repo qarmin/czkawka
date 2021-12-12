@@ -903,25 +903,25 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
             panic!()
         }
         Similarity::Similar(h) => {
-            #[cfg(debug_assertions)]
-            {
-                if *h <= SIMILAR_VALUES[index_preset][0] {
-                    format!("{} {}", fl!("core_similarity_very_high"), *h)
-                } else if *h <= SIMILAR_VALUES[index_preset][1] {
-                    format!("{} {}", fl!("core_similarity_high"), *h)
-                } else if *h <= SIMILAR_VALUES[index_preset][2] {
-                    format!("{} {}", fl!("core_similarity_medium"), *h)
-                } else if *h <= SIMILAR_VALUES[index_preset][3] {
-                    format!("{} {}", fl!("core_similarity_small"), *h)
-                } else if *h <= SIMILAR_VALUES[index_preset][4] {
-                    format!("{} {}", fl!("core_similarity_very_small"), *h)
-                } else if *h <= SIMILAR_VALUES[index_preset][5] {
-                    format!("{} {}", fl!("core_similarity_minimal"), *h)
-                } else {
-                    panic!();
-                }
-            }
-            #[cfg(not(debug_assertions))]
+            // #[cfg(debug_assertions)]
+            // {
+            //     if *h <= SIMILAR_VALUES[index_preset][0] {
+            //         format!("{} {}", fl!("core_similarity_very_high"), *h)
+            //     } else if *h <= SIMILAR_VALUES[index_preset][1] {
+            //         format!("{} {}", fl!("core_similarity_high"), *h)
+            //     } else if *h <= SIMILAR_VALUES[index_preset][2] {
+            //         format!("{} {}", fl!("core_similarity_medium"), *h)
+            //     } else if *h <= SIMILAR_VALUES[index_preset][3] {
+            //         format!("{} {}", fl!("core_similarity_small"), *h)
+            //     } else if *h <= SIMILAR_VALUES[index_preset][4] {
+            //         format!("{} {}", fl!("core_similarity_very_small"), *h)
+            //     } else if *h <= SIMILAR_VALUES[index_preset][5] {
+            //         format!("{} {}", fl!("core_similarity_minimal"), *h)
+            //     } else {
+            //         panic!();
+            //     }
+            // }
+            // #[cfg(not(debug_assertions))]
             {
                 if *h <= SIMILAR_VALUES[index_preset][0] {
                     fl!("core_similarity_very_high")

@@ -29,7 +29,7 @@ fn change_language(gui_data: &GuiData) {
     }
     gui_data.update_language();
 
-    // Try to use default OS
+    // Try to use default OS language
     // let requested_languages = DesktopLanguageRequester::requested_languages();
     // let localizers = vec![("czkawka_gui", crate::localizer::localizer())];
     //

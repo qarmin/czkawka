@@ -181,7 +181,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
             dbg!(&symhardlink_data);
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
-                    add_text_to_text_view(text_view_errors, format!("Failed to hardlink {}, reason {}", file_to_hardlink, e).as_str());
+                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", fl!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
                 }
             }
@@ -190,21 +190,21 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
         for symhardlink_data in vec_symhardlink_data {
             for file_to_symlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
-                    add_text_to_text_view(text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
+                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", fl!("delete_file_failed"), file_to_symlink, e).as_str());
                     continue;
                 };
 
                 #[cfg(target_family = "unix")]
                 {
                     if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
+                        add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", fl!("delete_file_failed"), file_to_symlink, e).as_str());
                         continue;
                     };
                 }
                 #[cfg(target_family = "windows")]
                 {
                     if let Err(e) = std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(&text_view_errors, format!("Failed to remove file {} when creating symlink, reason {}", file_to_symlink, e).as_str());
+                        add_text_to_text_view(&text_view_errors, format!("{} {}, reason {}", fl!("delete_file_failed"), file_to_symlink, e).as_str());
                         continue;
                     };
                 }
@@ -220,12 +220,12 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
 
 fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
     let dialog = gtk::Dialog::builder().title("Invalid selection with some groups").transient_for(window_main).modal(true).build();
-    let button_ok = dialog.add_button("Ok", ResponseType::Ok);
+    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some("In some groups there is only 1 record selected and it will be ignored."));
-    let label2: gtk::Label = gtk::Label::new(Some("To be able to hard/sym link this files, at least 2 results in group needs to be selected."));
-    let label3: gtk::Label = gtk::Label::new(Some("First in group is recognized as original and is not changed but second and later are modified."));
+    let label: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_invalid_selection_label_1")));
+    let label2: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_invalid_selection_label_2")));
+    let label3: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_invalid_selection_label_3")));
 
     button_ok.grab_focus();
 
@@ -323,11 +323,11 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk::C
 }
 
 fn create_dialog_ask_for_linking(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder().title("Link confirmation").transient_for(window_main).modal(true).build();
-    let button_ok = dialog.add_button("Ok", ResponseType::Ok);
+    let dialog = gtk::Dialog::builder().title(&fl!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
+    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some("Are you sure that you want to link this files?"));
+    let label: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_link_label")));
     let check_button: gtk::CheckButton = gtk::CheckButton::with_label("Ask next time");
     check_button.set_active(true);
     check_button.set_halign(Align::Center);

@@ -60,8 +60,3 @@ Next new record must be added to array.
         short_text: "pl",
     },
 ```
-
-
-
-
-
