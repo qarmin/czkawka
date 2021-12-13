@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
@@ -75,6 +75,7 @@ pub struct SimilarVideos {
     use_cache: bool,
     tolerance: i32,
     delete_outdated_cache: bool,
+    exclude_videos_with_same_size: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -111,7 +112,12 @@ impl SimilarVideos {
             use_cache: true,
             tolerance: 10,
             delete_outdated_cache: false,
+            exclude_videos_with_same_size: false,
         }
+    }
+
+    pub fn set_exclude_videos_with_same_size(&mut self, exclude_videos_with_same_size: bool) {
+        self.exclude_videos_with_same_size = exclude_videos_with_same_size;
     }
 
     pub fn set_delete_outdated_cache(&mut self, delete_outdated_cache: bool) {
@@ -477,11 +483,21 @@ impl SimilarVideos {
         let mut collected_similar_videos: Vec<Vec<FileEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<FileEntry> = Vec::new();
+            let mut bt_size: BTreeSet<u64> = Default::default();
             for j in i.duplicates() {
-                temp_vector.push(hashmap_with_file_entries.get(&j.to_string_lossy().to_string()).unwrap().clone());
+                let file_entry = hashmap_with_file_entries.get(&j.to_string_lossy().to_string()).unwrap();
+                if self.exclude_videos_with_same_size {
+                    if !bt_size.contains(&file_entry.size) {
+                        bt_size.insert(file_entry.size);
+                        temp_vector.push(file_entry.clone());
+                    }
+                } else {
+                    temp_vector.push(file_entry.clone());
+                }
             }
-            assert!(temp_vector.len() > 1);
-            collected_similar_videos.push(temp_vector);
+            if temp_vector.len() > 1 {
+                collected_similar_videos.push(temp_vector);
+            }
         }
 
         self.similar_vectors = collected_similar_videos;

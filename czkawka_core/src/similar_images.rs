@@ -391,21 +391,6 @@ impl SimilarImages {
     fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
-        if self.exclude_images_with_same_size {
-            let mut old_hash_map = Default::default();
-            mem::swap(&mut self.images_to_check, &mut old_hash_map);
-
-            let mut new_hash_map: BTreeMap<u64, FileEntry> = Default::default();
-
-            for (_name, file_entry) in old_hash_map {
-                new_hash_map.insert(file_entry.size, file_entry);
-            }
-            self.images_to_check = Default::default();
-            for (_size, file_entry) in new_hash_map {
-                self.images_to_check.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-        }
-
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -636,6 +621,24 @@ impl SimilarImages {
         }
 
         self.similar_vectors = collected_similar_images.values().cloned().collect();
+
+        if self.exclude_images_with_same_size {
+            let mut new_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut new_vector);
+            for vec_file_entry in new_vector {
+                let mut bt_sizes: BTreeSet<u64> = Default::default();
+                let mut vec_values = Vec::new();
+                for file_entry in vec_file_entry {
+                    if !bt_sizes.contains(&file_entry.size) {
+                        bt_sizes.insert(file_entry.size);
+                        vec_values.push(file_entry);
+                    }
+                }
+                if vec_values.len() > 1 {
+                    self.similar_vectors.push(vec_values);
+                }
+            }
+        }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
 

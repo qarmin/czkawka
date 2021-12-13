@@ -46,6 +46,7 @@ pub fn connect_button_search(
     let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let check_button_image_ignore_same_size = gui_data.main_notebook.check_button_image_ignore_same_size.clone();
+    let check_button_video_ignore_same_size = gui_data.main_notebook.check_button_video_ignore_same_size.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
@@ -318,6 +319,8 @@ pub fn connect_button_search(
 
                 let delete_outdated_cache = check_button_settings_similar_videos_delete_outdated_cache.is_active();
 
+                let ignore_same_size = check_button_video_ignore_same_size.is_active();
+
                 let futures_sender_similar_videos = futures_sender_similar_videos.clone();
                 // Find similar videos
                 thread::spawn(move || {
@@ -332,6 +335,7 @@ pub fn connect_button_search(
                     sf.set_use_cache(use_cache);
                     sf.set_tolerance(tolerance);
                     sf.set_delete_outdated_cache(delete_outdated_cache);
+                    sf.set_exclude_videos_with_same_size(ignore_same_size);
                     sf.find_similar_videos(Some(&stop_receiver), Some(&futures_sender_similar_videos));
                     let _ = glib_stop_sender.send(Message::SimilarVideos(sf));
                 });
