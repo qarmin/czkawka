@@ -539,7 +539,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label_duplicate_min_size">
+                          <object class="GtkLabel" id="label_general_min_size">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Min:</property>
@@ -551,7 +551,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_duplicate_minimal_size">
+                          <object class="GtkEntry" id="entry_general_minimal_size">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="max-length">15</property>
@@ -566,7 +566,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label_duplicate_max_size">
+                          <object class="GtkLabel" id="label_general_max_size">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Max:</property>
@@ -578,7 +578,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_duplicate_maximal_size">
+                          <object class="GtkEntry" id="entry_general_maximal_size">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="max-length">15</property>
@@ -1231,11 +1231,10 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry_similar_images_minimal_size">
+                              <object class="GtkEntry" id="entry_general_minimal_size1">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="max-length">15</property>
-                                <property name="text" translatable="yes">16384</property>
                                 <property name="caps-lock-warning">False</property>
                                 <property name="input-purpose">number</property>
                               </object>
@@ -1258,7 +1257,7 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry_similar_images_maximal_size">
+                              <object class="GtkEntry" id="entry_general_maximal_size1">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="max-length">15</property>
@@ -1451,7 +1450,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_similar_videos_minimal_size">
+                          <object class="GtkEntry" id="entry_general_minimal_size2">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="max-length">15</property>
@@ -1478,7 +1477,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_similar_videos_maximal_size">
+                          <object class="GtkEntry" id="entry_general_maximal_size2">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="max-length">15</property>
@@ -1635,7 +1634,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_same_music_minimal_size">
+                          <object class="GtkEntry" id="entry_general_minimal_size3">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="max-length">15</property>
@@ -1662,7 +1661,7 @@ Author: Rafał Mikrut
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_same_music_maximal_size">
+                          <object class="GtkEntry" id="entry_general_maximal_size3">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="max-length">15</property>

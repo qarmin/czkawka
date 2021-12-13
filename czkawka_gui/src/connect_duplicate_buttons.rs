@@ -1,21 +1,18 @@
+use czkawka_core::duplicate::CheckingMethod;
 use gtk::prelude::*;
 
 use crate::gui_data::GuiData;
+use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 
-pub fn connect_duplicate_buttons(gui_data: &GuiData) {
-    let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
-    let radio_button_hash_type_blake3 = gui_data.main_notebook.radio_button_hash_type_blake3.clone();
-    let radio_button_hash_type_xxh3 = gui_data.main_notebook.radio_button_hash_type_xxh3.clone();
-    let radio_button_hash_type_crc32 = gui_data.main_notebook.radio_button_hash_type_crc32.clone();
-    radio_button_duplicates_hash.connect_toggled(move |radio_button_duplicates_hash| {
-        if radio_button_duplicates_hash.is_active() {
-            radio_button_hash_type_blake3.set_sensitive(true);
-            radio_button_hash_type_xxh3.set_sensitive(true);
-            radio_button_hash_type_crc32.set_sensitive(true);
+pub fn connect_duplicate_combo_box(gui_data: &GuiData) {
+    let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
+    let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
+    combo_box_duplicate_check_method.connect_changed(move |combo_box_duplicate_check_method| {
+        let chosen_index = combo_box_duplicate_check_method.active().unwrap() as usize;
+        if DUPLICATES_CHECK_METHOD_COMBO_BOX[chosen_index].check_method == CheckingMethod::Hash {
+            combo_box_duplicate_hash_type.set_sensitive(true);
         } else {
-            radio_button_hash_type_blake3.set_sensitive(false);
-            radio_button_hash_type_xxh3.set_sensitive(false);
-            radio_button_hash_type_crc32.set_sensitive(false);
+            combo_box_duplicate_hash_type.set_sensitive(false);
         }
     });
 }

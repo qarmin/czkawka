@@ -17,6 +17,7 @@ use czkawka_core::similar_videos::MAX_TOLERANCE;
 use crate::create_tree_view::*;
 use crate::delete_things;
 use crate::gui_data::*;
+use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX};
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::notebook_enums::NotebookMainEnum;
@@ -49,6 +50,21 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             combo_box_settings_language.append_text(lang.combo_box_text);
         }
         combo_box_settings_language.set_active(Some(0));
+    }
+    //// Initialize main window comboboxes
+    {
+        let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
+        for check_type in &DUPLICATES_CHECK_METHOD_COMBO_BOX {
+            combo_box_duplicate_check_method.append_text(check_type.eng_name);
+        }
+        combo_box_duplicate_check_method.set_active(Some(0));
+    }
+    {
+        let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
+        for hash_type in &DUPLICATES_HASH_TYPE_COMBO_BOX {
+            combo_box_duplicate_hash_type.append_text(hash_type.eng_name);
+        }
+        combo_box_duplicate_hash_type.set_active(Some(0));
     }
 
     //// Initialize main scrolled view with notebook

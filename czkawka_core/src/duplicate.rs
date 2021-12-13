@@ -36,7 +36,7 @@ pub struct ProgressData {
     pub files_to_check: usize,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum CheckingMethod {
     None,
     Name,

@@ -41,14 +41,18 @@ pub struct GuiMainNotebook {
     pub evk_tree_view_invalid_symlinks: gtk::EventControllerKey,
     pub evk_tree_view_broken_files: gtk::EventControllerKey,
 
-    pub entry_similar_images_minimal_size: gtk::Entry,
-    pub entry_similar_images_maximal_size: gtk::Entry,
-    pub entry_similar_videos_minimal_size: gtk::Entry,
-    pub entry_similar_videos_maximal_size: gtk::Entry,
-    pub entry_duplicate_minimal_size: gtk::Entry,
-    pub entry_duplicate_maximal_size: gtk::Entry,
-    pub entry_same_music_minimal_size: gtk::Entry,
-    pub entry_same_music_maximal_size: gtk::Entry,
+    // General
+    pub entry_general_minimal_size: gtk::Entry,
+    pub entry_general_maximal_size: gtk::Entry,
+    pub label_general_size_bytes: gtk::Label,
+    pub label_general_min_size: gtk::Label,
+    pub label_general_max_size: gtk::Label,
+
+    // Duplicate
+    pub combo_box_duplicate_check_method: gtk::ComboBoxText,
+    pub combo_box_duplicate_hash_type: gtk::ComboBoxText,
+    pub label_duplicate_check_method: gtk::Label,
+    pub label_duplicate_hash_type: gtk::Label,
 
     pub entry_big_files_number: gtk::Entry,
 
@@ -61,17 +65,8 @@ pub struct GuiMainNotebook {
     pub check_button_music_approximate_comparison: gtk::CheckButton,
 
     //// Radio Buttons
-    // Duplicates
-    pub radio_button_duplicates_name: gtk::RadioButton,
-    pub radio_button_duplicates_size: gtk::RadioButton,
-    pub radio_button_duplicates_hash: gtk::RadioButton,
-
     pub scale_similarity_similar_images: gtk::Scale,
     pub scale_similarity_similar_videos: gtk::Scale,
-
-    pub radio_button_hash_type_blake3: gtk::RadioButton,
-    pub radio_button_hash_type_crc32: gtk::RadioButton,
-    pub radio_button_hash_type_xxh3: gtk::RadioButton,
 
     pub radio_button_resize_algorithm_lanczos3: gtk::RadioButton,
     pub radio_button_resize_algorithm_nearest: gtk::RadioButton,
@@ -92,14 +87,9 @@ pub struct GuiMainNotebook {
 
     pub check_button_image_ignore_same_size: gtk::CheckButton,
 
+    pub label_big_shown_files: gtk::Label,
     pub label_similar_images_minimal_similarity: gtk::Label,
 
-    pub label_duplicate_check_method: gtk::Label,
-    pub label_duplicate_hash_type: gtk::Label,
-    pub label_duplicate_size_bytes: gtk::Label,
-    pub label_duplicate_min_size: gtk::Label,
-    pub label_duplicate_max_size: gtk::Label,
-    pub label_big_shown_files: gtk::Label,
     pub label_image_resize_algorithm: gtk::Label,
     pub label_image_hash_type: gtk::Label,
     pub label_image_hash_size: gtk::Label,
@@ -182,14 +172,10 @@ impl GuiMainNotebook {
         // let evk_tree_view_broken_files: gtk4::EventControllerKey = EventControllerKey::new();
         // tree_view_broken_files.add_controller(&evk_tree_view_broken_files);
 
-        let entry_similar_images_minimal_size: gtk::Entry = builder.object("entry_similar_images_minimal_size").unwrap();
-        let entry_similar_images_maximal_size: gtk::Entry = builder.object("entry_similar_images_maximal_size").unwrap();
-        let entry_similar_videos_minimal_size: gtk::Entry = builder.object("entry_similar_videos_minimal_size").unwrap();
-        let entry_similar_videos_maximal_size: gtk::Entry = builder.object("entry_similar_videos_maximal_size").unwrap();
-        let entry_duplicate_minimal_size: gtk::Entry = builder.object("entry_duplicate_minimal_size").unwrap();
-        let entry_duplicate_maximal_size: gtk::Entry = builder.object("entry_duplicate_maximal_size").unwrap();
-        let entry_same_music_minimal_size: gtk::Entry = builder.object("entry_same_music_minimal_size").unwrap();
-        let entry_same_music_maximal_size: gtk::Entry = builder.object("entry_same_music_maximal_size").unwrap();
+        let entry_general_minimal_size: gtk::Entry = builder.object("entry_general_minimal_size").unwrap();
+        let entry_general_maximal_size: gtk::Entry = builder.object("entry_general_maximal_size").unwrap();
+        let combo_box_duplicate_check_method: gtk::ComboBoxText = builder.object("combo_box_duplicate_check_method").unwrap();
+        let combo_box_duplicate_hash_type: gtk::ComboBoxText = builder.object("combo_box_duplicate_hash_type").unwrap();
 
         let entry_big_files_number: gtk::Entry = builder.object("entry_big_files_number").unwrap();
 
@@ -202,16 +188,9 @@ impl GuiMainNotebook {
         let check_button_music_approximate_comparison: gtk::CheckButton = builder.object("check_button_music_approximate_comparison").unwrap();
 
         //// Radio Buttons
-        let radio_button_duplicates_name: gtk::RadioButton = builder.object("radio_button_duplicates_name").unwrap();
-        let radio_button_duplicates_size: gtk::RadioButton = builder.object("radio_button_duplicates_size").unwrap();
-        let radio_button_duplicates_hash: gtk::RadioButton = builder.object("radio_button_duplicates_hash").unwrap();
 
         let scale_similarity_similar_images: gtk::Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: gtk::Scale = builder.object("scale_similarity_similar_videos").unwrap();
-
-        let radio_button_hash_type_blake3: gtk::RadioButton = builder.object("radio_button_hash_type_blake3").unwrap();
-        let radio_button_hash_type_crc32: gtk::RadioButton = builder.object("radio_button_hash_type_crc32").unwrap();
-        let radio_button_hash_type_xxh3: gtk::RadioButton = builder.object("radio_button_hash_type_xxh3").unwrap();
 
         let radio_button_resize_algorithm_lanczos3: gtk::RadioButton = builder.object("radio_button_resize_algorithm_lanczos3").unwrap();
         let radio_button_resize_algorithm_nearest: gtk::RadioButton = builder.object("radio_button_resize_algorithm_nearest").unwrap();
@@ -236,9 +215,9 @@ impl GuiMainNotebook {
 
         let label_duplicate_check_method: gtk::Label = builder.object("label_duplicate_check_method").unwrap();
         let label_duplicate_hash_type: gtk::Label = builder.object("label_duplicate_hash_type").unwrap();
-        let label_duplicate_size_bytes: gtk::Label = builder.object("label_duplicate_size_bytes").unwrap();
-        let label_duplicate_min_size: gtk::Label = builder.object("label_duplicate_min_size").unwrap();
-        let label_duplicate_max_size: gtk::Label = builder.object("label_duplicate_max_size").unwrap();
+        let label_general_size_bytes: gtk::Label = builder.object("label_general_size_bytes").unwrap();
+        let label_general_min_size: gtk::Label = builder.object("label_general_min_size").unwrap();
+        let label_general_max_size: gtk::Label = builder.object("label_general_max_size").unwrap();
         let label_big_shown_files: gtk::Label = builder.object("label_big_shown_files").unwrap();
         let label_image_resize_algorithm: gtk::Label = builder.object("label_image_resize_algorithm").unwrap();
         let label_image_hash_type: gtk::Label = builder.object("label_image_hash_type").unwrap();
@@ -293,27 +272,17 @@ impl GuiMainNotebook {
             evk_tree_view_same_music_finder,
             evk_tree_view_invalid_symlinks,
             evk_tree_view_broken_files,
-            entry_similar_images_minimal_size,
-            entry_similar_images_maximal_size,
-            entry_similar_videos_minimal_size,
-            entry_similar_videos_maximal_size,
-            entry_duplicate_minimal_size,
+            entry_general_minimal_size,
+            entry_general_maximal_size,
             entry_big_files_number,
-            entry_same_music_minimal_size,
             check_button_music_title,
             check_button_music_artist,
             check_button_music_album_title,
             check_button_music_album_artist,
             check_button_music_year,
             check_button_music_approximate_comparison,
-            radio_button_duplicates_name,
-            radio_button_duplicates_size,
-            radio_button_duplicates_hash,
             scale_similarity_similar_images,
             scale_similarity_similar_videos,
-            radio_button_hash_type_blake3,
-            radio_button_hash_type_crc32,
-            radio_button_hash_type_xxh3,
             radio_button_resize_algorithm_lanczos3,
             radio_button_resize_algorithm_nearest,
             radio_button_resize_algorithm_triangle,
@@ -332,9 +301,10 @@ impl GuiMainNotebook {
             label_similar_images_minimal_similarity,
             label_duplicate_check_method,
             label_duplicate_hash_type,
-            label_duplicate_size_bytes,
-            label_duplicate_min_size,
-            label_duplicate_max_size,
+            label_general_size_bytes,
+            label_general_min_size,
+            label_general_max_size,
+            combo_box_duplicate_check_method,
             label_big_shown_files,
             label_image_resize_algorithm,
             label_image_hash_type,
@@ -354,9 +324,8 @@ impl GuiMainNotebook {
             label_music_min_size,
             label_music_max_size,
             image_preview_similar_images,
-            entry_duplicate_maximal_size,
-            entry_same_music_maximal_size,
             image_preview_duplicates,
+            combo_box_duplicate_hash_type,
         }
     }
 
@@ -383,18 +352,6 @@ impl GuiMainNotebook {
         self.check_button_music_year.set_label(&fl!("music_year_checkbox"));
         self.check_button_music_approximate_comparison.set_label(&fl!("music_comparison_checkbox"));
 
-        self.radio_button_duplicates_name.set_label(&fl!("duplicate_mode_name_checkbox"));
-        self.radio_button_duplicates_size.set_label(&fl!("duplicate_mode_size_checkbox"));
-        self.radio_button_duplicates_hash.set_label(&fl!("duplicate_mode_hash_checkbox"));
-
-        self.radio_button_duplicates_name.set_tooltip_text(Some(&fl!("duplicate_mode_name_checkbox_tooltip")));
-        self.radio_button_duplicates_size.set_tooltip_text(Some(&fl!("duplicate_mode_size_checkbox_tooltip")));
-        self.radio_button_duplicates_hash.set_tooltip_text(Some(&fl!("duplicate_mode_hash_checkbox_tooltip")));
-
-        self.radio_button_hash_type_blake3.set_tooltip_text(Some(&fl!("duplicate_hash_checkbox_blake3")));
-        self.radio_button_hash_type_crc32.set_tooltip_text(Some(&fl!("duplicate_hash_checkbox_crc32")));
-        self.radio_button_hash_type_xxh3.set_tooltip_text(Some(&fl!("duplicate_hash_checkbox_xxh3")));
-
         self.radio_button_similar_hash_size_8.set_tooltip_text(Some(&fl!("image_hash_checkbox_8")));
         self.radio_button_similar_hash_size_16.set_tooltip_text(Some(&fl!("image_hash_checkbox_16")));
         self.radio_button_similar_hash_size_32.set_tooltip_text(Some(&fl!("image_hash_checkbox_32")));
@@ -402,9 +359,9 @@ impl GuiMainNotebook {
 
         self.label_duplicate_check_method.set_label(&fl!("main_label_check_method"));
         self.label_duplicate_hash_type.set_label(&fl!("main_label_hash_type"));
-        self.label_duplicate_size_bytes.set_label(&fl!("main_label_size_bytes"));
-        self.label_duplicate_min_size.set_label(&fl!("main_label_min_size"));
-        self.label_duplicate_max_size.set_label(&fl!("main_label_max_size"));
+        self.label_general_size_bytes.set_label(&fl!("main_label_size_bytes"));
+        self.label_general_min_size.set_label(&fl!("main_label_min_size"));
+        self.label_general_max_size.set_label(&fl!("main_label_max_size"));
         self.label_big_shown_files.set_label(&fl!("main_label_shown_files"));
         self.label_image_resize_algorithm.set_label(&fl!("main_label_resize_algorithm"));
         self.label_image_hash_type.set_label(&fl!("main_label_hash_type"));
