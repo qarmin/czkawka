@@ -502,7 +502,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let checking_method = self.check_method.clone();
+            let checking_method = self.check_method;
             let max_stage = match self.check_method {
                 CheckingMethod::Size => 0,
                 CheckingMethod::Hash => 2,
@@ -511,7 +511,7 @@ impl DuplicateFinder {
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
-                        checking_method: checking_method.clone(),
+                        checking_method,
                         current_stage: 0,
                         max_stage,
                         files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
@@ -688,11 +688,11 @@ impl DuplicateFinder {
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = self.files_with_identical_size.iter().map(|e| e.1.len()).sum();
-            let checking_method = self.check_method.clone();
+            let checking_method = self.check_method;
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
-                        checking_method: checking_method.clone(),
+                        checking_method,
                         current_stage: 1,
                         max_stage: 2,
                         files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
@@ -855,11 +855,11 @@ impl DuplicateFinder {
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = pre_checked_map.iter().map(|(_size, vec_file_entry)| vec_file_entry.len()).sum();
-            let checking_method = self.check_method.clone();
+            let checking_method = self.check_method;
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
-                        checking_method: checking_method.clone(),
+                        checking_method,
                         current_stage: 2,
                         max_stage: 2,
                         files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,

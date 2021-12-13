@@ -527,7 +527,7 @@ Author: Rafał Mikrut
                         <property name="margin-end">5</property>
                         <property name="spacing">8</property>
                         <child>
-                          <object class="GtkLabel" id="label_upper_size_bytes">
+                          <object class="GtkLabel" id="label_general_size_bytes">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">File Size(bytes)</property>
@@ -647,7 +647,8 @@ Author: Rafał Mikrut
                               <object class="GtkLabel" id="label_duplicate_check_method">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Check method:</property>
+                                <property name="margin-end">3</property>
+                                <property name="label" translatable="yes">Check method</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -656,7 +657,7 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBox" id="combo_box_duplicate_check_method">
+                              <object class="GtkComboBoxText" id="combo_box_duplicate_check_method">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -670,7 +671,9 @@ Author: Rafał Mikrut
                               <object class="GtkLabel" id="label_duplicate_hash_type">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Hash type:</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Hash type</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -679,7 +682,7 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBox" id="combo_box_duplicate_hash_type">
+                              <object class="GtkComboBoxText" id="combo_box_duplicate_hash_type">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -915,7 +918,8 @@ Author: Rafał Mikrut
                               <object class="GtkLabel" id="label_image_resize_algorithm">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Resize algorithm:</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Resize algorithm</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -924,13 +928,9 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_resize_algorithm_lanczos3">
-                                <property name="label" translatable="yes">Lanczos3</property>
+                              <object class="GtkComboBoxText" id="combo_box_image_resize_algorithm">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -939,14 +939,12 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_resize_algorithm_nearest">
-                                <property name="label" translatable="yes">Nearest</property>
+                              <object class="GtkLabel" id="label_image_hash_size">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_resize_algorithm_lanczos3</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Hash size:</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -955,14 +953,9 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_resize_algorithm_triangle">
-                                <property name="label" translatable="yes">Triangle</property>
+                              <object class="GtkComboBoxText" id="combo_box_image_hash_size">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_resize_algorithm_lanczos3</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -971,14 +964,12 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_resize_algorithm_gaussian">
-                                <property name="label" translatable="yes">Gaussian</property>
+                              <object class="GtkLabel" id="label_image_hash_type">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_resize_algorithm_lanczos3</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Hash type:</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -987,14 +978,9 @@ Author: Rafał Mikrut
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="radio_button_resize_algorithm_catmullrom">
-                                <property name="label" translatable="yes">CatmullRom</property>
+                              <object class="GtkComboBoxText" id="combo_box_image_hash_algorithm">
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_resize_algorithm_lanczos3</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1007,289 +993,6 @@ Author: Rafał Mikrut
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="margin-start">5</property>
-                            <property name="margin-end">5</property>
-                            <child>
-                              <object class="GtkLabel" id="label_image_hash_type">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Hash type:</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_algorithm_gradient">
-                                <property name="label" translatable="yes">Gradient</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_algorithm_blockhash">
-                                <property name="label" translatable="yes">Blockhash</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_algorithm_gradient</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_algorithm_mean">
-                                <property name="label" translatable="yes">Mean</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_algorithm_gradient</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_algorithm_vertgradient">
-                                <property name="label" translatable="yes">VertGradient</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_algorithm_gradient</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_algorithm_doublegradient">
-                                <property name="label" translatable="yes">DoubleGradient</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_algorithm_gradient</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">5</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="margin-start">5</property>
-                            <property name="margin-end">5</property>
-                            <child>
-                              <object class="GtkLabel" id="label_image_hash_size">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Hash size:</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_size_8">
-                                <property name="label" translatable="yes">8</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_size_16">
-                                <property name="label" translatable="yes">16</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="active">True</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_8</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_size_32">
-                                <property name="label" translatable="yes">32</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_8</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radio_button_similar_hash_size_64">
-                                <property name="label" translatable="yes">64</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                                <property name="group">radio_button_similar_hash_size_8</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">5</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="margin-start">5</property>
-                            <property name="margin-end">5</property>
-                            <property name="spacing">8</property>
-                            <child>
-                              <object class="GtkLabel" id="label_image_size_bytes">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Size(bytes)</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label_image_min_size">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Min:</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="entry_general_minimal_size1">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="max-length">15</property>
-                                <property name="caps-lock-warning">False</property>
-                                <property name="input-purpose">number</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label_image_max_size">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Max:</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="entry_general_maximal_size1">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="max-length">15</property>
-                                <property name="text" translatable="yes">1099512000000</property>
-                                <property name="caps-lock-warning">False</property>
-                                <property name="input-purpose">number</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="check_button_image_ignore_same_size">
-                                <property name="label" translatable="yes">Ignore same size</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">False</property>
-                                <property name="draw-indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">5</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -1350,6 +1053,21 @@ Author: Rafał Mikrut
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_button_image_ignore_same_size">
+                                <property name="label" translatable="yes">Ignore same size</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="margin-start">7</property>
+                                <property name="draw-indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>
@@ -1423,87 +1141,6 @@ Author: Rafał Mikrut
                         <property name="can-focus">False</property>
                         <property name="margin-start">5</property>
                         <property name="margin-end">5</property>
-                        <property name="margin-top">2</property>
-                        <property name="spacing">8</property>
-                        <child>
-                          <object class="GtkLabel" id="label_video_size_bytes">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Size(bytes)</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label_video_min_size">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Min:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="entry_general_minimal_size2">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="max-length">15</property>
-                            <property name="text" translatable="yes">16384</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label_video_max_size">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Max:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="entry_general_maximal_size2">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="max-length">15</property>
-                            <property name="text" translatable="yes">1099512000000</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">5</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-end">5</property>
                         <property name="margin-bottom">2</property>
                         <child>
                           <object class="GtkLabel" id="label_video_similarity">
@@ -1558,6 +1195,21 @@ Author: Rafał Mikrut
                             <property name="position">3</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_video_ignore_same_size">
+                            <property name="label" translatable="yes">Ignore same size</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">7</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1601,87 +1253,6 @@ Author: Rafał Mikrut
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-top">2</property>
-                        <property name="spacing">8</property>
-                        <child>
-                          <object class="GtkLabel" id="label_music_size_bytes">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Size(bytes)</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label_music_min_size">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Min:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="entry_general_minimal_size3">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="max-length">15</property>
-                            <property name="text" translatable="yes">8192</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label_music_max_size">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Max:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="entry_general_maximal_size3">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="max-length">15</property>
-                            <property name="text" translatable="yes">1099512000000</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
@@ -1984,7 +1555,7 @@ Author: Rafał Mikrut
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
-                    <property name="icon-name">text-x-script</property>
+                    <property name="icon-name">utilities-system-monitor</property>
                   </object>
                 </child>
               </object>

@@ -22,10 +22,23 @@ music_album_artist_checkbox = Wykonawca Albumu
 music_year_checkbox = Rok
 music_comparison_checkbox = Przybliżone Porównywanie
 
+music_comparison_checkbox_tooltip =
+        Wyszukuje podobne pliki muzyczne za pomocą AI, która to za pomocą uczenia maszynowego usuwa nawiasy z wyrażenia np. z włączoną opcją, dane pliki zostaną uznane za duplikaty:
+        
+        Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
+
 duplicate_mode_name_checkbox = Nazwa
 duplicate_mode_size_checkbox = Rozmiar
 duplicate_mode_hash_checkbox = Hash
 
+duplicate_hash_type_tooltip = 
+        Czkawka oferuje 3 różne algorytmy do tworzenia hashu pliku:
+
+        Blake3 - kryptograficzna funkcja haszująca. Z racji połączenia szybkości i niskiej ilości kolizji jest to domyślny tryb.
+
+        CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashy.
+
+        XXH3 - zarówno pod względem jakości hashu jak i wydajności jest podobny do Blake3, dlatego te algorytmy mogą być używane wymiennie.
 
 duplicate_mode_name_checkbox_tooltip = 
         Służy do znajdowania plików o identycznych nazwach.
@@ -44,14 +57,25 @@ duplicate_mode_hash_checkbox_tooltip =
   
         Ten tryb używa pamięci podręcznej do przechowywania raz obliczonych hashy, dlatego drugie i kolejne skanowanie, powinno być o wiele szybsze niż pierwsze.
 
-duplicate_hash_checkbox_blake3 = Blake3 jest kryptograficzną funkcją haszującą. Z racji połączenia szybkości i niskiej ilości kolizji jest to domyślny tryb.
-duplicate_hash_checkbox_crc32 = CRC32 to prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashy.
-duplicate_hash_checkbox_xxh3 = XXH3 zarówno pod względem jakości hashu jak i wydajności jest podobny do Blake3, dlatego te algorytmy mogą być używane wymiennie.
+duplicate_check_method_tooltip = 
+        Na chwilę obecną, Czkawka oferuje 3 tryby wyszukiwania duplicatów poprzez:
 
-image_hash_checkbox_8 = Domyślna wielkość hasha, pozwala na wyszukanie obrazów od bardzo do minimalnie podobnych. Przy niższych poziomach podobieństwa, może grupować wiele niepodobnych obrazków.
-image_hash_checkbox_16 = Bardziej precyzyjny od 8. Przydatny gdy ze względu na dużą ilość zdjęć i kolizji między hashami niższy hash wyświetla nieprawidłowe dane.
-image_hash_checkbox_32 = Umożliwia wyszukiwanie niemal identycznych obrazów, różniących się niewielkimi szczegółami.
-image_hash_checkbox_64 = Tryb predatora, tworzy ogromne hashe które porównywane, wczytywane i zapisywane znacznie dłużej od poprzedników. Z racji wad nie powinien być raczej stosowany.
+        Nazwę - Znajduje identycznie nazywające się pliki.
+
+        Rozmiar - Znajduje pliki o identycznych rozmiarach.
+
+        Hash - Wyszukuje pliki o tej samej zawartości. W tym trybie, każdy plik jest hasowany a następnie każdy hash jest porównywany z innymi.  Ten tryb używa pamięci podręcznej do przechowywania raz obliczonych hashy, dlatego drugie i kolejne skanowanie, powinno być o wiele szybsze niż pierwsze. Jest to najbezpieczniejszy sposób na znalezienie duplikatów.
+
+image_hash_size_tooltip = 
+        Czkawka umożliwia zmianę wielkości generowanego hashu dla każdego obrazu. Im większy, tym mniejsze różnice może znaleźć pomiędzy obrazami, lecz również jest nieco wolniejszy w użytkowaniu.
+        
+        Domyśną wielkością hashu jest 8, które pozwala wyszukiwać zarówno bardzo jak i mało podobne do siebie obrazy. Hashe 16 i 32 powinny być głównie używane dla niemal identycznych plików. Hash 64 bajtowy nie powinien być stosowany, chyba że wymagane jest znalezienie bardzo małych różnic pomiędzy obrazami.
+
+image_resize_filter_tooltip = 
+        By obliczyć hash obrazu, biblioteka musi najpierw go zmniejszyć. W zależności od wybranego algorytmu, obraz będzie wyglądał nieco inaczej. Najszybszym, lecz za razem dającym najgorsze efekty jest algorytm Nearest.
+
+image_hash_alg_tooltip = 
+        Do wyboru jest kilka algorytmów obliczenia hashu obrazu. Każdy z nich ma swoje słabe i silne punkty i będzie dawał czasem lepsze a czasem gorsze rezultaty w zależności od obrazów, dlatego najlepiej będzie przetestować je na własną rękę.
 
 main_notebook_duplicates = Duplikaty
 main_notebook_empty_directories = Puste Katalogi
@@ -81,15 +105,20 @@ main_tree_view_column_symlink_folder = Folder Symlinka
 main_tree_view_column_destination_path = Docelowa Ścieżka
 main_tree_view_column_type_of_error = Typ Błędu
 
-main_label_check_method = Metoda sprawdzania:
-main_label_hash_type = Typ hashu:
-main_label_hash_size = Rozmiar hashu:
+main_label_check_method = Metoda sprawdzania
+main_label_hash_type = Typ hashu
+main_label_hash_size = Rozmiar hashu
 main_label_size_bytes = Rozmiar(bajty)
-main_label_min_size = Min:
-main_label_max_size = Max:
-main_label_shown_files = Liczba wyświetlanych plików:
-main_label_resize_algorithm = Algorytm zmiany rozmiaru:
+main_label_min_size = Min
+main_label_max_size = Max
+main_label_shown_files = Liczba wyświetlanych plików
+main_label_resize_algorithm = Algorytm zmiany rozmiaru
 main_label_similarity = Podobieństwo{"   "}
+
+check_button_general_same_size = Ignoruj identyczny rozmiar
+check_button_general_same_size_tooltip = Wyrzuca z wyników skanowania pliki, które posiadają identyczny rozmiar, po to by w wynikach zostały tylko niemal identyczne rekordy.
+
+main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
 # Górne okno
 upper_recursive_button = Rekursywnie
 upper_recursive_button_tooltip = Jeśli zaznaczony, szuka plików i folderów również w katalogach wewnątrz, nawet jeśli nie znajdują się one bezpośrednio w tym folderze.
