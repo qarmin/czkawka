@@ -14,10 +14,12 @@ use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
 
 use crate::gui_data::GuiData;
+use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
+    let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
@@ -47,10 +49,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
-    let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
-    let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
-    let radio_button_similar_hash_size_32 = gui_data.main_notebook.radio_button_similar_hash_size_32.clone();
-    let radio_button_similar_hash_size_64 = gui_data.main_notebook.radio_button_similar_hash_size_64.clone();
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
     let button_settings = gui_data.header.button_settings.clone();
     let button_app_info = gui_data.header.button_app_info.clone();
@@ -70,18 +68,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
         taskbar_state.borrow().hide();
 
-        let hash_size;
-        if radio_button_similar_hash_size_8.is_active() {
-            hash_size = 8;
-        } else if radio_button_similar_hash_size_16.is_active() {
-            hash_size = 16;
-        } else if radio_button_similar_hash_size_32.is_active() {
-            hash_size = 32;
-        } else if radio_button_similar_hash_size_64.is_active() {
-            hash_size = 64;
-        } else {
-            panic!("No radio button is pressed");
-        }
+        let hash_size_index = combo_box_image_hash_size.active().unwrap() as usize;
+        let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
         match msg {
             Message::Duplicates(df) => {

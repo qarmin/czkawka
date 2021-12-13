@@ -4,12 +4,11 @@ use std::thread;
 
 use glib::Sender;
 use gtk::prelude::*;
-use img_hash::{FilterType, HashAlg};
 
 use crate::fl;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::duplicate::{DuplicateFinder, HashType};
+use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
@@ -20,6 +19,7 @@ use czkawka_core::temporary::Temporary;
 use czkawka_core::*;
 
 use crate::gui_data::GuiData;
+use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX};
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
@@ -39,6 +39,11 @@ pub fn connect_button_search(
     futures_sender_invalid_symlinks: futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>,
     futures_sender_broken_files: futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
 ) {
+    let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
+    let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
+    let combo_box_image_resize_algorithm = gui_data.main_notebook.combo_box_image_resize_algorithm.clone();
+    let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
+    let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let check_button_image_ignore_same_size = gui_data.main_notebook.check_button_image_ignore_same_size.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
@@ -57,17 +62,11 @@ pub fn connect_button_search(
     let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
     let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
-    let entry_duplicate_maximal_size = gui_data.main_notebook.entry_duplicate_maximal_size.clone();
-    let entry_duplicate_minimal_size = gui_data.main_notebook.entry_duplicate_minimal_size.clone();
     let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
-    let entry_same_music_maximal_size = gui_data.main_notebook.entry_same_music_maximal_size.clone();
-    let entry_same_music_minimal_size = gui_data.main_notebook.entry_same_music_minimal_size.clone();
+    let entry_general_maximal_size = gui_data.upper_notebook.entry_general_maximal_size.clone();
+    let entry_general_minimal_size = gui_data.upper_notebook.entry_general_minimal_size.clone();
     let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
     let entry_settings_prehash_cache_file_minimal_size = gui_data.settings.entry_settings_prehash_cache_file_minimal_size.clone();
-    let entry_similar_images_maximal_size = gui_data.main_notebook.entry_similar_images_maximal_size.clone();
-    let entry_similar_images_minimal_size = gui_data.main_notebook.entry_similar_images_minimal_size.clone();
-    let entry_similar_videos_maximal_size = gui_data.main_notebook.entry_similar_videos_maximal_size.clone();
-    let entry_similar_videos_minimal_size = gui_data.main_notebook.entry_similar_videos_minimal_size.clone();
     let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let label_stage = gui_data.progress_window.label_stage.clone();
@@ -75,26 +74,6 @@ pub fn connect_button_search(
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
     let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let radio_button_duplicates_hash = gui_data.main_notebook.radio_button_duplicates_hash.clone();
-    let radio_button_duplicates_name = gui_data.main_notebook.radio_button_duplicates_name.clone();
-    let radio_button_duplicates_size = gui_data.main_notebook.radio_button_duplicates_size.clone();
-    let radio_button_hash_type_blake3 = gui_data.main_notebook.radio_button_hash_type_blake3.clone();
-    let radio_button_hash_type_crc32 = gui_data.main_notebook.radio_button_hash_type_crc32.clone();
-    let radio_button_hash_type_xxh3 = gui_data.main_notebook.radio_button_hash_type_xxh3.clone();
-    let radio_button_resize_algorithm_catmullrom = gui_data.main_notebook.radio_button_resize_algorithm_catmullrom.clone();
-    let radio_button_resize_algorithm_gaussian = gui_data.main_notebook.radio_button_resize_algorithm_gaussian.clone();
-    let radio_button_resize_algorithm_lanczos3 = gui_data.main_notebook.radio_button_resize_algorithm_lanczos3.clone();
-    let radio_button_resize_algorithm_nearest = gui_data.main_notebook.radio_button_resize_algorithm_nearest.clone();
-    let radio_button_resize_algorithm_triangle = gui_data.main_notebook.radio_button_resize_algorithm_triangle.clone();
-    let radio_button_similar_hash_algorithm_blockhash = gui_data.main_notebook.radio_button_similar_hash_algorithm_blockhash.clone();
-    let radio_button_similar_hash_algorithm_doublegradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_doublegradient.clone();
-    let radio_button_similar_hash_algorithm_gradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_gradient.clone();
-    let radio_button_similar_hash_algorithm_mean = gui_data.main_notebook.radio_button_similar_hash_algorithm_mean.clone();
-    let radio_button_similar_hash_algorithm_vertgradient = gui_data.main_notebook.radio_button_similar_hash_algorithm_vertgradient.clone();
-    let radio_button_similar_hash_size_16 = gui_data.main_notebook.radio_button_similar_hash_size_16.clone();
-    let radio_button_similar_hash_size_32 = gui_data.main_notebook.radio_button_similar_hash_size_32.clone();
-    let radio_button_similar_hash_size_64 = gui_data.main_notebook.radio_button_similar_hash_size_64.clone();
-    let radio_button_similar_hash_size_8 = gui_data.main_notebook.radio_button_similar_hash_size_8.clone();
     let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
     let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
@@ -157,29 +136,14 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_duplicate_finder).clear();
 
-                let check_method;
-                if radio_button_duplicates_name.is_active() {
-                    check_method = duplicate::CheckingMethod::Name;
-                } else if radio_button_duplicates_size.is_active() {
-                    check_method = duplicate::CheckingMethod::Size;
-                } else if radio_button_duplicates_hash.is_active() {
-                    check_method = duplicate::CheckingMethod::Hash;
-                } else {
-                    panic!("No radio button is pressed");
-                }
-                let minimal_file_size = entry_duplicate_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-                let maximal_file_size = entry_duplicate_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+                let check_method_index = combo_box_duplicate_check_method.active().unwrap() as usize;
+                let check_method = DUPLICATES_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
 
-                let hash_type: HashType;
-                if radio_button_hash_type_blake3.is_active() {
-                    hash_type = duplicate::HashType::Blake3;
-                } else if radio_button_hash_type_crc32.is_active() {
-                    hash_type = duplicate::HashType::Crc32;
-                } else if radio_button_hash_type_xxh3.is_active() {
-                    hash_type = duplicate::HashType::Xxh3;
-                } else {
-                    panic!("No radio button is pressed");
-                }
+                let hash_type_index = combo_box_duplicate_hash_type.active().unwrap() as usize;
+                let hash_type = DUPLICATES_HASH_TYPE_COMBO_BOX[hash_type_index].hash_type;
+
+                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
+                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let use_prehash_cache = check_button_duplicates_use_prehash_cache.is_active();
                 let minimal_prehash_cache_file_size = entry_settings_prehash_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(0);
@@ -300,51 +264,17 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_similar_images_finder).clear();
 
-                let hash_size;
-                if radio_button_similar_hash_size_8.is_active() {
-                    hash_size = 8;
-                } else if radio_button_similar_hash_size_16.is_active() {
-                    hash_size = 16;
-                } else if radio_button_similar_hash_size_32.is_active() {
-                    hash_size = 32;
-                } else if radio_button_similar_hash_size_64.is_active() {
-                    hash_size = 64;
-                } else {
-                    panic!("No radio button is pressed");
-                }
+                let hash_size_index = combo_box_image_hash_size.active().unwrap() as usize;
+                let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
-                let image_filter;
-                if radio_button_resize_algorithm_catmullrom.is_active() {
-                    image_filter = FilterType::CatmullRom;
-                } else if radio_button_resize_algorithm_lanczos3.is_active() {
-                    image_filter = FilterType::Lanczos3;
-                } else if radio_button_resize_algorithm_nearest.is_active() {
-                    image_filter = FilterType::Nearest;
-                } else if radio_button_resize_algorithm_triangle.is_active() {
-                    image_filter = FilterType::Triangle;
-                } else if radio_button_resize_algorithm_gaussian.is_active() {
-                    image_filter = FilterType::Gaussian;
-                } else {
-                    panic!("No radio button is pressed");
-                }
+                let image_filter_index = combo_box_image_resize_algorithm.active().unwrap() as usize;
+                let image_filter = IMAGES_RESIZE_ALGORITHM_COMBO_BOX[image_filter_index].filter;
 
-                let hash_alg;
-                if radio_button_similar_hash_algorithm_blockhash.is_active() {
-                    hash_alg = HashAlg::Blockhash;
-                } else if radio_button_similar_hash_algorithm_gradient.is_active() {
-                    hash_alg = HashAlg::Gradient;
-                } else if radio_button_similar_hash_algorithm_mean.is_active() {
-                    hash_alg = HashAlg::Mean;
-                } else if radio_button_similar_hash_algorithm_vertgradient.is_active() {
-                    hash_alg = HashAlg::VertGradient;
-                } else if radio_button_similar_hash_algorithm_doublegradient.is_active() {
-                    hash_alg = HashAlg::DoubleGradient;
-                } else {
-                    panic!("No radio button is pressed");
-                }
+                let hash_alg_index = combo_box_image_hash_algorithm.active().unwrap() as usize;
+                let hash_alg = IMAGES_HASH_TYPE_COMBO_BOX[hash_alg_index].hash_alg;
 
-                let minimal_file_size = entry_similar_images_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
-                let maximal_file_size = entry_similar_images_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
+                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let ignore_same_size = check_button_image_ignore_same_size.is_active();
 
@@ -381,8 +311,8 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_similar_videos_finder).clear();
 
-                let minimal_file_size = entry_similar_videos_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
-                let maximal_file_size = entry_similar_videos_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
+                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let tolerance = scale_similarity_similar_videos.value() as i32;
 
@@ -413,8 +343,8 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
-                let minimal_file_size = entry_same_music_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-                let maximal_file_size = entry_same_music_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
+                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
                 let approximate_comparison = check_button_music_approximate_comparison.is_active();
 
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;

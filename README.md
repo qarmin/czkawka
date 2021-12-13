@@ -91,31 +91,31 @@ Similar images which check 349 image files that occupied 1.7 GB
 
 Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these two apps shouldn't be compared directly or be considered as an alternative to one another.
 
-|                        | Czkawka     | FSlint     | DupeGuru          | Bleachbit   |
+|                        |   Czkawka   | FSlint     | DupeGuru          | Bleachbit   |
 |:----------------------:|:-----------:|:----------:|:-----------------:|:-----------:|
-| Language               | Rust        | Python     | Python/Obj-C      | Python      |
+| Language               |    Rust     | Python     | Python/Obj-C      | Python      |
 | OS                     | Lin,Mac,Win | Lin        | Lin,Mac,Win       | Lin,Mac,Win |
-| Framework              | GTK 3       | PyGTK2     | Qt 5 (PyQt)/Cocoa | PyGTK3      |
-| Duplicate finder       | •           | •          | •                 |             |
-| Empty files            | •           | •          |                   |             |
-| Empty folders          | •           | •          |                   |             |
-| Temporary files        | •           | •          |                   | •           |
-| Big files              | •           |            |                   |             |
-| Similar images         | •           |            | •                 |             |
-| Similar videos         | •           |            |                   |             |
-| Music duplicates(tags) | •           |            | •                 |             |
-| Invalid symlinks       | •           | •          |                   |             |
-| Broken files           | •           |            |                   |             |
-| Names conflict         | •           | •          |                   |             |
+| Framework              |    GTK 3    | PyGTK2     | Qt 5 (PyQt)/Cocoa | PyGTK3      |
+| Duplicate finder       |      •      | •          | •                 |             |
+| Empty files            |      •      | •          |                   |             |
+| Empty folders          |      •      | •          |                   |             |
+| Temporary files        |      •      | •          |                   | •           |
+| Big files              |      •      |            |                   |             |
+| Similar images         |      •      |            | •                 |             |
+| Similar videos         |      •      |            |                   |             |
+| Music duplicates(tags) |      •      |            | •                 |             |
+| Invalid symlinks       |      •      | •          |                   |             |
+| Broken files           |      •      |            |                   |             |
+| Names conflict         |      •      | •          |                   |             |
 | Installed packages     |             | •          |                   |             |
 | Invalid names          |             | •          |                   |             |
 | Bad ID                 |             | •          |                   |             |
 | Non stripped binaries  |             | •          |                   |             |
 | Redundant whitespace   |             | •          |                   |             |
 | Overwriting files      |             | •          |                   | •           |
-| Multiple languages(po) |             | •          | •                 | •           |
-| Cache support          | •           |            | •                 |             |
-| In active development  | Yes         | No         | Yes               | Yes         |
+| Multiple languages(po) |     •       | •          | •                 |      •      |
+| Cache support          |      •      |            | •                 |             |
+| In active development  |     Yes     | No         | Yes               | Yes         |
 
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.

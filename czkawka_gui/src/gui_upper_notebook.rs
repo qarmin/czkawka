@@ -31,6 +31,12 @@ pub struct GuiUpperNotebook {
 
     pub label_excluded_items: gtk::Label,
     pub label_allowed_extensions: gtk::Label,
+
+    pub entry_general_minimal_size: gtk::Entry,
+    pub entry_general_maximal_size: gtk::Entry,
+    pub label_general_size_bytes: gtk::Label,
+    pub label_general_min_size: gtk::Label,
+    pub label_general_max_size: gtk::Label,
 }
 
 impl GuiUpperNotebook {
@@ -61,6 +67,12 @@ impl GuiUpperNotebook {
         let label_excluded_items: gtk::Label = builder.object("label_excluded_items").unwrap();
         let label_allowed_extensions: gtk::Label = builder.object("label_allowed_extensions").unwrap();
 
+        let entry_general_minimal_size: gtk::Entry = builder.object("entry_general_minimal_size").unwrap();
+        let entry_general_maximal_size: gtk::Entry = builder.object("entry_general_maximal_size").unwrap();
+        let label_general_size_bytes: gtk::Label = builder.object("label_general_size_bytes").unwrap();
+        let label_general_min_size: gtk::Label = builder.object("label_general_min_size").unwrap();
+        let label_general_max_size: gtk::Label = builder.object("label_general_max_size").unwrap();
+
         Self {
             notebook_upper,
             scrolled_window_included_directories,
@@ -80,6 +92,11 @@ impl GuiUpperNotebook {
             buttons_remove_excluded_directory,
             label_excluded_items,
             label_allowed_extensions,
+            entry_general_minimal_size,
+            entry_general_maximal_size,
+            label_general_size_bytes,
+            label_general_min_size,
+            label_general_max_size,
         }
     }
     pub fn update_language(&self) {
@@ -107,6 +124,16 @@ impl GuiUpperNotebook {
 
         self.label_excluded_items.set_label(&fl!("upper_excluded_items"));
         self.label_allowed_extensions.set_label(&fl!("upper_allowed_extensions"));
+
+        self.label_general_size_bytes.set_label(&fl!("main_label_size_bytes"));
+        self.label_general_min_size.set_label(&fl!("main_label_min_size"));
+        self.label_general_max_size.set_label(&fl!("main_label_max_size"));
+
+        self.label_general_size_bytes.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
+        self.label_general_min_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
+        self.label_general_max_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
+        self.entry_general_minimal_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
+        self.entry_general_maximal_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
 
         let vec_children: Vec<gtk::Widget> = self.notebook_upper.children();
 

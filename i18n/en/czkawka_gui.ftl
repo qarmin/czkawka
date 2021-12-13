@@ -22,35 +22,43 @@ music_album_artist_checkbox = Album Artist
 music_year_checkbox = Year
 music_comparison_checkbox = Approximate Comparison
 
-duplicate_mode_name_checkbox = Name
-duplicate_mode_size_checkbox = Size
-duplicate_mode_hash_checkbox = Hash
-
-duplicate_mode_name_checkbox_tooltip = 
-        Finds files which have same name.
-  
-        This mode not checking what file contain inside, so be carefully when using it.
+music_comparison_checkbox_tooltip =
+        It searches for similar music files using AI, which uses machine learning to remove parentheses from a phrase, e.g. with this option enabled, the files in question will be considered duplicates:
         
-duplicate_mode_size_checkbox_tooltip = 
-        Finds files which have same size.
+        Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 
-        This mode not checking what file contain inside, so be carefully when using it.
+duplicate_mode_name_combo_box = Name
+duplicate_mode_size_combo_box = Size
+duplicate_mode_hash_combo_box = Hash
+
+duplicate_hash_type_tooltip = 
+        Czkawka offers 3 types of hashes, which could be used:
+
+        Blake3 - cryptographic hash function. It is used as default hash algorithm, because it is very fast.
+
+        CRC32 - simple hash function. It should be faster than Blake3, but probably may have very rarely some collisions.
+
+        XXH3 - very similar in case of performance and hash quality to Blake3, so such modes can be easily used.
+
+duplicate_check_method_tooltip = 
+        For now, Czkawka offers three types of method to find duplicates by:
+
+        Name - Finds files which have same name.
+
+        Size - Finds files which have same size.
+
+        Hash - Finds files which have the same content. This mode hashes file and later compare this hashes to find duplicates. This mode is the safest way to find duplicates. Tool heavily uses cache, so second and further scans of same data should be a lot of faster that first. 
+
+image_hash_size_tooltip = 
+        Czkawka offers changing size of generated hash for each images. Bigger hash cause allows to finds images with lower amount of differences between  images, but also it is a little slower to use.
         
-duplicate_mode_hash_checkbox_tooltip = 
-        Finds files which have the same content.
-  
-        This mode hashes file and later compare this hashes to find duplicates.
-  
-        Tool heavily uses cache, so second and further scans of same data should be a lot of faster that first.
+        Default value for hash is 8 bytes, which allows to find very similar and different images. 16 and 32 hashes should be used only for nearly identical images. 64 bytes hash shouldn't be used, except situation where really small differences are needed to find
 
-duplicate_hash_checkbox_blake3 = Blake3 is cryptographic hash function. It is used as default hash algorithm, because it is very fast.
-duplicate_hash_checkbox_crc32 = CRC32 is simple hash function. It should be faster than Blake3, but probably may have very rarely some collisions.
-duplicate_hash_checkbox_xxh3 = XXH3 is very similar in case of performance and hash quality to Blake3, so such modes can be easily used.
+image_resize_filter_tooltip = 
+        To compute hash of image, library must first resize it. Depend on choosen algorithm, resulted image will looks little different. The fastest algotithm to use, but also one which gives the worst results is Nearest.
 
-image_hash_checkbox_8 = Default hash size, with very high similarity it produce quite good results and don't save too much data too cache.
-image_hash_checkbox_16 = More precise than 8, so can be used to find very similar pictures, but create bigger cache entries.
-image_hash_checkbox_32 = Hash of this size provide very big similarity which is more than enough for most usages.
-image_hash_checkbox_64 = Paranoid mode, such tool create really big cache files and will catch almost same images.
+image_hash_alg_tooltip = 
+        Users can choose one from many algorithms of calculating hash. Each have both strong and weaker points and will give sometimes better and sometimes worse results for different images, so to choose the best one, manual testing is required.
 
 main_notebook_duplicates = Duplicate Files
 main_notebook_empty_directories = Empty Directories
@@ -80,15 +88,20 @@ main_tree_view_column_symlink_folder = Symlnik Folder
 main_tree_view_column_destination_path = Destination Path
 main_tree_view_column_type_of_error = Type Of Error
 
-main_label_check_method = Check method:
-main_label_hash_type = Hash type:
-main_label_hash_size = Hash size:
+main_label_check_method = Check method
+main_label_hash_type = Hash type
+main_label_hash_size = Hash size
 main_label_size_bytes = Size(bytes)
-main_label_min_size = Min:
-main_label_max_size = Max:
-main_label_shown_files = Number of shown files:
-main_label_resize_algorithm = Resize algorithm:
+main_label_min_size = Min
+main_label_max_size = Max
+main_label_shown_files = Number of shown files
+main_label_resize_algorithm = Resize algorithm
 main_label_similarity = Similarity{"   "}
+
+check_button_general_same_size = Ignore same size
+check_button_general_same_size_tooltip = Ignore from results, files which have identical size - usually this are 1:1 duplicates
+
+main_label_size_bytes_tooltip = Size of files which will be used in scan
 
 # Upper window
 upper_recursive_button = Recursive

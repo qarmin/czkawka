@@ -17,6 +17,7 @@ use czkawka_core::similar_videos::MAX_TOLERANCE;
 use crate::create_tree_view::*;
 use crate::delete_things;
 use crate::gui_data::*;
+use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX};
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::notebook_enums::NotebookMainEnum;
@@ -42,13 +43,53 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         buttons_hardlink.hide();
         buttons_move.hide();
     }
-    //// Initialize language combobox
+    //// Initialize language combo box
     {
         let combo_box_settings_language = gui_data.settings.combo_box_settings_language.clone();
         for lang in LANGUAGES_ALL {
             combo_box_settings_language.append_text(lang.combo_box_text);
         }
         combo_box_settings_language.set_active(Some(0));
+    }
+    //// Initialize main window combo boxes
+    {
+        {
+            let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
+            for check_type in &DUPLICATES_CHECK_METHOD_COMBO_BOX {
+                combo_box_duplicate_check_method.append_text(check_type.eng_name);
+            }
+            combo_box_duplicate_check_method.set_active(Some(0));
+        }
+        {
+            let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
+            for hash_type in &DUPLICATES_HASH_TYPE_COMBO_BOX {
+                combo_box_duplicate_hash_type.append_text(hash_type.eng_name);
+            }
+            combo_box_duplicate_hash_type.set_active(Some(0));
+        }
+    }
+    {
+        {
+            let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
+            for check_type in &IMAGES_HASH_TYPE_COMBO_BOX {
+                combo_box_image_hash_algorithm.append_text(check_type.eng_name);
+            }
+            combo_box_image_hash_algorithm.set_active(Some(0));
+        }
+        {
+            let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
+            for check_type in &IMAGES_HASH_SIZE_COMBO_BOX {
+                combo_box_image_hash_size.append_text(&check_type.to_string());
+            }
+            combo_box_image_hash_size.set_active(Some(0));
+        }
+        {
+            let combo_box_image_resize_algorithm = gui_data.main_notebook.combo_box_image_resize_algorithm.clone();
+            for resize in &IMAGES_RESIZE_ALGORITHM_COMBO_BOX {
+                combo_box_image_resize_algorithm.append_text(resize.eng_name);
+            }
+            combo_box_image_resize_algorithm.set_active(Some(0));
+        }
     }
 
     //// Initialize main scrolled view with notebook
