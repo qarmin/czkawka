@@ -136,7 +136,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_duplicates)));
 
@@ -181,7 +180,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_empty_folders(&tree_view);
@@ -210,7 +208,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_empty_files(&tree_view);
@@ -239,7 +236,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_temporary_files(&tree_view);
@@ -270,7 +266,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_big_files(&tree_view);
@@ -309,7 +304,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_similar_images)));
 
@@ -359,7 +353,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_similar_videos)));
 
@@ -399,7 +392,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
                 tree_view.selection().set_select_function(Some(Box::new(select_function_same_music)));
 
@@ -431,7 +423,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_invalid_symlinks(&tree_view);
@@ -461,7 +452,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
-
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
                 create_tree_view_broken_files(&tree_view);
@@ -519,7 +509,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             tree_view.set_model(Some(&list_store));
-
             tree_view.selection().set_mode(SelectionMode::Multiple);
 
             create_tree_view_directories(&tree_view);
@@ -553,7 +542,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         });
     }
 
-    // Needs to be called after setting tree_view name, probably in GTK 4 this will be easier
+    // This not need to be run in different code block, but this looks a little less complicated if is available in
     connect_event_buttons(gui_data);
 }
 
@@ -562,8 +551,8 @@ fn connect_event_buttons(gui_data: &GuiData) {
     {
         let gui_data_clone = gui_data.clone();
         let text_view_errors = gui_data.text_view_errors.clone();
-        let check_button_settings_show_preview_duplicates = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
-        let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
+        let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
+        let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
         let preview_path = gui_data.preview_path.clone();
 
         gui_data.main_notebook.evk_tree_view_duplicate_finder.connect_key_released(move |event_controller_key, _key_value, key_code, _modifier_type| {
@@ -575,8 +564,8 @@ fn connect_event_buttons(gui_data: &GuiData) {
             show_preview(
                 &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
                 &text_view_errors,
-                &check_button_settings_show_preview_duplicates,
-                &image_preview_duplicates,
+                &check_button_settings_show_preview,
+                &image_preview,
                 preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
