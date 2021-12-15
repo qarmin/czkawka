@@ -3,7 +3,7 @@ use gtk::TreeViewColumn;
 
 use crate::help_functions::*;
 
-pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_duplicates(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -61,7 +61,7 @@ pub fn create_tree_view_duplicates(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_empty_folders(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -114,7 +114,7 @@ pub fn create_tree_view_empty_folders(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_big_files(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -177,7 +177,7 @@ pub fn create_tree_view_big_files(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_temporary_files(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -230,7 +230,7 @@ pub fn create_tree_view_temporary_files(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_empty_files(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -283,7 +283,7 @@ pub fn create_tree_view_empty_files(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_similar_images(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -374,7 +374,7 @@ pub fn create_tree_view_similar_images(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_similar_videos(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_similar_videos(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -443,7 +443,7 @@ pub fn create_tree_view_similar_videos(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_directories(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_directories(tree_view: &gtk::TreeView) {
     let renderer = gtk::CellRendererText::new();
     let column: gtk::TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -453,7 +453,7 @@ pub fn create_tree_view_directories(tree_view: &mut gtk::TreeView) {
     tree_view.set_headers_visible(false);
 }
 
-pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_same_music(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -577,7 +577,7 @@ pub fn create_tree_view_same_music(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_invalid_symlinks(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
@@ -650,7 +650,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &mut gtk::TreeView) {
     tree_view.set_vexpand(true);
 }
 
-pub fn create_tree_view_broken_files(tree_view: &mut gtk::TreeView) {
+pub fn create_tree_view_broken_files(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
     let renderer = gtk::CellRendererToggle::new();
