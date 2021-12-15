@@ -6,9 +6,9 @@ use std::hash::Hasher;
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
 use std::io::{BufReader, BufWriter};
+use std::ops::Range;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
-use std::ops::Range;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -356,7 +356,7 @@ impl DuplicateFinder {
 
         //// PROGRESS THREAD END
 
-        let mut bounds: Range<usize> = 0 .. folders_to_check.len();
+        let mut bounds: Range<usize> = 0..folders_to_check.len();
 
         while !bounds.is_empty() {
             // Read the current frontier
@@ -369,104 +369,107 @@ impl DuplicateFinder {
                 return false;
             }
 
-            let segments: Vec<_> = current_slice.into_par_iter().map(|current_folder| {
-                let mut result = vec![];
-                let mut warnings = vec![];
-                let mut fe_result = vec![];
-                // Read current dir, if permission are denied just go to next
-                let read_dir = match fs::read_dir(&current_folder) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
-                        return (result, warnings, fe_result);
-                    } // Permissions denied
-                };
-
-                // Check every sub folder/file/link etc.
-                'dir: for entry in read_dir {
-                    let entry_data = match entry {
+            let segments: Vec<_> = current_slice
+                .into_par_iter()
+                .map(|current_folder| {
+                    let mut dir_result = vec![];
+                    let mut warnings = vec![];
+                    let mut fe_result = vec![];
+                    // Read current dir, if permission are denied just go to next
+                    let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
-                            continue 'dir;
-                        } //Permissions denied
+                            warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                            return (dir_result, warnings, fe_result);
+                        } // Permissions denied
                     };
-                    let metadata: Metadata = match entry_data.metadata() {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
-                            continue 'dir;
-                        } //Permissions denied
-                    };
-                    if metadata.is_dir() {
-                        if !self.recursive_search {
-                            continue 'dir;
-                        }
 
-                        let next_folder = current_folder.join(entry_data.file_name());
-                        if self.directories.is_excluded(&next_folder) {
-                            continue 'dir;
-                        }
-
-                        if self.excluded_items.is_excluded(&next_folder) {
-                            continue 'dir;
-                        }
-
-                        result.push(next_folder);
-                    } else if metadata.is_file() {
-                        atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                        // let mut have_valid_extension: bool;
-                        let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                    // Check every sub folder/file/link etc.
+                    'dir: for entry in read_dir {
+                        let entry_data = match entry {
                             Ok(t) => t,
-                            Err(_inspected) => {
-                                println!("File {:?} has not valid UTF-8 name", entry_data);
+                            Err(e) => {
+                                warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                                 continue 'dir;
-                            }
-                        }
-                        .to_lowercase();
-
-                        // Checking allowed extensions
-                        if !self.allowed_extensions.file_extensions.is_empty() {
-                            let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                            if !allowed {
-                                // Not an allowed extension, ignore it.
+                            } //Permissions denied
+                        };
+                        let metadata: Metadata = match entry_data.metadata() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                                 continue 'dir;
-                            }
-                        }
-                        // Checking files
-                        if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                            let current_file_name = current_folder.join(entry_data.file_name());
-                            if self.excluded_items.is_excluded(&current_file_name) {
+                            } //Permissions denied
+                        };
+                        if metadata.is_dir() {
+                            if !self.recursive_search {
                                 continue 'dir;
                             }
 
-                            // Creating new file entry
-                            let fe: FileEntry = FileEntry {
-                                path: current_file_name.clone(),
-                                size: metadata.len(),
-                                modified_date: match metadata.modified() {
-                                    Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                        Ok(d) => d.as_secs(),
-                                        Err(_inspected) => {
-                                            warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                            let next_folder = current_folder.join(entry_data.file_name());
+                            if self.directories.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            if self.excluded_items.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            dir_result.push(next_folder);
+                        } else if metadata.is_file() {
+                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                            // let mut have_valid_extension: bool;
+                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_inspected) => {
+                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    continue 'dir;
+                                }
+                            }
+                            .to_lowercase();
+
+                            // Checking allowed extensions
+                            if !self.allowed_extensions.file_extensions.is_empty() {
+                                let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                                if !allowed {
+                                    // Not an allowed extension, ignore it.
+                                    continue 'dir;
+                                }
+                            }
+                            // Checking files
+                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
+                                let current_file_name = current_folder.join(entry_data.file_name());
+                                if self.excluded_items.is_excluded(&current_file_name) {
+                                    continue 'dir;
+                                }
+
+                                // Creating new file entry
+                                let fe: FileEntry = FileEntry {
+                                    path: current_file_name.clone(),
+                                    size: metadata.len(),
+                                    modified_date: match metadata.modified() {
+                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                            Ok(d) => d.as_secs(),
+                                            Err(_inspected) => {
+                                                warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                                                0
+                                            }
+                                        },
+                                        Err(e) => {
+                                            warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
                                             0
-                                        }
+                                        } // Permissions Denied
                                     },
-                                    Err(e) => {
-                                        warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
-                                        0
-                                    } // Permissions Denied
-                                },
-                                hash: "".to_string(),
-                            };
+                                    hash: "".to_string(),
+                                };
 
-                            // Adding files to BTreeMap
-                            fe_result.push((entry_data.file_name().to_string_lossy().to_string(), fe));
+                                // Adding files to BTreeMap
+                                fe_result.push((entry_data.file_name().to_string_lossy().to_string(), fe));
+                            }
                         }
                     }
-                }
-                (result, warnings, fe_result)
-            }).collect();
+                    (dir_result, warnings, fe_result)
+                })
+                .collect();
 
             // Advance the frontier
             bounds.start = folders_to_check.len();
