@@ -6,7 +6,6 @@ use std::hash::Hasher;
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
 use std::io::{BufReader, BufWriter};
-use std::ops::Range;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -356,12 +355,7 @@ impl DuplicateFinder {
 
         //// PROGRESS THREAD END
 
-        let mut bounds: Range<usize> = 0..folders_to_check.len();
-
-        while !bounds.is_empty() {
-            // Read the current frontier
-            let current_slice = &folders_to_check[bounds.clone()];
-
+        while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 // End thread which send info to gui
                 progress_thread_run.store(false, Ordering::Relaxed);
@@ -369,8 +363,8 @@ impl DuplicateFinder {
                 return false;
             }
 
-            let segments: Vec<_> = current_slice
-                .into_par_iter()
+            let segments: Vec<_> = folders_to_check
+                .par_iter()
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
@@ -472,7 +466,7 @@ impl DuplicateFinder {
                 .collect();
 
             // Advance the frontier
-            bounds.start = folders_to_check.len();
+            folders_to_check.clear();
 
             // Process collected data
             for (mut segment, mut warnings, fe_result) in segments {
@@ -483,9 +477,6 @@ impl DuplicateFinder {
                     self.files_with_identical_names.get_mut(&name).unwrap().push(fe);
                 }
             }
-
-            // Finish the frontier
-            bounds.end = folders_to_check.len();
         }
 
         // End thread which send info to gui
