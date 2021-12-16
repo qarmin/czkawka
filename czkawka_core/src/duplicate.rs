@@ -185,7 +185,7 @@ impl DuplicateFinder {
 
         match self.check_method {
             CheckingMethod::Name => {
-                if !self.check_files_name(stop_receiver, progress_sender) {
+                if !self.check_files_name_threaded(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
@@ -314,7 +314,7 @@ impl DuplicateFinder {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_name_threaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -363,99 +363,118 @@ impl DuplicateFinder {
                 return false;
             }
 
-            let current_folder = folders_to_check.pop().unwrap();
-
-            // Read current dir, if permission are denied just go to next
-            let read_dir = match fs::read_dir(&current_folder) {
-                Ok(t) => t,
-                Err(e) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
-                    continue;
-                } // Permissions denied
-            };
-
-            // Check every sub folder/file/link etc.
-            'dir: for entry in read_dir {
-                let entry_data = match entry {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
-                        continue 'dir;
-                    } //Permissions denied
-                };
-                let metadata: Metadata = match entry_data.metadata() {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
-                        continue 'dir;
-                    } //Permissions denied
-                };
-                if metadata.is_dir() {
-                    if !self.recursive_search {
-                        continue 'dir;
-                    }
-
-                    let next_folder = current_folder.join(entry_data.file_name());
-                    if self.directories.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    if self.excluded_items.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    folders_to_check.push(next_folder);
-                } else if metadata.is_file() {
-                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                    // let mut have_valid_extension: bool;
-                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
+            let segments: Vec<_> = folders_to_check
+                .par_iter()
+                .map(|current_folder| {
+                    let mut dir_result = vec![];
+                    let mut warnings = vec![];
+                    let mut fe_result = vec![];
+                    // Read current dir, if permission are denied just go to next
+                    let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
-                        Err(_inspected) => {
-                            println!("File {:?} has not valid UTF-8 name", entry_data);
-                            continue 'dir;
-                        }
-                    }
-                    .to_lowercase();
+                        Err(e) => {
+                            warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                            return (dir_result, warnings, fe_result);
+                        } // Permissions denied
+                    };
 
-                    // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                        if !allowed {
-                            // Not an allowed extension, ignore it.
-                            continue 'dir;
-                        }
-                    }
-                    // Checking files
-                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                        let current_file_name = current_folder.join(entry_data.file_name());
-                        if self.excluded_items.is_excluded(&current_file_name) {
-                            continue 'dir;
-                        }
-
-                        // Creating new file entry
-                        let fe: FileEntry = FileEntry {
-                            path: current_file_name.clone(),
-                            size: metadata.len(),
-                            modified_date: match metadata.modified() {
-                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                    Ok(d) => d.as_secs(),
-                                    Err(_inspected) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
-                                        0
-                                    }
-                                },
-                                Err(e) => {
-                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
-                                    0
-                                } // Permissions Denied
-                            },
-                            hash: "".to_string(),
+                    // Check every sub folder/file/link etc.
+                    'dir: for entry in read_dir {
+                        let entry_data = match entry {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            } //Permissions denied
                         };
+                        let metadata: Metadata = match entry_data.metadata() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            } //Permissions denied
+                        };
+                        if metadata.is_dir() {
+                            if !self.recursive_search {
+                                continue 'dir;
+                            }
 
-                        // Adding files to BTreeMap
-                        self.files_with_identical_names.entry(entry_data.file_name().to_string_lossy().to_string()).or_insert_with(Vec::new);
-                        self.files_with_identical_names.get_mut(&entry_data.file_name().to_string_lossy().to_string()).unwrap().push(fe);
+                            let next_folder = current_folder.join(entry_data.file_name());
+                            if self.directories.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            if self.excluded_items.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            dir_result.push(next_folder);
+                        } else if metadata.is_file() {
+                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                            // let mut have_valid_extension: bool;
+                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_inspected) => {
+                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    continue 'dir;
+                                }
+                            }
+                            .to_lowercase();
+
+                            // Checking allowed extensions
+                            if !self.allowed_extensions.file_extensions.is_empty() {
+                                let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
+                                if !allowed {
+                                    // Not an allowed extension, ignore it.
+                                    continue 'dir;
+                                }
+                            }
+                            // Checking files
+                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
+                                let current_file_name = current_folder.join(entry_data.file_name());
+                                if self.excluded_items.is_excluded(&current_file_name) {
+                                    continue 'dir;
+                                }
+
+                                // Creating new file entry
+                                let fe: FileEntry = FileEntry {
+                                    path: current_file_name.clone(),
+                                    size: metadata.len(),
+                                    modified_date: match metadata.modified() {
+                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                            Ok(d) => d.as_secs(),
+                                            Err(_inspected) => {
+                                                warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                                                0
+                                            }
+                                        },
+                                        Err(e) => {
+                                            warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                            0
+                                        } // Permissions Denied
+                                    },
+                                    hash: "".to_string(),
+                                };
+
+                                // Adding files to BTreeMap
+                                fe_result.push((entry_data.file_name().to_string_lossy().to_string(), fe));
+                            }
+                        }
                     }
+                    (dir_result, warnings, fe_result)
+                })
+                .collect();
+
+            // Advance the frontier
+            folders_to_check.clear();
+
+            // Process collected data
+            for (segment, warnings, fe_result) in segments {
+                folders_to_check.extend(segment);
+                self.text_messages.warnings.extend(warnings);
+                for (name, fe) in fe_result {
+                    self.files_with_identical_names.entry(name.clone()).or_insert_with(Vec::new);
+                    self.files_with_identical_names.get_mut(&name).unwrap().push(fe);
                 }
             }
         }
