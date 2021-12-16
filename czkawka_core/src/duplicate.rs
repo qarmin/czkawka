@@ -469,9 +469,9 @@ impl DuplicateFinder {
             folders_to_check.clear();
 
             // Process collected data
-            for (mut segment, mut warnings, fe_result) in segments {
-                folders_to_check.append(&mut segment);
-                self.text_messages.warnings.append(&mut warnings);
+            for (segment, warnings, fe_result) in segments {
+                folders_to_check.extend(segment);
+                self.text_messages.warnings.extend(warnings);
                 for (name, fe) in fe_result {
                     self.files_with_identical_names.entry(name.clone()).or_insert_with(Vec::new);
                     self.files_with_identical_names.get_mut(&name).unwrap().push(fe);
