@@ -44,6 +44,17 @@ pub struct GuiMainNotebook {
     pub evk_tree_view_invalid_symlinks: gtk::EventControllerKey,
     pub evk_tree_view_broken_files: gtk::EventControllerKey,
 
+    // pub gc_tree_view_duplicate_finder: gtk4::GestureClick,
+    // pub gc_tree_view_empty_folder_finder: gtk::GestureClick,
+    // pub gc_tree_view_empty_files_finder: gtk::GestureClick,
+    // pub gc_tree_view_temporary_files_finder: gtk::GestureClick,
+    // pub gc_tree_view_big_files_finder: gtk::GestureClick,
+    // pub gc_tree_view_similar_images_finder: gtk::GestureClick,
+    // pub gc_tree_view_similar_videos_finder: gtk::GestureClick,
+    // pub gc_tree_view_same_music_finder: gtk::GestureClick,
+    // pub gc_tree_view_invalid_symlinks: gtk::GestureClick,
+    // pub gc_tree_view_broken_files: gtk::GestureClick,
+
     // General
 
     // Duplicate
@@ -153,6 +164,27 @@ impl GuiMainNotebook {
         // tree_view_invalid_symlinks.add_controller(&evk_tree_view_invalid_symlinks);
         // let evk_tree_view_broken_files: gtk4::EventControllerKey = EventControllerKey::new();
         // tree_view_broken_files.add_controller(&evk_tree_view_broken_files);
+
+        // let gc_tree_view_duplicate_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_duplicate_finder.add_controller(&gc_tree_view_duplicate_finder);
+        // let gc_tree_view_empty_folder_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_empty_folder_finder.add_controller(&gc_tree_view_empty_folder_finder);
+        // let gc_tree_view_empty_files_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_empty_files_finder.add_controller(&gc_tree_view_empty_files_finder);
+        // let gc_tree_view_temporary_files_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_temporary_files_finder.add_controller(&gc_tree_view_temporary_files_finder);
+        // let gc_tree_view_big_files_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_big_files_finder.add_controller(&gc_tree_view_big_files_finder);
+        // let gc_tree_view_similar_images_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_similar_images_finder.add_controller(&gc_tree_view_similar_images_finder);
+        // let gc_tree_view_similar_videos_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_similar_videos_finder.add_controller(&gc_tree_view_similar_videos_finder);
+        // let gc_tree_view_same_music_finder: gtk4::GestureClick = GestureClick::new();
+        // tree_view_same_music_finder.add_controller(&gc_tree_view_same_music_finder);
+        // let gc_tree_view_invalid_symlinks: gtk4::GestureClick = GestureClick::new();
+        // tree_view_invalid_symlinks.add_controller(&gc_tree_view_invalid_symlinks);
+        // let gc_tree_view_broken_files: gtk4::GestureClick = GestureClick::new();
+        // tree_view_broken_files.add_controller(&gc_tree_view_broken_files);
 
         let combo_box_duplicate_check_method: gtk::ComboBoxText = builder.object("combo_box_duplicate_check_method").unwrap();
         let combo_box_duplicate_hash_type: gtk::ComboBoxText = builder.object("combo_box_duplicate_hash_type").unwrap();
@@ -337,9 +369,12 @@ impl GuiMainNotebook {
             }
         }
 
-        // Change name of main notebook tabs
         let vec_children: Vec<gtk::Widget> = self.notebook_main.children();
 
+        // let vec_children: Vec<gtk::Widget> = get_all_children(&self.notebook_main);
+        // let vec_children: Vec<gtk::Widget> = get_all_children(&vec_children[1]);
+
+        // Change name of main notebook tabs
         for (main_enum, fl_thing) in [
             (NotebookMainEnum::Duplicate as usize, fl!("main_notebook_duplicates")),
             (NotebookMainEnum::EmptyDirectories as usize, fl!("main_notebook_empty_directories")),

@@ -542,7 +542,6 @@ pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
     }
 }
 
-// TODO children are not available in GTK 4
 pub fn get_custom_label_from_label_with_image(button: &gtk::Bin) -> gtk::Label {
     let internal_box = button.child().unwrap().downcast::<gtk::Box>().unwrap();
     for child in internal_box.children() {
@@ -552,3 +551,20 @@ pub fn get_custom_label_from_label_with_image(button: &gtk::Bin) -> gtk::Label {
     }
     panic!("Button doesn't have proper custom label child");
 }
+
+// GTK 4
+// pub fn get_all_children<P: IsA<gtk::Widget>>(wid: &P) -> Vec<gtk::Widget> {
+//     let mut vector = vec![];
+//     if let Some(mut child) = wid.first_child() {
+//         vector.push(child.clone());
+//         loop {
+//             child = match child.next_sibling() {
+//                 Some(t) => t,
+//                 None => break,
+//             };
+//             vector.push(child.clone());
+//         }
+//     }
+//
+//     return vector;
+// }
