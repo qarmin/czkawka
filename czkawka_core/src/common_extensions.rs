@@ -3,7 +3,7 @@ use std::time::SystemTime;
 use crate::common::Common;
 use crate::common_messages::Messages;
 
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub struct Extensions {
     pub file_extensions: Vec<String>,
 }
