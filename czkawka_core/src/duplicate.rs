@@ -44,33 +44,6 @@ pub enum CheckingMethod {
     Hash,
 }
 
-impl MyHasher for blake3::Hasher {
-    fn update(&mut self, bytes: &[u8]) {
-        self.update(bytes);
-    }
-    fn finalize(&self) -> String {
-        self.finalize().to_hex().to_string()
-    }
-}
-
-impl MyHasher for crc32fast::Hasher {
-    fn update(&mut self, bytes: &[u8]) {
-        self.write(bytes);
-    }
-    fn finalize(&self) -> String {
-        self.finish().to_string()
-    }
-}
-
-impl MyHasher for xxhash_rust::xxh3::Xxh3 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.write(bytes);
-    }
-    fn finalize(&self) -> String {
-        self.finish().to_string()
-    }
-}
-
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
     Blake3,
@@ -185,7 +158,7 @@ impl DuplicateFinder {
 
         match self.check_method {
             CheckingMethod::Name => {
-                if !self.check_files_name_threaded(stop_receiver, progress_sender) {
+                if !self.check_files_name(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
@@ -314,7 +287,7 @@ impl DuplicateFinder {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files_name_threaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -369,13 +342,13 @@ impl DuplicateFinder {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
-                    // Read current dir, if permission are denied just go to next
+                    // Read current dir childrens
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
                             warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                             return (dir_result, warnings, fe_result);
-                        } // Permissions denied
+                        }
                     };
 
                     // Check every sub folder/file/link etc.
@@ -385,14 +358,14 @@ impl DuplicateFinder {
                             Err(e) => {
                                 warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                                 continue 'dir;
-                            } //Permissions denied
+                            }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
                                 warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                                 continue 'dir;
-                            } //Permissions denied
+                            }
                         };
                         if metadata.is_dir() {
                             if !self.recursive_search {
@@ -411,32 +384,26 @@ impl DuplicateFinder {
                             dir_result.push(next_folder);
                         } else if metadata.is_file() {
                             atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                            // let mut have_valid_extension: bool;
+
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
                                     continue 'dir;
                                 }
                             }
                             .to_lowercase();
 
-                            // Checking allowed extensions
-                            if !self.allowed_extensions.file_extensions.is_empty() {
-                                let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                                if !allowed {
-                                    // Not an allowed extension, ignore it.
-                                    continue 'dir;
-                                }
+                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+                                continue 'dir;
                             }
-                            // Checking files
+
                             if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
                                 let current_file_name = current_folder.join(entry_data.file_name());
                                 if self.excluded_items.is_excluded(&current_file_name) {
                                     continue 'dir;
                                 }
 
-                                // Creating new file entry
                                 let fe: FileEntry = FileEntry {
                                     path: current_file_name.clone(),
                                     size: metadata.len(),
@@ -451,12 +418,11 @@ impl DuplicateFinder {
                                         Err(e) => {
                                             warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
                                             0
-                                        } // Permissions Denied
+                                        }
                                     },
                                     hash: "".to_string(),
                                 };
 
-                                // Adding files to BTreeMap
                                 fe_result.push((entry_data.file_name().to_string_lossy().to_string(), fe));
                             }
                         }
@@ -525,7 +491,7 @@ impl DuplicateFinder {
             let max_stage = match self.check_method {
                 CheckingMethod::Size => 0,
                 CheckingMethod::Hash => 2,
-                _ => 255,
+                _ => panic!(),
             };
             progress_thread_handle = thread::spawn(move || loop {
                 progress_send
@@ -556,130 +522,143 @@ impl DuplicateFinder {
                 return false;
             }
 
-            let current_folder = folders_to_check.pop().unwrap();
-
-            // Read current dir, if permission are denied just go to next
-            let read_dir = match fs::read_dir(&current_folder) {
-                Ok(t) => t,
-                Err(e) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
-                    continue;
-                } // Permissions denied
-            };
-
-            // Check every sub folder/file/link etc.
-            'dir: for entry in read_dir {
-                let entry_data = match entry {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
-                        continue 'dir;
-                    } //Permissions denied
-                };
-                let metadata: Metadata = match entry_data.metadata() {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
-                        continue 'dir;
-                    } //Permissions denied
-                };
-                if metadata.is_dir() {
-                    if !self.recursive_search {
-                        continue 'dir;
-                    }
-
-                    let next_folder = current_folder.join(entry_data.file_name());
-                    if self.directories.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    if self.excluded_items.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    folders_to_check.push(next_folder);
-                } else if metadata.is_file() {
-                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                    // let mut have_valid_extension: bool;
-                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
+            let segments: Vec<_> = folders_to_check
+                .par_iter()
+                .map(|current_folder| {
+                    let mut dir_result = vec![];
+                    let mut warnings = vec![];
+                    let mut fe_result = vec![];
+                    // Read current dir childrens
+                    let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
-                        Err(_inspected) => {
-                            println!("File {:?} has not valid UTF-8 name", entry_data);
-                            continue 'dir;
+                        Err(e) => {
+                            warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                            return (dir_result, warnings, fe_result);
                         }
-                    }
-                    .to_lowercase();
+                    };
 
-                    // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                        if !allowed {
-                            // Not an allowed extension, ignore it.
-
-                            continue 'dir;
-                        }
-                    }
-                    // Checking files
-                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                        let current_file_name = current_folder.join(entry_data.file_name());
-                        if self.excluded_items.is_excluded(&current_file_name) {
-                            continue 'dir;
-                        }
-
-                        // Creating new file entry
-                        let fe: FileEntry = FileEntry {
-                            path: current_file_name.clone(),
-                            size: metadata.len(),
-                            modified_date: match metadata.modified() {
-                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                    Ok(d) => d.as_secs(),
-                                    Err(_inspected) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
-                                        0
-                                    }
-                                },
-                                Err(e) => {
-                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
-                                    0
-                                } // Permissions Denied
-                            },
-                            hash: "".to_string(),
+                    // Check every sub folder/file/link etc.
+                    'dir: for entry in read_dir {
+                        let entry_data = match entry {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            }
                         };
+                        let metadata: Metadata = match entry_data.metadata() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            }
+                        };
+                        if metadata.is_dir() {
+                            if !self.recursive_search {
+                                continue 'dir;
+                            }
 
-                        // Adding files to BTreeMap
-                        self.files_with_identical_size.entry(metadata.len()).or_insert_with(Vec::new);
-                        self.files_with_identical_size.get_mut(&metadata.len()).unwrap().push(fe);
+                            let next_folder = current_folder.join(entry_data.file_name());
+                            if self.directories.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            if self.excluded_items.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            dir_result.push(next_folder);
+                        } else if metadata.is_file() {
+                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+
+                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_inspected) => {
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
+                                    continue 'dir;
+                                }
+                            }
+                            .to_lowercase();
+
+                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+                                continue 'dir;
+                            }
+
+                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
+                                let current_file_name = current_folder.join(entry_data.file_name());
+                                if self.excluded_items.is_excluded(&current_file_name) {
+                                    continue 'dir;
+                                }
+
+                                // Creating new file entry
+                                let fe: FileEntry = FileEntry {
+                                    path: current_file_name.clone(),
+                                    size: metadata.len(),
+                                    modified_date: match metadata.modified() {
+                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                            Ok(d) => d.as_secs(),
+                                            Err(_inspected) => {
+                                                warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                                                0
+                                            }
+                                        },
+                                        Err(e) => {
+                                            warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                            0
+                                        }
+                                    },
+                                    hash: "".to_string(),
+                                };
+
+                                fe_result.push(fe);
+                            }
+                        }
                     }
+                    (dir_result, warnings, fe_result)
+                })
+                .collect();
+
+            // Advance the frontier
+            folders_to_check.clear();
+
+            // Process collected data
+            for (segment, warnings, fe_result) in segments {
+                folders_to_check.extend(segment);
+                self.text_messages.warnings.extend(warnings);
+                for fe in fe_result {
+                    self.files_with_identical_size.entry(fe.size).or_insert_with(Vec::new);
+                    self.files_with_identical_size.get_mut(&fe.size).unwrap().push(fe);
                 }
             }
         }
+
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
         // Create new BTreeMap without single size entries(files have not duplicates)
-        let mut new_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+        let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+        mem::swap(&mut old_map, &mut self.files_with_identical_size);
 
-        for (size, vec) in &self.files_with_identical_size {
+        for (size, vec) in old_map {
             if vec.len() <= 1 {
                 continue;
             }
 
             let vector;
             if self.ignore_hard_links {
-                vector = filter_hard_links(vec);
+                vector = filter_hard_links(&vec);
             } else {
-                vector = vec.clone();
+                vector = vec;
             }
 
             if vector.len() > 1 {
                 self.information.number_of_duplicated_files_by_size += vector.len() - 1;
                 self.information.number_of_groups_by_size += 1;
                 self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
-                new_map.insert(*size, vector);
+                self.files_with_identical_size.insert(size, vector);
             }
         }
-        self.files_with_identical_size = new_map;
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
         true
@@ -1134,7 +1113,6 @@ impl DebugPrint for DuplicateFinder {
 
         println!("Files list size - {}", self.files_with_identical_size.len());
         println!("Hashed Files list size - {}", self.files_with_identical_hashes.len());
-        println!("Allowed extensions - {:?}", self.allowed_extensions.file_extensions);
         println!("Excluded items - {:?}", self.excluded_items.items);
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
@@ -1548,6 +1526,33 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 
     text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
+}
+
+impl MyHasher for blake3::Hasher {
+    fn update(&mut self, bytes: &[u8]) {
+        self.update(bytes);
+    }
+    fn finalize(&self) -> String {
+        self.finalize().to_hex().to_string()
+    }
+}
+
+impl MyHasher for crc32fast::Hasher {
+    fn update(&mut self, bytes: &[u8]) {
+        self.write(bytes);
+    }
+    fn finalize(&self) -> String {
+        self.finish().to_string()
+    }
+}
+
+impl MyHasher for xxhash_rust::xxh3::Xxh3 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.write(bytes);
+    }
+    fn finalize(&self) -> String {
+        self.finish().to_string()
+    }
 }
 
 #[cfg(test)]

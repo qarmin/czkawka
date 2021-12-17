@@ -9,6 +9,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
 use crossbeam_channel::Receiver;
+use rayon::prelude::*;
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -183,132 +184,152 @@ impl InvalidSymlinks {
                 progress_thread_handle.join().unwrap();
                 return false;
             }
-            let current_folder = folders_to_check.pop().unwrap();
 
-            // Read current dir, if permission are denied just go to next
-            let read_dir = match fs::read_dir(&current_folder) {
-                Ok(t) => t,
-                Err(e) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
-                    continue;
-                } // Permissions denied
-            };
-
-            // Check every sub folder/file/link etc.
-            'dir: for entry in read_dir {
-                let entry_data = match entry {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
-                        continue;
-                    } //Permissions denied
-                };
-                let metadata: Metadata = match entry_data.metadata() {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
-                        continue;
-                    } //Permissions denied
-                };
-                if metadata.is_dir() {
-                    if !self.recursive_search {
-                        continue;
-                    }
-
-                    let next_folder = current_folder.join(entry_data.file_name());
-                    if self.directories.is_excluded(&next_folder) || self.excluded_items.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    folders_to_check.push(next_folder);
-                } else if metadata.is_file() {
-                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                } else if metadata.file_type().is_symlink() {
-                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
+            let segments: Vec<_> = folders_to_check
+                .par_iter()
+                .map(|current_folder| {
+                    let mut dir_result = vec![];
+                    let mut warnings = vec![];
+                    let mut fe_result = vec![];
+                    // Read current dir childrens
+                    let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
-                        Err(_inspected) => {
-                            println!("File {:?} has not valid UTF-8 name", entry_data);
-                            continue 'dir;
+                        Err(e) => {
+                            warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                            return (dir_result, warnings, fe_result);
                         }
-                    }
-                    .to_lowercase();
-
-                    // Checking allowed extensions
-                    if !self.allowed_extensions.file_extensions.is_empty() {
-                        let allowed = self.allowed_extensions.file_extensions.iter().any(|e| file_name_lowercase.ends_with((".".to_string() + e.to_lowercase().as_str()).as_str()));
-                        if !allowed {
-                            // Not an allowed extension, ignore it.
-                            continue 'dir;
-                        }
-                    }
-
-                    // Checking files
-                    let current_file_name = current_folder.join(entry_data.file_name());
-                    if self.excluded_items.is_excluded(&current_file_name) {
-                        continue 'dir;
-                    }
-
-                    let mut destination_path = PathBuf::new();
-                    let type_of_error;
-
-                    match current_file_name.read_link() {
-                        Ok(t) => {
-                            destination_path.push(t);
-                            let mut number_of_loop = 0;
-                            let mut current_path = current_file_name.clone();
-                            loop {
-                                if number_of_loop == 0 && !current_path.exists() {
-                                    type_of_error = ErrorType::NonExistentFile;
-                                    break;
-                                }
-                                if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
-                                    type_of_error = ErrorType::InfiniteRecursion;
-                                    break;
-                                }
-
-                                current_path = match current_path.read_link() {
-                                    Ok(t) => t,
-                                    Err(_inspected) => {
-                                        // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
-                                        continue 'dir;
-                                    }
-                                };
-
-                                number_of_loop += 1;
-                            }
-                        }
-                        Err(_inspected) => {
-                            // Failed to load info about it
-                            type_of_error = ErrorType::NonExistentFile;
-                        }
-                    }
-
-                    // Creating new file entry
-                    let fe: FileEntry = FileEntry {
-                        symlink_path: current_file_name.clone(),
-                        destination_path,
-                        type_of_error,
-                        modified_date: match metadata.modified() {
-                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                Ok(d) => d.as_secs(),
-                                Err(_inspected) => {
-                                    self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
-                                    0
-                                }
-                            },
-                            Err(e) => {
-                                self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
-                                0
-                            } // Permissions Denied
-                        },
                     };
 
-                    // Adding files to Vector
+                    // Check every sub folder/file/link etc.
+                    'dir: for entry in read_dir {
+                        let entry_data = match entry {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            }
+                        };
+                        let metadata: Metadata = match entry_data.metadata() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            }
+                        };
+                        if metadata.is_dir() {
+                            if !self.recursive_search {
+                                continue 'dir;
+                            }
+
+                            let next_folder = current_folder.join(entry_data.file_name());
+                            if self.directories.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            if self.excluded_items.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            dir_result.push(next_folder);
+                        } else if metadata.is_file() {
+                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                        } else if metadata.file_type().is_symlink() {
+                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+
+                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_inspected) => {
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
+                                    continue 'dir;
+                                }
+                            }
+                            .to_lowercase();
+
+                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+                                continue 'dir;
+                            }
+
+                            let current_file_name = current_folder.join(entry_data.file_name());
+                            if self.excluded_items.is_excluded(&current_file_name) {
+                                continue 'dir;
+                            }
+
+                            let mut destination_path = PathBuf::new();
+                            let type_of_error;
+
+                            match current_file_name.read_link() {
+                                Ok(t) => {
+                                    destination_path.push(t);
+                                    let mut number_of_loop = 0;
+                                    let mut current_path = current_file_name.clone();
+                                    loop {
+                                        if number_of_loop == 0 && !current_path.exists() {
+                                            type_of_error = ErrorType::NonExistentFile;
+                                            break;
+                                        }
+                                        if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
+                                            type_of_error = ErrorType::InfiniteRecursion;
+                                            break;
+                                        }
+
+                                        current_path = match current_path.read_link() {
+                                            Ok(t) => t,
+                                            Err(_inspected) => {
+                                                // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
+                                                continue 'dir;
+                                            }
+                                        };
+
+                                        number_of_loop += 1;
+                                    }
+                                }
+                                Err(_inspected) => {
+                                    // Failed to load info about it
+                                    type_of_error = ErrorType::NonExistentFile;
+                                }
+                            }
+
+                            // Creating new file entry
+                            let fe: FileEntry = FileEntry {
+                                symlink_path: current_file_name.clone(),
+                                destination_path,
+                                type_of_error,
+                                modified_date: match metadata.modified() {
+                                    Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                        Ok(d) => d.as_secs(),
+                                        Err(_inspected) => {
+                                            warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                                            0
+                                        }
+                                    },
+                                    Err(e) => {
+                                        warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                        0
+                                    }
+                                },
+                            };
+
+                            // Adding files to Vector
+                            fe_result.push(fe);
+                        }
+                    }
+                    (dir_result, warnings, fe_result)
+                })
+                .collect();
+
+            // Advance the frontier
+            folders_to_check.clear();
+
+            // Process collected data
+            for (segment, warnings, fe_result) in segments {
+                folders_to_check.extend(segment);
+                self.text_messages.warnings.extend(warnings);
+                for fe in fe_result {
                     self.invalid_symlinks.push(fe);
                 }
             }
         }
+
         self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
@@ -366,7 +387,6 @@ impl DebugPrint for InvalidSymlinks {
         println!("### Other");
 
         println!("Invalid symlinks list size - {}", self.invalid_symlinks.len());
-        println!("Allowed extensions - {:?}", self.allowed_extensions.file_extensions);
         println!("Excluded items - {:?}", self.excluded_items.items);
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);

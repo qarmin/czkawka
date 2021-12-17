@@ -20,6 +20,7 @@ use rayon::prelude::*;
 
 use crate::common::Common;
 use crate::common_directory::Directories;
+use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
@@ -87,6 +88,7 @@ pub struct SimilarImages {
     information: Info,
     text_messages: Messages,
     directories: Directories,
+    allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
     bktree: BKTree<Vec<u8>, Hamming>,
     similar_vectors: Vec<Vec<FileEntry>>,
@@ -128,6 +130,7 @@ impl SimilarImages {
             text_messages: Messages::new(),
             directories: Directories::new(),
             excluded_items: Default::default(),
+            allowed_extensions: Extensions::new(),
             bktree: BKTree::new(Hamming),
             similar_vectors: vec![],
             recursive_search: true,
@@ -194,6 +197,9 @@ impl SimilarImages {
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
         self.recursive_search = recursive_search;
     }
+    pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
+        self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
+    }
 
     pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
         self.minimal_file_size = match minimal_file_size {
@@ -238,6 +244,9 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
+        self.allowed_extensions
+            .extend_allowed_extensions(&[".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+
         // Add root folders for finding
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
@@ -280,100 +289,119 @@ impl SimilarImages {
                 progress_thread_handle.join().unwrap();
                 return false;
             }
-            let current_folder = folders_to_check.pop().unwrap();
 
-            // Read current dir, if permission are denied just go to next
-            let read_dir = match fs::read_dir(&current_folder) {
-                Ok(t) => t,
-                Err(e) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
-                    continue;
-                } // Permissions denied
-            };
-
-            // Check every sub folder/file/link etc.
-            'dir: for entry in read_dir {
-                let entry_data = match entry {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
-                        continue;
-                    } //Permissions denied
-                };
-                let metadata: Metadata = match entry_data.metadata() {
-                    Ok(t) => t,
-                    Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
-                        continue;
-                    } //Permissions denied
-                };
-                if metadata.is_dir() {
-                    if !self.recursive_search {
-                        continue;
-                    }
-
-                    let next_folder = current_folder.join(entry_data.file_name());
-                    if self.directories.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    if self.excluded_items.is_excluded(&next_folder) {
-                        continue 'dir;
-                    }
-
-                    folders_to_check.push(next_folder);
-                } else if metadata.is_file() {
-                    atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-
-                    let file_name_lowercase: String = match entry_data.file_name().into_string() {
+            let segments: Vec<_> = folders_to_check
+                .par_iter()
+                .map(|current_folder| {
+                    let mut dir_result = vec![];
+                    let mut warnings = vec![];
+                    let mut fe_result = vec![];
+                    // Read current dir childrens
+                    let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
-                        Err(_inspected) => {
-                            println!("File {:?} has not valid UTF-8 name", entry_data);
-                            continue 'dir;
+                        Err(e) => {
+                            warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                            return (dir_result, warnings, fe_result);
                         }
-                    }
-                    .to_lowercase();
+                    };
 
-                    // Checking allowed image extensions
-                    let allowed_image_extensions = [".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]; // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
-                    if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                        continue 'dir;
-                    }
-
-                    // Checking files
-                    if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                        let current_file_name = current_folder.join(entry_data.file_name());
-                        if self.excluded_items.is_excluded(&current_file_name) {
-                            continue 'dir;
-                        }
-
-                        let fe: FileEntry = FileEntry {
-                            path: current_file_name.clone(),
-                            size: metadata.len(),
-                            dimensions: "".to_string(),
-                            modified_date: match metadata.modified() {
-                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                    Ok(d) => d.as_secs(),
-                                    Err(_inspected) => {
-                                        self.text_messages.warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
-                                        0
-                                    }
-                                },
-                                Err(e) => {
-                                    self.text_messages.warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
-                                    0
-                                } // Permissions Denied
-                            },
-
-                            hash: Vec::new(),
-                            similarity: Similarity::None,
+                    // Check every sub folder/file/link etc.
+                    'dir: for entry in read_dir {
+                        let entry_data = match entry {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            }
                         };
+                        let metadata: Metadata = match entry_data.metadata() {
+                            Ok(t) => t,
+                            Err(e) => {
+                                warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
+                                continue 'dir;
+                            }
+                        };
+                        if metadata.is_dir() {
+                            if !self.recursive_search {
+                                continue 'dir;
+                            }
 
-                        self.images_to_check.insert(current_file_name.to_string_lossy().to_string(), fe);
+                            let next_folder = current_folder.join(entry_data.file_name());
+                            if self.directories.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            if self.excluded_items.is_excluded(&next_folder) {
+                                continue 'dir;
+                            }
+
+                            dir_result.push(next_folder);
+                        } else if metadata.is_file() {
+                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+
+                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                Ok(t) => t,
+                                Err(_inspected) => {
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
+                                    continue 'dir;
+                                }
+                            }
+                            .to_lowercase();
+
+                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+                                continue 'dir;
+                            }
+
+                            // Checking files
+                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
+                                let current_file_name = current_folder.join(entry_data.file_name());
+                                if self.excluded_items.is_excluded(&current_file_name) {
+                                    continue 'dir;
+                                }
+
+                                let fe: FileEntry = FileEntry {
+                                    path: current_file_name.clone(),
+                                    size: metadata.len(),
+                                    dimensions: "".to_string(),
+                                    modified_date: match metadata.modified() {
+                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                            Ok(d) => d.as_secs(),
+                                            Err(_inspected) => {
+                                                warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                                                0
+                                            }
+                                        },
+                                        Err(e) => {
+                                            warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                            0
+                                        }
+                                    },
+
+                                    hash: Vec::new(),
+                                    similarity: Similarity::None,
+                                };
+
+                                fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
+                            }
+                        }
                     }
+                    (dir_result, warnings, fe_result)
+                })
+                .collect();
+
+            // Advance the frontier
+            folders_to_check.clear();
+
+            // Process collected data
+            for (segment, warnings, fe_result) in segments {
+                folders_to_check.extend(segment);
+                self.text_messages.warnings.extend(warnings);
+                for (name, fe) in fe_result {
+                    self.images_to_check.insert(name, fe);
                 }
             }
         }
+
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
