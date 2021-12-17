@@ -65,7 +65,7 @@ impl Extensions {
 
     pub fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
         for extension in file_extensions {
-            assert!(extension.starts_with("."));
+            assert!(extension.starts_with('.'));
             self.file_extensions.push(extension.to_string());
         }
     }
