@@ -24,7 +24,7 @@ impl Extensions {
         allowed_extensions = allowed_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
         allowed_extensions = allowed_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
 
-        let extensions: Vec<String> = allowed_extensions.split(',').map(String::from).collect();
+        let extensions: Vec<String> = allowed_extensions.split(',').map(|e| e.trim()).map(String::from).collect();
         for mut extension in extensions {
             if extension.is_empty() || extension.replace('.', "").trim() == "" {
                 continue;

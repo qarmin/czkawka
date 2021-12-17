@@ -231,6 +231,7 @@ pub fn connect_button_search(
                     bf.set_excluded_directory(excluded_directories);
                     bf.set_recursive_search(recursive_search);
                     bf.set_excluded_items(excluded_items);
+                    bf.set_allowed_extensions(allowed_extensions);
                     bf.set_number_of_files_to_check(numbers_of_files_to_check);
                     bf.find_big_files(Some(&stop_receiver), Some(&futures_sender_big_file));
                     let _ = glib_stop_sender.send(Message::BigFiles(bf));
@@ -299,6 +300,7 @@ pub fn connect_button_search(
                     sf.set_hash_alg(hash_alg);
                     sf.set_hash_size(hash_size);
                     sf.set_image_filter(image_filter);
+                    sf.set_allowed_extensions(allowed_extensions);
                     sf.set_delete_outdated_cache(delete_outdated_cache);
                     sf.set_exclude_images_with_same_size(ignore_same_size);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
@@ -332,6 +334,7 @@ pub fn connect_button_search(
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
                     sf.set_maximal_file_size(maximal_file_size);
+                    sf.set_allowed_extensions(allowed_extensions);
                     sf.set_use_cache(use_cache);
                     sf.set_tolerance(tolerance);
                     sf.set_delete_outdated_cache(delete_outdated_cache);
@@ -380,6 +383,7 @@ pub fn connect_button_search(
                         mf.set_excluded_items(excluded_items);
                         mf.set_minimal_file_size(minimal_file_size);
                         mf.set_maximal_file_size(maximal_file_size);
+                        mf.set_allowed_extensions(allowed_extensions);
                         mf.set_recursive_search(recursive_search);
                         mf.set_music_similarity(music_similarity);
                         mf.set_approximate_comparison(approximate_comparison);
@@ -408,6 +412,7 @@ pub fn connect_button_search(
                     isf.set_excluded_directory(excluded_directories);
                     isf.set_recursive_search(recursive_search);
                     isf.set_excluded_items(excluded_items);
+                    isf.set_allowed_extensions(allowed_extensions);
                     isf.find_invalid_links(Some(&stop_receiver), Some(&futures_sender_invalid_symlinks));
                     let _ = glib_stop_sender.send(Message::InvalidSymlinks(isf));
                 });
@@ -429,6 +434,7 @@ pub fn connect_button_search(
                     br.set_recursive_search(recursive_search);
                     br.set_excluded_items(excluded_items);
                     br.set_use_cache(use_cache);
+                    br.set_allowed_extensions(allowed_extensions);
                     br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
                     let _ = glib_stop_sender.send(Message::BrokenFiles(br));
                 });
