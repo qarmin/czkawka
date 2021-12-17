@@ -137,6 +137,10 @@ impl GuiUpperNotebook {
 
         let vec_children: Vec<gtk::Widget> = self.notebook_upper.children();
 
+        // let vec_children: Vec<gtk::Widget> = get_all_children(&self.notebook_upper);
+        // let vec_children: Vec<gtk::Widget> = get_all_children(&vec_children[1]);
+
+        // Change name of upper notebook tabs
         for (upper_enum, fl_thing) in [
             (NotebookUpperEnum::ItemsConfiguration as usize, fl!("upper_notebook_items_configuration")),
             (NotebookUpperEnum::ExcludedDirectories as usize, fl!("upper_notebook_excluded_directories")),

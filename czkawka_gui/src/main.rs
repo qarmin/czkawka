@@ -76,7 +76,7 @@ mod tests;
 
 fn main() {
     let application = gtk::Application::builder().application_id("pl.qarmin.czkawka").build();
-    application.connect_activate(|application| {
+    application.connect_activate(move |application| {
         let mut gui_data: GuiData = GuiData::new_with_application(application);
 
         // Used for getting data from thread

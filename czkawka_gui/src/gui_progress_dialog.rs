@@ -18,6 +18,7 @@ pub struct GuiProgressDialog {
 
     pub button_stop_in_dialog: gtk::Button,
     pub evk_button_stop_in_dialog: gtk::EventControllerKey,
+    // pub gc_button_stop_in_dialog: gtk4::GestureClick,
 }
 
 impl GuiProgressDialog {
@@ -41,6 +42,10 @@ impl GuiProgressDialog {
 
         let button_stop_in_dialog: gtk::Button = builder.object("button_stop_in_dialog").unwrap();
         let evk_button_stop_in_dialog = EventControllerKey::new(&button_stop_in_dialog);
+        // let evk_button_stop_in_dialog = EventControllerKey::new();
+        // button_stop_in_dialog.add_controller(&evk_button_stop_in_dialog);
+        // let gc_button_stop_in_dialog = gtk4::GestureClick::new();
+        // button_stop_in_dialog.add_controller(&gc_button_stop_in_dialog);
 
         Self {
             window_progress,

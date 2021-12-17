@@ -56,7 +56,7 @@ impl Extensions {
     }
 
     pub fn matches_filename(&self, file_name: &str) -> bool {
-        assert_eq!(file_name, file_name.to_lowercase()); // TODO comment this this after tests
+        // assert_eq!(file_name, file_name.to_lowercase());
         if !self.file_extensions.is_empty() && !self.file_extensions.iter().any(|e| file_name.ends_with(e)) {
             return false;
         }
