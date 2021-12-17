@@ -388,7 +388,7 @@ impl DuplicateFinder {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
                                     continue 'dir;
                                 }
                             }
@@ -574,7 +574,7 @@ impl DuplicateFinder {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
                                     continue 'dir;
                                 }
                             }
@@ -610,7 +610,7 @@ impl DuplicateFinder {
                                     hash: "".to_string(),
                                 };
 
-                                fe_result.push((fe.size, fe));
+                                fe_result.push(fe);
                             }
                         }
                     }
@@ -625,9 +625,9 @@ impl DuplicateFinder {
             for (segment, warnings, fe_result) in segments {
                 folders_to_check.extend(segment);
                 self.text_messages.warnings.extend(warnings);
-                for (length, fe) in fe_result {
-                    self.files_with_identical_size.entry(length).or_insert_with(Vec::new);
-                    self.files_with_identical_size.get_mut(&length).unwrap().push(fe);
+                for fe in fe_result {
+                    self.files_with_identical_size.entry(fe.size).or_insert_with(Vec::new);
+                    self.files_with_identical_size.get_mut(&fe.size).unwrap().push(fe);
                 }
             }
         }

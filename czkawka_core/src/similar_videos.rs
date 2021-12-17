@@ -201,6 +201,9 @@ impl SimilarVideos {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
+        self.allowed_extensions
+            .extend_allowed_extensions(&[".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv"]);
+
         // Add root folders for finding
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
@@ -296,20 +299,13 @@ impl SimilarVideos {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
                                     continue 'dir;
                                 }
                             }
                             .to_lowercase();
 
                             if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            if ![".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv"]
-                                .iter()
-                                .any(|e| file_name_lowercase.ends_with(e))
-                            {
                                 continue 'dir;
                             }
 
@@ -340,7 +336,7 @@ impl SimilarVideos {
                                     error: "".to_string(),
                                 };
 
-                                fe_result.push((entry_data.file_name().to_string_lossy().to_string(), fe));
+                                fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
                             }
                         }
                     }

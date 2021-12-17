@@ -256,7 +256,7 @@ impl BrokenFiles {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
                                     continue 'dir;
                                 }
                             }

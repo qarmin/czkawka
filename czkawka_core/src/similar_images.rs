@@ -244,6 +244,9 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
+        self.allowed_extensions
+            .extend_allowed_extensions(&[".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+
         // Add root folders for finding
         for id in &self.directories.included_directories {
             folders_to_check.push(id.clone());
@@ -339,18 +342,13 @@ impl SimilarImages {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    println!("File {:?} has not valid UTF-8 name", entry_data);
+                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
                                     continue 'dir;
                                 }
                             }
                             .to_lowercase();
 
                             if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            let allowed_image_extensions = [".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]; // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
-                            if !allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
                                 continue 'dir;
                             }
 
