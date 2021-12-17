@@ -5,7 +5,7 @@ use crate::common_messages::Messages;
 
 #[derive(Default)]
 pub struct Extensions {
-    pub file_extensions: Vec<String>,
+    file_extensions: Vec<String>,
 }
 
 impl Extensions {
@@ -30,12 +30,17 @@ impl Extensions {
                 continue;
             }
 
-            if extension.starts_with('.') {
-                extension = extension[1..].to_string();
+            if !extension.starts_with('.') {
+                extension = format!(".{}", extension);
             }
 
             if extension[1..].contains('.') {
-                text_messages.warnings.push(".".to_string() + extension.as_str() + " is not valid extension(valid extension doesn't have dot inside)");
+                text_messages.warnings.push(format!("{} is not valid extension because contains dot inside", extension));
+                continue;
+            }
+
+            if extension[1..].contains(' ') {
+                text_messages.warnings.push(format!("{} is not valid extension because contains empty space inside", extension));
                 continue;
             }
 
@@ -48,5 +53,17 @@ impl Extensions {
             text_messages.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
+    }
+
+    pub fn matches_filename(&self, file_name: &str) -> bool {
+        assert_eq!(file_name, file_name.to_lowercase()); // TODO comment this this after tests
+        if !self.file_extensions.is_empty() && !self.file_extensions.iter().any(|e| file_name.ends_with(e)) {
+            return false;
+        }
+        true
+    }
+
+    pub fn set_allowed_extensions_by_vector(&mut self, file_extensions: Vec<String>) {
+        self.file_extensions = file_extensions;
     }
 }

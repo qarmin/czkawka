@@ -196,30 +196,31 @@ impl EmptyFolder {
             }
             let current_folder = folders_to_check.pop().unwrap();
             // Checked folder may be deleted or we may not have permissions to open it so we assume that this folder is not be empty
+            // Read current dir childrens
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
-                Err(_inspected) => {
-                    folders_checked.get_mut(&current_folder).unwrap().is_empty = FolderEmptiness::No;
+                Err(e) => {
+                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
                     continue;
                 }
             };
 
+            // Check every sub folder/file/link etc.
             'dir: for entry in read_dir {
                 let entry_data = match entry {
                     Ok(t) => t,
-                    Err(_inspected) => {
-                        set_as_not_empty_folder(&mut folders_checked, &current_folder);
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
                         continue 'dir;
-                    } //Permissions denied
+                    }
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
-                    Err(_inspected) => {
-                        set_as_not_empty_folder(&mut folders_checked, &current_folder);
+                    Err(e) => {
+                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
                         continue 'dir;
-                    } //Permissions denied
+                    }
                 };
-                // If child is dir, still folder may be considered as empty if all children are only directories.
                 if metadata.is_dir() {
                     atomic_folder_counter.fetch_add(1, Ordering::Relaxed);
                     let next_folder = current_folder.join(entry_data.file_name());
