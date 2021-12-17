@@ -466,10 +466,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 }
 
 fn connect_event_mouse(gui_data: &GuiData) {
-    let text_view_errors = gui_data.text_view_errors.clone();
-
     // Duplicate
     {
+        let text_view_errors = gui_data.text_view_errors.clone();
         let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
         let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
         let preview_path = gui_data.preview_path.clone();
@@ -510,13 +509,13 @@ fn connect_event_mouse(gui_data: &GuiData) {
     }
     // Similar Images
     {
+        let text_view_errors = gui_data.text_view_errors.clone();
         let tree_view = gui_data.main_notebook.tree_view_similar_images_finder.clone();
         let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
         let preview_path = gui_data.preview_path.clone();
         let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
 
         tree_view.connect_button_press_event(opening_double_click_function);
-        let text_view_errors = gui_data.text_view_errors.clone();
         tree_view.connect_button_release_event(move |tree_view, _event| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             let preview_path = preview_path.clone();

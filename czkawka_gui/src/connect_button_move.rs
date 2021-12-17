@@ -75,7 +75,14 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
     let tree_view = tree_view.clone();
     chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
-            let folders = file_chooser.filenames();
+            let g_files = file_chooser.files();
+            let mut folders: Vec<PathBuf> = Vec::new();
+            for file in g_files {
+                if let Some(path_buf) = file.path() {
+                    folders.push(path_buf);
+                }
+            }
+
             if folders.len() != 1 {
                 add_text_to_text_view(&text_view_errors, format!("{} {:?}", &fl!("move_files_choose_more_than_1_path"), folders).as_str());
             } else {

@@ -1,5 +1,6 @@
 use gtk::prelude::*;
 use gtk::{ResponseType, TreeView, Window};
+use std::path::PathBuf;
 
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
@@ -80,26 +81,31 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let folders_to = if excluded_items { fl!("exclude_folders_dialog_title") } else { fl!("include_folders_dialog_title") };
 
-    let chooser = gtk::FileChooserDialog::builder().title(&folders_to).action(gtk::FileChooserAction::SelectFolder).transient_for(window_main).modal(true).build();
-    chooser.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    let file_chooser = gtk::FileChooserDialog::builder().title(&folders_to).action(gtk::FileChooserAction::SelectFolder).transient_for(window_main).modal(true).build();
+    file_chooser.add_button(&fl!("general_ok_button"), ResponseType::Ok);
+    file_chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
-    chooser.set_select_multiple(true);
-    chooser.show_all();
+    file_chooser.set_select_multiple(true);
+    file_chooser.show_all();
 
     let tree_view = tree_view.clone();
-    chooser.connect_response(move |chooser, response_type| {
+    file_chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
-            let folder = chooser.filenames();
-
+            let g_files = file_chooser.files();
+            let mut folders: Vec<PathBuf> = Vec::new();
+            for file in g_files {
+                if let Some(path_buf) = file.path() {
+                    folders.push(path_buf);
+                }
+            }
             let list_store = get_list_store(&tree_view);
 
-            for file_entry in &folder {
+            for file_entry in &folders {
                 let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
                 list_store.set(&list_store.append(), &values);
             }
         }
-        chooser.close();
+        file_chooser.close();
     });
 }
 

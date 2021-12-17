@@ -19,4 +19,11 @@ pub fn connect_button_stop(gui_data: &GuiData) {
         stop_sender.send(()).unwrap();
         gtk::Inhibit(false)
     });
+
+    // let gc_button_stop_in_dialog = gui_data.progress_window.gc_button_stop_in_dialog.clone();
+    // let stop_sender = gui_data.stop_sender.clone();
+    // gc_button_stop_in_dialog.connect_button_release_event(move |_, _e| {
+    //     stop_sender.send(()).unwrap();
+    //     gtk::Inhibit(false)
+    // });
 }

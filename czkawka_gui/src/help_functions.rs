@@ -551,6 +551,15 @@ pub fn get_custom_label_from_label_with_image(button: &gtk::Bin) -> gtk::Label {
     }
     panic!("Button doesn't have proper custom label child");
 }
+// pub fn get_custom_label_from_label_with_image<P: IsA<gtk::Widget>>(button: &P) -> gtk::Label {
+//     let internal_box = button.widget().unwrap().downcast::<gtk::Box>().unwrap();
+//     for child in internal_box.children() {
+//         if let Ok(t) = child.downcast::<gtk::Label>() {
+//             return t;
+//         }
+//     }
+//     panic!("Button doesn't have proper custom label child");
+// }
 
 // GTK 4
 // pub fn get_all_children<P: IsA<gtk::Widget>>(wid: &P) -> Vec<gtk::Widget> {
