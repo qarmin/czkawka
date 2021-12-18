@@ -302,12 +302,11 @@ impl DuplicateFinder {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         checking_method: CheckingMethod::Name,
@@ -321,10 +320,10 @@ impl DuplicateFinder {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
 
         //// PROGRESS THREAD END
 
@@ -482,8 +481,7 @@ impl DuplicateFinder {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
@@ -493,7 +491,7 @@ impl DuplicateFinder {
                 CheckingMethod::Hash => 2,
                 _ => panic!(),
             };
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         checking_method,
@@ -507,10 +505,10 @@ impl DuplicateFinder {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
 
         //// PROGRESS THREAD END
 
@@ -645,12 +643,7 @@ impl DuplicateFinder {
                 continue;
             }
 
-            let vector;
-            if self.ignore_hard_links {
-                vector = filter_hard_links(&vec);
-            } else {
-                vector = vec;
-            }
+            let vector = if self.ignore_hard_links { filter_hard_links(&vec) } else { vec };
 
             if vector.len() > 1 {
                 self.information.number_of_duplicated_files_by_size += vector.len() - 1;
@@ -680,14 +673,13 @@ impl DuplicateFinder {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = self.files_with_identical_size.iter().map(|e| e.1.len()).sum();
             let checking_method = self.check_method;
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         checking_method,
@@ -701,10 +693,10 @@ impl DuplicateFinder {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
 
         //// PROGRESS THREAD END
 
@@ -847,14 +839,13 @@ impl DuplicateFinder {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let files_to_check = pre_checked_map.iter().map(|(_size, vec_file_entry)| vec_file_entry.len()).sum();
             let checking_method = self.check_method;
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         checking_method,
@@ -868,10 +859,10 @@ impl DuplicateFinder {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
 
         //// PROGRESS THREAD END
 

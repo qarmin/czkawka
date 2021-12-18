@@ -74,18 +74,15 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let end_path;
         let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_name).get::<String>().unwrap();
         let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
 
-        match opening_mode {
-            OpenMode::OnlyPath => {
-                end_path = path;
-            }
+        let end_path = match opening_mode {
+            OpenMode::OnlyPath => path,
             OpenMode::PathAndName => {
-                end_path = format!("{}/{}", path, name);
+                format!("{}/{}", path, name)
             }
-        }
+        };
 
         open::that_in_background(&end_path);
 
