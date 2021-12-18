@@ -91,13 +91,24 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
     let tree_view = tree_view.clone();
     file_chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
-            let g_files = file_chooser.files();
-            let mut folders: Vec<PathBuf> = Vec::new();
-            for file in g_files {
-                if let Some(path_buf) = file.path() {
-                    folders.push(path_buf);
-                }
-            }
+            let folders: Vec<PathBuf>;
+            // GTK 3
+            folders = file_chooser.filenames();
+            // GTK 4
+            // folders = Vec::new();
+            // if let Some(g_files) = file_chooser.files() {
+            //     for index in 0..g_files.n_items() {
+            //         let file = &g_files.item(index);
+            //         if let Some(file) = file {
+            //             println!("{:?}", file);
+            //             let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
+            //             if let Some(path_buf) = ss.path() {
+            //                 folders.push(path_buf);
+            //             }
+            //         }
+            //     }
+            // }
+
             let list_store = get_list_store(&tree_view);
 
             for file_entry in &folders {

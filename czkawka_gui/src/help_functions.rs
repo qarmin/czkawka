@@ -542,7 +542,7 @@ pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
     }
 }
 
-pub fn get_custom_label_from_label_with_image(button: &gtk::Bin) -> gtk::Label {
+pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label {
     let internal_box = button.child().unwrap().downcast::<gtk::Box>().unwrap();
     for child in internal_box.children() {
         if let Ok(t) = child.downcast::<gtk::Label>() {
@@ -551,14 +551,30 @@ pub fn get_custom_label_from_label_with_image(button: &gtk::Bin) -> gtk::Label {
     }
     panic!("Button doesn't have proper custom label child");
 }
-// pub fn get_custom_label_from_label_with_image<P: IsA<gtk::Widget>>(button: &P) -> gtk::Label {
-//     let internal_box = button.widget().unwrap().downcast::<gtk::Box>().unwrap();
-//     for child in internal_box.children() {
-//         if let Ok(t) = child.downcast::<gtk::Label>() {
+
+// GTK 4
+// pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
+//     let internal_box = button.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
+//     for child in get_all_children(&internal_box) {
+//         if let Ok(t) = child.downcast::<gtk4::Label>() {
 //             return t;
 //         }
 //     }
 //     panic!("Button doesn't have proper custom label child");
+// }
+// TODO needs GTK 4.6 to be able to set as child of menu button a box
+// pub fn get_custom_label_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
+//     println!("{:?}", get_all_children(button));
+//     for c1 in get_all_children(button) {
+//         if let Ok(internal_box) = c1.downcast::<gtk4::Box>() {
+//             for child in get_all_children(&internal_box) {
+//                 if let Ok(t) = child.downcast::<gtk4::Label>() {
+//                     return t;
+//                 }
+//             }
+//         }
+//     }
+//     panic!("Menu Button doesn't have proper custom label child");
 // }
 
 // GTK 4
