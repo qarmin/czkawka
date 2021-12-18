@@ -214,12 +214,11 @@ impl SameMusic {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 0,
@@ -232,10 +231,10 @@ impl SameMusic {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
         //// PROGRESS THREAD END
 
         while !folders_to_check.is_empty() {
@@ -380,13 +379,12 @@ impl SameMusic {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let music_to_check = self.music_to_check.len();
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 1,
@@ -399,10 +397,10 @@ impl SameMusic {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
         //// PROGRESS THREAD END
 
         let vec_file_entry = self
@@ -477,13 +475,12 @@ impl SameMusic {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
             let music_to_check = self.music_to_check.len();
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 2,
@@ -496,10 +493,10 @@ impl SameMusic {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
         //// PROGRESS THREAD END
 
         let mut old_duplicates: Vec<Vec<FileEntry>> = vec![self.music_entries.clone()];
@@ -804,7 +801,7 @@ fn get_approximate_conversion(what: &mut String) {
     let mut new_what = String::with_capacity(what.len());
     let mut tab_number = 0;
     let mut space_before = true;
-    for character in what.chars().into_iter() {
+    for character in what.chars() {
         match character {
             '(' => {
                 tab_number += 1;

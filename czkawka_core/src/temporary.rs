@@ -136,12 +136,11 @@ impl Temporary {
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle;
-        if let Some(progress_sender) = progress_sender {
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            progress_thread_handle = thread::spawn(move || loop {
+            thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 0,
@@ -153,10 +152,10 @@ impl Temporary {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
-            });
+            })
         } else {
-            progress_thread_handle = thread::spawn(|| {});
-        }
+            thread::spawn(|| {})
+        };
         //// PROGRESS THREAD END
 
         while !folders_to_check.is_empty() {

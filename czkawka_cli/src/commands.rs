@@ -354,8 +354,7 @@ fn parse_maximal_file_size(src: &str) -> Result<u64, String> {
 }
 
 fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
-    let filter_type;
-    filter_type = match src.to_lowercase().as_str() {
+    let filter_type = match src.to_lowercase().as_str() {
         "lanczos3" => FilterType::Lanczos3,
         "nearest" => FilterType::Nearest,
         "triangle" => FilterType::Triangle,
@@ -367,8 +366,7 @@ fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
 }
 
 fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
-    let algorithm;
-    algorithm = match src.to_lowercase().as_str() {
+    let algorithm = match src.to_lowercase().as_str() {
         "mean" => HashAlg::Mean,
         "gradient" => HashAlg::Gradient,
         "blockhash" => HashAlg::Blockhash,
@@ -380,8 +378,7 @@ fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
 }
 
 fn parse_image_hash_size(src: &str) -> Result<u8, String> {
-    let hash_size;
-    hash_size = match src.to_lowercase().as_str() {
+    let hash_size = match src.to_lowercase().as_str() {
         "8" => 8,
         "16" => 16,
         "32" => 32,

@@ -106,7 +106,7 @@ impl Common {
 
         match path.to_str() {
             Some(path) if path.is_char_boundary(1) => {
-                let replaced = path.replace("/", "\\");
+                let replaced = path.replace('/', "\\");
                 let mut new_path = OsString::new();
                 if replaced[1..].starts_with(':') {
                     new_path.push(replaced[..1].to_ascii_uppercase());

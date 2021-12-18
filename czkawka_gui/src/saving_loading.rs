@@ -264,6 +264,13 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             }
         };
 
+        let mut short_language: String;
+
+        // Load here language, default system language could change value in settings so we don't want to lose this value
+        {
+            short_language = get_language_from_combo_box_text(settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text.to_string();
+        }
+
         // Parsing Data - this are default values
 
         let mut included_directories: Vec<String> = Vec::new();
@@ -286,7 +293,6 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let mut delete_outdated_cache_similar_videos: bool = false;
         let mut use_prehash_cache: bool = false;
         let mut cache_prehash_minimal_size: u64 = 0;
-        let mut short_language: String = "en".to_string();
 
         let mut current_type = TypeOfLoadedData::None;
         for (line_number, line) in loaded_data.replace("\r\n", "\n").split('\n').enumerate() {

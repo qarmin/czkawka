@@ -91,9 +91,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
     let tree_view = tree_view.clone();
     file_chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
-            let folders: Vec<PathBuf>;
-            // GTK 3
-            folders = file_chooser.filenames();
+            let folders: Vec<PathBuf> = file_chooser.filenames();
             // GTK 4
             // folders = Vec::new();
             // if let Some(g_files) = file_chooser.files() {

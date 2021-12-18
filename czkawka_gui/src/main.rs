@@ -28,6 +28,7 @@ use crate::connect_show_hide_ui::*;
 use crate::connect_similar_image_size_change::*;
 use crate::gui_data::*;
 use crate::initialize_gui::*;
+use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::*;
 use crate::tests::validate_notebook_data;
 
@@ -103,6 +104,7 @@ fn main() {
         initialize_gui(&mut gui_data);
         validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
         reset_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
+        load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
         load_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors, &gui_data.scrolled_window_errors);
 
         // Needs to run when entire GUI is initialized and

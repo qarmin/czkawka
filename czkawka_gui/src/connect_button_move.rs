@@ -75,9 +75,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
     let tree_view = tree_view.clone();
     chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk::ResponseType::Ok {
-            let folders: Vec<PathBuf>;
-            // GTK 3
-            folders = file_chooser.filenames();
+            let folders: Vec<PathBuf> = file_chooser.filenames();
             // GTK 4
             // folders = Vec::new();
             // if let Some(g_files) = file_chooser.files() {
