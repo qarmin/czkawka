@@ -564,6 +564,27 @@ fn connect_event_mouse(gui_data: &GuiData) {
     // }
 }
 fn connect_event_buttons(gui_data: &GuiData) {
+    for evk in [
+        //gui_data.main_notebook.evk_tree_view_duplicate_finder.clone(), // Manual - needs to show/hide preview
+        gui_data.main_notebook.evk_tree_view_empty_folder_finder.clone(),
+        gui_data.main_notebook.evk_tree_view_empty_files_finder.clone(),
+        gui_data.main_notebook.evk_tree_view_temporary_files_finder.clone(),
+        gui_data.main_notebook.evk_tree_view_big_files_finder.clone(),
+        //gui_data.main_notebook.evk_tree_view_similar_images_finder.clone(),// Manual - needs to show/hide preview
+        gui_data.main_notebook.evk_tree_view_similar_videos_finder.clone(),
+        gui_data.main_notebook.evk_tree_view_same_music_finder.clone(),
+        gui_data.main_notebook.evk_tree_view_invalid_symlinks.clone(),
+        gui_data.main_notebook.evk_tree_view_broken_files.clone(),
+    ] {
+        let gui_data_clone = gui_data.clone();
+        evk.connect_key_pressed(opening_enter_function_ported);
+
+        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
+            if key_code == KEY_DELETE {
+                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
+            }
+        });
+    }
     // Duplicate
     {
         let gui_data_clone = gui_data.clone();
@@ -592,58 +613,6 @@ fn connect_event_buttons(gui_data: &GuiData) {
             );
         });
     }
-    // Empty Folder
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_empty_folder_finder.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
-    // Empty Files
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_empty_files_finder.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
-    // Temporary
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_temporary_files_finder.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
-    // Big Files
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_big_files_finder.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
     // Similar Images
     {
         let check_button_settings_show_preview_similar_images = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
@@ -670,58 +639,6 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 nb_object.column_path,
                 nb_object.column_name,
             );
-        });
-    }
-    // Similar Videos
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_similar_videos_finder.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
-    // Same music
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_same_music_finder.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
-    // Invalid Symlinks
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_invalid_symlinks.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
-        });
-    }
-    // Broken Files
-    {
-        let gui_data_clone = gui_data.clone();
-        let evk = gui_data.main_notebook.evk_tree_view_broken_files.clone();
-
-        evk.connect_key_pressed(opening_enter_function_ported);
-
-        evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
-            if key_code == KEY_DELETE {
-                glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
-            }
         });
     }
 }
