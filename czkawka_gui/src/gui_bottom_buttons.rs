@@ -1,5 +1,5 @@
 use crate::fl;
-use crate::help_functions::get_custom_label_from_label_with_image;
+use crate::help_functions::get_custom_label_from_button_with_image;
 use gtk::prelude::*;
 use gtk::{Bin, Widget};
 
@@ -67,21 +67,21 @@ impl GuiBottomButtons {
         }
     }
     pub fn update_language(&self) {
-        get_custom_label_from_label_with_image(&self.buttons_search.clone().upcast::<Bin>()).set_text(&fl!("bottom_search_button"));
-        get_custom_label_from_label_with_image(&self.buttons_select.clone().upcast::<Bin>()).set_text(&fl!("bottom_select_button"));
-        get_custom_label_from_label_with_image(&self.buttons_delete.clone().upcast::<Bin>()).set_text(&fl!("bottom_delete_button"));
-        get_custom_label_from_label_with_image(&self.buttons_save.clone().upcast::<Bin>()).set_text(&fl!("bottom_save_button"));
-        get_custom_label_from_label_with_image(&self.buttons_symlink.clone().upcast::<Bin>()).set_text(&fl!("bottom_symlink_button"));
-        get_custom_label_from_label_with_image(&self.buttons_hardlink.clone().upcast::<Bin>()).set_text(&fl!("bottom_hardlink_button"));
-        get_custom_label_from_label_with_image(&self.buttons_move.clone().upcast::<Bin>()).set_text(&fl!("bottom_move_button"));
+        get_custom_label_from_button_with_image(&self.buttons_search.clone().upcast::<Bin>()).set_text(&fl!("bottom_search_button"));
+        get_custom_label_from_button_with_image(&self.buttons_select.clone().upcast::<Bin>()).set_text(&fl!("bottom_select_button"));
+        get_custom_label_from_button_with_image(&self.buttons_delete.clone().upcast::<Bin>()).set_text(&fl!("bottom_delete_button"));
+        get_custom_label_from_button_with_image(&self.buttons_save.clone().upcast::<Bin>()).set_text(&fl!("bottom_save_button"));
+        get_custom_label_from_button_with_image(&self.buttons_symlink.clone().upcast::<Bin>()).set_text(&fl!("bottom_symlink_button"));
+        get_custom_label_from_button_with_image(&self.buttons_hardlink.clone().upcast::<Bin>()).set_text(&fl!("bottom_hardlink_button"));
+        get_custom_label_from_button_with_image(&self.buttons_move.clone().upcast::<Bin>()).set_text(&fl!("bottom_move_button"));
 
-        // get_custom_label_from_label_with_image(&self.buttons_search.clone()).set_text(&fl!("bottom_search_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_select.clone()).set_text(&fl!("bottom_select_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_delete.clone()).set_text(&fl!("bottom_delete_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_save.clone()).set_text(&fl!("bottom_save_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_symlink.clone()).set_text(&fl!("bottom_symlink_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_hardlink.clone()).set_text(&fl!("bottom_hardlink_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_move.clone()).set_text(&fl!("bottom_move_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_search.clone()).set_text(&fl!("bottom_search_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_select.clone()).set_text(&fl!("bottom_select_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_delete.clone()).set_text(&fl!("bottom_delete_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_save.clone()).set_text(&fl!("bottom_save_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_symlink.clone()).set_text(&fl!("bottom_symlink_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_hardlink.clone()).set_text(&fl!("bottom_hardlink_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_move.clone()).set_text(&fl!("bottom_move_button"));
 
         self.buttons_search.set_tooltip_text(Some(&fl!("bottom_search_button_tooltip")));
         self.buttons_select.set_tooltip_text(Some(&fl!("bottom_select_button_tooltip")));

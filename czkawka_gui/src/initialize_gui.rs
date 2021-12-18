@@ -466,6 +466,20 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 }
 
 fn connect_event_mouse(gui_data: &GuiData) {
+    for tree_view in [
+        gui_data.main_notebook.tree_view_duplicate_finder.clone(),
+        gui_data.main_notebook.tree_view_empty_folder_finder.clone(),
+        gui_data.main_notebook.tree_view_empty_files_finder.clone(),
+        gui_data.main_notebook.tree_view_temporary_files_finder.clone(),
+        gui_data.main_notebook.tree_view_big_files_finder.clone(),
+        gui_data.main_notebook.tree_view_similar_images_finder.clone(),
+        gui_data.main_notebook.tree_view_similar_videos_finder.clone(),
+        gui_data.main_notebook.tree_view_same_music_finder.clone(),
+        gui_data.main_notebook.tree_view_invalid_symlinks.clone(),
+        gui_data.main_notebook.tree_view_broken_files.clone(),
+    ] {
+        tree_view.connect_button_press_event(opening_double_click_function);
+    }
     // Duplicate
     {
         let text_view_errors = gui_data.text_view_errors.clone();
@@ -474,7 +488,6 @@ fn connect_event_mouse(gui_data: &GuiData) {
         let preview_path = gui_data.preview_path.clone();
         let tree_view = gui_data.main_notebook.tree_view_duplicate_finder.clone();
 
-        tree_view.connect_button_press_event(opening_double_click_function);
         tree_view.connect_button_release_event(move |tree_view, _event| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
             let preview_path = preview_path.clone();
@@ -482,30 +495,6 @@ fn connect_event_mouse(gui_data: &GuiData) {
 
             gtk::Inhibit(false)
         });
-    }
-    // Empty Folders
-    {
-        let tree_view = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
-    // Empty Files
-    {
-        let tree_view = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
-    // Temporary Files
-    {
-        let tree_view = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
-    // Big Files
-    {
-        let tree_view = gui_data.main_notebook.tree_view_big_files_finder.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
     }
     // Similar Images
     {
@@ -523,30 +512,56 @@ fn connect_event_mouse(gui_data: &GuiData) {
             gtk::Inhibit(false)
         });
     }
-    // Similar Videos
-    {
-        let tree_view = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
 
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
-    // Same Music
-    {
-        let tree_view = gui_data.main_notebook.tree_view_same_music_finder.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
-    // Invalid Symlinks
-    {
-        let tree_view = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
-    // Broken Files
-    {
-        let tree_view = gui_data.main_notebook.tree_view_broken_files.clone();
-
-        tree_view.connect_button_press_event(opening_double_click_function);
-    }
+    // GTK 4
+    // for gc in [
+    //     gui_data.main_notebook.gc_tree_view_duplicate_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_empty_folder_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_empty_files_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_temporary_files_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_big_files_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_similar_images_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_similar_videos_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_same_music_finder.clone(),
+    //     gui_data.main_notebook.gc_tree_view_invalid_symlinks.clone(),
+    //     gui_data.main_notebook.gc_tree_view_broken_files.clone(),
+    // ] {
+    //     gc.set_button(0);
+    //     gc.connect_pressed(opening_double_click_function);
+    // }
+    //
+    // // Duplicate
+    // {
+    //     let text_view_errors = gui_data.text_view_errors.clone();
+    //     let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
+    //     let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
+    //     let preview_path = gui_data.preview_path.clone();
+    //
+    //     let gc = gui_data.main_notebook.gc_tree_view_duplicate_finder.clone();
+    //
+    //     gc.connect_released(move |gc, _event, _, _| {
+    //         let tree_view = gc.widget().unwrap().downcast::<gtk4::TreeView>().unwrap();
+    //         let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
+    //         let preview_path = preview_path.clone();
+    //         show_preview(&tree_view, &text_view_errors, &check_button_settings_show_preview, &image_preview, preview_path, nb_object.column_path, nb_object.column_name);
+    //     });
+    // }
+    // // Similar Images
+    // {
+    //     let text_view_errors = gui_data.text_view_errors.clone();
+    //     let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
+    //     let preview_path = gui_data.preview_path.clone();
+    //     let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
+    //
+    //     let gc = gui_data.main_notebook.gc_tree_view_similar_images_finder.clone();
+    //
+    //     gc.connect_released(move |gc, _event, _, _| {
+    //         let tree_view = gc.widget().unwrap().downcast::<gtk4::TreeView>().unwrap();
+    //         let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
+    //         let preview_path = preview_path.clone();
+    //         show_preview(&tree_view, &text_view_errors, &check_button_settings_show_preview, &image_preview, preview_path, nb_object.column_path, nb_object.column_name);
+    //     });
+    // }
 }
 fn connect_event_buttons(gui_data: &GuiData) {
     // Duplicate

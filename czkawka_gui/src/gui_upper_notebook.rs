@@ -1,5 +1,5 @@
 use crate::fl;
-use crate::help_functions::get_custom_label_from_label_with_image;
+use crate::help_functions::get_custom_label_from_button_with_image;
 use crate::notebook_enums::NotebookUpperEnum;
 use gtk::prelude::*;
 use gtk::{Bin, EventControllerKey, TreeView};
@@ -103,12 +103,20 @@ impl GuiUpperNotebook {
         self.check_button_recursive.set_label(&fl!("upper_recursive_button"));
         self.check_button_recursive.set_tooltip_text(Some(&fl!("upper_recursive_button_tooltip")));
 
-        get_custom_label_from_label_with_image(&self.buttons_manual_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_included_button"));
-        get_custom_label_from_label_with_image(&self.buttons_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_included_button"));
-        get_custom_label_from_label_with_image(&self.buttons_remove_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_included_button"));
-        get_custom_label_from_label_with_image(&self.buttons_manual_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_excluded_button"));
-        get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_excluded_button"));
-        get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_excluded_button"));
+        get_custom_label_from_button_with_image(&self.buttons_manual_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_included_button"));
+        get_custom_label_from_button_with_image(&self.buttons_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_included_button"));
+        get_custom_label_from_button_with_image(&self.buttons_remove_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_included_button"));
+        get_custom_label_from_button_with_image(&self.buttons_manual_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_excluded_button"));
+        get_custom_label_from_button_with_image(&self.buttons_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_excluded_button"));
+        get_custom_label_from_button_with_image(&self.buttons_remove_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_excluded_button"));
+
+        // GTK 4
+        // get_custom_label_from_label_with_image(&self.buttons_manual_add_included_directory.clone()).set_text(&fl!("upper_manual_add_included_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_add_included_directory.clone()).set_text(&fl!("upper_add_included_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_remove_included_directory.clone()).set_text(&fl!("upper_remove_included_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_manual_add_excluded_directory.clone()).set_text(&fl!("upper_manual_add_excluded_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&fl!("upper_add_excluded_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&fl!("upper_remove_excluded_button"));
 
         self.buttons_manual_add_included_directory.set_tooltip_text(Some(&fl!("upper_manual_add_included_button_tooltip")));
         self.buttons_add_included_directory.set_tooltip_text(Some(&fl!("upper_add_included_button_tooltip")));
