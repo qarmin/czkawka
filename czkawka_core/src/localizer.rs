@@ -4,6 +4,7 @@ use i18n_embed::{
 };
 use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;
+use std::collections::HashMap;
 
 #[derive(RustEmbed)]
 #[folder = "../i18n/"]
@@ -31,4 +32,12 @@ macro_rules! fl {
 // Get the `Localizer` to be used for localizing this library.
 pub fn localizer() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations))
+}
+
+pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap<&'static str, String> {
+    let mut hashmap: HashMap<&'static str, String> = Default::default();
+    for (key, value) in vec {
+        hashmap.insert(key, value);
+    }
+    hashmap
 }

@@ -6,6 +6,7 @@ use gtk::{ResponseType, TreePath};
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 pub fn connect_button_move(gui_data: &GuiData) {
@@ -92,7 +93,7 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
             // }
 
             if folders.len() != 1 {
-                add_text_to_text_view(&text_view_errors, format!("{} {:?}", &fl!("move_files_choose_more_than_1_path"), folders).as_str());
+                add_text_to_text_view(&text_view_errors, fl!("move_files_choose_more_than_1_path", generate_translation_hashmap(vec![("path_number", folders.len().to_string())])).as_str());
             } else {
                 let folder = folders[0].clone();
                 if let Some(column_color) = column_color {
@@ -176,19 +177,23 @@ fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_
         let destination_file = destination_folder.join(file_name);
         if Path::new(&thing).is_dir() {
             if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &fs_extra::dir::CopyOptions::new()) {
-                messages += format!("{}, reason {}\n", fl!("move_folder_failed"), e).as_str();
+                messages += fl!("move_folder_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
+                messages += "\n";
                 continue 'next_result;
             }
         } else {
             if let Err(e) = fs_extra::file::move_file(&thing, &destination_file, &fs_extra::file::CopyOptions::new()) {
-                messages += format!("{}, reason {}\n", fl!("move_file_failed"), e).as_str();
+                messages += fl!("move_file_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
+                messages += "\n";
+
                 continue 'next_result;
             }
         }
         model.remove(&iter);
         moved_files += 1;
     }
-    entry_info.set_text(format!("{} {}/{} {}", fl!("move_stats_1"), moved_files, selected_rows.len(), fl!("move_stats_2")).as_str());
+
+    entry_info.set_text(fl!("move_stats", generate_translation_hashmap(vec![("num_files", moved_files.to_string()), ("all_files", selected_rows.len().to_string())])).as_str());
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }

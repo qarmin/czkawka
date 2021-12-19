@@ -1,15 +1,16 @@
+use crate::localizer::generate_translation_hashmap;
+use czkawka_core::fl;
+use directories_next::ProjectDirs;
+use gtk::prelude::*;
+use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use image::imageops::FilterType;
+use image::GenericImageView;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::fs;
 use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
-
-use directories_next::ProjectDirs;
-use gtk::prelude::*;
-use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
-use image::imageops::FilterType;
-use image::GenericImageView;
 
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
@@ -662,7 +663,10 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                         break 'dir;
                     }
                 } else if let Err(e) = fs::create_dir_all(cache_dir) {
-                    add_text_to_text_view(text_view_errors, format!("Failed to create dir {} needed by image preview, reason {}", cache_dir.display(), e).as_str());
+                    add_text_to_text_view(
+                        text_view_errors,
+                        fl!("preview_failed_to_create_cache_dir", generate_translation_hashmap(vec![("name", cache_dir.display().to_string()), ("reason", e.to_string())])).as_str(),
+                    );
                     break 'dir;
                 }
                 let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
@@ -687,12 +691,15 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     let img = match image::open(&file_name) {
                         Ok(t) => t,
                         Err(e) => {
-                            add_text_to_text_view(text_view_errors, format!("Failed to open temporary image file {}, reason {}", file_name, e).as_str());
+                            add_text_to_text_view(
+                                text_view_errors,
+                                fl!("preview_temporary_file", generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])).as_str(),
+                            );
                             break 'dir;
                         }
                     };
                     if img.width() == 0 || img.height() == 0 {
-                        add_text_to_text_view(text_view_errors, format!("Cannot create preview of image {}, with 0 width or height", file_name).as_str());
+                        add_text_to_text_view(text_view_errors, fl!("preview_0_size", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str());
                         break 'dir;
                     }
                     let ratio = img.width() / img.height();
@@ -715,7 +722,10 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
                     let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase()));
                     if let Err(e) = img.save(&file_dir) {
-                        add_text_to_text_view(text_view_errors, format!("Failed to save temporary image file to {}, reason {}", file_dir.display(), e).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            fl!("preview_temporary_image_save", generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])).as_str(),
+                        );
                         let _ = fs::remove_file(&file_dir);
                         break 'dir;
                     }
@@ -728,7 +738,10 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     }
 
                     if let Err(e) = fs::remove_file(&file_dir) {
-                        add_text_to_text_view(text_view_errors, format!("Failed to delete temporary image file to {}, reason {}", file_dir.display(), e).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            fl!("preview_temporary_image_remove", generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])).as_str(),
+                        );
                         break 'dir;
                     }
                     created_image = true;

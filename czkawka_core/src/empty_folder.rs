@@ -15,6 +15,8 @@ use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::fl;
+use crate::localizer::generate_translation_hashmap;
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -199,7 +201,9 @@ impl EmptyFolder {
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(e) => {
-                    self.text_messages.warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                    self.text_messages
+                        .warnings
+                        .push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
                     continue;
                 }
             };
@@ -209,14 +213,18 @@ impl EmptyFolder {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
+                        self.text_messages
+                            .warnings
+                            .push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
                         continue 'dir;
                     }
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(e) => {
-                        self.text_messages.warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
+                        self.text_messages
+                            .warnings
+                            .push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
                         continue 'dir;
                     }
                 };
@@ -237,12 +245,16 @@ impl EmptyFolder {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
                                     Err(_inspected) => {
-                                        self.text_messages.warnings.push(format!("Folder {} seems to be modified before Unix Epoch.", current_folder.display()));
+                                        self.text_messages
+                                            .warnings
+                                            .push(fl!("core_folder_modified_before_epoch", generate_translation_hashmap(vec![("name", current_folder.display().to_string())])));
                                         0
                                     }
                                 },
                                 Err(e) => {
-                                    self.text_messages.warnings.push(format!("Failed to read modification date of folder {}, reason {}", current_folder.display(), e));
+                                    self.text_messages
+                                        .warnings
+                                        .push(fl!("core_folder_no_modification_date", generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])));
                                     0
                                 }
                             },
