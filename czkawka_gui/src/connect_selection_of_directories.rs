@@ -1,6 +1,7 @@
+use std::path::PathBuf;
+
 use gtk::prelude::*;
 use gtk::{ResponseType, TreeView, Window};
-use std::path::PathBuf;
 
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;

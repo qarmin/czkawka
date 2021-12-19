@@ -1,10 +1,11 @@
 use futures::StreamExt;
 use gtk::prelude::*;
 
-use crate::fl;
 use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, similar_videos, temporary};
 
+use crate::fl;
 use crate::gui_data::GuiData;
+use crate::localizer::generate_translation_hashmap;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 #[allow(clippy::too_many_arguments)]
@@ -42,7 +43,7 @@ pub fn connect_progress_window(
                                 progress_bar_current_stage.hide();
                                 // progress_bar_all_stages.hide();
                                 progress_bar_all_stages.set_fraction(0 as f64);
-                                label_stage.set_text(format!("{} {} {} {}", fl!("progress_scanned"), fl!("progress_size"), item.files_checked, fl!("progress_files")).as_str());
+                                label_stage.set_text(&fl!("progress_scanning_size", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                             }
                             // Hash - first 1KB file
@@ -58,7 +59,11 @@ pub fn connect_progress_window(
                                     progress_bar_current_stage.set_fraction(0f64);
                                     taskbar_state.borrow().set_progress_value(1, 1 + item.max_stage as u64);
                                 }
-                                label_stage.set_text(format!("{} {}/{} {}", fl!("progress_analyzed_partial_hash"), item.files_checked, item.files_to_check, fl!("progress_files")).as_str());
+
+                                label_stage.set_text(&fl!(
+                                    "progress_analyzed_partial_hash",
+                                    generate_translation_hashmap(vec![("file_checked", item.files_checked.to_string()), ("all_files", item.files_to_check.to_string())])
+                                ));
                             }
                             // Hash - normal hash
                             2 => {
@@ -74,7 +79,10 @@ pub fn connect_progress_window(
                                     taskbar_state.borrow().set_progress_value(2, 1 + item.max_stage as u64);
                                 }
 
-                                label_stage.set_text(format!("{} {}/{} {}", fl!("progress_analyzed_full_hash"), item.files_checked, item.files_to_check, fl!("progress_files")).as_str());
+                                label_stage.set_text(&fl!(
+                                    "progress_analyzed_full_hash",
+                                    generate_translation_hashmap(vec![("file_checked", item.files_checked.to_string()), ("all_files", item.files_to_check.to_string())])
+                                ));
                             }
                             _ => {
                                 panic!("Not available current_stage");
@@ -85,14 +93,14 @@ pub fn connect_progress_window(
                         label_stage.show();
                         grid_progress_stages.hide();
 
-                        label_stage.set_text(format!("{} {} {} {}", fl!("progress_scanned"), fl!("progress_name"), item.files_checked, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!("progress_scanning_name", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     duplicate::CheckingMethod::Size => {
                         label_stage.show();
                         grid_progress_stages.hide();
 
-                        label_stage.set_text(format!("{} {} {} {}", fl!("progress_scanned"), fl!("progress_size"), item.files_checked, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!("progress_scanning_size", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     duplicate::CheckingMethod::None => {
@@ -109,7 +117,7 @@ pub fn connect_progress_window(
         let taskbar_state = gui_data.taskbar_state.clone();
         let future = async move {
             while let Some(item) = futures_receiver_empty_files.next().await {
-                label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.files_checked, fl!("progress_files")).as_str());
+                label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
         };
@@ -121,7 +129,7 @@ pub fn connect_progress_window(
         let taskbar_state = gui_data.taskbar_state.clone();
         let future = async move {
             while let Some(item) = futures_receiver_empty_folder.next().await {
-                label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.folders_checked, fl!("progress_folders")).as_str());
+                label_stage.set_text(&fl!("progress_scanning_empty_folders", generate_translation_hashmap(vec![("folder_number", item.folders_checked.to_string())])));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
         };
@@ -133,7 +141,7 @@ pub fn connect_progress_window(
         let taskbar_state = gui_data.taskbar_state.clone();
         let future = async move {
             while let Some(item) = futures_receiver_big_files.next().await {
-                label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.files_checked, fl!("progress_files")).as_str());
+                label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
         };
@@ -150,7 +158,7 @@ pub fn connect_progress_window(
                 match item.current_stage {
                     0 => {
                         progress_bar_current_stage.hide();
-                        label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.music_checked, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.music_checked.to_string())])));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     1 => {
@@ -164,7 +172,10 @@ pub fn connect_progress_window(
                             progress_bar_current_stage.set_fraction(0f64);
                             taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
                         }
-                        label_stage.set_text(format!("{} {}/{} {}", fl!("progress_tags"), item.music_checked, item.music_to_check, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!(
+                            "progress_scanning_music_tags",
+                            generate_translation_hashmap(vec![("file_checked", item.music_checked.to_string()), ("all_files", item.music_to_check.to_string())])
+                        ));
                     }
                     2 => {
                         if item.music_to_check != 0 {
@@ -178,7 +189,10 @@ pub fn connect_progress_window(
                             progress_bar_current_stage.set_fraction(0f64);
                             taskbar_state.borrow().set_progress_value(2, (item.max_stage + 1) as u64);
                         }
-                        label_stage.set_text(format!("{} {}/{} {}", fl!("progress_checking"), item.music_checked, item.music_to_check, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!(
+                            "progress_scanning_music_tags_end",
+                            generate_translation_hashmap(vec![("file_checked", item.music_checked.to_string()), ("all_files", item.music_to_check.to_string())])
+                        ));
                     }
                     _ => {
                         panic!();
@@ -199,7 +213,7 @@ pub fn connect_progress_window(
                 match item.current_stage {
                     0 => {
                         progress_bar_current_stage.hide();
-                        label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.images_checked, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.images_checked.to_string())])));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     1 => {
@@ -215,7 +229,10 @@ pub fn connect_progress_window(
                             progress_bar_current_stage.set_fraction(0f64);
                             taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
                         }
-                        label_stage.set_text(format!("{} {}/{} {}", fl!("progress_hashing"), item.images_checked, item.images_to_check, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!(
+                            "progress_scanning_image",
+                            generate_translation_hashmap(vec![("file_checked", item.images_checked.to_string()), ("all_files", item.images_to_check.to_string())])
+                        ));
                     }
                     _ => {
                         panic!();
@@ -236,7 +253,7 @@ pub fn connect_progress_window(
                 match item.current_stage {
                     0 => {
                         progress_bar_current_stage.hide();
-                        label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.videos_checked, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.videos_checked.to_string())])));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     1 => {
@@ -252,7 +269,10 @@ pub fn connect_progress_window(
                             progress_bar_current_stage.set_fraction(0f64);
                             taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
                         }
-                        label_stage.set_text(format!("{} {}/{} {}", fl!("progress_hashing"), item.videos_checked, item.videos_to_check, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!(
+                            "progress_scanning_video",
+                            generate_translation_hashmap(vec![("file_checked", item.videos_checked.to_string()), ("all_files", item.videos_to_check.to_string())])
+                        ));
                     }
                     _ => {
                         panic!();
@@ -268,7 +288,7 @@ pub fn connect_progress_window(
         let taskbar_state = gui_data.taskbar_state.clone();
         let future = async move {
             while let Some(item) = futures_receiver_temporary.next().await {
-                label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.files_checked, fl!("progress_files")).as_str());
+                label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
         };
@@ -280,7 +300,7 @@ pub fn connect_progress_window(
         let taskbar_state = gui_data.taskbar_state.clone();
         let future = async move {
             while let Some(item) = futures_receiver_invalid_symlinks.next().await {
-                label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.files_checked, fl!("progress_files")).as_str());
+                label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
         };
@@ -297,7 +317,7 @@ pub fn connect_progress_window(
                 match item.current_stage {
                     0 => {
                         progress_bar_current_stage.hide();
-                        label_stage.set_text(format!("{} {} {}", fl!("progress_scanned"), item.files_checked, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!("progress_scanning_general_file", generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     1 => {
@@ -311,7 +331,10 @@ pub fn connect_progress_window(
                             progress_bar_current_stage.set_fraction(0f64);
                             taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
                         }
-                        label_stage.set_text(format!("{} {}/{} {}", fl!("progress_checking"), item.files_checked, item.files_to_check, fl!("progress_files")).as_str());
+                        label_stage.set_text(&fl!(
+                            "progress_scanning_broken_files",
+                            generate_translation_hashmap(vec![("file_checked", item.files_checked.to_string()), ("all_files", item.files_to_check.to_string())])
+                        ));
                     }
                     _ => {
                         panic!();

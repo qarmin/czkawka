@@ -1,5 +1,6 @@
-use czkawka_core::duplicate::CheckingMethod;
 use gtk::prelude::*;
+
+use czkawka_core::duplicate::CheckingMethod;
 
 use crate::gui_data::GuiData;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;

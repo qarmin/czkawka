@@ -1,6 +1,7 @@
-use crate::fl;
 use gtk::prelude::*;
 use gtk::Builder;
+
+use crate::fl;
 
 #[derive(Clone)]
 pub struct GuiPopovers {

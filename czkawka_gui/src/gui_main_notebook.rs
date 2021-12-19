@@ -1,9 +1,10 @@
-use crate::fl;
-use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
-use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
 use gtk::prelude::*;
 use gtk::{EventControllerKey, TreeView};
 
+use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
+
+use crate::fl;
+use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[derive(Clone)]

@@ -8,11 +8,11 @@ use glib::Receiver;
 use gtk::prelude::*;
 use humansize::{file_size_opts as options, FileSize};
 
-use crate::fl;
 use czkawka_core::duplicate::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
 
+use crate::fl;
 use crate::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
