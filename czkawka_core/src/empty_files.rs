@@ -1,4 +1,3 @@
-use rayon::prelude::*;
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::io::BufWriter;
@@ -10,6 +9,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
 use crossbeam_channel::Receiver;
+use rayon::prelude::*;
 
 use crate::common::Common;
 use crate::common_directory::Directories;

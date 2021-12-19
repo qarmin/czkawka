@@ -1,6 +1,7 @@
-use crate::fl;
 use gtk::prelude::*;
 use gtk::{Builder, Window};
+
+use crate::fl;
 
 #[derive(Clone)]
 pub struct GuiSettings {
@@ -211,7 +212,7 @@ impl GuiSettings {
         // Change name of main notebook tabs
         let names: [String; 4] = [fl!("settings_notebook_general"), fl!("settings_notebook_duplicates"), fl!("settings_notebook_images"), fl!("settings_notebook_videos")];
         for (index, fl_thing) in names.iter().enumerate() {
-            self.notebook_settings.tab_label(&vec_children[index]).unwrap().downcast::<gtk::Label>().unwrap().set_text(&fl_thing);
+            self.notebook_settings.tab_label(&vec_children[index]).unwrap().downcast::<gtk::Label>().unwrap().set_text(fl_thing);
         }
     }
 }

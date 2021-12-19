@@ -1,11 +1,11 @@
-use crate::localizer::generate_translation_hashmap;
 use futures::StreamExt;
 use gtk::prelude::*;
 
-use crate::fl;
 use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, similar_videos, temporary};
 
+use crate::fl;
 use crate::gui_data::GuiData;
+use crate::localizer::generate_translation_hashmap;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 #[allow(clippy::too_many_arguments)]

@@ -1,5 +1,6 @@
-use crate::fl;
 use gtk::prelude::*;
+
+use crate::fl;
 
 #[derive(Clone)]
 pub struct GuiHeader {

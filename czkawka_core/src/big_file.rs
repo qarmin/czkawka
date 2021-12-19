@@ -1,6 +1,3 @@
-use crossbeam_channel::Receiver;
-use humansize::{file_size_opts as options, FileSize};
-use rayon::prelude::*;
 use std::collections::BTreeMap;
 use std::fs::{File, Metadata};
 use std::io::{BufWriter, Write};
@@ -12,6 +9,10 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
+
+use crossbeam_channel::Receiver;
+use humansize::{file_size_opts as options, FileSize};
+use rayon::prelude::*;
 
 use crate::common::Common;
 use crate::common_directory::Directories;

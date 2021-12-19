@@ -1,8 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use czkawka_core::fl;
 use gtk::prelude::*;
 use gtk::{ResponseType, TreePath};
+
+use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::*;

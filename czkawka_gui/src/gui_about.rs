@@ -1,6 +1,7 @@
-use crate::fl;
 use gtk::prelude::*;
 use gtk::{Builder, Window};
+
+use crate::fl;
 
 #[derive(Clone)]
 pub struct GuiAbout {

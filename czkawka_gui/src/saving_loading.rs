@@ -3,10 +3,11 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, fs};
 
-use czkawka_core::fl;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{ScrolledWindow, TextView};
+
+use czkawka_core::fl;
 
 use crate::gui_settings::GuiSettings;
 use crate::gui_upper_notebook::GuiUpperNotebook;

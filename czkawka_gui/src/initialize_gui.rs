@@ -1,10 +1,3 @@
-use crate::localizer::generate_translation_hashmap;
-use czkawka_core::fl;
-use directories_next::ProjectDirs;
-use gtk::prelude::*;
-use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
-use image::imageops::FilterType;
-use image::GenericImageView;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::fs;
@@ -12,6 +5,13 @@ use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
 
+use directories_next::ProjectDirs;
+use gtk::prelude::*;
+use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use image::imageops::FilterType;
+use image::GenericImageView;
+
+use czkawka_core::fl;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
@@ -21,6 +21,7 @@ use crate::gui_data::*;
 use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX};
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
+use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
 

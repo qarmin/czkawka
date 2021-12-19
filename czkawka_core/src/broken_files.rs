@@ -1,7 +1,3 @@
-use crate::localizer::generate_translation_hashmap;
-use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
-use rayon::prelude::*;
 use std::collections::BTreeMap;
 use std::fs::{File, Metadata, OpenOptions};
 use std::io::prelude::*;
@@ -13,6 +9,10 @@ use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
+use crossbeam_channel::Receiver;
+use directories_next::ProjectDirs;
+use rayon::prelude::*;
+
 use crate::common::Common;
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -20,6 +20,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crate::fl;
+use crate::localizer::generate_translation_hashmap;
 
 const CACHE_FILE_NAME: &str = "cache_broken_files.txt";
 

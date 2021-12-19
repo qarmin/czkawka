@@ -2,13 +2,14 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
 
-use crate::localizer::generate_translation_hashmap;
-use czkawka_core::fl;
 use gtk::prelude::*;
 use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
 
+use czkawka_core::fl;
+
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
