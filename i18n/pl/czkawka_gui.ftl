@@ -15,6 +15,10 @@ core_folder_modified_before_epoch = Folder {$name} ma datę modyfikacji sprzed e
 core_file_no_modification_date = Nie udało się pobrać daty modyfikacji z pliku {$name}, powód {$reason}
 core_folder_no_modification_date = Nie udało się pobrać daty modyfikacji z folderu {$name}, powód {$reason}
 
+# Nazwy okien
+window_settings_title = Opcje
+window_main_title = Czkawka
+window_progress_title = Skanowanie
 
 # Różne
 general_ok_button = Ok
@@ -37,9 +41,9 @@ music_comparison_checkbox_tooltip =
         
         Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 
-duplicate_mode_name_checkbox = Nazwa
-duplicate_mode_size_checkbox = Rozmiar
-duplicate_mode_hash_checkbox = Hash
+duplicate_mode_name_combo_box = Nazwa
+duplicate_mode_size_combo_box = Rozmiar
+duplicate_mode_hash_combo_box = Hash
 
 duplicate_hash_type_tooltip = 
         Czkawka oferuje 3 różne algorytmy do tworzenia hashu pliku:
@@ -49,23 +53,6 @@ duplicate_hash_type_tooltip =
         CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashy.
 
         XXH3 - zarówno pod względem jakości hashu jak i wydajności jest podobny do Blake3, dlatego te algorytmy mogą być używane wymiennie.
-
-duplicate_mode_name_checkbox_tooltip = 
-        Służy do znajdowania plików o identycznych nazwach.
-        
-        Ten tryb nie sprawdza zawartości pliku, dlatego należy uważać przy jego stosowaniu.
-        
-duplicate_mode_size_checkbox_tooltip = 
-        Służy do znajdowania plików o identycznych rozmiarach.
-
-        Ten tryb nie sprawdza zawartości pliku, dlatego należy uważać przy jego stosowaniu.
-        
-duplicate_mode_hash_checkbox_tooltip = 
-        Znajduje pliki z identyczną zawartością, bez względu na nazwę i rozszerzenie pliku.
-
-        W tym trybie, każdy plik jest hasowany a następnie każdy hash jest porównywany z innymi.
-  
-        Ten tryb używa pamięci podręcznej do przechowywania raz obliczonych hashy, dlatego drugie i kolejne skanowanie, powinno być o wiele szybsze niż pierwsze.
 
 duplicate_check_method_tooltip = 
         Na chwilę obecną, Czkawka oferuje 3 tryby wyszukiwania duplicatów poprzez:
@@ -278,6 +265,7 @@ settings_confirm_group_deletion_button_tooltip = Wyświetla okno potwierdzające
 settings_show_text_view_button_tooltip = Pokazuje na dole ekranu panel tekstowy.
 settings_use_cache_button_tooltip = Umożliwia zapisywanie rekordów do pamięci podręcznej.
 settings_use_trash_button_tooltip = Przenosi pliki do kosza zamiast usuwać je permanentnie.
+settings_language_label_tooltip = Pozwala wybrać język interfejsu.
 
 settings_save_at_exit_button = Zapisuj konfigurację przy wyłączaniu
 settings_load_at_start_button = Ładuj ustawienia na starcie z pliku
@@ -287,6 +275,7 @@ settings_confirm_group_deletion_button = Pokazuj okno potwierdzające usuwanie w
 settings_show_text_view_button = Pokazuj panel tekstowy na dole
 settings_use_cache_button = Używaj pamięci podręcznej
 settings_use_trash_button = Przenoś pliki do kosza
+settings_language_label = Język
 
 
 ## Multiple - ustawienia wskazywane przez większość zakładek
@@ -419,7 +408,12 @@ searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę cz
 text_view_messages = WIADOMOŚCI
 text_view_warnings = OSTRZEŻENIA
 text_view_errors = BŁĘDY
+about_window_motto = 
+        Program jest i będzie zawsze darmowy do użytku.
 
+        Może interfejs programu nie jest ergonomiczny,
+        ale za to przynajmniej kod jest nieczytelny.
+        
 # Various dialog
 dialogs_ask_next_time = Pytaj następnym razem
 reason_of_error = powód

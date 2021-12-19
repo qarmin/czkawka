@@ -60,3 +60,29 @@ Next new record must be added to array.
         short_text: "pl",
     },
 ```
+
+# Verify strings
+Due renames, adding and removing elements, may happen that translations contains outdated entries.
+
+To help find such keywords, special python script can be used.
+
+To be able to use it, be sure that you are directly inside main `czkawka` folder.  
+Next run python script `python3 misc/translation_test.py`.  
+Then results should be visible in console:
+```
+Checking pl language
+Missing keyword - duplicate_mode_name_combo_box
+Missing keyword - duplicate_mode_size_combo_box
+Missing keyword - duplicate_mode_hash_combo_box
+Missing keyword - settings_language_label_tooltip
+Missing keyword - settings_language_label
+Unused keyword - duplicate_mode_name_checkbox
+Unused keyword - duplicate_mode_size_checkbox
+Unused keyword - duplicate_mode_hash_checkbox
+Unused keyword - duplicate_mode_name_checkbox_tooltip
+Unused keyword - duplicate_mode_size_checkbox_tooltip
+Unused keyword - duplicate_mode_hash_checkbox_tooltip
+```
+To be able to check new language, inside script variable `translations` needs to be updated.  
+`Missing keyword` means that some keywords exists in base translations and texts needs to be translated.  
+`Unused keyword` means that keyword is no longer used. It can be renamed or entirely removed from file.

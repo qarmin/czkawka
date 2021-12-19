@@ -11,6 +11,7 @@ use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::fl;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
@@ -86,8 +87,8 @@ impl GuiData {
 
         //// Windows
         let window_main: gtk::Window = builder.object("window_main").unwrap();
+        window_main.set_title(&fl!("window_main_title"));
         window_main.show_all();
-        window_main.set_title("Czkawka");
 
         window_main.set_application(Some(application));
 
@@ -181,6 +182,8 @@ impl GuiData {
     }
 
     pub fn update_language(&self) {
+        self.window_main.set_title(&fl!("window_main_title"));
+
         self.main_notebook.update_language();
         self.upper_notebook.update_language();
         self.popovers.update_language();

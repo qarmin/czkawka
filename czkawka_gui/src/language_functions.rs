@@ -5,12 +5,9 @@ pub struct Language {
 }
 
 pub const LANGUAGES_ALL: [Language; 2] = [
+    Language { combo_box_text: "English", short_text: "en" },
     Language {
-        combo_box_text: "English (en)",
-        short_text: "en",
-    },
-    Language {
-        combo_box_text: "Polski (pl)",
+        combo_box_text: "Polski (Polish)",
         short_text: "pl",
     },
 ];

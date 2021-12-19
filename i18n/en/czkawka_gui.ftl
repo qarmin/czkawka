@@ -15,11 +15,14 @@ core_folder_modified_before_epoch = Folder {$name} seems to be modified before U
 core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}
 core_folder_no_modification_date = Unable to get modification date from folder {$name}, reason {$reason}
 
+# Window titles
+window_settings_title = Options
+window_main_title = Czkawka (Hiccup)
+window_progress_title = Scanning
 
 # General
 general_ok_button = Ok
 general_close_button = Close
-
 
 general_bytes = bytes
 general_lost = lost
@@ -416,6 +419,7 @@ searching_for_data = Searching data, it may take a while, please wait...
 text_view_messages = MESSAGES
 text_view_warnings = WARNINGS
 text_view_errors = ERRORS
+about_window_motto = This program is free to use and will always be.
 
 # Various dialog
 dialogs_ask_next_time = Ask next time

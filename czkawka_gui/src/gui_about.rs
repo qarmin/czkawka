@@ -33,6 +33,10 @@ impl GuiAbout {
         }
     }
     pub fn update_language(&self) {
+        let mut comment_text: String = "2020 - 2021  Rafał Mikrut(qarmin)\n\n".to_string();
+        comment_text += &fl!("about_window_motto");
+        self.about_dialog.set_comments(Some(&comment_text));
+
         self.button_repository.set_tooltip_text(Some(&fl!("about_repository_button_tooltip")));
         self.button_donation.set_tooltip_text(Some(&fl!("about_donation_button_tooltip")));
         self.button_instruction.set_tooltip_text(Some(&fl!("about_instruction_button_tooltip")));

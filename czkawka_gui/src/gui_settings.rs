@@ -56,6 +56,7 @@ impl GuiSettings {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_settings: gtk::Window = builder.object("window_settings").unwrap();
+        window_settings.set_title(&fl!("window_settings_title"));
         window_settings.set_modal(true);
         window_settings.set_transient_for(Some(window_main));
 
@@ -137,6 +138,8 @@ impl GuiSettings {
     }
 
     pub fn update_language(&self) {
+        self.window_settings.set_title(&fl!("window_settings_title"));
+
         self.check_button_settings_save_at_exit.set_label(&fl!("settings_save_at_exit_button"));
         self.check_button_settings_load_at_start.set_label(&fl!("settings_load_at_start_button"));
         self.check_button_settings_confirm_deletion.set_label(&fl!("settings_confirm_deletion_button"));
