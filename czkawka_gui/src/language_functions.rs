@@ -4,19 +4,16 @@ pub struct Language {
     pub short_text: &'static str,
 }
 
-<<<<<<< HEAD
+/// Languages should be alphabetically sorted
 pub const LANGUAGES_ALL: [Language; 3] = [
-=======
-pub const LANGUAGES_ALL: [Language; 2] = [
     Language { combo_box_text: "English", short_text: "en" },
->>>>>>> d1ac2f3c22bf7be86b121153ff8258f3d09085de
+    Language {
+        combo_box_text: "Italiano (Italian)",
+        short_text: "it",
+    },
     Language {
         combo_box_text: "Polski (Polish)",
         short_text: "pl",
-    },
-    Language {
-        combo_box_text: "Italian (it)",
-        short_text: "it",
     },
 ];
 

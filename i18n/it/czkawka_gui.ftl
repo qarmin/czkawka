@@ -6,10 +6,23 @@ core_similarity_small = Piccola
 core_similarity_very_small = Piccolissima
 core_similarity_minimal = Minima
 
+core_cannot_open_dir = Impossibile aprire cartella {$dir}, motivo {$reason}
+core_cannot_read_entry_dir = Impossibile leggere elemento nella cartella {$dir}, ragione {$reason}
+core_cannot_read_metadata_dir = Impossibile leggere metadati nella cartella {$dir}, ragione {$reason}
+core_file_not_utf8_name = Il file {$name} non ha un nome UTF-8 valido (alcuni caratteri potrebbero non essere mostrati)
+core_file_modified_before_epoch = Il file {$name} sembra essere stato modificato prima dell'Epoca Unix
+core_folder_modified_before_epoch = La cartella {$name} sembra essere stato modificata prima dell'Epoca Unix
+core_file_no_modification_date = Impossibile recuperare data di modifica dal file {$name}, ragione {$reason}
+core_folder_no_modification_date = Impossibile recuperare data di modifica dalla cartella {$name}, ragione {$reason}
+
+# Window titles
+window_settings_title = Impostazioni
+window_main_title = Singhiozzo
+window_progress_title = Ricerca
+
 # General
 general_ok_button = Ok
 general_close_button = Chiudi
-
 
 general_bytes = byte
 general_lost = persi
@@ -32,7 +45,7 @@ duplicate_mode_size_combo_box = Dimensione
 duplicate_mode_hash_combo_box = Hash
 
 duplicate_hash_type_tooltip = 
-        Czkawka offre 3 tipi di hash, che possono essere usati:
+        Singhiozzo offre 3 tipi di hash, che possono essere usati:
 
         Blake3 - funzione hash crittografica. È usato come algoritmo hash predefinito, poiché velocissimo.
 
@@ -41,7 +54,7 @@ duplicate_hash_type_tooltip =
         XXH3 - molto simile per prestazioni e qualità a Blake3, quindi questi metodi possono essere usati con semplicità.
 
 duplicate_check_method_tooltip = 
-        Al momento, Czkawka offre tre metodi di ricerca dei duplicati:
+        Al momento, Singhiozzo offre tre metodi di ricerca dei duplicati:
 
         Nome - Trova i file con lo stesso nome.
 
@@ -50,7 +63,7 @@ duplicate_check_method_tooltip =
         Hash - Trova i file con lo stesso contenuto. Questo metodo fa l'hashing dei file e successivamente li confronta per trovare i duplicati. Questo metodo è il più veloce per cercare i duplicati. Utilizza molto la cache, quindi successivamente la ricerca dati simili dovrebbe essere molto più veloce. 
 
 image_hash_size_tooltip = 
-        Czkawka offre la modifica degli hash generati per ogni immagine. Hash più grandi permettono di trovare immagini con un numero minore di differenze, ma rendono la ricerca più lunga.
+        Singhiozzo offre la modifica degli hash generati per ogni immagine. Hash più grandi permettono di trovare immagini con un numero minore di differenze, ma rendono la ricerca più lunga.
         
         Il valore predefinito per gli hash è di 8 byte, che permette di trovare immagini molto simili e differenti. Gli hash di 16 and 32 byte dovrebbero essere utilizzate per immagini pressoché identiche. Gli hash di 64 bytes non dovrebbero essere usati, tranne in caso sia necessario cercare differenze molto piccole.
 
@@ -274,6 +287,11 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
 
         Nel caso si abbiano centinaia di migliaia di elementi nella cache, è suggerito selezionare questa opzione per accelerare il caricamento ed il salvataggio della cache all'avvio ed alla fine della ricerca.
 
+settings_notebook_general = Generale
+settings_notebook_duplicates = Duplicati
+settings_notebook_images = Immagini simili
+settings_notebook_videos = Video simili
+
 ## Multiple - settings used in multiple tabs
 settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
 settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
@@ -353,7 +371,7 @@ compute_stopped_by_user = Ricerca interrotta dall'utente
 
 compute_found = Trovati
 compute_duplicated_files_in = file duplicati in
-compute_groups_which_took = gruppi che ha impiegato
+compute_groups_which_took = gruppi che occupano
 compute_groups = gruppi
 compute_duplicates_for = duplicati per
 
@@ -368,16 +386,21 @@ compute_symlinks = colegamenti simbolici invalidi
 compute_broken_files = file corrotti
 
 # Progress window
-progress_scanned = Cercati
-progress_files = file
-progress_folders = cartelle
-progress_tags = Lettura etichette di
-progress_hashing = Hash in corso
-progress_checking = Controllo
-progress_size = dimensione
-progress_name = nome
-progress_analyzed_full_hash = Analizzato hash completo di 
-progress_analyzed_partial_hash = Analizzato hash parziale di 
+progress_scanning_general_file = Processando {$file_number} file
+
+progress_scanning_broken_files = Verificando {$file_checked}/{$all_files} file
+progress_scanning_video = Hashing di {$file_checked}/{$all_files} video
+progress_scanning_image = Hashing di {$file_checked}/{$all_files} image
+progress_scanning_music_tags_end = Confrontando le etichette di {$file_checked}/{$all_files} file musicali
+progress_scanning_music_tags = Leggendo le etichette di {$file_checked}/{$all_files} file musicali
+progress_scanning_empty_folders = Verificando {$folder_number} cartelle
+progress_scanning_size = Leggendo le dimensioni di {$file_number} file
+progress_scanning_name = Leggendo il nome di {$file_number} file
+progress_analyzed_partial_hash = Analizzato gli hash parziali di {$file_checked}/{$all_files} file
+progress_analyzed_full_hash = Analizzato gli hash completi di {$file_checked}/{$all_files} file
+
+progress_current_stage = Fase attuale:{"  "}
+progress_all_stages = Tutte le fasi:{"  "}
 
 # Saving loading 
 saving_loading_saving_success = Configurazione salvata su file
@@ -396,20 +419,20 @@ searching_for_data = Ricerca dei dati, può durare a lungo, attendere prego...
 text_view_messages = MESSAGES
 text_view_warnings = WARNINGS
 text_view_errors = ERRORS
+about_window_motto = Questo programma può essere usato liberamente e lo sarà sempre.
 
 # Various dialog
 dialogs_ask_next_time = Chiedi la prossima volta
 reason_of_error = ragione
 
-delete_file_failed = Rimozione file fallita
+delete_file_failed = Rimozione file {$name} fallita, ragione {$reason}
 
 delete_title_dialog = Conferma di cancellazione
 delete_question_label = Sei sicuro di cancellare i file?
 delete_all_files_in_group_title = Conferma di cancellazione di tutti i file nel gruppo
 delete_all_files_in_group_label1 = In alcuni gruppi tutti gli elementi sono selezionati.
 delete_all_files_in_group_label2 = Sei sicuro di cancellarli tutti?
-delete_folder_failed_1 = Cancellazione cartella fallita
-delete_folder_failed_2 = perché la cartella non esiste, non si hanno permessi sufficienti o perché non vuota.
+delete_folder_failed = Cancellazione cartella {$dir} fallita perché la cartella non esiste, non si hanno permessi sufficienti o perché non vuota.
 
 hardlink_failed = Failed to hardlink
 hard_sym_invalid_selection_title_dialog = Slezione invalida in alcuni gruppi
@@ -419,12 +442,11 @@ hard_sym_invalid_selection_label_3 = Il primo nel gruppo sarà considerato l'ori
 hard_sym_link_title_dialog = Conferma collegamento
 hard_sym_link_label = Sei sicuro di collegare questi file?
 
-move_folder_failed = Spostamento cartella fallito
-move_file_failed = Spostamento file fallito
+move_folder_failed = Spostamento cartella {$name} fallito, ragione {$reason}
+move_file_failed = Spostamento file {$name} fallito, ragione {$reason}
 move_files_title_dialog = Sleziona la cartella dove vuoi spostare i file duplicati
-move_files_choose_more_than_1_path = Solo un percorso deve essere selezionato per copiarvi i file, trovati
-move_stats_1 = Spostati con successo
-move_stats_2 = elementi
+move_files_choose_more_than_1_path = Solo un percorso deve essere selezionato per copiarvi i file, selezionati {$path_number}
+move_stats = {$num_files}/{$all_files} elementi spostati con successo 
 
 save_results_to_file = Risultati salvati su file
 
@@ -443,3 +465,10 @@ cache_clear_message_label_1 = Vuoi cancellare le voci obsolete dalla cache?
 cache_clear_message_label_2 = Quest'operazione cancellera tutti gli elementi che puntano a file invalidi.
 cache_clear_message_label_3 = Questo velocizzerà un po' il caricamento/savataggio della cache.
 cache_clear_message_label_4 = WARNING: L'operazione cancellerà tutti i dati della cache dai dischi esterni non collegati, quindi gli hash dpvranno essere generati nuovamente.
+
+# Show preview
+preview_temporary_file = Impossibile aprire immagine temporanea {$name}, ragione {$reason}
+preview_0_size = Impossibile creare anteprima dell'immagine {$name}, con larghezza o altezza 0
+preview_temporary_image_save = Impossibile salvare immagine temporanea in {$name}, ragione {$reason}
+preview_temporary_image_remove = Impossibile cancellare immagine temporanea {$name}, ragione {$reason}
+preview_failed_to_create_cache_dir = Impossibile creare cartella {$name} necessaria per l'anteprima immagine, ragione {$reason}
