@@ -6,10 +6,23 @@ core_similarity_small = Small
 core_similarity_very_small = Very Small
 core_similarity_minimal = Minimal
 
+core_cannot_open_dir = Cannot open dir {$dir}, reason {$reason}
+core_cannot_read_entry_dir = Cannot read entry in dir {$dir}, reason {$reason}
+core_cannot_read_metadata_dir = Cannot read metadata in dir {$dir}, reason {$reason}
+core_file_not_utf8_name = File {$name} has not valid UTF-8 name(some characters may not be shown)
+core_file_modified_before_epoch = File {$name} seems to be modified before Unix Epoch
+core_folder_modified_before_epoch = Folder {$name} seems to be modified before Unix Epoch
+core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}
+core_folder_no_modification_date = Unable to get modification date from folder {$name}, reason {$reason}
+
+# Window titles
+window_settings_title = Options
+window_main_title = Czkawka (Hiccup)
+window_progress_title = Scanning
+
 # General
 general_ok_button = Ok
 general_close_button = Close
-
 
 general_bytes = bytes
 general_lost = lost
@@ -274,6 +287,11 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
 
         In case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan.
 
+settings_notebook_general = General
+settings_notebook_duplicates = Duplicates
+settings_notebook_images = Similar Images
+settings_notebook_videos = Similar Video
+
 ## Multiple - settings used in multiple tabs
 settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
 settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
@@ -329,6 +347,9 @@ settings_saving_button = Save configuration
 settings_loading_button = Load configuration
 settings_reset_button = Reset configuration
 
+settings_load_orphan_data = Found invalid header in line {$line_number} \"{$line}\" when loading file {$name} (save file may be from different Czkawka version)
+settings_load_invalid_bool_value = Found invalid header in line {$line_number} \"{$line}\" which isn't proper value(0/1/true/false) when loading file {$name}
+
 
 ## Opening cache/config folders
 settings_folder_cache_open_tooltip = 
@@ -368,24 +389,26 @@ compute_symlinks = invalid symlinks
 compute_broken_files = broken files
 
 # Progress window
-progress_scanned = Scanned
-progress_files = file
-progress_folders = folders
-progress_tags = Reading tags of
-progress_hashing = Hashing
-progress_checking = Checking
-progress_size = size
-progress_name = name
-progress_analyzed_full_hash = Analyzed full hash of 
-progress_analyzed_partial_hash = Analyzed partial hash of 
+progress_scanning_general_file = Scanning {$file_number} file
+
+progress_scanning_broken_files = Checking {$file_checked}/{$all_files} file
+progress_scanning_video = Hashing of {$file_checked}/{$all_files} video
+progress_scanning_image = Hashing of {$file_checked}/{$all_files} image
+progress_scanning_music_tags_end = Comparing tags of {$file_checked}/{$all_files} music file
+progress_scanning_music_tags = Reading tags of {$file_checked}/{$all_files} music file
+progress_scanning_empty_folders = Scanning {$folder_number} folder
+progress_scanning_size = Scanning size of {$file_number} file
+progress_scanning_name = Scanning name of {$file_number} file
+progress_analyzed_partial_hash = Analyzed partial hash of {$file_checked}/{$all_files} files
+progress_analyzed_full_hash = Analyzed full hash of {$file_checked}/{$all_files} files
+
+progress_current_stage = Current Stage:{"  "}
+progress_all_stages = All Stages:{"  "}
 
 # Saving loading 
 saving_loading_saving_success = Saved configuration to file 
 saving_loading_reset_configuration = Current configuration was cleared.
 saving_loading_loading_success = Properly loaded configuration from file
-
-progress_current_stage = Current Stage:{"  "}
-progress_all_stages = All Stages:{"  "}
 
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Infinite recursion
@@ -396,20 +419,20 @@ searching_for_data = Searching data, it may take a while, please wait...
 text_view_messages = MESSAGES
 text_view_warnings = WARNINGS
 text_view_errors = ERRORS
+about_window_motto = This program is free to use and will always be.
 
 # Various dialog
 dialogs_ask_next_time = Ask next time
 reason_of_error = reason
 
-delete_file_failed = Failed to remove file
+delete_file_failed = Failed to remove file {$name}, reason {$reason}
 
 delete_title_dialog = Delete confirmation
 delete_question_label = Are you sure that you want to delete files?
 delete_all_files_in_group_title = Confirmation of deleting all files in group
 delete_all_files_in_group_label1 = In some groups there are selected all records.
 delete_all_files_in_group_label2 = Are you sure that you want to delete them?
-delete_folder_failed_1 = Failed to remove folder
-delete_folder_failed_2 = because folder doesn't exists, you don't have permissions or isn't empty.
+delete_folder_failed = Failed to remove folder {$dir} because folder doesn't exists, you don't have permissions or isn't empty.
 
 hardlink_failed = Failed to hardlink
 hard_sym_invalid_selection_title_dialog = Invalid selection with some groups
@@ -419,14 +442,13 @@ hard_sym_invalid_selection_label_3 = First in group is recognized as original an
 hard_sym_link_title_dialog = Link confirmation
 hard_sym_link_label = Are you sure that you want to link this files?
 
-move_folder_failed = Failed to move folder
-move_file_failed = Failed to move file
+move_folder_failed = Failed to move folder {$name}, reason {$reason}
+move_file_failed = Failed to move file {$name}, reason {$reason}
 move_files_title_dialog = Choose folder to which you want to move duplicated files
-move_files_choose_more_than_1_path = Only 1 path must be selected to be able to copy there duplicated files, found
-move_stats_1 = Properly moved
-move_stats_2 = items
+move_files_choose_more_than_1_path = Only 1 path must be selected to be able to copy there duplicated files, selected {$path_number}
+move_stats = Properly moved {$num_files}/{$all_files} items
 
-save_results_to_file = Saved results to file
+save_results_to_file = Saved results to file {$name}
 
 search_not_choosing_any_music = ERROR: You must select at least one checkbox with music searching types.
 
@@ -443,3 +465,10 @@ cache_clear_message_label_1 = Do you want to clear cache from outdated entries?
 cache_clear_message_label_2 = This operation will remove all cache entries which points to invalid files.
 cache_clear_message_label_3 = This may speedup a little loading/saving to cache.
 cache_clear_message_label_4 = WARNING: Operation will remove all cached data from unplugged external drives, so hash will need to be generated again.
+
+# Show preview
+preview_temporary_file = Failed to open temporary image file {$name}, reason {$reason}
+preview_0_size = Cannot create preview of image {$name}, with 0 width or height
+preview_temporary_image_save = Failed to save temporary image file to {$name}, reason {$reason}
+preview_temporary_image_remove = Failed to delete temporary image file {$name}, reason {$reason}
+preview_failed_to_create_cache_dir = Failed to create dir {$name} needed by image preview, reason {$reason}

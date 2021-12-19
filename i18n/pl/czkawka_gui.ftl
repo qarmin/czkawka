@@ -6,6 +6,20 @@ core_similarity_small = Małe
 core_similarity_very_small = Bardzo Małe
 core_similarity_minimal = Minimalne
 
+core_cannot_open_dir = Nie można otworzyć folderu {$dir}, powód {$reason}
+core_cannot_read_entry_dir = Nie można odczytać danych z folderu {$dir}, powód {$reason}
+core_cannot_read_metadata_dir = Nie można odczytać metadanych folderu {$dir}, powód {$reason}
+core_file_not_utf8_name = Plik {$name} nie posiada nazwy zakodowanej za pomocą UTF-8(niektóre znaki mogą się nie wyświetlać)
+core_file_modified_before_epoch = Plik {$name} ma datę modyfikacji sprzed epoki unixa
+core_folder_modified_before_epoch = Folder {$name} ma datę modyfikacji sprzed epoki unixa
+core_file_no_modification_date = Nie udało się pobrać daty modyfikacji z pliku {$name}, powód {$reason}
+core_folder_no_modification_date = Nie udało się pobrać daty modyfikacji z folderu {$name}, powód {$reason}
+
+# Nazwy okien
+window_settings_title = Opcje
+window_main_title = Czkawka
+window_progress_title = Skanowanie
+
 # Różne
 general_ok_button = Ok
 general_close_button = Zamknij
@@ -27,9 +41,9 @@ music_comparison_checkbox_tooltip =
         
         Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 
-duplicate_mode_name_checkbox = Nazwa
-duplicate_mode_size_checkbox = Rozmiar
-duplicate_mode_hash_checkbox = Hash
+duplicate_mode_name_combo_box = Nazwa
+duplicate_mode_size_combo_box = Rozmiar
+duplicate_mode_hash_combo_box = Hash
 
 duplicate_hash_type_tooltip = 
         Czkawka oferuje 3 różne algorytmy do tworzenia hashu pliku:
@@ -39,23 +53,6 @@ duplicate_hash_type_tooltip =
         CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashy.
 
         XXH3 - zarówno pod względem jakości hashu jak i wydajności jest podobny do Blake3, dlatego te algorytmy mogą być używane wymiennie.
-
-duplicate_mode_name_checkbox_tooltip = 
-        Służy do znajdowania plików o identycznych nazwach.
-        
-        Ten tryb nie sprawdza zawartości pliku, dlatego należy uważać przy jego stosowaniu.
-        
-duplicate_mode_size_checkbox_tooltip = 
-        Służy do znajdowania plików o identycznych rozmiarach.
-
-        Ten tryb nie sprawdza zawartości pliku, dlatego należy uważać przy jego stosowaniu.
-        
-duplicate_mode_hash_checkbox_tooltip = 
-        Znajduje pliki z identyczną zawartością, bez względu na nazwę i rozszerzenie pliku.
-
-        W tym trybie, każdy plik jest hasowany a następnie każdy hash jest porównywany z innymi.
-  
-        Ten tryb używa pamięci podręcznej do przechowywania raz obliczonych hashy, dlatego drugie i kolejne skanowanie, powinno być o wiele szybsze niż pierwsze.
 
 duplicate_check_method_tooltip = 
         Na chwilę obecną, Czkawka oferuje 3 tryby wyszukiwania duplicatów poprzez:
@@ -268,6 +265,7 @@ settings_confirm_group_deletion_button_tooltip = Wyświetla okno potwierdzające
 settings_show_text_view_button_tooltip = Pokazuje na dole ekranu panel tekstowy.
 settings_use_cache_button_tooltip = Umożliwia zapisywanie rekordów do pamięci podręcznej.
 settings_use_trash_button_tooltip = Przenosi pliki do kosza zamiast usuwać je permanentnie.
+settings_language_label_tooltip = Pozwala wybrać język interfejsu.
 
 settings_save_at_exit_button = Zapisuj konfigurację przy wyłączaniu
 settings_load_at_start_button = Ładuj ustawienia na starcie z pliku
@@ -277,6 +275,7 @@ settings_confirm_group_deletion_button = Pokazuj okno potwierdzające usuwanie w
 settings_show_text_view_button = Pokazuj panel tekstowy na dole
 settings_use_cache_button = Używaj pamięci podręcznej
 settings_use_trash_button = Przenoś pliki do kosza
+settings_language_label = Język
 
 
 ## Multiple - ustawienia wskazywane przez większość zakładek
@@ -325,6 +324,11 @@ settings_duplicates_prehash_checkbutton = Używaj pamięci podręcznej dla hashy
 settings_duplicates_minimal_size_cache_label = Wielkość pliku, od którego hash będzie zapisywany w pamięci podręcznej
 settings_duplicates_minimal_size_cache_prehash_label = Wielkość pliku, od którego cząstkowy hash będzie zapisywany w pamięci podręcznej
 
+settings_notebook_general = Ogólne
+settings_notebook_duplicates = Duplikaty
+settings_notebook_images = Podobne Obrazy
+settings_notebook_videos = Podobne Wideo
+
 ## Saving/Loading settings
 settings_saving_button_tooltip = Zapisuje aktualne ustawienia do pliku.
 settings_loading_button_tooltip = Ładuje ustawienia z pliku.
@@ -334,6 +338,8 @@ settings_saving_button = Zapisanie ustawień
 settings_loading_button = Załadowanie ustawień
 settings_reset_button = Reset ustawień
 
+settings_load_orphan_data = Znaleziono dane bez wlaściciela w lini {$line_number} \"{$line}\" podczas ładowania pliku {$name} (plik zapisu może pochodzić z innej wersji Czkawki)
+settings_load_invalid_bool_value = Znaleziono nieprawidłowe dane w linii {$line_number} \"{$line}\" które nie są poprawną wartością binarną(0/1/true/false) w pliku {$name}
 
 ## Opening cache/config folders
 settings_folder_cache_open_tooltip = 
@@ -371,16 +377,19 @@ compute_symlinks = niepoprawnych linków symbolicznych
 compute_broken_files = zepsutych plików
 
 # Progress window
-progress_scanned = Przeskanowano
-progress_files = plików
-progress_folders = folderów
-progress_tags = Sczytano tagi z
-progress_hashing = Przehashowano
-progress_checking = Sprawdzono
-progress_size = rozmiar
-progress_name = nazwa
-progress_analyzed_full_hash = Przeanalizowano pełny hash
-progress_analyzed_partial_hash = Przeanalizowano częściowy hash 
+
+progress_scanning_general_file = Skanowanie {$file_number} pliku
+
+progress_scanning_broken_files = Sprawdzanie {$file_checked}/{$all_files} pliku
+progress_scanning_video = Hashowanie {$file_checked}/{$all_files} pliku wideo
+progress_scanning_image = Hashowanie {$file_checked}/{$all_files} obrazu
+progress_scanning_music_tags_end = Porównywanie tagów {$file_checked}/{$all_files} pliku audio
+progress_scanning_music_tags = Sczytywanie tagów {$file_checked}/{$all_files} pliku audio
+progress_scanning_empty_folders = Przeszukiwanie {$folder_number} folderu
+progress_scanning_size = Sprawdzanie rozmiaru {$file_number} pliku
+progress_scanning_name = Sprawdzanie nazwy {$file_number} pliku
+progress_analyzed_partial_hash = Obliczanie częściowego hashu {$file_checked}/{$all_files} pliku
+progress_analyzed_full_hash = Obliczanie pełnego hashu {$file_checked}/{$all_files} pliku
 
 progress_current_stage = Aktualny Etap:{"  "}
 progress_all_stages = Wszystkie Etapy:{"  "}
@@ -399,20 +408,24 @@ searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę cz
 text_view_messages = WIADOMOŚCI
 text_view_warnings = OSTRZEŻENIA
 text_view_errors = BŁĘDY
+about_window_motto = 
+        Program jest i będzie zawsze darmowy do użytku.
 
+        Może interfejs programu nie jest ergonomiczny,
+        ale za to przynajmniej kod jest nieczytelny.
+        
 # Various dialog
 dialogs_ask_next_time = Pytaj następnym razem
 reason_of_error = powód
 
-delete_file_failed = Nie udało się usunąć pliku
+delete_file_failed = Nie udało się usunąć pliku {$name}, powód {$reason}
 
 delete_title_dialog = Potwierdzenie usunięcia
 delete_question_label = Czy na pewno usunąć te pliki?
 delete_all_files_in_group_title = Potwierdzenie usunięcia wszystkich plików w grupie
 delete_all_files_in_group_label1 = W niektórych grupach zaznaczono wszystkie rekordy.
 delete_all_files_in_group_label2 = Czy na pewno je usunąć?
-delete_folder_failed_1 = Nie udało się usunąć folderu
-delete_folder_failed_2 = ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
+delete_folder_failed = Nie udało się usunąć folderu {$name} ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
 
 hardlink_failed = Nie udało się utworzyć twardego dowiązania
 hard_sym_invalid_selection_title_dialog = Niepoprawne zaznaczenie w niektórych grupach
@@ -422,14 +435,13 @@ hard_sym_invalid_selection_label_3 = Pierwszy pozostaje nienaruszony a drugi i k
 hard_sym_link_title_dialog = Potwierdzenie dowiązania
 hard_sym_link_label = Czy na pewno dowiązać te pliki?
 
-move_folder_failed = Nie można przenieść folderu
-move_file_failed = Nie można przenieść pliku
+move_folder_failed = Nie można przenieść folderu {$name}, powód {$reason}
+move_file_failed = Nie można przenieść pliku {$name}, powód {$reason}
 move_files_title_dialog = Wybierz folder do którego zostaną przeniesione pliki
-move_files_choose_more_than_1_path = Można przenieść elementy tylko do 1 folderu, zaznaczono 
-move_stats_1 = Poprawnie przeniesiono
-move_stats_2 = elementów
+move_files_choose_more_than_1_path = Można przenieść elementy tylko do 1 folderu, zaznaczono {$path_number}
+move_stats = Poprawnie przeniesiono {$num_files}/{$all_files} elementów
 
-save_results_to_file = Zapisano wyniki do pliku
+save_results_to_file = Zapisano wyniki do pliku {$name}
 
 search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
 
@@ -446,3 +458,10 @@ cache_clear_message_label_1 = Czy na pewno chcesz oczyścić pamięć podręczn�
 cache_clear_message_label_2 = Ta operacja usunie wszystkie rekordy, które wskazują na nieistniejące pliki.
 cache_clear_message_label_3 = Może spowodować to przyspieszenie ładowania i zapisywania danych do pamięci w trakcie skanowania.
 cache_clear_message_label_4 = OSTRZEŻENIE: Usunięte zostaną wszystkie rekordy z odpiętych dyskach zewnętrznych i konieczne będzie ich ponowne sprawdzenie po podpięciu.
+
+# Show preview
+preview_temporary_file = Nie udało się otworzyć tymczasowego obrazu {$name}, powód {$reason}
+preview_0_size = Nie można stworzyć podglądu obrazu {$name}, z wysokością lub szerokością 0 pikseli
+preview_temporary_image_save = Nie udało się zapisać tymczasowego obrazu do {$name}, powód {$reason}
+preview_temporary_image_remove = Nie udało się usunąć tymczasowego obrazu {$name}, powód {$reason}
+preview_failed_to_create_cache_dir = Nie udało stworzyć się katalogu {$name} wymaganego do stworzenia podglądu obrazu, powód {$reason}

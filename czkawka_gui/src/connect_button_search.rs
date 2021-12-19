@@ -5,7 +5,6 @@ use std::thread;
 use glib::Sender;
 use gtk::prelude::*;
 
-use crate::fl;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -18,6 +17,7 @@ use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::*;
 
+use crate::fl;
 use crate::gui_data::GuiData;
 use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX};
 use crate::help_functions::*;

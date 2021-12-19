@@ -1,5 +1,6 @@
-use czkawka_core::duplicate::{CheckingMethod, HashType};
 use img_hash::{FilterType, HashAlg};
+
+use czkawka_core::duplicate::{CheckingMethod, HashType};
 
 pub struct HashTypeStruct {
     pub eng_name: &'static str,

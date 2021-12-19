@@ -1,6 +1,7 @@
-use crate::help_functions::*;
 use gdk::ModifierType;
 use gtk::prelude::*;
+
+use crate::help_functions::*;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 

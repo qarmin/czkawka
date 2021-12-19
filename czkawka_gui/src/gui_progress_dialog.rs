@@ -1,7 +1,8 @@
-use crate::fl;
-use crate::help_functions::get_custom_label_from_button_with_image;
 use gtk::prelude::*;
 use gtk::{Bin, Builder, EventControllerKey, Window};
+
+use crate::fl;
+use crate::help_functions::get_custom_label_from_button_with_image;
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
@@ -27,9 +28,9 @@ impl GuiProgressDialog {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_progress: gtk::Dialog = builder.object("window_progress").unwrap();
+        window_progress.set_title(&fl!("window_progress_title"));
         window_progress.set_transient_for(Some(window_main));
         window_progress.set_modal(true);
-        window_progress.set_title("Czkawka");
 
         let progress_bar_current_stage: gtk::ProgressBar = builder.object("progress_bar_current_stage").unwrap();
         let progress_bar_all_stages: gtk::ProgressBar = builder.object("progress_bar_all_stages").unwrap();
@@ -60,6 +61,8 @@ impl GuiProgressDialog {
         }
     }
     pub fn update_language(&self) {
+        self.window_progress.set_title(&fl!("window_progress_title"));
+
         get_custom_label_from_button_with_image(&self.button_stop_in_dialog.clone().upcast::<Bin>()).set_text(&fl!("progress_stop_button"));
 
         self.label_progress_current_stage.set_label(&fl!("progress_current_stage"));

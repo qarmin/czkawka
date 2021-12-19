@@ -1,13 +1,15 @@
-use czkawka_core::common_messages::Messages;
-use czkawka_core::duplicate::HashType;
-use czkawka_core::fl;
+use std::collections::BTreeMap;
+use std::default::Default;
+
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{LabelBuilder, ResponseType, Window};
 use image::imageops::FilterType;
 use img_hash::HashAlg;
-use std::collections::BTreeMap;
-use std::default::Default;
+
+use czkawka_core::common_messages::Messages;
+use czkawka_core::duplicate::HashType;
+use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::get_dialog_box_child;

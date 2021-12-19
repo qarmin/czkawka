@@ -2,12 +2,14 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
 
-use czkawka_core::fl;
 use gtk::prelude::*;
 use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
 
+use czkawka_core::fl;
+
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -289,7 +291,8 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             }
         }
         if error_happened {
-            messages += format!("{} {}/{} {}\n", fl!("delete_folder_failed_1"), path, name, fl!("delete_folder_failed_2")).as_str()
+            messages += &fl!("delete_folder_failed", generate_translation_hashmap(vec![("dir", format!("{}/{}", path, name))]));
+            messages += "\n";
         }
     }
 
@@ -333,14 +336,21 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(e) => messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, name, e).as_str(),
+
+                Err(e) => {
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, name)), ("reason", e.to_string())])).as_str();
+                    messages += "\n";
+                }
             }
         } else {
             match trash::delete(format!("{}/{}", path, name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
-                Err(e) => messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, name, e).as_str(),
+                Err(e) => {
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, name)), ("reason", e.to_string())])).as_str();
+                    messages += "\n";
+                }
             }
         }
     }
@@ -401,10 +411,12 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         for file_name in vec_file_name {
             if !use_trash {
                 if let Err(e) = fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())) {
-                    messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, file_name, e).as_str()
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, file_name)), ("reason", e.to_string())])).as_str();
+                    messages += "\n";
                 }
             } else if let Err(e) = trash::delete(format!("{}/{}", path.clone(), file_name.clone())) {
-                messages += format!("{} {}/{}, reason {}\n", fl!("delete_file_failed"), path, file_name, e).as_str()
+                messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, file_name)), ("reason", e.to_string())])).as_str();
+                messages += "\n";
             }
 
             vec_path_to_delete.push((path.clone(), file_name.clone()));

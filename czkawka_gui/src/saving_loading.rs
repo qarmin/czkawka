@@ -3,15 +3,17 @@ use std::io::Write;
 use std::path::Path;
 use std::{env, fs};
 
-use czkawka_core::fl;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{ScrolledWindow, TextView};
+
+use czkawka_core::fl;
 
 use crate::gui_settings::GuiSettings;
 use crate::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_functions::*;
 use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
+use crate::localizer::generate_translation_hashmap;
 
 // TODO organize this better, add specific functions that will allow to load from files specific strings
 const SAVE_FILE_NAME: &str = "czkawka_gui_config.txt";
@@ -346,14 +348,22 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                 current_type = TypeOfLoadedData::None;
                 add_text_to_text_view(
                     &text_view_errors,
-                    format!("Found invalid header in line {} \"{}\" when loading file {:?} (save file may be from different Czkawka version)", line_number, line, config_file).as_str(),
+                    fl!(
+                        "settings_load_orphan_data",
+                        generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                    )
+                    .as_str(),
                 );
             } else {
                 match current_type {
                     TypeOfLoadedData::None => {
                         add_text_to_text_view(
                             &text_view_errors,
-                            format!("Found orphan data in line {} \"{}\" when loading file {:?} (save file may be from different Czkawka version)", line_number, line, config_file).as_str(),
+                            fl!(
+                                "settings_load_orphan_data",
+                                generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                            )
+                            .as_str(),
                         );
                     }
                     TypeOfLoadedData::IncludedDirectories => {
@@ -377,7 +387,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -390,7 +404,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -403,7 +421,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -416,7 +438,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -429,7 +455,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -442,7 +472,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -455,7 +489,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -468,7 +506,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -481,7 +523,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -494,7 +540,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -517,7 +567,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -530,7 +584,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -543,7 +601,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -556,7 +618,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(0/1/true/false) when loading file {:?}", line_number, line, config_file).as_str(),
+                                fl!(
+                                    "settings_load_invalid_bool_value",
+                                    generate_translation_hashmap(vec![("name", config_file.display().to_string()), ("line_number", line_number.to_string()), ("line", line)])
+                                )
+                                .as_str(),
                             );
                         }
                     }

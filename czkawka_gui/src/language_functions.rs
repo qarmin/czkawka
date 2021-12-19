@@ -4,13 +4,14 @@ pub struct Language {
     pub short_text: &'static str,
 }
 
+<<<<<<< HEAD
 pub const LANGUAGES_ALL: [Language; 3] = [
+=======
+pub const LANGUAGES_ALL: [Language; 2] = [
+    Language { combo_box_text: "English", short_text: "en" },
+>>>>>>> d1ac2f3c22bf7be86b121153ff8258f3d09085de
     Language {
-        combo_box_text: "English (en)",
-        short_text: "en",
-    },
-    Language {
-        combo_box_text: "Polski (pl)",
+        combo_box_text: "Polski (Polish)",
         short_text: "pl",
     },
     Language {

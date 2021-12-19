@@ -1,8 +1,10 @@
-use crate::language_functions::get_language_from_combo_box_text;
-use crate::{GuiData, LANGUAGES_ALL};
 use gtk::prelude::*;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
+
+use crate::language_functions::get_language_from_combo_box_text;
+use crate::{GuiData, LANGUAGES_ALL};
+
 // use i18n_embed::{DesktopLanguageRequester, Localizer};
 
 pub fn connect_change_language(gui_data: &GuiData) {
