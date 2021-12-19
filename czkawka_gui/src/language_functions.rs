@@ -4,7 +4,7 @@ pub struct Language {
     pub short_text: &'static str,
 }
 
-pub const LANGUAGES_ALL: [Language; 2] = [
+pub const LANGUAGES_ALL: [Language; 3] = [
     Language {
         combo_box_text: "English (en)",
         short_text: "en",
@@ -12,6 +12,10 @@ pub const LANGUAGES_ALL: [Language; 2] = [
     Language {
         combo_box_text: "Polski (pl)",
         short_text: "pl",
+    },
+    Language {
+        combo_box_text: "Italian (it)",
+        short_text: "it",
     },
 ];
 
