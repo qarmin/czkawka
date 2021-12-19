@@ -9,6 +9,7 @@ use czkawka_core::common_traits::SaveResults;
 use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
+use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 pub fn connect_button_save(gui_data: &GuiData) {
@@ -87,7 +88,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
 }
 
 fn post_save_things(file_name: &str, type_of_tab: &NotebookMainEnum, shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>, entry_info: &Entry, buttons_save: &Button) {
-    entry_info.set_text(format!("{} {}", fl!("save_results_to_file"), file_name).as_str());
+    entry_info.set_text(fl!("save_results_to_file", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str());
     // Set state
     {
         buttons_save.hide();

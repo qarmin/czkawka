@@ -1,8 +1,9 @@
+use gtk::prelude::*;
+use gtk::{Bin, EventControllerKey, TreeView};
+
 use crate::fl;
 use crate::help_functions::get_custom_label_from_button_with_image;
 use crate::notebook_enums::NotebookUpperEnum;
-use gtk::prelude::*;
-use gtk::{Bin, EventControllerKey, TreeView};
 
 #[derive(Clone)]
 pub struct GuiUpperNotebook {

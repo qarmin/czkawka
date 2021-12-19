@@ -1,7 +1,8 @@
-use crate::fl;
-use crate::help_functions::get_custom_label_from_button_with_image;
 use gtk::prelude::*;
 use gtk::{Bin, Widget};
+
+use crate::fl;
+use crate::help_functions::get_custom_label_from_button_with_image;
 
 #[derive(Clone)]
 pub struct GuiBottomButtons {

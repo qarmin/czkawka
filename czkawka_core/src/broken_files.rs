@@ -19,6 +19,8 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
+use crate::fl;
+use crate::localizer::generate_translation_hashmap;
 
 const CACHE_FILE_NAME: &str = "cache_broken_files.txt";
 
@@ -213,7 +215,7 @@ impl BrokenFiles {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(format!("Cannot open dir {}, reason {}", current_folder.display(), e));
+                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -223,14 +225,14 @@ impl BrokenFiles {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(format!("Cannot read entry in dir {}, reason {}", current_folder.display(), e));
+                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(format!("Cannot read metadata in dir {}, reason {}", current_folder.display(), e));
+                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
                                 continue 'dir;
                             }
                         };
@@ -255,7 +257,7 @@ impl BrokenFiles {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(format!("File {:?} has not valid UTF-8 name", entry_data));
+                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
                                     continue 'dir;
                                 }
                             }
@@ -281,12 +283,15 @@ impl BrokenFiles {
                                     Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                         Ok(d) => d.as_secs(),
                                         Err(_inspected) => {
-                                            warnings.push(format!("File {} seems to be modified before Unix Epoch.", current_file_name.display()));
+                                            warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
                                             0
                                         }
                                     },
                                     Err(e) => {
-                                        warnings.push(format!("Unable to get modification date from file {}, reason {}", current_file_name.display(), e));
+                                        warnings.push(fl!(
+                                            "core_file_no_modification_date",
+                                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
+                                        ));
                                         0
                                     }
                                 },

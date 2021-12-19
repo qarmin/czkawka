@@ -88,7 +88,7 @@ Author: Rafał Mikrut
               </packing>
             </child>
             <child>
-              <object class="GtkNotebook">
+              <object class="GtkNotebook" id="notebook_settings">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="tab-pos">left</property>

@@ -1,10 +1,13 @@
-use crate::fl;
 use gtk::prelude::*;
 use gtk::{Builder, Window};
+
+use crate::fl;
 
 #[derive(Clone)]
 pub struct GuiSettings {
     pub window_settings: gtk::Window,
+
+    pub notebook_settings: gtk::Notebook,
 
     // General
     pub check_button_settings_save_at_exit: gtk::CheckButton,
@@ -56,6 +59,8 @@ impl GuiSettings {
         window_settings.set_modal(true);
         window_settings.set_transient_for(Some(window_main));
 
+        let notebook_settings: gtk::Notebook = builder.object("notebook_settings").unwrap();
+
         // General
         let check_button_settings_save_at_exit: gtk::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
         let check_button_settings_load_at_start: gtk::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
@@ -98,6 +103,7 @@ impl GuiSettings {
 
         Self {
             window_settings,
+            notebook_settings,
             check_button_settings_save_at_exit,
             check_button_settings_load_at_start,
             check_button_settings_confirm_deletion,
@@ -197,5 +203,16 @@ impl GuiSettings {
 
         self.button_settings_open_cache_folder.set_tooltip_text(Some(&fl!("settings_folder_cache_open_tooltip")));
         self.button_settings_open_settings_folder.set_tooltip_text(Some(&fl!("settings_folder_settings_open_tooltip")));
+
+        let vec_children: Vec<gtk::Widget> = self.notebook_settings.children();
+
+        // let vec_children: Vec<gtk::Widget> = get_all_children(&self.notebook_settings);
+        // let vec_children: Vec<gtk::Widget> = get_all_children(&vec_children[1]);
+
+        // Change name of main notebook tabs
+        let names: [String; 4] = [fl!("settings_notebook_general"), fl!("settings_notebook_duplicates"), fl!("settings_notebook_images"), fl!("settings_notebook_videos")];
+        for (index, fl_thing) in names.iter().enumerate() {
+            self.notebook_settings.tab_label(&vec_children[index]).unwrap().downcast::<gtk::Label>().unwrap().set_text(fl_thing);
+        }
     }
 }

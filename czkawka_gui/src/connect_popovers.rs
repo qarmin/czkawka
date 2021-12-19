@@ -2,9 +2,9 @@ use gtk::prelude::*;
 use gtk::{ResponseType, TreeIter, Window};
 use regex::Regex;
 
-use crate::fl;
 use czkawka_core::common::Common;
 
+use crate::fl;
 use crate::gui_data::GuiData;
 use crate::help_functions::*;
 
