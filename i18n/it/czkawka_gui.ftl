@@ -347,6 +347,9 @@ settings_saving_button = Salva configurazione
 settings_loading_button = Carica configurazione
 settings_reset_button = Reimposta configurazione
 
+settings_load_orphan_data = Trovata intestazione invalida nella linea {$line_number} \"{$line}\" durante il caricamento del file {$name} (il salvataggio potrebbe essere differente dalla versione di Singhiozzo)
+settings_load_invalid_bool_value = Trovata intestazione invalida nella linea {$line_number} \"{$line}\" che non è un valore corretto (0/1/true/false) durante il caricamento del file {$name}
+
 
 ## Opening cache/config folders
 settings_folder_cache_open_tooltip = 
@@ -406,9 +409,6 @@ progress_all_stages = Tutte le fasi:{"  "}
 saving_loading_saving_success = Configurazione salvata su file
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
 saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo
-
-progress_current_stage = Fase corrente:{"  "}
-progress_all_stages = Tutte le fasi:{"  "}
 
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Ricorsione infinita
