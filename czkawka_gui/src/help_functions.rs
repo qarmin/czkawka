@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use gtk::prelude::*;
-use gtk::{ListStore, TextView, Widget};
+use gtk::{ListStore, TextView, TreeView, Widget};
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -553,6 +553,52 @@ pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
             model.clear();
         }
     }
+}
+pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: Option<i32>, column_selection: i32) -> (u64, u64) {
+    let mut number_of_selected_items: u64 = 0;
+    let mut number_of_selected_groups: u64 = 0;
+
+    let model = get_list_store(tree_view);
+
+    let mut is_item_currently_selected_in_group: bool = false;
+
+    // First iter
+    if let Some(iter) = model.iter_first() {
+        if let Some(column_color) = column_color {
+            assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+
+            loop {
+                if !model.iter_next(&iter) {
+                    break;
+                }
+
+                if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    is_item_currently_selected_in_group = false;
+                } else {
+                    if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                        number_of_selected_items += 1;
+
+                        if !is_item_currently_selected_in_group {
+                            number_of_selected_groups += 1;
+                        }
+                        is_item_currently_selected_in_group = true;
+                    }
+                }
+            }
+        } else {
+            loop {
+                if !model.iter_next(&iter) {
+                    break;
+                }
+
+                if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                    number_of_selected_items += 1;
+                }
+            }
+        }
+    }
+
+    (number_of_selected_items, number_of_selected_groups)
 }
 
 pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label {

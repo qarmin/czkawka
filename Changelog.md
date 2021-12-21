@@ -1,10 +1,12 @@
 ## Version 4.0.0 - ?
+- Multithread support for collecting files to check(2/3x on 4 thread processor) - [#502](https://github.com/qarmin/czkawka/pull/502), [#504](https://github.com/qarmin/czkawka/pull/504)
+- Add Polish and Italian translation - [#469](https://github.com/qarmin/czkawka/pull/469), [#508](https://github.com/qarmin/czkawka/pull/508)
 - Add support for finding similar videos - [#460](https://github.com/qarmin/czkawka/pull/460)
 - GUI code refactoring(could fix some bugs) - [#462](https://github.com/qarmin/czkawka/pull/462)
 - Fixed crash when trying to hard/symlink 0 files - [#462](https://github.com/qarmin/czkawka/pull/462)
-- GTK 4 compatibility improvements for future change of toolkit - [#467](https://github.com/qarmin/czkawka/pull/467), [#468](https://github.com/qarmin/czkawka/pull/468), [#473](https://github.com/qarmin/czkawka/pull/473), [#474](https://github.com/qarmin/czkawka/pull/474)
+- GTK 4 compatibility improvements for future change of toolkit - [#467](https://github.com/qarmin/czkawka/pull/467), [#468](https://github.com/qarmin/czkawka/pull/468), [#473](https://github.com/qarmin/czkawka/pull/473), [#474](https://github.com/qarmin/czkawka/pull/474), [#503](https://github.com/qarmin/czkawka/pull/503), [#505](https://github.com/qarmin/czkawka/pull/505)
 - Change minimal supported OS to Ubuntu 20.04(needed by GTK) - [#468](https://github.com/qarmin/czkawka/pull/468)
-- Increased performance when using image previews - [#468](https://github.com/qarmin/czkawka/pull/468)
+- Increased performance by avoiding creating unnecessary image previews - [#468](https://github.com/qarmin/czkawka/pull/468)
 - Improved performance due caching hash of broken/not supported images/videos = [#471](https://github.com/qarmin/czkawka/pull/471)
 - Option to not remove cache from non existent files(e.g. from unplugged pendrive) - [#472](https://github.com/qarmin/czkawka/pull/472)
 - Add multiple tooltips with helpful messages - [#472](https://github.com/qarmin/czkawka/pull/472)
@@ -13,6 +15,9 @@
 - Remove support for finding zeroed files - [#461](https://github.com/qarmin/czkawka/pull/461)
 - Remove HashMB mode - [#476](https://github.com/qarmin/czkawka/pull/476)
 - Approximate comparison of music - [#483](https://github.com/qarmin/czkawka/pull/483)
+- Enable column sorting for simple treeview - [#487](https://github.com/qarmin/czkawka/pull/487)
+- Allow to hide upper panel - [#491](https://github.com/qarmin/czkawka/pull/491)
+- Make UI take less space - [#500](https://github.com/qarmin/czkawka/pull/500)
 
 ## Version 3.3.1 - 22.11.2021r
 - Fix crash when moving buttons [#457](https://github.com/qarmin/czkawka/pull/457)
