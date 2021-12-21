@@ -293,16 +293,6 @@ settings_notebook_images = Similar Images
 settings_notebook_videos = Similar Video
 
 ## Multiple - settings used in multiple tabs
-settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
-settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
-        Allows to delete outdated cache results which points to non-existent files.
-
-        When enabled, app make sure when loading records, that all points to valid files and ignore broken ones.
-
-        Disabling this option, will help to scan files on external drives, so cache entries about them will not be purged in next scan.
-
-        In case of having hundred of thousands records in cache, it is suggested to enable this option, to speedup cache loading and saving at start and end of scan.
-
 settings_multiple_image_preview_checkbutton_tooltip = Shows preview at right side, when selecting image file.
 settings_multiple_image_preview_checkbutton = Show image preview
 

@@ -6,6 +6,8 @@ App use Fluent localization system - https://projectfluent.org/
 
 Main/Default language is English, but also Polish is officially supported.
 
+Translating is mostly done by site - https://crowdin.com/project/czkawka
+
 ## How to translate Czkawka?
 
 Base translatable strings are placed under `i18n/en/czkawka_gui.ftl` file.  
@@ -24,6 +26,8 @@ to create new folder with translations, it is required to create copy of `i18n/e
 
 Next only translated strings needs to be changed
 
+Such translated file, can be easily uploaded to crowdin page to increase % of translated strings
+
 ## Testing translation
 ### Replacing en folder
 The simplest method is to remove `en` folder and replace it with needed one.  
@@ -37,11 +41,11 @@ After creating proper and well named folder and translating string inside it, to
 ```rust
 pub const LANGUAGES_ALL: [Language; 2] = [
     Language {
-        combo_box_text: "English (en)",
+        combo_box_text: "English",
         short_text: "en",
     },
     Language {
-        combo_box_text: "Polski (pl)",
+        combo_box_text: "Polski (Polish)",
         short_text: "pl",
     },
 ];
@@ -52,37 +56,11 @@ The only thing which is required to change is `LANGUAGES_ALL` constant.
 Number of items must be changed `[Language; 2]` -> `[Language; 3]`.
 
 Next new record must be added to array.  
-`combo_box_text` must contains translated language name(so `Polski` is used instead `Polish`), to help find people to find their native(or not) language.  
+`combo_box_text` must contains native and english name of language e.g. `Polski (Polish)` - English is only exception because in both versions is exactly same.  
 `short_text` is `ISO 639-1` code which need to match with county code and name of folder inside `i18n`.
 ```
     Language {
-        combo_box_text: "Polski (pl)",
+        combo_box_text: "Polski (Polish)",
         short_text: "pl",
     },
 ```
-
-# Verify strings
-Due renames, adding and removing elements, may happen that translations contains outdated entries.
-
-To help find such keywords, special python script can be used.
-
-To be able to use it, be sure that you are directly inside main `czkawka` folder.  
-Next run python script `python3 misc/translation_test.py`.  
-Then results should be visible in console:
-```
-Checking pl language
-Missing keyword - duplicate_mode_name_combo_box
-Missing keyword - duplicate_mode_size_combo_box
-Missing keyword - duplicate_mode_hash_combo_box
-Missing keyword - settings_language_label_tooltip
-Missing keyword - settings_language_label
-Unused keyword - duplicate_mode_name_checkbox
-Unused keyword - duplicate_mode_size_checkbox
-Unused keyword - duplicate_mode_hash_checkbox
-Unused keyword - duplicate_mode_name_checkbox_tooltip
-Unused keyword - duplicate_mode_size_checkbox_tooltip
-Unused keyword - duplicate_mode_hash_checkbox_tooltip
-```
-To be able to check new language, inside script variable `translations` needs to be updated.  
-`Missing keyword` means that some keywords exists in base translations and texts needs to be translated.  
-`Unused keyword` means that keyword is no longer used. It can be renamed or entirely removed from file.
