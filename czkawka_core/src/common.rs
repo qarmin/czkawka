@@ -12,7 +12,11 @@ impl Common {
     #[allow(unused_variables)]
     pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
         #[cfg(debug_assertions)]
-        println!("Execution of function \"{}\" took {:?}", function_name, end_time.duration_since(start_time).expect("Time cannot go reverse."));
+        println!(
+            "Execution of function \"{}\" took {:?}",
+            function_name,
+            end_time.duration_since(start_time).expect("Time cannot go reverse.")
+        );
     }
 
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {

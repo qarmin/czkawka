@@ -245,8 +245,11 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions
-            .extend_allowed_extensions(&[".jpg", ".jpeg", ".png" /*, ".bmp"*/, ".tiff", ".tif", ".tga", ".ff" /*, ".gif"*/, ".jif", ".jfi" /*, ".webp"*/]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+        self.allowed_extensions.extend_allowed_extensions(&[
+            ".jpg", ".jpeg", ".png", /*, ".bmp"*/
+            ".tiff", ".tif", ".tga", ".ff", /*, ".gif"*/
+            ".jif", ".jfi", /*, ".webp"*/
+        ]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -300,7 +303,10 @@ impl SimilarImages {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                            warnings.push(fl!(
+                                "core_cannot_open_dir",
+                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                            ));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -310,14 +316,20 @@ impl SimilarImages {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_entry_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_metadata_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
@@ -342,7 +354,10 @@ impl SimilarImages {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
+                                    warnings.push(fl!(
+                                        "core_file_not_utf8_name",
+                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                    ));
                                     continue 'dir;
                                 }
                             }
@@ -367,7 +382,10 @@ impl SimilarImages {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
+                                                warnings.push(fl!(
+                                                    "core_file_modified_before_epoch",
+                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                ));
                                                 0
                                             }
                                         },
@@ -451,7 +469,11 @@ impl SimilarImages {
             mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from cache and preparing them".to_string());
+        Common::print_time(
+            hash_map_modification,
+            SystemTime::now(),
+            "sort_images - reading data from cache and preparing them".to_string(),
+        );
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
@@ -511,7 +533,10 @@ impl SimilarImages {
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
 
-                let hasher_config = HasherConfig::new().hash_size(self.hash_size as u32, self.hash_size as u32).hash_alg(self.hash_alg).resize_filter(self.image_filter);
+                let hasher_config = HasherConfig::new()
+                    .hash_size(self.hash_size as u32, self.hash_size as u32)
+                    .hash_alg(self.hash_alg)
+                    .resize_filter(self.image_filter);
                 let hasher = hasher_config.to_hasher();
 
                 let hash = hasher.hash_image(&image);
@@ -805,14 +830,22 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .messages
+                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
         };
         let mut writer = BufWriter::new(file_handler);
 
         for file_entry in hashmap.values() {
-            let mut string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.dimensions, file_entry.modified_date);
+            let mut string: String = format!(
+                "{}//{}//{}//{}",
+                file_entry.path.display(),
+                file_entry.size,
+                file_entry.dimensions,
+                file_entry.modified_date
+            );
 
             for hash in &file_entry.hash {
                 string.push_str("//");
@@ -820,14 +853,22 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             }
 
             if let Err(e) = writeln!(writer, "{}", string) {
-                text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .messages
+                    .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                 return;
             };
         }
     }
 }
 
-pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> Option<BTreeMap<String, FileEntry>> {
+pub fn load_hashes_from_file(
+    text_messages: &mut Messages,
+    delete_outdated_cache: bool,
+    hash_size: u8,
+    hash_alg: HashAlg,
+    image_filter: FilterType,
+) -> Option<BTreeMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
@@ -850,7 +891,9 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             let line = match line {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
                     return None;
                 }
             };
@@ -873,9 +916,13 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
                     hash.push(match uuu[4 + i as usize].parse::<u8>() {
                         Ok(t) => t,
                         Err(e) => {
-                            text_messages
-                                .warnings
-                                .push(format!("Found invalid hash value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                            text_messages.warnings.push(format!(
+                                "Found invalid hash value in line {} - ({}) in cache file {}, reason {}",
+                                index + 1,
+                                line,
+                                cache_file.display(),
+                                e
+                            ));
                             continue;
                         }
                     });
@@ -888,9 +935,13 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
                         size: match uuu[1].parse::<u64>() {
                             Ok(t) => t,
                             Err(e) => {
-                                text_messages
-                                    .warnings
-                                    .push(format!("Found invalid size value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                                text_messages.warnings.push(format!(
+                                    "Found invalid size value in line {} - ({}) in cache file {}, reason {}",
+                                    index + 1,
+                                    line,
+                                    cache_file.display(),
+                                    e
+                                ));
                                 continue;
                             }
                         },
@@ -898,9 +949,13 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
                         modified_date: match uuu[3].parse::<u64>() {
                             Ok(t) => t,
                             Err(e) => {
-                                text_messages
-                                    .warnings
-                                    .push(format!("Found invalid modified date value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                                text_messages.warnings.push(format!(
+                                    "Found invalid modified date value in line {} - ({}) in cache file {}, reason {}",
+                                    index + 1,
+                                    line,
+                                    cache_file.display(),
+                                    e
+                                ));
                                 continue;
                             }
                         },
@@ -919,7 +974,12 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 }
 
 fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
-    format!("cache_similar_images_{}_{}_{}.txt", hash_size, convert_algorithm_to_string(hash_alg), convert_filters_to_string(image_filter))
+    format!(
+        "cache_similar_images_{}_{}_{}.txt",
+        hash_size,
+        convert_algorithm_to_string(hash_alg),
+        convert_filters_to_string(image_filter)
+    )
 }
 
 pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> String {
@@ -1024,7 +1084,13 @@ pub fn test_image_conversion_speed() {
     match image::open(file_path) {
         Ok(img_open) => {
             for alg in [HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
-                for filter in [FilterType::Lanczos3, FilterType::CatmullRom, FilterType::Gaussian, FilterType::Nearest, FilterType::Triangle] {
+                for filter in [
+                    FilterType::Lanczos3,
+                    FilterType::CatmullRom,
+                    FilterType::Gaussian,
+                    FilterType::Nearest,
+                    FilterType::Triangle,
+                ] {
                     for size in [8, 16, 32, 64] {
                         let hasher_config = HasherConfig::new().hash_alg(alg).resize_filter(filter).hash_size(size, size);
 

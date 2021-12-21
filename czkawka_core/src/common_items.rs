@@ -44,7 +44,9 @@ impl ExcludedItems {
                 continue;
             }
             if !expression.contains('*') {
-                text_messages.warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
+                text_messages
+                    .warnings
+                    .push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
                 continue;
             }
 

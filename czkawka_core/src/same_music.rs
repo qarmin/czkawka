@@ -257,7 +257,10 @@ impl SameMusic {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                            warnings.push(fl!(
+                                "core_cannot_open_dir",
+                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                            ));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -267,14 +270,20 @@ impl SameMusic {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_entry_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_metadata_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
@@ -299,7 +308,10 @@ impl SameMusic {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
+                                    warnings.push(fl!(
+                                        "core_file_not_utf8_name",
+                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                    ));
                                     continue 'dir;
                                 }
                             }
@@ -323,7 +335,10 @@ impl SameMusic {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
+                                                warnings.push(fl!(
+                                                    "core_file_modified_before_epoch",
+                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                ));
                                                 0
                                             }
                                         },

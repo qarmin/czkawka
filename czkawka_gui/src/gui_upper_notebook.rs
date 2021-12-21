@@ -119,10 +119,12 @@ impl GuiUpperNotebook {
         // get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&fl!("upper_add_excluded_button"));
         // get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&fl!("upper_remove_excluded_button"));
 
-        self.buttons_manual_add_included_directory.set_tooltip_text(Some(&fl!("upper_manual_add_included_button_tooltip")));
+        self.buttons_manual_add_included_directory
+            .set_tooltip_text(Some(&fl!("upper_manual_add_included_button_tooltip")));
         self.buttons_add_included_directory.set_tooltip_text(Some(&fl!("upper_add_included_button_tooltip")));
         self.buttons_remove_included_directory.set_tooltip_text(Some(&fl!("upper_remove_included_button_tooltip")));
-        self.buttons_manual_add_excluded_directory.set_tooltip_text(Some(&fl!("upper_manual_add_excluded_button_tooltip")));
+        self.buttons_manual_add_excluded_directory
+            .set_tooltip_text(Some(&fl!("upper_manual_add_excluded_button_tooltip")));
         self.buttons_add_excluded_directory.set_tooltip_text(Some(&fl!("upper_add_excluded_button_tooltip")));
         self.buttons_remove_excluded_directory.set_tooltip_text(Some(&fl!("upper_remove_excluded_button_tooltip")));
 
@@ -155,7 +157,12 @@ impl GuiUpperNotebook {
             (NotebookUpperEnum::ExcludedDirectories as usize, fl!("upper_notebook_excluded_directories")),
             (NotebookUpperEnum::IncludedDirectories as usize, fl!("upper_notebook_included_directories")),
         ] {
-            self.notebook_upper.tab_label(&vec_children[upper_enum]).unwrap().downcast::<gtk::Label>().unwrap().set_text(&fl_thing);
+            self.notebook_upper
+                .tab_label(&vec_children[upper_enum])
+                .unwrap()
+                .downcast::<gtk::Label>()
+                .unwrap()
+                .set_text(&fl_thing);
         }
     }
 }

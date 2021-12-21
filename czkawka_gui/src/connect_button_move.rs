@@ -63,7 +63,16 @@ pub fn connect_button_move(gui_data: &GuiData) {
 }
 
 // TODO add progress bar
-fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: Option<i32>, column_selection: i32, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView, window_main: &gtk::Window) {
+fn move_things(
+    tree_view: &gtk::TreeView,
+    column_file_name: i32,
+    column_path: i32,
+    column_color: Option<i32>,
+    column_selection: i32,
+    entry_info: &gtk::Entry,
+    text_view_errors: &gtk::TextView,
+    window_main: &gtk::Window,
+) {
     reset_text_view(text_view_errors);
 
     let chooser = gtk::FileChooserDialog::builder()
@@ -100,11 +109,27 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
             // }
 
             if folders.len() != 1 {
-                add_text_to_text_view(&text_view_errors, fl!("move_files_choose_more_than_1_path", generate_translation_hashmap(vec![("path_number", folders.len().to_string())])).as_str());
+                add_text_to_text_view(
+                    &text_view_errors,
+                    fl!(
+                        "move_files_choose_more_than_1_path",
+                        generate_translation_hashmap(vec![("path_number", folders.len().to_string())])
+                    )
+                    .as_str(),
+                );
             } else {
                 let folder = folders[0].clone();
                 if let Some(column_color) = column_color {
-                    move_with_tree(&tree_view, column_file_name, column_path, column_color, column_selection, folder, &entry_info, &text_view_errors);
+                    move_with_tree(
+                        &tree_view,
+                        column_file_name,
+                        column_path,
+                        column_color,
+                        column_selection,
+                        folder,
+                        &entry_info,
+                        &text_view_errors,
+                    );
                 } else {
                     move_with_list(&tree_view, column_file_name, column_path, column_selection, folder, &entry_info, &text_view_errors);
                 }
@@ -114,7 +139,16 @@ fn move_things(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i3
     });
 }
 
-fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, destination_folder: PathBuf, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
+fn move_with_tree(
+    tree_view: &gtk::TreeView,
+    column_file_name: i32,
+    column_path: i32,
+    column_color: i32,
+    column_selection: i32,
+    destination_folder: PathBuf,
+    entry_info: &gtk::Entry,
+    text_view_errors: &gtk::TextView,
+) {
     let model = get_list_store(tree_view);
 
     let mut selected_rows = Vec::new();
@@ -144,7 +178,15 @@ fn move_with_tree(tree_view: &gtk::TreeView, column_file_name: i32, column_path:
     clean_invalid_headers(&model, column_color);
 }
 
-fn move_with_list(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_selection: i32, destination_folder: PathBuf, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
+fn move_with_list(
+    tree_view: &gtk::TreeView,
+    column_file_name: i32,
+    column_path: i32,
+    column_selection: i32,
+    destination_folder: PathBuf,
+    entry_info: &gtk::Entry,
+    text_view_errors: &gtk::TextView,
+) {
     let model = get_list_store(tree_view);
 
     let mut selected_rows = Vec::new();
@@ -168,7 +210,15 @@ fn move_with_list(tree_view: &gtk::TreeView, column_file_name: i32, column_path:
     move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors)
 }
 
-fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_file_name: i32, column_path: i32, destination_folder: &Path, entry_info: &gtk::Entry, text_view_errors: &gtk::TextView) {
+fn move_files_common(
+    selected_rows: &[TreePath],
+    model: &gtk::ListStore,
+    column_file_name: i32,
+    column_path: i32,
+    destination_folder: &Path,
+    entry_info: &gtk::Entry,
+    text_view_errors: &gtk::TextView,
+) {
     let mut messages: String = "".to_string();
 
     let mut moved_files: u32 = 0;
@@ -200,7 +250,13 @@ fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_
         moved_files += 1;
     }
 
-    entry_info.set_text(fl!("move_stats", generate_translation_hashmap(vec![("num_files", moved_files.to_string()), ("all_files", selected_rows.len().to_string())])).as_str());
+    entry_info.set_text(
+        fl!(
+            "move_stats",
+            generate_translation_hashmap(vec![("num_files", moved_files.to_string()), ("all_files", selected_rows.len().to_string())])
+        )
+        .as_str(),
+    );
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }

@@ -6,7 +6,10 @@ pub struct Language {
 
 /// Languages should be alphabetically sorted
 pub const LANGUAGES_ALL: [Language; 3] = [
-    Language { combo_box_text: "English", short_text: "en" },
+    Language {
+        combo_box_text: "English",
+        short_text: "en",
+    },
     Language {
         combo_box_text: "Italiano (Italian)",
         short_text: "it",

@@ -317,7 +317,8 @@ impl GuiMainNotebook {
         self.check_button_music_year.set_label(&fl!("music_year_checkbox"));
         self.check_button_music_approximate_comparison.set_label(&fl!("music_comparison_checkbox"));
 
-        self.check_button_music_approximate_comparison.set_tooltip_text(Some(&fl!("music_comparison_checkbox_tooltip")));
+        self.check_button_music_approximate_comparison
+            .set_tooltip_text(Some(&fl!("music_comparison_checkbox_tooltip")));
 
         self.label_duplicate_check_method.set_label(&fl!("main_label_check_method"));
         self.label_duplicate_hash_type.set_label(&fl!("main_label_hash_type"));
@@ -345,8 +346,10 @@ impl GuiMainNotebook {
         self.combo_box_image_hash_algorithm.set_tooltip_text(Some(&fl!("image_hash_alg_tooltip")));
         self.label_image_hash_type.set_tooltip_text(Some(&fl!("image_hash_alg_tooltip")));
 
-        self.check_button_image_ignore_same_size.set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
-        self.check_button_video_ignore_same_size.set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
+        self.check_button_image_ignore_same_size
+            .set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
+        self.check_button_video_ignore_same_size
+            .set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
         self.check_button_image_ignore_same_size.set_label(&fl!("check_button_general_same_size"));
         self.check_button_video_ignore_same_size.set_label(&fl!("check_button_general_same_size"));
 
@@ -355,16 +358,20 @@ impl GuiMainNotebook {
             let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
             match hash_size {
                 8 => {
-                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[0][5]), 8));
+                    self.label_similar_images_minimal_similarity
+                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[0][5]), 8));
                 }
                 16 => {
-                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[1][5]), 16));
+                    self.label_similar_images_minimal_similarity
+                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[1][5]), 16));
                 }
                 32 => {
-                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[2][5]), 32));
+                    self.label_similar_images_minimal_similarity
+                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[2][5]), 32));
                 }
                 64 => {
-                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[3][5]), 64));
+                    self.label_similar_images_minimal_similarity
+                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[3][5]), 64));
                 }
                 _ => panic!(),
             }
@@ -388,21 +395,42 @@ impl GuiMainNotebook {
             (NotebookMainEnum::Symlinks as usize, fl!("main_notebook_symlinks")),
             (NotebookMainEnum::BrokenFiles as usize, fl!("main_notebook_broken_files")),
         ] {
-            self.notebook_main.tab_label(&vec_children[main_enum]).unwrap().downcast::<gtk::Label>().unwrap().set_text(&fl_thing);
+            self.notebook_main
+                .tab_label(&vec_children[main_enum])
+                .unwrap()
+                .downcast::<gtk::Label>()
+                .unwrap()
+                .set_text(&fl_thing);
         }
 
         // Change names of columns
         let names_of_columns = [
-            vec![fl!("main_tree_view_column_file_name"), fl!("main_tree_view_column_path"), fl!("main_tree_view_column_modification")], // Duplicates
-            vec![fl!("main_tree_view_column_folder_name"), fl!("main_tree_view_column_path"), fl!("main_tree_view_column_modification")], // Empty Folders
+            vec![
+                fl!("main_tree_view_column_file_name"),
+                fl!("main_tree_view_column_path"),
+                fl!("main_tree_view_column_modification"),
+            ], // Duplicates
+            vec![
+                fl!("main_tree_view_column_folder_name"),
+                fl!("main_tree_view_column_path"),
+                fl!("main_tree_view_column_modification"),
+            ], // Empty Folders
             vec![
                 fl!("main_tree_view_column_size"),
                 fl!("main_tree_view_column_file_name"),
                 fl!("main_tree_view_column_path"),
                 fl!("main_tree_view_column_modification"),
             ], // Big files
-            vec![fl!("main_tree_view_column_file_name"), fl!("main_tree_view_column_path"), fl!("main_tree_view_column_modification")], // Empty files
-            vec![fl!("main_tree_view_column_file_name"), fl!("main_tree_view_column_path"), fl!("main_tree_view_column_modification")], // Temporary Files
+            vec![
+                fl!("main_tree_view_column_file_name"),
+                fl!("main_tree_view_column_path"),
+                fl!("main_tree_view_column_modification"),
+            ], // Empty files
+            vec![
+                fl!("main_tree_view_column_file_name"),
+                fl!("main_tree_view_column_path"),
+                fl!("main_tree_view_column_modification"),
+            ], // Temporary Files
             vec![
                 fl!("main_tree_view_column_similarity"),
                 fl!("main_tree_view_column_size"),
