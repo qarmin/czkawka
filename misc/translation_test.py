@@ -1,4 +1,4 @@
-translations = ["pl"] # en is missing here
+translations = ["pl", "it"] # en is missing here
 base_translation = "en"
 
 base_keywords = []

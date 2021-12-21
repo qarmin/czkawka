@@ -4,8 +4,13 @@ pub struct Language {
     pub short_text: &'static str,
 }
 
-pub const LANGUAGES_ALL: [Language; 2] = [
+/// Languages should be alphabetically sorted
+pub const LANGUAGES_ALL: [Language; 3] = [
     Language { combo_box_text: "English", short_text: "en" },
+    Language {
+        combo_box_text: "Italiano (Italian)",
+        short_text: "it",
+    },
     Language {
         combo_box_text: "Polski (Polish)",
         short_text: "pl",
