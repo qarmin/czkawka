@@ -826,8 +826,14 @@ fn get_approximate_conversion(what: &mut String) {
             }
             ch => {
                 if tab_number == 0 {
-                    space_before = false;
-                    new_what.push(ch);
+                    // Ignore all non alphabetic ascii characters like " or .
+                    if !ch.is_ascii() || ch.is_ascii_alphabetic() {
+                        space_before = false;
+                        new_what.push(ch);
+                    } else if !space_before {
+                        new_what.push(' ');
+                        space_before = true;
+                    }
                 }
             }
         }
@@ -852,5 +858,9 @@ mod tests {
         let mut what = "  HH)    ".to_string();
         get_approximate_conversion(&mut what);
         assert_eq!(what, "HH");
+
+        let mut what = "  fsf.f.  ".to_string();
+        get_approximate_conversion(&mut what);
+        assert_eq!(what, "fsf f");
     }
 }
