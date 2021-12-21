@@ -401,11 +401,8 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
                         let is_selected = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
                         let path = model.value(&iter, column_path).get::<String>().unwrap();
                         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-                        #[cfg(not(target_family = "windows"))]
-                        let character = "/";
-                        #[cfg(target_family = "windows")]
-                        let character = "\\";
-                        let path_and_name = format!("{}{}{}", path, character, name);
+
+                        let path_and_name = get_full_name_from_path_name(&path, &name);
 
                         let mut need_to_change_thing: bool = false;
 

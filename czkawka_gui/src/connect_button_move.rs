@@ -174,7 +174,7 @@ fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_
         let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();
         let path = model.value(&iter, column_path).get::<String>().unwrap();
 
-        let thing = format!("{}/{}", path, file_name);
+        let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(file_name);
         if Path::new(&thing).is_dir() {
             if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &fs_extra::dir::CopyOptions::new()) {

@@ -19,6 +19,11 @@ use czkawka_core::{fl, invalid_symlinks};
 
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
+#[cfg(not(target_family = "windows"))]
+pub const CHARACTER: char = '/';
+#[cfg(target_family = "windows")]
+pub const CHARACTER: char = '\\';
+
 pub const KEY_DELETE: u32 = 119;
 pub const KEY_ENTER: u32 = 36;
 pub const KEY_SPACE: u32 = 65;
@@ -468,6 +473,14 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
 pub fn get_notebook_object_from_tree_view(tree_view: &gtk::TreeView) -> &NotebookObject {
     let nb_enum = get_notebook_enum_from_tree_view(tree_view);
     &NOTEBOOKS_INFOS[nb_enum as usize]
+}
+
+pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
+    let mut string = String::with_capacity(path.len() + name.len() + 1);
+    string.push_str(path);
+    string.push(CHARACTER);
+    string.push_str(name);
+    string
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case

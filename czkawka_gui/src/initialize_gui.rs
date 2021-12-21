@@ -673,7 +673,7 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                 let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
                 let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
 
-                let file_name = format!("{}/{}", path, name);
+                let file_name = get_full_name_from_path_name(&path, &name);
                 let file_name = file_name.as_str();
 
                 if let Some(extension) = Path::new(file_name).extension() {

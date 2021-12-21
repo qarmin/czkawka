@@ -227,7 +227,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
-        let mut folders_to_check: Vec<String> = vec![format!("{}/{}", path, name)];
+        let mut folders_to_check: Vec<String> = vec![get_full_name_from_path_name(&path, &name)];
         let mut current_folder: String;
         let mut next_folder: String;
         'dir: while !folders_to_check.is_empty() {
@@ -275,14 +275,14 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
         if !error_happened {
             if !use_trash {
-                match fs::remove_dir_all(format!("{}/{}", path, name)) {
+                match fs::remove_dir_all(get_full_name_from_path_name(&path, &name)) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
                     Err(_inspected) => error_happened = true,
                 }
             } else {
-                match trash::delete(format!("{}/{}", path, name)) {
+                match trash::delete(get_full_name_from_path_name(&path, &name)) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
@@ -291,7 +291,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             }
         }
         if error_happened {
-            messages += &fl!("delete_folder_failed", generate_translation_hashmap(vec![("dir", format!("{}/{}", path, name))]));
+            messages += &fl!("delete_folder_failed", generate_translation_hashmap(vec![("dir", get_full_name_from_path_name(&path, &name))]));
             messages += "\n";
         }
     }
@@ -332,23 +332,23 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
         let path = model.value(&iter, column_path).get::<String>().unwrap();
 
         if !use_trash {
-            match fs::remove_file(format!("{}/{}", path, name)) {
+            match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
 
                 Err(e) => {
-                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, name)), ("reason", e.to_string())])).as_str();
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])).as_str();
                     messages += "\n";
                 }
             }
         } else {
-            match trash::delete(format!("{}/{}", path, name)) {
+            match trash::delete(get_full_name_from_path_name(&path, &name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
                 Err(e) => {
-                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, name)), ("reason", e.to_string())])).as_str();
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])).as_str();
                     messages += "\n";
                 }
             }
@@ -410,12 +410,12 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         vec_file_name.dedup();
         for file_name in vec_file_name {
             if !use_trash {
-                if let Err(e) = fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())) {
-                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, file_name)), ("reason", e.to_string())])).as_str();
+                if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])).as_str();
                     messages += "\n";
                 }
-            } else if let Err(e) = trash::delete(format!("{}/{}", path.clone(), file_name.clone())) {
-                messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, file_name)), ("reason", e.to_string())])).as_str();
+            } else if let Err(e) = trash::delete(get_full_name_from_path_name(&path, &file_name)) {
+                messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])).as_str();
                 messages += "\n";
             }
 
