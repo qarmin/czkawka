@@ -94,7 +94,9 @@ impl GuiPopovers {
         self.buttons_popover_select_one_newest.set_label(&fl!("popover_select_one_newest"));
         self.buttons_popover_select_custom.set_label(&fl!("popover_select_custom"));
         self.buttons_popover_unselect_custom.set_label(&fl!("popover_unselect_custom"));
-        self.buttons_popover_select_all_images_except_biggest.set_label(&fl!("popover_select_all_images_except_biggest"));
-        self.buttons_popover_select_all_images_except_smallest.set_label(&fl!("popover_select_all_images_except_smallest"));
+        self.buttons_popover_select_all_images_except_biggest
+            .set_label(&fl!("popover_select_all_images_except_biggest"));
+        self.buttons_popover_select_all_images_except_smallest
+            .set_label(&fl!("popover_select_all_images_except_smallest"));
     }
 }

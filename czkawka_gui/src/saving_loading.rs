@@ -36,11 +36,17 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let config_dir = proj_dirs.config_dir();
         if config_dir.exists() {
             if !config_dir.is_dir() {
-                add_text_to_text_view(&text_view_errors, format!("Cannot create save file inside {} because this isn't a folder.", config_dir.display()).as_str());
+                add_text_to_text_view(
+                    &text_view_errors,
+                    format!("Cannot create save file inside {} because this isn't a folder.", config_dir.display()).as_str(),
+                );
                 return;
             }
         } else if let Err(e) = fs::create_dir_all(config_dir) {
-            add_text_to_text_view(&text_view_errors, format!("Failed configuration to create configuration folder {}, reason {}", config_dir.display(), e).as_str());
+            add_text_to_text_view(
+                &text_view_errors,
+                format!("Failed configuration to create configuration folder {}, reason {}", config_dir.display(), e).as_str(),
+            );
             return;
         }
         let mut data_to_save: Vec<String> = Vec::with_capacity(16);
@@ -175,7 +181,11 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             //// language
             data_to_save.push("--language:".to_string());
             let combo_box_settings_language = settings.combo_box_settings_language.clone();
-            data_to_save.push(get_language_from_combo_box_text(combo_box_settings_language.active_text().unwrap().to_string()).short_text.to_string());
+            data_to_save.push(
+                get_language_from_combo_box_text(combo_box_settings_language.active_text().unwrap().to_string())
+                    .short_text
+                    .to_string(),
+            );
         }
 
         // Creating/Opening config file
@@ -270,7 +280,9 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
 
         // Load here language, default system language could change value in settings so we don't want to lose this value
         {
-            short_language = get_language_from_combo_box_text(settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text.to_string();
+            short_language = get_language_from_combo_box_text(settings.combo_box_settings_language.active_text().unwrap().to_string())
+                .short_text
+                .to_string();
         }
 
         // Parsing Data - this are default values
@@ -554,7 +566,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(u64) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!(
+                                    "Found invalid data in line {} \"{}\" isn't proper value(u64) when loading file {:?}",
+                                    line_number, line, config_file
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -632,7 +648,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper value(u64) when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!(
+                                    "Found invalid data in line {} \"{}\" isn't proper value(u64) when loading file {:?}",
+                                    line_number, line, config_file
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -642,7 +662,11 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                         } else {
                             add_text_to_text_view(
                                 &text_view_errors,
-                                format!("Found invalid data in line {} \"{}\" isn't proper language value when loading file {:?}", line_number, line, config_file).as_str(),
+                                format!(
+                                    "Found invalid data in line {} \"{}\" isn't proper language value when loading file {:?}",
+                                    line_number, line, config_file
+                                )
+                                .as_str(),
                             );
                         }
                     }
@@ -697,8 +721,12 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             settings.check_button_settings_show_preview_similar_images.set_active(show_previews_similar_images);
             settings.check_button_settings_show_preview_duplicates.set_active(show_previews_duplicates);
 
-            settings.check_button_settings_similar_videos_delete_outdated_cache.set_active(delete_outdated_cache_similar_videos);
-            settings.check_button_settings_similar_images_delete_outdated_cache.set_active(delete_outdated_cache_similar_images);
+            settings
+                .check_button_settings_similar_videos_delete_outdated_cache
+                .set_active(delete_outdated_cache_similar_videos);
+            settings
+                .check_button_settings_similar_images_delete_outdated_cache
+                .set_active(delete_outdated_cache_similar_images);
             settings.check_button_settings_duplicates_delete_outdated_cache.set_active(delete_outdated_cache_dupliactes);
 
             settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
@@ -712,7 +740,9 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             settings.check_button_duplicates_use_prehash_cache.set_active(use_prehash_cache);
             settings.check_button_settings_use_trash.set_active(use_trash);
             settings.entry_settings_cache_file_minimal_size.set_text(cache_minimal_size.to_string().as_str());
-            settings.entry_settings_prehash_cache_file_minimal_size.set_text(cache_prehash_minimal_size.to_string().as_str());
+            settings
+                .entry_settings_prehash_cache_file_minimal_size
+                .set_text(cache_prehash_minimal_size.to_string().as_str());
         } else {
             settings.check_button_settings_load_at_start.set_active(false);
         }

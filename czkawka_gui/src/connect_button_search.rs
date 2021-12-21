@@ -19,7 +19,9 @@ use czkawka_core::*;
 
 use crate::fl;
 use crate::gui_data::GuiData;
-use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX};
+use crate::help_combo_box::{
+    DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
+};
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
@@ -391,7 +393,11 @@ pub fn connect_button_search(
                         let _ = glib_stop_sender.send(Message::SameMusic(mf));
                     });
                 } else {
-                    set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(), &buttons_array, &buttons_names);
+                    set_buttons(
+                        &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(),
+                        &buttons_array,
+                        &buttons_names,
+                    );
                     entry_info.set_text(&fl!("search_not_choosing_any_music"));
                     show_dialog.store(false, Ordering::Relaxed);
                 }

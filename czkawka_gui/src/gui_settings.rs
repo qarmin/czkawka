@@ -151,47 +151,67 @@ impl GuiSettings {
         self.label_settings_general_language.set_label(&fl!("settings_language_label"));
 
         self.check_button_settings_save_at_exit.set_tooltip_text(Some(&fl!("settings_save_at_exit_button_tooltip")));
-        self.check_button_settings_load_at_start.set_tooltip_text(Some(&fl!("settings_load_at_start_button_tooltip")));
-        self.check_button_settings_confirm_deletion.set_tooltip_text(Some(&fl!("settings_confirm_deletion_button_tooltip")));
+        self.check_button_settings_load_at_start
+            .set_tooltip_text(Some(&fl!("settings_load_at_start_button_tooltip")));
+        self.check_button_settings_confirm_deletion
+            .set_tooltip_text(Some(&fl!("settings_confirm_deletion_button_tooltip")));
         self.check_button_settings_confirm_link.set_tooltip_text(Some(&fl!("settings_confirm_link_button_tooltip")));
-        self.check_button_settings_confirm_group_deletion.set_tooltip_text(Some(&fl!("settings_confirm_group_deletion_button_tooltip")));
-        self.check_button_settings_show_text_view.set_tooltip_text(Some(&fl!("settings_show_text_view_button_tooltip")));
+        self.check_button_settings_confirm_group_deletion
+            .set_tooltip_text(Some(&fl!("settings_confirm_group_deletion_button_tooltip")));
+        self.check_button_settings_show_text_view
+            .set_tooltip_text(Some(&fl!("settings_show_text_view_button_tooltip")));
         self.check_button_settings_use_cache.set_tooltip_text(Some(&fl!("settings_use_cache_button_tooltip")));
         self.check_button_settings_use_trash.set_tooltip_text(Some(&fl!("settings_use_trash_button_tooltip")));
         self.label_settings_general_language.set_tooltip_text(Some(&fl!("settings_language_label_tooltip")));
 
         self.check_button_settings_hide_hard_links.set_label(&fl!("settings_duplicates_hide_hard_link_button"));
-        self.check_button_settings_show_preview_duplicates.set_label(&fl!("settings_multiple_image_preview_checkbutton"));
-        self.check_button_settings_duplicates_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
+        self.check_button_settings_show_preview_duplicates
+            .set_label(&fl!("settings_multiple_image_preview_checkbutton"));
+        self.check_button_settings_duplicates_delete_outdated_cache
+            .set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
         self.button_settings_duplicates_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
         self.check_button_duplicates_use_prehash_cache.set_label(&fl!("settings_duplicates_prehash_checkbutton"));
-        self.label_settings_duplicate_minimal_size_cache.set_label(&fl!("settings_duplicates_minimal_size_cache_label"));
-        self.label_settings_duplicate_minimal_size_cache_prehash.set_label(&fl!("settings_duplicates_minimal_size_cache_prehash_label"));
+        self.label_settings_duplicate_minimal_size_cache
+            .set_label(&fl!("settings_duplicates_minimal_size_cache_label"));
+        self.label_settings_duplicate_minimal_size_cache_prehash
+            .set_label(&fl!("settings_duplicates_minimal_size_cache_prehash_label"));
 
-        self.check_button_settings_hide_hard_links.set_tooltip_text(Some(&fl!("settings_duplicates_hide_hard_link_button_tooltip")));
-        self.entry_settings_cache_file_minimal_size.set_tooltip_text(Some(&fl!("settings_duplicates_minimal_size_entry_tooltip")));
-        self.check_button_settings_show_preview_duplicates.set_tooltip_text(Some(&fl!("settings_multiple_image_preview_checkbutton_tooltip")));
+        self.check_button_settings_hide_hard_links
+            .set_tooltip_text(Some(&fl!("settings_duplicates_hide_hard_link_button_tooltip")));
+        self.entry_settings_cache_file_minimal_size
+            .set_tooltip_text(Some(&fl!("settings_duplicates_minimal_size_entry_tooltip")));
+        self.check_button_settings_show_preview_duplicates
+            .set_tooltip_text(Some(&fl!("settings_multiple_image_preview_checkbutton_tooltip")));
         self.check_button_settings_duplicates_delete_outdated_cache
             .set_tooltip_text(Some(&fl!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
-        self.button_settings_duplicates_clear_cache.set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
-        self.check_button_duplicates_use_prehash_cache.set_tooltip_text(Some(&fl!("settings_duplicates_prehash_checkbutton_tooltip")));
-        self.entry_settings_prehash_cache_file_minimal_size.set_tooltip_text(Some(&fl!("settings_duplicates_prehash_minimal_entry_tooltip")));
+        self.button_settings_duplicates_clear_cache
+            .set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
+        self.check_button_duplicates_use_prehash_cache
+            .set_tooltip_text(Some(&fl!("settings_duplicates_prehash_checkbutton_tooltip")));
+        self.entry_settings_prehash_cache_file_minimal_size
+            .set_tooltip_text(Some(&fl!("settings_duplicates_prehash_minimal_entry_tooltip")));
 
-        self.check_button_settings_show_preview_similar_images.set_label(&fl!("settings_multiple_image_preview_checkbutton"));
-        self.check_button_settings_similar_images_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
+        self.check_button_settings_show_preview_similar_images
+            .set_label(&fl!("settings_multiple_image_preview_checkbutton"));
+        self.check_button_settings_similar_images_delete_outdated_cache
+            .set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
         self.button_settings_similar_images_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
 
-        self.check_button_settings_show_preview_similar_images.set_tooltip_text(Some(&fl!("settings_multiple_image_preview_checkbutton_tooltip")));
+        self.check_button_settings_show_preview_similar_images
+            .set_tooltip_text(Some(&fl!("settings_multiple_image_preview_checkbutton_tooltip")));
         self.check_button_settings_similar_images_delete_outdated_cache
             .set_tooltip_text(Some(&fl!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
-        self.button_settings_similar_images_clear_cache.set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
+        self.button_settings_similar_images_clear_cache
+            .set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
 
-        self.check_button_settings_similar_videos_delete_outdated_cache.set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
+        self.check_button_settings_similar_videos_delete_outdated_cache
+            .set_label(&fl!("settings_multiple_delete_outdated_cache_checkbutton"));
         self.button_settings_similar_videos_clear_cache.set_label(&fl!("settings_multiple_clear_cache_button"));
 
         self.check_button_settings_similar_videos_delete_outdated_cache
             .set_tooltip_text(Some(&fl!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
-        self.button_settings_similar_videos_clear_cache.set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
+        self.button_settings_similar_videos_clear_cache
+            .set_tooltip_text(Some(&fl!("settings_multiple_clear_cache_button_tooltip")));
 
         self.button_settings_save_configuration.set_label(&fl!("settings_saving_button"));
         self.button_settings_load_configuration.set_label(&fl!("settings_loading_button"));
@@ -205,7 +225,8 @@ impl GuiSettings {
         self.button_settings_open_settings_folder.set_label(&fl!("settings_folder_settings_open"));
 
         self.button_settings_open_cache_folder.set_tooltip_text(Some(&fl!("settings_folder_cache_open_tooltip")));
-        self.button_settings_open_settings_folder.set_tooltip_text(Some(&fl!("settings_folder_settings_open_tooltip")));
+        self.button_settings_open_settings_folder
+            .set_tooltip_text(Some(&fl!("settings_folder_settings_open_tooltip")));
 
         let vec_children: Vec<gtk::Widget> = self.notebook_settings.children();
 
@@ -213,9 +234,19 @@ impl GuiSettings {
         // let vec_children: Vec<gtk::Widget> = get_all_children(&vec_children[1]);
 
         // Change name of main notebook tabs
-        let names: [String; 4] = [fl!("settings_notebook_general"), fl!("settings_notebook_duplicates"), fl!("settings_notebook_images"), fl!("settings_notebook_videos")];
+        let names: [String; 4] = [
+            fl!("settings_notebook_general"),
+            fl!("settings_notebook_duplicates"),
+            fl!("settings_notebook_images"),
+            fl!("settings_notebook_videos"),
+        ];
         for (index, fl_thing) in names.iter().enumerate() {
-            self.notebook_settings.tab_label(&vec_children[index]).unwrap().downcast::<gtk::Label>().unwrap().set_text(fl_thing);
+            self.notebook_settings
+                .tab_label(&vec_children[index])
+                .unwrap()
+                .downcast::<gtk::Label>()
+                .unwrap()
+                .set_text(fl_thing);
         }
     }
 }

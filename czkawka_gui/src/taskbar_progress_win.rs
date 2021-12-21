@@ -51,7 +51,11 @@ impl TaskbarProgress {
     pub fn set_progress_value(&self, completed: u64, total: u64) {
         // Don't change the value if the is_active flag is false or the value has not changed.
         // If is_active is true and the value has not changed, but the progress indicator was in NOPROGRESS or INDETERMINATE state, set the value (and NORMAL state).
-        if ((completed, total) == *self.current_progress.borrow() && *self.current_state.borrow() != tbp_flags::TBPF_NOPROGRESS && *self.current_state.borrow() != tbp_flags::TBPF_INDETERMINATE) || !*self.is_active.borrow() {
+        if ((completed, total) == *self.current_progress.borrow()
+            && *self.current_state.borrow() != tbp_flags::TBPF_NOPROGRESS
+            && *self.current_state.borrow() != tbp_flags::TBPF_INDETERMINATE)
+            || !*self.is_active.borrow()
+        {
             return ();
         }
         let result = unsafe {
@@ -127,7 +131,15 @@ impl From<HWND> for TaskbarProgress {
         let mut taskbar_list: *mut ITaskbarList3 = ptr::null_mut();
         let taskbar_list_ptr: *mut *mut ITaskbarList3 = &mut taskbar_list;
 
-        unsafe { combaseapi::CoCreateInstance(&CLSID_TaskbarList, ptr::null_mut(), CLSCTX_INPROC_SERVER, &ITaskbarList3::uuidof(), taskbar_list_ptr as *mut *mut c_void) };
+        unsafe {
+            combaseapi::CoCreateInstance(
+                &CLSID_TaskbarList,
+                ptr::null_mut(),
+                CLSCTX_INPROC_SERVER,
+                &ITaskbarList3::uuidof(),
+                taskbar_list_ptr as *mut *mut c_void,
+            )
+        };
 
         TaskbarProgress {
             hwnd: if taskbar_list.is_null() { ptr::null_mut() } else { hwnd },

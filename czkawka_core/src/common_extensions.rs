@@ -40,7 +40,9 @@ impl Extensions {
             }
 
             if extension[1..].contains(' ') {
-                text_messages.warnings.push(format!("{} is not valid extension because contains empty space inside", extension));
+                text_messages
+                    .warnings
+                    .push(format!("{} is not valid extension because contains empty space inside", extension));
                 continue;
             }
 
@@ -50,7 +52,9 @@ impl Extensions {
         }
 
         if self.file_extensions.is_empty() {
-            text_messages.messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
+            text_messages
+                .messages
+                .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
     }
