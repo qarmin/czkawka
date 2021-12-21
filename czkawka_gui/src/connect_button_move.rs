@@ -31,6 +31,12 @@ pub fn connect_button_move(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
+        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_color, nb_object.column_selection);
+
+        // Nothing is selected
+        if number_of_selected_items == 0 {
+            return;
+        }
         move_things(
             tree_view,
             nb_object.column_name,
@@ -174,7 +180,7 @@ fn move_files_common(selected_rows: &[TreePath], model: &gtk::ListStore, column_
         let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();
         let path = model.value(&iter, column_path).get::<String>().unwrap();
 
-        let thing = format!("{}/{}", path, file_name);
+        let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(file_name);
         if Path::new(&thing).is_dir() {
             if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &fs_extra::dir::CopyOptions::new()) {

@@ -424,6 +424,9 @@ delete_all_files_in_group_label1 = In some groups there are selected all records
 delete_all_files_in_group_label2 = Are you sure that you want to delete them?
 delete_folder_failed = Failed to remove folder {$dir} because folder doesn't exists, you don't have permissions or isn't empty.
 
+delete_items_label = { $items } files will be removed.
+delete_items_groups_label = { $items } files from { $groups } groups will be removed.
+
 hardlink_failed = Failed to hardlink
 hard_sym_invalid_selection_title_dialog = Invalid selection with some groups
 hard_sym_invalid_selection_label_1 = In some groups there is only 1 record selected and it will be ignored.

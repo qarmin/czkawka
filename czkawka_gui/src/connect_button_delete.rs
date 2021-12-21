@@ -41,31 +41,31 @@ pub async fn delete_things(gui_data: GuiData) {
     let preview_path = gui_data.preview_path.clone();
 
     let text_view_errors = gui_data.text_view_errors.clone();
-    if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main).await {
-        return;
-    }
 
     let nb_number = notebook_main.current_page().unwrap();
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
+    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_color, nb_object.column_selection);
+
+    // Nothing is selected
+    if number_of_selected_items == 0 {
+        return;
+    }
+
+    if !check_if_can_delete_files(&check_button_settings_confirm_deletion, &window_main, number_of_selected_items, number_of_selected_groups).await {
+        return;
+    }
+
     if let Some(column_color) = nb_object.column_color {
         if !check_button_settings_confirm_group_deletion.is_active() || !check_if_deleting_all_files_in_group(tree_view, column_color, nb_object.column_selection, &window_main, &check_button_settings_confirm_group_deletion).await {
-            tree_remove(
-                &tree_view.clone(),
-                nb_object.column_name,
-                nb_object.column_path,
-                column_color,
-                nb_object.column_selection,
-                &check_button_settings_use_trash,
-                &text_view_errors,
-            );
+            tree_remove(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
         }
     } else {
         if nb_number == NotebookMainEnum::EmptyDirectories as u32 {
-            empty_folder_remover(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
+            empty_folder_remover(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
         } else {
-            basic_remove(&tree_view.clone(), nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
+            basic_remove(tree_view, nb_object.column_name, nb_object.column_path, nb_object.column_selection, &check_button_settings_use_trash, &text_view_errors);
         }
     }
 
@@ -82,9 +82,9 @@ pub async fn delete_things(gui_data: GuiData) {
     }
 }
 
-pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &gtk::CheckButton, window_main: &gtk::Window) -> bool {
+pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &gtk::CheckButton, window_main: &gtk::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> bool {
     if check_button_settings_confirm_deletion.is_active() {
-        let (confirmation_dialog_delete, check_button) = create_dialog_ask_for_deletion(window_main);
+        let (confirmation_dialog_delete, check_button) = create_dialog_ask_for_deletion(window_main, number_of_selected_items, number_of_selected_groups);
 
         let response_type = confirmation_dialog_delete.run_future().await;
         if response_type == gtk::ResponseType::Ok {
@@ -102,12 +102,19 @@ pub async fn check_if_can_delete_files(check_button_settings_confirm_deletion: &
     true
 }
 
-fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
+fn create_dialog_ask_for_deletion(window_main: &gtk::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> (Dialog, CheckButton) {
     let dialog = gtk::Dialog::builder().title(&fl!("delete_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk::Label = gtk::Label::new(Some(&fl!("delete_question_label")));
+    let label2: gtk::Label = match number_of_selected_groups {
+        0 => gtk::Label::new(Some(&fl!("delete_items_label", generate_translation_hashmap(vec![("items", number_of_selected_items.to_string())])))),
+        _ => gtk::Label::new(Some(&fl!(
+            "delete_items_groups_label",
+            generate_translation_hashmap(vec![("items", number_of_selected_items.to_string()), ("groups", number_of_selected_groups.to_string())])
+        ))),
+    };
     let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&fl!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
@@ -116,7 +123,10 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window) -> (Dialog, CheckBu
 
     let internal_box = get_dialog_box_child(&dialog);
     internal_box.add(&label);
+    internal_box.add(&label2);
     internal_box.add(&check_button);
+    internal_box.set_margin(5);
+    check_button.set_margin_top(5);
 
     dialog.show_all();
     (dialog, check_button)
@@ -227,7 +237,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
-        let mut folders_to_check: Vec<String> = vec![format!("{}/{}", path, name)];
+        let mut folders_to_check: Vec<String> = vec![get_full_name_from_path_name(&path, &name)];
         let mut current_folder: String;
         let mut next_folder: String;
         'dir: while !folders_to_check.is_empty() {
@@ -275,14 +285,14 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
 
         if !error_happened {
             if !use_trash {
-                match fs::remove_dir_all(format!("{}/{}", path, name)) {
+                match fs::remove_dir_all(get_full_name_from_path_name(&path, &name)) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
                     Err(_inspected) => error_happened = true,
                 }
             } else {
-                match trash::delete(format!("{}/{}", path, name)) {
+                match trash::delete(get_full_name_from_path_name(&path, &name)) {
                     Ok(_) => {
                         model.remove(&iter);
                     }
@@ -291,7 +301,7 @@ pub fn empty_folder_remover(tree_view: &gtk::TreeView, column_file_name: i32, co
             }
         }
         if error_happened {
-            messages += &fl!("delete_folder_failed", generate_translation_hashmap(vec![("dir", format!("{}/{}", path, name))]));
+            messages += &fl!("delete_folder_failed", generate_translation_hashmap(vec![("dir", get_full_name_from_path_name(&path, &name))]));
             messages += "\n";
         }
     }
@@ -332,23 +342,23 @@ pub fn basic_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_pat
         let path = model.value(&iter, column_path).get::<String>().unwrap();
 
         if !use_trash {
-            match fs::remove_file(format!("{}/{}", path, name)) {
+            match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
 
                 Err(e) => {
-                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, name)), ("reason", e.to_string())])).as_str();
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])).as_str();
                     messages += "\n";
                 }
             }
         } else {
-            match trash::delete(format!("{}/{}", path, name)) {
+            match trash::delete(get_full_name_from_path_name(&path, &name)) {
                 Ok(_) => {
                     model.remove(&iter);
                 }
                 Err(e) => {
-                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, name)), ("reason", e.to_string())])).as_str();
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])).as_str();
                     messages += "\n";
                 }
             }
@@ -410,12 +420,12 @@ pub fn tree_remove(tree_view: &gtk::TreeView, column_file_name: i32, column_path
         vec_file_name.dedup();
         for file_name in vec_file_name {
             if !use_trash {
-                if let Err(e) = fs::remove_file(format!("{}/{}", path.clone(), file_name.clone())) {
-                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, file_name)), ("reason", e.to_string())])).as_str();
+                if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
+                    messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])).as_str();
                     messages += "\n";
                 }
-            } else if let Err(e) = trash::delete(format!("{}/{}", path.clone(), file_name.clone())) {
-                messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", format!("{}/{}", path, file_name)), ("reason", e.to_string())])).as_str();
+            } else if let Err(e) = trash::delete(get_full_name_from_path_name(&path, &file_name)) {
+                messages += fl!("delete_file_failed", generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])).as_str();
                 messages += "\n";
             }
 

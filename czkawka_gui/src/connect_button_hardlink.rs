@@ -140,7 +140,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
         if model.path(&current_iter).unwrap() == selected_rows[current_selected_index] {
             let file_name = model.value(&current_iter, column_file_name).get::<String>().unwrap();
             let path = model.value(&current_iter, column_path).get::<String>().unwrap();
-            let full_file_path = format!("{}/{}", path, file_name);
+            let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
             if current_symhardlink_data.is_some() {
                 vec_tree_path_to_remove.push(model.path(&current_iter).unwrap());

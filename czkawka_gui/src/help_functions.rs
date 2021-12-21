@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use gtk::prelude::*;
-use gtk::{ListStore, TextView, Widget};
+use gtk::{ListStore, TextView, TreeView, Widget};
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -18,6 +18,11 @@ use czkawka_core::temporary::Temporary;
 use czkawka_core::{fl, invalid_symlinks};
 
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
+
+#[cfg(not(target_family = "windows"))]
+pub const CHARACTER: char = '/';
+#[cfg(target_family = "windows")]
+pub const CHARACTER: char = '\\';
 
 pub const KEY_DELETE: u32 = 119;
 pub const KEY_ENTER: u32 = 36;
@@ -470,6 +475,14 @@ pub fn get_notebook_object_from_tree_view(tree_view: &gtk::TreeView) -> &Noteboo
     &NOTEBOOKS_INFOS[nb_enum as usize]
 }
 
+pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
+    let mut string = String::with_capacity(path.len() + name.len() + 1);
+    string.push_str(path);
+    string.push(CHARACTER);
+    string.push_str(name);
+    string
+}
+
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
 pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
     // Remove only child from header
@@ -540,6 +553,52 @@ pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
             model.clear();
         }
     }
+}
+pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: Option<i32>, column_selection: i32) -> (u64, u64) {
+    let mut number_of_selected_items: u64 = 0;
+    let mut number_of_selected_groups: u64 = 0;
+
+    let model = get_list_store(tree_view);
+
+    let mut is_item_currently_selected_in_group: bool = false;
+
+    // First iter
+    if let Some(iter) = model.iter_first() {
+        if let Some(column_color) = column_color {
+            assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+
+            loop {
+                if !model.iter_next(&iter) {
+                    break;
+                }
+
+                if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    is_item_currently_selected_in_group = false;
+                } else {
+                    if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                        number_of_selected_items += 1;
+
+                        if !is_item_currently_selected_in_group {
+                            number_of_selected_groups += 1;
+                        }
+                        is_item_currently_selected_in_group = true;
+                    }
+                }
+            }
+        } else {
+            loop {
+                if !model.iter_next(&iter) {
+                    break;
+                }
+
+                if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                    number_of_selected_items += 1;
+                }
+            }
+        }
+    }
+
+    (number_of_selected_items, number_of_selected_groups)
 }
 
 pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label {

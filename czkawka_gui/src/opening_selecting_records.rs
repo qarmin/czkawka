@@ -80,9 +80,7 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
 
         let end_path = match opening_mode {
             OpenMode::OnlyPath => path,
-            OpenMode::PathAndName => {
-                format!("{}/{}", path, name)
-            }
+            OpenMode::PathAndName => get_full_name_from_path_name(&path, &name),
         };
 
         open::that_in_background(&end_path);
@@ -96,11 +94,9 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
 fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32) {
     match key_code {
         KEY_ENTER => {
-            // Enter
             common_open_function(tree_view, name_column, path_column, OpenMode::PathAndName);
         }
         KEY_SPACE => {
-            // Space
             common_mark_function(tree_view, mark_column);
         }
         _ => {}
