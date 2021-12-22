@@ -72,6 +72,7 @@ pub fn connect_button_search(
     let entry_settings_prehash_cache_file_minimal_size = gui_data.settings.entry_settings_prehash_cache_file_minimal_size.clone();
     let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
     let label_stage = gui_data.progress_window.label_stage.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
@@ -133,6 +134,8 @@ pub fn connect_button_search(
 
         match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
+                image_preview_duplicates.hide();
+
                 label_stage.show();
                 grid_progress_stages.show_all();
                 window_progress.resize(1, 1);

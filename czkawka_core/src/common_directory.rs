@@ -8,11 +8,30 @@ use crate::common_messages::Messages;
 pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,
+    pub reference_directories: Vec<PathBuf>,
 }
 
 impl Directories {
     pub fn new() -> Self {
         Default::default()
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>, text_messages: &mut Messages) {
+        let mut reference_directory = reference_directory;
+
+        if cfg!(target_family = "windows") {
+            reference_directory = reference_directory.iter().map(Common::normalize_windows_path).collect();
+        }
+
+        // TODO silent this
+        for i in reference_directory {
+            if self.included_directories.contains(&i) {
+                text_messages.messages.push(format!("REFERENCE {:?}", i));
+                self.reference_directories.push(i);
+            } else {
+                text_messages.messages.push(format!("NON REFERENCE {:?}", i));
+            }
+        }
     }
 
     /// Setting included directories, at least one must be provided

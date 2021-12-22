@@ -142,7 +142,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             CheckingMethod::Name => {
                                 let btreemap = df.get_files_sorted_by_names();
 
-                                for (name, vector) in btreemap.iter().rev() {
+                                for (_name, vector) in btreemap.iter().rev() {
                                     // Sort
                                     let vector = if vector.len() >= 2 {
                                         let mut vector = vector.clone();
@@ -155,10 +155,11 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         vector.clone()
                                     };
 
-                                    let values: [(u32, &dyn ToValue); 8] = [
+                                    let values: [(u32, &dyn ToValue); 9] = [
                                         (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                         (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Name as u32, &name),
+                                        (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                        (ColumnsDuplicates::Name as u32, (&"".to_string())),
                                         (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
                                         (ColumnsDuplicates::Modification as u32, (&"".to_string())), // No text in 3 column
                                         (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),      // Not used here
@@ -169,9 +170,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 8] = [
+                                        let values: [(u32, &dyn ToValue); 9] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
                                             (ColumnsDuplicates::Name as u32, &file),
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
@@ -193,7 +195,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             CheckingMethod::Hash => {
                                 let btreemap = df.get_files_sorted_by_hash();
 
-                                for (size, vectors_vector) in btreemap.iter().rev() {
+                                for (_size, vectors_vector) in btreemap.iter().rev() {
                                     for vector in vectors_vector {
                                         // Sort
                                         let vector = if vector.len() >= 2 {
@@ -207,23 +209,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             vector.clone()
                                         };
 
-                                        let values: [(u32, &dyn ToValue); 8] = [
+                                        let values: [(u32, &dyn ToValue); 9] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (
-                                                ColumnsDuplicates::Name as u32,
-                                                &(format!("{} x {} ({} {})", vector.len(), size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes"))),
-                                            ),
-                                            (
-                                                ColumnsDuplicates::Path as u32,
-                                                &(format!(
-                                                    "{} ({} {}) {}",
-                                                    ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(),
-                                                    (vector.len() - 1) as u64 * *size as u64,
-                                                    fl!("general_bytes"),
-                                                    fl!("general_lost")
-                                                )),
-                                            ),
+                                            (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Path as u32, (&"".to_string())),
                                             (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
                                             (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
                                             (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -234,9 +225,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         for entry in vector {
                                             let (directory, file) = split_path(&entry.path);
 
-                                            let values: [(u32, &dyn ToValue); 8] = [
+                                            let values: [(u32, &dyn ToValue); 9] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
@@ -256,7 +248,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             CheckingMethod::Size => {
                                 let btreemap = df.get_files_sorted_by_size();
 
-                                for (size, vector) in btreemap.iter().rev() {
+                                for (_size, vector) in btreemap.iter().rev() {
                                     // Sort
                                     let vector = if vector.len() >= 2 {
                                         let mut vector = vector.clone();
@@ -268,23 +260,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     } else {
                                         vector.clone()
                                     };
-                                    let values: [(u32, &dyn ToValue); 8] = [
+                                    let values: [(u32, &dyn ToValue); 9] = [
                                         (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                         (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (
-                                            ColumnsDuplicates::Name as u32,
-                                            &(format!("{} x {} ({} {})", vector.len(), size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes"))),
-                                        ),
-                                        (
-                                            ColumnsDuplicates::Path as u32,
-                                            &(format!(
-                                                "{} ({} {}) {}",
-                                                ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(),
-                                                (vector.len() - 1) as u64 * *size as u64,
-                                                fl!("general_bytes"),
-                                                fl!("general_lost")
-                                            )),
-                                        ),
+                                        (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                        (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                        (ColumnsDuplicates::Path as u32, (&"".to_string())),
                                         (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
                                         (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
                                         (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -294,9 +275,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     list_store.set(&list_store.append(), &values);
                                     for entry in vector {
                                         let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 8] = [
+                                        let values: [(u32, &dyn ToValue); 9] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
                                             (ColumnsDuplicates::Name as u32, &file),
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (

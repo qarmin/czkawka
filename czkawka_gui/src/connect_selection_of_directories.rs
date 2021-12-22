@@ -8,7 +8,7 @@ use czkawka_core::common::Common;
 use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
-use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsDirectory};
+use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsIncludedDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
@@ -120,7 +120,10 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
             let list_store = get_list_store(&tree_view);
 
             for file_entry in &folders {
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
+                let values: [(u32, &dyn ToValue); 2] = [
+                    (ColumnsIncludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string()),
+                    (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+                ];
                 list_store.set(&list_store.append(), &values);
             }
         }
@@ -154,7 +157,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
             if !text.is_empty() {
                 let list_store = get_list_store(&tree_view);
 
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &text)];
+                let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
                 list_store.set(&list_store.append(), &values);
             }
         }

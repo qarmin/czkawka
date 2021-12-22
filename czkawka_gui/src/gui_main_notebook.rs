@@ -406,6 +406,7 @@ impl GuiMainNotebook {
         // Change names of columns
         let names_of_columns = [
             vec![
+                fl!("main_tree_view_column_size"),
                 fl!("main_tree_view_column_file_name"),
                 fl!("main_tree_view_column_path"),
                 fl!("main_tree_view_column_modification"),

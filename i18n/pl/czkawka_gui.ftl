@@ -97,6 +97,8 @@ check_button_general_same_size = Ignoruj identyczny rozmiar
 check_button_general_same_size_tooltip = Wyrzuca z wyników skanowania pliki, które posiadają identyczny rozmiar, po to by w wynikach zostały tylko niemal identyczne rekordy.
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
 # Upper window
+upper_tree_view_included_folder_column_title = Foldery do Przeszukania
+upper_tree_view_included_reference_column_title = Źródłowy Folder
 upper_recursive_button = Rekursywnie
 upper_recursive_button_tooltip = Jeśli zaznaczony, szuka plików i folderów również w katalogach wewnątrz, nawet jeśli nie znajdują się one bezpośrednio w tym folderze.
 upper_manual_add_included_button = Ręcznie Dodaj

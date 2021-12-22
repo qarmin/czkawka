@@ -69,8 +69,8 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_selection: ColumnsDuplicates::SelectionButton as i32,
         column_color: Some(ColumnsDuplicates::Color as i32),
         column_dimensions: None,
-        column_size: None,
-        column_size_as_bytes: None,
+        column_size: None,          // Do not add, useless in hash and size mode
+        column_size_as_bytes: None, // Do not add, useless in hash and size mode
         column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
     },
     NotebookObject {
@@ -209,6 +209,7 @@ pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
     ActivatableSelectButton = 0,
     SelectionButton,
+    Size,
     Name,
     Path,
     Modification,
@@ -226,8 +227,13 @@ pub enum ColumnsEmptyFolders {
     ModificationAsSecs,
 }
 
-pub enum ColumnsDirectory {
-    // Columns for Included and Excluded Directories in upper Notebook
+pub enum ColumnsIncludedDirectory {
+    // Columns for Included Directories in upper Notebook
+    Path = 0,
+    ReferenceButton,
+}
+pub enum ColumnsExcludedDirectory {
+    // Columns for Excluded Directories in upper Notebook
     Path = 0,
 }
 

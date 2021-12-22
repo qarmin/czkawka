@@ -124,9 +124,10 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
                 image_preview.hide();
 
-                let col_types: [glib::types::Type; 8] = [
+                let col_types: [glib::types::Type; 9] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Size
                     glib::types::Type::STRING, // Name
                     glib::types::Type::STRING, // Path
                     glib::types::Type::STRING, // Modification
@@ -397,13 +398,16 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let tree_view = gui_data.upper_notebook.tree_view_included_directories.clone();
             let evk = gui_data.upper_notebook.evk_tree_view_included_directories.clone();
 
-            let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
+            let col_types: [glib::types::Type; 2] = [
+                glib::types::Type::STRING, // Path
+                glib::types::Type::BOOL,   // ReferenceButton
+            ];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             tree_view.set_model(Some(&list_store));
             tree_view.selection().set_mode(SelectionMode::Multiple);
 
-            create_tree_view_directories(&tree_view);
+            create_tree_view_included_directories(&tree_view);
 
             scrolled_window.add(&tree_view);
             scrolled_window.show_all();
@@ -433,7 +437,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             tree_view.set_model(Some(&list_store));
             tree_view.selection().set_mode(SelectionMode::Multiple);
 
-            create_tree_view_directories(&tree_view);
+            create_tree_view_excluded_directories(&tree_view);
 
             scrolled_window.add(&tree_view);
             scrolled_window.show_all();
