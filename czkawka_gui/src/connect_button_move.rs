@@ -175,7 +175,7 @@ fn move_with_tree(
 
     move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors);
 
-    clean_invalid_headers(&model, column_color);
+    clean_invalid_headers(&model, column_color, column_path);
 }
 
 fn move_with_list(

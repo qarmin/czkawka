@@ -523,7 +523,7 @@ pub fn tree_remove(
         }
     }
 
-    clean_invalid_headers(&model, column_color);
+    clean_invalid_headers(&model, column_color, column_path);
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }

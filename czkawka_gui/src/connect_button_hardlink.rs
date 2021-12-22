@@ -253,7 +253,7 @@ pub fn hardlink_symlink(
         model.remove(&model.iter(tree_path).unwrap());
     }
 
-    clean_invalid_headers(&model, column_color);
+    clean_invalid_headers(&model, column_color, column_path);
 }
 
 fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
