@@ -67,7 +67,15 @@ pub async fn sym_hard_link_things(gui_data: GuiData, hardlinking: bool) {
         return;
     }
 
-    hardlink_symlink(tree_view, nb_object.column_name, nb_object.column_path, column_color, nb_object.column_selection, hardlinking, &text_view_errors);
+    hardlink_symlink(
+        tree_view,
+        nb_object.column_name,
+        nb_object.column_path,
+        column_color,
+        nb_object.column_selection,
+        hardlinking,
+        &text_view_errors,
+    );
 
     match &nb_object.notebook_type {
         NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
@@ -82,7 +90,15 @@ pub async fn sym_hard_link_things(gui_data: GuiData, hardlinking: bool) {
     }
 }
 
-pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column_path: i32, column_color: i32, column_selection: i32, hardlinking: bool, text_view_errors: &TextView) {
+pub fn hardlink_symlink(
+    tree_view: &gtk::TreeView,
+    column_file_name: i32,
+    column_path: i32,
+    column_color: i32,
+    column_selection: i32,
+    hardlinking: bool,
+    text_view_errors: &TextView,
+) {
     reset_text_view(text_view_errors);
 
     let model = get_list_store(tree_view);
@@ -140,7 +156,7 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
         if model.path(&current_iter).unwrap() == selected_rows[current_selected_index] {
             let file_name = model.value(&current_iter, column_file_name).get::<String>().unwrap();
             let path = model.value(&current_iter, column_path).get::<String>().unwrap();
-            let full_file_path = format!("{}/{}", path, file_name);
+            let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
             if current_symhardlink_data.is_some() {
                 vec_tree_path_to_remove.push(model.path(&current_iter).unwrap());
@@ -193,7 +209,11 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,
-                        fl!("delete_file_failed", generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])).as_str(),
+                        fl!(
+                            "delete_file_failed",
+                            generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
+                        )
+                        .as_str(),
                     );
                     continue;
                 };
@@ -203,7 +223,11 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
                     if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!("delete_file_failed", generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])).as_str(),
+                            fl!(
+                                "delete_file_failed",
+                                generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
                         );
                         continue;
                     };
@@ -213,7 +237,11 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
                     if let Err(e) = std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!("delete_file_failed", generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])).as_str(),
+                            fl!(
+                                "delete_file_failed",
+                                generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
                         );
                         continue;
                     };
@@ -229,7 +257,11 @@ pub fn hardlink_symlink(tree_view: &gtk::TreeView, column_file_name: i32, column
 }
 
 fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
-    let dialog = gtk::Dialog::builder().title(&fl!("hard_sym_invalid_selection_title_dialog")).transient_for(window_main).modal(true).build();
+    let dialog = gtk::Dialog::builder()
+        .title(&fl!("hard_sym_invalid_selection_title_dialog"))
+        .transient_for(window_main)
+        .modal(true)
+        .build();
     let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
@@ -333,7 +365,11 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk::C
 }
 
 fn create_dialog_ask_for_linking(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder().title(&fl!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
+    let dialog = gtk::Dialog::builder()
+        .title(&fl!("hard_sym_link_title_dialog"))
+        .transient_for(window_main)
+        .modal(true)
+        .build();
     let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 

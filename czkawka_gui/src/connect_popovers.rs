@@ -80,7 +80,15 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_but
     popover.popdown();
 }
 
-fn popover_all_except_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32, except_oldest: bool) {
+fn popover_all_except_oldest_newest(
+    popover: &gtk::Popover,
+    tree_view: &gtk::TreeView,
+    column_color: i32,
+    column_modification_as_secs: i32,
+    column_file_name: i32,
+    column_button_selection: u32,
+    except_oldest: bool,
+) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
@@ -147,7 +155,15 @@ fn popover_all_except_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::Tre
     popover.popdown();
 }
 
-fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_modification_as_secs: i32, column_file_name: i32, column_button_selection: u32, check_oldest: bool) {
+fn popover_one_oldest_newest(
+    popover: &gtk::Popover,
+    tree_view: &gtk::TreeView,
+    column_color: i32,
+    column_modification_as_secs: i32,
+    column_file_name: i32,
+    column_button_selection: u32,
+    check_oldest: bool,
+) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
@@ -215,7 +231,16 @@ fn popover_one_oldest_newest(popover: &gtk::Popover, tree_view: &gtk::TreeView, 
     popover.popdown();
 }
 
-fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, tree_view: &gtk::TreeView, column_color: Option<i32>, column_file_name: i32, column_path: i32, column_button_selection: u32, select_things: bool) {
+fn popover_custom_select_unselect(
+    popover: &gtk::Popover,
+    window_main: &Window,
+    tree_view: &gtk::TreeView,
+    column_color: Option<i32>,
+    column_file_name: i32,
+    column_path: i32,
+    column_button_selection: u32,
+    select_things: bool,
+) {
     popover.popdown();
 
     let window_title = match select_things {
@@ -401,11 +426,8 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
                         let is_selected = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
                         let path = model.value(&iter, column_path).get::<String>().unwrap();
                         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-                        #[cfg(not(target_family = "windows"))]
-                        let character = "/";
-                        #[cfg(target_family = "windows")]
-                        let character = "\\";
-                        let path_and_name = format!("{}{}{}", path, character, name);
+
+                        let path_and_name = get_full_name_from_path_name(&path, &name);
 
                         let mut need_to_change_thing: bool = false;
 
@@ -456,7 +478,15 @@ fn popover_custom_select_unselect(popover: &gtk::Popover, window_main: &Window, 
     }
 }
 
-fn popover_all_except_biggest_smallest(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_color: i32, column_size_as_bytes: i32, column_dimensions: Option<i32>, column_button_selection: u32, except_biggest: bool) {
+fn popover_all_except_biggest_smallest(
+    popover: &gtk::Popover,
+    tree_view: &gtk::TreeView,
+    column_color: i32,
+    column_size_as_bytes: i32,
+    column_dimensions: Option<i32>,
+    column_button_selection: u32,
+    except_biggest: bool,
+) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {

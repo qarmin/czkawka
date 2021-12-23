@@ -14,6 +14,10 @@ pub fn connect_notebook_tabs(gui_data: &GuiData) {
         let current_tab_in_main_notebook = to_notebook_main_enum(number);
 
         // Buttons
-        set_buttons(&mut *shared_buttons.borrow_mut().get_mut(&current_tab_in_main_notebook).unwrap(), &buttons_array, &buttons_names);
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&current_tab_in_main_notebook).unwrap(),
+            &buttons_array,
+            &buttons_names,
+        );
     });
 }

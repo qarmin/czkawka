@@ -11,8 +11,14 @@ pub const DUPLICATES_HASH_TYPE_COMBO_BOX: [HashTypeStruct; 3] = [
         eng_name: "Blake3",
         hash_type: HashType::Blake3,
     },
-    HashTypeStruct { eng_name: "CRC32", hash_type: HashType::Crc32 },
-    HashTypeStruct { eng_name: "XXH3", hash_type: HashType::Xxh3 },
+    HashTypeStruct {
+        eng_name: "CRC32",
+        hash_type: HashType::Crc32,
+    },
+    HashTypeStruct {
+        eng_name: "XXH3",
+        hash_type: HashType::Xxh3,
+    },
 ];
 pub struct CheckMethodStruct {
     pub eng_name: &'static str,
@@ -72,7 +78,10 @@ pub const IMAGES_HASH_TYPE_COMBO_BOX: [ImageHashTypeStruct; 5] = [
         eng_name: "Gradient",
         hash_alg: HashAlg::Gradient,
     },
-    ImageHashTypeStruct { eng_name: "Mean", hash_alg: HashAlg::Mean },
+    ImageHashTypeStruct {
+        eng_name: "Mean",
+        hash_alg: HashAlg::Mean,
+    },
     ImageHashTypeStruct {
         eng_name: "VertGradient",
         hash_alg: HashAlg::VertGradient,

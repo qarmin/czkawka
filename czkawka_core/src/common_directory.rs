@@ -29,34 +29,47 @@ impl Directories {
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {
             if directory.to_string_lossy().contains('*') {
-                text_messages.warnings.push(format!("Included Directory Warning: Wildcards in path are not supported, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Included Directory Warning: Wildcards in path are not supported, ignoring {}", directory.display()));
                 continue;
             }
 
             #[cfg(not(target_family = "windows"))]
             if directory.is_relative() {
-                text_messages.warnings.push(format!("Included Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Included Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
                 continue;
             }
             #[cfg(target_family = "windows")]
             if directory.is_relative() && !directory.starts_with("\\") {
-                text_messages.warnings.push(format!("Included Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Included Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
                 continue;
             }
 
             if !directory.exists() {
-                text_messages.warnings.push(format!("Included Directory Warning: Provided folder path must exits, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Included Directory Warning: Provided folder path must exits, ignoring {}", directory.display()));
                 continue;
             }
             if !directory.is_dir() {
-                text_messages.warnings.push(format!("Included Directory Warning: Provided path must point at the directory, ignoring {}", directory.display()));
+                text_messages.warnings.push(format!(
+                    "Included Directory Warning: Provided path must point at the directory, ignoring {}",
+                    directory.display()
+                ));
                 continue;
             }
             checked_directories.push(directory);
         }
 
         if checked_directories.is_empty() {
-            text_messages.errors.push("Included Directory ERROR: Not found even one correct path to included which is required.".to_string());
+            text_messages
+                .errors
+                .push("Included Directory ERROR: Not found even one correct path to included which is required.".to_string());
             return false;
         }
 
@@ -79,21 +92,29 @@ impl Directories {
         for directory in directories {
             let directory_as_string = directory.to_string_lossy();
             if directory_as_string == "/" {
-                text_messages.errors.push("Excluded Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
+                text_messages
+                    .errors
+                    .push("Excluded Directory ERROR: Excluding / is pointless, because it means that no files will be scanned.".to_string());
                 break;
             }
             if directory_as_string.contains('*') {
-                text_messages.warnings.push(format!("Excluded Directory Warning: Wildcards in path are not supported, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Excluded Directory Warning: Wildcards in path are not supported, ignoring {}", directory.display()));
                 continue;
             }
             #[cfg(not(target_family = "windows"))]
             if directory.is_relative() {
-                text_messages.warnings.push(format!("Excluded Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Excluded Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
                 continue;
             }
             #[cfg(target_family = "windows")]
             if directory.is_relative() && !directory.starts_with("\\") {
-                text_messages.warnings.push(format!("Excluded Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Excluded Directory Warning: Relative path are not supported, ignoring {}", directory.display()));
                 continue;
             }
 
@@ -102,7 +123,10 @@ impl Directories {
                 continue;
             }
             if !directory.is_dir() {
-                text_messages.warnings.push(format!("Excluded Directory Warning: Provided path must point at the directory, ignoring {}", directory.display()));
+                text_messages.warnings.push(format!(
+                    "Excluded Directory Warning: Provided path must point at the directory, ignoring {}",
+                    directory.display()
+                ));
                 continue;
             }
             checked_directories.push(directory);
@@ -228,7 +252,9 @@ impl Directories {
         self.excluded_directories = optimized_excluded;
 
         if self.included_directories.is_empty() {
-            text_messages.errors.push("Optimize Directories ERROR: Excluded directories overlaps all included directories.".to_string());
+            text_messages
+                .errors
+                .push("Optimize Directories ERROR: Excluded directories overlaps all included directories.".to_string());
             return false;
         }
 

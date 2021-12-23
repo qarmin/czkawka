@@ -201,9 +201,10 @@ impl EmptyFolder {
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(e) => {
-                    self.text_messages
-                        .warnings
-                        .push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                    self.text_messages.warnings.push(fl!(
+                        "core_cannot_open_dir",
+                        generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                    ));
                     continue;
                 }
             };
@@ -213,18 +214,20 @@ impl EmptyFolder {
                 let entry_data = match entry {
                     Ok(t) => t,
                     Err(e) => {
-                        self.text_messages
-                            .warnings
-                            .push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                        self.text_messages.warnings.push(fl!(
+                            "core_cannot_read_entry_dir",
+                            generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                        ));
                         continue 'dir;
                     }
                 };
                 let metadata: Metadata = match entry_data.metadata() {
                     Ok(t) => t,
                     Err(e) => {
-                        self.text_messages
-                            .warnings
-                            .push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                        self.text_messages.warnings.push(fl!(
+                            "core_cannot_read_metadata_dir",
+                            generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                        ));
                         continue 'dir;
                     }
                 };
@@ -245,16 +248,18 @@ impl EmptyFolder {
                                 Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                     Ok(d) => d.as_secs(),
                                     Err(_inspected) => {
-                                        self.text_messages
-                                            .warnings
-                                            .push(fl!("core_folder_modified_before_epoch", generate_translation_hashmap(vec![("name", current_folder.display().to_string())])));
+                                        self.text_messages.warnings.push(fl!(
+                                            "core_folder_modified_before_epoch",
+                                            generate_translation_hashmap(vec![("name", current_folder.display().to_string())])
+                                        ));
                                         0
                                     }
                                 },
                                 Err(e) => {
-                                    self.text_messages
-                                        .warnings
-                                        .push(fl!("core_folder_no_modification_date", generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                    self.text_messages.warnings.push(fl!(
+                                        "core_folder_no_modification_date",
+                                        generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])
+                                    ));
                                     0
                                 }
                             },
@@ -356,13 +361,21 @@ impl SaveResults for EmptyFolder {
         };
         let mut writer = BufWriter::new(file_handler);
 
-        if let Err(e) = writeln!(writer, "Results of searching {:?} with excluded directories {:?}", self.directories.included_directories, self.directories.excluded_directories) {
+        if let Err(e) = writeln!(
+            writer,
+            "Results of searching {:?} with excluded directories {:?}",
+            self.directories.included_directories, self.directories.excluded_directories
+        ) {
             self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
             return false;
         }
 
         if !self.empty_folder_list.is_empty() {
-            writeln!(writer, "-------------------------------------------------Empty folder list-------------------------------------------------").unwrap();
+            writeln!(
+                writer,
+                "-------------------------------------------------Empty folder list-------------------------------------------------"
+            )
+            .unwrap();
             writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders).unwrap();
             for name in self.empty_folder_list.keys() {
                 writeln!(writer, "{}", name.display()).unwrap();

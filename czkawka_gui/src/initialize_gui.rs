@@ -18,7 +18,9 @@ use czkawka_core::similar_videos::MAX_TOLERANCE;
 use crate::create_tree_view::*;
 use crate::delete_things;
 use crate::gui_data::*;
-use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX};
+use crate::help_combo_box::{
+    DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
+};
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::localizer::generate_translation_hashmap;
@@ -493,7 +495,15 @@ fn connect_event_mouse(gui_data: &GuiData) {
         tree_view.connect_button_release_event(move |tree_view, _event| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
             let preview_path = preview_path.clone();
-            show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview, &image_preview, preview_path, nb_object.column_path, nb_object.column_name);
+            show_preview(
+                tree_view,
+                &text_view_errors,
+                &check_button_settings_show_preview,
+                &image_preview,
+                preview_path,
+                nb_object.column_path,
+                nb_object.column_name,
+            );
 
             gtk::Inhibit(false)
         });
@@ -510,7 +520,15 @@ fn connect_event_mouse(gui_data: &GuiData) {
         tree_view.connect_button_release_event(move |tree_view, _event| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             let preview_path = preview_path.clone();
-            show_preview(tree_view, &text_view_errors, &check_button_settings_show_preview, &image_preview, preview_path, nb_object.column_path, nb_object.column_name);
+            show_preview(
+                tree_view,
+                &text_view_errors,
+                &check_button_settings_show_preview,
+                &image_preview,
+                preview_path,
+                nb_object.column_path,
+                nb_object.column_name,
+            );
             gtk::Inhibit(false)
         });
     }
@@ -645,7 +663,15 @@ fn connect_event_buttons(gui_data: &GuiData) {
     }
 }
 
-fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_settings_show_preview: &CheckButton, image_preview: &Image, preview_path: Rc<RefCell<String>>, column_path: i32, column_name: i32) {
+fn show_preview(
+    tree_view: &TreeView,
+    text_view_errors: &TextView,
+    check_button_settings_show_preview: &CheckButton,
+    image_preview: &Image,
+    preview_path: Rc<RefCell<String>>,
+    column_path: i32,
+    column_name: i32,
+) {
     let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
     let mut created_image = false;
@@ -660,20 +686,27 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                 let cache_dir = proj_dirs.cache_dir();
                 if cache_dir.exists() {
                     if !cache_dir.is_dir() {
-                        add_text_to_text_view(text_view_errors, format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str(),
+                        );
                         break 'dir;
                     }
                 } else if let Err(e) = fs::create_dir_all(cache_dir) {
                     add_text_to_text_view(
                         text_view_errors,
-                        fl!("preview_failed_to_create_cache_dir", generate_translation_hashmap(vec![("name", cache_dir.display().to_string()), ("reason", e.to_string())])).as_str(),
+                        fl!(
+                            "preview_failed_to_create_cache_dir",
+                            generate_translation_hashmap(vec![("name", cache_dir.display().to_string()), ("reason", e.to_string())])
+                        )
+                        .as_str(),
                     );
                     break 'dir;
                 }
                 let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
                 let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
 
-                let file_name = format!("{}/{}", path, name);
+                let file_name = get_full_name_from_path_name(&path, &name);
                 let file_name = file_name.as_str();
 
                 if let Some(extension) = Path::new(file_name).extension() {
@@ -694,13 +727,20 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                         Err(e) => {
                             add_text_to_text_view(
                                 text_view_errors,
-                                fl!("preview_temporary_file", generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])).as_str(),
+                                fl!(
+                                    "preview_temporary_file",
+                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                )
+                                .as_str(),
                             );
                             break 'dir;
                         }
                     };
                     if img.width() == 0 || img.height() == 0 {
-                        add_text_to_text_view(text_view_errors, fl!("preview_0_size", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            fl!("preview_0_size", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str(),
+                        );
                         break 'dir;
                     }
                     let ratio = img.width() / img.height();
@@ -725,7 +765,11 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     if let Err(e) = img.save(&file_dir) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!("preview_temporary_image_save", generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])).as_str(),
+                            fl!(
+                                "preview_temporary_image_save",
+                                generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
                         );
                         let _ = fs::remove_file(&file_dir);
                         break 'dir;
@@ -741,7 +785,11 @@ fn show_preview(tree_view: &TreeView, text_view_errors: &TextView, check_button_
                     if let Err(e) = fs::remove_file(&file_dir) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!("preview_temporary_image_remove", generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])).as_str(),
+                            fl!(
+                                "preview_temporary_image_remove",
+                                generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
                         );
                         break 'dir;
                     }

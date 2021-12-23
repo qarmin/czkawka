@@ -217,19 +217,37 @@ pub enum Commands {
 
 #[derive(Debug, StructOpt)]
 pub struct Directories {
-    #[structopt(short, long, parse(from_os_str), required = true, help = "Directorie(s) to search", long_help = "List of directorie(s) which will be searched(absolute path)")]
+    #[structopt(
+        short,
+        long,
+        parse(from_os_str),
+        required = true,
+        help = "Directorie(s) to search",
+        long_help = "List of directorie(s) which will be searched(absolute path)"
+    )]
     pub directories: Vec<PathBuf>,
 }
 
 #[derive(Debug, StructOpt)]
 pub struct ExcludedDirectories {
-    #[structopt(short, long, parse(from_os_str), help = "Excluded directorie(s)", long_help = "List of directorie(s) which will be excluded from search(absolute path)")]
+    #[structopt(
+        short,
+        long,
+        parse(from_os_str),
+        help = "Excluded directorie(s)",
+        long_help = "List of directorie(s) which will be excluded from search(absolute path)"
+    )]
     pub excluded_directories: Vec<PathBuf>,
 }
 
 #[derive(Debug, StructOpt)]
 pub struct ExcludedItems {
-    #[structopt(short = "E", long, help = "Excluded item(s)", long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)")]
+    #[structopt(
+        short = "E",
+        long,
+        help = "Excluded item(s)",
+        long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
+    )]
     pub excluded_items: Vec<String>,
 }
 

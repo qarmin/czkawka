@@ -347,7 +347,10 @@ impl DuplicateFinder {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                            warnings.push(fl!(
+                                "core_cannot_open_dir",
+                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                            ));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -357,14 +360,20 @@ impl DuplicateFinder {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_entry_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_metadata_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
@@ -389,7 +398,10 @@ impl DuplicateFinder {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
+                                    warnings.push(fl!(
+                                        "core_file_not_utf8_name",
+                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                    ));
                                     continue 'dir;
                                 }
                             }
@@ -412,7 +424,10 @@ impl DuplicateFinder {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
+                                                warnings.push(fl!(
+                                                    "core_file_modified_before_epoch",
+                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                ));
                                                 0
                                             }
                                         },
@@ -535,7 +550,10 @@ impl DuplicateFinder {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                            warnings.push(fl!(
+                                "core_cannot_open_dir",
+                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                            ));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -545,14 +563,20 @@ impl DuplicateFinder {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_entry_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_metadata_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
@@ -577,7 +601,10 @@ impl DuplicateFinder {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
+                                    warnings.push(fl!(
+                                        "core_file_not_utf8_name",
+                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                    ));
                                     continue 'dir;
                                 }
                             }
@@ -601,7 +628,10 @@ impl DuplicateFinder {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
+                                                warnings.push(fl!(
+                                                    "core_file_modified_before_epoch",
+                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                ));
                                                 0
                                             }
                                         },
@@ -1100,8 +1130,16 @@ impl DebugPrint for DuplicateFinder {
             "Number of duplicated files by name(in groups) - {} ({})",
             self.information.number_of_duplicated_files_by_name, self.information.number_of_groups_by_name
         );
-        println!("Lost space by size - {} ({} bytes)", self.information.lost_space_by_size.file_size(options::BINARY).unwrap(), self.information.lost_space_by_size);
-        println!("Lost space by hash - {} ({} bytes)", self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(), self.information.lost_space_by_hash);
+        println!(
+            "Lost space by size - {} ({} bytes)",
+            self.information.lost_space_by_size.file_size(options::BINARY).unwrap(),
+            self.information.lost_space_by_size
+        );
+        println!(
+            "Lost space by hash - {} ({} bytes)",
+            self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(),
+            self.information.lost_space_by_hash
+        );
         println!(
             "Gained space by removing duplicated entries - {} ({} bytes)",
             self.information.gained_space.file_size(options::BINARY).unwrap(),
@@ -1151,7 +1189,11 @@ impl SaveResults for DuplicateFinder {
         match self.check_method {
             CheckingMethod::Name => {
                 if !self.files_with_identical_names.is_empty() {
-                    writeln!(writer, "-------------------------------------------------Files with same names-------------------------------------------------").unwrap();
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same names-------------------------------------------------"
+                    )
+                    .unwrap();
                     writeln!(
                         writer,
                         "Found {} files in {} groups with same name(may have different content)",
@@ -1171,7 +1213,11 @@ impl SaveResults for DuplicateFinder {
             }
             CheckingMethod::Size => {
                 if !self.files_with_identical_size.is_empty() {
-                    writeln!(writer, "-------------------------------------------------Files with same size-------------------------------------------------").unwrap();
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same size-------------------------------------------------"
+                    )
+                    .unwrap();
                     writeln!(
                         writer,
                         "Found {} duplicated files which in {} groups which takes {}.",
@@ -1192,7 +1238,11 @@ impl SaveResults for DuplicateFinder {
             }
             CheckingMethod::Hash => {
                 if !self.files_with_identical_hashes.is_empty() {
-                    writeln!(writer, "-------------------------------------------------Files with same hashes-------------------------------------------------").unwrap();
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same hashes-------------------------------------------------"
+                    )
+                    .unwrap();
                     writeln!(
                         writer,
                         "Found {} duplicated files which in {} groups which takes {}.",
@@ -1406,7 +1456,9 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .messages
+                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
         };
@@ -1418,7 +1470,9 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
                 let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
 
                 if let Err(e) = writeln!(writer, "{}", string) {
-                    text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
+                    text_messages
+                        .messages
+                        .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                     return;
                 };
             }
@@ -1480,15 +1534,20 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             let line = match line {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
                     return None;
                 }
             };
             let uuu = line.split("//").collect::<Vec<&str>>();
             if uuu.len() != 4 {
-                text_messages
-                    .warnings
-                    .push(format!("Found invalid data(too much or too low amount of data) in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                text_messages.warnings.push(format!(
+                    "Found invalid data(too much or too low amount of data) in line {} - ({}) in cache file {}",
+                    index + 1,
+                    line,
+                    cache_file.display()
+                ));
                 continue;
             }
             // Don't load cache data if destination file not exists
@@ -1498,18 +1557,26 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
                     size: match uuu[1].parse::<u64>() {
                         Ok(t) => t,
                         Err(e) => {
-                            text_messages
-                                .warnings
-                                .push(format!("Found invalid size value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                            text_messages.warnings.push(format!(
+                                "Found invalid size value in line {} - ({}) in cache file {}, reason {}",
+                                index + 1,
+                                line,
+                                cache_file.display(),
+                                e
+                            ));
                             continue;
                         }
                     },
                     modified_date: match uuu[2].parse::<u64>() {
                         Ok(t) => t,
                         Err(e) => {
-                            text_messages
-                                .warnings
-                                .push(format!("Found invalid modified date value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                            text_messages.warnings.push(format!(
+                                "Found invalid modified date value in line {} - ({}) in cache file {}, reason {}",
+                                index + 1,
+                                line,
+                                cache_file.display(),
+                                e
+                            ));
                             continue;
                         }
                     },

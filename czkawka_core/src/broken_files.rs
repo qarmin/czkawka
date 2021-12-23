@@ -215,7 +215,10 @@ impl BrokenFiles {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                            warnings.push(fl!(
+                                "core_cannot_open_dir",
+                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                            ));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -225,14 +228,20 @@ impl BrokenFiles {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_entry_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_metadata_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
@@ -257,7 +266,10 @@ impl BrokenFiles {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
+                                    warnings.push(fl!(
+                                        "core_file_not_utf8_name",
+                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                    ));
                                     continue 'dir;
                                 }
                             }
@@ -283,7 +295,10 @@ impl BrokenFiles {
                                     Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                         Ok(d) => d.as_secs(),
                                         Err(_inspected) => {
-                                            warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
+                                            warnings.push(fl!(
+                                                "core_file_modified_before_epoch",
+                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                            ));
                                             0
                                         }
                                     },
@@ -466,7 +481,10 @@ impl BrokenFiles {
             vec_file_entry.push(file_entry.clone());
         }
 
-        self.broken_files = vec_file_entry.iter().filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) }).collect();
+        self.broken_files = vec_file_entry
+            .iter()
+            .filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) })
+            .collect();
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
@@ -619,7 +637,9 @@ fn save_cache_to_file(hashmap_file_entry: &BTreeMap<String, FileEntry>, text_mes
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .messages
+                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
         };
@@ -628,10 +648,18 @@ fn save_cache_to_file(hashmap_file_entry: &BTreeMap<String, FileEntry>, text_mes
         for file_entry in hashmap_file_entry.values() {
             // Only save to cache files which have more than 1KB
             if file_entry.size > 1024 {
-                let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.error_string);
+                let string: String = format!(
+                    "{}//{}//{}//{}",
+                    file_entry.path.display(),
+                    file_entry.size,
+                    file_entry.modified_date,
+                    file_entry.error_string
+                );
 
                 if let Err(e) = writeln!(writer, "{}", string) {
-                    text_messages.messages.push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
+                    text_messages
+                        .messages
+                        .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                     return;
                 };
             }
@@ -661,13 +689,17 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
             let line = match line {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
                     return None;
                 }
             };
             let uuu = line.split("//").collect::<Vec<&str>>();
             if uuu.len() != 4 {
-                text_messages.warnings.push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
+                text_messages
+                    .warnings
+                    .push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
                 continue;
             }
             // Don't load cache data if destination file not exists
@@ -679,18 +711,26 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
                         size: match uuu[1].parse::<u64>() {
                             Ok(t) => t,
                             Err(e) => {
-                                text_messages
-                                    .warnings
-                                    .push(format!("Found invalid size value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                                text_messages.warnings.push(format!(
+                                    "Found invalid size value in line {} - ({}) in cache file {}, reason {}",
+                                    index + 1,
+                                    line,
+                                    cache_file.display(),
+                                    e
+                                ));
                                 continue;
                             }
                         },
                         modified_date: match uuu[2].parse::<u64>() {
                             Ok(t) => t,
                             Err(e) => {
-                                text_messages
-                                    .warnings
-                                    .push(format!("Found invalid modified date value in line {} - ({}) in cache file {}, reason {}", index + 1, line, cache_file.display(), e));
+                                text_messages.warnings.push(format!(
+                                    "Found invalid modified date value in line {} - ({}) in cache file {}, reason {}",
+                                    index + 1,
+                                    line,
+                                    cache_file.display(),
+                                    e
+                                ));
                                 continue;
                             }
                         },

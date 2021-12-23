@@ -80,9 +80,18 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 }
 
 fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
-    let folders_to = if excluded_items { fl!("exclude_folders_dialog_title") } else { fl!("include_folders_dialog_title") };
+    let folders_to = if excluded_items {
+        fl!("exclude_folders_dialog_title")
+    } else {
+        fl!("include_folders_dialog_title")
+    };
 
-    let file_chooser = gtk::FileChooserDialog::builder().title(&folders_to).action(gtk::FileChooserAction::SelectFolder).transient_for(window_main).modal(true).build();
+    let file_chooser = gtk::FileChooserDialog::builder()
+        .title(&folders_to)
+        .action(gtk::FileChooserAction::SelectFolder)
+        .transient_for(window_main)
+        .modal(true)
+        .build();
     file_chooser.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     file_chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
@@ -120,7 +129,11 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
-    let dialog = gtk::Dialog::builder().title(&fl!("include_manually_directories_dialog_title")).transient_for(window_main).modal(true).build();
+    let dialog = gtk::Dialog::builder()
+        .title(&fl!("include_manually_directories_dialog_title"))
+        .transient_for(window_main)
+        .modal(true)
+        .build();
     dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 

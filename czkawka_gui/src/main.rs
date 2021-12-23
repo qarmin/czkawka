@@ -84,28 +84,58 @@ fn main() {
         let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         // Futures progress report
-        let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (futures::channel::mpsc::UnboundedSender<duplicate::ProgressData>, futures::channel::mpsc::UnboundedReceiver<duplicate::ProgressData>) =
-            futures::channel::mpsc::unbounded();
-        let (futures_sender_empty_files, futures_receiver_empty_files): (futures::channel::mpsc::UnboundedSender<empty_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<empty_files::ProgressData>) = futures::channel::mpsc::unbounded();
-        let (futures_sender_empty_folder, futures_receiver_empty_folder): (futures::channel::mpsc::UnboundedSender<empty_folder::ProgressData>, futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>) =
-            futures::channel::mpsc::unbounded();
-        let (futures_sender_big_file, futures_receiver_big_file): (futures::channel::mpsc::UnboundedSender<big_file::ProgressData>, futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>) = futures::channel::mpsc::unbounded();
-        let (futures_sender_same_music, futures_receiver_same_music): (futures::channel::mpsc::UnboundedSender<same_music::ProgressData>, futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>) = futures::channel::mpsc::unbounded();
-        let (futures_sender_similar_images, futures_receiver_similar_images): (futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>, futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>) =
-            futures::channel::mpsc::unbounded();
-        let (futures_sender_similar_videos, futures_receiver_similar_videos): (futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>, futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>) =
-            futures::channel::mpsc::unbounded();
-        let (futures_sender_temporary, futures_receiver_temporary): (futures::channel::mpsc::UnboundedSender<temporary::ProgressData>, futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>) = futures::channel::mpsc::unbounded();
-        let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>, futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>) =
-            futures::channel::mpsc::unbounded();
-        let (futures_sender_broken_files, futures_receiver_broken_files): (futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>, futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>) =
-            futures::channel::mpsc::unbounded();
+        let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (
+            futures::channel::mpsc::UnboundedSender<duplicate::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<duplicate::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_empty_files, futures_receiver_empty_files): (
+            futures::channel::mpsc::UnboundedSender<empty_files::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<empty_files::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_empty_folder, futures_receiver_empty_folder): (
+            futures::channel::mpsc::UnboundedSender<empty_folder::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_big_file, futures_receiver_big_file): (
+            futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_same_music, futures_receiver_same_music): (
+            futures::channel::mpsc::UnboundedSender<same_music::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_similar_images, futures_receiver_similar_images): (
+            futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_similar_videos, futures_receiver_similar_videos): (
+            futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_temporary, futures_receiver_temporary): (
+            futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (
+            futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
+        let (futures_sender_broken_files, futures_receiver_broken_files): (
+            futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
+        ) = futures::channel::mpsc::unbounded();
 
         initialize_gui(&mut gui_data);
         validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
         reset_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
         load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
-        load_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors, &gui_data.scrolled_window_errors);
+        load_configuration(
+            false,
+            &gui_data.upper_notebook,
+            &gui_data.settings,
+            &gui_data.text_view_errors,
+            &gui_data.scrolled_window_errors,
+        );
 
         // Needs to run when entire GUI is initialized and
         connect_change_language(&gui_data);

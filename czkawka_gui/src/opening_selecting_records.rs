@@ -80,9 +80,7 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
 
         let end_path = match opening_mode {
             OpenMode::OnlyPath => path,
-            OpenMode::PathAndName => {
-                format!("{}/{}", path, name)
-            }
+            OpenMode::PathAndName => get_full_name_from_path_name(&path, &name),
         };
 
         open::that_in_background(&end_path);
@@ -96,11 +94,9 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
 fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32) {
     match key_code {
         KEY_ENTER => {
-            // Enter
             common_open_function(tree_view, name_column, path_column, OpenMode::PathAndName);
         }
         KEY_SPACE => {
-            // Space
             common_mark_function(tree_view, mark_column);
         }
         _ => {}
@@ -108,7 +104,10 @@ fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32).get::<String>().unwrap();
+    let color = tree_model
+        .value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32)
+        .get::<String>()
+        .unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -118,7 +117,10 @@ pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_mod
 }
 
 pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>().unwrap();
+    let color = tree_model
+        .value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32)
+        .get::<String>()
+        .unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -128,7 +130,10 @@ pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_mod
 }
 
 pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32).get::<String>().unwrap();
+    let color = tree_model
+        .value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32)
+        .get::<String>()
+        .unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -138,7 +143,10 @@ pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree
 }
 
 pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32).get::<String>().unwrap();
+    let color = tree_model
+        .value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32)
+        .get::<String>()
+        .unwrap();
 
     if color == HEADER_ROW_COLOR {
         return false;

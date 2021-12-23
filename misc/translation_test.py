@@ -7,6 +7,11 @@ with open('i18n/' + base_translation + "/czkawka_gui.ftl", 'r') as file:
     for line in base_translation_file_content:
         if line.find("=") != -1:
             first_split = line.split("=")[0].strip()
+            try:
+                base_keywords.index(first_split)
+                print("Duplicated member " + first_split +" in base translation")
+            except:
+                True # All good
             base_keywords.append(first_split)
 
 
@@ -18,6 +23,11 @@ for lang in translations:
         for line in file_content:
             if line.find("=") != -1:
                 first_split = line.split("=")[0].strip()
+                try:
+                    lang_keywords.index(first_split)
+                    print("Duplicated member " + first_split +" in " + lang + " translation")
+                except:
+                    True # All good
                 lang_keywords.append(first_split)
         
     for keyword in base_keywords:

@@ -203,8 +203,9 @@ impl SimilarVideos {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions
-            .extend_allowed_extensions(&[".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv"]);
+        self.allowed_extensions.extend_allowed_extensions(&[
+            ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
+        ]);
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -258,7 +259,10 @@ impl SimilarVideos {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!("core_cannot_open_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                            warnings.push(fl!(
+                                "core_cannot_open_dir",
+                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                            ));
                             return (dir_result, warnings, fe_result);
                         }
                     };
@@ -268,14 +272,20 @@ impl SimilarVideos {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_entry_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_entry_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!("core_cannot_read_metadata_dir", generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])));
+                                warnings.push(fl!(
+                                    "core_cannot_read_metadata_dir",
+                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                                ));
                                 continue 'dir;
                             }
                         };
@@ -300,7 +310,10 @@ impl SimilarVideos {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!("core_file_not_utf8_name", generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])));
+                                    warnings.push(fl!(
+                                        "core_file_not_utf8_name",
+                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                    ));
                                     continue 'dir;
                                 }
                             }
@@ -324,7 +337,10 @@ impl SimilarVideos {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!("core_file_modified_before_epoch", generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])));
+                                                warnings.push(fl!(
+                                                    "core_file_modified_before_epoch",
+                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                ));
                                                 0
                                             }
                                         },
@@ -400,7 +416,11 @@ impl SimilarVideos {
             mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from cache and preparing them".to_string());
+        Common::print_time(
+            hash_map_modification,
+            SystemTime::now(),
+            "sort_videos - reading data from cache and preparing them".to_string(),
+        );
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
@@ -640,7 +660,9 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
-                text_messages.messages.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .messages
+                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
         };
@@ -648,12 +670,16 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
         let writer = BufWriter::new(file_handler);
         #[cfg(not(debug_assertions))]
         if let Err(e) = bincode::serialize_into(writer, hashmap) {
-            text_messages.messages.push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            text_messages
+                .messages
+                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
             return;
         }
         #[cfg(debug_assertions)]
         if let Err(e) = serde_json::to_writer(writer, hashmap) {
-            text_messages.messages.push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            text_messages
+                .messages
+                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
             return;
         }
 
@@ -678,7 +704,9 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
         let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(reader) {
             Ok(t) => t,
             Err(e) => {
-                text_messages.warnings.push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .warnings
+                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
                 return None;
             }
         };
@@ -686,7 +714,9 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
         let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match bincode::deserialize_from(reader) {
             Ok(t) => t,
             Err(e) => {
-                text_messages.warnings.push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                text_messages
+                    .warnings
+                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
                 return None;
             }
         };
@@ -721,7 +751,11 @@ fn get_cache_file() -> String {
 
 pub fn check_if_ffmpeg_is_installed() -> bool {
     let vid = "999999999999999999.txt";
-    if let Err(DetermineVideo { src_path: _a, error: FfmpegNotFound }) = VideoHash::from_path(&vid) {
+    if let Err(DetermineVideo {
+        src_path: _a,
+        error: FfmpegNotFound,
+    }) = VideoHash::from_path(&vid)
+    {
         return false;
     }
     true
