@@ -334,7 +334,7 @@ pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
 //pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
-pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
+pub fn get_string_from_list_store(tree_view: &gtk::TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
     let list_store: gtk::ListStore = get_list_store(tree_view);
 
     let mut string_vector: Vec<String> = Vec::new();
@@ -345,11 +345,21 @@ pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
             return string_vector;
         }
     };
-    loop {
-        string_vector.push(list_store.value(&tree_iter, 0).get::<String>().unwrap());
-        if !list_store.iter_next(&tree_iter) {
-            return string_vector;
-        }
+    match column_selection {
+        Some(column_selection) => loop {
+            if list_store.value(&tree_iter, column_selection).get::<bool>().unwrap() {
+                string_vector.push(list_store.value(&tree_iter, column_full_path).get::<String>().unwrap());
+            }
+            if !list_store.iter_next(&tree_iter) {
+                return string_vector;
+            }
+        },
+        None => loop {
+            string_vector.push(list_store.value(&tree_iter, column_full_path).get::<String>().unwrap());
+            if !list_store.iter_next(&tree_iter) {
+                return string_vector;
+            }
+        },
     }
 }
 

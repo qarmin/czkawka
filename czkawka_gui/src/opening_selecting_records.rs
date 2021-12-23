@@ -13,7 +13,14 @@ pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey,
     }
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
-    handle_tree_keypress(&tree_view, key_code, nt_object.column_name, nt_object.column_path, nt_object.column_selection);
+    handle_tree_keypress(
+        &tree_view,
+        key_code,
+        nt_object.column_name,
+        nt_object.column_path,
+        nt_object.column_selection,
+        nt_object.column_color,
+    );
     false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
 }
 
@@ -58,13 +65,18 @@ enum OpenMode {
     PathAndName,
 }
 
-fn common_mark_function(tree_view: &gtk::TreeView, column_name: i32) {
+fn common_mark_function(tree_view: &gtk::TreeView, column_name: i32, column_color: Option<i32>) {
     let selection = tree_view.selection();
     let (selected_rows, tree_model) = selection.selected_rows();
 
     let model = get_list_store(tree_view);
 
     for tree_path in selected_rows.iter().rev() {
+        if let Some(column_color) = column_color {
+            if model.value(&model.iter(tree_path).unwrap(), column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                continue;
+            }
+        }
         let value = !tree_model.value(&tree_model.iter(tree_path).unwrap(), column_name).get::<bool>().unwrap();
         model.set_value(&tree_model.iter(tree_path).unwrap(), column_name as u32, &value.to_value());
     }
@@ -91,13 +103,13 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
     }
 }
 
-fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32) {
+fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32, column_color: Option<i32>) {
     match key_code {
         KEY_ENTER => {
             common_open_function(tree_view, name_column, path_column, OpenMode::PathAndName);
         }
         KEY_SPACE => {
-            common_mark_function(tree_view, mark_column);
+            common_mark_function(tree_view, mark_column, column_color);
         }
         _ => {}
     }
@@ -152,5 +164,8 @@ pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree
         return false;
     }
 
+    true
+}
+pub fn select_function_always_true(_tree_selection: &gtk::TreeSelection, _tree_model: &gtk::TreeModel, _tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
     true
 }

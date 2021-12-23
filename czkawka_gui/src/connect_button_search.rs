@@ -103,8 +103,13 @@ pub fn connect_button_search(
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
-        let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
-        let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories));
+        let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
+        let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None));
+        let reference_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(
+            &tree_view_included_directories,
+            ColumnsIncludedDirectory::Path as i32,
+            Some(ColumnsIncludedDirectory::ReferenceButton as i32),
+        ));
         let recursive_search = check_button_recursive.is_active();
         let excluded_items = entry_excluded_items.text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
@@ -296,6 +301,7 @@ pub fn connect_button_search(
 
                     sf.set_included_directory(included_directories);
                     sf.set_excluded_directory(excluded_directories);
+                    sf.set_reference_directory(reference_directories);
                     sf.set_recursive_search(recursive_search);
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);

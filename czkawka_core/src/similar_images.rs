@@ -57,7 +57,6 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub hash: Vec<u8>,
     pub similarity: Similarity,
-    pub is_in_reference_folder: bool,
 }
 
 // This is used by CLI tool when we cann
@@ -108,6 +107,7 @@ pub struct SimilarImages {
     use_cache: bool,
     delete_outdated_cache: bool,
     exclude_images_with_same_size: bool,
+    use_reference_folders: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -150,6 +150,7 @@ impl SimilarImages {
             use_cache: true,
             delete_outdated_cache: true,
             exclude_images_with_same_size: false,
+            use_reference_folders: false,
         }
     }
 
@@ -202,7 +203,7 @@ impl SimilarImages {
     }
 
     pub fn get_use_reference(&self) -> bool {
-        self.similar_referenced_vectors.is_some()
+        self.use_reference_folders
     }
 
     pub const fn get_information(&self) -> &Info {
@@ -239,6 +240,7 @@ impl SimilarImages {
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
+        self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
@@ -418,7 +420,6 @@ impl SimilarImages {
 
                                     hash: Vec::new(),
                                     similarity: Similarity::None,
-                                    is_in_reference_folder: false,
                                 };
 
                                 fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
@@ -666,7 +667,6 @@ impl SimilarImages {
                             modified_date: fe.modified_date,
                             hash: fe.hash.clone(),
                             similarity: Similarity::Similar(0),
-                            is_in_reference_folder: false,
                         })
                         .collect();
                     collected_similar_images.get_mut(hash).unwrap().append(&mut things);
@@ -686,7 +686,6 @@ impl SimilarImages {
                                 modified_date: fe.modified_date,
                                 hash: Vec::new(),
                                 similarity: Similarity::Similar(current_similarity),
-                                is_in_reference_folder: false,
                             })
                             .collect::<Vec<_>>();
                         collected_similar_images.get_mut(hash).unwrap().append(&mut things);
@@ -758,6 +757,10 @@ impl SimilarImages {
     /// Set included dir which needs to be relative, exists etc.
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
@@ -1011,7 +1014,6 @@ pub fn load_hashes_from_file(
                         },
                         hash,
                         similarity: Similarity::None,
-                        is_in_reference_folder: false,
                     },
                 );
             }

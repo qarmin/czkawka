@@ -17,6 +17,7 @@ use crate::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
+use crate::opening_selecting_records::{select_function_always_true, select_function_similar_images};
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -567,6 +568,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if sf.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
+                    if sf.get_use_reference() {
+                        tree_view_similar_images_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_similar_images_finder
+                            .selection()
+                            .set_select_function(Some(Box::new(select_function_similar_images)));
+                    }
                     //let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
 
