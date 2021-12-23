@@ -117,6 +117,9 @@ pub fn connect_button_search(
         let use_cache = check_button_settings_use_cache.is_active();
         let minimal_cache_file_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 / 4);
 
+        let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
+        let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+
         let show_dialog = Arc::new(AtomicBool::new(true));
 
         hide_all_buttons(&buttons_array);
@@ -152,9 +155,6 @@ pub fn connect_button_search(
 
                 let hash_type_index = combo_box_duplicate_hash_type.active().unwrap() as usize;
                 let hash_type = DUPLICATES_HASH_TYPE_COMBO_BOX[hash_type_index].hash_type;
-
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
                 let use_prehash_cache = check_button_duplicates_use_prehash_cache.is_active();
                 let minimal_prehash_cache_file_size = entry_settings_prehash_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(0);
@@ -285,9 +285,6 @@ pub fn connect_button_search(
                 let hash_alg_index = combo_box_image_hash_algorithm.active().unwrap() as usize;
                 let hash_alg = IMAGES_HASH_TYPE_COMBO_BOX[hash_alg_index].hash_alg;
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
-
                 let ignore_same_size = check_button_image_ignore_same_size.is_active();
 
                 let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
@@ -325,9 +322,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_similar_videos_finder).clear();
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
-
                 let tolerance = scale_similarity_similar_videos.value() as i32;
 
                 let delete_outdated_cache = check_button_settings_similar_videos_delete_outdated_cache.is_active();
@@ -362,8 +356,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
                 let approximate_comparison = check_button_music_approximate_comparison.is_active();
 
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;

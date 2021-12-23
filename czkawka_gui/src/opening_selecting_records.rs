@@ -2,6 +2,7 @@ use gdk::ModifierType;
 use gtk::prelude::*;
 
 use crate::help_functions::*;
+use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
@@ -24,12 +25,55 @@ pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey,
     false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
 }
 
+pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
+    let tree_view = event_controller.widget().unwrap().downcast::<gtk::TreeView>().unwrap();
+    #[cfg(debug_assertions)]
+    {
+        println!("key_code {}", key_code);
+    }
+
+    match get_notebook_upper_enum_from_tree_view(&tree_view) {
+        NotebookUpperEnum::IncludedDirectories => {
+            handle_tree_keypress_upper_directories(
+                &tree_view,
+                key_code,
+                ColumnsIncludedDirectory::Path as i32,
+                Some(ColumnsIncludedDirectory::ReferenceButton as i32),
+            );
+        }
+        NotebookUpperEnum::ExcludedDirectories => {
+            handle_tree_keypress_upper_directories(&tree_view, key_code, ColumnsExcludedDirectory::Path as i32, None);
+        }
+        _ => {
+            panic!()
+        }
+    }
+    false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
+}
+
 pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     let nt_object = get_notebook_object_from_tree_view(tree_view);
     if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
         common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::PathAndName);
     } else if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 3 {
         common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::OnlyPath);
+    }
+    gtk::Inhibit(false)
+}
+
+pub fn opening_double_click_function_directories(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+    if event.event_type() == gdk::EventType::DoubleButtonPress && (event.button() == 1 || event.button() == 3) {
+        match get_notebook_upper_enum_from_tree_view(tree_view) {
+            NotebookUpperEnum::IncludedDirectories => {
+                common_open_function_upper_directories(tree_view, ColumnsIncludedDirectory::Path as i32);
+            }
+            NotebookUpperEnum::ExcludedDirectories => {
+                common_open_function_upper_directories(tree_view, ColumnsExcludedDirectory::Path as i32);
+            }
+            _ => {
+                panic!()
+            }
+        }
     }
     gtk::Inhibit(false)
 }
@@ -65,7 +109,7 @@ enum OpenMode {
     PathAndName,
 }
 
-fn common_mark_function(tree_view: &gtk::TreeView, column_name: i32, column_color: Option<i32>) {
+fn common_mark_function(tree_view: &gtk::TreeView, column_selection: i32, column_color: Option<i32>) {
     let selection = tree_view.selection();
     let (selected_rows, tree_model) = selection.selected_rows();
 
@@ -77,8 +121,8 @@ fn common_mark_function(tree_view: &gtk::TreeView, column_name: i32, column_colo
                 continue;
             }
         }
-        let value = !tree_model.value(&tree_model.iter(tree_path).unwrap(), column_name).get::<bool>().unwrap();
-        model.set_value(&tree_model.iter(tree_path).unwrap(), column_name as u32, &value.to_value());
+        let value = !tree_model.value(&tree_model.iter(tree_path).unwrap(), column_selection).get::<bool>().unwrap();
+        model.set_value(&tree_model.iter(tree_path).unwrap(), column_selection as u32, &value.to_value());
     }
 }
 
@@ -100,6 +144,31 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
         // if let Err(e) = open::that(&end_path) {
         //     println!("Failed to open {} - Error {}", end_path, e);
         // }
+    }
+}
+
+fn common_open_function_upper_directories(tree_view: &gtk::TreeView, column_full_path: i32) {
+    let selection = tree_view.selection();
+    let (selected_rows, tree_model) = selection.selected_rows();
+
+    for tree_path in selected_rows.iter().rev() {
+        let full_path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_full_path).get::<String>().unwrap();
+
+        open::that_in_background(&full_path);
+    }
+}
+
+fn handle_tree_keypress_upper_directories(tree_view: &gtk::TreeView, key_code: u32, full_path_column: i32, mark_column: Option<i32>) {
+    match key_code {
+        KEY_ENTER => {
+            common_open_function_upper_directories(tree_view, full_path_column);
+        }
+        KEY_SPACE => {
+            if let Some(mark_column) = mark_column {
+                common_mark_function(tree_view, mark_column, None);
+            }
+        }
+        _ => {}
     }
 }
 

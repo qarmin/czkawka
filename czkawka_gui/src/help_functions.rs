@@ -17,7 +17,7 @@ use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::{fl, invalid_symlinks};
 
-use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
+use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[cfg(not(target_family = "windows"))]
 pub const CHARACTER: char = '/';
@@ -480,6 +480,16 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
         "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
         "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
         "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
+        e => {
+            panic!("{}", e)
+        }
+    }
+}
+
+pub fn get_notebook_upper_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookUpperEnum {
+    match (*tree_view).widget_name().to_string().as_str() {
+        "tree_view_upper_included_directories" => NotebookUpperEnum::IncludedDirectories,
+        "tree_view_upper_excluded_directories" => NotebookUpperEnum::ExcludedDirectories,
         e => {
             panic!("{}", e)
         }
