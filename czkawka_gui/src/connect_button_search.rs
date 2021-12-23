@@ -167,6 +167,7 @@ pub fn connect_button_search(
                     let mut df = DuplicateFinder::new();
                     df.set_included_directory(included_directories);
                     df.set_excluded_directory(excluded_directories);
+                    df.set_reference_directory(reference_directories);
                     df.set_recursive_search(recursive_search);
                     df.set_excluded_items(excluded_items);
                     df.set_allowed_extensions(allowed_extensions);

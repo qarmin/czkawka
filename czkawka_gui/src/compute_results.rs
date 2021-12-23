@@ -77,6 +77,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if df.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
+                    if df.get_use_reference() {
+                        tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_duplicates)));
+                    }
+
                     let information = df.get_information();
                     let text_messages = df.get_text_messages();
 
@@ -139,65 +145,196 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_duplicate_finder);
 
-                        match df.get_check_method() {
-                            CheckingMethod::Name => {
-                                let btreemap = df.get_files_sorted_by_names();
+                        if df.get_use_reference() {
+                            match df.get_check_method() {
+                                CheckingMethod::Name => {
+                                    let btreemap = df.get_files_with_identical_name_referenced();
 
-                                for (_name, vector) in btreemap.iter().rev() {
-                                    // Sort
-                                    let vector = if vector.len() >= 2 {
-                                        let mut vector = vector.clone();
-                                        vector.sort_by_key(|e| {
-                                            let t = split_path(e.path.as_path());
-                                            (t.0, t.1)
-                                        });
-                                        vector
-                                    } else {
-                                        vector.clone()
-                                    };
+                                    for (_name, (base_file_entry, vector)) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
 
-                                    let values: [(u32, &dyn ToValue); 9] = [
-                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                        (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Size as u32, (&"".to_string())),
-                                        (ColumnsDuplicates::Name as u32, (&"".to_string())),
-                                        (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
-                                        (ColumnsDuplicates::Modification as u32, (&"".to_string())), // No text in 3 column
-                                        (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),      // Not used here
-                                        (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                    ];
-
-                                    list_store.set(&list_store.append(), &values);
-                                    for entry in vector {
-                                        let (directory, file) = split_path(&entry.path);
+                                        // HEADER
+                                        let (directory, file) = split_path(&base_file_entry.path);
                                         let values: [(u32, &dyn ToValue); 9] = [
-                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                            (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
                                             (ColumnsDuplicates::Name as u32, &file),
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
                                                 ColumnsDuplicates::Modification as u32,
                                                 &(format!(
                                                     "{} - ({})",
-                                                    NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
-                                                    entry.size.file_size(options::BINARY).unwrap()
+                                                    NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0),
+                                                    base_file_entry.size.file_size(options::BINARY).unwrap()
                                                 )),
                                             ),
-                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                            (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                             (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                         ];
+
                                         list_store.set(&list_store.append(), &values);
+
+                                        // MEAT
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(format!(
+                                                        "{} - ({})",
+                                                        NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
+                                                        entry.size.file_size(options::BINARY).unwrap()
+                                                    )),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
                                     }
                                 }
-                            }
-                            CheckingMethod::Hash => {
-                                let btreemap = df.get_files_sorted_by_hash();
+                                CheckingMethod::Hash => {
+                                    let btreemap = df.get_files_with_identical_hashes_referenced();
 
-                                for (_size, vectors_vector) in btreemap.iter().rev() {
-                                    for vector in vectors_vector {
+                                    for (_size, vectors_vector) in btreemap.iter().rev() {
+                                        for (base_file_entry, vector) in vectors_vector {
+                                            // Sort
+                                            let vector = if vector.len() >= 2 {
+                                                let mut vector = vector.clone();
+                                                vector.sort_by_key(|e| {
+                                                    let t = split_path(e.path.as_path());
+                                                    (t.0, t.1)
+                                                });
+                                                vector
+                                            } else {
+                                                vector.clone()
+                                            };
+
+                                            // HEADER
+                                            let (directory, file) = split_path(&base_file_entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+
+                                            // MEAT
+                                            list_store.set(&list_store.append(), &values);
+                                            for entry in vector {
+                                                let (directory, file) = split_path(&entry.path);
+
+                                                let values: [(u32, &dyn ToValue); 9] = [
+                                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                    (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                    (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                    (ColumnsDuplicates::Name as u32, &file),
+                                                    (ColumnsDuplicates::Path as u32, &directory),
+                                                    (
+                                                        ColumnsDuplicates::Modification as u32,
+                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    ),
+                                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                                ];
+
+                                                list_store.set(&list_store.append(), &values);
+                                            }
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Size => {
+                                    let btreemap = df.get_files_with_identical_size_referenced();
+
+                                    for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+
+                                        // HEADER
+                                        let (directory, file) = split_path(&base_file_entry.path);
+                                        let values: [(u32, &dyn ToValue); 9] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                            (ColumnsDuplicates::Name as u32, &file),
+                                            (ColumnsDuplicates::Path as u32, &directory),
+                                            (
+                                                ColumnsDuplicates::Modification as u32,
+                                                &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                            ),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        // MEAT
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
+                                CheckingMethod::None => {
+                                    panic!();
+                                }
+                            }
+                        } else {
+                            match df.get_check_method() {
+                                CheckingMethod::Name => {
+                                    let btreemap = df.get_files_sorted_by_names();
+
+                                    for (_name, vector) in btreemap.iter().rev() {
                                         // Sort
                                         let vector = if vector.len() >= 2 {
                                             let mut vector = vector.clone();
@@ -215,9 +352,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
                                             (ColumnsDuplicates::Size as u32, (&"".to_string())),
                                             (ColumnsDuplicates::Name as u32, (&"".to_string())),
-                                            (ColumnsDuplicates::Path as u32, (&"".to_string())),
-                                            (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
-                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
+                                            (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
+                                            (ColumnsDuplicates::Modification as u32, (&"".to_string())), // No text in 3 column
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),      // Not used here
                                             (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                             (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                         ];
@@ -225,7 +362,111 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         list_store.set(&list_store.append(), &values);
                                         for entry in vector {
                                             let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(format!(
+                                                        "{} - ({})",
+                                                        NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
+                                                        entry.size.file_size(options::BINARY).unwrap()
+                                                    )),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Hash => {
+                                    let btreemap = df.get_files_sorted_by_hash();
 
+                                    for (_size, vectors_vector) in btreemap.iter().rev() {
+                                        for vector in vectors_vector {
+                                            // Sort
+                                            let vector = if vector.len() >= 2 {
+                                                let mut vector = vector.clone();
+                                                vector.sort_by_key(|e| {
+                                                    let t = split_path(e.path.as_path());
+                                                    (t.0, t.1)
+                                                });
+                                                vector
+                                            } else {
+                                                vector.clone()
+                                            };
+
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                                (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                                (ColumnsDuplicates::Path as u32, (&"".to_string())),
+                                                (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
+                                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+
+                                            list_store.set(&list_store.append(), &values);
+                                            for entry in vector {
+                                                let (directory, file) = split_path(&entry.path);
+
+                                                let values: [(u32, &dyn ToValue); 9] = [
+                                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                    (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                    (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                    (ColumnsDuplicates::Name as u32, &file),
+                                                    (ColumnsDuplicates::Path as u32, &directory),
+                                                    (
+                                                        ColumnsDuplicates::Modification as u32,
+                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    ),
+                                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                                ];
+
+                                                list_store.set(&list_store.append(), &values);
+                                            }
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Size => {
+                                    let btreemap = df.get_files_sorted_by_size();
+
+                                    for (_size, vector) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+                                        let values: [(u32, &dyn ToValue); 9] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Path as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
                                             let values: [(u32, &dyn ToValue); 9] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
@@ -240,65 +481,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
                                                 (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                             ];
-
                                             list_store.set(&list_store.append(), &values);
                                         }
                                     }
                                 }
-                            }
-                            CheckingMethod::Size => {
-                                let btreemap = df.get_files_sorted_by_size();
-
-                                for (_size, vector) in btreemap.iter().rev() {
-                                    // Sort
-                                    let vector = if vector.len() >= 2 {
-                                        let mut vector = vector.clone();
-                                        vector.sort_by_key(|e| {
-                                            let t = split_path(e.path.as_path());
-                                            (t.0, t.1)
-                                        });
-                                        vector
-                                    } else {
-                                        vector.clone()
-                                    };
-                                    let values: [(u32, &dyn ToValue); 9] = [
-                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                        (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Size as u32, (&"".to_string())),
-                                        (ColumnsDuplicates::Name as u32, (&"".to_string())),
-                                        (ColumnsDuplicates::Path as u32, (&"".to_string())),
-                                        (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
-                                        (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
-                                        (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                    ];
-
-                                    list_store.set(&list_store.append(), &values);
-                                    for entry in vector {
-                                        let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 9] = [
-                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                            (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
-                                            (ColumnsDuplicates::Name as u32, &file),
-                                            (ColumnsDuplicates::Path as u32, &directory),
-                                            (
-                                                ColumnsDuplicates::Modification as u32,
-                                                &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
-                                            ),
-                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                            (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                        ];
-                                        list_store.set(&list_store.append(), &values);
-                                    }
+                                CheckingMethod::None => {
+                                    panic!();
                                 }
                             }
-                            CheckingMethod::None => {
-                                panic!();
-                            }
                         }
-
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
 

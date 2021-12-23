@@ -105,9 +105,12 @@ impl Info {
 pub struct DuplicateFinder {
     text_messages: Messages,
     information: Info,
-    files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,    // File Size, File Entry
-    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,        // File Size, File Entry
-    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>, // File Size, File Entry
+    files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,                            // File Size, File Entry
+    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,                                // File Size, File Entry
+    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,                         // File Size, next grouped by file size, next grouped by hash
+    files_with_identical_names_referenced: BTreeMap<String, (FileEntry, Vec<FileEntry>)>,    // File Size, File Entry
+    files_with_identical_size_referenced: BTreeMap<u64, (FileEntry, Vec<FileEntry>)>,        // File Size, File Entry
+    files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>>, // File Size, next grouped by file size, next grouped by hash
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
@@ -125,6 +128,7 @@ pub struct DuplicateFinder {
     minimal_cache_file_size: u64,
     minimal_prehash_cache_file_size: u64,
     delete_outdated_cache: bool,
+    use_reference_folders: bool,
 }
 
 impl DuplicateFinder {
@@ -135,6 +139,9 @@ impl DuplicateFinder {
             files_with_identical_names: Default::default(),
             files_with_identical_size: Default::default(),
             files_with_identical_hashes: Default::default(),
+            files_with_identical_names_referenced: Default::default(),
+            files_with_identical_size_referenced: Default::default(),
+            files_with_identical_hashes_referenced: Default::default(),
             recursive_search: true,
             allowed_extensions: Extensions::new(),
             check_method: CheckingMethod::None,
@@ -152,11 +159,13 @@ impl DuplicateFinder {
             minimal_cache_file_size: 1024 * 1024 / 4, // By default cache only >= 256 KB files
             minimal_prehash_cache_file_size: 0,
             delete_outdated_cache: true,
+            use_reference_folders: false,
         }
     }
 
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
+        self.use_reference_folders = !self.directories.reference_directories.is_empty();
 
         match self.check_method {
             CheckingMethod::Name => {
@@ -270,23 +279,43 @@ impl DuplicateFinder {
         };
     }
 
+    pub fn get_use_reference(&self) -> bool {
+        self.use_reference_folders
+    }
+
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
         self.recursive_search = recursive_search;
     }
 
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages)
+    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
+        self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
     }
+
+    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
+        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
+    }
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
+    pub fn get_files_with_identical_hashes_referenced(&self) -> &BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>> {
+        &self.files_with_identical_hashes_referenced
+    }
+
+    pub fn get_files_with_identical_name_referenced(&self) -> &BTreeMap<String, (FileEntry, Vec<FileEntry>)> {
+        &self.files_with_identical_names_referenced
+    }
+
+    pub fn get_files_with_identical_size_referenced(&self) -> &BTreeMap<u64, (FileEntry, Vec<FileEntry>)> {
+        &self.files_with_identical_size_referenced
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -479,6 +508,36 @@ impl DuplicateFinder {
             }
         }
         self.files_with_identical_names = new_map;
+
+        // Reference - only use in size, because later hash will be counted differently
+        if self.use_reference_folders {
+            let mut btree_map = Default::default();
+            mem::swap(&mut self.files_with_identical_names, &mut btree_map);
+            let reference_directories = self.directories.reference_directories.clone();
+            let vec = btree_map
+                .into_iter()
+                .filter_map(|(_size, vec_file_entry)| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+            for (fe, vec_fe) in vec {
+                self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
+            }
+        }
 
         Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
         true
@@ -688,6 +747,36 @@ impl DuplicateFinder {
                 self.information.number_of_groups_by_size += 1;
                 self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
                 self.files_with_identical_size.insert(size, vector);
+            }
+        }
+
+        // Reference - only use in size, because later hash will be counted differently
+        if self.use_reference_folders && self.check_method == CheckingMethod::Size {
+            let mut btree_map = Default::default();
+            mem::swap(&mut self.files_with_identical_size, &mut btree_map);
+            let reference_directories = self.directories.reference_directories.clone();
+            let vec = btree_map
+                .into_iter()
+                .filter_map(|(_size, vec_file_entry)| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+            for (fe, vec_fe) in vec {
+                self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
             }
         }
 

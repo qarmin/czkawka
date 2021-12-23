@@ -483,10 +483,7 @@ impl GuiMainNotebook {
         }
 
         {
-            let active = match self.combo_box_duplicate_check_method.active() {
-                Some(t) => t,
-                None => 0,
-            };
+            let active = self.combo_box_duplicate_check_method.active().unwrap_or(0);
             self.combo_box_duplicate_check_method.remove_all();
             for i in &DUPLICATES_CHECK_METHOD_COMBO_BOX {
                 let text = match i.check_method {
