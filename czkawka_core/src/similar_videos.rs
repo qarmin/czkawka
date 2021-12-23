@@ -68,6 +68,7 @@ pub struct SimilarVideos {
     excluded_items: ExcludedItems,
     allowed_extensions: Extensions,
     similar_vectors: Vec<Vec<FileEntry>>,
+    similar_referenced_vectors: Vec<(FileEntry, Vec<FileEntry>)>,
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -78,6 +79,7 @@ pub struct SimilarVideos {
     tolerance: i32,
     delete_outdated_cache: bool,
     exclude_videos_with_same_size: bool,
+    use_reference_folders: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -115,6 +117,8 @@ impl SimilarVideos {
             tolerance: 10,
             delete_outdated_cache: false,
             exclude_videos_with_same_size: false,
+            use_reference_folders: false,
+            similar_referenced_vectors: vec![],
         }
     }
 
@@ -171,6 +175,21 @@ impl SimilarVideos {
             t => t,
         };
     }
+    pub fn get_similar_videos_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        &self.similar_referenced_vectors
+    }
+
+    pub fn get_number_of_base_duplicated_files(&self) -> usize {
+        if self.use_reference_folders {
+            self.similar_referenced_vectors.len()
+        } else {
+            self.similar_vectors.len()
+        }
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.use_reference_folders
+    }
 
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
@@ -178,6 +197,7 @@ impl SimilarVideos {
             self.text_messages.errors.push("Cannot find proper installation of FFmpeg.".to_string());
         } else {
             self.directories.optimize_directories(true, &mut self.text_messages);
+            self.use_reference_folders = !self.directories.reference_directories.is_empty();
             if !self.check_for_similar_videos(stop_receiver, progress_sender) {
                 self.stopped_search = true;
                 return;
@@ -539,6 +559,32 @@ impl SimilarVideos {
 
         self.similar_vectors = collected_similar_videos;
 
+        if self.use_reference_folders {
+            let mut similars_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similars_vector);
+            let reference_directories = self.directories.reference_directories.clone();
+            self.similar_referenced_vectors = similars_vector
+                .into_iter()
+                .filter_map(|vec_file_entry| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+        }
+
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap".to_string());
 
         // Clean unused data
@@ -551,6 +597,10 @@ impl SimilarVideos {
     /// Set included dir which needs to be relative, exists etc.
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {

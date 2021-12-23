@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, thread};
+use std::{fs, mem, thread};
 
 use audiotags::Tag;
 use crossbeam_channel::Receiver;
@@ -90,6 +90,7 @@ pub struct SameMusic {
     music_to_check: Vec<FileEntry>,
     music_entries: Vec<FileEntry>,
     duplicated_music_entries: Vec<Vec<FileEntry>>,
+    duplicated_music_entries_referenced: Vec<(FileEntry, Vec<FileEntry>)>,
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
@@ -100,6 +101,7 @@ pub struct SameMusic {
     music_similarity: MusicSimilarity,
     stopped_search: bool,
     approximate_comparison: bool,
+    use_reference_folders: bool,
 }
 
 impl SameMusic {
@@ -120,11 +122,14 @@ impl SameMusic {
             duplicated_music_entries: vec![],
             music_to_check: Vec::with_capacity(2048),
             approximate_comparison: true,
+            use_reference_folders: false,
+            duplicated_music_entries_referenced: vec![],
         }
     }
 
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
+        self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
@@ -172,8 +177,13 @@ impl SameMusic {
         self.recursive_search = recursive_search;
     }
 
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages)
+    /// Set included dir which needs to be relative, exists etc.
+    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
+        self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
@@ -183,6 +193,7 @@ impl SameMusic {
     pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
+
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
@@ -196,6 +207,22 @@ impl SameMusic {
             0 => 1,
             t => t,
         };
+    }
+
+    pub fn get_similar_music_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        &self.duplicated_music_entries_referenced
+    }
+
+    pub fn get_number_of_base_duplicated_files(&self) -> usize {
+        if self.use_reference_folders {
+            self.duplicated_music_entries_referenced.len()
+        } else {
+            self.duplicated_music_entries.len()
+        }
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.use_reference_folders
     }
 
     /// Check files for any with size == 0
@@ -671,9 +698,40 @@ impl SameMusic {
 
         self.duplicated_music_entries = old_duplicates;
 
-        for vec in &self.duplicated_music_entries {
-            self.information.number_of_duplicates_music_files += vec.len() - 1;
+        if self.use_reference_folders {
+            let mut similars_vector = Default::default();
+            mem::swap(&mut self.duplicated_music_entries, &mut similars_vector);
+            let reference_directories = self.directories.reference_directories.clone();
+            self.duplicated_music_entries_referenced = similars_vector
+                .into_iter()
+                .filter_map(|vec_file_entry| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+
+            for (_fe, vec) in &self.duplicated_music_entries_referenced {
+                self.information.number_of_duplicates_music_files += vec.len();
+            }
+        } else {
+            for vec in &self.duplicated_music_entries {
+                self.information.number_of_duplicates_music_files += vec.len() - 1;
+            }
         }
+
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();

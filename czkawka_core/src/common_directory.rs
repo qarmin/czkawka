@@ -295,8 +295,4 @@ impl Directories {
         // We're assuming that `excluded_directories` are already normalized
         self.excluded_directories.iter().any(|p| p.as_path() == path)
     }
-
-    pub fn is_reference_folders_used(&self) -> bool {
-        !self.reference_directories.is_empty()
-    }
 }

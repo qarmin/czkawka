@@ -93,7 +93,7 @@ pub struct SimilarImages {
     excluded_items: ExcludedItems,
     bktree: BKTree<Vec<u8>, Hamming>,
     similar_vectors: Vec<Vec<FileEntry>>,
-    similar_referenced_vectors: Option<Vec<(FileEntry, Vec<FileEntry>)>>,
+    similar_referenced_vectors: Vec<(FileEntry, Vec<FileEntry>)>,
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -136,7 +136,7 @@ impl SimilarImages {
             allowed_extensions: Extensions::new(),
             bktree: BKTree::new(Hamming),
             similar_vectors: vec![],
-            similar_referenced_vectors: None,
+            similar_referenced_vectors: Default::default(),
             recursive_search: true,
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
             maximal_file_size: u64::MAX,
@@ -192,13 +192,14 @@ impl SimilarImages {
     }
 
     pub fn get_similar_images_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
-        self.similar_referenced_vectors.as_ref().unwrap()
+        &self.similar_referenced_vectors
     }
 
     pub fn get_number_of_base_duplicated_files(&self) -> usize {
-        match &self.similar_referenced_vectors {
-            Some(s_reference) => s_reference.len(),
-            None => self.similar_vectors.len(),
+        if self.use_reference_folders {
+            self.similar_referenced_vectors.len()
+        } else {
+            self.similar_vectors.len()
         }
     }
 
@@ -715,33 +716,30 @@ impl SimilarImages {
             }
         }
 
-        // TODO use reference search
-        if self.directories.is_reference_folders_used() {
+        if self.use_reference_folders {
             let mut similars_vector = Default::default();
             mem::swap(&mut self.similar_vectors, &mut similars_vector);
             let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = Some(
-                similars_vector
-                    .into_iter()
-                    .filter_map(|vec_file_entry| {
-                        let mut files_from_referenced_folders = Vec::new();
-                        let mut normal_files = Vec::new();
-                        for file_entry in vec_file_entry {
-                            if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
-                                files_from_referenced_folders.push(file_entry);
-                            } else {
-                                normal_files.push(file_entry);
-                            }
-                        }
-
-                        if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
-                            None
+            self.similar_referenced_vectors = similars_vector
+                .into_iter()
+                .filter_map(|vec_file_entry| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
                         } else {
-                            Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                            normal_files.push(file_entry);
                         }
-                    })
-                    .collect::<Vec<(FileEntry, Vec<FileEntry>)>>(),
-            );
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());

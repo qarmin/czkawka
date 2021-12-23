@@ -17,7 +17,7 @@ use crate::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
-use crate::opening_selecting_records::{select_function_always_true, select_function_similar_images};
+use crate::opening_selecting_records::*;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -744,6 +744,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if ff.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
+                    if ff.get_use_reference() {
+                        tree_view_similar_videos_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_similar_videos_finder
+                            .selection()
+                            .set_select_function(Some(Box::new(select_function_similar_videos)));
+                    }
                     //let information = ff.get_information();
                     let text_messages = ff.get_text_messages();
 
@@ -764,55 +771,113 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_similar_videos_finder);
 
-                        let vec_struct_similar = ff.get_similar_videos();
+                        if ff.get_use_reference() {
+                            let vec_struct_similar = ff.get_similar_videos_referenced();
 
-                        for vec_file_entry in vec_struct_similar.iter() {
-                            // Sort
-                            let vec_file_entry = if vec_file_entry.len() >= 2 {
-                                let mut vec_file_entry = vec_file_entry.clone();
-                                vec_file_entry.sort_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vec_file_entry
-                            } else {
-                                vec_file_entry.clone()
-                            };
+                            for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
 
-                            // Header
-                            let values: [(u32, &dyn ToValue); 10] = [
-                                (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
-                                (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                (ColumnsSimilarVideos::Size as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
-                                (ColumnsSimilarVideos::Name as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::Path as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::Modification as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::ModificationAsSecs as u32, &(0)),
-                                (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-                            list_store.set(&list_store.append(), &values);
-
-                            // Meat
-                            for file_entry in vec_file_entry.iter() {
-                                let (directory, file) = split_path(&file_entry.path);
+                                // Header
+                                let (directory, file) = split_path(&base_file_entry.path);
                                 let values: [(u32, &dyn ToValue); 10] = [
-                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
                                     (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                    (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSimilarVideos::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSimilarVideos::Name as u32, &file),
                                     (ColumnsSimilarVideos::Path as u32, &directory),
                                     (
                                         ColumnsSimilarVideos::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
                                     ),
-                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                                    (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                    (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                     (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
+
+                                // Meat
+                                for file_entry in vec_file_entry.iter() {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 10] = [
+                                        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSimilarVideos::SelectionButton as u32, &false),
+                                        (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSimilarVideos::Name as u32, &file),
+                                        (ColumnsSimilarVideos::Path as u32, &directory),
+                                        (
+                                            ColumnsSimilarVideos::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
+                            }
+                        } else {
+                            let vec_struct_similar = ff.get_similar_videos();
+
+                            for vec_file_entry in vec_struct_similar.iter() {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
+
+                                // Header
+                                let values: [(u32, &dyn ToValue); 10] = [
+                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
+                                    (ColumnsSimilarVideos::SelectionButton as u32, &false),
+                                    (ColumnsSimilarVideos::Size as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
+                                    (ColumnsSimilarVideos::Name as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::Path as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::Modification as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(0)),
+                                    (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                ];
+                                list_store.set(&list_store.append(), &values);
+
+                                // Meat
+                                for file_entry in vec_file_entry.iter() {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 10] = [
+                                        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSimilarVideos::SelectionButton as u32, &false),
+                                        (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSimilarVideos::Name as u32, &file),
+                                        (ColumnsSimilarVideos::Path as u32, &directory),
+                                        (
+                                            ColumnsSimilarVideos::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
                             }
                         }
 
@@ -842,6 +907,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if mf.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
+                    if mf.get_use_reference() {
+                        tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_same_music)));
+                    }
+
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
 
@@ -853,8 +924,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_same_music_finder);
 
-                        let vector = mf.get_duplicated_music_entries();
-
                         let music_similarity = *mf.get_music_similarity();
 
                         let is_title = (MusicSimilarity::TITLE & music_similarity) != MusicSimilarity::NONE;
@@ -863,92 +932,159 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let is_album_artist = (MusicSimilarity::ALBUM_ARTIST & music_similarity) != MusicSimilarity::NONE;
                         let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
 
-                        let text: String = "-----".to_string();
+                        if mf.get_use_reference() {
+                            let vector = mf.get_similar_music_referenced();
 
-                        for vec_file_entry in vector {
-                            // Sort
-                            let vec_file_entry = if vec_file_entry.len() >= 2 {
-                                let mut vec_file_entry = vec_file_entry.clone();
-                                vec_file_entry.sort_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vec_file_entry
-                            } else {
-                                vec_file_entry.clone()
-                            };
+                            for (base_file_entry, vec_file_entry) in vector {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
 
-                            let values: [(u32, &dyn ToValue); 15] = [
-                                (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
-                                (ColumnsSameMusic::SelectionButton as u32, &false),
-                                (ColumnsSameMusic::Size as u32, &"".to_string()),
-                                (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
-                                (ColumnsSameMusic::Name as u32, &"".to_string()),
-                                (ColumnsSameMusic::Path as u32, &"".to_string()),
-                                (
-                                    ColumnsSameMusic::Title as u32,
-                                    &(match is_title {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::Artist as u32,
-                                    &(match is_artist {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::AlbumTitle as u32,
-                                    &(match is_album_title {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::AlbumArtist as u32,
-                                    &(match is_album_artist {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::Year as u32,
-                                    &(match is_year {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (ColumnsSameMusic::Modification as u32, &"".to_string()),
-                                (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
-                                (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-                            list_store.set(&list_store.append(), &values);
-                            for file_entry in vec_file_entry {
-                                let (directory, file) = split_path(&file_entry.path);
+                                let (directory, file) = split_path(&base_file_entry.path);
                                 let values: [(u32, &dyn ToValue); 15] = [
-                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
                                     (ColumnsSameMusic::SelectionButton as u32, &false),
-                                    (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSameMusic::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSameMusic::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSameMusic::Name as u32, &file),
                                     (ColumnsSameMusic::Path as u32, &directory),
-                                    (ColumnsSameMusic::Title as u32, &file_entry.title),
-                                    (ColumnsSameMusic::Artist as u32, &file_entry.artist),
-                                    (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
-                                    (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
-                                    (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                    (ColumnsSameMusic::Title as u32, &base_file_entry.title),
+                                    (ColumnsSameMusic::Artist as u32, &base_file_entry.artist),
+                                    (ColumnsSameMusic::AlbumTitle as u32, &base_file_entry.album_title),
+                                    (ColumnsSameMusic::AlbumArtist as u32, &base_file_entry.album_artist),
+                                    (ColumnsSameMusic::Year as u32, &base_file_entry.year.to_string()),
                                     (
                                         ColumnsSameMusic::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
                                     ),
-                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                                    (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                    (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                     (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
+                                for file_entry in vec_file_entry {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 15] = [
+                                        (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSameMusic::SelectionButton as u32, &false),
+                                        (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSameMusic::Name as u32, &file),
+                                        (ColumnsSameMusic::Path as u32, &directory),
+                                        (ColumnsSameMusic::Title as u32, &file_entry.title),
+                                        (ColumnsSameMusic::Artist as u32, &file_entry.artist),
+                                        (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
+                                        (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
+                                        (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                        (
+                                            ColumnsSameMusic::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
+                            }
+                        } else {
+                            let vector = mf.get_duplicated_music_entries();
+
+                            let text: String = "-----".to_string();
+
+                            for vec_file_entry in vector {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
+
+                                let values: [(u32, &dyn ToValue); 15] = [
+                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
+                                    (ColumnsSameMusic::SelectionButton as u32, &false),
+                                    (ColumnsSameMusic::Size as u32, &"".to_string()),
+                                    (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
+                                    (ColumnsSameMusic::Name as u32, &"".to_string()),
+                                    (ColumnsSameMusic::Path as u32, &"".to_string()),
+                                    (
+                                        ColumnsSameMusic::Title as u32,
+                                        &(match is_title {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::Artist as u32,
+                                        &(match is_artist {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::AlbumTitle as u32,
+                                        &(match is_album_title {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::AlbumArtist as u32,
+                                        &(match is_album_artist {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::Year as u32,
+                                        &(match is_year {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (ColumnsSameMusic::Modification as u32, &"".to_string()),
+                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
+                                    (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                    (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                ];
+                                list_store.set(&list_store.append(), &values);
+                                for file_entry in vec_file_entry {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 15] = [
+                                        (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSameMusic::SelectionButton as u32, &false),
+                                        (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSameMusic::Name as u32, &file),
+                                        (ColumnsSameMusic::Path as u32, &directory),
+                                        (ColumnsSameMusic::Title as u32, &file_entry.title),
+                                        (ColumnsSameMusic::Artist as u32, &file_entry.artist),
+                                        (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
+                                        (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
+                                        (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                        (
+                                            ColumnsSameMusic::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
                             }
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);

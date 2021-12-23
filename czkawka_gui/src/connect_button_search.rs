@@ -341,6 +341,7 @@ pub fn connect_button_search(
 
                     sf.set_included_directory(included_directories);
                     sf.set_excluded_directory(excluded_directories);
+                    sf.set_reference_directory(reference_directories);
                     sf.set_recursive_search(recursive_search);
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
@@ -391,6 +392,7 @@ pub fn connect_button_search(
 
                         mf.set_included_directory(included_directories);
                         mf.set_excluded_directory(excluded_directories);
+                        mf.set_reference_directory(reference_directories);
                         mf.set_excluded_items(excluded_items);
                         mf.set_minimal_file_size(minimal_file_size);
                         mf.set_maximal_file_size(maximal_file_size);
