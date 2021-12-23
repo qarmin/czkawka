@@ -57,6 +57,7 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub hash: Vec<u8>,
     pub similarity: Similarity,
+    pub is_in_reference_folder: bool,
 }
 
 // This is used by CLI tool when we cann
@@ -93,6 +94,7 @@ pub struct SimilarImages {
     excluded_items: ExcludedItems,
     bktree: BKTree<Vec<u8>, Hamming>,
     similar_vectors: Vec<Vec<FileEntry>>,
+    similar_referenced_vectors: Option<Vec<(FileEntry, Vec<FileEntry>)>>,
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -134,6 +136,7 @@ impl SimilarImages {
             allowed_extensions: Extensions::new(),
             bktree: BKTree::new(Hamming),
             similar_vectors: vec![],
+            similar_referenced_vectors: None,
             recursive_search: true,
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
             maximal_file_size: u64::MAX,
@@ -185,6 +188,21 @@ impl SimilarImages {
 
     pub const fn get_similar_images(&self) -> &Vec<Vec<FileEntry>> {
         &self.similar_vectors
+    }
+
+    pub fn get_similar_images_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        self.similar_referenced_vectors.as_ref().unwrap()
+    }
+
+    pub fn get_number_of_base_duplicated_files(&self) -> usize {
+        match &self.similar_referenced_vectors {
+            Some(s_reference) => s_reference.len(),
+            None => self.similar_vectors.len(),
+        }
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.similar_referenced_vectors.is_some()
     }
 
     pub const fn get_information(&self) -> &Info {
@@ -400,6 +418,7 @@ impl SimilarImages {
 
                                     hash: Vec::new(),
                                     similarity: Similarity::None,
+                                    is_in_reference_folder: false,
                                 };
 
                                 fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
@@ -647,6 +666,7 @@ impl SimilarImages {
                             modified_date: fe.modified_date,
                             hash: fe.hash.clone(),
                             similarity: Similarity::Similar(0),
+                            is_in_reference_folder: false,
                         })
                         .collect();
                     collected_similar_images.get_mut(hash).unwrap().append(&mut things);
@@ -666,6 +686,7 @@ impl SimilarImages {
                                 modified_date: fe.modified_date,
                                 hash: Vec::new(),
                                 similarity: Similarity::Similar(current_similarity),
+                                is_in_reference_folder: false,
                             })
                             .collect::<Vec<_>>();
                         collected_similar_images.get_mut(hash).unwrap().append(&mut things);
@@ -693,6 +714,35 @@ impl SimilarImages {
                     self.similar_vectors.push(vec_values);
                 }
             }
+        }
+
+        // TODO use reference search
+        if self.directories.is_reference_folders_used() {
+            let mut similars_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similars_vector);
+            let reference_directories = self.directories.reference_directories.clone();
+            self.similar_referenced_vectors = Some(
+                similars_vector
+                    .into_iter()
+                    .filter_map(|vec_file_entry| {
+                        let mut files_from_referenced_folders = Vec::new();
+                        let mut normal_files = Vec::new();
+                        for file_entry in vec_file_entry {
+                            if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                files_from_referenced_folders.push(file_entry);
+                            } else {
+                                normal_files.push(file_entry);
+                            }
+                        }
+
+                        if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                            None
+                        } else {
+                            Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                        }
+                    })
+                    .collect::<Vec<(FileEntry, Vec<FileEntry>)>>(),
+            );
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
@@ -961,6 +1011,7 @@ pub fn load_hashes_from_file(
                         },
                         hash,
                         similarity: Similarity::None,
+                        is_in_reference_folder: false,
                     },
                 );
             }
