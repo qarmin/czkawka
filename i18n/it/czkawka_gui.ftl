@@ -293,7 +293,7 @@ settings_notebook_images = Immagini simili
 settings_notebook_videos = Video simili
 
 ## Multiple - settings used in multiple tabs
-settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
+settings_multiple_delete_outdated_cache_checkbutton = Cancella automaticamente la cache obsoleta
 settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
         Permette di cancellare i risultati cache obsoleti che puntano a file inesistenti.
 
@@ -434,8 +434,8 @@ delete_all_files_in_group_label1 = In alcuni gruppi tutti gli elementi sono sele
 delete_all_files_in_group_label2 = Sei sicuro di cancellarli tutti?
 delete_folder_failed = Cancellazione cartella {$dir} fallita perché la cartella non esiste, non si hanno permessi sufficienti o perché non vuota.
 
-hardlink_failed = Failed to hardlink
-hard_sym_invalid_selection_title_dialog = Slezione invalida in alcuni gruppi
+hardlink_failed = Collegamento fisico fallito
+hard_sym_invalid_selection_title_dialog = Selezione invalida in alcuni gruppi
 hard_sym_invalid_selection_label_1 = In alcuni gruppi c'è solo una voce selezionata e verrà ignorata.
 hard_sym_invalid_selection_label_2 = Per poter collegare simbolicamente/fisicamente questi files, devono essere selezionati almeno due risultati.
 hard_sym_invalid_selection_label_3 = Il primo nel gruppo sarà considerato l'originale ed inalteratom, ma il secondo ed i successivi verranno modificati.
