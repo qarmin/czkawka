@@ -113,9 +113,8 @@ pub struct SimilarImages {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
-    pub gained_space: u64,
+    pub number_of_duplicates: usize,
+    pub number_of_groups: u64,
 }
 
 impl Info {
@@ -743,6 +742,18 @@ impl SimilarImages {
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
+
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
 
         // Clean unused data
         self.image_hashes = Default::default();

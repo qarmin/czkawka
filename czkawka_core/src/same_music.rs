@@ -71,10 +71,8 @@ pub struct FileEntry {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_music_entries: usize,
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
-    pub number_of_duplicates_music_files: usize,
+    pub number_of_duplicates: usize,
+    pub number_of_groups: u64,
 }
 
 impl Info {
@@ -409,7 +407,6 @@ impl SameMusic {
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
-        self.information.number_of_music_entries = self.music_entries.len();
 
         Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
         true
@@ -696,6 +693,10 @@ impl SameMusic {
             // new_duplicates = Vec::new();
         }
 
+        // End thread which send info to gui
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
+
         self.duplicated_music_entries = old_duplicates;
 
         if self.use_reference_folders {
@@ -722,19 +723,19 @@ impl SameMusic {
                     }
                 })
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
-
-            for (_fe, vec) in &self.duplicated_music_entries_referenced {
-                self.information.number_of_duplicates_music_files += vec.len();
-            }
-        } else {
-            for vec in &self.duplicated_music_entries {
-                self.information.number_of_duplicates_music_files += vec.len() - 1;
-            }
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.duplicated_music_entries_referenced {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.duplicated_music_entries {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
 
         Common::print_time(start_time, SystemTime::now(), "check_for_duplicates".to_string());
 
@@ -793,9 +794,6 @@ impl DebugPrint for SameMusic {
         println!("Errors size - {}", self.text_messages.errors.len());
         println!("Warnings size - {}", self.text_messages.warnings.len());
         println!("Messages size - {}", self.text_messages.messages.len());
-        println!("Number of removed files - {}", self.information.number_of_removed_files);
-        println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
-        println!("Number of duplicated music files - {}", self.information.number_of_duplicates_music_files);
 
         println!("### Other");
 
@@ -838,7 +836,7 @@ impl SaveResults for SameMusic {
         }
 
         if !self.music_entries.is_empty() {
-            writeln!(writer, "Found {} same music files.", self.information.number_of_music_entries).unwrap();
+            writeln!(writer, "Found {} same music files.", self.information.number_of_duplicates).unwrap();
             for file_entry in self.music_entries.iter() {
                 writeln!(writer, "{}", file_entry.path.display()).unwrap();
             }

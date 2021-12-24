@@ -1107,7 +1107,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
 
-                    let same_music_number: usize = information.number_of_duplicates_music_files;
+                    let same_music_number: usize = information.number_of_duplicates;
 
                     entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), same_music_number, fl!("compute_music_files")).as_str());
 
