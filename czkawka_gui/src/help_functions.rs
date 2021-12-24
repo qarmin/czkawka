@@ -17,7 +17,7 @@ use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::{fl, invalid_symlinks};
 
-use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
+use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[cfg(not(target_family = "windows"))]
 pub const CHARACTER: char = '/';
@@ -69,8 +69,8 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_selection: ColumnsDuplicates::SelectionButton as i32,
         column_color: Some(ColumnsDuplicates::Color as i32),
         column_dimensions: None,
-        column_size: None,
-        column_size_as_bytes: None,
+        column_size: None,          // Do not add, useless in hash and size mode
+        column_size_as_bytes: None, // Do not add, useless in hash and size mode
         column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
     },
     NotebookObject {
@@ -209,6 +209,7 @@ pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
     ActivatableSelectButton = 0,
     SelectionButton,
+    Size,
     Name,
     Path,
     Modification,
@@ -226,8 +227,13 @@ pub enum ColumnsEmptyFolders {
     ModificationAsSecs,
 }
 
-pub enum ColumnsDirectory {
-    // Columns for Included and Excluded Directories in upper Notebook
+pub enum ColumnsIncludedDirectory {
+    // Columns for Included Directories in upper Notebook
+    Path = 0,
+    ReferenceButton,
+}
+pub enum ColumnsExcludedDirectory {
+    // Columns for Excluded Directories in upper Notebook
     Path = 0,
 }
 
@@ -328,7 +334,7 @@ pub const HEADER_ROW_COLOR: &str = "#272727";
 //pub const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
 //pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
-pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
+pub fn get_string_from_list_store(tree_view: &gtk::TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
     let list_store: gtk::ListStore = get_list_store(tree_view);
 
     let mut string_vector: Vec<String> = Vec::new();
@@ -339,11 +345,21 @@ pub fn get_string_from_list_store(tree_view: &gtk::TreeView) -> Vec<String> {
             return string_vector;
         }
     };
-    loop {
-        string_vector.push(list_store.value(&tree_iter, 0).get::<String>().unwrap());
-        if !list_store.iter_next(&tree_iter) {
-            return string_vector;
-        }
+    match column_selection {
+        Some(column_selection) => loop {
+            if list_store.value(&tree_iter, column_selection).get::<bool>().unwrap() {
+                string_vector.push(list_store.value(&tree_iter, column_full_path).get::<String>().unwrap());
+            }
+            if !list_store.iter_next(&tree_iter) {
+                return string_vector;
+            }
+        },
+        None => loop {
+            string_vector.push(list_store.value(&tree_iter, column_full_path).get::<String>().unwrap());
+            if !list_store.iter_next(&tree_iter) {
+                return string_vector;
+            }
+        },
     }
 }
 
@@ -470,6 +486,16 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
     }
 }
 
+pub fn get_notebook_upper_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookUpperEnum {
+    match (*tree_view).widget_name().to_string().as_str() {
+        "tree_view_upper_included_directories" => NotebookUpperEnum::IncludedDirectories,
+        "tree_view_upper_excluded_directories" => NotebookUpperEnum::ExcludedDirectories,
+        e => {
+            panic!("{}", e)
+        }
+    }
+}
+
 pub fn get_notebook_object_from_tree_view(tree_view: &gtk::TreeView) -> &NotebookObject {
     let nb_enum = get_notebook_enum_from_tree_view(tree_view);
     &NOTEBOOKS_INFOS[nb_enum as usize]
@@ -484,7 +510,7 @@ pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
-pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
+pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32, column_path: i32) {
     // Remove only child from header
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk::TreePath> = Vec::new();
@@ -495,55 +521,109 @@ pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32) {
 
         let mut next_iter;
         let mut next_next_iter;
-        'main: loop {
-            if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
-                panic!("First deleted element, should be a header"); // First element should be header
-            };
 
-            next_iter = current_iter.clone();
-            if !model.iter_next(&next_iter) {
-                // There is only single header left (H1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                break 'main;
-            }
+        // Empty means default check type
+        if model.value(&current_iter, column_path).get::<String>().unwrap().is_empty() {
+            'main: loop {
+                if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+                    panic!("First deleted element, should be a header"); // First element should be header
+                };
 
-            if model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                current_iter = next_iter.clone();
-                continue 'main;
-            }
-
-            next_next_iter = next_iter.clone();
-            if !model.iter_next(&next_next_iter) {
-                // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
-                break 'main;
-            }
-
-            if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
-                // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
-                vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
-                vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
-                current_iter = next_next_iter.clone();
-                continue 'main;
-            }
-
-            loop {
-                // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                if !model.iter_next(&next_next_iter) {
+                next_iter = current_iter.clone();
+                if !model.iter_next(&next_iter) {
+                    // There is only single header left (H1 -> END) -> (NOTHING)
+                    vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
                     break 'main;
                 }
-                // Move to next header
+
+                if model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
+                    vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                    current_iter = next_iter.clone();
+                    continue 'main;
+                }
+
+                next_next_iter = next_iter.clone();
+                if !model.iter_next(&next_next_iter) {
+                    // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
+                    vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                    vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
+                    break 'main;
+                }
+
                 if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
+                    vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                    vec_tree_path_to_delete.push(model.path(&next_iter).unwrap());
                     current_iter = next_next_iter.clone();
                     continue 'main;
                 }
+
+                loop {
+                    // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
+                    if !model.iter_next(&next_next_iter) {
+                        break 'main;
+                    }
+                    // Move to next header
+                    if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                        current_iter = next_next_iter.clone();
+                        continue 'main;
+                    }
+                }
+            }
+            for tree_path in vec_tree_path_to_delete.iter().rev() {
+                model.remove(&model.iter(tree_path).unwrap());
             }
         }
-        for tree_path in vec_tree_path_to_delete.iter().rev() {
-            model.remove(&model.iter(tree_path).unwrap());
+        // Non empty means that header points at reference folder
+        else {
+            // TODO verify how it works
+            'reference: loop {
+                if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+                    panic!("First deleted element, should be a header"); // First element should be header
+                };
+
+                next_iter = current_iter.clone();
+                if !model.iter_next(&next_iter) {
+                    // There is only single header left (H1 -> END) -> (NOTHING)
+                    vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                    break 'reference;
+                }
+
+                if model.value(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
+                    vec_tree_path_to_delete.push(model.path(&current_iter).unwrap());
+                    current_iter = next_iter.clone();
+                    continue 'reference;
+                }
+
+                next_next_iter = next_iter.clone();
+                if !model.iter_next(&next_next_iter) {
+                    // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
+                    break 'reference;
+                }
+
+                if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
+                    current_iter = next_next_iter.clone();
+                    continue 'reference;
+                }
+
+                loop {
+                    // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
+                    if !model.iter_next(&next_next_iter) {
+                        break 'reference;
+                    }
+                    // Move to next header
+                    if model.value(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                        current_iter = next_next_iter.clone();
+                        continue 'reference;
+                    }
+                }
+            }
+            for tree_path in vec_tree_path_to_delete.iter().rev() {
+                model.remove(&model.iter(tree_path).unwrap());
+            }
         }
     }
 

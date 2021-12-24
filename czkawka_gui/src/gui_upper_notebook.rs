@@ -164,5 +164,15 @@ impl GuiUpperNotebook {
                 .unwrap()
                 .set_text(&fl_thing);
         }
+
+        let names_of_columns = [
+            vec![fl!("upper_tree_view_included_folder_column_title"), fl!("upper_tree_view_included_reference_column_title")], // Included folders
+        ];
+
+        for (notebook_index, tree_view) in [self.tree_view_included_directories.clone()].iter().enumerate() {
+            for (column_index, column) in tree_view.columns().iter().enumerate() {
+                column.set_title(&names_of_columns[notebook_index][column_index]);
+            }
+        }
     }
 }

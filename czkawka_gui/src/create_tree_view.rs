@@ -3,6 +3,46 @@ use gtk::TreeViewColumn;
 
 use crate::help_functions::*;
 
+// When adding new column do not forget to update translations
+
+pub fn create_tree_view_included_directories(tree_view: &gtk::TreeView) {
+    let model = get_list_store(tree_view);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.set_title("Folders to check");
+    column.pack_start(&renderer, true);
+    column.add_attribute(&renderer, "text", ColumnsIncludedDirectory::Path as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererToggle::new();
+    renderer.connect_toggled(move |_r, path| {
+        let iter = model.iter(&path).unwrap();
+        let mut fixed = model
+            .value(&iter, ColumnsIncludedDirectory::ReferenceButton as i32)
+            .get::<bool>()
+            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        fixed = !fixed;
+        model.set_value(&iter, ColumnsIncludedDirectory::ReferenceButton as u32, &fixed.to_value());
+    });
+    renderer.set_activatable(true);
+    let column = gtk::TreeViewColumn::new();
+    column.set_title("Reference folder");
+    column.pack_start(&renderer, true);
+    column.add_attribute(&renderer, "active", ColumnsIncludedDirectory::ReferenceButton as i32);
+    tree_view.append_column(&column);
+}
+
+pub fn create_tree_view_excluded_directories(tree_view: &gtk::TreeView) {
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.add_attribute(&renderer, "text", ColumnsExcludedDirectory::Path as i32);
+    tree_view.append_column(&column);
+
+    tree_view.set_headers_visible(false);
+}
+
 pub fn create_tree_view_duplicates(tree_view: &gtk::TreeView) {
     let model = get_list_store(tree_view);
 
@@ -23,6 +63,17 @@ pub fn create_tree_view_duplicates(tree_view: &gtk::TreeView) {
     column.add_attribute(&renderer, "activatable", ColumnsDuplicates::ActivatableSelectButton as i32);
     column.add_attribute(&renderer, "active", ColumnsDuplicates::SelectionButton as i32);
     column.add_attribute(&renderer, "cell-background", ColumnsDuplicates::Color as i32);
+    tree_view.append_column(&column);
+
+    let renderer = gtk::CellRendererText::new();
+    let column: gtk::TreeViewColumn = TreeViewColumn::new();
+    column.pack_start(&renderer, true);
+    column.set_title("Size");
+    column.set_resizable(true);
+    column.set_min_width(50);
+    column.add_attribute(&renderer, "text", ColumnsDuplicates::Size as i32);
+    column.add_attribute(&renderer, "background", ColumnsDuplicates::Color as i32);
+    column.add_attribute(&renderer, "foreground", ColumnsDuplicates::TextColor as i32);
     tree_view.append_column(&column);
 
     let renderer = gtk::CellRendererText::new();
@@ -441,16 +492,6 @@ pub fn create_tree_view_similar_videos(tree_view: &gtk::TreeView) {
     tree_view.append_column(&column);
 
     tree_view.set_vexpand(true);
-}
-
-pub fn create_tree_view_directories(tree_view: &gtk::TreeView) {
-    let renderer = gtk::CellRendererText::new();
-    let column: gtk::TreeViewColumn = TreeViewColumn::new();
-    column.pack_start(&renderer, true);
-    column.add_attribute(&renderer, "text", ColumnsDirectory::Path as i32);
-    tree_view.append_column(&column);
-
-    tree_view.set_headers_visible(false);
 }
 
 pub fn create_tree_view_same_music(tree_view: &gtk::TreeView) {

@@ -63,6 +63,7 @@ pub async fn delete_things(gui_data: GuiData) {
                 tree_view,
                 column_color,
                 nb_object.column_selection,
+                nb_object.column_path,
                 &window_main,
                 &check_button_settings_confirm_group_deletion,
             )
@@ -201,6 +202,7 @@ pub async fn check_if_deleting_all_files_in_group(
     tree_view: &gtk::TreeView,
     column_color: i32,
     column_selection: i32,
+    column_path: i32,
     window_main: &gtk::Window,
     check_button_settings_confirm_group_deletion: &gtk::CheckButton,
 ) -> bool {
@@ -210,6 +212,11 @@ pub async fn check_if_deleting_all_files_in_group(
 
     if let Some(iter) = model.iter_first() {
         assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+
+        // It is safe to remove any number of files in reference mode
+        if !model.value(&iter, column_path).get::<String>().unwrap().is_empty() {
+            return false;
+        }
 
         loop {
             if !model.iter_next(&iter) {
@@ -523,7 +530,7 @@ pub fn tree_remove(
         }
     }
 
-    clean_invalid_headers(&model, column_color);
+    clean_invalid_headers(&model, column_color, column_path);
 
     text_view_errors.buffer().unwrap().set_text(messages.as_str());
 }

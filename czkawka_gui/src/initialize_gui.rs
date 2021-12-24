@@ -101,8 +101,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         // Set step increment
         {
             let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
-            scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[1][5] as f64); // This defaults to value of minimal size of hash 8
-            scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[1][5] as f64);
+            scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // This defaults to value of minimal size of hash 8
+            scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
             scale_similarity_similar_images.adjustment().set_step_increment(1_f64);
         }
         // Set step increment
@@ -124,9 +124,10 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
                 image_preview.hide();
 
-                let col_types: [glib::types::Type; 8] = [
+                let col_types: [glib::types::Type; 9] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Size
                     glib::types::Type::STRING, // Name
                     glib::types::Type::STRING, // Path
                     glib::types::Type::STRING, // Modification
@@ -397,17 +398,23 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let tree_view = gui_data.upper_notebook.tree_view_included_directories.clone();
             let evk = gui_data.upper_notebook.evk_tree_view_included_directories.clone();
 
-            let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
+            let col_types: [glib::types::Type; 2] = [
+                glib::types::Type::STRING, // Path
+                glib::types::Type::BOOL,   // ReferenceButton
+            ];
             let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
 
             tree_view.set_model(Some(&list_store));
             tree_view.selection().set_mode(SelectionMode::Multiple);
 
-            create_tree_view_directories(&tree_view);
+            create_tree_view_included_directories(&tree_view);
 
+            tree_view.set_widget_name("tree_view_upper_included_directories");
             scrolled_window.add(&tree_view);
             scrolled_window.show_all();
 
+            tree_view.connect_button_press_event(opening_double_click_function_directories);
+            evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
             evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
                 if key_code == KEY_DELETE {
                     let list_store = get_list_store(&tree_view);
@@ -433,11 +440,14 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             tree_view.set_model(Some(&list_store));
             tree_view.selection().set_mode(SelectionMode::Multiple);
 
-            create_tree_view_directories(&tree_view);
+            create_tree_view_excluded_directories(&tree_view);
 
+            tree_view.set_widget_name("tree_view_upper_excluded_directories");
             scrolled_window.add(&tree_view);
             scrolled_window.show_all();
 
+            tree_view.connect_button_press_event(opening_double_click_function_directories);
+            evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
             evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
                 if key_code == KEY_DELETE {
                     let list_store = get_list_store(&tree_view);
@@ -516,7 +526,6 @@ fn connect_event_mouse(gui_data: &GuiData) {
         let preview_path = gui_data.preview_path.clone();
         let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
 
-        tree_view.connect_button_press_event(opening_double_click_function);
         tree_view.connect_button_release_event(move |tree_view, _event| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             let preview_path = preview_path.clone();

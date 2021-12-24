@@ -11,7 +11,7 @@
 - Option to not remove cache from non existent files(e.g. from unplugged pendrive) - [#472](https://github.com/qarmin/czkawka/pull/472)
 - Add multiple tooltips with helpful messages - [#472](https://github.com/qarmin/czkawka/pull/472)
 - Allow to cache prehash - [#477](https://github.com/qarmin/czkawka/pull/477)
-- Improve custom selecting of records(allows to use Rust red regex) - [#489](https://github.com/qarmin/czkawka/pull/478)
+- Improve custom selecting of records(allows to use Rust regex) - [#489](https://github.com/qarmin/czkawka/pull/478)
 - Remove support for finding zeroed files - [#461](https://github.com/qarmin/czkawka/pull/461)
 - Remove HashMB mode - [#476](https://github.com/qarmin/czkawka/pull/476)
 - Approximate comparison of music - [#483](https://github.com/qarmin/czkawka/pull/483)

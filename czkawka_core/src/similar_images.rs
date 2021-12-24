@@ -93,6 +93,7 @@ pub struct SimilarImages {
     excluded_items: ExcludedItems,
     bktree: BKTree<Vec<u8>, Hamming>,
     similar_vectors: Vec<Vec<FileEntry>>,
+    similar_referenced_vectors: Vec<(FileEntry, Vec<FileEntry>)>,
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -106,14 +107,14 @@ pub struct SimilarImages {
     use_cache: bool,
     delete_outdated_cache: bool,
     exclude_images_with_same_size: bool,
+    use_reference_folders: bool,
 }
 
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
-    pub gained_space: u64,
+    pub number_of_duplicates: usize,
+    pub number_of_groups: u64,
 }
 
 impl Info {
@@ -134,6 +135,7 @@ impl SimilarImages {
             allowed_extensions: Extensions::new(),
             bktree: BKTree::new(Hamming),
             similar_vectors: vec![],
+            similar_referenced_vectors: Default::default(),
             recursive_search: true,
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
             maximal_file_size: u64::MAX,
@@ -147,6 +149,7 @@ impl SimilarImages {
             use_cache: true,
             delete_outdated_cache: true,
             exclude_images_with_same_size: false,
+            use_reference_folders: false,
         }
     }
 
@@ -187,6 +190,14 @@ impl SimilarImages {
         &self.similar_vectors
     }
 
+    pub fn get_similar_images_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        &self.similar_referenced_vectors
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.use_reference_folders
+    }
+
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -221,6 +232,7 @@ impl SimilarImages {
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
+        self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
@@ -695,7 +707,45 @@ impl SimilarImages {
             }
         }
 
+        if self.use_reference_folders {
+            let mut similars_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similars_vector);
+            let reference_directories = self.directories.reference_directories.clone();
+            self.similar_referenced_vectors = similars_vector
+                .into_iter()
+                .filter_map(|vec_file_entry| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+        }
+
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
+
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
 
         // Clean unused data
         self.image_hashes = Default::default();
@@ -708,6 +758,10 @@ impl SimilarImages {
     /// Set included dir which needs to be relative, exists etc.
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {

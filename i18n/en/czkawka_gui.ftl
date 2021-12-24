@@ -117,8 +117,11 @@ check_button_general_same_size_tooltip = Ignore from results, files which have i
 main_label_size_bytes_tooltip = Size of files which will be used in scan
 
 # Upper window
+upper_tree_view_included_folder_column_title = Folders to Search
+upper_tree_view_included_reference_column_title = Reference Folders
+
 upper_recursive_button = Recursive
-upper_recursive_button_tooltip = If selected, search also for files which are not placed directly under chosen folders
+upper_recursive_button_tooltip = If selected, search also for files which are not placed directly under chosen folders.
 
 upper_manual_add_included_button = Manual Add
 upper_add_included_button = Add
@@ -127,19 +130,19 @@ upper_manual_add_excluded_button = Manual Add
 upper_add_excluded_button = Add
 upper_remove_excluded_button =  Remove
 
-upper_manual_add_included_button_tooltip = Allows to add directory name to search by hand
-upper_add_included_button_tooltip = Add new directory to search
-upper_remove_included_button_tooltip =  Delete directory from search
-upper_manual_add_excluded_button_tooltip = Allows to add excluded directory name by hand
-upper_add_excluded_button_tooltip = Add directory to be excluded in search
-upper_remove_excluded_button_tooltip = Delete directory from excluded
+upper_manual_add_included_button_tooltip = Allows to add directory name to search by hand.
+upper_add_included_button_tooltip = Add new directory to search.
+upper_remove_included_button_tooltip =  Delete directory from search.
+upper_manual_add_excluded_button_tooltip = Allows to add excluded directory name by hand.
+upper_add_excluded_button_tooltip = Add directory to be excluded in search.
+upper_remove_excluded_button_tooltip = Delete directory from excluded.
 
 upper_notebook_items_configuration = Items Configuration
 upper_notebook_excluded_directories = Excluded Directories
 upper_notebook_included_directories = Included Directories
 
 upper_allowed_extensions_tooltip = 
-        Allowed extensions must be separated by commas(by default all are available)
+        Allowed extensions must be separated by commas(by default all are available).
 
         Macros IMAGE, VIDEO, MUSIC, TEXT which adds multiple extensions at once are also available.
 
@@ -181,7 +184,7 @@ popover_custom_name_check_button_entry_tooltip =
 popover_custom_regex_check_button_entry_tooltip = 
         Allows to select records by specified Regex.
 
-        With this mode, searched text is Path with Name
+        With this mode, searched text is Path with Name.
 
         Example usage:
         /usr/bin/ziemniak.txt can be found with /ziem[a-z]+
@@ -216,9 +219,9 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Move
 
-bottom_search_button_tooltip = Start to search for files/folders
+bottom_search_button_tooltip = Start to search for files/folders.
 bottom_select_button_tooltip = Selects records. Only selected files/folders can be later processed.
-bottom_delete_button_tooltip = Delete selected files/folders
+bottom_delete_button_tooltip = Delete selected files/folders.
 bottom_save_button_tooltip = Save data about search to file
 bottom_symlink_button_tooltip = 
         Creates symbolic links.
@@ -362,21 +365,17 @@ settings_folder_settings_open = Open settings folder
 # Compute results
 compute_stopped_by_user = Searching was stopped by user
 
-compute_found = Found
-compute_duplicated_files_in = duplicated files in
-compute_groups_which_took = groups which took
-compute_groups = groups
-compute_duplicates_for = duplicates for
-
-compute_empty_folders = empty folders
-compute_empty_files = empty files
-compute_biggest_files = biggest files
-compute_temporary_files = temporary files
-compute_similar_image = images
-compute_similar_videos = videos
-compute_music_files = music files
-compute_symlinks = invalid symlinks
-compute_broken_files = broken files
+compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }
+compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups
+compute_found_empty_folders = Found { $number_files } empty folders
+compute_found_empty_files = Found { $number_files } empty files
+compute_found_big_files = Found { $number_files } big files
+compute_found_temporary_files = Found { $number_files } temporary files
+compute_found_images = Found { $number_files } similar images in { $number_groups } groups
+compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups
+compute_found_music = Found { $number_files } similar music files in { $number_groups } groups
+compute_found_invalid_symlinks = Found { $number_files } invalid symlinks
+compute_found_broken_files = Found { $number_files } broken files
 
 # Progress window
 progress_scanning_general_file = Scanning {$file_number} file
@@ -396,9 +395,12 @@ progress_current_stage = Current Stage:{"  "}
 progress_all_stages = All Stages:{"  "}
 
 # Saving loading 
-saving_loading_saving_success = Saved configuration to file 
+saving_loading_saving_success = Saved configuration to file { $name }.
+saving_loading_saving_failure = Failed to save configuration data to file { $name }.
 saving_loading_reset_configuration = Current configuration was cleared.
-saving_loading_loading_success = Properly loaded configuration from file
+saving_loading_loading_success = Properly loaded configuration from file.
+
+saving_loading_failed_to_get_home_directory = Failed to get home directory to open/save config file.
 
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Infinite recursion
@@ -438,7 +440,7 @@ hard_sym_link_label = Are you sure that you want to link this files?
 move_folder_failed = Failed to move folder {$name}, reason {$reason}
 move_file_failed = Failed to move file {$name}, reason {$reason}
 move_files_title_dialog = Choose folder to which you want to move duplicated files
-move_files_choose_more_than_1_path = Only 1 path must be selected to be able to copy there duplicated files, selected {$path_number}
+move_files_choose_more_than_1_path = Only 1 path must be selected to be able to copy there duplicated files, selected {$path_number}.
 move_stats = Properly moved {$num_files}/{$all_files} items
 
 save_results_to_file = Saved results to file {$name}
@@ -460,8 +462,8 @@ cache_clear_message_label_3 = This may speedup a little loading/saving to cache.
 cache_clear_message_label_4 = WARNING: Operation will remove all cached data from unplugged external drives, so hash will need to be generated again.
 
 # Show preview
-preview_temporary_file = Failed to open temporary image file {$name}, reason {$reason}
-preview_0_size = Cannot create preview of image {$name}, with 0 width or height
-preview_temporary_image_save = Failed to save temporary image file to {$name}, reason {$reason}
-preview_temporary_image_remove = Failed to delete temporary image file {$name}, reason {$reason}
-preview_failed_to_create_cache_dir = Failed to create dir {$name} needed by image preview, reason {$reason}
+preview_temporary_file = Failed to open temporary image file {$name}, reason {$reason}.
+preview_0_size = Cannot create preview of image {$name}, with 0 width or height.
+preview_temporary_image_save = Failed to save temporary image file to {$name}, reason {$reason}.
+preview_temporary_image_remove = Failed to delete temporary image file {$name}, reason {$reason}.
+preview_failed_to_create_cache_dir = Failed to create dir {$name} needed by image preview, reason {$reason}.

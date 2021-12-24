@@ -92,7 +92,6 @@ pub struct Info {
     pub number_of_duplicated_files_by_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
-    pub gained_space: u64,
 }
 
 impl Info {
@@ -105,9 +104,12 @@ impl Info {
 pub struct DuplicateFinder {
     text_messages: Messages,
     information: Info,
-    files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,    // File Size, File Entry
-    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,        // File Size, File Entry
-    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>, // File Size, File Entry
+    files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,                            // File Size, File Entry
+    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,                                // File Size, File Entry
+    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,                         // File Size, next grouped by file size, next grouped by hash
+    files_with_identical_names_referenced: BTreeMap<String, (FileEntry, Vec<FileEntry>)>,    // File Size, File Entry
+    files_with_identical_size_referenced: BTreeMap<u64, (FileEntry, Vec<FileEntry>)>,        // File Size, File Entry
+    files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>>, // File Size, next grouped by file size, next grouped by hash
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
@@ -125,6 +127,7 @@ pub struct DuplicateFinder {
     minimal_cache_file_size: u64,
     minimal_prehash_cache_file_size: u64,
     delete_outdated_cache: bool,
+    use_reference_folders: bool,
 }
 
 impl DuplicateFinder {
@@ -135,6 +138,9 @@ impl DuplicateFinder {
             files_with_identical_names: Default::default(),
             files_with_identical_size: Default::default(),
             files_with_identical_hashes: Default::default(),
+            files_with_identical_names_referenced: Default::default(),
+            files_with_identical_size_referenced: Default::default(),
+            files_with_identical_hashes_referenced: Default::default(),
             recursive_search: true,
             allowed_extensions: Extensions::new(),
             check_method: CheckingMethod::None,
@@ -152,11 +158,13 @@ impl DuplicateFinder {
             minimal_cache_file_size: 1024 * 1024 / 4, // By default cache only >= 256 KB files
             minimal_prehash_cache_file_size: 0,
             delete_outdated_cache: true,
+            use_reference_folders: false,
         }
     }
 
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
+        self.use_reference_folders = !self.directories.reference_directories.is_empty();
 
         match self.check_method {
             CheckingMethod::Name => {
@@ -270,23 +278,43 @@ impl DuplicateFinder {
         };
     }
 
+    pub fn get_use_reference(&self) -> bool {
+        self.use_reference_folders
+    }
+
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
         self.recursive_search = recursive_search;
     }
 
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages)
+    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
+        self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
     }
+
+    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
+        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
+    }
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
+    pub fn get_files_with_identical_hashes_referenced(&self) -> &BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>> {
+        &self.files_with_identical_hashes_referenced
+    }
+
+    pub fn get_files_with_identical_name_referenced(&self) -> &BTreeMap<String, (FileEntry, Vec<FileEntry>)> {
+        &self.files_with_identical_names_referenced
+    }
+
+    pub fn get_files_with_identical_size_referenced(&self) -> &BTreeMap<u64, (FileEntry, Vec<FileEntry>)> {
+        &self.files_with_identical_size_referenced
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -473,12 +501,52 @@ impl DuplicateFinder {
 
         for (name, vector) in &self.files_with_identical_names {
             if vector.len() > 1 {
-                self.information.number_of_duplicated_files_by_name += vector.len() - 1;
-                self.information.number_of_groups_by_name += 1;
                 new_map.insert(name.clone(), vector.clone());
             }
         }
         self.files_with_identical_names = new_map;
+
+        // Reference - only use in size, because later hash will be counted differently
+        if self.use_reference_folders {
+            let mut btree_map = Default::default();
+            mem::swap(&mut self.files_with_identical_names, &mut btree_map);
+            let reference_directories = self.directories.reference_directories.clone();
+            let vec = btree_map
+                .into_iter()
+                .filter_map(|(_size, vec_file_entry)| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+            for (fe, vec_fe) in vec {
+                self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
+            }
+        }
+
+        if self.use_reference_folders {
+            for (_fe, vector) in self.files_with_identical_names_referenced.values() {
+                self.information.number_of_duplicated_files_by_name += vector.len();
+                self.information.number_of_groups_by_name += 1;
+            }
+        } else {
+            for vector in self.files_with_identical_names.values() {
+                self.information.number_of_duplicated_files_by_name += vector.len() - 1;
+                self.information.number_of_groups_by_name += 1;
+            }
+        }
 
         Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
         true
@@ -684,10 +752,51 @@ impl DuplicateFinder {
             let vector = if self.ignore_hard_links { filter_hard_links(&vec) } else { vec };
 
             if vector.len() > 1 {
+                self.files_with_identical_size.insert(size, vector);
+            }
+        }
+
+        // Reference - only use in size, because later hash will be counted differently
+        if self.use_reference_folders && self.check_method == CheckingMethod::Size {
+            let mut btree_map = Default::default();
+            mem::swap(&mut self.files_with_identical_size, &mut btree_map);
+            let reference_directories = self.directories.reference_directories.clone();
+            let vec = btree_map
+                .into_iter()
+                .filter_map(|(_size, vec_file_entry)| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+            for (fe, vec_fe) in vec {
+                self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
+            }
+        }
+
+        if self.use_reference_folders {
+            for (size, (_fe, vector)) in &self.files_with_identical_size_referenced {
+                self.information.number_of_duplicated_files_by_size += vector.len();
+                self.information.number_of_groups_by_size += 1;
+                self.information.lost_space_by_size += (vector.len() as u64) * size;
+            }
+        } else {
+            for (size, vector) in &self.files_with_identical_size {
                 self.information.number_of_duplicated_files_by_size += vector.len() - 1;
                 self.information.number_of_groups_by_size += 1;
                 self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
-                self.files_with_identical_size.insert(size, vector);
             }
         }
 
@@ -1036,9 +1145,57 @@ impl DuplicateFinder {
                     }
                 }
             }
+        }
 
-            /////////////////////////
+        ///////////////////////////////////////////////////////////////////////////// HASHING END
 
+        // Reference - only use in size, because later hash will be counted differently
+        if self.use_reference_folders {
+            let mut btree_map = Default::default();
+            mem::swap(&mut self.files_with_identical_hashes, &mut btree_map);
+            let reference_directories = self.directories.reference_directories.clone();
+            let vec = btree_map
+                .into_iter()
+                .filter_map(|(_size, vec_vec_file_entry)| {
+                    let mut all_results_with_same_size = Vec::new();
+                    for vec_file_entry in vec_vec_file_entry {
+                        let mut files_from_referenced_folders = Vec::new();
+                        let mut normal_files = Vec::new();
+                        for file_entry in vec_file_entry {
+                            if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                files_from_referenced_folders.push(file_entry);
+                            } else {
+                                normal_files.push(file_entry);
+                            }
+                        }
+
+                        if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                            continue;
+                        } else {
+                            all_results_with_same_size.push((files_from_referenced_folders.pop().unwrap(), normal_files))
+                        }
+                    }
+                    if all_results_with_same_size.is_empty() {
+                        None
+                    } else {
+                        Some(all_results_with_same_size)
+                    }
+                })
+                .collect::<Vec<Vec<(FileEntry, Vec<FileEntry>)>>>();
+            for vec_of_vec in vec {
+                self.files_with_identical_hashes_referenced.insert(vec_of_vec[0].0.size, vec_of_vec);
+            }
+        }
+
+        if self.use_reference_folders {
+            for (size, vector_vectors) in &self.files_with_identical_hashes_referenced {
+                for (_fe, vector) in vector_vectors {
+                    self.information.number_of_duplicated_files_by_hash += vector.len();
+                    self.information.number_of_groups_by_hash += 1;
+                    self.information.lost_space_by_hash += (vector.len() as u64) * size;
+                }
+            }
+        } else {
             for (size, vector_vectors) in &self.files_with_identical_hashes {
                 for vector in vector_vectors {
                     self.information.number_of_duplicated_files_by_hash += vector.len() - 1;
@@ -1047,8 +1204,6 @@ impl DuplicateFinder {
                 }
             }
         }
-
-        ///////////////////////////////////////////////////////////////////////////// HASHING END
 
         Common::print_time(start_time, SystemTime::now(), "check_files_hash - full hash".to_string());
 
@@ -1069,22 +1224,19 @@ impl DuplicateFinder {
         match self.check_method {
             CheckingMethod::Name => {
                 for vector in self.files_with_identical_names.values() {
-                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
-                    self.information.gained_space += tuple.0;
+                    let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                 }
             }
             CheckingMethod::Hash => {
                 for vector_vectors in self.files_with_identical_hashes.values() {
                     for vector in vector_vectors.iter() {
-                        let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
-                        self.information.gained_space += tuple.0;
+                        let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                     }
                 }
             }
             CheckingMethod::Size => {
                 for vector in self.files_with_identical_size.values() {
-                    let tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
-                    self.information.gained_space += tuple.0;
+                    let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                 }
             }
             CheckingMethod::None => {
@@ -1139,11 +1291,6 @@ impl DebugPrint for DuplicateFinder {
             "Lost space by hash - {} ({} bytes)",
             self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(),
             self.information.lost_space_by_hash
-        );
-        println!(
-            "Gained space by removing duplicated entries - {} ({} bytes)",
-            self.information.gained_space.file_size(options::BINARY).unwrap(),
-            self.information.gained_space
         );
 
         println!("### Other");

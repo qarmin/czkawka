@@ -57,7 +57,8 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let list_store = get_list_store(&tree_view_included_directories);
         if let Some(iter) = list_store.iter_first() {
             loop {
-                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap());
+                // TODO maybe save also here reference directories?
+                data_to_save.push(list_store.value(&iter, ColumnsIncludedDirectory::Path as i32).get::<String>().unwrap());
                 if !list_store.iter_next(&iter) {
                     break;
                 }
@@ -70,7 +71,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         let list_store = get_list_store(&tree_view_excluded_directories);
         if let Some(iter) = list_store.iter_first() {
             loop {
-                data_to_save.push(list_store.value(&iter, ColumnsDirectory::Path as i32).get::<String>().unwrap());
+                data_to_save.push(list_store.value(&iter, ColumnsExcludedDirectory::Path as i32).get::<String>().unwrap());
                 if !list_store.iter_next(&iter) {
                     break;
                 }
@@ -213,12 +214,26 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             }
         }
         if data_saved {
-            add_text_to_text_view(&text_view_errors, format!("{} {}", fl!("saving_loading_saving_success"), config_file.display()).as_str());
+            add_text_to_text_view(
+                &text_view_errors,
+                fl!(
+                    "saving_loading_saving_success",
+                    generate_translation_hashmap(vec![("name", config_file.display().to_string())])
+                )
+                .as_str(),
+            );
         } else {
-            add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_file.display()).as_str());
+            add_text_to_text_view(
+                &text_view_errors,
+                fl!(
+                    "saving_loading_saving_failure",
+                    generate_translation_hashmap(vec![("name", config_file.display().to_string())])
+                )
+                .as_str(),
+            );
         }
     } else {
-        add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't save file.");
+        add_text_to_text_view(&text_view_errors, fl!("saving_loading_failed_to_get_home_directory").as_str());
     }
 }
 
@@ -682,7 +697,10 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             list_store.clear();
 
             for directory in included_directories {
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &directory)];
+                let values: [(u32, &dyn ToValue); 2] = [
+                    (ColumnsIncludedDirectory::Path as u32, &directory),
+                    (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+                ];
                 list_store.set(&list_store.append(), &values);
             }
 
@@ -692,7 +710,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             list_store.clear();
 
             for directory in excluded_directories {
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &directory)];
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &directory)];
                 list_store.set(&list_store.append(), &values);
             }
 
@@ -782,7 +800,10 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
             }
         };
 
-        let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &current_dir)];
+        let values: [(u32, &dyn ToValue); 2] = [
+            (ColumnsIncludedDirectory::Path as u32, &current_dir),
+            (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+        ];
         list_store.set(&list_store.append(), &values);
     }
     // Resetting excluded directories
@@ -792,7 +813,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         list_store.clear();
         if cfg!(target_family = "unix") {
             for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsDirectory::Path as u32, &i)];
+                let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
                 list_store.set(&list_store.append(), &values);
             }
         }
