@@ -265,9 +265,9 @@ impl Directories {
             for folder in &self.reference_directories {
                 if self.included_directories.iter().any(|e| folder.starts_with(&e)) {
                     ref_folders.push(folder.clone());
-                    println!("REF: VALID reference folder {:?}", folder);
+                    // println!("REF: VALID reference folder {:?}", folder);
                 } else {
-                    println!("REF: Invalid reference folder {:?}", folder);
+                    // println!("REF: Invalid reference folder {:?}", folder);
                 }
             }
             self.reference_directories = ref_folders;

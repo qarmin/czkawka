@@ -18,6 +18,7 @@ use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::opening_selecting_records::*;
+use czkawka_core::localizer::generate_translation_hashmap;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -90,31 +91,31 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let duplicates_size: u64;
                     let duplicates_group: usize;
 
-                    let fl_found = fl!("compute_found");
-                    let fl_groups = fl!("compute_groups");
-                    let fl_groups_which_took = fl!("compute_groups_which_took");
-                    let fl_duplicated_files_in = fl!("compute_duplicated_files_in");
-
                     match df.get_check_method() {
                         CheckingMethod::Name => {
                             duplicates_number = information.number_of_duplicated_files_by_name;
                             // duplicates_size = 0;
                             duplicates_group = information.number_of_groups_by_name;
-                            entry_info.set_text(format!("{} {} {} {} {}", fl_found, duplicates_number, fl_duplicated_files_in, duplicates_group, fl_groups).as_str());
+                            entry_info.set_text(
+                                fl!(
+                                    "compute_found_duplicates_name",
+                                    generate_translation_hashmap(vec![("number_files", duplicates_number.to_string()), ("number_groups", duplicates_group.to_string())])
+                                )
+                                .as_str(),
+                            );
                         }
                         CheckingMethod::Hash => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
                             entry_info.set_text(
-                                format!(
-                                    "{} {} {} {} {} {}.",
-                                    fl_found,
-                                    duplicates_number,
-                                    fl_duplicated_files_in,
-                                    duplicates_group,
-                                    fl_groups_which_took,
-                                    duplicates_size.file_size(options::BINARY).unwrap()
+                                fl!(
+                                    "compute_found_duplicates_hash_size",
+                                    generate_translation_hashmap(vec![
+                                        ("number_files", duplicates_number.to_string()),
+                                        ("number_groups", duplicates_group.to_string()),
+                                        ("size", duplicates_size.file_size(options::BINARY).unwrap())
+                                    ])
                                 )
                                 .as_str(),
                             );
@@ -124,14 +125,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
                             entry_info.set_text(
-                                format!(
-                                    "{} {} {} {} {} {}.",
-                                    fl_found,
-                                    duplicates_number,
-                                    fl_duplicated_files_in,
-                                    duplicates_group,
-                                    fl_groups_which_took,
-                                    duplicates_size.file_size(options::BINARY).unwrap()
+                                fl!(
+                                    "compute_found_duplicates_hash_size",
+                                    generate_translation_hashmap(vec![
+                                        ("number_files", duplicates_number.to_string()),
+                                        ("number_groups", duplicates_group.to_string()),
+                                        ("size", duplicates_size.file_size(options::BINARY).unwrap())
+                                    ])
                                 )
                                 .as_str(),
                             );
@@ -521,7 +521,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let empty_folder_number: usize = information.number_of_empty_folders;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), empty_folder_number, fl!("compute_empty_folders")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_empty_folders",
+                            generate_translation_hashmap(vec![("number_files", empty_folder_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -580,7 +586,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let empty_files_number: usize = information.number_of_empty_files;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), empty_files_number, fl!("compute_empty_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_empty_files",
+                            generate_translation_hashmap(vec![("number_files", empty_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -640,7 +652,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let biggest_files_number: usize = information.number_of_real_files;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), biggest_files_number, fl!("compute_biggest_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_big_files",
+                            generate_translation_hashmap(vec![("number_files", biggest_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -704,7 +722,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let text_messages = tf.get_text_messages();
 
                     let temporary_files_number: usize = information.number_of_temporary_files;
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), temporary_files_number, fl!("compute_temporary_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_temporary_files",
+                            generate_translation_hashmap(vec![("number_files", temporary_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -766,18 +790,18 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             .selection()
                             .set_select_function(Some(Box::new(select_function_similar_images)));
                     }
-                    //let information = sf.get_information();
+                    let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
 
-                    let base_images_size = sf.get_number_of_base_duplicated_files();
+                    let found_any_duplicates = information.number_of_duplicates > 0;
 
                     entry_info.set_text(
-                        format!(
-                            "{} {} {} {}.",
-                            fl!("compute_found"),
-                            fl!("compute_duplicates_for"),
-                            base_images_size,
-                            fl!("compute_similar_image")
+                        fl!(
+                            "compute_found_images",
+                            generate_translation_hashmap(vec![
+                                ("number_files", information.number_of_duplicates.to_string()),
+                                ("number_groups", information.number_of_groups.to_string()),
+                            ])
                         )
                         .as_str(),
                     );
@@ -920,7 +944,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             &shared_buttons,
                             &NotebookMainEnum::SimilarImages,
                             &["save", "delete", "select", "symlink", "hardlink", "move"],
-                            base_images_size > 0,
+                            found_any_duplicates,
                         );
 
                         set_buttons(
@@ -942,18 +966,17 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             .selection()
                             .set_select_function(Some(Box::new(select_function_similar_videos)));
                     }
-                    //let information = ff.get_information();
+                    let information = ff.get_information();
                     let text_messages = ff.get_text_messages();
-
-                    let base_videos_size = ff.get_similar_videos().len();
+                    let found_any_duplicates = information.number_of_duplicates > 0;
 
                     entry_info.set_text(
-                        format!(
-                            "{} {} {} {}.",
-                            fl!("compute_found"),
-                            fl!("compute_duplicates_for"),
-                            base_videos_size,
-                            fl!("compute_similar_videos")
+                        fl!(
+                            "compute_found_videos",
+                            generate_translation_hashmap(vec![
+                                ("number_files", information.number_of_duplicates.to_string()),
+                                ("number_groups", information.number_of_groups.to_string()),
+                            ])
                         )
                         .as_str(),
                     );
@@ -1083,7 +1106,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             &shared_buttons,
                             &NotebookMainEnum::SimilarVideos,
                             &["save", "delete", "select", "symlink", "hardlink", "move"],
-                            base_videos_size > 0,
+                            found_any_duplicates,
                         );
 
                         set_buttons(
@@ -1109,7 +1132,16 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let same_music_number: usize = information.number_of_duplicates;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), same_music_number, fl!("compute_music_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_music",
+                            generate_translation_hashmap(vec![
+                                ("number_files", information.number_of_duplicates.to_string()),
+                                ("number_groups", information.number_of_groups.to_string()),
+                            ])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -1309,7 +1341,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let invalid_symlinks: usize = information.number_of_invalid_symlinks;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), invalid_symlinks, fl!("compute_symlinks")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_invalid_symlinks",
+                            generate_translation_hashmap(vec![("number_files", invalid_symlinks.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -1367,7 +1405,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let broken_files_number: usize = information.number_of_broken_files;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), broken_files_number, fl!("compute_broken_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_broken_files",
+                            generate_translation_hashmap(vec![("number_files", broken_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {

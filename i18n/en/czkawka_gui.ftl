@@ -365,21 +365,17 @@ settings_folder_settings_open = Open settings folder
 # Compute results
 compute_stopped_by_user = Searching was stopped by user
 
-compute_found = Found
-compute_duplicated_files_in = duplicated files in
-compute_groups_which_took = groups which took
-compute_groups = groups
-compute_duplicates_for = duplicates for
-
-compute_empty_folders = empty folders
-compute_empty_files = empty files
-compute_biggest_files = biggest files
-compute_temporary_files = temporary files
-compute_similar_image = images
-compute_similar_videos = videos
-compute_music_files = music files
-compute_symlinks = invalid symlinks
-compute_broken_files = broken files
+compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }
+compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups
+compute_found_empty_folders = Found { $number_files } empty folders
+compute_found_empty_files = Found { $number_files } empty files
+compute_found_big_files = Found { $number_files } big files
+compute_found_temporary_files = Found { $number_files } temporary files
+compute_found_images = Found { $number_files } similar images in { $number_groups } groups
+compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups
+compute_found_music = Found { $number_files } similar music files in { $number_groups } groups
+compute_found_invalid_symlinks = Found { $number_files } invalid symlinks
+compute_found_broken_files = Found { $number_files } broken files
 
 # Progress window
 progress_scanning_general_file = Scanning {$file_number} file
@@ -399,9 +395,12 @@ progress_current_stage = Current Stage:{"  "}
 progress_all_stages = All Stages:{"  "}
 
 # Saving loading 
-saving_loading_saving_success = Saved configuration to file 
-saving_loading_reset_configuration = Current configuration was cleared
-saving_loading_loading_success = Properly loaded configuration from file
+saving_loading_saving_success = Saved configuration to file { $name }.
+saving_loading_saving_failure = Failed to save configuration data to file { $name }.
+saving_loading_reset_configuration = Current configuration was cleared.
+saving_loading_loading_success = Properly loaded configuration from file.
+
+saving_loading_failed_to_get_home_directory = Failed to get home directory to open/save config file.
 
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Infinite recursion

@@ -214,12 +214,26 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
             }
         }
         if data_saved {
-            add_text_to_text_view(&text_view_errors, format!("{} {}", fl!("saving_loading_saving_success"), config_file.display()).as_str());
+            add_text_to_text_view(
+                &text_view_errors,
+                fl!(
+                    "saving_loading_saving_success",
+                    generate_translation_hashmap(vec![("name", config_file.display().to_string())])
+                )
+                .as_str(),
+            );
         } else {
-            add_text_to_text_view(&text_view_errors, format!("Failed to save configuration data to file {}", config_file.display()).as_str());
+            add_text_to_text_view(
+                &text_view_errors,
+                fl!(
+                    "saving_loading_saving_failure",
+                    generate_translation_hashmap(vec![("name", config_file.display().to_string())])
+                )
+                .as_str(),
+            );
         }
     } else {
-        add_text_to_text_view(&text_view_errors, "Failed to get home directory, so can't save file.");
+        add_text_to_text_view(&text_view_errors, fl!("saving_loading_failed_to_get_home_directory").as_str());
     }
 }
 

@@ -18,7 +18,8 @@ impl Messages {
         if !self.messages.is_empty() {
             text_to_return += "-------------------------------MESSAGES--------------------------------\n";
             for i in &self.messages {
-                text_to_return += format!("{}\n", i).as_str();
+                text_to_return += i;
+                text_to_return += "\n";
             }
             text_to_return += "---------------------------END OF MESSAGES-----------------------------\n";
         }
@@ -27,7 +28,8 @@ impl Messages {
             text_to_return += "-------------------------------WARNINGS--------------------------------\n";
 
             for i in &self.warnings {
-                text_to_return += format!("{}\n", i).as_str();
+                text_to_return += i;
+                text_to_return += "\n";
             }
             text_to_return += "---------------------------END OF WARNINGS-----------------------------\n";
         }
@@ -36,7 +38,8 @@ impl Messages {
             text_to_return += "--------------------------------ERRORS---------------------------------\n";
 
             for i in &self.errors {
-                text_to_return += format!("{}\n", i).as_str();
+                text_to_return += i;
+                text_to_return += "\n";
             }
             text_to_return += "----------------------------END OF ERRORS------------------------------\n";
         }

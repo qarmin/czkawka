@@ -194,14 +194,6 @@ impl SimilarImages {
         &self.similar_referenced_vectors
     }
 
-    pub fn get_number_of_base_duplicated_files(&self) -> usize {
-        if self.use_reference_folders {
-            self.similar_referenced_vectors.len()
-        } else {
-            self.similar_vectors.len()
-        }
-    }
-
     pub fn get_use_reference(&self) -> bool {
         self.use_reference_folders
     }
