@@ -47,7 +47,13 @@ impl LoadSaveStruct {
 
     pub fn get_vector_string(&self, key: String, default_value: Vec<String>) -> Vec<String> {
         if self.loaded_items.contains_key(&key) {
-            return self.loaded_items.get(&key).unwrap().clone();
+            let mut new_vector = Vec::new();
+            for i in self.loaded_items.get(&key).unwrap() {
+                if !i.trim().is_empty() {
+                    new_vector.push(i.trim().to_string());
+                }
+            }
+            return new_vector;
         }
 
         default_value
