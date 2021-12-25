@@ -383,6 +383,7 @@ progress_scanning_general_file = Scanning {$file_number} file
 progress_scanning_broken_files = Checking {$file_checked}/{$all_files} file
 progress_scanning_video = Hashing of {$file_checked}/{$all_files} video
 progress_scanning_image = Hashing of {$file_checked}/{$all_files} image
+progress_comparing_image_hashes = Comparing {$file_checked}/{$all_files} image hash
 progress_scanning_music_tags_end = Comparing tags of {$file_checked}/{$all_files} music file
 progress_scanning_music_tags = Reading tags of {$file_checked}/{$all_files} music file
 progress_scanning_empty_folders = Scanning {$folder_number} folder

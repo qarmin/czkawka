@@ -256,12 +256,31 @@ pub fn connect_progress_window(
                                 item.images_to_check as u64 * (item.max_stage + 1) as u64,
                             );
                         } else {
-                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                            progress_bar_all_stages.set_fraction((item.current_stage as f64) / (item.max_stage + 1) as f64);
                             progress_bar_current_stage.set_fraction(0f64);
                             taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
                         }
                         label_stage.set_text(&fl!(
                             "progress_scanning_image",
+                            generate_translation_hashmap(vec![("file_checked", item.images_checked.to_string()), ("all_files", item.images_to_check.to_string())])
+                        ));
+                    }
+                    2 => {
+                        progress_bar_current_stage.show();
+                        if item.images_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((2f64 + (item.images_checked) as f64 / item.images_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.images_checked) as f64 / item.images_to_check as f64);
+                            taskbar_state.borrow().set_progress_value(
+                                (item.images_to_check + item.images_checked) as u64,
+                                item.images_to_check as u64 * (item.max_stage + 1) as u64,
+                            );
+                        } else {
+                            progress_bar_all_stages.set_fraction((item.current_stage as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                            taskbar_state.borrow().set_progress_value(2, (item.max_stage + 1) as u64);
+                        }
+                        label_stage.set_text(&fl!(
+                            "progress_comparing_image_hashes",
                             generate_translation_hashmap(vec![("file_checked", item.images_checked.to_string()), ("all_files", item.images_to_check.to_string())])
                         ));
                     }

@@ -719,7 +719,9 @@ fn show_preview(
                 let file_name = file_name.as_str();
 
                 if let Some(extension) = Path::new(file_name).extension() {
-                    if !["jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "gif", "jif", "jfi"].contains(&extension.to_string_lossy().to_string().to_lowercase().as_str()) {
+                    if !["jpg", "jpeg", "png", "bmp", /*"tiff", "tif",*/ "tga", "ff", "gif", "jif", "jfi"]
+                        .contains(&extension.to_string_lossy().to_string().to_lowercase().as_str())
+                    {
                         break 'dir;
                     }
 

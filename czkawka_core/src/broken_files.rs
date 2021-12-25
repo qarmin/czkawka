@@ -748,7 +748,7 @@ fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     // Checking allowed image extensions
     let allowed_image_extensions = [
         ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-        ".tiff", ".tif", ".tga", ".ff", /*, ".gif"*/
+        /*".tiff", ".tif",*/ ".tga", ".ff", /*, ".gif"*/
         // Gif will be reenabled in image-rs 0.24
         ".jif", ".jfi", /*, ".ico"*/
         // Ico and bmp crashes are not fixed yet
