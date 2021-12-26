@@ -60,8 +60,6 @@ pub enum TypeOfFile {
 #[derive(Default)]
 pub struct Info {
     pub number_of_broken_files: usize,
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
 }
 
 impl Info {
@@ -550,8 +548,6 @@ impl DebugPrint for BrokenFiles {
         println!("Errors size - {}", self.text_messages.errors.len());
         println!("Warnings size - {}", self.text_messages.warnings.len());
         println!("Messages size - {}", self.text_messages.messages.len());
-        println!("Number of removed files - {}", self.information.number_of_removed_files);
-        println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
 
         println!("### Other");
 
@@ -752,7 +748,7 @@ fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     // Checking allowed image extensions
     let allowed_image_extensions = [
         ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-        ".tiff", ".tif", ".tga", ".ff", /*, ".gif"*/
+        /*".tiff", ".tif",*/ ".tga", ".ff", /*, ".gif"*/
         // Gif will be reenabled in image-rs 0.24
         ".jif", ".jfi", /*, ".ico"*/
         // Ico and bmp crashes are not fixed yet

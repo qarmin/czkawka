@@ -17,6 +17,7 @@ use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
 use img_hash::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::common::Common;
 use crate::common_directory::Directories;
@@ -42,14 +43,15 @@ pub struct ProgressData {
     pub images_checked: usize,
     pub images_to_check: usize,
 }
+const LOOP_DURATION: u32 = 200; //ms
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum Similarity {
     None,
     Similar(u32),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -93,6 +95,7 @@ pub struct SimilarImages {
     excluded_items: ExcludedItems,
     bktree: BKTree<Vec<u8>, Hamming>,
     similar_vectors: Vec<Vec<FileEntry>>,
+    similar_referenced_vectors: Vec<(FileEntry, Vec<FileEntry>)>,
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -106,14 +109,14 @@ pub struct SimilarImages {
     use_cache: bool,
     delete_outdated_cache: bool,
     exclude_images_with_same_size: bool,
+    use_reference_folders: bool,
 }
 
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
-    pub gained_space: u64,
+    pub number_of_duplicates: usize,
+    pub number_of_groups: u64,
 }
 
 impl Info {
@@ -134,6 +137,7 @@ impl SimilarImages {
             allowed_extensions: Extensions::new(),
             bktree: BKTree::new(Hamming),
             similar_vectors: vec![],
+            similar_referenced_vectors: Default::default(),
             recursive_search: true,
             minimal_file_size: 1024 * 16, // 16 KB should be enough to exclude too small images from search
             maximal_file_size: u64::MAX,
@@ -147,6 +151,7 @@ impl SimilarImages {
             use_cache: true,
             delete_outdated_cache: true,
             exclude_images_with_same_size: false,
+            use_reference_folders: false,
         }
     }
 
@@ -187,6 +192,14 @@ impl SimilarImages {
         &self.similar_vectors
     }
 
+    pub fn get_similar_images_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        &self.similar_referenced_vectors
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.use_reference_folders
+    }
+
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -221,6 +234,7 @@ impl SimilarImages {
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
+        self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
@@ -247,7 +261,7 @@ impl SimilarImages {
 
         self.allowed_extensions.extend_allowed_extensions(&[
             ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-            ".tiff", ".tif", ".tga", ".ff", /*, ".gif"*/
+            /*".tiff", ".tif",*/ ".tga", ".ff", /*, ".gif"*/
             ".jif", ".jfi", /*, ".webp"*/
         ]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
 
@@ -257,7 +271,6 @@ impl SimilarImages {
         }
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
@@ -270,7 +283,7 @@ impl SimilarImages {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 0,
-                        max_stage: 1,
+                        max_stage: 2,
                         images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
                         images_to_check: 0,
                     })
@@ -477,7 +490,6 @@ impl SimilarImages {
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
@@ -491,7 +503,7 @@ impl SimilarImages {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 1,
-                        max_stage: 1,
+                        max_stage: 2,
                         images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
                         images_to_check,
                     })
@@ -590,33 +602,54 @@ impl SimilarImages {
             _ => panic!(),
         };
 
-        // TODO
-        // Maybe also add here progress report
-
         let mut collected_similar_images: BTreeMap<Vec<u8>, Vec<FileEntry>> = Default::default();
 
         let mut available_hashes = self.image_hashes.clone();
         let mut this_time_check_hashes;
         let mut master_of_group: BTreeSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
 
-        // TODO optimize this for big temp_max_similarity values
-        // TODO maybe Simialar(u32) is enough instead SIMILAR_VALUES value?
-        let temp_max_similarity = match self.hash_size {
-            8 => SIMILAR_VALUES[0][5],
-            16 => SIMILAR_VALUES[1][4],
-            32 => SIMILAR_VALUES[2][3],
-            64 => SIMILAR_VALUES[3][2],
-            _ => panic!(),
-        };
+        //// PROGRESS THREAD START
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
 
-        for current_similarity in 0..=temp_max_similarity {
+        let atomic_mode_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
+            let progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_mode_counter = atomic_mode_counter.clone();
+            let all_images = similarity as usize * available_hashes.len();
+            thread::spawn(move || loop {
+                progress_send
+                    .unbounded_send(ProgressData {
+                        current_stage: 2,
+                        max_stage: 2,
+                        images_checked: atomic_mode_counter.load(Ordering::Relaxed) as usize,
+                        images_to_check: all_images,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            })
+        } else {
+            thread::spawn(|| {})
+        };
+        //// PROGRESS THREAD END
+
+        for current_similarity in 0..=similarity {
             this_time_check_hashes = available_hashes.clone();
 
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                // End thread which send info to gui
+                progress_thread_run.store(false, Ordering::Relaxed);
+                progress_thread_handle.join().unwrap();
                 return false;
             }
 
-            for (hash, vec_file_entry) in this_time_check_hashes.iter() {
+            for (hash, vec_file_entry) in &this_time_check_hashes {
+                atomic_mode_counter.fetch_add(1, Ordering::Relaxed);
+
                 let vector_with_found_similar_hashes = self
                     .bktree
                     .find(hash, similarity)
@@ -631,6 +664,14 @@ impl SimilarImages {
                 // This one picture doesn't have similar pictures except self in similarity 0
                 if current_similarity == 0 && vector_with_found_similar_hashes.len() == 1 {
                     continue;
+                }
+
+                // This shouldn't be executed too much times, so it should be quite fast to check this
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
+                    return false;
                 }
 
                 // Jeśli jeszcze nie dodał, to dodaje teraz grupę główną do już obrobionych
@@ -675,6 +716,9 @@ impl SimilarImages {
             }
         }
 
+        progress_thread_run.store(false, Ordering::Relaxed);
+        progress_thread_handle.join().unwrap();
+
         self.similar_vectors = collected_similar_images.values().cloned().collect();
 
         if self.exclude_images_with_same_size {
@@ -695,7 +739,45 @@ impl SimilarImages {
             }
         }
 
+        if self.use_reference_folders {
+            let mut similars_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similars_vector);
+            let reference_directories = self.directories.reference_directories.clone();
+            self.similar_referenced_vectors = similars_vector
+                .into_iter()
+                .filter_map(|vec_file_entry| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+        }
+
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
+
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
 
         // Clean unused data
         self.image_hashes = Default::default();
@@ -708,6 +790,10 @@ impl SimilarImages {
     /// Set included dir which needs to be relative, exists etc.
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.directories.set_reference_directory(reference_directory);
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
@@ -826,7 +912,8 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
             return;
         }
-        let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
+
+        let cache_file = cache_dir.join(cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter)));
         let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
@@ -836,29 +923,24 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
                 return;
             }
         };
-        let mut writer = BufWriter::new(file_handler);
 
-        for file_entry in hashmap.values() {
-            let mut string: String = format!(
-                "{}//{}//{}//{}",
-                file_entry.path.display(),
-                file_entry.size,
-                file_entry.dimensions,
-                file_entry.modified_date
-            );
-
-            for hash in &file_entry.hash {
-                string.push_str("//");
-                string.push_str(hash.to_string().as_str());
-            }
-
-            if let Err(e) = writeln!(writer, "{}", string) {
-                text_messages
-                    .messages
-                    .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            };
+        let writer = BufWriter::new(file_handler);
+        #[cfg(not(debug_assertions))]
+        if let Err(e) = bincode::serialize_into(writer, hashmap) {
+            text_messages
+                .messages
+                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            return;
         }
+        #[cfg(debug_assertions)]
+        if let Err(e) = serde_json::to_writer(writer, hashmap) {
+            text_messages
+                .messages
+                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+            return;
+        }
+
+        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
     }
 }
 
@@ -875,96 +957,39 @@ pub fn load_hashes_from_file(
         let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
             Ok(t) => t,
             Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
+                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error warning
                 return None;
             }
         };
 
         let reader = BufReader::new(file_handler);
-
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = Default::default();
-
-        let number_of_results: usize = hash_size as usize * hash_size as usize / 8;
-
-        // Read the file line by line using the lines() iterator from std::io::BufRead.
-        for (index, line) in reader.lines().enumerate() {
-            let line = match line {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
-                    return None;
-                }
-            };
-            let uuu = line.split("//").collect::<Vec<&str>>();
-            if uuu.len() != (number_of_results + 4) {
-                text_messages.warnings.push(format!(
-                    "Found invalid data in line {} - ({}) in cache file {}, expected {} values, found {}",
-                    index + 1,
-                    line,
-                    cache_file.display(),
-                    number_of_results + 4,
-                    uuu.len()
-                ));
-                continue;
+        #[cfg(debug_assertions)]
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(reader) {
+            Ok(t) => t,
+            Err(e) => {
+                text_messages
+                    .warnings
+                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                return None;
             }
-            // Don't load cache data if destination file not exists
-            if !delete_outdated_cache || Path::new(uuu[0]).exists() {
-                let mut hash: Vec<u8> = Vec::new();
-                for i in 0..number_of_results {
-                    hash.push(match uuu[4 + i as usize].parse::<u8>() {
-                        Ok(t) => t,
-                        Err(e) => {
-                            text_messages.warnings.push(format!(
-                                "Found invalid hash value in line {} - ({}) in cache file {}, reason {}",
-                                index + 1,
-                                line,
-                                cache_file.display(),
-                                e
-                            ));
-                            continue;
-                        }
-                    });
-                }
-
-                hashmap_loaded_entries.insert(
-                    uuu[0].to_string(),
-                    FileEntry {
-                        path: PathBuf::from(uuu[0]),
-                        size: match uuu[1].parse::<u64>() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                text_messages.warnings.push(format!(
-                                    "Found invalid size value in line {} - ({}) in cache file {}, reason {}",
-                                    index + 1,
-                                    line,
-                                    cache_file.display(),
-                                    e
-                                ));
-                                continue;
-                            }
-                        },
-                        dimensions: uuu[2].to_string(),
-                        modified_date: match uuu[3].parse::<u64>() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                text_messages.warnings.push(format!(
-                                    "Found invalid modified date value in line {} - ({}) in cache file {}, reason {}",
-                                    index + 1,
-                                    line,
-                                    cache_file.display(),
-                                    e
-                                ));
-                                continue;
-                            }
-                        },
-                        hash,
-                        similarity: Similarity::None,
-                    },
-                );
+        };
+        #[cfg(not(debug_assertions))]
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match bincode::deserialize_from(reader) {
+            Ok(t) => t,
+            Err(e) => {
+                text_messages
+                    .warnings
+                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                return None;
             }
+        };
+
+        // Don't load cache data if destination file not exists
+        if delete_outdated_cache {
+            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
         }
+
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
 
         return Some(hashmap_loaded_entries);
     }
@@ -974,11 +999,22 @@ pub fn load_hashes_from_file(
 }
 
 fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
+    let extension;
+    #[cfg(debug_assertions)]
+    {
+        extension = "json";
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        extension = "bin";
+    }
+
     format!(
-        "cache_similar_images_{}_{}_{}.txt",
+        "cache_similar_images_{}_{}_{}.{}",
         hash_size,
         convert_algorithm_to_string(hash_alg),
-        convert_filters_to_string(image_filter)
+        convert_filters_to_string(image_filter),
+        extension
     )
 }
 

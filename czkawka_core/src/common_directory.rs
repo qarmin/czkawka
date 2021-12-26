@@ -8,11 +8,16 @@ use crate::common_messages::Messages;
 pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,
+    pub reference_directories: Vec<PathBuf>,
 }
 
 impl Directories {
     pub fn new() -> Self {
         Default::default()
+    }
+
+    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
+        self.reference_directories = reference_directory
     }
 
     /// Setting included directories, at least one must be provided
@@ -146,15 +151,18 @@ impl Directories {
         if cfg!(target_family = "windows") {
             self.included_directories = self.included_directories.iter().map(Common::normalize_windows_path).collect();
             self.excluded_directories = self.excluded_directories.iter().map(Common::normalize_windows_path).collect();
+            self.reference_directories = self.reference_directories.iter().map(Common::normalize_windows_path).collect();
         }
 
         // Remove duplicated entries like: "/", "/"
 
         self.excluded_directories.sort();
         self.included_directories.sort();
+        self.reference_directories.sort();
 
         self.excluded_directories.dedup();
         self.included_directories.dedup();
+        self.reference_directories.dedup();
 
         // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
         if recursive_search {
@@ -250,6 +258,20 @@ impl Directories {
         }
 
         self.excluded_directories = optimized_excluded;
+
+        // Selecting Reference folders
+        {
+            let mut ref_folders = Vec::new();
+            for folder in &self.reference_directories {
+                if self.included_directories.iter().any(|e| folder.starts_with(&e)) {
+                    ref_folders.push(folder.clone());
+                    // println!("REF: VALID reference folder {:?}", folder);
+                } else {
+                    // println!("REF: Invalid reference folder {:?}", folder);
+                }
+            }
+            self.reference_directories = ref_folders;
+        }
 
         if self.included_directories.is_empty() {
             text_messages

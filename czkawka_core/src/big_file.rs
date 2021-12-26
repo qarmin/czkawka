@@ -44,7 +44,6 @@ pub enum DeleteMethod {
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
-    pub taken_space: u64,
     pub number_of_real_files: usize,
 }
 
@@ -302,7 +301,6 @@ impl BigFile {
                     if self.information.number_of_real_files < self.number_of_files_to_check {
                         new_map.entry(*size).or_insert_with(Vec::new);
                         new_map.get_mut(size).unwrap().push(file.clone());
-                        self.information.taken_space += size;
                         self.information.number_of_real_files += 1;
                     } else {
                         break;
@@ -445,11 +443,6 @@ impl SaveResults for BigFile {
 impl PrintResults for BigFile {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
-        println!(
-            "Found {} files which take {}:",
-            self.information.number_of_real_files,
-            self.information.taken_space.file_size(options::BINARY).unwrap()
-        );
         for (size, vector) in self.big_files.iter().rev() {
             // TODO Align all to same width
             for entry in vector {

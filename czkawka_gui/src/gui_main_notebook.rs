@@ -1,10 +1,11 @@
+use czkawka_core::duplicate::CheckingMethod;
 use gtk::prelude::*;
 use gtk::{EventControllerKey, TreeView};
 
 use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
 
 use crate::fl;
-use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
+use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[derive(Clone)]
@@ -406,6 +407,7 @@ impl GuiMainNotebook {
         // Change names of columns
         let names_of_columns = [
             vec![
+                fl!("main_tree_view_column_size"),
                 fl!("main_tree_view_column_file_name"),
                 fl!("main_tree_view_column_path"),
                 fl!("main_tree_view_column_modification"),
@@ -478,6 +480,23 @@ impl GuiMainNotebook {
                 }
                 column.set_title(&names_of_columns[notebook_index][column_index - 1]);
             }
+        }
+
+        {
+            let active = self.combo_box_duplicate_check_method.active().unwrap_or(0);
+            self.combo_box_duplicate_check_method.remove_all();
+            for i in &DUPLICATES_CHECK_METHOD_COMBO_BOX {
+                let text = match i.check_method {
+                    CheckingMethod::Hash => fl!("duplicate_mode_hash_combo_box"),
+                    CheckingMethod::Size => fl!("duplicate_mode_size_combo_box"),
+                    CheckingMethod::Name => fl!("duplicate_mode_name_combo_box"),
+                    _ => {
+                        panic!()
+                    }
+                };
+                self.combo_box_duplicate_check_method.append_text(&text);
+            }
+            self.combo_box_duplicate_check_method.set_active(Some(active));
         }
     }
 }

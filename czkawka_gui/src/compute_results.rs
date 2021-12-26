@@ -17,6 +17,8 @@ use crate::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
+use crate::opening_selecting_records::*;
+use czkawka_core::localizer::generate_translation_hashmap;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -76,6 +78,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if df.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
+                    if df.get_use_reference() {
+                        tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_duplicates)));
+                    }
+
                     let information = df.get_information();
                     let text_messages = df.get_text_messages();
 
@@ -83,31 +91,31 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let duplicates_size: u64;
                     let duplicates_group: usize;
 
-                    let fl_found = fl!("compute_found");
-                    let fl_groups = fl!("compute_groups");
-                    let fl_groups_which_took = fl!("compute_groups_which_took");
-                    let fl_duplicated_files_in = fl!("compute_duplicated_files_in");
-
                     match df.get_check_method() {
                         CheckingMethod::Name => {
                             duplicates_number = information.number_of_duplicated_files_by_name;
                             // duplicates_size = 0;
                             duplicates_group = information.number_of_groups_by_name;
-                            entry_info.set_text(format!("{} {} {} {} {}", fl_found, duplicates_number, fl_duplicated_files_in, duplicates_group, fl_groups).as_str());
+                            entry_info.set_text(
+                                fl!(
+                                    "compute_found_duplicates_name",
+                                    generate_translation_hashmap(vec![("number_files", duplicates_number.to_string()), ("number_groups", duplicates_group.to_string())])
+                                )
+                                .as_str(),
+                            );
                         }
                         CheckingMethod::Hash => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
                             entry_info.set_text(
-                                format!(
-                                    "{} {} {} {} {} {}.",
-                                    fl_found,
-                                    duplicates_number,
-                                    fl_duplicated_files_in,
-                                    duplicates_group,
-                                    fl_groups_which_took,
-                                    duplicates_size.file_size(options::BINARY).unwrap()
+                                fl!(
+                                    "compute_found_duplicates_hash_size",
+                                    generate_translation_hashmap(vec![
+                                        ("number_files", duplicates_number.to_string()),
+                                        ("number_groups", duplicates_group.to_string()),
+                                        ("size", duplicates_size.file_size(options::BINARY).unwrap())
+                                    ])
                                 )
                                 .as_str(),
                             );
@@ -117,14 +125,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
                             entry_info.set_text(
-                                format!(
-                                    "{} {} {} {} {} {}.",
-                                    fl_found,
-                                    duplicates_number,
-                                    fl_duplicated_files_in,
-                                    duplicates_group,
-                                    fl_groups_which_took,
-                                    duplicates_size.file_size(options::BINARY).unwrap()
+                                fl!(
+                                    "compute_found_duplicates_hash_size",
+                                    generate_translation_hashmap(vec![
+                                        ("number_files", duplicates_number.to_string()),
+                                        ("number_groups", duplicates_group.to_string()),
+                                        ("size", duplicates_size.file_size(options::BINARY).unwrap())
+                                    ])
                                 )
                                 .as_str(),
                             );
@@ -138,63 +145,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_duplicate_finder);
 
-                        match df.get_check_method() {
-                            CheckingMethod::Name => {
-                                let btreemap = df.get_files_sorted_by_names();
+                        if df.get_use_reference() {
+                            match df.get_check_method() {
+                                CheckingMethod::Name => {
+                                    let btreemap = df.get_files_with_identical_name_referenced();
 
-                                for (name, vector) in btreemap.iter().rev() {
-                                    // Sort
-                                    let vector = if vector.len() >= 2 {
-                                        let mut vector = vector.clone();
-                                        vector.sort_by_key(|e| {
-                                            let t = split_path(e.path.as_path());
-                                            (t.0, t.1)
-                                        });
-                                        vector
-                                    } else {
-                                        vector.clone()
-                                    };
-
-                                    let values: [(u32, &dyn ToValue); 8] = [
-                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                        (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Name as u32, &name),
-                                        (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
-                                        (ColumnsDuplicates::Modification as u32, (&"".to_string())), // No text in 3 column
-                                        (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),      // Not used here
-                                        (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                    ];
-
-                                    list_store.set(&list_store.append(), &values);
-                                    for entry in vector {
-                                        let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 8] = [
-                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                            (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Name as u32, &file),
-                                            (ColumnsDuplicates::Path as u32, &directory),
-                                            (
-                                                ColumnsDuplicates::Modification as u32,
-                                                &(format!(
-                                                    "{} - ({})",
-                                                    NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
-                                                    entry.size.file_size(options::BINARY).unwrap()
-                                                )),
-                                            ),
-                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                            (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                        ];
-                                        list_store.set(&list_store.append(), &values);
-                                    }
-                                }
-                            }
-                            CheckingMethod::Hash => {
-                                let btreemap = df.get_files_sorted_by_hash();
-
-                                for (size, vectors_vector) in btreemap.iter().rev() {
-                                    for vector in vectors_vector {
+                                    for (_name, (base_file_entry, vector)) in btreemap.iter().rev() {
                                         // Sort
                                         let vector = if vector.len() >= 2 {
                                             let mut vector = vector.clone();
@@ -207,36 +163,154 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             vector.clone()
                                         };
 
-                                        let values: [(u32, &dyn ToValue); 8] = [
+                                        // HEADER
+                                        let (directory, file) = split_path(&base_file_entry.path);
+                                        let values: [(u32, &dyn ToValue); 9] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                            (ColumnsDuplicates::Name as u32, &file),
+                                            (ColumnsDuplicates::Path as u32, &directory),
                                             (
-                                                ColumnsDuplicates::Name as u32,
-                                                &(format!("{} x {} ({} {})", vector.len(), size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes"))),
-                                            ),
-                                            (
-                                                ColumnsDuplicates::Path as u32,
+                                                ColumnsDuplicates::Modification as u32,
                                                 &(format!(
-                                                    "{} ({} {}) {}",
-                                                    ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(),
-                                                    (vector.len() - 1) as u64 * *size as u64,
-                                                    fl!("general_bytes"),
-                                                    fl!("general_lost")
+                                                    "{} - ({})",
+                                                    NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0),
+                                                    base_file_entry.size.file_size(options::BINARY).unwrap()
                                                 )),
                                             ),
-                                            (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
-                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                             (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                             (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                         ];
 
                                         list_store.set(&list_store.append(), &values);
+
+                                        // MEAT
                                         for entry in vector {
                                             let (directory, file) = split_path(&entry.path);
-
-                                            let values: [(u32, &dyn ToValue); 8] = [
+                                            let values: [(u32, &dyn ToValue); 9] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(format!(
+                                                        "{} - ({})",
+                                                        NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
+                                                        entry.size.file_size(options::BINARY).unwrap()
+                                                    )),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Hash => {
+                                    let btreemap = df.get_files_with_identical_hashes_referenced();
+
+                                    for (_size, vectors_vector) in btreemap.iter().rev() {
+                                        for (base_file_entry, vector) in vectors_vector {
+                                            // Sort
+                                            let vector = if vector.len() >= 2 {
+                                                let mut vector = vector.clone();
+                                                vector.sort_by_key(|e| {
+                                                    let t = split_path(e.path.as_path());
+                                                    (t.0, t.1)
+                                                });
+                                                vector
+                                            } else {
+                                                vector.clone()
+                                            };
+
+                                            // HEADER
+                                            let (directory, file) = split_path(&base_file_entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+
+                                            // MEAT
+                                            list_store.set(&list_store.append(), &values);
+                                            for entry in vector {
+                                                let (directory, file) = split_path(&entry.path);
+
+                                                let values: [(u32, &dyn ToValue); 9] = [
+                                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                    (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                    (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                    (ColumnsDuplicates::Name as u32, &file),
+                                                    (ColumnsDuplicates::Path as u32, &directory),
+                                                    (
+                                                        ColumnsDuplicates::Modification as u32,
+                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    ),
+                                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                                ];
+
+                                                list_store.set(&list_store.append(), &values);
+                                            }
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Size => {
+                                    let btreemap = df.get_files_with_identical_size_referenced();
+
+                                    for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+
+                                        // HEADER
+                                        let (directory, file) = split_path(&base_file_entry.path);
+                                        let values: [(u32, &dyn ToValue); 9] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                            (ColumnsDuplicates::Name as u32, &file),
+                                            (ColumnsDuplicates::Path as u32, &directory),
+                                            (
+                                                ColumnsDuplicates::Modification as u32,
+                                                &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                            ),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        // MEAT
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
@@ -247,75 +321,175 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
                                                 (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
                                             ];
-
                                             list_store.set(&list_store.append(), &values);
                                         }
                                     }
                                 }
-                            }
-                            CheckingMethod::Size => {
-                                let btreemap = df.get_files_sorted_by_size();
-
-                                for (size, vector) in btreemap.iter().rev() {
-                                    // Sort
-                                    let vector = if vector.len() >= 2 {
-                                        let mut vector = vector.clone();
-                                        vector.sort_by_key(|e| {
-                                            let t = split_path(e.path.as_path());
-                                            (t.0, t.1)
-                                        });
-                                        vector
-                                    } else {
-                                        vector.clone()
-                                    };
-                                    let values: [(u32, &dyn ToValue); 8] = [
-                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                        (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (
-                                            ColumnsDuplicates::Name as u32,
-                                            &(format!("{} x {} ({} {})", vector.len(), size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes"))),
-                                        ),
-                                        (
-                                            ColumnsDuplicates::Path as u32,
-                                            &(format!(
-                                                "{} ({} {}) {}",
-                                                ((vector.len() - 1) as u64 * *size as u64).file_size(options::BINARY).unwrap(),
-                                                (vector.len() - 1) as u64 * *size as u64,
-                                                fl!("general_bytes"),
-                                                fl!("general_lost")
-                                            )),
-                                        ),
-                                        (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
-                                        (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
-                                        (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                    ];
-
-                                    list_store.set(&list_store.append(), &values);
-                                    for entry in vector {
-                                        let (directory, file) = split_path(&entry.path);
-                                        let values: [(u32, &dyn ToValue); 8] = [
-                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                            (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Name as u32, &file),
-                                            (ColumnsDuplicates::Path as u32, &directory),
-                                            (
-                                                ColumnsDuplicates::Modification as u32,
-                                                &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
-                                            ),
-                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                            (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                        ];
-                                        list_store.set(&list_store.append(), &values);
-                                    }
+                                CheckingMethod::None => {
+                                    panic!();
                                 }
                             }
-                            CheckingMethod::None => {
-                                panic!();
+                        } else {
+                            match df.get_check_method() {
+                                CheckingMethod::Name => {
+                                    let btreemap = df.get_files_sorted_by_names();
+
+                                    for (_name, vector) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+
+                                        let values: [(u32, &dyn ToValue); 9] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
+                                            (ColumnsDuplicates::Modification as u32, (&"".to_string())), // No text in 3 column
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),      // Not used here
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(format!(
+                                                        "{} - ({})",
+                                                        NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
+                                                        entry.size.file_size(options::BINARY).unwrap()
+                                                    )),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Hash => {
+                                    let btreemap = df.get_files_sorted_by_hash();
+
+                                    for (_size, vectors_vector) in btreemap.iter().rev() {
+                                        for vector in vectors_vector {
+                                            // Sort
+                                            let vector = if vector.len() >= 2 {
+                                                let mut vector = vector.clone();
+                                                vector.sort_by_key(|e| {
+                                                    let t = split_path(e.path.as_path());
+                                                    (t.0, t.1)
+                                                });
+                                                vector
+                                            } else {
+                                                vector.clone()
+                                            };
+
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                                (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                                (ColumnsDuplicates::Path as u32, (&"".to_string())),
+                                                (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
+                                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+
+                                            list_store.set(&list_store.append(), &values);
+                                            for entry in vector {
+                                                let (directory, file) = split_path(&entry.path);
+
+                                                let values: [(u32, &dyn ToValue); 9] = [
+                                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                    (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                    (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                    (ColumnsDuplicates::Name as u32, &file),
+                                                    (ColumnsDuplicates::Path as u32, &directory),
+                                                    (
+                                                        ColumnsDuplicates::Modification as u32,
+                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    ),
+                                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                                ];
+
+                                                list_store.set(&list_store.append(), &values);
+                                            }
+                                        }
+                                    }
+                                }
+                                CheckingMethod::Size => {
+                                    let btreemap = df.get_files_sorted_by_size();
+
+                                    for (_size, vector) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+                                        let values: [(u32, &dyn ToValue); 9] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Name as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Path as u32, (&"".to_string())),
+                                            (ColumnsDuplicates::Modification as u32, &"".to_string()), // No text in 3 column
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),      // Not used here
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); 9] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
+                                CheckingMethod::None => {
+                                    panic!();
+                                }
                             }
                         }
-
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }
 
@@ -347,7 +521,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let empty_folder_number: usize = information.number_of_empty_folders;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), empty_folder_number, fl!("compute_empty_folders")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_empty_folders",
+                            generate_translation_hashmap(vec![("number_files", empty_folder_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -406,7 +586,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let empty_files_number: usize = information.number_of_empty_files;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), empty_files_number, fl!("compute_empty_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_empty_files",
+                            generate_translation_hashmap(vec![("number_files", empty_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -466,7 +652,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let biggest_files_number: usize = information.number_of_real_files;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), biggest_files_number, fl!("compute_biggest_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_big_files",
+                            generate_translation_hashmap(vec![("number_files", biggest_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -484,10 +676,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let (directory, file) = split_path(&file_entry.path);
                                 let values: [(u32, &dyn ToValue); 7] = [
                                     (ColumnsBigFiles::SelectionButton as u32, &false),
-                                    (
-                                        ColumnsBigFiles::Size as u32,
-                                        &(format!("{} ({} {})", size.file_size(options::BINARY).unwrap(), size, fl!("general_bytes"))),
-                                    ),
+                                    (ColumnsBigFiles::Size as u32, &(size.file_size(options::BINARY).unwrap())),
                                     (ColumnsBigFiles::Name as u32, &file),
                                     (ColumnsBigFiles::Path as u32, &directory),
                                     (
@@ -530,7 +719,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let text_messages = tf.get_text_messages();
 
                     let temporary_files_number: usize = information.number_of_temporary_files;
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), temporary_files_number, fl!("compute_temporary_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_temporary_files",
+                            generate_translation_hashmap(vec![("number_files", temporary_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -585,18 +780,25 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if sf.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
-                    //let information = sf.get_information();
+                    if sf.get_use_reference() {
+                        tree_view_similar_images_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_similar_images_finder
+                            .selection()
+                            .set_select_function(Some(Box::new(select_function_similar_images)));
+                    }
+                    let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
 
-                    let base_images_size = sf.get_similar_images().len();
+                    let found_any_duplicates = information.number_of_duplicates > 0;
 
                     entry_info.set_text(
-                        format!(
-                            "{} {} {} {}.",
-                            fl!("compute_found"),
-                            fl!("compute_duplicates_for"),
-                            base_images_size,
-                            fl!("compute_similar_image")
+                        fl!(
+                            "compute_found_images",
+                            generate_translation_hashmap(vec![
+                                ("number_files", information.number_of_duplicates.to_string()),
+                                ("number_groups", information.number_of_groups.to_string()),
+                            ])
                         )
                         .as_str(),
                     );
@@ -605,62 +807,126 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_similar_images_finder);
 
-                        let vec_struct_similar = sf.get_similar_images();
+                        if sf.get_use_reference() {
+                            let vec_struct_similar: &Vec<(czkawka_core::similar_images::FileEntry, Vec<czkawka_core::similar_images::FileEntry>)> =
+                                sf.get_similar_images_referenced();
+                            for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
 
-                        for vec_file_entry in vec_struct_similar.iter() {
-                            // Sort
-                            let vec_file_entry = if vec_file_entry.len() >= 2 {
-                                let mut vec_file_entry = vec_file_entry.clone();
-                                vec_file_entry.sort_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vec_file_entry
-                            } else {
-                                vec_file_entry.clone()
-                            };
-
-                            // Header
-                            let values: [(u32, &dyn ToValue); 12] = [
-                                (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
-                                (ColumnsSimilarImages::SelectionButton as u32, &false),
-                                (ColumnsSimilarImages::Similarity as u32, &"".to_string()),
-                                (ColumnsSimilarImages::Size as u32, &"".to_string()),
-                                (ColumnsSimilarImages::SizeAsBytes as u32, &(0)),
-                                (ColumnsSimilarImages::Dimensions as u32, &"".to_string()),
-                                (ColumnsSimilarImages::Name as u32, &"".to_string()),
-                                (ColumnsSimilarImages::Path as u32, &"".to_string()),
-                                (ColumnsSimilarImages::Modification as u32, &"".to_string()),
-                                (ColumnsSimilarImages::ModificationAsSecs as u32, &(0)),
-                                (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-                            list_store.set(&list_store.append(), &values);
-
-                            // Meat
-                            for file_entry in vec_file_entry.iter() {
-                                let (directory, file) = split_path(&file_entry.path);
+                                // Header
+                                let (directory, file) = split_path(&base_file_entry.path);
                                 let values: [(u32, &dyn ToValue); 12] = [
-                                    (ColumnsSimilarImages::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
                                     (ColumnsSimilarImages::SelectionButton as u32, &false),
-                                    (
-                                        ColumnsSimilarImages::Similarity as u32,
-                                        &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
-                                    ),
-                                    (ColumnsSimilarImages::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
-                                    (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
+                                    (ColumnsSimilarImages::Similarity as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarImages::SizeAsBytes as u32, &base_file_entry.size),
+                                    (ColumnsSimilarImages::Dimensions as u32, &base_file_entry.dimensions),
                                     (ColumnsSimilarImages::Name as u32, &file),
                                     (ColumnsSimilarImages::Path as u32, &directory),
                                     (
                                         ColumnsSimilarImages::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
                                     ),
-                                    (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                                    (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarImages::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                    (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                     (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
+
+                                // Meat
+                                for file_entry in vec_file_entry.iter() {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 12] = [
+                                        (ColumnsSimilarImages::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSimilarImages::SelectionButton as u32, &false),
+                                        (
+                                            ColumnsSimilarImages::Similarity as u32,
+                                            &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
+                                        ),
+                                        (ColumnsSimilarImages::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
+                                        (ColumnsSimilarImages::Name as u32, &file),
+                                        (ColumnsSimilarImages::Path as u32, &directory),
+                                        (
+                                            ColumnsSimilarImages::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
+                            }
+                        } else {
+                            let vec_struct_similar = sf.get_similar_images();
+                            for vec_file_entry in vec_struct_similar.iter() {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
+
+                                // Header
+                                let values: [(u32, &dyn ToValue); 12] = [
+                                    (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
+                                    (ColumnsSimilarImages::SelectionButton as u32, &false),
+                                    (ColumnsSimilarImages::Similarity as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::Size as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::SizeAsBytes as u32, &(0)),
+                                    (ColumnsSimilarImages::Dimensions as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::Name as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::Path as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::Modification as u32, &"".to_string()),
+                                    (ColumnsSimilarImages::ModificationAsSecs as u32, &(0)),
+                                    (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                ];
+                                list_store.set(&list_store.append(), &values);
+
+                                // Meat
+                                for file_entry in vec_file_entry.iter() {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 12] = [
+                                        (ColumnsSimilarImages::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSimilarImages::SelectionButton as u32, &false),
+                                        (
+                                            ColumnsSimilarImages::Similarity as u32,
+                                            &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
+                                        ),
+                                        (ColumnsSimilarImages::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
+                                        (ColumnsSimilarImages::Name as u32, &file),
+                                        (ColumnsSimilarImages::Path as u32, &directory),
+                                        (
+                                            ColumnsSimilarImages::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
                             }
                         }
 
@@ -675,7 +941,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             &shared_buttons,
                             &NotebookMainEnum::SimilarImages,
                             &["save", "delete", "select", "symlink", "hardlink", "move"],
-                            base_images_size > 0,
+                            found_any_duplicates,
                         );
 
                         set_buttons(
@@ -690,18 +956,24 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if ff.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
-                    //let information = ff.get_information();
+                    if ff.get_use_reference() {
+                        tree_view_similar_videos_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_similar_videos_finder
+                            .selection()
+                            .set_select_function(Some(Box::new(select_function_similar_videos)));
+                    }
+                    let information = ff.get_information();
                     let text_messages = ff.get_text_messages();
-
-                    let base_videos_size = ff.get_similar_videos().len();
+                    let found_any_duplicates = information.number_of_duplicates > 0;
 
                     entry_info.set_text(
-                        format!(
-                            "{} {} {} {}.",
-                            fl!("compute_found"),
-                            fl!("compute_duplicates_for"),
-                            base_videos_size,
-                            fl!("compute_similar_videos")
+                        fl!(
+                            "compute_found_videos",
+                            generate_translation_hashmap(vec![
+                                ("number_files", information.number_of_duplicates.to_string()),
+                                ("number_groups", information.number_of_groups.to_string()),
+                            ])
                         )
                         .as_str(),
                     );
@@ -710,55 +982,113 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_similar_videos_finder);
 
-                        let vec_struct_similar = ff.get_similar_videos();
+                        if ff.get_use_reference() {
+                            let vec_struct_similar = ff.get_similar_videos_referenced();
 
-                        for vec_file_entry in vec_struct_similar.iter() {
-                            // Sort
-                            let vec_file_entry = if vec_file_entry.len() >= 2 {
-                                let mut vec_file_entry = vec_file_entry.clone();
-                                vec_file_entry.sort_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vec_file_entry
-                            } else {
-                                vec_file_entry.clone()
-                            };
+                            for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
 
-                            // Header
-                            let values: [(u32, &dyn ToValue); 10] = [
-                                (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
-                                (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                (ColumnsSimilarVideos::Size as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
-                                (ColumnsSimilarVideos::Name as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::Path as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::Modification as u32, &"".to_string()),
-                                (ColumnsSimilarVideos::ModificationAsSecs as u32, &(0)),
-                                (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-                            list_store.set(&list_store.append(), &values);
-
-                            // Meat
-                            for file_entry in vec_file_entry.iter() {
-                                let (directory, file) = split_path(&file_entry.path);
+                                // Header
+                                let (directory, file) = split_path(&base_file_entry.path);
                                 let values: [(u32, &dyn ToValue); 10] = [
-                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
                                     (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                    (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSimilarVideos::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSimilarVideos::Name as u32, &file),
                                     (ColumnsSimilarVideos::Path as u32, &directory),
                                     (
                                         ColumnsSimilarVideos::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
                                     ),
-                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                                    (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                    (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                     (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
+
+                                // Meat
+                                for file_entry in vec_file_entry.iter() {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 10] = [
+                                        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSimilarVideos::SelectionButton as u32, &false),
+                                        (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSimilarVideos::Name as u32, &file),
+                                        (ColumnsSimilarVideos::Path as u32, &directory),
+                                        (
+                                            ColumnsSimilarVideos::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
+                            }
+                        } else {
+                            let vec_struct_similar = ff.get_similar_videos();
+
+                            for vec_file_entry in vec_struct_similar.iter() {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
+
+                                // Header
+                                let values: [(u32, &dyn ToValue); 10] = [
+                                    (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
+                                    (ColumnsSimilarVideos::SelectionButton as u32, &false),
+                                    (ColumnsSimilarVideos::Size as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
+                                    (ColumnsSimilarVideos::Name as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::Path as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::Modification as u32, &"".to_string()),
+                                    (ColumnsSimilarVideos::ModificationAsSecs as u32, &(0)),
+                                    (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                    (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                ];
+                                list_store.set(&list_store.append(), &values);
+
+                                // Meat
+                                for file_entry in vec_file_entry.iter() {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 10] = [
+                                        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSimilarVideos::SelectionButton as u32, &false),
+                                        (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSimilarVideos::Name as u32, &file),
+                                        (ColumnsSimilarVideos::Path as u32, &directory),
+                                        (
+                                            ColumnsSimilarVideos::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
                             }
                         }
 
@@ -773,7 +1103,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             &shared_buttons,
                             &NotebookMainEnum::SimilarVideos,
                             &["save", "delete", "select", "symlink", "hardlink", "move"],
-                            base_videos_size > 0,
+                            found_any_duplicates,
                         );
 
                         set_buttons(
@@ -788,18 +1118,31 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                 if mf.get_stopped_search() {
                     entry_info.set_text(&fl!("compute_stopped_by_user"));
                 } else {
+                    if mf.get_use_reference() {
+                        tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                    } else {
+                        tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_same_music)));
+                    }
+
                     let information = mf.get_information();
                     let text_messages = mf.get_text_messages();
 
-                    let same_music_number: usize = information.number_of_duplicates_music_files;
+                    let same_music_number: usize = information.number_of_duplicates;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), same_music_number, fl!("compute_music_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_music",
+                            generate_translation_hashmap(vec![
+                                ("number_files", information.number_of_duplicates.to_string()),
+                                ("number_groups", information.number_of_groups.to_string()),
+                            ])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
                         let list_store = get_list_store(&tree_view_same_music_finder);
-
-                        let vector = mf.get_duplicated_music_entries();
 
                         let music_similarity = *mf.get_music_similarity();
 
@@ -809,92 +1152,159 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let is_album_artist = (MusicSimilarity::ALBUM_ARTIST & music_similarity) != MusicSimilarity::NONE;
                         let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
 
-                        let text: String = "-----".to_string();
+                        if mf.get_use_reference() {
+                            let vector = mf.get_similar_music_referenced();
 
-                        for vec_file_entry in vector {
-                            // Sort
-                            let vec_file_entry = if vec_file_entry.len() >= 2 {
-                                let mut vec_file_entry = vec_file_entry.clone();
-                                vec_file_entry.sort_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vec_file_entry
-                            } else {
-                                vec_file_entry.clone()
-                            };
+                            for (base_file_entry, vec_file_entry) in vector {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
 
-                            let values: [(u32, &dyn ToValue); 15] = [
-                                (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
-                                (ColumnsSameMusic::SelectionButton as u32, &false),
-                                (ColumnsSameMusic::Size as u32, &"".to_string()),
-                                (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
-                                (ColumnsSameMusic::Name as u32, &"".to_string()),
-                                (ColumnsSameMusic::Path as u32, &"".to_string()),
-                                (
-                                    ColumnsSameMusic::Title as u32,
-                                    &(match is_title {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::Artist as u32,
-                                    &(match is_artist {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::AlbumTitle as u32,
-                                    &(match is_album_title {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::AlbumArtist as u32,
-                                    &(match is_album_artist {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (
-                                    ColumnsSameMusic::Year as u32,
-                                    &(match is_year {
-                                        true => text.clone(),
-                                        false => "".to_string(),
-                                    }),
-                                ),
-                                (ColumnsSameMusic::Modification as u32, &"".to_string()),
-                                (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
-                                (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-                            list_store.set(&list_store.append(), &values);
-                            for file_entry in vec_file_entry {
-                                let (directory, file) = split_path(&file_entry.path);
+                                let (directory, file) = split_path(&base_file_entry.path);
                                 let values: [(u32, &dyn ToValue); 15] = [
-                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
                                     (ColumnsSameMusic::SelectionButton as u32, &false),
-                                    (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
-                                    (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                    (ColumnsSameMusic::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSameMusic::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSameMusic::Name as u32, &file),
                                     (ColumnsSameMusic::Path as u32, &directory),
-                                    (ColumnsSameMusic::Title as u32, &file_entry.title),
-                                    (ColumnsSameMusic::Artist as u32, &file_entry.artist),
-                                    (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
-                                    (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
-                                    (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                    (ColumnsSameMusic::Title as u32, &base_file_entry.title),
+                                    (ColumnsSameMusic::Artist as u32, &base_file_entry.artist),
+                                    (ColumnsSameMusic::AlbumTitle as u32, &base_file_entry.album_title),
+                                    (ColumnsSameMusic::AlbumArtist as u32, &base_file_entry.album_artist),
+                                    (ColumnsSameMusic::Year as u32, &base_file_entry.year.to_string()),
                                     (
                                         ColumnsSameMusic::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
                                     ),
-                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                                    (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                    (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
                                     (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
                                 ];
                                 list_store.set(&list_store.append(), &values);
+                                for file_entry in vec_file_entry {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 15] = [
+                                        (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSameMusic::SelectionButton as u32, &false),
+                                        (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSameMusic::Name as u32, &file),
+                                        (ColumnsSameMusic::Path as u32, &directory),
+                                        (ColumnsSameMusic::Title as u32, &file_entry.title),
+                                        (ColumnsSameMusic::Artist as u32, &file_entry.artist),
+                                        (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
+                                        (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
+                                        (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                        (
+                                            ColumnsSameMusic::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
+                            }
+                        } else {
+                            let vector = mf.get_duplicated_music_entries();
+
+                            let text: String = "-----".to_string();
+
+                            for vec_file_entry in vector {
+                                // Sort
+                                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                                    let mut vec_file_entry = vec_file_entry.clone();
+                                    vec_file_entry.sort_by_key(|e| {
+                                        let t = split_path(e.path.as_path());
+                                        (t.0, t.1)
+                                    });
+                                    vec_file_entry
+                                } else {
+                                    vec_file_entry.clone()
+                                };
+
+                                let values: [(u32, &dyn ToValue); 15] = [
+                                    (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
+                                    (ColumnsSameMusic::SelectionButton as u32, &false),
+                                    (ColumnsSameMusic::Size as u32, &"".to_string()),
+                                    (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
+                                    (ColumnsSameMusic::Name as u32, &"".to_string()),
+                                    (ColumnsSameMusic::Path as u32, &"".to_string()),
+                                    (
+                                        ColumnsSameMusic::Title as u32,
+                                        &(match is_title {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::Artist as u32,
+                                        &(match is_artist {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::AlbumTitle as u32,
+                                        &(match is_album_title {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::AlbumArtist as u32,
+                                        &(match is_album_artist {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::Year as u32,
+                                        &(match is_year {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (ColumnsSameMusic::Modification as u32, &"".to_string()),
+                                    (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
+                                    (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                    (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                ];
+                                list_store.set(&list_store.append(), &values);
+                                for file_entry in vec_file_entry {
+                                    let (directory, file) = split_path(&file_entry.path);
+                                    let values: [(u32, &dyn ToValue); 15] = [
+                                        (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
+                                        (ColumnsSameMusic::SelectionButton as u32, &false),
+                                        (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
+                                        (ColumnsSameMusic::Name as u32, &file),
+                                        (ColumnsSameMusic::Path as u32, &directory),
+                                        (ColumnsSameMusic::Title as u32, &file_entry.title),
+                                        (ColumnsSameMusic::Artist as u32, &file_entry.artist),
+                                        (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
+                                        (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
+                                        (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                        (
+                                            ColumnsSameMusic::Modification as u32,
+                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                        ),
+                                        (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
+                                        (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                        (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                    ];
+                                    list_store.set(&list_store.append(), &values);
+                                }
                             }
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
@@ -928,7 +1338,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let invalid_symlinks: usize = information.number_of_invalid_symlinks;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), invalid_symlinks, fl!("compute_symlinks")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_invalid_symlinks",
+                            generate_translation_hashmap(vec![("number_files", invalid_symlinks.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {
@@ -986,7 +1402,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                     let broken_files_number: usize = information.number_of_broken_files;
 
-                    entry_info.set_text(format!("{} {} {}.", fl!("compute_found"), broken_files_number, fl!("compute_broken_files")).as_str());
+                    entry_info.set_text(
+                        fl!(
+                            "compute_found_broken_files",
+                            generate_translation_hashmap(vec![("number_files", broken_files_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
 
                     // Create GUI
                     {

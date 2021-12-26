@@ -43,8 +43,6 @@ pub struct FileEntry {
 #[derive(Default)]
 pub struct Info {
     pub number_of_empty_files: usize,
-    pub number_of_removed_files: usize,
-    pub number_of_failed_to_remove_files: usize,
 }
 
 impl Info {
@@ -350,8 +348,6 @@ impl DebugPrint for EmptyFiles {
         println!("Errors size - {}", self.text_messages.errors.len());
         println!("Warnings size - {}", self.text_messages.warnings.len());
         println!("Messages size - {}", self.text_messages.messages.len());
-        println!("Number of removed files - {}", self.information.number_of_removed_files);
-        println!("Number of failed to remove files - {}", self.information.number_of_failed_to_remove_files);
 
         println!("### Other");
 

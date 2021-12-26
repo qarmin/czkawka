@@ -20,8 +20,6 @@ window_progress_title = Skanowanie
 # General
 general_ok_button = Ok
 general_close_button = Zamknij
-general_bytes = bajtów
-general_lost = zaprzepaszczono
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -41,7 +39,7 @@ duplicate_hash_type_tooltip =
     
     Blake3 - kryptograficzna funkcja haszująca. Z racji połączenia szybkości i niskiej ilości kolizji jest to domyślny tryb.
     
-    CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashy.
+    CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashów.
     
     XXH3 - zarówno pod względem jakości hashu jak i wydajności jest podobny do Blake3, dlatego te algorytmy mogą być używane wymiennie.
 duplicate_check_method_tooltip =
@@ -97,6 +95,8 @@ check_button_general_same_size = Ignoruj identyczny rozmiar
 check_button_general_same_size_tooltip = Wyrzuca z wyników skanowania pliki, które posiadają identyczny rozmiar, po to by w wynikach zostały tylko niemal identyczne rekordy.
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
 # Upper window
+upper_tree_view_included_folder_column_title = Foldery do Przeszukania
+upper_tree_view_included_reference_column_title = Foldery Referencyjne
 upper_recursive_button = Rekursywnie
 upper_recursive_button_tooltip = Jeśli zaznaczony, szuka plików i folderów również w katalogach wewnątrz, nawet jeśli nie znajdują się one bezpośrednio w tym folderze.
 upper_manual_add_included_button = Ręcznie Dodaj
@@ -105,21 +105,21 @@ upper_remove_included_button = Usuń
 upper_manual_add_excluded_button = Ręcznie Dodaj
 upper_add_excluded_button = Dodaj
 upper_remove_excluded_button = Usuń
-upper_manual_add_included_button_tooltip = Pozwala ręcznie dodać foldery do skanowania
-upper_add_included_button_tooltip = Dodaje wybrany folder do przeskanowania
-upper_remove_included_button_tooltip = Usuwa zaznaczony folder z listy do przeskanowania
-upper_manual_add_excluded_button_tooltip = Pozwala ręcznie dodać foldery do ignorowania
-upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych
-upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych
+upper_manual_add_included_button_tooltip = Pozwala ręcznie dodać foldery do skanowania.
+upper_add_included_button_tooltip = Dodaje wybrany folder do przeskanowania.
+upper_remove_included_button_tooltip = Usuwa zaznaczony folder z listy do skanowania.
+upper_manual_add_excluded_button_tooltip = Pozwala ręcznie dodać ignorowane foldery.
+upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych.
+upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych.
 upper_notebook_items_configuration = Konfiguracja Skanowania
 upper_notebook_excluded_directories = Ignorowane Foldery
 upper_notebook_included_directories = Przeszukiwane Foldery
 upper_allowed_extensions_tooltip =
-    Dozwolone rozszerzenia muszą być oddzielone za pomocą przecinków - brak rozszerzeń oznacza ż wszystkie rozszerzenia są używane.
+    Dozwolone rozszerzenia muszą być oddzielone za pomocą przecinków - brak rozszerzeń oznacza że wszystkie rozszerzenia są używane.
     
-    Makra IMAGE, VIDEO, MUSIC, TEXT które dodają rozrzerzenia w paczkach, również są wspierane
+    Makra IMAGE, VIDEO, MUSIC, TEXT które dodają rozszerzenia w paczkach, również są wspierane.
     
-    Przykładowe użycie ".exe, IMAGE, VIDEO, .rar, 7z" oznacza że obrazy(np. jpg, png), widea(np. avi, mp4) oraz pliki z roszerzeniami exe, rar i 7z będą przeskanowane
+    Przykładowe użycie ".exe, IMAGE, VIDEO, .rar, 7z" oznacza że obrazy(np. jpg, png), widea(np. avi, mp4) oraz pliki z rozszerzeniami exe, rar i 7z będą przeskanowane.
 upper_excluded_items_tooltip =
     Ignorowane obiekty mogą zawierać *(oznaczający dowolny ciąg znaków) i muszą być oddzielone za pomocą przecinków.
     Działa o wiele wolniej niż Ignorowane Foldery, dlatego należy używać tego ostrożnie.
@@ -150,9 +150,9 @@ popover_custom_name_check_button_entry_tooltip =
 popover_custom_regex_check_button_entry_tooltip =
     Pozwala wyszukiwać rekordy za pomocą regexów.
     
-    W tym trybie przeszukiwanym tekstem jest pełna ścieżka(nazwa + ścieżka)
+    W tym trybie przeszukiwanym tekstem jest pełna ścieżka(nazwa pliku + ścieżka do niego).
     
-    Example usage:
+    Przykładowe użycie:
     /usr/bin/ziemniak.txt może zostać znalezione with /ziem[a-z]+
     
     Używana jest domyśla implementacja Rust regex o której użyciu można więcej przeczytać tutaj - https://docs.rs/regex.
@@ -251,13 +251,6 @@ settings_notebook_videos = Podobne Wideo
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Dozwolone rozszerzenia muszą być oddzielone za pomocą przecinków - brak rozszerzeń oznacza że wszystkie rozszerzenia są używane.
-    
-     Makra IMAGE, VIDEO, MUSIC, TEXT które dodają rozszerzenia w paczkach, również są wspierane
-    
-     Przykładowe użycie ". exe, Image, Video,. rar, 7z" oznacza że obrazy(np. jpg, png), widea(np. avi, mp4) oraz pliki z rozszerzeniami exe, rar i 7z będą przeskanowane.
 settings_multiple_image_preview_checkbutton_tooltip = Pokazuje podgląd obrazów po ich zaznaczeniu po prawej stronie aplikacji.
 settings_multiple_image_preview_checkbutton = Pokazuj podgląd obrazów
 settings_multiple_clear_cache_button_tooltip = Ręcznie czyści pamięć podręczną z nieaktualnych danych.
@@ -279,7 +272,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     Domyślnie jest zablokowane, ponieważ może powodować spowolnione skanowanie w niektórych sytuacjach.
     
     Jest mocno polecane osobom które skanują tylko i wyłącznie katalogi zawierające dziesiątki lub setki tysięcy lub nawet miliony plików, ponieważ może to wielokrotnie przyspieszyć proces skanowania.
-settings_duplicates_prehash_minimal_entry_tooltip = Minimalny rozmiar pliku, którego cząstowy hash będzie zapisywany do pamięci podręcznej.
+settings_duplicates_prehash_minimal_entry_tooltip = Minimalny rozmiar pliku, którego cząstkowy hash będzie zapisywany do pamięci podręcznej.
 settings_duplicates_hide_hard_link_button = Ukrywaj twarde dowiązania(nie działa na Windowsie)
 settings_duplicates_prehash_checkbutton = Używaj pamięci podręcznej dla hashy cząstkowych
 settings_duplicates_minimal_size_cache_label = Wielkość pliku, od którego hash będzie zapisywany w pamięci podręcznej
@@ -293,44 +286,40 @@ settings_reset_button_tooltip = Resetuje aktualne ustawienia do domyślnie używ
 settings_saving_button = Zapisanie ustawień
 settings_loading_button = Załadowanie ustawień
 settings_reset_button = Reset ustawień
-settings_load_orphan_data = Znaleziono dane bez wlaściciela w lini { $line_number } \"{ $line }\" podczas ładowania pliku { $name } (plik zapisu może pochodzić z innej wersji Czkawki)
-settings_load_invalid_bool_value = Znaleziono nieprawidłowe dane w linii { $line_number } \"{ $line }\" które nie są poprawną wartością binarną(0/1/true/false) w pliku { $name }
 
 ## Opening cache/config folders
 
 settings_folder_cache_open_tooltip =
     Otwiera folder gdzie przechowywana jest pamięć podręczna aplikacji.
     
-    Jej ręczne modyfikowanie może powodować wyświetlanie niepoprawnych wyników lub jej uszkodzenie spowoduje koniecznośc ponownej generacji, lecz umożliwia też oszczędzenie czasu przy przesuwaniu większej ilości plików.
+    Jej ręczne modyfikowanie może powodować wyświetlanie niepoprawnych wyników lub jej uszkodzenie spowoduje konieczność ponownej generacji, lecz umożliwia też oszczędzenie czasu przy przesuwaniu większej ilości plików.
     
     Można pliki kopiować pomiędzy komputerami by zaoszczędzić czas na hashowaniu plików(oczywiście tylko gdy dane są przechowywane w identycznej strukturze katalogów na komputerach).
 settings_folder_settings_open_tooltip =
     Otwiera folder gdzie Czkawka przechowuje ustawienia.
     
-    Ich ręczna zmiana, może spowodować różne błędy i kataklizmy, którym fiziologom się nie śniły.
+    Ich ręczna zmiana, może spowodować różne błędy i kataklizmy, o których fizjologom się nie śniło.
 settings_folder_cache_open = Otwórz folder pamięci podręcznej
 settings_folder_settings_open = Otwórz folder ustawień
 # Compute results
 compute_stopped_by_user = Przeszukiwanie zostało zatrzymane przez użytkownika
-compute_found = Znaleziono
-compute_duplicated_files_in = duplikatów w
-compute_groups_which_took = grupach, które zabrały
-compute_groups = grup
-compute_duplicates_for = duplikatów dla
-compute_empty_folders = pustych folderów
-compute_empty_files = pustych plików
-compute_biggest_files = największych plików
-compute_temporary_files = plików tymczasowych
-compute_similar_image = obrazów
-compute_similar_videos = plików wideo
-compute_music_files = plików muzycznych
-compute_symlinks = niepoprawnych linków symbolicznych
-compute_broken_files = zepsutych plików
+compute_found_duplicates_hash_size = Znaleziono { $number_files } duplikatów w { $number_groups } grupach, które zajmują { $size }
+compute_found_duplicates_name = Znaleziono { $number_files } duplikatów w { $number_groups } grupach
+compute_found_empty_folders = Znaleziono { $number_files } pustych folderów
+compute_found_empty_files = Znaleziono { $number_files } pustych plików
+compute_found_big_files = Znaleziono { $number_files } największych plików
+compute_found_temporary_files = Znaleziono { $number_files } tymczasowych plików
+compute_found_images = Znaleziono { $number_files } podobnych obrazów w { $number_groups } grupach
+compute_found_videos = Znaleziono { $number_files } podobnych plików wideo w { $number_groups } grupach
+compute_found_music = Znaleziono { $number_files } podobnych plików muzycznych w { $number_groups } grupach
+compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych dowiązań symbolicznych
+compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików
 # Progress window
 progress_scanning_general_file = Skanowanie { $file_number } pliku
 progress_scanning_broken_files = Sprawdzanie { $file_checked }/{ $all_files } pliku
 progress_scanning_video = Hashowanie { $file_checked }/{ $all_files } pliku wideo
 progress_scanning_image = Hashowanie { $file_checked }/{ $all_files } obrazu
+progress_comparing_image_hashes = Porównywanie { $file_checked }/{ $all_files } hashu obrazu
 progress_scanning_music_tags_end = Porównywanie tagów { $file_checked }/{ $all_files } pliku audio
 progress_scanning_music_tags = Sczytywanie tagów { $file_checked }/{ $all_files } pliku audio
 progress_scanning_empty_folders = Przeszukiwanie { $folder_number } folderu
@@ -341,9 +330,23 @@ progress_analyzed_full_hash = Obliczanie pełnego hashu { $file_checked }/{ $all
 progress_current_stage = Aktualny Etap:{ "  " }
 progress_all_stages = Wszystkie Etapy:{ "  " }
 # Saving loading 
-saving_loading_saving_success = Zapisano konfigurację do pliku
+saving_loading_saving_success = Zapisano konfigurację do pliku { $name }.
+saving_loading_saving_failure = Nie udało zapisać się konfiguracji do pliku { $name }.
 saving_loading_reset_configuration = Przywrócono domyślą konfigurację.
-saving_loading_loading_success = Poprawnie załadowano konfigurację z pliku
+saving_loading_loading_success = Poprawnie załadowano ustawienia aplikacji.
+saving_loading_invalid_string = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest jedno-liniowym ciągiem znaków.
+saving_loading_invalid_int = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest liczbą całkowitą.
+saving_loading_invalid_bool = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest typem logicznym.
+saving_loading_decode_problem_bool = Nie udało się zdekodować wartości z klucza "{ $key }", znaleziono "{ $result }" ale dozwolone wartości to 0, 1, true lub false.
+saving_loading_saving_same_keys = Próba zapisania ustawień z zduplikowanym kluczem "{ $key }".
+saving_loading_failed_to_get_home_directory = Nie udało się pobrać informacji o katalogu domowym by otworzyć i zapisać plik konfiguracyjny.
+saving_loading_folder_config_instead_file = Nie można utworzyć lub otworzyć pliku konfiguracyjnego w ścieżce "{ $path }", ponieważ w danej ścieżce istnieje już folder.
+saving_loading_failed_to_create_configuration_folder = Nie udało się utworzyć folderu konfiguracyjnego "{ $path }", powód "{ $reason }".
+saving_loading_failed_to_create_config_file = Nie udało się utworzyć pliku konfiguracyjnego "{ $path }", powód "{ $reason }".
+saving_loading_failed_to_read_config_file = Nie można załadować konfiguracji z "{ $path }" ponieważ nie istnieje lub nie jest plikiem.
+saving_loading_failed_to_read_data_from_file = Nie można odczytać danych z pliku "{ $path }", powód "{ $reason }".
+saving_loading_orphan_data = Znaleziono osierocone dane "{ $data }" w wierszu "{ $line }".
+saving_loading_not_valid = Ustawienie "{ $data }" nie istnieje w bieżącej wersji aplikacji.
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Nieskończona rekurencja
 invalid_symlink_non_existent_destination = Nie istniejący docelowy plik
@@ -359,44 +362,43 @@ about_window_motto =
     ale za to przynajmniej kod jest nieczytelny.
 # Various dialog
 dialogs_ask_next_time = Pytaj następnym razem
-reason_of_error = powód
 delete_file_failed = Nie udało się usunąć pliku { $name }, powód { $reason }
 delete_title_dialog = Potwierdzenie usunięcia
 delete_question_label = Czy na pewno usunąć te pliki?
 delete_all_files_in_group_title = Potwierdzenie usunięcia wszystkich plików w grupie
 delete_all_files_in_group_label1 = W niektórych grupach zaznaczono wszystkie rekordy.
 delete_all_files_in_group_label2 = Czy na pewno je usunąć?
-delete_folder_failed = Nie udało się usunąć folderu { $name } ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
-delete_items_label = { $items } plików zostanie usuniętych.
+delete_folder_failed = Nie udało się usunąć folderu { $dir } ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
+delete_items_label = { $items } plików będzie usuniętych.
 delete_items_groups_label = { $items } plików z { $groups } grup będzie usuniętych.
 hardlink_failed = Nie udało się utworzyć twardego dowiązania
 hard_sym_invalid_selection_title_dialog = Niepoprawne zaznaczenie w niektórych grupach
-hard_sym_invalid_selection_label_1 = W niektórych grupach zaznaczono tylko 1 rekord który zostanie zignorowany.
+hard_sym_invalid_selection_label_1 = W niektórych grupach zaznaczono tylko 1 rekord, który zostanie zignorowany.
 hard_sym_invalid_selection_label_2 = Aby móc używać dowiązań, należy zaznaczyć przynajmniej 2 obiekty w danej grupie.
 hard_sym_invalid_selection_label_3 = Pierwszy pozostaje nienaruszony a drugi i kolejne są dowiązywane do tego pierwszego.
 hard_sym_link_title_dialog = Potwierdzenie dowiązania
 hard_sym_link_label = Czy na pewno dowiązać te pliki?
 move_folder_failed = Nie można przenieść folderu { $name }, powód { $reason }
 move_file_failed = Nie można przenieść pliku { $name }, powód { $reason }
-move_files_title_dialog = Wybierz folder do którego zostaną przeniesione pliki
-move_files_choose_more_than_1_path = Można przenieść elementy tylko do 1 folderu, zaznaczono { $path_number }
+move_files_title_dialog = Wybierz folder, do którego zostaną przeniesione pliki
+move_files_choose_more_than_1_path = Można przenieść elementy tylko do 1 folderu, zaznaczono { $path_number }.
 move_stats = Poprawnie przeniesiono { $num_files }/{ $all_files } elementów
 save_results_to_file = Zapisano wyniki do pliku { $name }
 search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
 include_folders_dialog_title = Foldery do przeszukiwania
 exclude_folders_dialog_title = Foldery do ignorowania
 include_manually_directories_dialog_title = Dodaj katalogi ręcznie
-cache_properly_cleared = Poprawnie wyczyszczono pamięc podręczną
+cache_properly_cleared = Poprawnie wyczyszczono pamięć podręczną
 cache_clear_duplicates_title = Czyszczenie pamięci podręcznej duplikatów
 cache_clear_similar_images_title = Czyszczenie pamięci podręcznej podobnych obrazów
-cache_clear_similar_videos_title = Czyszczenie pamięci podręcznej podobnych plików Wideo
+cache_clear_similar_videos_title = Czyszczenie pamięci podręcznej podobnych plików wideo
 cache_clear_message_label_1 = Czy na pewno chcesz oczyścić pamięć podręczną z przestarzałych wpisów?
 cache_clear_message_label_2 = Ta operacja usunie wszystkie rekordy, które wskazują na nieistniejące pliki.
 cache_clear_message_label_3 = Może spowodować to przyspieszenie ładowania i zapisywania danych do pamięci w trakcie skanowania.
 cache_clear_message_label_4 = OSTRZEŻENIE: Usunięte zostaną wszystkie rekordy z odpiętych dyskach zewnętrznych i konieczne będzie ich ponowne sprawdzenie po podpięciu.
 # Show preview
-preview_temporary_file = Nie udało się otworzyć tymczasowego obrazu { $name }, powód { $reason }
-preview_0_size = Nie można stworzyć podglądu obrazu { $name }, z wysokością lub szerokością 0 pikseli
-preview_temporary_image_save = Nie udało się zapisać tymczasowego obrazu do { $name }, powód { $reason }
-preview_temporary_image_remove = Nie udało się usunąć tymczasowego obrazu { $name }, powód { $reason }
-preview_failed_to_create_cache_dir = Nie udało stworzyć się katalogu { $name } wymaganego do stworzenia podglądu obrazu, powód { $reason }
+preview_temporary_file = Nie udało się otworzyć tymczasowego obrazu { $name }, powód { $reason }.
+preview_0_size = Nie można stworzyć podglądu obrazu { $name }, z wysokością lub szerokością 0 pikseli.
+preview_temporary_image_save = Nie udało się zapisać tymczasowego obrazu do { $name }, powód { $reason }.
+preview_temporary_image_remove = Nie udało się usunąć tymczasowego obrazu { $name }, powód { $reason }.
+preview_failed_to_create_cache_dir = Nie udało stworzyć się katalogu { $name } wymaganego do stworzenia podglądu obrazu, powód { $reason }.

@@ -11,7 +11,7 @@
 - CLI frontend - for easy automation
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
-- Multilingual - app support multiple languages
+- Multilingual - support multiple languages like Polish, English or Italian
 - Multiple tools to use:
   - Duplicates - Finds duplicates based on file name, size or hash
   - Empty Folders - Finds empty folders with the help of an advanced algorithm
@@ -50,12 +50,12 @@ I set the minimal file size to check to 1KB on all programs.
 
 | App                         | Executing Time |
 |:---------------------------:|:--------------:|
-| FSlint 2.4.7 (First Run)    | 86s            |
-| FSlint 2.4.7 (Second Run)   | 43s            |
-| Czkawka 3.0.0 (First Run)   | 8s             |
-| Czkawka 3.0.0 (Second Run)  | 7s             |
-| DupeGuru 4.1.1 (First Run)  | 22s            |
-| DupeGuru 4.1.1 (Second Run) | 21s            |
+| FSlint 2.4.7 (First Run)    |      86s       |
+| FSlint 2.4.7 (Second Run)   |      43s       |
+| Czkawka 3.0.0 (First Run)   |       8s       |
+| Czkawka 3.0.0 (Second Run)  |       7s       |
+| DupeGuru 4.1.1 (First Run)  |      22s       |
+| DupeGuru 4.1.1 (Second Run) |      21s       |
 
 I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for Czkawka.
 
@@ -91,31 +91,31 @@ Similar images which check 349 image files that occupied 1.7 GB
 
 Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these two apps shouldn't be compared directly or be considered as an alternative to one another.
 
-|                        |   Czkawka   | FSlint     | DupeGuru          | Bleachbit   |
+|                        |   Czkawka   |   FSlint   |     DupeGuru      |  Bleachbit  |
 |:----------------------:|:-----------:|:----------:|:-----------------:|:-----------:|
-| Language               |    Rust     | Python     | Python/Obj-C      | Python      |
-| OS                     | Lin,Mac,Win | Lin        | Lin,Mac,Win       | Lin,Mac,Win |
-| Framework              |    GTK 3    | PyGTK2     | Qt 5 (PyQt)/Cocoa | PyGTK3      |
-| Duplicate finder       |      •      | •          | •                 |             |
-| Empty files            |      •      | •          |                   |             |
-| Empty folders          |      •      | •          |                   |             |
-| Temporary files        |      •      | •          |                   | •           |
-| Big files              |      •      |            |                   |             |
-| Similar images         |      •      |            | •                 |             |
-| Similar videos         |      •      |            |                   |             |
-| Music duplicates(tags) |      •      |            | •                 |             |
-| Invalid symlinks       |      •      | •          |                   |             |
-| Broken files           |      •      |            |                   |             |
-| Names conflict         |      •      | •          |                   |             |
-| Installed packages     |             | •          |                   |             |
-| Invalid names          |             | •          |                   |             |
-| Bad ID                 |             | •          |                   |             |
-| Non stripped binaries  |             | •          |                   |             |
-| Redundant whitespace   |             | •          |                   |             |
-| Overwriting files      |             | •          |                   | •           |
-| Multiple languages(po) |     •       | •          | •                 |      •      |
-| Cache support          |      •      |            | •                 |             |
-| In active development  |     Yes     | No         | Yes               | Yes         |
+|        Language        |    Rust     |   Python   |   Python/Obj-C    |   Python    |
+|           OS           | Lin,Mac,Win |    Lin     |    Lin,Mac,Win    | Lin,Mac,Win |
+|       Framework        |    GTK 3    |   PyGTK2   | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
+|    Duplicate finder    |      •      |     •      |         •         |             |
+|      Empty files       |      •      |     •      |                   |             |
+|     Empty folders      |      •      |     •      |                   |             |
+|    Temporary files     |      •      |     •      |                   |      •      |
+|       Big files        |      •      |            |                   |             |
+|     Similar images     |      •      |            |         •         |             |
+|     Similar videos     |      •      |            |                   |             |
+| Music duplicates(tags) |      •      |            |         •         |             |
+|    Invalid symlinks    |      •      |     •      |                   |             |
+|      Broken files      |      •      |            |                   |             |
+|     Names conflict     |      •      |     •      |                   |             |
+|   Installed packages   |             |     •      |                   |             |
+|     Invalid names      |             |     •      |                   |             |
+|         Bad ID         |             |     •      |                   |             |
+| Non stripped binaries  |             |     •      |                   |             |
+|  Redundant whitespace  |             |     •      |                   |             |
+|   Overwriting files    |             |     •      |                   |      •      |
+|   Multiple languages   |      •      |     •      |         •         |      •      |
+|     Cache support      |      •      |            |         •         |             |
+| In active development  |     Yes     |     No     |        Yes        |     Yes     |
 
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.

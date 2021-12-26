@@ -26,3 +26,10 @@ apps:
       - home
       - removable-media
       - udisks2
+    slots:
+      - dbus-daemon
+slots:
+  dbus-daemon:
+    interface: dbus
+    bus: session
+    name: pl.qarmin.czkawka

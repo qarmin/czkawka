@@ -72,6 +72,7 @@ pub fn connect_button_search(
     let entry_settings_prehash_cache_file_minimal_size = gui_data.settings.entry_settings_prehash_cache_file_minimal_size.clone();
     let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
+    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
     let label_stage = gui_data.progress_window.label_stage.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
@@ -102,14 +103,22 @@ pub fn connect_button_search(
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
-        let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories));
-        let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories));
+        let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
+        let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None));
+        let reference_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(
+            &tree_view_included_directories,
+            ColumnsIncludedDirectory::Path as i32,
+            Some(ColumnsIncludedDirectory::ReferenceButton as i32),
+        ));
         let recursive_search = check_button_recursive.is_active();
         let excluded_items = entry_excluded_items.text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.is_active();
         let use_cache = check_button_settings_use_cache.is_active();
         let minimal_cache_file_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 / 4);
+
+        let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
+        let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 
@@ -133,6 +142,8 @@ pub fn connect_button_search(
 
         match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
+                image_preview_duplicates.hide();
+
                 label_stage.show();
                 grid_progress_stages.show_all();
                 window_progress.resize(1, 1);
@@ -145,9 +156,6 @@ pub fn connect_button_search(
                 let hash_type_index = combo_box_duplicate_hash_type.active().unwrap() as usize;
                 let hash_type = DUPLICATES_HASH_TYPE_COMBO_BOX[hash_type_index].hash_type;
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
-
                 let use_prehash_cache = check_button_duplicates_use_prehash_cache.is_active();
                 let minimal_prehash_cache_file_size = entry_settings_prehash_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(0);
 
@@ -159,6 +167,7 @@ pub fn connect_button_search(
                     let mut df = DuplicateFinder::new();
                     df.set_included_directory(included_directories);
                     df.set_excluded_directory(excluded_directories);
+                    df.set_reference_directory(reference_directories);
                     df.set_recursive_search(recursive_search);
                     df.set_excluded_items(excluded_items);
                     df.set_allowed_extensions(allowed_extensions);
@@ -277,9 +286,6 @@ pub fn connect_button_search(
                 let hash_alg_index = combo_box_image_hash_algorithm.active().unwrap() as usize;
                 let hash_alg = IMAGES_HASH_TYPE_COMBO_BOX[hash_alg_index].hash_alg;
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
-
                 let ignore_same_size = check_button_image_ignore_same_size.is_active();
 
                 let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
@@ -293,6 +299,7 @@ pub fn connect_button_search(
 
                     sf.set_included_directory(included_directories);
                     sf.set_excluded_directory(excluded_directories);
+                    sf.set_reference_directory(reference_directories);
                     sf.set_recursive_search(recursive_search);
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
@@ -316,9 +323,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_similar_videos_finder).clear();
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 16);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
-
                 let tolerance = scale_similarity_similar_videos.value() as i32;
 
                 let delete_outdated_cache = check_button_settings_similar_videos_delete_outdated_cache.is_active();
@@ -332,6 +336,7 @@ pub fn connect_button_search(
 
                     sf.set_included_directory(included_directories);
                     sf.set_excluded_directory(excluded_directories);
+                    sf.set_reference_directory(reference_directories);
                     sf.set_recursive_search(recursive_search);
                     sf.set_excluded_items(excluded_items);
                     sf.set_minimal_file_size(minimal_file_size);
@@ -352,8 +357,6 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
-                let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-                let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
                 let approximate_comparison = check_button_music_approximate_comparison.is_active();
 
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
@@ -382,6 +385,7 @@ pub fn connect_button_search(
 
                         mf.set_included_directory(included_directories);
                         mf.set_excluded_directory(excluded_directories);
+                        mf.set_reference_directory(reference_directories);
                         mf.set_excluded_items(excluded_items);
                         mf.set_minimal_file_size(minimal_file_size);
                         mf.set_maximal_file_size(maximal_file_size);
