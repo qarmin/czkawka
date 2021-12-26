@@ -1,6 +1,7 @@
 use img_hash::{FilterType, HashAlg};
 
-use czkawka_core::duplicate::{CheckingMethod, HashType};
+use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::duplicate::HashType;
 
 pub struct HashTypeStruct {
     pub eng_name: &'static str,

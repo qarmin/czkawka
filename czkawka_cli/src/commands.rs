@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use img_hash::{FilterType, HashAlg};
 use structopt::StructOpt;
 
-use czkawka_core::duplicate::{CheckingMethod, DeleteMethod, HashType};
+use czkawka_core::duplicate::{DeleteMethod, HashType};
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
 

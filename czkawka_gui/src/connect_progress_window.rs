@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use gtk::prelude::*;
 
-use czkawka_core::{big_file, broken_files, duplicate, empty_files, empty_folder, invalid_symlinks, same_music, similar_images, similar_videos, temporary};
+use czkawka_core::{big_file, broken_files, empty_folder, same_music, similar_images, similar_videos, temporary, common_dir_traversal};
 
 use crate::fl;
 use crate::gui_data::GuiData;
@@ -11,15 +11,15 @@ use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(
     gui_data: &GuiData,
-    mut futures_receiver_duplicate_files: futures::channel::mpsc::UnboundedReceiver<duplicate::ProgressData>,
-    mut futures_receiver_empty_files: futures::channel::mpsc::UnboundedReceiver<empty_files::ProgressData>,
+    mut futures_receiver_duplicate_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_empty_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_empty_folder: futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>,
     mut futures_receiver_big_files: futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
     mut futures_receiver_same_music: futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>,
     mut futures_receiver_similar_images: futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
     mut futures_receiver_similar_videos: futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
     mut futures_receiver_temporary: futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
-    mut futures_receiver_invalid_symlinks: futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>,
+    mut futures_receiver_invalid_symlinks: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
@@ -35,7 +35,7 @@ pub fn connect_progress_window(
         let future = async move {
             while let Some(item) = futures_receiver_duplicate_files.next().await {
                 match item.checking_method {
-                    duplicate::CheckingMethod::Hash => {
+                    common_dir_traversal::CheckingMethod::Hash => {
                         label_stage.show();
                         match item.current_stage {
                             // Checking Size
@@ -45,7 +45,7 @@ pub fn connect_progress_window(
                                 progress_bar_all_stages.set_fraction(0 as f64);
                                 label_stage.set_text(&fl!(
                                     "progress_scanning_size",
-                                    generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])
+                                    generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
                                 ));
                                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                             }
@@ -53,12 +53,12 @@ pub fn connect_progress_window(
                             1 => {
                                 progress_bar_current_stage.show();
                                 // progress_bar_all_stages.show();
-                                if item.files_to_check != 0 {
-                                    progress_bar_all_stages.set_fraction((1f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
-                                    progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                                if item.entries_to_check != 0 {
+                                    progress_bar_all_stages.set_fraction((1f64 + (item.entries_to_check) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction((item.entries_to_check) as f64 / item.entries_to_check as f64);
                                     taskbar_state
                                         .borrow()
-                                        .set_progress_value((item.files_to_check + item.files_checked) as u64, item.files_to_check as u64 * (item.max_stage + 1) as u64);
+                                        .set_progress_value((item.entries_to_check + item.entries_to_check) as u64, item.entries_to_check as u64 * (item.max_stage + 1) as u64);
                                 } else {
                                     progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
                                     progress_bar_current_stage.set_fraction(0f64);
@@ -67,17 +67,17 @@ pub fn connect_progress_window(
 
                                 label_stage.set_text(&fl!(
                                     "progress_analyzed_partial_hash",
-                                    generate_translation_hashmap(vec![("file_checked", item.files_checked.to_string()), ("all_files", item.files_to_check.to_string())])
+                                    generate_translation_hashmap(vec![("file_checked", item.entries_to_check.to_string()), ("all_files", item.entries_to_check.to_string())])
                                 ));
                             }
                             // Hash - normal hash
                             2 => {
-                                if item.files_to_check != 0 {
-                                    progress_bar_all_stages.set_fraction((2f64 + (item.files_checked) as f64 / item.files_to_check as f64) / (item.max_stage + 1) as f64);
-                                    progress_bar_current_stage.set_fraction((item.files_checked) as f64 / item.files_to_check as f64);
+                                if item.entries_to_check != 0 {
+                                    progress_bar_all_stages.set_fraction((2f64 + (item.entries_to_check) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction((item.entries_to_check) as f64 / item.entries_to_check as f64);
                                     taskbar_state.borrow().set_progress_value(
-                                        (2 * item.files_to_check + item.files_checked) as u64,
-                                        item.files_to_check as u64 * (item.max_stage + 1) as u64,
+                                        (2 * item.entries_to_check + item.entries_to_check) as u64,
+                                        item.entries_to_check as u64 * (item.max_stage + 1) as u64,
                                     );
                                 } else {
                                     progress_bar_all_stages.set_fraction((2f64) / (item.max_stage + 1) as f64);
@@ -87,7 +87,7 @@ pub fn connect_progress_window(
 
                                 label_stage.set_text(&fl!(
                                     "progress_analyzed_full_hash",
-                                    generate_translation_hashmap(vec![("file_checked", item.files_checked.to_string()), ("all_files", item.files_to_check.to_string())])
+                                    generate_translation_hashmap(vec![("file_checked", item.entries_to_check.to_string()), ("all_files", item.entries_to_check.to_string())])
                                 ));
                             }
                             _ => {
@@ -95,27 +95,27 @@ pub fn connect_progress_window(
                             }
                         }
                     }
-                    duplicate::CheckingMethod::Name => {
+                    common_dir_traversal::CheckingMethod::Name => {
                         label_stage.show();
                         grid_progress_stages.hide();
 
                         label_stage.set_text(&fl!(
                             "progress_scanning_name",
-                            generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])
+                            generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
                         ));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
-                    duplicate::CheckingMethod::Size => {
+                    common_dir_traversal::CheckingMethod::Size => {
                         label_stage.show();
                         grid_progress_stages.hide();
 
                         label_stage.set_text(&fl!(
                             "progress_scanning_size",
-                            generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])
+                            generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
                         ));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
-                    duplicate::CheckingMethod::None => {
+                    common_dir_traversal::CheckingMethod::None => {
                         panic!();
                     }
                 };
@@ -131,7 +131,7 @@ pub fn connect_progress_window(
             while let Some(item) = futures_receiver_empty_files.next().await {
                 label_stage.set_text(&fl!(
                     "progress_scanning_general_file",
-                    generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])
+                    generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
                 ));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
@@ -359,7 +359,7 @@ pub fn connect_progress_window(
             while let Some(item) = futures_receiver_invalid_symlinks.next().await {
                 label_stage.set_text(&fl!(
                     "progress_scanning_general_file",
-                    generate_translation_hashmap(vec![("file_number", item.files_checked.to_string())])
+                    generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
                 ));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }

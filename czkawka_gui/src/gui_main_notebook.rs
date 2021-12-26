@@ -1,4 +1,4 @@
-use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use gtk::prelude::*;
 use gtk::{EventControllerKey, TreeView};
 

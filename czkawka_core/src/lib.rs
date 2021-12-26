@@ -18,6 +18,7 @@ pub mod common_extensions;
 pub mod common_items;
 pub mod common_messages;
 pub mod common_traits;
+pub mod common_dir_traversal;
 pub mod localizer;
 
 pub const CZKAWKA_VERSION: &str = env!("CARGO_PKG_VERSION");
