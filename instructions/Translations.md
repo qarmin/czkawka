@@ -91,3 +91,7 @@ Unused keyword - duplicate_mode_hash_checkbox_tooltip
 `Unused keyword` means that keyword is no longer used. It can be renamed or entirely removed from file.
 
 When script will not print anything except "Checking language", then this means that translation file have exactly same keys as base one.
+
+# Computer Translations
+Some languages in settings, will have annotation that were created by computers.  
+Such translations will have a lot of errors, so manual checking of each string is required.

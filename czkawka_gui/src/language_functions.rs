@@ -5,7 +5,7 @@ pub struct Language {
 }
 
 /// Languages should be alphabetically sorted
-pub const LANGUAGES_ALL: [Language; 3] = [
+pub const LANGUAGES_ALL: [Language; 4] = [
     Language {
         combo_box_text: "English",
         short_text: "en",
@@ -17,6 +17,10 @@ pub const LANGUAGES_ALL: [Language; 3] = [
     Language {
         combo_box_text: "Polski (Polish)",
         short_text: "pl",
+    },
+    Language {
+        combo_box_text: "Deutsch (German) - Computer translation",
+        short_text: "de",
     },
 ];
 
