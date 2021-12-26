@@ -243,10 +243,12 @@ progress_stop_button = Ferma
 about_repository_button_tooltip = Collegamento alla pagina del codice sorgente nell'archivio.
 about_donation_button_tooltip = Collegamento alla pagina delle donazioni.
 about_instruction_button_tooltip = Colegamento alla pagina delle istruzioni.
+about_translation_button_tooltip = Link alla pagina di Crowdin con le traduzioni delle app. Ufficialmente sono supportati il polacco e l'inglese, ma qualsiasi aiuto con altre lingue sarà apprezzato.
 
 about_repository_button = Archivio
 about_donation_button = Donazioni
 about_instruction_button = Istruzioni
+about_translation_button = Traduzione
 
 # Header
 header_setting_button_tooltip = Apre la finestra impostazioni.

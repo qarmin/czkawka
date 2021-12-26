@@ -5,6 +5,7 @@ use crate::gui_data::GuiData;
 const SPONSOR_SITE: &str = "https://github.com/sponsors/qarmin";
 const REPOSITORY_SITE: &str = "https://github.com/qarmin/czkawka";
 const INSTRUCTION_SITE: &str = "https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md";
+const TRANSLATION_SITE: &str = "https://crwd.in/czkawka";
 
 pub fn connect_about_buttons(gui_data: &GuiData) {
     let button_donation = gui_data.about.button_donation.clone();
@@ -29,6 +30,14 @@ pub fn connect_about_buttons(gui_data: &GuiData) {
         open::that_in_background(REPOSITORY_SITE);
         // if let Err(e) = open::that(REPOSITORY_SITE) {
         //     println!("Failed to open repository site: {}, reason {}", REPOSITORY_SITE, e)
+        // };
+    });
+
+    let button_translation = gui_data.about.button_translation.clone();
+    button_translation.connect_clicked(move |_| {
+        open::that_in_background(TRANSLATION_SITE);
+        // if let Err(e) = open::that(TRANSLATION_SITE) {
+        //     println!("Failed to open repository site: {}, reason {}", TRANSLATION_SITE, e)
         // };
     });
 }
