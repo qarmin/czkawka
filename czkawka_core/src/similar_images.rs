@@ -666,6 +666,14 @@ impl SimilarImages {
                     continue;
                 }
 
+                // This shouldn't be executed too much times, so it should be quite fast to check this
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    // End thread which send info to gui
+                    progress_thread_run.store(false, Ordering::Relaxed);
+                    progress_thread_handle.join().unwrap();
+                    return false;
+                }
+
                 // Jeśli jeszcze nie dodał, to dodaje teraz grupę główną do już obrobionych
                 if !master_of_group.contains(hash) {
                     master_of_group.insert(hash.clone());

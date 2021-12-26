@@ -24,9 +24,6 @@ window_progress_title = Scanning
 general_ok_button = Ok
 general_close_button = Close
 
-general_bytes = bytes
-general_lost = lost
-
 # Main window
 music_title_checkbox = Title
 music_artist_checkbox = Artist
@@ -340,10 +337,6 @@ settings_saving_button = Save configuration
 settings_loading_button = Load configuration
 settings_reset_button = Reset configuration
 
-settings_load_orphan_data = Found invalid header in line {$line_number} \"{$line}\" when loading file {$name} (save file may be from different Czkawka version)
-settings_load_invalid_bool_value = Found invalid header in line {$line_number} \"{$line}\" which isn't proper value(0/1/true/false) when loading file {$name}
-
-
 ## Opening cache/config folders
 settings_folder_cache_open_tooltip = 
         Opens folder where are stored txt files with cache.
@@ -399,9 +392,23 @@ progress_all_stages = All Stages:{"  "}
 saving_loading_saving_success = Saved configuration to file { $name }.
 saving_loading_saving_failure = Failed to save configuration data to file { $name }.
 saving_loading_reset_configuration = Current configuration was cleared.
-saving_loading_loading_success = Properly loaded configuration from file.
+saving_loading_loading_success = Properly loaded app configuration.
+
+saving_loading_invalid_string = For key "{ $key }" found invalid result - "{ $result }" which is not a string.
+saving_loading_invalid_int = For key "{ $key }" found invalid result - "{ $result }" which is not a integer.
+saving_loading_invalid_bool = For key "{ $key }" found invalid result - "{ $result }" which is not a bool.
+saving_loading_decode_problem_bool = Failed to decode bool from key "{ $key }" found "{ $result }" but allowed values are 0, 1, true or false.
+saving_loading_saving_same_keys = Trying to save setting with duplicated key "{ $key }".
 
 saving_loading_failed_to_get_home_directory = Failed to get home directory to open/save config file.
+saving_loading_folder_config_instead_file = Cannot create or open save configuration file in path "{ $path }" because already there is a folder.
+saving_loading_failed_to_create_configuration_folder = Failed configuration to create configuration folder "{ $path }", reason "{ $reason }".
+saving_loading_failed_to_create_config_file = Failed to create config file "{ $path }", reason "{ $reason }".
+saving_loading_failed_to_read_config_file = Cannot load configuration from "{ $path }" because not exists or is not a file.
+saving_loading_failed_to_read_data_from_file = Cannot read data from file "{ $path }", reason "{ $reason }".
+saving_loading_orphan_data = Found orphan data "{ $data }" in line "{ $line }".
+saving_loading_not_valid = Setting "{ $data }" not exists in current app version.
+
 
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Infinite recursion
@@ -416,7 +423,6 @@ about_window_motto = This program is free to use and will always be.
 
 # Various dialog
 dialogs_ask_next_time = Ask next time
-reason_of_error = reason
 
 delete_file_failed = Failed to remove file {$name}, reason {$reason}
 

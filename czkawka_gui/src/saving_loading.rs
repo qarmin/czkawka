@@ -38,11 +38,15 @@ const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 
 struct LoadSaveStruct {
     loaded_items: HashMap<String, Vec<String>>,
+    text_view: gtk::TextView,
 }
 
 impl LoadSaveStruct {
-    pub fn new() -> Self {
-        Self { loaded_items: Default::default() }
+    pub fn with_text_view(text_view: gtk::TextView) -> Self {
+        Self {
+            loaded_items: Default::default(),
+            text_view,
+        }
     }
 
     pub fn get_vector_string(&self, key: String, default_value: Vec<String>) -> Vec<String> {
@@ -66,7 +70,13 @@ impl LoadSaveStruct {
             } else if item.is_empty() {
                 "".to_string()
             } else {
-                println!("For key {}, found invalid {:?} result(not string)", key, item);
+                add_text_to_text_view(
+                    &self.text_view,
+                    &fl!(
+                        "saving_loading_invalid_string",
+                        generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
+                    ),
+                );
                 default_value
             };
         }
@@ -86,7 +96,13 @@ impl LoadSaveStruct {
                     }
                 }
             } else {
-                println!("For key {}, found invalid {:?} result(not string)", key, item);
+                add_text_to_text_view(
+                    &self.text_view,
+                    &fl!(
+                        "saving_loading_invalid_int",
+                        generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
+                    ),
+                );
                 default_value
             };
         }
@@ -103,11 +119,23 @@ impl LoadSaveStruct {
                 } else if text == "true" || text == "1" {
                     true
                 } else {
-                    println!("Failed to decode bool from \"{}\", found {}", key, item[0]);
+                    add_text_to_text_view(
+                        &self.text_view,
+                        &fl!(
+                            "saving_loading_decode_problem_bool",
+                            generate_translation_hashmap(vec![("key", key), ("result", item[0].to_string())])
+                        ),
+                    );
                     default_value
                 }
             } else {
-                println!("For key {}, found invalid {:?} result(not bool)", key, item);
+                add_text_to_text_view(
+                    &self.text_view,
+                    &fl!(
+                        "saving_loading_invalid_bool",
+                        generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
+                    ),
+                );
                 default_value
             };
         }
@@ -118,7 +146,10 @@ impl LoadSaveStruct {
     // Bool, int, string
     pub fn save_var<T: ToString>(&mut self, key: String, value: T) {
         if self.loaded_items.contains_key(&key) {
-            println!("Already exists in hashmap key {}", key)
+            add_text_to_text_view(
+                &self.text_view,
+                &fl!("saving_loading_saving_same_keys", generate_translation_hashmap(vec![("key", key.clone())])),
+            );
         }
 
         self.loaded_items.insert(key, vec![value.to_string()]);
@@ -153,18 +184,20 @@ impl LoadSaveStruct {
                     if !config_dir.is_dir() {
                         add_text_to_text_view(
                             text_view_errors,
-                            format!(
-                                "Cannot create or open save configuration file in path {} because already there is a folder.",
-                                config_dir.display()
-                            )
-                            .as_str(),
+                            &fl!(
+                                "saving_loading_folder_config_instead_file",
+                                generate_translation_hashmap(vec![("path", config_dir.display().to_string())])
+                            ),
                         );
                         return None;
                     }
                 } else if let Err(e) = fs::create_dir_all(config_dir) {
                     add_text_to_text_view(
                         text_view_errors,
-                        format!("Failed configuration to create configuration folder {}, reason {}", config_dir.display(), e).as_str(),
+                        &fl!(
+                            "saving_loading_failed_to_create_configuration_folder",
+                            generate_translation_hashmap(vec![("path", config_dir.display().to_string()), ("reason", e.to_string())])
+                        ),
                     );
                     return None;
                 }
@@ -172,7 +205,13 @@ impl LoadSaveStruct {
                 let config_file_handler = match File::create(&config_file) {
                     Ok(t) => t,
                     Err(e) => {
-                        add_text_to_text_view(text_view_errors, format!("Failed to create config file {}, reason {}", config_dir.display(), e).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            &fl!(
+                                "saving_loading_failed_to_create_config_file",
+                                generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                            ),
+                        );
                         return None;
                     }
                 };
@@ -181,7 +220,13 @@ impl LoadSaveStruct {
                 if !config_file.exists() || !config_file.is_file() {
                     if manual_execution {
                         // Don't show errors when there is no configuration file when starting app
-                        add_text_to_text_view(text_view_errors, format!("Cannot load configuration from file {:?}.", config_file.display()).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            &fl!(
+                                "saving_loading_failed_to_read_config_file",
+                                generate_translation_hashmap(vec![("path", config_file.display().to_string())])
+                            ),
+                        );
                     }
                     return None;
                 }
@@ -189,7 +234,13 @@ impl LoadSaveStruct {
                 let config_file_handler = match File::open(&config_file) {
                     Ok(t) => t,
                     Err(e) => {
-                        add_text_to_text_view(text_view_errors, format!("Failed to create config file {}, reason {}", config_dir.display(), e).as_str());
+                        add_text_to_text_view(
+                            text_view_errors,
+                            &fl!(
+                                "saving_loading_failed_to_create_config_file",
+                                generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                            ),
+                        );
                         return None;
                     }
                 };
@@ -205,7 +256,13 @@ impl LoadSaveStruct {
         if let Some((mut config_file_handler, config_file)) = self.open_save_file(text_view_errors, false, manual_execution) {
             let mut loaded_data: String = String::new();
             if let Err(e) = config_file_handler.read_to_string(&mut loaded_data) {
-                add_text_to_text_view(text_view_errors, format!("Failed to read data from file {:?}, reason {}", config_file, e).as_str());
+                add_text_to_text_view(
+                    text_view_errors,
+                    &fl!(
+                        "saving_loading_failed_to_read_data_from_file",
+                        generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                    ),
+                );
                 return;
             }
 
@@ -219,18 +276,29 @@ impl LoadSaveStruct {
                     self.loaded_items.entry(header.clone()).or_insert_with(Vec::new);
                     self.loaded_items.get_mut(&header).unwrap().push(line.to_string());
                 } else {
-                    println!("Failed {} orphan data in line {}", line, index);
+                    add_text_to_text_view(
+                        text_view_errors,
+                        &fl!(
+                            "saving_loading_orphan_data",
+                            generate_translation_hashmap(vec![("data", line.to_string()), ("index", index.to_string())])
+                        ),
+                    );
                 }
             }
 
             let (_, hashmap_sl) = create_hash_map();
             for setting in self.loaded_items.keys() {
                 if !hashmap_sl.contains_key(setting) {
-                    println!("Setting {} is not valid", setting);
+                    add_text_to_text_view(
+                        text_view_errors,
+                        &fl!("saving_loading_not_valid", generate_translation_hashmap(vec![("data", setting.to_string())])),
+                    );
                 }
             }
 
-            // dbg!(&self.loaded_items);
+            if manual_execution {
+                add_text_to_text_view(text_view_errors, &fl!("saving_loading_loading_success"));
+            }
         }
     }
 
@@ -353,7 +421,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         return;
     }
 
-    let mut saving_struct = LoadSaveStruct::new();
+    let mut saving_struct = LoadSaveStruct::with_text_view(text_view_errors.clone());
 
     let (hashmap_ls, _hashmap_sl) = create_hash_map();
 
@@ -454,7 +522,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
 
     reset_text_view(&text_view_errors);
 
-    let mut loaded_entries = LoadSaveStruct::new();
+    let mut loaded_entries = LoadSaveStruct::with_text_view(text_view_errors.clone());
     loaded_entries.open_and_read_content(&text_view_errors, manual_execution);
 
     // Load here language, default system language could change value in settings so we don't want to lose this value
@@ -568,10 +636,6 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&cache_prehash_minimal_size);
     } else {
         settings.check_button_settings_load_at_start.set_active(false);
-    }
-
-    if manual_execution {
-        add_text_to_text_view(&text_view_errors, &fl!("saving_loading_reset_configuration"));
     }
 }
 

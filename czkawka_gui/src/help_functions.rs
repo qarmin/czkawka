@@ -425,7 +425,11 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
         Some(t) => t.to_string(),
         None => "".to_string(),
     };
-    buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
+    if current_text.is_empty() {
+        buffer.set_text(string_to_append);
+    } else {
+        buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
+    }
 }
 
 pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Widget], button_names: &[String]) {
@@ -577,7 +581,6 @@ pub fn clean_invalid_headers(model: &gtk::ListStore, column_color: i32, column_p
         }
         // Non empty means that header points at reference folder
         else {
-            // TODO verify how it works
             'reference: loop {
                 if model.value(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
                     panic!("First deleted element, should be a header"); // First element should be header
