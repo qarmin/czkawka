@@ -76,7 +76,7 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    let application = gtk::Application::builder().application_id("pl.qarmin.czkawka").build();
+    let application = gtk::Application::builder().build();
     application.connect_activate(move |application| {
         let mut gui_data: GuiData = GuiData::new_with_application(application);
 
