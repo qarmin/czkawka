@@ -87,7 +87,7 @@ pub const IMAGES_HASH_TYPE_COMBO_BOX: [ImageHashTypeStruct; 5] = [
         hash_alg: HashAlg::VertGradient,
     },
     ImageHashTypeStruct {
-        eng_name: "Blackhash",
+        eng_name: "Blockhash",
         hash_alg: HashAlg::Blockhash,
     },
     ImageHashTypeStruct {

@@ -243,10 +243,12 @@ progress_stop_button = Stop
 about_repository_button_tooltip = Link to repository page with source code.
 about_donation_button_tooltip = Link to donation page.
 about_instruction_button_tooltip = Link to instruction page.
+about_translation_button_tooltip = Link to Crowdin page with app translations. Officially Polish and English are supported, but any help with other language will be appreciated.
 
 about_repository_button = Repository
 about_donation_button = Donation
 about_instruction_button = Instruction
+about_translation_button = Translation
 
 # Header
 header_setting_button_tooltip = Opens settings dialog.

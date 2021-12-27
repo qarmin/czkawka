@@ -202,9 +202,11 @@ progress_stop_button = Stop
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
+about_translation_button_tooltip = Link do strony z tłumaczeniami - Crowdin. Oficialnie język polski i angielski są wspierane, jednak za pomoc przy poprawie bieżących tekstów i tłumaczeniu ich na inny język, byłbym wdzięczny.
 about_repository_button = Repozytorium
 about_donation_button = Dotacje
 about_instruction_button = Instrukcja(ENG)
+about_translation_button = Tłumaczenie
 # Header
 header_setting_button_tooltip = Otwórz okno z ustawieniami programu.
 header_about_button_tooltip = Otwórz okno z informacjami o programie.

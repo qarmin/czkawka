@@ -10,6 +10,7 @@ pub struct GuiAbout {
     pub button_repository: gtk::Button,
     pub button_donation: gtk::Button,
     pub button_instruction: gtk::Button,
+    pub button_translation: gtk::Button,
 }
 
 impl GuiAbout {
@@ -24,12 +25,14 @@ impl GuiAbout {
         let button_repository: gtk::Button = builder.object("button_repository").unwrap();
         let button_donation: gtk::Button = builder.object("button_donation").unwrap();
         let button_instruction: gtk::Button = builder.object("button_instruction").unwrap();
+        let button_translation: gtk::Button = builder.object("button_translation").unwrap();
 
         Self {
             about_dialog,
             button_repository,
             button_donation,
             button_instruction,
+            button_translation,
         }
     }
     pub fn update_language(&self) {
@@ -40,9 +43,11 @@ impl GuiAbout {
         self.button_repository.set_tooltip_text(Some(&fl!("about_repository_button_tooltip")));
         self.button_donation.set_tooltip_text(Some(&fl!("about_donation_button_tooltip")));
         self.button_instruction.set_tooltip_text(Some(&fl!("about_instruction_button_tooltip")));
+        self.button_translation.set_tooltip_text(Some(&fl!("about_translation_button_tooltip")));
 
         self.button_repository.set_label(&fl!("about_repository_button"));
         self.button_donation.set_label(&fl!("about_donation_button"));
         self.button_instruction.set_label(&fl!("about_instruction_button"));
+        self.button_translation.set_label(&fl!("about_translation_button"));
     }
 }
