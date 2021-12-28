@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
@@ -47,7 +47,6 @@ const LOOP_DURATION: u32 = 200; //ms
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum Similarity {
-    None,
     Similar(u32),
 }
 
@@ -416,7 +415,7 @@ impl SimilarImages {
                                     },
 
                                     hash: Vec::new(),
-                                    similarity: Similarity::None,
+                                    similarity: Similarity::Similar(0),
                                 };
 
                                 fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
@@ -583,7 +582,6 @@ impl SimilarImages {
         for (file_entry, buf) in &vec_file_entry {
             // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
             if !(buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
-                self.bktree.add(buf.clone());
                 self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
                 self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
             }
@@ -599,20 +597,32 @@ impl SimilarImages {
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
-        let hash_map_modification = SystemTime::now();
+        true
     }
 
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let similarity: u32 = match self.similarity {
-            Similarity::Similar(k) => k,
-            _ => panic!(),
-        };
+        let hash_map_modification = SystemTime::now();
+        let Similarity::Similar(similarity) = self.similarity;
 
+        // Results
         let mut collected_similar_images: BTreeMap<Vec<u8>, Vec<FileEntry>> = Default::default();
 
-        let mut available_hashes = self.image_hashes.clone();
+        let mut temp_hashes = Default::default();
+        mem::swap(&mut temp_hashes, &mut self.image_hashes);
+
         let mut this_time_check_hashes;
-        let mut master_of_group: BTreeSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
+        let mut master_of_group: HashSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
+
+        let mut available_hashes: HashMap<Vec<u8>, Vec<FileEntry>> = Default::default();
+        for (hash, vec_file_entry) in temp_hashes {
+            // There exists 2 or more hashes with same hash
+            if vec_file_entry.len() >= 2 {
+                collected_similar_images.insert(hash, vec_file_entry);
+            } else {
+                self.bktree.add(hash.clone());
+                available_hashes.insert(hash, vec_file_entry);
+            }
+        }
 
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -642,37 +652,10 @@ impl SimilarImages {
             thread::spawn(|| {})
         };
         //// PROGRESS THREAD END
+        if similarity >= 1 {
+            for current_similarity in 1..=similarity {
+                this_time_check_hashes = available_hashes.clone();
 
-        for current_similarity in 0..=similarity {
-            this_time_check_hashes = available_hashes.clone();
-
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
-                return false;
-            }
-
-            for (hash, vec_file_entry) in &this_time_check_hashes {
-                atomic_mode_counter.fetch_add(1, Ordering::Relaxed);
-
-                let vector_with_found_similar_hashes = self
-                    .bktree
-                    .find(hash, similarity)
-                    .filter(|r| (r.0 == current_similarity) && !master_of_group.contains(r.1) && available_hashes.contains_key(r.1))
-                    .collect::<Vec<_>>();
-
-                // Not found any hash with specific distance
-                if vector_with_found_similar_hashes.is_empty() {
-                    continue;
-                }
-
-                // This one picture doesn't have similar pictures except self in similarity 0
-                if current_similarity == 0 && vector_with_found_similar_hashes.len() == 1 {
-                    continue;
-                }
-
-                // This shouldn't be executed too much times, so it should be quite fast to check this
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
@@ -680,43 +663,51 @@ impl SimilarImages {
                     return false;
                 }
 
-                // Jeśli jeszcze nie dodał, to dodaje teraz grupę główną do już obrobionych
-                if !master_of_group.contains(hash) {
-                    master_of_group.insert(hash.clone());
-                    collected_similar_images.insert(hash.clone(), Vec::new());
+                for (hash, vec_file_entry) in this_time_check_hashes.into_iter() {
+                    atomic_mode_counter.fetch_add(1, Ordering::Relaxed);
 
-                    let mut things: Vec<FileEntry> = vec_file_entry
-                        .iter()
-                        .map(|fe| FileEntry {
-                            path: fe.path.clone(),
-                            size: fe.size,
-                            dimensions: fe.dimensions.clone(),
-                            modified_date: fe.modified_date,
-                            hash: fe.hash.clone(),
-                            similarity: Similarity::Similar(0),
-                        })
-                        .collect();
-                    collected_similar_images.get_mut(hash).unwrap().append(&mut things);
-                }
+                    // Finds hashes with specific distance to
+                    let vector_with_found_similar_hashes = self
+                        .bktree
+                        .find(&hash, similarity)
+                        .filter(|(similarity, hash)| (*similarity == current_similarity) && !master_of_group.contains(*hash) && available_hashes.contains_key(*hash))
+                        .collect::<Vec<_>>();
 
-                // Since we checked hash, we don't need to check it again
-                if current_similarity != 0 {
-                    vector_with_found_similar_hashes.iter().for_each(|e| {
-                        let mut things: Vec<FileEntry> = available_hashes
-                            .get_mut(e.1)
-                            .unwrap()
-                            .iter()
-                            .map(|fe| FileEntry {
-                                path: fe.path.clone(),
-                                size: fe.size,
-                                dimensions: fe.dimensions.clone(),
-                                modified_date: fe.modified_date,
-                                hash: Vec::new(),
-                                similarity: Similarity::Similar(current_similarity),
+                    // Not found any hash with specific distance
+                    if vector_with_found_similar_hashes.is_empty() {
+                        continue;
+                    }
+
+                    // Current checked hash isn't in any group of similarity, so we create one, because found similar images
+                    if !master_of_group.contains(&hash) {
+                        master_of_group.insert(hash.clone());
+                        collected_similar_images.insert(hash.clone(), Vec::new());
+
+                        let mut things: Vec<FileEntry> = vec_file_entry
+                            .into_iter()
+                            .map(|mut fe| {
+                                fe.similarity = Similarity::Similar(0);
+                                fe
                             })
-                            .collect::<Vec<_>>();
-                        collected_similar_images.get_mut(hash).unwrap().append(&mut things);
-                        available_hashes.remove(e.1);
+                            .collect();
+                        collected_similar_images.get_mut(&hash).unwrap().append(&mut things);
+
+                        // This shouldn't be executed too much times, so it should be quite fast to check this
+                        if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                            // End thread which send info to gui
+                            progress_thread_run.store(false, Ordering::Relaxed);
+                            progress_thread_handle.join().unwrap();
+                            return false;
+                        }
+                    }
+
+                    vector_with_found_similar_hashes.iter().for_each(|(_similarity, other_hash)| {
+                        let mut vec_fe = available_hashes.remove(*other_hash).unwrap();
+                        for fe in &mut vec_fe {
+                            fe.similarity = Similarity::Similar(current_similarity)
+                        }
+
+                        collected_similar_images.get_mut(&hash).unwrap().append(&mut vec_fe);
                     });
                 }
             }
@@ -725,7 +716,7 @@ impl SimilarImages {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        self.similar_vectors = collected_similar_images.values().cloned().collect();
+        self.similar_vectors = collected_similar_images.into_values().collect();
 
         if self.exclude_images_with_same_size {
             let mut new_vector = Default::default();
@@ -1034,9 +1025,9 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
     };
 
     match similarity {
-        Similarity::None => {
-            panic!()
-        }
+        // Similarity::None => {
+        //     panic!()
+        // }
         Similarity::Similar(h) => {
             // #[cfg(debug_assertions)]
             // {
