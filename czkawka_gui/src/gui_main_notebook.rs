@@ -85,6 +85,8 @@ pub struct GuiMainNotebook {
     pub check_button_image_ignore_same_size: gtk::CheckButton,
     pub check_button_video_ignore_same_size: gtk::CheckButton,
 
+    pub check_button_image_fast_compare: gtk::CheckButton,
+
     pub label_image_similarity: gtk::Label,
     pub label_image_similarity_max: gtk::Label,
 
@@ -206,6 +208,8 @@ impl GuiMainNotebook {
         let scale_similarity_similar_images: gtk::Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: gtk::Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
+        let check_button_image_fast_compare: gtk::CheckButton = builder.object("check_button_image_fast_compare").unwrap();
+
         let combo_box_image_resize_algorithm: gtk::ComboBoxText = builder.object("combo_box_image_resize_algorithm").unwrap();
         let combo_box_image_hash_algorithm: gtk::ComboBoxText = builder.object("combo_box_image_hash_algorithm").unwrap();
         let combo_box_image_hash_size: gtk::ComboBoxText = builder.object("combo_box_image_hash_size").unwrap();
@@ -292,6 +296,7 @@ impl GuiMainNotebook {
             combo_box_duplicate_hash_type,
             combo_box_image_hash_size,
             check_button_video_ignore_same_size,
+            check_button_image_fast_compare,
         }
     }
 
@@ -353,6 +358,10 @@ impl GuiMainNotebook {
             .set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
         self.check_button_image_ignore_same_size.set_label(&fl!("check_button_general_same_size"));
         self.check_button_video_ignore_same_size.set_label(&fl!("check_button_general_same_size"));
+
+        self.check_button_image_fast_compare.set_label(&fl!("main_notebook_image_fast_compare"));
+        self.check_button_image_fast_compare
+            .set_tooltip_text(Some(&fl!("main_notebook_image_fast_compare_tooltip")));
 
         {
             let hash_size_index = self.combo_box_image_hash_size.active().unwrap() as usize;

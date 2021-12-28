@@ -101,6 +101,7 @@ pub fn connect_button_search(
     let button_settings = gui_data.header.button_settings.clone();
     let button_app_info = gui_data.header.button_app_info.clone();
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
+    let check_button_image_fast_compare = gui_data.main_notebook.check_button_image_fast_compare.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
@@ -292,6 +293,8 @@ pub fn connect_button_search(
 
                 let delete_outdated_cache = check_button_settings_similar_images_delete_outdated_cache.is_active();
 
+                let fast_compare = check_button_image_fast_compare.is_active();
+
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
                 thread::spawn(move || {
@@ -312,6 +315,7 @@ pub fn connect_button_search(
                     sf.set_allowed_extensions(allowed_extensions);
                     sf.set_delete_outdated_cache(delete_outdated_cache);
                     sf.set_exclude_images_with_same_size(ignore_same_size);
+                    sf.set_fast_comparing(fast_compare);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));
                 });
