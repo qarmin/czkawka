@@ -716,7 +716,8 @@ impl SimilarImages {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        self.similar_vectors = collected_similar_images.into_values().collect();
+        // self.similar_vectors = collected_similar_images.into_values().collect(); // TODO use this in Rust 1.54.0
+        self.similar_vectors = collected_similar_images.values().cloned().collect(); // 1.53.0 version
 
         if self.exclude_images_with_same_size {
             let mut new_vector = Default::default();
