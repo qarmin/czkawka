@@ -8,7 +8,7 @@ use czkawka_core::common::Common;
 use czkawka_core::fl;
 
 use crate::gui_data::GuiData;
-use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsIncludedDirectory};
+use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
@@ -17,7 +17,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let buttons_manual_add_included_directory = gui_data.upper_notebook.buttons_manual_add_included_directory.clone();
         buttons_manual_add_included_directory.connect_clicked(move |_| {
-            add_manually_directories(&window_main, &tree_view_included_directories);
+            add_manually_directories(&window_main, &tree_view_included_directories, false);
         });
     }
     // Add manually excluded directory
@@ -26,7 +26,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
         let window_main = gui_data.window_main.clone();
         let buttons_manual_add_excluded_directory = gui_data.upper_notebook.buttons_manual_add_excluded_directory.clone();
         buttons_manual_add_excluded_directory.connect_clicked(move |_| {
-            add_manually_directories(&window_main, &tree_view_excluded_directories);
+            add_manually_directories(&window_main, &tree_view_excluded_directories, true);
         });
     }
     // Add included directory
@@ -119,19 +119,26 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 
             let list_store = get_list_store(&tree_view);
 
-            for file_entry in &folders {
-                let values: [(u32, &dyn ToValue); 2] = [
-                    (ColumnsIncludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string()),
-                    (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
-                ];
-                list_store.set(&list_store.append(), &values);
+            if excluded_items {
+                for file_entry in &folders {
+                    let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
+                    list_store.set(&list_store.append(), &values);
+                }
+            } else {
+                for file_entry in &folders {
+                    let values: [(u32, &dyn ToValue); 2] = [
+                        (ColumnsIncludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string()),
+                        (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+                    ];
+                    list_store.set(&list_store.append(), &values);
+                }
             }
         }
         file_chooser.close();
     });
 }
 
-fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
+fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let dialog = gtk::Dialog::builder()
         .title(&fl!("include_manually_directories_dialog_title"))
         .transient_for(window_main)
@@ -157,8 +164,13 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView) {
             if !text.is_empty() {
                 let list_store = get_list_store(&tree_view);
 
-                let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
-                list_store.set(&list_store.append(), &values);
+                if excluded_items {
+                    let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
+                    list_store.set(&list_store.append(), &values);
+                } else {
+                    let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
+                    list_store.set(&list_store.append(), &values);
+                }
             }
         }
         dialog.close();
