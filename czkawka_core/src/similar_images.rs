@@ -239,7 +239,11 @@ impl SimilarImages {
             self.stopped_search = true;
             return;
         }
-        if !self.sort_images(stop_receiver, progress_sender) {
+        if !self.hash_images(stop_receiver, progress_sender) {
+            self.stopped_search = true;
+            return;
+        }
+        if !self.find_similar_hashes(stop_receiver, progress_sender) {
             self.stopped_search = true;
             return;
         }
@@ -450,7 +454,7 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
-    fn sort_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
         let loaded_hash_map;
@@ -596,7 +600,9 @@ impl SimilarImages {
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
         let hash_map_modification = SystemTime::now();
+    }
 
+    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let similarity: u32 = match self.similarity {
             Similarity::Similar(k) => k,
             _ => panic!(),
