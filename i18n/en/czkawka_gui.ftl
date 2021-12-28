@@ -65,10 +65,18 @@ image_hash_size_tooltip =
         Default value for hash is 8 bytes, which allows to find very similar and different images. 16 and 32 hashes should be used only for nearly identical images. 64 bytes hash shouldn't be used, except situation where really small differences are needed to find
 
 image_resize_filter_tooltip = 
-        To compute hash of image, library must first resize it. Depend on choosen algorithm, resulted image will looks little different. The fastest algotithm to use, but also one which gives the worst results is Nearest.
+        To compute hash of image, library must first resize it. Depend on chosen algorithm, resulted image will looks little different. The fastest algorithm to use, but also one which gives the worst results is Nearest.
 
 image_hash_alg_tooltip = 
         Users can choose one from many algorithms of calculating hash. Each have both strong and weaker points and will give sometimes better and sometimes worse results for different images, so to choose the best one, manual testing is required.
+
+main_notebook_image_fast_compare = Fast compare
+main_notebook_image_fast_compare_tooltip =
+        Speedup searching and comparing hashes.
+
+        In opposite to normal mode where each hash is compared to each other x times, where x is similarity which user choose, in this mode always only one comparing is used.
+
+        This option is recommended when comparing >10000 images with non 0(Very High) similarity.
 
 main_notebook_duplicates = Duplicate Files
 main_notebook_empty_directories = Empty Directories
