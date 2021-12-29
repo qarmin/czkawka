@@ -1,3 +1,4 @@
+use core::panic;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
@@ -527,14 +528,20 @@ impl SimilarImages {
         };
         //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
-            .par_iter()
-            .map(|file_entry| {
+            .into_par_iter()
+            .map(|(_s, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // This will not break
                     return None;
                 }
-                let mut file_entry = file_entry.1.clone();
+
+                // let result = panic::catch_unwind(||{
+                //
+                // });
+                // if result.is_err(){
+                //     return Some(None);
+                // }
 
                 let image = match image::open(file_entry.path.clone()) {
                     Ok(t) => t,
@@ -542,12 +549,7 @@ impl SimilarImages {
                     // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
                     // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
                     Err(_inspected) => {
-                        let mut buf = Vec::new();
-                        for _i in 0..(self.hash_size * self.hash_size / 8) {
-                            buf.push(0);
-                        }
-                        file_entry.hash = buf.clone();
-                        return Some(Some((file_entry, buf)));
+                        return Some(Some((file_entry, Vec::new())));
                     }
                 };
                 let dimensions = image.dimensions();
@@ -587,7 +589,7 @@ impl SimilarImages {
         // All valid entries are used to create bktree used to check for hash similarity
         for (file_entry, buf) in &vec_file_entry {
             // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
-            if !(buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
+            if !(buf.is_empty() || buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
                 self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
                 self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
             }
