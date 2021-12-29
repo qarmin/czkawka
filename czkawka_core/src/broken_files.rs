@@ -413,6 +413,8 @@ impl BrokenFiles {
 
                 match file_entry.type_of_file {
                     TypeOfFile::Image => {
+                        let file_entry_clone = file_entry.clone();
+
                         let result = panic::catch_unwind(|| {
                             match image::open(&file_entry.path) {
                                 Ok(_) => Some(None),
@@ -420,7 +422,6 @@ impl BrokenFiles {
                                     let error_string = t.to_string();
                                     // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
                                     if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                                        let mut file_entry = file_entry.clone();
                                         file_entry.error_string = error_string;
                                         Some(Some(file_entry))
                                     } else {
@@ -434,8 +435,8 @@ impl BrokenFiles {
                         if let Ok(image_result) = result {
                              image_result
                         } else {
-                            println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
-                             Some(Some(file_entry))
+                            println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry_clone.path);
+                             Some(Some(file_entry_clone))
                         }
                     }
                     TypeOfFile::ArchiveZip => match fs::File::open(&file_entry.path) {
@@ -454,9 +455,7 @@ impl BrokenFiles {
                         Ok(file) => match rodio::Decoder::new(BufReader::new(file)) {
                             Ok(_) => Some(None),
                             Err(e) => {
-                                let error_string = e.to_string();
-                                let mut file_entry = file_entry.clone();
-                                file_entry.error_string = error_string;
+                                file_entry.error_string = e.to_string();
                                 Some(Some(file_entry))
                             }
                         },

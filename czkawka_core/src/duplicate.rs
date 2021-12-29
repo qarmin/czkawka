@@ -1061,22 +1061,21 @@ impl DuplicateFinder {
             }
 
             full_hash_results = non_cached_files_to_check
-                .par_iter()
+                .into_par_iter()
                 .map(|(size, vec_file_entry)| {
                     let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
                     let mut errors: Vec<String> = Vec::new();
                     let mut buffer = [0u8; 1024 * 128];
 
                     atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                    for file_entry in vec_file_entry {
+                    for mut file_entry in vec_file_entry {
                         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                             check_was_breaked.store(true, Ordering::Relaxed);
                             return None;
                         }
 
-                        match hash_calculation(&mut buffer, file_entry, &check_type, u64::MAX) {
+                        match hash_calculation(&mut buffer, &file_entry, &check_type, u64::MAX) {
                             Ok(hash_string) => {
-                                let mut file_entry = file_entry.clone();
                                 file_entry.hash = hash_string.clone();
                                 hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new);
                                 hashmap_with_hash.get_mut(hash_string.as_str()).unwrap().push(file_entry);
@@ -1084,7 +1083,7 @@ impl DuplicateFinder {
                             Err(s) => errors.push(s),
                         }
                     }
-                    Some((*size, hashmap_with_hash, errors))
+                    Some((size, hashmap_with_hash, errors))
                 })
                 .while_some()
                 .collect();
