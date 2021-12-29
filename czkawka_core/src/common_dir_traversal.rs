@@ -117,6 +117,12 @@ pub struct DirTraversal<'a, 'b, F> {
     collect: Collect,
 }
 
+impl<'a, 'b> Default for DirTraversalBuilder<'a, 'b, ()> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
     pub fn new() -> DirTraversalBuilder<'a, 'b, ()> {
         DirTraversalBuilder {

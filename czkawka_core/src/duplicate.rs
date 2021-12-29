@@ -302,6 +302,8 @@ impl DuplicateFinder {
             .allowed_extensions(self.allowed_extensions.clone())
             .excluded_items(self.excluded_items.clone())
             .recursive_search(self.recursive_search)
+            .minimal_file_size(self.minimal_file_size)
+            .maximal_file_size(self.maximal_file_size)
             .build()
             .run();
         match result {
@@ -394,6 +396,8 @@ impl DuplicateFinder {
             .allowed_extensions(self.allowed_extensions.clone())
             .excluded_items(self.excluded_items.clone())
             .recursive_search(self.recursive_search)
+            .minimal_file_size(self.minimal_file_size)
+            .maximal_file_size(self.maximal_file_size)
             .build()
             .run();
         match result {
