@@ -45,7 +45,7 @@ pub fn connect_progress_window(
                                 progress_bar_all_stages.set_fraction(0 as f64);
                                 label_stage.set_text(&fl!(
                                     "progress_scanning_size",
-                                    generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
+                                    generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
                                 ));
                                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                             }
@@ -54,10 +54,10 @@ pub fn connect_progress_window(
                                 progress_bar_current_stage.show();
                                 // progress_bar_all_stages.show();
                                 if item.entries_to_check != 0 {
-                                    progress_bar_all_stages.set_fraction((1f64 + (item.entries_to_check) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
-                                    progress_bar_current_stage.set_fraction((item.entries_to_check) as f64 / item.entries_to_check as f64);
+                                    progress_bar_all_stages.set_fraction((1f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
                                     taskbar_state.borrow().set_progress_value(
-                                        (item.entries_to_check + item.entries_to_check) as u64,
+                                        (item.entries_to_check + item.entries_checked) as u64,
                                         item.entries_to_check as u64 * (item.max_stage + 1) as u64,
                                     );
                                 } else {
@@ -68,16 +68,16 @@ pub fn connect_progress_window(
 
                                 label_stage.set_text(&fl!(
                                     "progress_analyzed_partial_hash",
-                                    generate_translation_hashmap(vec![("file_checked", item.entries_to_check.to_string()), ("all_files", item.entries_to_check.to_string())])
+                                    generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
                                 ));
                             }
                             // Hash - normal hash
                             2 => {
                                 if item.entries_to_check != 0 {
-                                    progress_bar_all_stages.set_fraction((2f64 + (item.entries_to_check) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
-                                    progress_bar_current_stage.set_fraction((item.entries_to_check) as f64 / item.entries_to_check as f64);
+                                    progress_bar_all_stages.set_fraction((2f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                                    progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
                                     taskbar_state.borrow().set_progress_value(
-                                        (2 * item.entries_to_check + item.entries_to_check) as u64,
+                                        (2 * item.entries_to_check + item.entries_checked) as u64,
                                         item.entries_to_check as u64 * (item.max_stage + 1) as u64,
                                     );
                                 } else {
@@ -88,7 +88,7 @@ pub fn connect_progress_window(
 
                                 label_stage.set_text(&fl!(
                                     "progress_analyzed_full_hash",
-                                    generate_translation_hashmap(vec![("file_checked", item.entries_to_check.to_string()), ("all_files", item.entries_to_check.to_string())])
+                                    generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
                                 ));
                             }
                             _ => {
@@ -102,7 +102,7 @@ pub fn connect_progress_window(
 
                         label_stage.set_text(&fl!(
                             "progress_scanning_name",
-                            generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
+                            generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
                         ));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
@@ -112,7 +112,7 @@ pub fn connect_progress_window(
 
                         label_stage.set_text(&fl!(
                             "progress_scanning_size",
-                            generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
+                            generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
                         ));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
@@ -132,7 +132,7 @@ pub fn connect_progress_window(
             while let Some(item) = futures_receiver_empty_files.next().await {
                 label_stage.set_text(&fl!(
                     "progress_scanning_general_file",
-                    generate_translation_hashmap(vec![("file_number", item.entries_to_check.to_string())])
+                    generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
                 ));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }
