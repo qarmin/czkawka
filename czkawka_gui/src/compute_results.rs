@@ -1368,7 +1368,10 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsInvalidSymlinks::Name as u32, &file),
                                 (ColumnsInvalidSymlinks::Path as u32, &directory),
                                 (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
-                                (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(&symlink_info.type_of_error)),
+                                (
+                                    ColumnsInvalidSymlinks::TypeOfError as u32,
+                                    &get_text_from_invalid_symlink_cause(&symlink_info.type_of_error),
+                                ),
                                 (
                                     ColumnsInvalidSymlinks::Modification as u32,
                                     &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),

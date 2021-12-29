@@ -21,18 +21,12 @@ use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
 
 use crate::common::Common;
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::common_dir_traversal::{
-    DirTraversalBuilder,
-    DirTraversalResult,
-    FileEntry,
-    CheckingMethod,
-    ProgressData,
-};
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
@@ -377,9 +371,7 @@ impl DuplicateFinder {
             DirTraversalResult::SuccessFolders { .. } => {
                 unreachable!()
             }
-            DirTraversalResult::Stopped => {
-                false
-            }
+            DirTraversalResult::Stopped => false,
         }
     }
 
@@ -479,9 +471,7 @@ impl DuplicateFinder {
             DirTraversalResult::SuccessFolders { .. } => {
                 unreachable!()
             }
-            DirTraversalResult::Stopped => {
-                false
-            }
+            DirTraversalResult::Stopped => false,
         }
     }
 
@@ -1452,7 +1442,7 @@ impl MyHasher for xxhash_rust::xxh3::Xxh3 {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{read_dir, Metadata, File};
+    use std::fs::{read_dir, File, Metadata};
     use std::io;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;

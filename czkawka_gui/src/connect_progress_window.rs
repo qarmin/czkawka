@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use gtk::prelude::*;
 
-use czkawka_core::{big_file, broken_files, empty_folder, same_music, similar_images, similar_videos, temporary, common_dir_traversal};
+use czkawka_core::{big_file, broken_files, common_dir_traversal, empty_folder, same_music, similar_images, similar_videos, temporary};
 
 use crate::fl;
 use crate::gui_data::GuiData;
@@ -56,9 +56,10 @@ pub fn connect_progress_window(
                                 if item.entries_to_check != 0 {
                                     progress_bar_all_stages.set_fraction((1f64 + (item.entries_to_check) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
                                     progress_bar_current_stage.set_fraction((item.entries_to_check) as f64 / item.entries_to_check as f64);
-                                    taskbar_state
-                                        .borrow()
-                                        .set_progress_value((item.entries_to_check + item.entries_to_check) as u64, item.entries_to_check as u64 * (item.max_stage + 1) as u64);
+                                    taskbar_state.borrow().set_progress_value(
+                                        (item.entries_to_check + item.entries_to_check) as u64,
+                                        item.entries_to_check as u64 * (item.max_stage + 1) as u64,
+                                    );
                                 } else {
                                     progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
                                     progress_bar_current_stage.set_fraction(0f64);

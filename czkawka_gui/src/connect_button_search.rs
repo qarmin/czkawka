@@ -7,6 +7,7 @@ use gtk::prelude::*;
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
+use czkawka_core::common_dir_traversal;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -15,7 +16,6 @@ use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use czkawka_core::common_dir_traversal;
 use czkawka_core::*;
 
 use crate::fl;

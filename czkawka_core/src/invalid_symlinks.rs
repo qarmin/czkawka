@@ -1,26 +1,19 @@
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::path::PathBuf;
 use std::time::SystemTime;
-use std::fs;
 
 use crossbeam_channel::Receiver;
 
 use crate::common::Common;
+use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::common_dir_traversal::{
-    DirTraversalBuilder,
-    DirTraversalResult,
-    FileEntry,
-    ProgressData,
-    Collect,
-    ErrorType,
-};
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -146,9 +139,7 @@ impl InvalidSymlinks {
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => unreachable!(),
-            DirTraversalResult::Stopped => {
-                false
-            }
+            DirTraversalResult::Stopped => false,
         }
     }
 

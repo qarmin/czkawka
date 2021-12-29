@@ -105,7 +105,7 @@ pub struct DirTraversal<'a, 'b, F> {
     group_by: F,
     root_dirs: Vec<PathBuf>,
     stop_receiver: Option<&'a Receiver<()>>,
-    progress_sender:  Option<&'b futures::channel::mpsc::UnboundedSender<ProgressData>>,
+    progress_sender: Option<&'b futures::channel::mpsc::UnboundedSender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
     excluded_items: ExcludedItems,
@@ -199,7 +199,8 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
     }
 
     pub fn group_by<G, T>(self, group_by: G) -> DirTraversalBuilder<'a, 'b, G>
-        where G: Fn(&FileEntry) -> T
+    where
+        G: Fn(&FileEntry) -> T,
     {
         DirTraversalBuilder {
             group_by: Some(group_by),
@@ -252,8 +253,9 @@ pub enum DirTraversalResult<T: Ord + PartialOrd> {
 }
 
 impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
-    where F: Fn(&FileEntry) -> T,
-        T: Ord + PartialOrd,
+where
+    F: Fn(&FileEntry) -> T,
+    T: Ord + PartialOrd,
 {
     pub fn run(self) -> DirTraversalResult<T> {
         let mut all_warnings = vec![];
@@ -310,7 +312,17 @@ impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
 
         //// PROGRESS THREAD END
 
-        let DirTraversal { collect, directories, excluded_items, allowed_extensions, recursive_search, minimal_file_size, maximal_file_size, stop_receiver, .. } = self;
+        let DirTraversal {
+            collect,
+            directories,
+            excluded_items,
+            allowed_extensions,
+            recursive_search,
+            minimal_file_size,
+            maximal_file_size,
+            stop_receiver,
+            ..
+        } = self;
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -386,34 +398,32 @@ impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
                                     continue 'dir;
                                 }
                                 dir_result.push(next_folder.clone());
-                                folder_entries_list.push(
-                                    (
-                                        next_folder.clone(),
-                                        FolderEntry {
-                                            parent_path: Some(current_folder.clone()),
-                                            is_empty: FolderEmptiness::Maybe,
-                                            modified_date: match metadata.modified() {
-                                                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                                    Ok(d) => d.as_secs(),
-                                                    Err(_inspected) => {
-                                                        warnings.push(fl!(
-                                                            "core_folder_modified_before_epoch",
-                                                            generate_translation_hashmap(vec![("name", current_folder.display().to_string())])
-                                                        ));
-                                                        0
-                                                    }
-                                                },
-                                                Err(e) => {
+                                folder_entries_list.push((
+                                    next_folder.clone(),
+                                    FolderEntry {
+                                        parent_path: Some(current_folder.clone()),
+                                        is_empty: FolderEmptiness::Maybe,
+                                        modified_date: match metadata.modified() {
+                                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                                Ok(d) => d.as_secs(),
+                                                Err(_inspected) => {
                                                     warnings.push(fl!(
-                                                        "core_folder_no_modification_date",
-                                                        generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])
+                                                        "core_folder_modified_before_epoch",
+                                                        generate_translation_hashmap(vec![("name", current_folder.display().to_string())])
                                                     ));
                                                     0
                                                 }
                                             },
+                                            Err(e) => {
+                                                warnings.push(fl!(
+                                                    "core_folder_no_modification_date",
+                                                    generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])
+                                                ));
+                                                0
+                                            }
                                         },
-                                    )
-                                );
+                                    },
+                                ));
                             }
                         } else if metadata.is_file() && collect == Collect::Files {
                             atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
@@ -558,10 +568,7 @@ impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
                                 },
                                 size: 0,
                                 hash: "".to_string(),
-                                symlink_info: Some(SymlinkInfo {
-                                    destination_path,
-                                    type_of_error,
-                                }),
+                                symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
                             };
 
                             // Adding files to Vector
@@ -597,20 +604,16 @@ impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
         progress_thread_handle.join().unwrap();
 
         match collect {
-            Collect::Files | Collect::InvalidSymlinks => {
-                DirTraversalResult::SuccessFiles {
-                    start_time,
-                    grouped_file_entries,
-                    warnings: all_warnings,
-                }
-            }
-            Collect::EmptyFolders => {
-                DirTraversalResult::SuccessFolders {
-                    start_time,
-                    folder_entries,
-                    warnings: all_warnings,
-                }
-            }
+            Collect::Files | Collect::InvalidSymlinks => DirTraversalResult::SuccessFiles {
+                start_time,
+                grouped_file_entries,
+                warnings: all_warnings,
+            },
+            Collect::EmptyFolders => DirTraversalResult::SuccessFolders {
+                start_time,
+                folder_entries,
+                warnings: all_warnings,
+            },
         }
     }
 }
