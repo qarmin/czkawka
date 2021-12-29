@@ -1,9 +1,9 @@
-use core::panic;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::io::*;
+use std::panic;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -536,12 +536,11 @@ impl SimilarImages {
                     return None;
                 }
 
-                // let result = panic::catch_unwind(||{
-                //
-                // });
-                // if result.is_err(){
-                //     return Some(None);
-                // }
+                let result = panic::catch_unwind(|| {});
+                // Image crashed when opening, so ignore them in this and next
+                if result.is_err() {
+                    return Some(Some((file_entry, Vec::new())));
+                }
 
                 let image = match image::open(file_entry.path.clone()) {
                     Ok(t) => t,
