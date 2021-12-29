@@ -269,8 +269,9 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions
-            .extend_allowed_extensions(&[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".gif", ".jif", ".jfi" /*, ".webp"*/]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+        self.allowed_extensions.extend_allowed_extensions(&[
+            ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", /*, ".webp", ".gif", ".ico"*/
+        ]); // webp cannot be seen in preview, gif is not too good to checking preview because is animated, ico is just ico and is not too usable
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
