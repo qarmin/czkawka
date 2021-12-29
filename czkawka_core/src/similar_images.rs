@@ -3,6 +3,7 @@ use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::io::*;
+use std::panic;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -269,10 +270,8 @@ impl SimilarImages {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         self.allowed_extensions.extend_allowed_extensions(&[
-            ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-            /*".tiff", ".tif",*/ ".tga", ".ff", /*, ".gif"*/
-            ".jif", ".jfi", /*, ".webp"*/
-        ]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+            ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", /*, ".webp", ".gif", ".ico"*/
+        ]); // webp cannot be seen in preview, gif is not too good to checking preview because is animated, ico is just ico and is not too usable
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -527,29 +526,38 @@ impl SimilarImages {
         };
         //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
-            .par_iter()
-            .map(|file_entry| {
+            .into_par_iter()
+            .map(|(_s, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // This will not break
                     return None;
                 }
-                let mut file_entry = file_entry.1.clone();
 
-                let image = match image::open(file_entry.path.clone()) {
-                    Ok(t) => t,
-                    // Err(_inspected) => return Some(None), // Something is wrong with image,
-                    // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
-                    // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
-                    Err(_inspected) => {
-                        let mut buf = Vec::new();
-                        for _i in 0..(self.hash_size * self.hash_size / 8) {
-                            buf.push(0);
-                        }
-                        file_entry.hash = buf.clone();
-                        return Some(Some((file_entry, buf)));
+                let image;
+
+                let result = panic::catch_unwind(|| {
+                    match image::open(file_entry.path.clone()) {
+                        Ok(t) => Ok(t),
+                        // Err(_inspected) => return Some(None), // Something is wrong with image,
+                        // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
+                        // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
+                        Err(_inspected) => Err(()),
                     }
-                };
+                });
+
+                // If image crashed during opening, we just skip checking its hash and go on
+                if let Ok(image_result) = result {
+                    if let Ok(image2) = image_result {
+                        image = image2;
+                    } else {
+                        return Some(Some((file_entry, Vec::new())));
+                    }
+                } else {
+                    println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
+                    return Some(Some((file_entry, Vec::new())));
+                }
+
                 let dimensions = image.dimensions();
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
@@ -587,7 +595,7 @@ impl SimilarImages {
         // All valid entries are used to create bktree used to check for hash similarity
         for (file_entry, buf) in &vec_file_entry {
             // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
-            if !(buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
+            if !(buf.is_empty() || buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
                 self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
                 self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
             }

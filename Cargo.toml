@@ -4,5 +4,10 @@ members = [
     "czkawka_cli",
     "czkawka_gui",
 ]
-#[profile.release]
-#lto = true
+[profile.release]
+# Panic = "abort" will crash entire app when processing invalid image file.
+# Since crash happens in external library, this is only way to handle this(I think).
+panic = "unwind"
+
+# LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
+#lto = "fat"
