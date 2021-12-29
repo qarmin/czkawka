@@ -269,11 +269,8 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions.extend_allowed_extensions(&[
-            ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-            /*".tiff", ".tif",*/ ".tga", ".ff", /*, ".gif"*/
-            ".jif", ".jfi", /*, ".webp"*/
-        ]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
+        self.allowed_extensions
+            .extend_allowed_extensions(&[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".gif", ".jif", ".jfi" /*, ".webp"*/]); // webp cannot be seen in preview, gif needs to be enabled after releasing image crate 0.24.0, bmp needs to be fixed in image crate
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -536,21 +533,30 @@ impl SimilarImages {
                     return None;
                 }
 
-                let result = panic::catch_unwind(|| {});
-                // Image crashed when opening, so ignore them in this and next
-                if result.is_err() {
+                let image;
+
+                let result = panic::catch_unwind(|| {
+                    match image::open(file_entry.path.clone()) {
+                        Ok(t) => Ok(t),
+                        // Err(_inspected) => return Some(None), // Something is wrong with image,
+                        // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
+                        // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
+                        Err(_inspected) => Err(()),
+                    }
+                });
+
+                // If image crashed during opening, we just skip checking its hash and go on
+                if let Ok(image_result) = result {
+                    if let Ok(image2) = image_result {
+                        image = image2;
+                    } else {
+                        return Some(Some((file_entry, Vec::new())));
+                    }
+                } else {
+                    println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
                     return Some(Some((file_entry, Vec::new())));
                 }
 
-                let image = match image::open(file_entry.path.clone()) {
-                    Ok(t) => t,
-                    // Err(_inspected) => return Some(None), // Something is wrong with image,
-                    // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
-                    // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
-                    Err(_inspected) => {
-                        return Some(Some((file_entry, Vec::new())));
-                    }
-                };
                 let dimensions = image.dimensions();
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);

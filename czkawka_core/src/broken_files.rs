@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, mem, thread};
+use std::{fs, mem, panic, thread};
 
 use crossbeam_channel::Receiver;
 use directories_next::ProjectDirs;
@@ -403,30 +403,39 @@ impl BrokenFiles {
         };
         //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
-            .par_iter()
-            .map(|file_entry| {
+            .into_par_iter()
+            .map(|(_, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
-                let file_entry = file_entry.1;
 
                 match file_entry.type_of_file {
                     TypeOfFile::Image => {
-                        match image::open(&file_entry.path) {
-                            Ok(_) => Some(None),
-                            Err(t) => {
-                                let error_string = t.to_string();
-                                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
-                                if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                                    let mut file_entry = file_entry.clone();
-                                    file_entry.error_string = error_string;
-                                    Some(Some(file_entry))
-                                } else {
-                                    Some(None)
+                        let result = panic::catch_unwind(|| {
+                            match image::open(&file_entry.path) {
+                                Ok(_) => Some(None),
+                                Err(t) => {
+                                    let error_string = t.to_string();
+                                    // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
+                                    if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
+                                        let mut file_entry = file_entry.clone();
+                                        file_entry.error_string = error_string;
+                                        Some(Some(file_entry))
+                                    } else {
+                                        Some(None)
+                                    }
                                 }
-                            } // Something is wrong with image
+                            }
+                        });
+
+                        // If image crashed during opening, we just skip checking its hash and go on
+                        if let Ok(image_result) = result {
+                             image_result
+                        } else {
+                            println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
+                             Some(Some(file_entry))
                         }
                     }
                     TypeOfFile::ArchiveZip => match fs::File::open(&file_entry.path) {
@@ -434,9 +443,7 @@ impl BrokenFiles {
                             Ok(_) => Some(None),
                             Err(e) => {
                                 // TODO Maybe filter out unnecessary types of errors
-                                let error_string = e.to_string();
-                                let mut file_entry = file_entry.clone();
-                                file_entry.error_string = error_string;
+                                file_entry.error_string = e.to_string();
                                 Some(Some(file_entry))
                             }
                         },
@@ -747,10 +754,7 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
 fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
     // Checking allowed image extensions
     let allowed_image_extensions = [
-        ".jpg", ".jpeg", ".png", /*, ".bmp"*/
-        /*".tiff", ".tif",*/ ".tga", ".ff", /*, ".gif"*/
-        // Gif will be reenabled in image-rs 0.24
-        ".jif", ".jfi", /*, ".ico"*/
+        ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico",
         // Ico and bmp crashes are not fixed yet
         /*".webp",*/ ".avif", // Webp is not really supported in image crate
     ];
