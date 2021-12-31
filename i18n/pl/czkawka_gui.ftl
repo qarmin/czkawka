@@ -56,6 +56,13 @@ image_hash_size_tooltip =
     Domyślną wielkością hashu jest 8, które pozwala wyszukiwać zarówno bardzo jak i mało podobne do siebie obrazy. Hashe 16 i 32 powinny być głównie używane dla niemal identycznych plików. Hash 64 bajtowy nie powinien być stosowany, chyba że wymagane jest znalezienie bardzo małych różnic pomiędzy obrazami.
 image_resize_filter_tooltip = By obliczyć hash obrazu, biblioteka musi najpierw go zmniejszyć. W zależności od wybranego algorytmu, obraz będzie wyglądał nieco inaczej. Najszybszym, lecz za razem dającym najgorsze efekty jest algorytm Nearest.
 image_hash_alg_tooltip = Do wyboru jest kilka algorytmów obliczenia hashu obrazu. Każdy z nich ma swoje słabe i silne punkty i będzie dawał czasem lepsze a czasem gorsze rezultaty w zależności od obrazów, dlatego najlepiej będzie przetestować je na własną rękę.
+main_notebook_image_fast_compare = Szybkie porównywanie
+main_notebook_image_fast_compare_tooltip =
+    Przyśpieszenie wyszukiwania i porównywania hashów.
+    
+    W przeciwieństwie do zwykłego trybu, w którym każdy skrót jest porównywany ze sobą x razy, gdzie x jest podobieństwem, które wybiera użytkownik, w tym trybie zawsze stosuje się tylko jedno porównanie.
+    
+    Ta opcja jest zalecana podczas porównywania >10000 obrazów z podobieństwem innym niż 0 (Bardzo Duże).
 main_notebook_duplicates = Duplikaty
 main_notebook_empty_directories = Puste Katalogi
 main_notebook_big_files = Duże Pliki
@@ -202,7 +209,7 @@ progress_stop_button = Stop
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
-about_translation_button_tooltip = Link do strony z tłumaczeniami - Crowdin. Oficialnie język polski i angielski są wspierane, jednak za pomoc przy poprawie bieżących tekstów i tłumaczeniu ich na inny język, byłbym wdzięczny.
+about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficjalnie polski i angielski są wspierane ale za każdą pomoc w tłumaczeniu innych języków będę wdzięczny.
 about_repository_button = Repozytorium
 about_donation_button = Dotacje
 about_instruction_button = Instrukcja(ENG)
