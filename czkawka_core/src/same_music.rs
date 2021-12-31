@@ -21,6 +21,7 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crate::fl;
 use crate::localizer::generate_translation_hashmap;
+use crate::similar_images::AUDIO_FILES_EXTENSIONS;
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -223,12 +224,13 @@ impl SameMusic {
         self.use_reference_folders
     }
 
-    /// Check files for any with size == 0
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions.extend_allowed_extensions(&[".mp3", ".flac", ".m4a"]);
+        if !self.allowed_extensions.using_custom_extensions() {
+            self.allowed_extensions.extend_allowed_extensions(&AUDIO_FILES_EXTENSIONS);
+        }
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
