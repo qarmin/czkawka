@@ -8,26 +8,28 @@
 
 If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
 
+FFmpeg is not included here, because is not needed to build because it is dynamically loaded.
+
 #### Debian / Ubuntu
 ```shell
 sudo apt install -y curl  # Needed by Rust update tool
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo apt install -y libgtk-3-dev libasound2-dev # Latest is optional
+sudo apt install -y libgtk-3-dev
 ```
 
 #### Fedora / CentOS / Rocky Linux
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo yum install gtk3-devel glib2-devel alsa-lib-devel # Latest is optional
+sudo yum install gtk3-devel glib2-devel
 ```
 
 #### macOS
-You need to install Rust via Homebrew and GTK Libraries(ffmpeg is optional dependency)
+You need to install Rust via Homebrew and GTK Libraries
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install rust gtk+3 adwaita-icon-theme librsvg ffmpeg
+brew install rust gtk+3 adwaita-icon-theme librsvg
 ```
 
 ### Windows

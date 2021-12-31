@@ -56,6 +56,10 @@ i18n-embed-fl = "0.6"
 rust-embed = "6.2.0"
 once_cell = "1.8.0"
 
+# Raw image files
+rawloader = "0.37.0"
+imagepipe = "0.4.0"
+
 [features]
 default = []
 

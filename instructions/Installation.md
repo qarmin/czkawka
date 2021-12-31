@@ -3,9 +3,10 @@
 ### Linux
 If you use Snap, Flatpak or Appimage, you need to only install ffmpeg if you want to use Similar Videos tool.
 
-For Czkawka GUI you are required to have at least `GTK 3.24` and also `Alsa` installed (for finding broken music files, but it is disabled by default).  
-`FFmpeg` in Similar Videos is non required dependency - app will work, but this tool will throw errors, so I recommend to install it.  
-It should be installed by default on all the most popular distros.
+For Czkawka GUI the lowest supported version of GTK is `3.24` which is the only required dependency(of course on Ubuntu, different distributions will probably require a little different set of dependences).  
+In app exists Similar Video tool which require `FFmpeg` to work, but is completelly optional and without it, only warning would be printed when trying to use this tool without installed ffmpeg.  
+Broken files finder by default don't check for music files, and it is possible to enable this feature but it require to have alsa lib installed(on Ubuntu this is `libasound2-dev` package)
+
 #### Ubuntu/Debian/Linux Mint
 ```
 sudo apt install libgtk-3-dev ffmpeg
@@ -19,7 +20,7 @@ sudo dnf -y install ffmpeg
 ```
 #### Void Linux (CLI only)
 ```
-sudo xbps-install gcc pkg-config alsa-lib-devel ffpmeg
+sudo xbps-install gcc pkg-config ffpmeg
 ```
 
 ### macOS
@@ -62,8 +63,9 @@ Artifacts from each commit can be downloaded [**here**](https://github.com/qarmi
 
 ### Appimage
 Appimage files are available in release page - [**GitHub releases**](https://github.com/qarmin/czkawka/releases/)  
-This version is bundled with its own theme.  
-There is also minimal appimage which use system theme.
+Available are 2 versions of Appimage:
+- default - which bundle gtk theme
+- alternative - which don't include any gtk specific libraries
 
 ### Cargo
 The easiest method to install Czkawka is using the `cargo` command. To compile it, you need to get all the
@@ -86,8 +88,7 @@ sudo snap connect czkawka:removable-media
 
 The Snap store entry can be found [**here**](https://snapcraft.io/czkawka).
 
-Fresh builds are available in edge branch, but they may be a little unstable, although that happens very rarely
-because I don't push untested code.
+Fresh builds are available in edge branch, but they may be a little unstable.
 
 ### Flatpak
 ```
@@ -121,7 +122,7 @@ yay -Syu czkawka-gui-bin
 yay -Syu czkawka-cli-bin
 ```
 
-Package info's - https://aur.archlinux.org/packages/?O=0&SeB=nd&K=czkawka&outdated=&SB=n&SO=a&PP=50&do_Search=Go
+[**Packages info**](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=czkawka&outdated=&SB=n&SO=a&PP=50&do_Search=Go)
 
 ### Docker image (unofficial)
 Czkawka docker image is available [**here**](https://github.com/jlesage/docker-czkawka)
