@@ -5,6 +5,7 @@ use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
 
+use czkawka_core::common::get_dynamic_image_from_raw_image;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -12,7 +13,7 @@ use image::imageops::FilterType;
 use image::GenericImageView;
 
 use czkawka_core::fl;
-use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
@@ -719,9 +720,10 @@ fn show_preview(
                 let file_name = file_name.as_str();
 
                 if let Some(extension) = Path::new(file_name).extension() {
-                    if !["jpg", "jpeg", "png", "bmp", /*"tiff", "tif",*/ "tga", "ff", "gif", "jif", "jfi"]
-                        .contains(&extension.to_string_lossy().to_string().to_lowercase().as_str())
-                    {
+                    let extension_lowercase = format!(".{}", extension.to_string_lossy().to_lowercase());
+
+                    let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&extension_lowercase.as_str());
+                    if !IMAGE_RS_EXTENSIONS.contains(&extension_lowercase.as_str()) && !is_raw_image {
                         break 'dir;
                     }
 
@@ -732,21 +734,38 @@ fn show_preview(
                             return; // Preview is already created, no need to recreate it
                         }
                     }
-
-                    let img = match image::open(&file_name) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            add_text_to_text_view(
-                                text_view_errors,
-                                fl!(
-                                    "preview_temporary_file",
-                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
-                                )
-                                .as_str(),
-                            );
-                            break 'dir;
+                    let img;
+                    if !is_raw_image {
+                        img = match image::open(&file_name) {
+                            Ok(t) => t,
+                            Err(e) => {
+                                add_text_to_text_view(
+                                    text_view_errors,
+                                    fl!(
+                                        "preview_temporary_file",
+                                        generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                    )
+                                    .as_str(),
+                                );
+                                break 'dir;
+                            }
+                        };
+                    } else {
+                        img = match get_dynamic_image_from_raw_image(file_name) {
+                            Some(t) => t,
+                            None => {
+                                add_text_to_text_view(
+                                    text_view_errors,
+                                    fl!(
+                                        "preview_temporary_file",
+                                        generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", "None".to_string())])
+                                    )
+                                    .as_str(),
+                                );
+                                break 'dir;
+                            }
                         }
-                    };
+                    }
                     if img.width() == 0 || img.height() == 0 {
                         add_text_to_text_view(
                             text_view_errors,
@@ -772,7 +791,10 @@ fn show_preview(
                         }
                     }
                     let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
-                    let file_dir = cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase()));
+                    let file_dir = match is_raw_image {
+                        true => cache_dir.join("cached_file.jpg"),
+                        false => cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase())),
+                    };
                     if let Err(e) = img.save(&file_dir) {
                         add_text_to_text_view(
                             text_view_errors,

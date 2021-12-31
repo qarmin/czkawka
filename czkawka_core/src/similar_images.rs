@@ -15,12 +15,12 @@ use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
 use directories_next::ProjectDirs;
 use humansize::{file_size_opts as options, FileSize};
-use image::{ColorType, GenericImageView};
+use image::GenericImageView;
 use img_hash::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::Common;
+use crate::common::{get_dynamic_image_from_raw_image, Common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -29,7 +29,22 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crate::fl;
 use crate::localizer::generate_translation_hashmap;
 
-// TODO check for better values
+pub const RAW_IMAGE_EXTENSIONS: [&str; 24] = [
+    ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
+    ".cr2", ".ari",
+];
+pub const IMAGE_RS_EXTENSIONS: [&str; 13] = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico"];
+
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: [&str; 9] = [
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", //,".bmp",
+];
+pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: [&str; 10] = [
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", //,".bmp", ".ico"
+];
+pub const ZIP_FILES_EXTENSIONS: [&str; 1] = [".zip"];
+
+pub const AUDIO_FILES_EXTENSIONS: [&str; 4] = [".mp3", ".flac", ".wav", ".ogg"];
+
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [0, 2, 5, 7, 14, 20],    // 8
     [2, 5, 15, 30, 40, 40],  // 16
@@ -269,9 +284,10 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions.extend_allowed_extensions(&[
-            ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".cr2", /*, ".webp", ".gif", ".ico"*/
-        ]); // webp cannot be seen in preview, gif is not too good to checking preview because is animated, ico is just ico and is not too usable
+        if !self.allowed_extensions.using_custom_extensions() {
+            self.allowed_extensions.extend_allowed_extensions(&IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(&RAW_IMAGE_EXTENSIONS);
+        }
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -524,98 +540,29 @@ impl SimilarImages {
         } else {
             thread::spawn(|| {})
         };
+
         //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // This will not break
                     return None;
                 }
+                let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
 
+                let image;
 
-                if file_entry.path.to_string_lossy().ends_with(".cr2"){
+                if !IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)){
+                    println!("Hashing {:?}", file_entry.path);
 
-                    let decoded = match imagepipe::simple_decode_8bit(&file_entry.path,0,0){
-                            Ok(t) => t,
-                            Err(e) => {
-                                println!("Failed to process image {:?}, reason {}", file_entry.path,e);
-                                return Some(Some((file_entry,Vec::new())));
-                            }
-                        };
-                    let vec_8 = Vec::new()
-;                     let mut f = BufWriter::new(vec_8);
-
-                    match image::codecs::jpeg::JpegEncoder::new(&mut f).encode(&decoded.data, decoded.width as u32, decoded.height as u32, ColorType::Rgb8){
-                        Ok(t) => t,
-                        Err(e) => {
-                            println!("Failed to jpeg image {:?}, reason {}", file_entry.path,e);
-                            return Some(Some((file_entry,Vec::new())));
-                        }
+                    image = match get_dynamic_image_from_raw_image(&file_entry.path){
+                        Some(t) => t,
+                        None =>
+                        return Some(Some((file_entry, Vec::new())))
                     };
-
-                    let img =
-                            match image::load_from_memory(f.buffer()){
-                                Ok(t ) => t,
-                                Err(e) => {
-                                    println!("Failed to convert image from memory {:?}, reason {}", file_entry.path,e);
-                                    return Some(Some((file_entry,Vec::new())));
-                                }
-                            };
-
-
-
-                    let hasher_config = HasherConfig::new()
-                        .hash_size(self.hash_size as u32, self.hash_size as u32)
-                        .hash_alg(self.hash_alg)
-                        .resize_filter(self.image_filter);
-                    let hasher = hasher_config.to_hasher();
-
-                    let hash = hasher.hash_image(&img);
-                    let buf: Vec<u8> = hash.as_bytes().to_vec();
-
-                    // let raw_image = match rawloader::decode_file(&file_entry.path){
-                    //     Ok(t) => t,
-                    //     Err(e) => {
-                    //         println!("Failed to process image {:?}, reason {}", file_entry.path,e);
-                    //         return Some(Some((file_entry,Vec::new())));
-                    //     }
-                    // };
-                    //
-                    // ImageBuffer::n
-                    //
-                    // let hasher_config = HasherConfig::new()
-                    //     .hash_size(self.hash_size as u32, self.hash_size as u32)
-                    //     .hash_alg(self.hash_alg)
-                    //     .resize_filter(self.image_filter);
-                    // let hasher = hasher_config.to_hasher();
-                    //
-                    // let aa = image::codecs::jpeg::JpegEncoder::new();
-                    // let hash = hasher.hash_image(&aa);
-                    //
-                    // let
-
-
-                    // image = match raw_image.data{
-                    //     RawImageData::Integer(vec_16) => unsafe {
-                    //         match image::load_from_memory(vec_16.align_to::<u8>().1){
-                    //             Ok(t ) => t,
-                    //             Err(e) => {
-                    //                 println!("Failed to conver image from memory {:?}, reason {}", file_entry.path,e);
-                    //                 return Some(Some((file_entry,Vec::new())));
-                    //             }
-                    //         }
-                    //     }
-                    //     RawImageData::Float(_vec_32) => {
-                    //         println!("Unsupported float 32 in image {:?}", file_entry.path);
-                    //         return Some(Some((file_entry,Vec::new())));
-                    //     }
-                    // }
-                    Some(Some((file_entry, buf)))
                 }
                 else {
-                    let image;
 
                     let result = panic::catch_unwind(|| {
                         match image::open(file_entry.path.clone()) {
@@ -638,6 +585,7 @@ impl SimilarImages {
                         println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
                         return Some(Some((file_entry, Vec::new())));
                     }
+                }
 
 
                     let dimensions = image.dimensions();
@@ -654,9 +602,10 @@ impl SimilarImages {
                     let buf: Vec<u8> = hash.as_bytes().to_vec();
 
                     file_entry.hash = buf.clone();
+                println!("{:?}, hash {:?}",file_entry.path,file_entry.hash);
 
                     Some(Some((file_entry, buf)))
-                }
+
 
             })
             .while_some()

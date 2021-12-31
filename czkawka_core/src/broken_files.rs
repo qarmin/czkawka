@@ -21,6 +21,7 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crate::fl;
 use crate::localizer::generate_translation_hashmap;
+use crate::similar_images::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 
 const CACHE_FILE_NAME: &str = "cache_broken_files.txt";
 
@@ -751,19 +752,11 @@ fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String,
 }
 
 fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
-    // Checking allowed image extensions
-    let allowed_image_extensions = [
-        ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico",
-        // Ico and bmp crashes are not fixed yet
-        /*".webp",*/ ".avif", // Webp is not really supported in image crate
-    ];
-    let allowed_archive_zip_extensions = [".zip"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
-    let allowed_audio_extensions = [".mp3", ".flac", ".wav", ".ogg"]; // Probably also should work [".xz", ".bz2"], but from my tests they not working
-    if allowed_image_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+    if IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::Image
-    } else if allowed_archive_zip_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+    } else if ZIP_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::ArchiveZip
-    } else if allowed_audio_extensions.iter().any(|e| file_name_lowercase.ends_with(e)) {
+    } else if AUDIO_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         #[cfg(feature = "broken_audio")]
         {
             TypeOfFile::Audio

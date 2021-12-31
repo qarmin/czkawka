@@ -1,11 +1,66 @@
+use image::{DynamicImage, ImageBuffer, Rgb};
+use imagepipe::{ImageSource, Pipeline};
 use std::ffi::OsString;
 use std::fs;
+use std::fs::OpenOptions;
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 /// Class for common functions used across other class/functions
 
 pub struct Common();
+
+pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
+    let file_handler = match OpenOptions::new().read(true).open(&path) {
+        Ok(t) => t,
+        Err(_e) => {
+            // println!("Failed to open image {:?}, reason {}", path, e);
+            return None;
+        }
+    };
+
+    let mut reader = BufReader::new(file_handler);
+    let raw = match rawloader::decode(&mut reader) {
+        Ok(raw) => raw,
+        Err(_e) => {
+            // println!("Failed to decode raw image {:?}, reason {}", path, e);
+            return None;
+        }
+    };
+
+    let width = raw.width;
+    let height = raw.height;
+    let source = ImageSource::Raw(raw);
+
+    let mut pipeline = match Pipeline::new_from_source(source, width, height, true) {
+        Ok(pipeline) => pipeline,
+        Err(_e) => {
+            // println!("Failed to create pipeline {:?}, reason {}", path, e);
+            return None;
+        }
+    };
+
+    pipeline.run(None);
+    let image = match pipeline.output_8bit(None) {
+        Ok(image) => image,
+        Err(_e) => {
+            // println!("Failed to process image {:?}, reason {}", path, e);
+            return None;
+        }
+    };
+
+    let image = match ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) {
+        Some(image) => image,
+        None => {
+            // println!("Failed to get image {:?}", path);
+            return None;
+        }
+    };
+
+    // println!("Properly hashed {:?}", path);
+    Some(image::DynamicImage::ImageRgb8(image))
+}
 
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
