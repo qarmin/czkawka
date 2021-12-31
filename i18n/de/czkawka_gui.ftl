@@ -56,6 +56,13 @@ image_hash_size_tooltip =
     Der Standardwert für den Hash ist 8 Bytes, wodurch sehr ähnliche und unterschiedliche Bilder gefunden werden können. 16 und 32 Hashes sollten nur für nahezu identische Bilder verwendet werden. 64 Bytes Hash sollte nicht verwendet werden, außer wenn wirklich kleine Unterschiede benötigt werden, um zu finden
 image_resize_filter_tooltip = Um den Hash des Bildes zu berechnen, muss die Bibliothek zuerst die Größe des Bildes verändern. Abhängig vom gewählten Algorithmus sieht das Ergebnis wenig anders aus. Der schnellste Algotithmus zu verwenden, aber auch einer, der die schlechtesten Ergebnisse gibt ist in der Nähe.
 image_hash_alg_tooltip = Benutzer können einen aus vielen Algorithmen zur Berechnung des Hashs auswählen. Jeder hat sowohl starke als auch schwächere Punkte und wird manchmal bessere und manchmal schlechtere Ergebnisse für verschiedene Bilder liefern um die beste zu wählen, ist eine manuelle Prüfung erforderlich.
+main_notebook_image_fast_compare = Schneller Vergleich
+main_notebook_image_fast_compare_tooltip =
+    Beschleunige die Suche und den Vergleich von Hashes.
+    
+    Im Gegensatz zum normalen Modus, in dem jeder Hash x-mal miteinander verglichen wird wobei x die Ähnlichkeit ist, die der Benutzer wählt, in diesem Modus wird immer nur ein Vergleich verwendet.
+    
+    Diese Option wird empfohlen, wenn >10000 Bilder mit nicht 0 (Very High) Ähnlichkeit verglichen werden.
 main_notebook_duplicates = Dateien Duplizieren
 main_notebook_empty_directories = Leere Verzeichnisse
 main_notebook_big_files = Große Dateien
