@@ -27,6 +27,7 @@ use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crate::fl;
 use crate::localizer::generate_translation_hashmap;
+use crate::similar_images::VIDEO_FILES_EXTENSIONS;
 
 pub const MAX_TOLERANCE: i32 = 20;
 
@@ -222,9 +223,9 @@ impl SimilarVideos {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions.extend_allowed_extensions(&[
-            ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
-        ]);
+        if !self.allowed_extensions.using_custom_extensions() {
+            self.allowed_extensions.extend_allowed_extensions(&VIDEO_FILES_EXTENSIONS);
+        }
 
         // Add root folders for finding
         for id in &self.directories.included_directories {

@@ -14,7 +14,6 @@ parts:
     plugin: rust
     source: https://github.com/qarmin/czkawka.git
     build-packages:
-      - libasound2-dev
       - curl
       - gcc
       - git

@@ -67,6 +67,10 @@ impl Extensions {
         true
     }
 
+    pub fn using_custom_extensions(&self) -> bool {
+        !self.file_extensions.is_empty()
+    }
+
     pub fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
         for extension in file_extensions {
             assert!(extension.starts_with('.'));

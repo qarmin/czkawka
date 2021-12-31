@@ -20,7 +20,7 @@ use img_hash::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::Common;
+use crate::common::{get_dynamic_image_from_raw_image, Common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -29,7 +29,26 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crate::fl;
 use crate::localizer::generate_translation_hashmap;
 
-// TODO check for better values
+pub const RAW_IMAGE_EXTENSIONS: [&str; 24] = [
+    ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
+    ".cr2", ".ari",
+];
+pub const IMAGE_RS_EXTENSIONS: [&str; 13] = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico"];
+
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: [&str; 9] = [
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", //,".bmp",
+];
+pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: [&str; 10] = [
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", //,".bmp", ".ico"
+];
+pub const ZIP_FILES_EXTENSIONS: [&str; 1] = [".zip"];
+
+pub const AUDIO_FILES_EXTENSIONS: [&str; 4] = [".mp3", ".flac", ".wav", ".ogg"];
+
+pub const VIDEO_FILES_EXTENSIONS: [&str; 16] = [
+    ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
+];
+
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [0, 2, 5, 7, 14, 20],    // 8
     [2, 5, 15, 30, 40, 40],  // 16
@@ -269,9 +288,10 @@ impl SimilarImages {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
-        self.allowed_extensions.extend_allowed_extensions(&[
-            ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", /*, ".webp", ".gif", ".ico"*/
-        ]); // webp cannot be seen in preview, gif is not too good to checking preview because is animated, ico is just ico and is not too usable
+        if !self.allowed_extensions.using_custom_extensions() {
+            self.allowed_extensions.extend_allowed_extensions(&IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(&RAW_IMAGE_EXTENSIONS);
+        }
 
         // Add root folders for finding
         for id in &self.directories.included_directories {
@@ -524,56 +544,73 @@ impl SimilarImages {
         } else {
             thread::spawn(|| {})
         };
+
         //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // This will not break
                     return None;
                 }
+                let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
 
                 let image;
 
-                let result = panic::catch_unwind(|| {
-                    match image::open(file_entry.path.clone()) {
-                        Ok(t) => Ok(t),
-                        // Err(_inspected) => return Some(None), // Something is wrong with image,
-                        // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
-                        // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
-                        Err(_inspected) => Err(()),
-                    }
-                });
+                if !IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)){
+                    println!("Hashing {:?}", file_entry.path);
 
-                // If image crashed during opening, we just skip checking its hash and go on
-                if let Ok(image_result) = result {
-                    if let Ok(image2) = image_result {
-                        image = image2;
+                    image = match get_dynamic_image_from_raw_image(&file_entry.path){
+                        Some(t) => t,
+                        None =>
+                        return Some(Some((file_entry, Vec::new())))
+                    };
+                }
+                else {
+
+                    let result = panic::catch_unwind(|| {
+                        match image::open(file_entry.path.clone()) {
+                            Ok(t) => Ok(t),
+                            // Err(_inspected) => return Some(None), // Something is wrong with image,
+                            // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
+                            // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
+                            Err(_inspected) => Err(()),
+                        }
+                    });
+
+                    // If image crashed during opening, we just skip checking its hash and go on
+                    if let Ok(image_result) = result {
+                        if let Ok(image2) = image_result {
+                            image = image2;
+                        } else {
+                            return Some(Some((file_entry, Vec::new())));
+                        }
                     } else {
+                        println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
                         return Some(Some((file_entry, Vec::new())));
                     }
-                } else {
-                    println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
-                    return Some(Some((file_entry, Vec::new())));
                 }
 
-                let dimensions = image.dimensions();
 
-                file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
+                    let dimensions = image.dimensions();
 
-                let hasher_config = HasherConfig::new()
-                    .hash_size(self.hash_size as u32, self.hash_size as u32)
-                    .hash_alg(self.hash_alg)
-                    .resize_filter(self.image_filter);
-                let hasher = hasher_config.to_hasher();
+                    file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
 
-                let hash = hasher.hash_image(&image);
-                let buf: Vec<u8> = hash.as_bytes().to_vec();
+                    let hasher_config = HasherConfig::new()
+                        .hash_size(self.hash_size as u32, self.hash_size as u32)
+                        .hash_alg(self.hash_alg)
+                        .resize_filter(self.image_filter);
+                    let hasher = hasher_config.to_hasher();
 
-                file_entry.hash = buf.clone();
+                    let hash = hasher.hash_image(&image);
+                    let buf: Vec<u8> = hash.as_bytes().to_vec();
 
-                Some(Some((file_entry, buf)))
+                    file_entry.hash = buf.clone();
+                println!("{:?}, hash {:?}",file_entry.path,file_entry.hash);
+
+                    Some(Some((file_entry, buf)))
+
+
             })
             .while_some()
             .filter(|file_entry| file_entry.is_some())
