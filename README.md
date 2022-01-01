@@ -48,7 +48,7 @@ I prepared a disk and performed a test without any folder exceptions and with di
 
 I set the minimal file size to check to 1KB on all programs.
 
-| App                         | Executing Time |
+|             App             | Executing Time |
 |:---------------------------:|:--------------:|
 | FSlint 2.4.7 (First Run)    |      86s       |
 | FSlint 2.4.7 (Second Run)   |      43s       |
@@ -59,11 +59,11 @@ I set the minimal file size to check to 1KB on all programs.
 
 I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for Czkawka.
 
-| App            | Idle Ram | Max Operational Ram Usage | Stabilized after search |
+|      App       | Idle Ram | Max Operational Ram Usage | Stabilized after search |
 |:--------------:|:--------:|:-------------------------:|:-----------------------:|
-| FSlint 2.4.7   | 62 MB    | 164 MB                    | 158 MB                  |
-| Dupeguru 4.1.1 | 90 MB    | 170 MB                    | 166 MB                  |
-| Czkawka 3.0.0  | 12 MB    | 122 MB                    | 60 MB                   |
+|  FSlint 2.4.7  |  62 MB   |          164 MB           |         158 MB          |
+| Dupeguru 4.1.1 |  90 MB   |          170 MB           |         166 MB          |
+| Czkawka 3.0.0  |  12 MB   |          122 MB           |          60 MB          |
 
 
 In Dupeguru I enabled checking images with different dimensions to match Czkawka behavior.
@@ -71,16 +71,16 @@ Both apps use caching mechanism, so second scan is really fast.
 
 Similar images which check 10949 files that occupied 6.6 GB
 
-| App                         | Scan time |
+|             App             | Scan time |
 |:---------------------------:|:---------:|
-| Czkawka 3.0.0 (First Run)   | 276s      |
-| Czkawka 3.0.0 (Second Run)  | 1s        |
-| DupeGuru 4.1.1 (First Run)  | 539s      |
-| DupeGuru 4.1.1 (Second Run) | 1s        |
+| Czkawka 3.0.0 (First Run)   |   276s    |
+| Czkawka 3.0.0 (Second Run)  |    1s     |
+| DupeGuru 4.1.1 (First Run)  |   539s    |
+| DupeGuru 4.1.1 (Second Run) |    1s     |
 
 Similar images which check 349 image files that occupied 1.7 GB
 
-| App                         | Scan time |
+|             App             | Scan time |
 |:---------------------------:|:----------|
 | Czkawka 3.0.0 (First Run)   | 54s       |
 | Czkawka 3.0.0 (Second Run)  | 1s        |

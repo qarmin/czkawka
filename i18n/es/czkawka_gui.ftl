@@ -15,7 +15,7 @@ core_file_no_modification_date = No se puede obtener la fecha de modificación d
 core_folder_no_modification_date = No se puede obtener la fecha de modificación de la carpeta { $name }, razón { $reason }
 # Window titles
 window_settings_title = Opciones
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Hipo)
 window_progress_title = Escaneando
 # General
 general_ok_button = Ok

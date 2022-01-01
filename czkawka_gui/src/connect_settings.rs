@@ -196,7 +196,7 @@ pub fn connect_settings(gui_data: &GuiData) {
 }
 
 fn create_clear_cache_dialog(title_str: String, window_settings: &Window) -> gtk::Dialog {
-    let dialog = gtk::Dialog::builder().title(&title_str).transient_for(window_settings).build();
+    let dialog = gtk::Dialog::builder().title(&title_str).modal(true).transient_for(window_settings).build();
     dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
 
