@@ -118,10 +118,17 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 | In active development  |     Yes     |     No     |        Yes        |     Yes     |
 
 ## Other apps
-There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.
+There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.  
+### GUI
 - [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize, great photo compare tool
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
-- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, it is written also in Rust but only in CLI
+- [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
+- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it), supports video thumbnails
+### CLI
+Due to limited time, the biggest emphasis is on the GUI version so if you are looking for really good and feature-packed console apps, then take a look at these:
+- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, it is written also in Rust
+- [Rmlint](https://github.com/sahib/rmlint) - Really good console interface and also is feature packed
+- [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
 
 ## Contributions
 Contributions to this repository are welcome.
