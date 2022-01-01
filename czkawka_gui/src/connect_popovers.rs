@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use gtk::prelude::*;
 use gtk::{ResponseType, TreeIter, Window};
 use regex::Regex;
@@ -576,6 +578,89 @@ fn popover_all_except_biggest_smallest(
     popover.popdown();
 }
 
+enum Sort {
+    Portion {
+        direction: Direction,
+        column_button_selection: i32,
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum Direction {
+    Ascending,
+    Descending,
+}
+
+fn popover_sort_list(
+    popover: &gtk::Popover,
+    tree_view: &gtk::TreeView,
+    column_color: i32,
+    sort: Sort,
+) {
+    let model = get_list_store(tree_view);
+
+    let mut list: Vec<(f64, Range<usize>)> = vec![];
+    if let Some(iter) = model.iter_first() {
+        let mut end: bool = false;
+        let mut current_index_outer: usize = 0;
+        loop {
+            let mut current_index: usize = 0;
+            let mut num_selected: usize = 0;
+
+            // Per-group
+
+            // Skip header
+            let color = model.value(&iter, column_color).get::<String>().unwrap();
+            assert_eq!(color, HEADER_ROW_COLOR);
+            if !model.iter_next(&iter) {
+                break;
+            }
+
+            current_index_outer += 1;
+
+            loop {
+                // Per-row
+                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                if color == HEADER_ROW_COLOR {
+                    break;
+                } else {
+                    match sort {
+                        Sort::Portion { column_button_selection, direction } => {
+                            let selection = model.value(&iter, column_button_selection).get::<bool>().unwrap();
+                            if selection ^ (direction == Direction::Descending) {
+                                num_selected += 1;
+                            }
+                        }
+                    }
+                }
+
+                current_index += 1;
+                current_index_outer += 1;
+
+                if !model.iter_next(&iter) {
+                    end = true;
+                    break;
+                }
+            }
+
+            // Per-group
+            let range = current_index_outer - current_index - 1 .. current_index_outer;
+
+            list.push((num_selected as f64 / current_index as f64, range));
+
+            if end {
+                break;
+            }
+        }
+    }
+
+    list.sort_by(|&(portion_a, _), &(portion_b, _)| { portion_a.partial_cmp(&portion_b).unwrap() });
+    let oldpos: Vec<_> = list.into_iter().flat_map(|(_, range)| range).map(|v| v as u32).collect();
+    model.reorder(&oldpos[..]);
+
+    popover.popdown();
+}
+
 pub fn connect_popovers(gui_data: &GuiData) {
     let popover_select = gui_data.popovers.popover_select.clone();
     let buttons_popover_select_all = gui_data.popovers.buttons_popover_select_all.clone();
@@ -758,23 +843,37 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_all_images_except_smallest = gui_data.popovers.buttons_popover_select_all_images_except_smallest.clone();
+    let popover_sort = gui_data.popovers.popover_sort.clone();
+    let buttons_popover_sort_portion_ascending = gui_data.popovers.buttons_popover_sort_portion_ascending.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
+    buttons_popover_sort_portion_ascending.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        popover_all_except_biggest_smallest(
-            &popover_select,
+        popover_sort_list(
+            &popover_sort,
             tree_view,
-            nb_object.column_color.expect("AES can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
-            nb_object.column_dimensions,
-            nb_object.column_selection as u32,
-            false,
+            nb_object.column_color.expect("sort can't be used without headers"),
+            Sort::Portion { column_button_selection: nb_object.column_selection, direction: Direction::Ascending },
+        );
+    });
+
+    let popover_sort = gui_data.popovers.popover_sort.clone();
+    let buttons_popover_sort_portion_descending = gui_data.popovers.buttons_popover_sort_portion_descending.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    buttons_popover_sort_portion_descending.connect_clicked(move |_| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+
+        popover_sort_list(
+            &popover_sort,
+            tree_view,
+            nb_object.column_color.expect("sort can't be used without headers"),
+            Sort::Portion { column_button_selection: nb_object.column_selection, direction: Direction::Descending },
         );
     });
 }

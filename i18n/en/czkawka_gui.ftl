@@ -215,6 +215,12 @@ popover_custom_mode_select = Select Custom
 popover_invalid_regex = Regex is invalid
 popover_valid_regex = Regex is valid
 
+popover_sort_portion_ascending = Sort by proportion selected, ascending
+popover_sort_portion_descending = Sort by proportion selected, descending
+
+bottom_sort_button = Sort
+bottom_sort_button_tooltip = Sort list entries
+
 # Bottom buttons
 bottom_search_button = Search
 bottom_select_button = Select

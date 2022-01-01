@@ -9,6 +9,7 @@ use czkawka_core::*;
 
 use crate::compute_results::*;
 use crate::connect_about_buttons::*;
+use crate::connect_button_sort::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_hardlink::*;
 use crate::connect_button_move::*;
@@ -34,6 +35,7 @@ use crate::tests::validate_notebook_data;
 
 mod compute_results;
 mod connect_about_buttons;
+mod connect_button_sort;
 mod connect_button_delete;
 mod connect_button_hardlink;
 mod connect_button_move;
@@ -140,6 +142,7 @@ fn main() {
         // Needs to run when entire GUI is initialized and
         connect_change_language(&gui_data);
 
+        connect_button_sort(&gui_data);
         connect_button_delete(&gui_data);
         connect_button_save(&gui_data);
         connect_button_search(

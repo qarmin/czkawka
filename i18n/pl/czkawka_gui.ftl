@@ -177,6 +177,13 @@ popover_custom_mode_unselect = Własne odznaczanie
 popover_custom_mode_select = Własne zaznaczanie
 popover_invalid_regex = Regex jest niepoprawny
 popover_valid_regex = Regex jest poprawny
+
+popover_sort_portion_ascending = Sortuj według części zaznaczonych, rosnąco
+popover_sort_portion_descending = Sortuj według części zaznaczonych, malejąco
+
+bottom_sort_button = Sortuj
+bottom_sort_button_tooltip = Sortuj grupy.
+
 # Bottom buttons
 bottom_search_button = Szukaj
 bottom_select_button = Zaznacz

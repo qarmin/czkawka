@@ -17,6 +17,9 @@ pub struct GuiPopovers {
     pub buttons_popover_select_all_images_except_biggest: gtk::Button,
     pub buttons_popover_select_all_images_except_smallest: gtk::Button,
 
+    pub buttons_popover_sort_portion_ascending: gtk::Button,
+    pub buttons_popover_sort_portion_descending: gtk::Button,
+
     pub separator_select_image_size: gtk::Separator,
     pub separator_select_reverse: gtk::Separator,
     pub separator_select_date: gtk::Separator,
@@ -26,6 +29,7 @@ pub struct GuiPopovers {
     pub buttons_popover_right_click_open_folder: gtk::Button,
 
     pub popover_select: gtk::Popover,
+    pub popover_sort: gtk::Popover,
     pub popover_right_click: gtk::Popover,
 }
 
@@ -62,6 +66,15 @@ impl GuiPopovers {
 
         let popover_right_click: gtk::Popover = builder.object("popover_right_click").unwrap();
 
+        // Popover sort
+        let glade_src = include_str!("../ui/popover_sort.glade").to_string();
+        let builder = Builder::from_string(glade_src.as_str());
+
+        let buttons_popover_sort_portion_ascending: gtk::Button = builder.object("buttons_popover_sort_portion_ascending").unwrap();
+        let buttons_popover_sort_portion_descending: gtk::Button = builder.object("buttons_popover_sort_portion_descending").unwrap();
+
+        let popover_sort: gtk::Popover = builder.object("popover_sort").unwrap();
+
         Self {
             buttons_popover_select_all,
             buttons_popover_unselect_all,
@@ -82,6 +95,9 @@ impl GuiPopovers {
             buttons_popover_right_click_open_folder,
             popover_select,
             popover_right_click,
+            buttons_popover_sort_portion_ascending,
+            buttons_popover_sort_portion_descending,
+            popover_sort,
         }
     }
     pub fn update_language(&self) {
@@ -98,5 +114,9 @@ impl GuiPopovers {
             .set_label(&fl!("popover_select_all_images_except_biggest"));
         self.buttons_popover_select_all_images_except_smallest
             .set_label(&fl!("popover_select_all_images_except_smallest"));
+        self.buttons_popover_sort_portion_ascending
+            .set_label(&fl!("popover_sort_portion_ascending"));
+        self.buttons_popover_sort_portion_descending
+            .set_label(&fl!("popover_sort_portion_descending"));
     }
 }
