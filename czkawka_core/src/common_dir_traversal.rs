@@ -90,6 +90,7 @@ enum EntryType {
     File,
     Dir,
     Symlink,
+    Other,
 }
 
 pub struct DirTraversalBuilder<'a, 'b, F> {
@@ -395,7 +396,7 @@ where
                         } else if metadata.is_file() {
                             entry_type = EntryType::File;
                         } else {
-                            unreachable!();
+                            entry_type = EntryType::Other;
                         }
                         match (entry_type, collect) {
                             (EntryType::Dir, Collect::Files) | (EntryType::Dir, Collect::InvalidSymlinks) => {
@@ -599,7 +600,7 @@ where
                                 // Adding files to Vector
                                 fe_result.push(fe);
                             }
-                            (EntryType::Symlink, Collect::Files) => {
+                            (EntryType::Symlink, Collect::Files) | (EntryType::Other, _) => {
                                 // nothing to do
                             }
                         }
