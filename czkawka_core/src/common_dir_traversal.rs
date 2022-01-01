@@ -78,11 +78,18 @@ pub struct FolderEntry {
 
 // Collection mode (files / empty folders)
 
-#[derive(Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Collect {
     EmptyFolders,
     InvalidSymlinks,
     Files,
+}
+
+#[derive(Eq, PartialEq)]
+enum EntryType {
+    File,
+    Dir,
+    Symlink,
 }
 
 pub struct DirTraversalBuilder<'a, 'b, F> {
@@ -380,8 +387,18 @@ where
                                 continue 'dir;
                             }
                         };
+                        let entry_type;
                         if metadata.is_dir() {
-                            if collect == Collect::Files {
+                            entry_type = EntryType::Dir;
+                        } else if metadata.file_type().is_symlink() {
+                            entry_type = EntryType::Symlink;
+                        } else if metadata.is_file() {
+                            entry_type = EntryType::File;
+                        } else {
+                            unreachable!();
+                        }
+                        match (entry_type, collect) {
+                            (EntryType::Dir, Collect::Files) | (EntryType::Dir, Collect::InvalidSymlinks) => {
                                 if !recursive_search {
                                     continue 'dir;
                                 }
@@ -396,7 +413,8 @@ where
                                 }
 
                                 dir_result.push(next_folder);
-                            } else {
+                            }
+                            (EntryType::Dir, Collect::EmptyFolders) => {
                                 atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
                                 let next_folder = current_folder.join(entry_data.file_name());
                                 if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
@@ -431,35 +449,129 @@ where
                                     },
                                 ));
                             }
-                        } else if metadata.is_file() && collect == Collect::Files {
-                            atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                            (EntryType::File, Collect::Files) => {
+                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
 
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(fl!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
+                                let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                    Ok(t) => t,
+                                    Err(_inspected) => {
+                                        warnings.push(fl!(
+                                            "core_file_not_utf8_name",
+                                            generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                        ));
+                                        continue 'dir;
+                                    }
+                                }
+                                .to_lowercase();
+
+                                if !allowed_extensions.matches_filename(&file_name_lowercase) {
                                     continue 'dir;
                                 }
-                            }
-                            .to_lowercase();
 
-                            if !allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
+                                if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
+                                    let current_file_name = current_folder.join(entry_data.file_name());
+                                    if excluded_items.is_excluded(&current_file_name) {
+                                        continue 'dir;
+                                    }
 
-                            if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
+                                    // Creating new file entry
+                                    let fe: FileEntry = FileEntry {
+                                        path: current_file_name.clone(),
+                                        size: metadata.len(),
+                                        modified_date: match metadata.modified() {
+                                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                                                Ok(d) => d.as_secs(),
+                                                Err(_inspected) => {
+                                                    warnings.push(fl!(
+                                                        "core_file_modified_before_epoch",
+                                                        generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                    ));
+                                                    0
+                                                }
+                                            },
+                                            Err(e) => {
+                                                warnings.push(fl!(
+                                                    "core_file_no_modification_date",
+                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
+                                                ));
+                                                0
+                                            }
+                                        },
+                                        hash: "".to_string(),
+                                        symlink_info: None,
+                                    };
+
+                                    fe_result.push(fe);
+                                }
+                            }
+                            (EntryType::File, Collect::EmptyFolders) | (EntryType::Symlink, Collect::EmptyFolders) => {
+                                set_as_not_empty_folder_list.push(current_folder.clone());
+                            }
+                            (EntryType::File, Collect::InvalidSymlinks) => {
+                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                            }
+                            (EntryType::Symlink, Collect::InvalidSymlinks) => {
+                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+
+                                let file_name_lowercase: String = match entry_data.file_name().into_string() {
+                                    Ok(t) => t,
+                                    Err(_inspected) => {
+                                        warnings.push(fl!(
+                                            "core_file_not_utf8_name",
+                                            generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                                        ));
+                                        continue 'dir;
+                                    }
+                                }
+                                .to_lowercase();
+
+                                if !allowed_extensions.matches_filename(&file_name_lowercase) {
+                                    continue 'dir;
+                                }
+
                                 let current_file_name = current_folder.join(entry_data.file_name());
                                 if excluded_items.is_excluded(&current_file_name) {
                                     continue 'dir;
                                 }
 
+                                let mut destination_path = PathBuf::new();
+                                let type_of_error;
+
+                                match current_file_name.read_link() {
+                                    Ok(t) => {
+                                        destination_path.push(t);
+                                        let mut number_of_loop = 0;
+                                        let mut current_path = current_file_name.clone();
+                                        loop {
+                                            if number_of_loop == 0 && !current_path.exists() {
+                                                type_of_error = ErrorType::NonExistentFile;
+                                                break;
+                                            }
+                                            if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
+                                                type_of_error = ErrorType::InfiniteRecursion;
+                                                break;
+                                            }
+
+                                            current_path = match current_path.read_link() {
+                                                Ok(t) => t,
+                                                Err(_inspected) => {
+                                                    // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
+                                                    continue 'dir;
+                                                }
+                                            };
+
+                                            number_of_loop += 1;
+                                        }
+                                    }
+                                    Err(_inspected) => {
+                                        // Failed to load info about it
+                                        type_of_error = ErrorType::NonExistentFile;
+                                    }
+                                }
+
                                 // Creating new file entry
                                 let fe: FileEntry = FileEntry {
                                     path: current_file_name.clone(),
-                                    size: metadata.len(),
                                     modified_date: match metadata.modified() {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
@@ -479,106 +591,17 @@ where
                                             0
                                         }
                                     },
+                                    size: 0,
                                     hash: "".to_string(),
-                                    symlink_info: None,
+                                    symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
                                 };
 
+                                // Adding files to Vector
                                 fe_result.push(fe);
                             }
-                        } else if metadata.is_file() {
-                            if collect == Collect::EmptyFolders {
-                                set_as_not_empty_folder_list.push(current_folder.clone());
-                            } else if collect == Collect::InvalidSymlinks {
-                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                            (EntryType::Symlink, Collect::Files) => {
+                                // nothing to do
                             }
-                        } else if metadata.file_type().is_symlink() && collect == Collect::InvalidSymlinks {
-                            atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(fl!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
-                            }
-                            .to_lowercase();
-
-                            if !allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            let current_file_name = current_folder.join(entry_data.file_name());
-                            if excluded_items.is_excluded(&current_file_name) {
-                                continue 'dir;
-                            }
-
-                            let mut destination_path = PathBuf::new();
-                            let type_of_error;
-
-                            match current_file_name.read_link() {
-                                Ok(t) => {
-                                    destination_path.push(t);
-                                    let mut number_of_loop = 0;
-                                    let mut current_path = current_file_name.clone();
-                                    loop {
-                                        if number_of_loop == 0 && !current_path.exists() {
-                                            type_of_error = ErrorType::NonExistentFile;
-                                            break;
-                                        }
-                                        if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
-                                            type_of_error = ErrorType::InfiniteRecursion;
-                                            break;
-                                        }
-
-                                        current_path = match current_path.read_link() {
-                                            Ok(t) => t,
-                                            Err(_inspected) => {
-                                                // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
-                                                continue 'dir;
-                                            }
-                                        };
-
-                                        number_of_loop += 1;
-                                    }
-                                }
-                                Err(_inspected) => {
-                                    // Failed to load info about it
-                                    type_of_error = ErrorType::NonExistentFile;
-                                }
-                            }
-
-                            // Creating new file entry
-                            let fe: FileEntry = FileEntry {
-                                path: current_file_name.clone(),
-                                modified_date: match metadata.modified() {
-                                    Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                        Ok(d) => d.as_secs(),
-                                        Err(_inspected) => {
-                                            warnings.push(fl!(
-                                                "core_file_modified_before_epoch",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-                                    Err(e) => {
-                                        warnings.push(fl!(
-                                            "core_file_no_modification_date",
-                                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                        ));
-                                        0
-                                    }
-                                },
-                                size: 0,
-                                hash: "".to_string(),
-                                symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
-                            };
-
-                            // Adding files to Vector
-                            fe_result.push(fe);
                         }
                     }
                     (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list)
