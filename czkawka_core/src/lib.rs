@@ -13,6 +13,7 @@ pub mod similar_videos;
 pub mod temporary;
 
 pub mod common;
+pub mod common_dir_traversal;
 pub mod common_directory;
 pub mod common_extensions;
 pub mod common_items;

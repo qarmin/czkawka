@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 #[cfg(target_family = "unix")]
 use std::collections::HashSet;
-use std::fs::{File, Metadata, OpenOptions};
+use std::fs::{File, OpenOptions};
 use std::hash::Hasher;
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime};
 use std::{fs, mem, thread};
 
 use crossbeam_channel::Receiver;
@@ -21,30 +21,12 @@ use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
 
 use crate::common::Common;
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::fl;
-use crate::localizer::generate_translation_hashmap;
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub checking_method: CheckingMethod,
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub files_checked: usize,
-    pub files_to_check: usize,
-}
-
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
-pub enum CheckingMethod {
-    None,
-    Name,
-    Size,
-    Hash,
-}
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
@@ -71,14 +53,6 @@ pub enum DeleteMethod {
     OneOldest,
     OneNewest,
     HardLink,
-}
-
-#[derive(Clone, Debug, PartialEq, Default)]
-pub struct FileEntry {
-    pub path: PathBuf,
-    pub size: u64,
-    pub modified_date: u64,
-    pub hash: String,
 }
 
 /// Info struck with helpful information's about results
@@ -318,490 +292,191 @@ impl DuplicateFinder {
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-
-        // Add root folders for finding
-        for id in &self.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
-
-        //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method: CheckingMethod::Name,
-                        current_stage: 0,
-                        max_stage: 0,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        files_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-
-        //// PROGRESS THREAD END
-
-        while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
-                return false;
-            }
-
-            let segments: Vec<_> = folders_to_check
-                .par_iter()
-                .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
-                    let mut fe_result = vec![];
-                    // Read current dir childrens
-                    let read_dir = match fs::read_dir(&current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(fl!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result);
-                        }
-                    };
-
-                    // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(fl!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(fl!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
-                        if metadata.is_dir() {
-                            if !self.recursive_search {
-                                continue 'dir;
-                            }
-
-                            let next_folder = current_folder.join(entry_data.file_name());
-                            if self.directories.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            if self.excluded_items.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            dir_result.push(next_folder);
-                        } else if metadata.is_file() {
-                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(fl!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
-                            }
-                            .to_lowercase();
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                                let current_file_name = current_folder.join(entry_data.file_name());
-                                if self.excluded_items.is_excluded(&current_file_name) {
-                                    continue 'dir;
-                                }
-
-                                let fe: FileEntry = FileEntry {
-                                    path: current_file_name.clone(),
-                                    size: metadata.len(),
-                                    modified_date: match metadata.modified() {
-                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                            Ok(d) => d.as_secs(),
-                                            Err(_inspected) => {
-                                                warnings.push(fl!(
-                                                    "core_file_modified_before_epoch",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
-                                        Err(e) => {
-                                            warnings.push(fl!(
-                                                "core_file_no_modification_date",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-                                    hash: "".to_string(),
-                                };
-
-                                fe_result.push((entry_data.file_name().to_string_lossy().to_string(), fe));
-                            }
-                        }
-                    }
-                    (dir_result, warnings, fe_result)
-                })
-                .collect();
-
-            // Advance the frontier
-            folders_to_check.clear();
-
-            // Process collected data
-            for (segment, warnings, fe_result) in segments {
-                folders_to_check.extend(segment);
+        let result = DirTraversalBuilder::new()
+            .root_dirs(self.directories.included_directories.clone())
+            .group_by(|fe| fe.path.file_name().unwrap().to_string_lossy().to_string())
+            .stop_receiver(stop_receiver)
+            .progress_sender(progress_sender)
+            .checking_method(CheckingMethod::Name)
+            .directories(self.directories.clone())
+            .allowed_extensions(self.allowed_extensions.clone())
+            .excluded_items(self.excluded_items.clone())
+            .recursive_search(self.recursive_search)
+            .minimal_file_size(self.minimal_file_size)
+            .maximal_file_size(self.maximal_file_size)
+            .build()
+            .run();
+        match result {
+            DirTraversalResult::SuccessFiles {
+                start_time,
+                grouped_file_entries,
+                warnings,
+            } => {
+                self.files_with_identical_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
-                for (name, fe) in fe_result {
-                    self.files_with_identical_names.entry(name.clone()).or_insert_with(Vec::new);
-                    self.files_with_identical_names.get_mut(&name).unwrap().push(fe);
+
+                // Create new BTreeMap without single size entries(files have not duplicates)
+                let mut new_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
+
+                for (name, vector) in &self.files_with_identical_names {
+                    if vector.len() > 1 {
+                        new_map.insert(name.clone(), vector.clone());
+                    }
                 }
-            }
-        }
+                self.files_with_identical_names = new_map;
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+                // Reference - only use in size, because later hash will be counted differently
+                if self.use_reference_folders {
+                    let mut btree_map = Default::default();
+                    mem::swap(&mut self.files_with_identical_names, &mut btree_map);
+                    let reference_directories = self.directories.reference_directories.clone();
+                    let vec = btree_map
+                        .into_iter()
+                        .filter_map(|(_size, vec_file_entry)| {
+                            let mut files_from_referenced_folders = Vec::new();
+                            let mut normal_files = Vec::new();
+                            for file_entry in vec_file_entry {
+                                if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                    files_from_referenced_folders.push(file_entry);
+                                } else {
+                                    normal_files.push(file_entry);
+                                }
+                            }
 
-        // Create new BTreeMap without single size entries(files have not duplicates)
-        let mut new_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
-
-        for (name, vector) in &self.files_with_identical_names {
-            if vector.len() > 1 {
-                new_map.insert(name.clone(), vector.clone());
-            }
-        }
-        self.files_with_identical_names = new_map;
-
-        // Reference - only use in size, because later hash will be counted differently
-        if self.use_reference_folders {
-            let mut btree_map = Default::default();
-            mem::swap(&mut self.files_with_identical_names, &mut btree_map);
-            let reference_directories = self.directories.reference_directories.clone();
-            let vec = btree_map
-                .into_iter()
-                .filter_map(|(_size, vec_file_entry)| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
+                            if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                                None
+                            } else {
+                                Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                            }
+                        })
+                        .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+                    for (fe, vec_fe) in vec {
+                        self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
                     }
+                }
 
-                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
-                        None
-                    } else {
-                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                if self.use_reference_folders {
+                    for (_fe, vector) in self.files_with_identical_names_referenced.values() {
+                        self.information.number_of_duplicated_files_by_name += vector.len();
+                        self.information.number_of_groups_by_name += 1;
                     }
-                })
-                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
-            for (fe, vec_fe) in vec {
-                self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
-            }
-        }
+                } else {
+                    for vector in self.files_with_identical_names.values() {
+                        self.information.number_of_duplicated_files_by_name += vector.len() - 1;
+                        self.information.number_of_groups_by_name += 1;
+                    }
+                }
 
-        if self.use_reference_folders {
-            for (_fe, vector) in self.files_with_identical_names_referenced.values() {
-                self.information.number_of_duplicated_files_by_name += vector.len();
-                self.information.number_of_groups_by_name += 1;
+                Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
+                true
             }
-        } else {
-            for vector in self.files_with_identical_names.values() {
-                self.information.number_of_duplicated_files_by_name += vector.len() - 1;
-                self.information.number_of_groups_by_name += 1;
+            DirTraversalResult::SuccessFolders { .. } => {
+                unreachable!()
             }
+            DirTraversalResult::Stopped => false,
         }
-
-        Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
-        true
     }
 
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
     fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-
-        // Add root folders for finding
-        for id in &self.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
-
-        //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            let checking_method = self.check_method;
-            let max_stage = match self.check_method {
-                CheckingMethod::Size => 0,
-                CheckingMethod::Hash => 2,
-                _ => panic!(),
-            };
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method,
-                        current_stage: 0,
-                        max_stage,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        files_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
+        let max_stage = match self.check_method {
+            CheckingMethod::Size => 0,
+            CheckingMethod::Hash => 2,
+            _ => panic!(),
         };
-
-        //// PROGRESS THREAD END
-
-        while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
-                return false;
-            }
-
-            let segments: Vec<_> = folders_to_check
-                .par_iter()
-                .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
-                    let mut fe_result = vec![];
-                    // Read current dir childrens
-                    let read_dir = match fs::read_dir(&current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(fl!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result);
-                        }
-                    };
-
-                    // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(fl!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(fl!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
-                        if metadata.is_dir() {
-                            if !self.recursive_search {
-                                continue 'dir;
-                            }
-
-                            let next_folder = current_folder.join(entry_data.file_name());
-                            if self.directories.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            if self.excluded_items.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            dir_result.push(next_folder);
-                        } else if metadata.is_file() {
-                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(fl!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
-                            }
-                            .to_lowercase();
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                                let current_file_name = current_folder.join(entry_data.file_name());
-                                if self.excluded_items.is_excluded(&current_file_name) {
-                                    continue 'dir;
-                                }
-
-                                // Creating new file entry
-                                let fe: FileEntry = FileEntry {
-                                    path: current_file_name.clone(),
-                                    size: metadata.len(),
-                                    modified_date: match metadata.modified() {
-                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                            Ok(d) => d.as_secs(),
-                                            Err(_inspected) => {
-                                                warnings.push(fl!(
-                                                    "core_file_modified_before_epoch",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
-                                        Err(e) => {
-                                            warnings.push(fl!(
-                                                "core_file_no_modification_date",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-                                    hash: "".to_string(),
-                                };
-
-                                fe_result.push(fe);
-                            }
-                        }
-                    }
-                    (dir_result, warnings, fe_result)
-                })
-                .collect();
-
-            // Advance the frontier
-            folders_to_check.clear();
-
-            // Process collected data
-            for (segment, warnings, fe_result) in segments {
-                folders_to_check.extend(segment);
+        let result = DirTraversalBuilder::new()
+            .root_dirs(self.directories.included_directories.clone())
+            .group_by(|fe| fe.size)
+            .stop_receiver(stop_receiver)
+            .progress_sender(progress_sender)
+            .checking_method(self.check_method)
+            .max_stage(max_stage)
+            .directories(self.directories.clone())
+            .allowed_extensions(self.allowed_extensions.clone())
+            .excluded_items(self.excluded_items.clone())
+            .recursive_search(self.recursive_search)
+            .minimal_file_size(self.minimal_file_size)
+            .maximal_file_size(self.maximal_file_size)
+            .build()
+            .run();
+        match result {
+            DirTraversalResult::SuccessFiles {
+                start_time,
+                grouped_file_entries,
+                warnings,
+            } => {
+                self.files_with_identical_size = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
-                for fe in fe_result {
-                    self.files_with_identical_size.entry(fe.size).or_insert_with(Vec::new);
-                    self.files_with_identical_size.get_mut(&fe.size).unwrap().push(fe);
+
+                // Create new BTreeMap without single size entries(files have not duplicates)
+                let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+                mem::swap(&mut old_map, &mut self.files_with_identical_size);
+
+                for (size, vec) in old_map {
+                    if vec.len() <= 1 {
+                        continue;
+                    }
+
+                    let vector = if self.ignore_hard_links { filter_hard_links(&vec) } else { vec };
+
+                    if vector.len() > 1 {
+                        self.files_with_identical_size.insert(size, vector);
+                    }
                 }
-            }
-        }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+                // Reference - only use in size, because later hash will be counted differently
+                if self.use_reference_folders && self.check_method == CheckingMethod::Size {
+                    let mut btree_map = Default::default();
+                    mem::swap(&mut self.files_with_identical_size, &mut btree_map);
+                    let reference_directories = self.directories.reference_directories.clone();
+                    let vec = btree_map
+                        .into_iter()
+                        .filter_map(|(_size, vec_file_entry)| {
+                            let mut files_from_referenced_folders = Vec::new();
+                            let mut normal_files = Vec::new();
+                            for file_entry in vec_file_entry {
+                                if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                    files_from_referenced_folders.push(file_entry);
+                                } else {
+                                    normal_files.push(file_entry);
+                                }
+                            }
 
-        // Create new BTreeMap without single size entries(files have not duplicates)
-        let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-        mem::swap(&mut old_map, &mut self.files_with_identical_size);
-
-        for (size, vec) in old_map {
-            if vec.len() <= 1 {
-                continue;
-            }
-
-            let vector = if self.ignore_hard_links { filter_hard_links(&vec) } else { vec };
-
-            if vector.len() > 1 {
-                self.files_with_identical_size.insert(size, vector);
-            }
-        }
-
-        // Reference - only use in size, because later hash will be counted differently
-        if self.use_reference_folders && self.check_method == CheckingMethod::Size {
-            let mut btree_map = Default::default();
-            mem::swap(&mut self.files_with_identical_size, &mut btree_map);
-            let reference_directories = self.directories.reference_directories.clone();
-            let vec = btree_map
-                .into_iter()
-                .filter_map(|(_size, vec_file_entry)| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
+                            if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                                None
+                            } else {
+                                Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                            }
+                        })
+                        .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+                    for (fe, vec_fe) in vec {
+                        self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
                     }
+                }
 
-                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
-                        None
-                    } else {
-                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                if self.use_reference_folders {
+                    for (size, (_fe, vector)) in &self.files_with_identical_size_referenced {
+                        self.information.number_of_duplicated_files_by_size += vector.len();
+                        self.information.number_of_groups_by_size += 1;
+                        self.information.lost_space_by_size += (vector.len() as u64) * size;
                     }
-                })
-                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
-            for (fe, vec_fe) in vec {
-                self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
-            }
-        }
+                } else {
+                    for (size, vector) in &self.files_with_identical_size {
+                        self.information.number_of_duplicated_files_by_size += vector.len() - 1;
+                        self.information.number_of_groups_by_size += 1;
+                        self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
+                    }
+                }
 
-        if self.use_reference_folders {
-            for (size, (_fe, vector)) in &self.files_with_identical_size_referenced {
-                self.information.number_of_duplicated_files_by_size += vector.len();
-                self.information.number_of_groups_by_size += 1;
-                self.information.lost_space_by_size += (vector.len() as u64) * size;
+                Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
+                true
             }
-        } else {
-            for (size, vector) in &self.files_with_identical_size {
-                self.information.number_of_duplicated_files_by_size += vector.len() - 1;
-                self.information.number_of_groups_by_size += 1;
-                self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
+            DirTraversalResult::SuccessFolders { .. } => {
+                unreachable!()
             }
+            DirTraversalResult::Stopped => false,
         }
-
-        Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
-        true
     }
 
     /// The slowest checking type, which must be applied after checking for size
@@ -832,8 +507,8 @@ impl DuplicateFinder {
                         checking_method,
                         current_stage: 1,
                         max_stage: 2,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        files_to_check,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_to_check: files_to_check,
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -998,8 +673,8 @@ impl DuplicateFinder {
                         checking_method,
                         current_stage: 2,
                         max_stage: 2,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        files_to_check,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_to_check: files_to_check,
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -1727,6 +1402,7 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
                         }
                     },
                     hash: uuu[3].to_string(),
+                    symlink_info: None,
                 };
                 hashmap_loaded_entries.entry(file_entry.size).or_insert_with(Vec::new);
                 hashmap_loaded_entries.get_mut(&file_entry.size).unwrap().push(file_entry);
@@ -1769,7 +1445,7 @@ impl MyHasher for xxhash_rust::xxh3::Xxh3 {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{read_dir, File};
+    use std::fs::{read_dir, File, Metadata};
     use std::io;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;

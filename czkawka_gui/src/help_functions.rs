@@ -15,7 +15,7 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use czkawka_core::{fl, invalid_symlinks};
+use czkawka_core::{common_dir_traversal, fl};
 
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
@@ -448,10 +448,10 @@ pub fn hide_all_buttons(buttons_array: &[Widget]) {
     }
 }
 
-pub fn get_text_from_invalid_symlink_cause(error: &invalid_symlinks::ErrorType) -> String {
+pub fn get_text_from_invalid_symlink_cause(error: &common_dir_traversal::ErrorType) -> String {
     match error {
-        invalid_symlinks::ErrorType::InfiniteRecursion => fl!("invalid_symlink_infinite_recursion"),
-        invalid_symlinks::ErrorType::NonExistentFile => fl!("invalid_symlink_non_existent_destination"),
+        common_dir_traversal::ErrorType::InfiniteRecursion => fl!("invalid_symlink_infinite_recursion"),
+        common_dir_traversal::ErrorType::NonExistentFile => fl!("invalid_symlink_non_existent_destination"),
     }
 }
 

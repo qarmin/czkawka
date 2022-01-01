@@ -8,7 +8,7 @@ use glib::Receiver;
 use gtk::prelude::*;
 use humansize::{file_size_opts as options, FileSize};
 
-use czkawka_core::duplicate::CheckingMethod;
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
 
@@ -1356,18 +1356,22 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let mut vector = vector.clone();
 
                         vector.sort_by_key(|e| {
-                            let t = split_path(e.symlink_path.as_path());
+                            let t = split_path(e.path.as_path());
                             (t.0, t.1)
                         });
 
                         for file_entry in vector {
-                            let (directory, file) = split_path(&file_entry.symlink_path);
+                            let (directory, file) = split_path(&file_entry.path);
+                            let symlink_info = file_entry.symlink_info.clone().expect("invalid traversal result");
                             let values: [(u32, &dyn ToValue); 7] = [
                                 (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
                                 (ColumnsInvalidSymlinks::Name as u32, &file),
                                 (ColumnsInvalidSymlinks::Path as u32, &directory),
-                                (ColumnsInvalidSymlinks::DestinationPath as u32, &file_entry.destination_path.to_string_lossy().to_string()),
-                                (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(&file_entry.type_of_error)),
+                                (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
+                                (
+                                    ColumnsInvalidSymlinks::TypeOfError as u32,
+                                    &get_text_from_invalid_symlink_cause(&symlink_info.type_of_error),
+                                ),
                                 (
                                     ColumnsInvalidSymlinks::Modification as u32,
                                     &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),

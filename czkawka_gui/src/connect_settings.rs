@@ -104,7 +104,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                         for use_prehash in [true, false] {
                             for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32].iter() {
                                 if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash, use_prehash) {
-                                    let mut hashmap_to_save: BTreeMap<String, czkawka_core::duplicate::FileEntry> = Default::default();
+                                    let mut hashmap_to_save: BTreeMap<String, czkawka_core::common_dir_traversal::FileEntry> = Default::default();
                                     for (_, vec_file_entry) in cache_entries {
                                         for file_entry in vec_file_entry {
                                             hashmap_to_save.insert(file_entry.path.to_string_lossy().to_string(), file_entry);

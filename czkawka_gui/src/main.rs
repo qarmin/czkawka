@@ -85,12 +85,12 @@ fn main() {
 
         // Futures progress report
         let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (
-            futures::channel::mpsc::UnboundedSender<duplicate::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<duplicate::ProgressData>,
+            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_empty_files, futures_receiver_empty_files): (
-            futures::channel::mpsc::UnboundedSender<empty_files::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<empty_files::ProgressData>,
+            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_empty_folder, futures_receiver_empty_folder): (
             futures::channel::mpsc::UnboundedSender<empty_folder::ProgressData>,
@@ -117,8 +117,8 @@ fn main() {
             futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (
-            futures::channel::mpsc::UnboundedSender<invalid_symlinks::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<invalid_symlinks::ProgressData>,
+            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_broken_files, futures_receiver_broken_files): (
             futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
