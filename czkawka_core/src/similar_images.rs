@@ -558,7 +558,6 @@ impl SimilarImages {
                 let image;
 
                 if !IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)){
-                    println!("Hashing {:?}", file_entry.path);
 
                     image = match get_dynamic_image_from_raw_image(&file_entry.path){
                         Some(t) => t,
@@ -606,7 +605,6 @@ impl SimilarImages {
                     let buf: Vec<u8> = hash.as_bytes().to_vec();
 
                     file_entry.hash = buf.clone();
-                println!("{:?}, hash {:?}",file_entry.path,file_entry.hash);
 
                     Some(Some((file_entry, buf)))
 
