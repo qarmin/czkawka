@@ -1,18 +1,18 @@
 # Core
-core_similarity_very_high = Très haut
+core_similarity_very_high = Très élevé
 core_similarity_high = Élevé
 core_similarity_medium = Moyenne
-core_similarity_small = Petit
-core_similarity_very_small = Très petit
+core_similarity_small = Bas
+core_similarity_very_small = Très bas
 core_similarity_minimal = Minimal
-core_cannot_open_dir = Impossible d'ouvrir le répertoire { $dir }, raison { $reason }
-core_cannot_read_entry_dir = Impossible de lire l'entrée dans le répertoire { $dir }, raison { $reason }
-core_cannot_read_metadata_dir = Impossible de lire les métadonnées dans le répertoire { $dir }, raison { $reason }
+core_cannot_open_dir = Impossible d’ouvrir le répertoire { $dir }, raison : { $reason }
+core_cannot_read_entry_dir = Impossible de lire l'entrée dans le répertoire { $dir }, raison : { $reason }
+core_cannot_read_metadata_dir = Impossible de lire les métadonnées dans le répertoire { $dir }, raison : { $reason }
 core_file_not_utf8_name = Le fichier { $name } n'a pas de nom UTF-8 valide (certains caractères ne peuvent pas être affichés)
-core_file_modified_before_epoch = Le fichier { $name } semble être modifié avant l'époque Unix
-core_folder_modified_before_epoch = Le dossier { $name } semble être modifié avant l'époque Unix
-core_file_no_modification_date = Impossible d'obtenir la date de modification du fichier { $name }, raison { $reason }
-core_folder_no_modification_date = Impossible d'obtenir la date de modification du dossier { $name }, raison { $reason }
+core_file_modified_before_epoch = Le fichier { $name } semble avoir été modifié avant l'époque Unix
+core_folder_modified_before_epoch = Le dossier { $name } semble avoir été modifié avant l'époque Unix
+core_file_no_modification_date = Impossible d'obtenir la date de modification du fichier { $name }, raison : { $reason }
+core_folder_no_modification_date = Impossible d'obtenir la date de modification du dossier { $name }, raison : { $reason }
 # Window titles
 window_settings_title = Options
 window_main_title = Czkawka (Hoquet)
@@ -23,55 +23,55 @@ general_close_button = Fermer
 # Main window
 music_title_checkbox = Titre de la page
 music_artist_checkbox = Artiste
-music_album_title_checkbox = Titre de l'album
-music_album_artist_checkbox = Artiste de l'album
+music_album_title_checkbox = Titre de l’album
+music_album_artist_checkbox = Artiste de l’album
 music_year_checkbox = Année
 music_comparison_checkbox = Comparaison approximative
 music_comparison_checkbox_tooltip =
-    Il recherche des fichiers de musique similaires à l'aide de l'AI, qui utilise l'apprentissage automatique pour supprimer des parenthèses d'une phrase, p. ex. avec cette option activée, les fichiers en question seront considérés comme des doublons :
+    Il recherche des fichiers de musique similaires à l'aide de l’AI, qui utilise l'apprentissage automatique pour supprimer des parenthèses d'une phrase, par ex. avec cette option activée, les fichiers en question seront considérés comme des doublons :
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_mode_name_combo_box = Nom
 duplicate_mode_size_combo_box = Taille
 duplicate_mode_hash_combo_box = Hachage
 duplicate_hash_type_tooltip =
-    Czkawka offre 3 types de hachages, qui peuvent être utilisés:
+    Czkawka offre 3 types de hachages, qui peuvent être utilisés :
     
-    Blake3 - fonction de hachage cryptographique. Il est utilisé comme algorithme de hachage par défaut, car il est très rapide.
+    Blake3 - fonction de hachage cryptographique. Il est utilisé comme algorithme de hachage par défaut, car très rapide.
     
-    CRC32 - fonction de hachage simple. Cela devrait être plus rapide que Blake3, mais probablement très rarement quelques collisions.
+    CRC32 - fonction de hachage simple. Cela devrait être plus rapide que Blake3, mais avec probablement de très rares collisions.
     
-    XXH3 - très similaire en cas de performances et de qualité de hachage à Blake3, de sorte que de tels modes peuvent être facilement utilisés.
+    XXH3 - très similaire en termes de performances et de qualité de hachage à Blake3, de sorte qu’il peut être facilement utilisés.
 duplicate_check_method_tooltip =
-    Pour l'instant, Czkawka offre trois types de méthode pour trouver des doublons par:
+    Pour l'instant, Czkawka offre trois types de méthode pour trouver des doublons par :
     
-    Name - Trouve des fichiers qui ont le même nom.
+    Nom - Trouve des fichiers qui ont le même nom.
     
-    Taille - Trouve des fichiers qui ont la mme taille.
+    Taille - Trouve des fichiers qui ont la même taille.
     
-    Hash - Trouve des fichiers qui ont le męme contenu. Ce mode permet de comparer les fichiers et ensuite de les comparer pour trouver les doublons. Ce mode est le moyen le plus sûr de trouver les doublons. L'outil utilise lourdement le cache, donc les analyses secondaires et ultérieures des mêmes données devraient être beaucoup plus rapides que la première.
+    Hachage - Trouve des fichiers qui ont le même contenu. Ce mode permet de hacher les fichiers et de les comparer ensuite pour trouver les doublons. Ce mode est le moyen le plus sûr de trouver les doublons. L'outil utilise lourdement le cache, donc les analyses secondaires et ultérieures des mêmes données devraient être beaucoup plus rapides que la première.
 image_hash_size_tooltip =
     Czkawka offre une taille variable de hachage généré pour chaque image. Une cause de hachage plus importante permet de trouver des images avec moins de différences entre les images, mais aussi un peu plus lent à utiliser.
     
-    La valeur par défaut pour le hachage est de 8 octets, ce qui permet de trouver des images très similaires et différentes. Les hashs 16 et 32 ne doivent être utilisés que pour des images presque identiques. Le hash de 64 octets ne devrait pas être utilisé, sauf situation où de petites différences sont nécessaires pour trouver
-image_resize_filter_tooltip = Pour calculer le hachage de l'image, la bibliothèque doit d'abord le redimensionner. Dépend de l'algorithme choisi, l'image résultée sera peu différente. L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest.
-image_hash_alg_tooltip = Les utilisateurs peuvent choisir un des nombreux algorithmes de calcul du hachage. Chacun a des points forts et des points faibles et donnera parfois de meilleurs résultats pour des images différentes, parfois pires, afin de choisir le meilleur, des tests manuels sont nécessaires.
+    La valeur par défaut pour le hachage est de 8 octets, ce qui permet de trouver des images avec de très faibles différentes entre elles. Les hachages 16 et 32 ne doivent être utilisés que pour des images presque identiques. Le hachage de 64 octets ne devrait pas être utilisé, sauf dans le cas où de très faibles différences doivent être trouvées.
+image_resize_filter_tooltip = Pour calculer le hachage de l'image, la bibliothèque doit d'abord le redimensionner. Cela dépend de l'algorithme choisi, l'image résultée sera peu différente. L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest.
+image_hash_alg_tooltip = Les utilisateurs peuvent choisir un des nombreux algorithmes de calcul de hachage. Chacun a des points forts et des points faibles et donnera parfois de meilleurs résultats pour certaines images, parfois de plus mauvais résultats pour d'autres images. Afin de choisir le meilleur d’entre eux, des tests manuels sont nécessaires.
 main_notebook_image_fast_compare = Comparaison rapide
 main_notebook_image_fast_compare_tooltip =
-    Accélère la recherche et la comparaison des haches.
+    Accélère la recherche et la comparaison des hachages.
     
-    En opposé au mode normal où chaque hachage est comparé les uns aux autres x fois, où x est la similitude de l'utilisateur choisi, dans ce mode, une seule comparaison est utilisée.
+    Contrairement au mode normal où chaque hachage est comparé les uns aux autres x fois, où x est la similitude de l'utilisateur choisi, dans ce mode, une seule comparaison est utilisée.
     
     Cette option est recommandée lors de la comparaison de >10000 images avec la similitude non 0(Very High) .
 main_notebook_duplicates = Fichiers en double
 main_notebook_empty_directories = Dossiers vides
-main_notebook_big_files = Grands fichiers
+main_notebook_big_files = Gros fichiers
 main_notebook_empty_files = Fichiers vides
 main_notebook_temporary = Fichiers temporaires
 main_notebook_similar_images = Images similaires
 main_notebook_similar_videos = Vidéos similaires
 main_notebook_same_music = Doublons de musique
-main_notebook_symlinks = Liens symboliques non valides
+main_notebook_symlinks = Liens symboliques invalides
 main_notebook_broken_files = Fichiers cassés
 main_tree_view_column_file_name = Nom du fichier
 main_tree_view_column_folder_name = Nom du dossier
@@ -80,19 +80,19 @@ main_tree_view_column_modification = Date de modification
 main_tree_view_column_size = Taille
 main_tree_view_column_similarity = Similitude
 main_tree_view_column_dimensions = Dimensions
-main_tree_view_column_title = Titre de la page
+main_tree_view_column_title = Titre
 main_tree_view_column_artist = Artiste
 main_tree_view_column_year = Année
-main_tree_view_column_album_title = Titre de l'album
-main_tree_view_column_album_artist = Artiste de l'album
-main_tree_view_column_symlink_file_name = Nom du fichier Symlink
-main_tree_view_column_symlink_folder = Dossier Symlnik
+main_tree_view_column_album_title = Titre de l’album
+main_tree_view_column_album_artist = Artiste de l’album
+main_tree_view_column_symlink_file_name = Nom du lien symbolique
+main_tree_view_column_symlink_folder = Dossier de lien symbolique
 main_tree_view_column_destination_path = Chemin de destination
 main_tree_view_column_type_of_error = Type d'erreur
 main_label_check_method = Méthode de vérification
 main_label_hash_type = Type de hachage
 main_label_hash_size = Taille du hachage
-main_label_size_bytes = Taille(octets)
+main_label_size_bytes = Taille (octets)
 main_label_min_size = Min
 main_label_max_size = Max
 main_label_shown_files = Nombre de fichiers affichés
@@ -115,20 +115,20 @@ upper_remove_excluded_button = Retirer
 upper_manual_add_included_button_tooltip = Permet d'ajouter un nom de répertoire à la recherche manuelle.
 upper_add_included_button_tooltip = Ajouter un nouveau répertoire à la recherche.
 upper_remove_included_button_tooltip = Supprimer le répertoire de la recherche.
-upper_manual_add_excluded_button_tooltip = Permet d'ajouter des noms de répertoires exclus à la main.
+upper_manual_add_excluded_button_tooltip = Permet d'ajouter des noms de répertoires exclus manuellement.
 upper_add_excluded_button_tooltip = Ajouter un répertoire à exclure dans la recherche.
-upper_remove_excluded_button_tooltip = Supprimer le répertoire de l'exclusion.
-upper_notebook_items_configuration = Configuration des articles
+upper_remove_excluded_button_tooltip = Supprimer le répertoire de l’exclusion.
+upper_notebook_items_configuration = Configuration des éléments
 upper_notebook_excluded_directories = Répertoires exclus
 upper_notebook_included_directories = Répertoires inclus
 upper_allowed_extensions_tooltip =
     Les extensions autorisées doivent être séparées par des virgules (par défaut, toutes sont disponibles).
     
-    Macros IMAGE, VIDEO, MUSIC, TEXT qui ajoute plusieurs extensions à la fois sont également disponibles.
+    Macros IMAGE, VIDEO, MUSIC, TEXT qui ajoutent plusieurs extensions à la fois sont également disponibles.
     
-    Exemple d'utilisation ".exe, IMAGE, VIDEO, .rar, 7z" - cela signifie que l'image(e. jpg, png), vidéo (par exemple, avi, mp4), exe, rar et 7z fichiers seront scannés.
+    Exemple d'utilisation ".exe, IMAGE, VIDEO, .rar, 7z" - cela signifie que  les fichiers image (par ex. jpg, png), vidéo (par ex., avi, mp4), exe, rar et 7z  seront analysés.
 upper_excluded_items_tooltip =
-    Les éléments exclus doivent contenir des caractères génériques * et doivent être séparés par des virgules.
+    Les éléments exclus doivent contenir des caractères génériques comme * et doivent être séparés par des virgules.
     Ceci est plus lent que les répertoires exclus, donc utilisez-les attentivement.
 upper_excluded_items = Éléments exclus :
 upper_allowed_extensions = Extensions autorisées :
@@ -138,11 +138,11 @@ popover_unselect_all = Désélectionner tout
 popover_reverse = Inverser la sélection
 popover_select_all_except_oldest = Tout sélectionner sauf le plus ancien
 popover_select_all_except_newest = Tout sélectionner sauf le plus récent
-popover_select_one_oldest = Sélectionnez un plus ancien
-popover_select_one_newest = Sélectionnez une dernière version
+popover_select_one_oldest = Sélectionner un plus ancien
+popover_select_one_newest = Sélectionner la version la plus récente
 popover_select_custom = Sélectionner une personnalisation
-popover_unselect_custom = Désélectionner personnalisé
-popover_select_all_images_except_biggest = Tout sélectionner sauf le plus grand
+popover_unselect_custom = Déselection personalisée
+popover_select_all_images_except_biggest = Tout sélectionner sauf le plus gros
 popover_select_all_images_except_smallest = Tout sélectionner sauf le plus petit
 popover_custom_path_check_button_entry_tooltip =
     Permet de sélectionner les enregistrements par son chemin.
@@ -162,41 +162,41 @@ popover_custom_regex_check_button_entry_tooltip =
     Utilisation d'exemple :
     /usr/bin/ziemniak. xt peut être trouvé avec /ziem[a-z]+
     
-    Cette implémentation de regex Rust par défaut, vous pouvez donc en savoir plus à ce sujet dans https://docs.rs/regex.
+    Cela utilise l’implémentation par défaut de la regex Rust, vous pouvez donc en savoir plus à ce sujet dans https://docs.rs/regex.
 popover_custom_not_all_check_button_tooltip =
     Empêche la sélection de tous les enregistrements du groupe.
     
-    Ceci est activé par défaut, car dans la plupart des cas, l'utilisateur ne veut pas supprimer à la fois les fichiers originaux et les doublons mais vous voulez laisser au moins un fichier.
+    Ceci est activé par défaut, car dans la plupart des cas, l'utilisateur ne veut pas supprimer à la fois les fichiers originaux et les doublons mais souhaite laisser au moins un fichier.
     
     Avertissement : Ce paramètre ne fonctionne pas si l'utilisateur a déjà sélectionné tous les résultats dans le groupe manuellement.
 popover_custom_regex_path_label = Chemin d'accès
 popover_custom_regex_name_label = Nom
 popover_custom_regex_regex_label = Chemin de Regex + Nom
 popover_custom_all_in_group_label = Ne pas sélectionner tous les enregistrements du groupe
-popover_custom_mode_unselect = Désélectionner Personnalisé
-popover_custom_mode_select = Sélectionnez Personnalisé
-popover_invalid_regex = Regex est invalide
-popover_valid_regex = Regex est valide
+popover_custom_mode_unselect = Désélectionner la personnalisation
+popover_custom_mode_select = Sélectionner la personnalisation
+popover_invalid_regex = La regex est invalide
+popover_valid_regex = La regex est valide
 # Bottom buttons
 bottom_search_button = Chercher
 bottom_select_button = Sélectionner
-bottom_delete_button = Supprimez
+bottom_delete_button = Supprimer
 bottom_save_button = Enregistrer
-bottom_symlink_button = Symlink
-bottom_hardlink_button = Hardlink
+bottom_symlink_button = Lien symbolique
+bottom_hardlink_button = Lien dur
 bottom_move_button = Déplacer
-bottom_search_button_tooltip = Commencez à rechercher des fichiers/dossiers.
+bottom_search_button_tooltip = Commencer à rechercher des fichiers/dossiers.
 bottom_select_button_tooltip = Sélectionne les enregistrements. Seuls les fichiers/dossiers sélectionnés peuvent être traités plus tard.
 bottom_delete_button_tooltip = Supprimer les fichiers/dossiers sélectionnés.
-bottom_save_button_tooltip = Enregistrer les données sur la recherche dans un fichier
+bottom_save_button_tooltip = Enregistrer les données de la recherche sur un fichier
 bottom_symlink_button_tooltip =
     Crée des liens symboliques.
     Ne fonctionne que si au moins 2 résultats sont sélectionnés dans le groupe.
-    Le premier est inchangé et le second et plus tard sont liés au premier.
+    Le premier est inchangé et le second et les suivants sont liés au premier.
 bottom_hardlink_button_tooltip =
     Crée des liens durs.
     Ne fonctionne que si au moins 2 résultats sont sélectionnés dans le groupe.
-    Le premier est inchangé et le second et plus tard sont hardliés au premier.
+    Le premier est inchangé et le second et les suivants sont liés en dur au premier.
 bottom_move_button_tooltip =
     Déplace les fichiers dans le dossier choisi.
     Il copie tous les fichiers dans le dossier sans préserver l'arborescence des répertoires.
@@ -225,20 +225,20 @@ header_about_button_tooltip = Ouvre la boîte de dialogue avec les informations 
 
 settings_save_at_exit_button_tooltip = Enregistre la configuration dans un fichier lors de la fermeture de l'application.
 settings_load_at_start_button_tooltip =
-    Chargement de la configuration à partir du fichier.
+    Chargement de la configuration à partir d’un fichier.
     
     Ne pas sélectionner cette option chargera les paramètres par défaut.
 settings_confirm_deletion_button_tooltip = Affiche la boîte de dialogue de confirmation lorsque vous cliquez sur le bouton Supprimer.
-settings_confirm_link_button_tooltip = Affiche la boîte de dialogue de confirmation lorsque vous cliquez sur le bouton hard/symlink.
+settings_confirm_link_button_tooltip = Affiche la boîte de dialogue de confirmation lorsque vous cliquez sur le bouton lien symbolique/lien en dur.
 settings_confirm_group_deletion_button_tooltip = Affiche la boîte de dialogue lorsque vous essayez de supprimer tous les enregistrements du groupe.
 settings_show_text_view_button_tooltip = Affiche le panneau d'erreur en bas de page.
 settings_use_cache_button_tooltip = Option permettant de ne pas utiliser la fonctionnalité de cache.
-settings_use_trash_button_tooltip = Lorsqu'il est activé, il déplace les fichiers vers la corbeille au lieu de les supprimer définitivement.
+settings_use_trash_button_tooltip = Lorsqu’elle est activé, elle déplace les fichiers vers la corbeille au lieu de les supprimer définitivement.
 settings_language_label_tooltip = Permet de choisir la langue de l'interface à partir des langues disponibles.
 settings_save_at_exit_button = Enregistrer la configuration à la sortie
 settings_load_at_start_button = Charger la configuration au démarrage
 settings_confirm_deletion_button = Afficher la boîte de dialogue de confirmation lors de la suppression des fichiers
-settings_confirm_link_button = Afficher la boîte de dialogue de confirmation lorsque des liens hard/symlinks sont des fichiers
+settings_confirm_link_button = Afficher la boîte de dialogue de confirmation lorsque des liens en dur/liens symboliques sont des fichiers
 settings_confirm_group_deletion_button = Afficher la boîte de dialogue de confirmation lors de la suppression de tous les fichiers du groupe
 settings_show_text_view_button = Afficher le panneau de texte du bas
 settings_use_cache_button = Utiliser le cache

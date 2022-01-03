@@ -5,17 +5,17 @@ core_similarity_medium = 中
 core_similarity_small = 小的
 core_similarity_very_small = 非常小
 core_similarity_minimal = 最小化
-core_cannot_open_dir = 无法打开目录 { $dir }，原因 { $reason }
-core_cannot_read_entry_dir = 无法在目录 { $dir } 中读取条目，原因 { $reason }
-core_cannot_read_metadata_dir = 无法读取目录 { $dir } 中的元数据，原因 { $reason }
+core_cannot_open_dir = 无法打开目录 { $dir }，因为 { $reason }
+core_cannot_read_entry_dir = 无法在目录 { $dir } 中读取条目，因为 { $reason }
+core_cannot_read_metadata_dir = 无法读取目录 { $dir } 中的元数据，因为 { $reason }
 core_file_not_utf8_name = 文件 { $name } 无效的 UTF-8 名称 (可能无法显示一些字符)
 core_file_modified_before_epoch = 文件 { $name } 似乎在 Unix Epoch前被修改
 core_folder_modified_before_epoch = 文件夹 { $name } 似乎在Unix Epoch前被修改
-core_file_no_modification_date = 无法从文件 { $name } 获取修改日期，原因 { $reason }
-core_folder_no_modification_date = 无法从文件夹 { $name } 获取修改日期，原因 { $reason }
+core_file_no_modification_date = 无法从文件 { $name } 获取修改日期，因为 { $reason }
+core_folder_no_modification_date = 无法从文件夹 { $name } 获取修改日期，因为 { $reason }
 # Window titles
 window_settings_title = 备选方案
-window_main_title = Czkawka (打嗝)
+window_main_title = Czkawka
 window_progress_title = 正在扫描
 # General
 general_ok_button = 好的
@@ -63,7 +63,7 @@ main_notebook_image_fast_compare_tooltip =
     与正常模式相反，每次散列被比较的 x 次， 用户选择的 x 相似之处，在这种模式下总是只使用一个比较。
     
     在比较一千00图像与 non 0(Very High) 相似性时建议使用此选项。
-main_notebook_duplicates = 复制文件
+main_notebook_duplicates = 重复文件
 main_notebook_empty_directories = 空目录
 main_notebook_big_files = 大文件
 main_notebook_empty_files = 空文件
@@ -253,7 +253,7 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     禁用此选项将有助于扫描外部驱动器上的文件，所以在下一次扫描中不会清除有关它们的缓存条目。
     
     在缓存中拥有数百万条记录的情况下， 建议启用此选项，以便在扫描开始和结束时加速缓存加载和保存。
-settings_notebook_general = 一. 概况
+settings_notebook_general = 概况
 settings_notebook_duplicates = 重复项
 settings_notebook_images = 相似图像
 settings_notebook_videos = 相似视频
@@ -340,7 +340,7 @@ progress_scanning_size = 正在扫描文件大小 { $file_number }
 progress_scanning_name = 正在扫描 { $file_number } 文件的名称
 progress_analyzed_partial_hash = 分析了 { $file_checked }/{ $all_files } 文件的部分哈希
 progress_analyzed_full_hash = 分析了 { $file_checked }/{ $all_files } 文件的完整哈希值
-progress_current_stage = Current Stage:{ "  " }
+progress_current_stage = 当前阶段:{ "  " }
 progress_all_stages = 所有阶段:{ " " }
 # Saving loading 
 saving_loading_saving_success = 配置保存到文件 { $name }。
