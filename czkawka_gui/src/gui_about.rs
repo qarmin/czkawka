@@ -22,6 +22,47 @@ impl GuiAbout {
         about_dialog.set_modal(true);
         about_dialog.set_transient_for(Some(window_main));
 
+        // Taken from command - "git shortlog -s -n -e" - remember to remove duplicates
+        // This should be updated only before releasing new version
+        about_dialog.set_authors(&vec![
+            "Rafał Mikrut",
+            "Thomas Andreas Jung",
+            "Alexis Lefebvre",
+            "Ben Bodenmiller",
+            "Dan Dascalescu",
+            "Igor",
+            "Peter Blackson",
+            "Shriraj Hegde",
+            "krzysdz",
+            "0xflotus",
+            "Adam Boguszewski",
+            "Caduser2020",
+            "Danny Kirkham",
+            "Dariusz Niedoba",
+            "Douman",
+            "Elazar Fine",
+            "Farmadupe",
+            "Jan Jurec",
+            "Jona",
+            "Meir Klemfner",
+            "Mek101",
+            "Michael Grigoryan",
+            "Nikita Karamov",
+            "Proprietary Chrome-chan",
+            "Sbgodin",
+            "Spirit",
+            "Stefan Seering",
+            "Syfaro",
+            "Yuri Slobodyanyuk",
+            "bellrise",
+            "endolith",
+            "jann",
+            "kamilek96",
+            "kuskov",
+            "tecome",
+            "tenninjas",
+        ]);
+
         let button_repository: gtk::Button = builder.object("button_repository").unwrap();
         let button_donation: gtk::Button = builder.object("button_donation").unwrap();
         let button_instruction: gtk::Button = builder.object("button_instruction").unwrap();
@@ -36,7 +77,7 @@ impl GuiAbout {
         }
     }
     pub fn update_language(&self) {
-        let mut comment_text: String = "2020 - 2021  Rafał Mikrut(qarmin)\n\n".to_string();
+        let mut comment_text: String = "2020 - 2022  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &fl!("about_window_motto");
         self.about_dialog.set_comments(Some(&comment_text));
 

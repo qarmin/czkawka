@@ -38,7 +38,7 @@ Author: Rafał Mikrut
     <property name="type-hint">dialog</property>
     <property name="program-name">Czkawka</property>
     <property name="version">3.3.1</property>
-    <property name="comments" translatable="yes">2020 - 2021  Rafał Mikrut(qarmin)
+    <property name="comments" translatable="yes">2020 - 2022  Rafał Mikrut(qarmin)
 
 This program is free to use and will always be.
 </property>
