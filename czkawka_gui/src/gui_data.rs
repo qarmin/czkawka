@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crossbeam_channel::unbounded;
+use gdk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::Builder;
 
@@ -90,6 +91,9 @@ impl GuiData {
         window_main.set_title(&fl!("window_main_title"));
         window_main.show_all();
 
+        let pixbuf = Pixbuf::from_file_at_scale("snap/gui/czkawka.png", 200, 200, false).unwrap();
+        window_main.set_icon(Some(&pixbuf));
+
         window_main.set_application(Some(application));
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
@@ -97,7 +101,7 @@ impl GuiData {
         let popovers = GuiPopovers::create_from_builder();
         let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers.popover_select);
         let progress_window = GuiProgressDialog::create_from_builder(&window_main);
-        let about = GuiAbout::create_from_builder(&window_main);
+        let about = GuiAbout::create_from_builder(&window_main, &pixbuf);
         let header = GuiHeader::create_from_builder(&builder);
         let settings = GuiSettings::create_from_builder(&window_main);
 
