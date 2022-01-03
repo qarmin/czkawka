@@ -1,3 +1,4 @@
+use gdk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::{Builder, Window};
 
@@ -14,13 +15,15 @@ pub struct GuiAbout {
 }
 
 impl GuiAbout {
-    pub fn create_from_builder(window_main: &Window) -> Self {
+    pub fn create_from_builder(window_main: &Window, logo: &Pixbuf) -> Self {
         let glade_src = include_str!("../ui/about_dialog.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let about_dialog: gtk::AboutDialog = builder.object("about_dialog").unwrap();
         about_dialog.set_modal(true);
         about_dialog.set_transient_for(Some(window_main));
+
+        about_dialog.set_logo(Some(logo));
 
         // Taken from command - "git shortlog -s -n -e" - remember to remove duplicates
         // This should be updated only before releasing new version
