@@ -1,14 +1,11 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::io::BufReader;
 use std::rc::Rc;
 
 use crossbeam_channel::unbounded;
 use gdk::gdk_pixbuf::Pixbuf;
-use glib::value::FromValue;
 use gtk::prelude::*;
 use gtk::Builder;
-use image::EncodableLayout;
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
