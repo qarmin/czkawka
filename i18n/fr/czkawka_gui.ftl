@@ -1,13 +1,13 @@
 # Core
-core_similarity_very_high = Très élevé
-core_similarity_high = Élevé
+core_similarity_very_high = Très haute
+core_similarity_high = Haute
 core_similarity_medium = Moyenne
-core_similarity_small = Bas
-core_similarity_very_small = Très bas
-core_similarity_minimal = Minimal
-core_cannot_open_dir = Impossible d’ouvrir le répertoire { $dir }, raison : { $reason }
-core_cannot_read_entry_dir = Impossible de lire l'entrée dans le répertoire { $dir }, raison : { $reason }
-core_cannot_read_metadata_dir = Impossible de lire les métadonnées dans le répertoire { $dir }, raison : { $reason }
+core_similarity_small = Basse
+core_similarity_very_small = Très basse
+core_similarity_minimal = Minimale
+core_cannot_open_dir = Impossible d'ouvrir le répertoire { $dir }, raison { $reason }
+core_cannot_read_entry_dir = Impossible de lire l'entrée dans le répertoire { $dir }, raison { $reason }
+core_cannot_read_metadata_dir = Impossible de lire les métadonnées dans le répertoire { $dir }, raison { $reason }
 core_file_not_utf8_name = Le fichier { $name } n'a pas de nom UTF-8 valide (certains caractères ne peuvent pas être affichés)
 core_file_modified_before_epoch = Le fichier { $name } semble avoir été modifié avant l'époque Unix
 core_folder_modified_before_epoch = Le dossier { $name } semble avoir été modifié avant l'époque Unix
@@ -28,20 +28,20 @@ music_album_artist_checkbox = Artiste de l’album
 music_year_checkbox = Année
 music_comparison_checkbox = Comparaison approximative
 music_comparison_checkbox_tooltip =
-    Il recherche des fichiers de musique similaires à l'aide de l’AI, qui utilise l'apprentissage automatique pour supprimer des parenthèses d'une phrase, par ex. avec cette option activée, les fichiers en question seront considérés comme des doublons :
+    Il recherche des fichiers de musique similaires à l'aide de l’intelligence artificielle, qui utilise l'apprentissage automatique pour supprimer des parenthèses d'une phrase, par ex. avec cette option activée, les fichiers en question seront considérés comme des doublons :
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_mode_name_combo_box = Nom
 duplicate_mode_size_combo_box = Taille
 duplicate_mode_hash_combo_box = Hachage
 duplicate_hash_type_tooltip =
-    Czkawka offre 3 types de hachages, qui peuvent être utilisés :
+    Czkawka offre 3 types de hachages, qui peuvent être utilisés :
     
     Blake3 - fonction de hachage cryptographique. Il est utilisé comme algorithme de hachage par défaut, car très rapide.
     
     CRC32 - fonction de hachage simple. Cela devrait être plus rapide que Blake3, mais avec probablement de très rares collisions.
     
-    XXH3 - très similaire en termes de performances et de qualité de hachage à Blake3, de sorte qu’il peut être facilement utilisés.
+    XXH3 - très similaire en terme de performances et de qualité de hachage à Blake3, de sorte que de tels modes peuvent être facilement utilisés.
 duplicate_check_method_tooltip =
     Pour l'instant, Czkawka offre trois types de méthode pour trouver des doublons par :
     
@@ -51,16 +51,16 @@ duplicate_check_method_tooltip =
     
     Hachage - Trouve des fichiers qui ont le même contenu. Ce mode permet de hacher les fichiers et de les comparer ensuite pour trouver les doublons. Ce mode est le moyen le plus sûr de trouver les doublons. L'outil utilise lourdement le cache, donc les analyses secondaires et ultérieures des mêmes données devraient être beaucoup plus rapides que la première.
 image_hash_size_tooltip =
-    Czkawka offre une taille variable de hachage généré pour chaque image. Une cause de hachage plus importante permet de trouver des images avec moins de différences entre les images, mais aussi un peu plus lent à utiliser.
+    Czkawka offre une taille variable de hachage généré pour chaque image. Une taille de hachage plus importante permet de trouver des images avec moins de différences entre les images, mais aussi un peu plus lent à utiliser.
     
-    La valeur par défaut pour le hachage est de 8 octets, ce qui permet de trouver des images avec de très faibles différentes entre elles. Les hachages 16 et 32 ne doivent être utilisés que pour des images presque identiques. Le hachage de 64 octets ne devrait pas être utilisé, sauf dans le cas où de très faibles différences doivent être trouvées.
-image_resize_filter_tooltip = Pour calculer le hachage de l'image, la bibliothèque doit d'abord le redimensionner. Cela dépend de l'algorithme choisi, l'image résultée sera peu différente. L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest.
-image_hash_alg_tooltip = Les utilisateurs peuvent choisir un des nombreux algorithmes de calcul de hachage. Chacun a des points forts et des points faibles et donnera parfois de meilleurs résultats pour certaines images, parfois de plus mauvais résultats pour d'autres images. Afin de choisir le meilleur d’entre eux, des tests manuels sont nécessaires.
+    La valeur par défaut pour le hachage est de 8 octets, ce qui permet de trouver des images très similaires et différentes. Les hashs 16 et 32 ne doivent être utilisés que pour des images presque identiques. Le hash de 64 octets ne devrait pas être utilisé, sauf situation où de petites différences sont nécessaires pour trouver
+image_resize_filter_tooltip = Pour calculer le hachage de l'image, la bibliothèque doit d'abord la redimensionner. En fonction de l'algorithme choisi, l'image résultée sera peu différente. L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest.
+image_hash_alg_tooltip = Les utilisateurs peuvent choisir un des nombreux algorithmes de calcul du hachage. Chacun a des points forts et des points faibles et donnera parfois de meilleurs résultats pour des images différentes, parfois pires, afin de choisir le meilleur, des tests manuels sont nécessaires
 main_notebook_image_fast_compare = Comparaison rapide
 main_notebook_image_fast_compare_tooltip =
-    Accélère la recherche et la comparaison des hachages.
+    Accélère la recherche et la comparaison des hashs.
     
-    Contrairement au mode normal où chaque hachage est comparé les uns aux autres x fois, où x est la similitude de l'utilisateur choisi, dans ce mode, une seule comparaison est utilisée.
+    En opposé au mode normal où chaque hash est comparé les uns aux autres x fois, où x est la similitude de l'utilisateur choisi, dans ce mode, une seule comparaison est utilisée.
     
     Cette option est recommandée lors de la comparaison de >10000 images avec la similitude non 0(Very High) .
 main_notebook_duplicates = Fichiers en double
@@ -96,7 +96,7 @@ main_label_size_bytes = Taille (octets)
 main_label_min_size = Min
 main_label_max_size = Max
 main_label_shown_files = Nombre de fichiers affichés
-main_label_resize_algorithm = Redimensionner l'algorithme
+main_label_resize_algorithm = Algorithme de redimensionnement
 main_label_similarity = Similarité{ " " }
 check_button_general_same_size = Ignorer la même taille
 check_button_general_same_size_tooltip = Ignorer les résultats, les fichiers dont la taille est identique - généralement ce sont des doublons 1:1
@@ -105,7 +105,7 @@ main_label_size_bytes_tooltip = Taille des fichiers qui seront utilisés lors de
 upper_tree_view_included_folder_column_title = Dossiers à rechercher
 upper_tree_view_included_reference_column_title = Dossiers de référence
 upper_recursive_button = Récursif
-upper_recursive_button_tooltip = Si sélectionné, recherchez également les fichiers qui ne sont pas placés directement dans les dossiers choisis.
+upper_recursive_button_tooltip = Si sélectionné, rechercher également les fichiers qui ne sont pas placés directement dans les dossiers choisis.
 upper_manual_add_included_button = Ajout manuel
 upper_add_included_button = Ajouter
 upper_remove_included_button = Retirer
@@ -166,7 +166,7 @@ popover_custom_regex_check_button_entry_tooltip =
 popover_custom_not_all_check_button_tooltip =
     Empêche la sélection de tous les enregistrements du groupe.
     
-    Ceci est activé par défaut, car dans la plupart des cas, l'utilisateur ne veut pas supprimer à la fois les fichiers originaux et les doublons mais souhaite laisser au moins un fichier.
+    Ceci est activé par défaut, car dans la plupart des cas, l'utilisateur ne veut pas supprimer à la fois les fichiers originaux et les doublons mais souhaite conserver au moins un fichier.
     
     Avertissement : Ce paramètre ne fonctionne pas si l'utilisateur a déjà sélectionné tous les résultats dans le groupe manuellement.
 popover_custom_regex_path_label = Chemin d'accès
@@ -186,9 +186,9 @@ bottom_symlink_button = Lien symbolique
 bottom_hardlink_button = Lien dur
 bottom_move_button = Déplacer
 bottom_search_button_tooltip = Commencer à rechercher des fichiers/dossiers.
-bottom_select_button_tooltip = Sélectionne les enregistrements. Seuls les fichiers/dossiers sélectionnés peuvent être traités plus tard.
+bottom_select_button_tooltip = Sélectionner les enregistrements. Seuls les fichiers/dossiers sélectionnés peuvent être traités plus tard.
 bottom_delete_button_tooltip = Supprimer les fichiers/dossiers sélectionnés.
-bottom_save_button_tooltip = Enregistrer les données de la recherche sur un fichier
+bottom_save_button_tooltip = Enregistrer les données sur la recherche dans un fichier
 bottom_symlink_button_tooltip =
     Crée des liens symboliques.
     Ne fonctionne que si au moins 2 résultats sont sélectionnés dans le groupe.
@@ -260,7 +260,7 @@ settings_notebook_videos = Vidéo similaire
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_image_preview_checkbutton_tooltip = Affiche l'aperçu à droite lors de la sélection du fichier image.
+settings_multiple_image_preview_checkbutton_tooltip = Afficher l'aperçu à droite lors de la sélection du fichier image.
 settings_multiple_image_preview_checkbutton = Afficher l'aperçu de l'image
 settings_multiple_clear_cache_button_tooltip =
     Effacer manuellement le cache des entrées obsolètes.
@@ -303,7 +303,7 @@ settings_reset_button = Réinitialiser la configuration
 settings_folder_cache_open_tooltip =
     Ouvre le dossier où sont stockés les fichiers txt avec le cache.
     
-    Les modifier peut causer d'afficher des résultats invalides mais aussi de modifier e. . Le chemin peut gagner du temps lorsque vous déplacez une grande quantité de fichiers à un endroit différent.
+    Les modifier peut causer l'affichage de résultats invalides mais les modifier (par exemple le chemin peut faire gagner du temps lorsque vous déplacez une grande quantité de fichiers à un endroit différent.
     
     Vous pouvez copier ces fichiers entre ordinateurs pour gagner du temps sur l'analyse à nouveau pour les fichiers (bien sûr s'ils ont une structure de répertoire similaire).
     
@@ -320,7 +320,7 @@ compute_found_duplicates_hash_size = { $number_files } doublons trouvés dans { 
 compute_found_duplicates_name = { $number_files } doublons trouvés dans les groupes { $number_groups }
 compute_found_empty_folders = { $number_files } dossiers vides trouvés
 compute_found_empty_files = { $number_files } fichiers vides trouvés
-compute_found_big_files = { $number_files } gros fichiers trouvés
+compute_found_big_files = { $number_files } grands fichiers trouvés
 compute_found_temporary_files = { $number_files } fichiers temporaires trouvés
 compute_found_images = { $number_files } images similaires trouvées dans les groupes { $number_groups }
 compute_found_videos = { $number_files } vidéos similaires trouvées dans les groupes { $number_groups }
@@ -368,7 +368,7 @@ searching_for_data = Recherche de données, cela peut prendre un certain temps, 
 text_view_messages = MESSAGES
 text_view_warnings = ATTENTIONS
 text_view_errors = ERREUR
-about_window_motto = Ce programme est gratuit et sera toujours disponible.
+about_window_motto = Ce programme est gratuit et le sera toujours.
 # Various dialog
 dialogs_ask_next_time = Demander la prochaine fois
 delete_file_failed = Impossible de supprimer le fichier { $name }, raison { $reason }
