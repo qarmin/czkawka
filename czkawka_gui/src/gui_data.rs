@@ -30,6 +30,8 @@ use crate::gui_upper_notebook::GuiUpperNotebook;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
+const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../snap/gui/czkawka.png");
+
 #[derive(Clone)]
 pub struct GuiData {
     // Glade builder
@@ -91,7 +93,7 @@ impl GuiData {
         window_main.set_title(&fl!("window_main_title"));
         window_main.show_all();
 
-        let pixbuf = Pixbuf::from_file_at_scale("snap/gui/czkawka.png", 200, 200, false).unwrap();
+        let pixbuf = Pixbuf::from_read(std::io::BufReader::new(ICON_ABOUT.as_slice())).unwrap();
         window_main.set_icon(Some(&pixbuf));
 
         window_main.set_application(Some(application));
