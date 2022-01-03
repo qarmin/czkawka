@@ -63,7 +63,7 @@ pub enum ErrorType {
 /// Enum with values which show if folder is empty.
 /// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
 #[derive(Eq, PartialEq, Copy, Clone)]
-enum FolderEmptiness {
+pub(crate) enum FolderEmptiness {
     No,
     Maybe,
 }
@@ -71,8 +71,8 @@ enum FolderEmptiness {
 /// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
 #[derive(Clone)]
 pub struct FolderEntry {
-    parent_path: Option<PathBuf>, // Usable only when finding
-    is_empty: FolderEmptiness,
+    pub(crate) parent_path: Option<PathBuf>, // Usable only when finding
+    pub(crate) is_empty: FolderEmptiness,
     pub modified_date: u64,
 }
 
@@ -246,7 +246,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             collect: self.collect,
             directories: self.directories.expect("could not build"),
             excluded_items: self.excluded_items.expect("could not build"),
-            allowed_extensions: self.allowed_extensions.expect("could not build"),
+            allowed_extensions: self.allowed_extensions.unwrap_or_default(),
             recursive_search: self.recursive_search,
         }
     }
@@ -277,6 +277,7 @@ where
         let mut folder_entries: BTreeMap<PathBuf, FolderEntry> = BTreeMap::new();
         let start_time: SystemTime = SystemTime::now();
 
+        // Add root folders into result (only for empty folder collection)
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         if self.collect == Collect::EmptyFolders {
             for dir in &self.root_dirs {

@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use gtk::prelude::*;
 
-use czkawka_core::{big_file, broken_files, common_dir_traversal, empty_folder, same_music, similar_images, similar_videos, temporary};
+use czkawka_core::{big_file, broken_files, common_dir_traversal, same_music, similar_images, similar_videos, temporary};
 
 use crate::fl;
 use crate::gui_data::GuiData;
@@ -13,7 +13,7 @@ pub fn connect_progress_window(
     gui_data: &GuiData,
     mut futures_receiver_duplicate_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_empty_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_empty_folder: futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>,
+    mut futures_receiver_empty_folder: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_big_files: futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
     mut futures_receiver_same_music: futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>,
     mut futures_receiver_similar_images: futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
@@ -147,7 +147,7 @@ pub fn connect_progress_window(
             while let Some(item) = futures_receiver_empty_folder.next().await {
                 label_stage.set_text(&fl!(
                     "progress_scanning_empty_folders",
-                    generate_translation_hashmap(vec![("folder_number", item.folders_checked.to_string())])
+                    generate_translation_hashmap(vec![("folder_number", item.entries_checked.to_string())])
                 ));
                 taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
             }

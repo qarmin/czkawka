@@ -93,8 +93,8 @@ fn main() {
             futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_empty_folder, futures_receiver_empty_folder): (
-            futures::channel::mpsc::UnboundedSender<empty_folder::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<empty_folder::ProgressData>,
+            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_big_file, futures_receiver_big_file): (
             futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
