@@ -314,9 +314,9 @@ settings_multiple_clear_cache_button = Remove outdated results from images cache
 
 ## Duplicates
 settings_duplicates_hide_hard_link_button_tooltip = 
-        Hides all files except one, if are points to same data(are hardlinked).
+        Hides all files except one, if all points to the same data (are hardlinked).
 
-        E.g. in case where on disk there is 7 files which are hardlinked to specific data and one different file with same data but different inode, then in duplicate finder will be visible only one unique file and one file from hardlinked ones.
+        E.g. in case where on disk there are 7 files which are hardlinked to specific data and one different file with same data but different inode, then in duplicate finder will be visible only one unique file and one file from hardlinked ones.
 
 settings_duplicates_minimal_size_entry_tooltip = 
         Allows to set minimal size of file, which will be cached.
