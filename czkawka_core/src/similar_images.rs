@@ -727,8 +727,8 @@ impl SimilarImages {
                         .filter(|(_similarity, hash)| !master_of_group.contains(*hash) && available_hashes.contains_key(*hash))
                         .collect::<Vec<_>>();
 
-                    // Not found any hash with specific distance
-                    if vector_with_found_similar_hashes.is_empty() {
+                    // Not found any hash with specific distance maybe except self
+                    if vector_with_found_similar_hashes.len() <= 1 {
                         continue;
                     }
 
