@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::OpenOptions;
+=======
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+>>>>>>> 42e62c3 (Simplify cache code)
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::io::*;
@@ -13,14 +17,13 @@ use std::{fs, mem, thread};
 
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
 use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
 use img_hash::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{get_dynamic_image_from_raw_image, Common};
+use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -1033,6 +1036,7 @@ impl PrintResults for SimilarImages {
     }
 }
 
+<<<<<<< HEAD
 pub fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
@@ -1057,18 +1061,22 @@ pub fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: 
             }
         };
 
+=======
+pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
+    if let Some((file_handler, cache_file)) = open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), true, &mut text_messages.warnings) {
+>>>>>>> 42e62c3 (Simplify cache code)
         let writer = BufWriter::new(file_handler);
         #[cfg(not(debug_assertions))]
         if let Err(e) = bincode::serialize_into(writer, hashmap) {
             text_messages
-                .messages
+                .warnings
                 .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
             return;
         }
         #[cfg(debug_assertions)]
         if let Err(e) = serde_json::to_writer(writer, hashmap) {
             text_messages
-                .messages
+                .warnings
                 .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
             return;
         }
@@ -1083,6 +1091,7 @@ pub fn load_hashes_from_file(
     hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
+<<<<<<< HEAD
 ) -> Option<HashMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
@@ -1095,6 +1104,10 @@ pub fn load_hashes_from_file(
             }
         };
 
+=======
+) -> Option<BTreeMap<String, FileEntry>> {
+    if let Some((file_handler, cache_file)) = open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), false, &mut text_messages.warnings) {
+>>>>>>> 42e62c3 (Simplify cache code)
         let reader = BufReader::new(file_handler);
         #[cfg(debug_assertions)]
         let mut hashmap_loaded_entries: HashMap<String, FileEntry> = match serde_json::from_reader(reader) {
@@ -1126,8 +1139,6 @@ pub fn load_hashes_from_file(
 
         return Some(hashmap_loaded_entries);
     }
-
-    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
 }
 

@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::io::*;
@@ -11,7 +10,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
 use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
@@ -19,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::Common;
+use crate::common::{open_cache_folder, Common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -706,41 +704,19 @@ impl PrintResults for SimilarVideos {
 }
 
 pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        if cache_dir.exists() {
-            if !cache_dir.is_dir() {
-                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
-                return;
-            }
-        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
-            return;
-        }
-
-        let cache_file = cache_dir.join(cache_dir.join(get_cache_file()));
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(e) => {
-                text_messages
-                    .messages
-                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        };
-
+    if let Some((file_handler, cache_file)) = open_cache_folder(&get_cache_file(), true, &mut text_messages.warnings) {
         let writer = BufWriter::new(file_handler);
         #[cfg(not(debug_assertions))]
         if let Err(e) = bincode::serialize_into(writer, hashmap) {
             text_messages
-                .messages
+                .warnings
                 .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
             return;
         }
         #[cfg(debug_assertions)]
         if let Err(e) = serde_json::to_writer(writer, hashmap) {
             text_messages
-                .messages
+                .warnings
                 .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
             return;
         }
@@ -750,17 +726,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 }
 
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(get_cache_file());
-        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error warning
-                return None;
-            }
-        };
-
+    if let Some((file_handler, cache_file)) = open_cache_folder(&get_cache_file(), false, &mut text_messages.warnings) {
         let reader = BufReader::new(file_handler);
         #[cfg(debug_assertions)]
         let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(reader) {
@@ -792,8 +758,6 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 
         return Some(hashmap_loaded_entries);
     }
-
-    text_messages.messages.push("Cannot find or open system config dir to save cache file.".to_string());
     None
 }
 

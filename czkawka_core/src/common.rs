@@ -1,8 +1,9 @@
+use directories_next::ProjectDirs;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 use std::ffi::OsString;
 use std::fs;
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
@@ -10,6 +11,42 @@ use std::time::SystemTime;
 /// Class for common functions used across other class/functions
 
 pub struct Common();
+
+pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, warnings: &mut Vec<String>) -> Option<(File, PathBuf)> {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(cache_file_name);
+        let file_handler = if save_to_cache {
+            if cache_dir.exists() {
+                if !cache_dir.is_dir() {
+                    warnings.push(format!("Config dir {} is a file!", cache_dir.display()));
+                    return None;
+                }
+            } else if let Err(e) = fs::create_dir_all(&cache_dir) {
+                warnings.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
+                return None;
+            }
+
+            match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+                Ok(t) => t,
+                Err(e) => {
+                    warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    return None;
+                }
+            }
+        } else {
+            match OpenOptions::new().read(true).open(&cache_file) {
+                Ok(t) => t,
+                Err(_inspected) => {
+                    // messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error warning
+                    return None;
+                }
+            }
+        };
+        return Some((file_handler, cache_file));
+    }
+    return None;
+}
 
 pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
     let file_handler = match OpenOptions::new().read(true).open(&path) {
