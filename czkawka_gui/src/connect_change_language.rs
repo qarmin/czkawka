@@ -2,7 +2,7 @@ use gtk::prelude::*;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
 
-use crate::language_functions::get_language_from_combo_box_text;
+
 
 // use i18n_embed::{DesktopLanguageRequester, Localizer};
 

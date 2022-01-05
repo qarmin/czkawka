@@ -7,14 +7,14 @@ use gtk::prelude::*;
 use gtk::WindowType;
 
 use crate::connect_change_language::*;
-use czkawka_core::*;
+
 
 mod connect_change_language;
 mod language_functions;
 
 fn main() {
     let application = gtk::Application::builder().build();
-    application.connect_activate(move |application| {
+    application.connect_activate(move |_application| {
         load_system_language(); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
 
         connect_change_language();
