@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::io::*;
@@ -11,7 +10,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
 use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
@@ -19,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::Common;
+use crate::common::{open_cache_folder, Common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -81,6 +79,7 @@ pub struct SimilarVideos {
     delete_outdated_cache: bool,
     exclude_videos_with_same_size: bool,
     use_reference_folders: bool,
+    save_also_as_json: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -119,6 +118,7 @@ impl SimilarVideos {
             exclude_videos_with_same_size: false,
             use_reference_folders: false,
             similar_referenced_vectors: vec![],
+            save_also_as_json: true,
         }
     }
 
@@ -133,6 +133,9 @@ impl SimilarVideos {
     pub fn set_tolerance(&mut self, tolerance: i32) {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         self.tolerance = tolerance
+    }
+    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
+        self.save_also_as_json = save_also_as_json;
     }
 
     pub fn get_stopped_search(&self) -> bool {
@@ -529,7 +532,7 @@ impl SimilarVideos {
             for file_entry in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_hashes_to_file(&all_results, &mut self.text_messages);
+            save_hashes_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files".to_string());
@@ -705,44 +708,27 @@ impl PrintResults for SimilarVideos {
     }
 }
 
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        if cache_dir.exists() {
-            if !cache_dir.is_dir() {
-                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
-                return;
-            }
-        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
-            return;
-        }
-
-        let cache_file = cache_dir.join(cache_dir.join(get_cache_file()));
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(e) => {
+pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
+        {
+            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+            if let Err(e) = bincode::serialize_into(writer, hashmap) {
                 text_messages
-                    .messages
-                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    .warnings
+                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
-        };
-
-        let writer = BufWriter::new(file_handler);
-        #[cfg(not(debug_assertions))]
-        if let Err(e) = bincode::serialize_into(writer, hashmap) {
-            text_messages
-                .messages
-                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-            return;
         }
-        #[cfg(debug_assertions)]
-        if let Err(e) = serde_json::to_writer(writer, hashmap) {
-            text_messages
-                .messages
-                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-            return;
+        if save_also_as_json {
+            if let Some(file_handler_json) = file_handler_json {
+                let writer = BufWriter::new(file_handler_json);
+                if let Err(e) = serde_json::to_writer(writer, hashmap) {
+                    text_messages
+                        .warnings
+                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
+                    return;
+                }
+            }
         }
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
@@ -750,38 +736,31 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 }
 
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(get_cache_file());
-        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error warning
-                return None;
-            }
-        };
-
-        let reader = BufReader::new(file_handler);
-        #[cfg(debug_assertions)]
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(reader) {
-            Ok(t) => t,
-            Err(e) => {
-                text_messages
-                    .warnings
-                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                return None;
-            }
-        };
-        #[cfg(not(debug_assertions))]
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match bincode::deserialize_from(reader) {
-            Ok(t) => t,
-            Err(e) => {
-                text_messages
-                    .warnings
-                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                return None;
-            }
-        };
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry>;
+        if let Some(file_handler) = file_handler {
+            let reader = BufReader::new(file_handler);
+            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                    return None;
+                }
+            };
+        } else {
+            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            hashmap_loaded_entries = match serde_json::from_reader(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
+                    return None;
+                }
+            };
+        }
 
         // Don't load cache data if destination file not exists
         if delete_outdated_cache {
@@ -792,23 +771,11 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 
         return Some(hashmap_loaded_entries);
     }
-
-    text_messages.messages.push("Cannot find or open system config dir to save cache file.".to_string());
     None
 }
 
 fn get_cache_file() -> String {
-    let extension;
-    #[cfg(debug_assertions)]
-    {
-        extension = "json";
-    }
-    #[cfg(not(debug_assertions))]
-    {
-        extension = "bin";
-    }
-
-    format!("cache_similar_videos.{}", extension)
+    "cache_similar_videos.bin".to_string()
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {

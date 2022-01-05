@@ -1,8 +1,8 @@
 ## Version 4.0.0 - ?
 - Multithreading support for collecting files to check(2/3x speedup on 4 thread processor and SSD) - [#502](https://github.com/qarmin/czkawka/pull/502), [#504](https://github.com/qarmin/czkawka/pull/504)
-- Add Polish, German and Italian translation - [#469](https://github.com/qarmin/czkawka/pull/469), [#508](https://github.com/qarmin/czkawka/pull/508), [5be](https://github.com/qarmin/czkawka/commit/5be801e76395855f07ab1da43cdbb8bd0b843834)
+- Add multiple translations - Polish, Italian, French, German, Russian ... - [#469](https://github.com/qarmin/czkawka/pull/469), [#508](https://github.com/qarmin/czkawka/pull/508), [5be](https://github.com/qarmin/czkawka/commit/5be801e76395855f07ab1da43cdbb8bd0b843834)
 - Add support for finding similar videos - [#460](https://github.com/qarmin/czkawka/pull/460)
-- GUI code refactoring(could fix some bugs) - [#462](https://github.com/qarmin/czkawka/pull/462)
+- GUI code refactoring and search code unification - [#462](https://github.com/qarmin/czkawka/pull/462), [#531](https://github.com/qarmin/czkawka/pull/531)
 - Fixed crash when trying to hard/symlink 0 files - [#462](https://github.com/qarmin/czkawka/pull/462)
 - GTK 4 compatibility improvements for future change of toolkit - [#467](https://github.com/qarmin/czkawka/pull/467), [#468](https://github.com/qarmin/czkawka/pull/468), [#473](https://github.com/qarmin/czkawka/pull/473), [#474](https://github.com/qarmin/czkawka/pull/474), [#503](https://github.com/qarmin/czkawka/pull/503), [#505](https://github.com/qarmin/czkawka/pull/505)
 - Change minimal supported OS to Ubuntu 20.04(needed by GTK) - [#468](https://github.com/qarmin/czkawka/pull/468)
@@ -22,6 +22,7 @@
 - Image compare performance and usability improvements - [#529](https://github.com/qarmin/czkawka/pull/529), [#528](https://github.com/qarmin/czkawka/pull/528), [#530](https://github.com/qarmin/czkawka/pull/530), [#525](https://github.com/qarmin/czkawka/pull/525)
 - Reorganize(unify) saving/loading data from file - [#524](https://github.com/qarmin/czkawka/pull/524)
 - Add "reference folders" -  [#516](https://github.com/qarmin/czkawka/pull/516)
+- Add cache for similar music files - [#558](https://github.com/qarmin/czkawka/pull/558)
 
 ## Version 3.3.1 - 22.11.2021r
 - Fix crash when moving buttons [#457](https://github.com/qarmin/czkawka/pull/457)

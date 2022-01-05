@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fs::{File, Metadata, OpenOptions};
+use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
@@ -10,10 +10,10 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, panic, thread};
 
 use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
-use crate::common::Common;
+use crate::common::{open_cache_folder, Common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -22,8 +22,6 @@ use crate::common_traits::*;
 use crate::fl;
 use crate::localizer::generate_translation_hashmap;
 use crate::similar_images::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
-
-const CACHE_FILE_NAME: &str = "cache_broken_files.txt";
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -39,7 +37,7 @@ pub enum DeleteMethod {
     Delete,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
@@ -48,7 +46,7 @@ pub struct FileEntry {
     pub error_string: String,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
@@ -82,6 +80,8 @@ pub struct BrokenFiles {
     delete_method: DeleteMethod,
     stopped_search: bool,
     use_cache: bool,
+    delete_outdated_cache: bool, // TODO add this to GUI
+    save_also_as_json: bool,
 }
 
 impl BrokenFiles {
@@ -98,6 +98,8 @@ impl BrokenFiles {
             stopped_search: false,
             broken_files: Default::default(),
             use_cache: true,
+            delete_outdated_cache: true,
+            save_also_as_json: false,
         }
     }
 
@@ -133,6 +135,10 @@ impl BrokenFiles {
 
     pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
         self.delete_method = delete_method;
+    }
+
+    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
+        self.save_also_as_json = save_also_as_json;
     }
 
     pub fn set_use_cache(&mut self, use_cache: bool) {
@@ -350,7 +356,7 @@ impl BrokenFiles {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
-            loaded_hash_map = match load_cache_from_file(&mut self.text_messages) {
+            loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -501,7 +507,7 @@ impl BrokenFiles {
             for (_name, file_entry) in loaded_hash_map {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_cache_to_file(&all_results, &mut self.text_messages);
+            save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
         }
 
         self.information.number_of_broken_files = self.broken_files.len();
@@ -620,135 +626,82 @@ impl PrintResults for BrokenFiles {
     }
 }
 
-fn save_cache_to_file(hashmap_file_entry: &BTreeMap<String, FileEntry>, text_messages: &mut Messages) {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        // Lin: /home/username/.cache/czkawka
-        // Win: C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache
-        // Mac: /Users/Username/Library/Caches/pl.Qarmin.Czkawka
-
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        if cache_dir.exists() {
-            if !cache_dir.is_dir() {
-                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
-                return;
-            }
-        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
-            return;
+fn save_cache_to_file(old_hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
+    let mut hashmap: BTreeMap<String, FileEntry> = Default::default();
+    for (path, fe) in old_hashmap {
+        if fe.size > 1024 {
+            hashmap.insert(path.clone(), fe.clone());
         }
-        let cache_file = cache_dir.join(CACHE_FILE_NAME);
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(e) => {
+    }
+    let hashmap = &hashmap;
+
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
+        {
+            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+            if let Err(e) = bincode::serialize_into(writer, hashmap) {
                 text_messages
-                    .messages
-                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    .warnings
+                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        for file_entry in hashmap_file_entry.values() {
-            // Only save to cache files which have more than 1KB
-            if file_entry.size > 1024 {
-                let string: String = format!(
-                    "{}//{}//{}//{}",
-                    file_entry.path.display(),
-                    file_entry.size,
-                    file_entry.modified_date,
-                    file_entry.error_string
-                );
-
-                if let Err(e) = writeln!(writer, "{}", string) {
+        }
+        if save_also_as_json {
+            if let Some(file_handler_json) = file_handler_json {
+                let writer = BufWriter::new(file_handler_json);
+                if let Err(e) = serde_json::to_writer(writer, hashmap) {
                     text_messages
-                        .messages
-                        .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
+                        .warnings
+                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
                     return;
-                };
+                }
             }
         }
+
+        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
     }
 }
 
-fn load_cache_from_file(text_messages: &mut Messages) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(CACHE_FILE_NAME);
-        // TODO add before checking if cache exists(if not just return) but if exists then enable error
-        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // This shouldn't be write to output
-                return None;
-            }
-        };
-
-        let reader = BufReader::new(file_handler);
-
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = Default::default();
-
-        // Read the file line by line using the lines() iterator from std::io::BufRead.
-        for (index, line) in reader.lines().enumerate() {
-            let line = match line {
+fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
+        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry>;
+        if let Some(file_handler) = file_handler {
+            let reader = BufReader::new(file_handler);
+            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
                     text_messages
                         .warnings
-                        .push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
                     return None;
                 }
             };
-            let uuu = line.split("//").collect::<Vec<&str>>();
-            if uuu.len() != 4 {
-                text_messages
-                    .warnings
-                    .push(format!("Found invalid data in line {} - ({}) in cache file {}", index + 1, line, cache_file.display()));
-                continue;
-            }
-            // Don't load cache data if destination file not exists
-            if Path::new(uuu[0]).exists() {
-                hashmap_loaded_entries.insert(
-                    uuu[0].to_string(),
-                    FileEntry {
-                        path: PathBuf::from(uuu[0]),
-                        size: match uuu[1].parse::<u64>() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                text_messages.warnings.push(format!(
-                                    "Found invalid size value in line {} - ({}) in cache file {}, reason {}",
-                                    index + 1,
-                                    line,
-                                    cache_file.display(),
-                                    e
-                                ));
-                                continue;
-                            }
-                        },
-                        modified_date: match uuu[2].parse::<u64>() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                text_messages.warnings.push(format!(
-                                    "Found invalid modified date value in line {} - ({}) in cache file {}, reason {}",
-                                    index + 1,
-                                    line,
-                                    cache_file.display(),
-                                    e
-                                ));
-                                continue;
-                            }
-                        },
-                        type_of_file: check_extension_avaibility(&uuu[0].to_lowercase()),
-                        error_string: uuu[3].to_string(),
-                    },
-                );
-            }
+        } else {
+            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            hashmap_loaded_entries = match serde_json::from_reader(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
+                    return None;
+                }
+            };
         }
+
+        // Don't load cache data if destination file not exists
+        if delete_outdated_cache {
+            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
+        }
+
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
 
         return Some(hashmap_loaded_entries);
     }
-
-    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
+}
+
+fn get_cache_file() -> String {
+    "cache_broken_files.bin".to_string()
 }
 
 fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {

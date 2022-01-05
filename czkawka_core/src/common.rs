@@ -1,8 +1,9 @@
+use directories_next::ProjectDirs;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 use std::ffi::OsString;
 use std::fs;
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
@@ -10,6 +11,62 @@ use std::time::SystemTime;
 /// Class for common functions used across other class/functions
 
 pub struct Common();
+
+pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
+        let cache_file = cache_dir.join(cache_file_name);
+        let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
+
+        let mut file_handler_default = None;
+        let mut file_handler_json = None;
+
+        if save_to_cache {
+            if cache_dir.exists() {
+                if !cache_dir.is_dir() {
+                    warnings.push(format!("Config dir {} is a file!", cache_dir.display()));
+                    return None;
+                }
+            } else if let Err(e) = fs::create_dir_all(&cache_dir) {
+                warnings.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
+                return None;
+            }
+
+            file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+                Ok(t) => t,
+                Err(e) => {
+                    warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    return None;
+                }
+            });
+            if use_json {
+                file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
+                    Ok(t) => t,
+                    Err(e) => {
+                        warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file_json.display(), e));
+                        return None;
+                    }
+                });
+            }
+        } else {
+            if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
+                file_handler_default = Some(t);
+            } else {
+                if use_json {
+                    file_handler_json = Some(match OpenOptions::new().read(true).open(&cache_file_json) {
+                        Ok(t) => t,
+                        Err(_) => return None,
+                    });
+                } else {
+                    // messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error or warning
+                    return None;
+                }
+            }
+        };
+        return Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)));
+    }
+    None
+}
 
 pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
     let file_handler = match OpenOptions::new().read(true).open(&path) {

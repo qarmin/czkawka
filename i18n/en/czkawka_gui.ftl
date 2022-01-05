@@ -274,6 +274,7 @@ settings_confirm_link_button_tooltip = Shows confirmation dialog when clicking a
 settings_confirm_group_deletion_button_tooltip = Shows dialog when trying to remove all records from group.
 settings_show_text_view_button_tooltip = Shows error panel at bottom.
 settings_use_cache_button_tooltip = Option to which allows to not use cache feature.
+settings_save_also_as_json_button_tooltip = Save cache to readable by human JSON format. It is possible to modify its content. Cache from this file will be read automatically by app if binary format cache (with bin extension) will be missing.
 settings_use_trash_button_tooltip = When enabled it moves files to trash instead deleting them permanently.
 settings_language_label_tooltip = Allows to choose language of interface from available ones.
 
@@ -284,6 +285,7 @@ settings_confirm_link_button = Show confirm dialog when hard/symlinks any files
 settings_confirm_group_deletion_button = Show confirm dialog when deleting all files in group
 settings_show_text_view_button = Show bottom text panel
 settings_use_cache_button = Use cache
+settings_save_also_as_json_button = Save cache also to JSON file
 settings_use_trash_button = Move deleted files to trash
 settings_language_label = Language
 

@@ -1,8 +1,8 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::BufWriter;
-use std::path::PathBuf;
+use std::io::{BufReader, BufWriter};
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -12,8 +12,9 @@ use std::{mem, thread};
 use audiotags::Tag;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
-use crate::common::Common;
+use crate::common::{open_cache_folder, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -43,7 +44,7 @@ bitflags! {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct MusicEntry {
     pub size: u64,
 
@@ -61,10 +62,10 @@ pub struct MusicEntry {
 }
 
 impl FileEntry {
-    fn into_music_entry(self) -> MusicEntry {
+    fn to_music_entry(&self) -> MusicEntry {
         MusicEntry {
             size: self.size,
-            path: self.path,
+            path: self.path.clone(),
             modified_date: self.modified_date,
 
             title: "".to_string(),
@@ -94,7 +95,7 @@ impl Info {
 pub struct SameMusic {
     text_messages: Messages,
     information: Info,
-    music_to_check: Vec<FileEntry>,
+    music_to_check: HashMap<String, MusicEntry>,
     music_entries: Vec<MusicEntry>,
     duplicated_music_entries: Vec<Vec<MusicEntry>>,
     duplicated_music_entries_referenced: Vec<(MusicEntry, Vec<MusicEntry>)>,
@@ -108,7 +109,10 @@ pub struct SameMusic {
     music_similarity: MusicSimilarity,
     stopped_search: bool,
     approximate_comparison: bool,
+    use_cache: bool,
+    delete_outdated_cache: bool, // TODO add this to GUI
     use_reference_folders: bool,
+    save_also_as_json: bool,
 }
 
 impl SameMusic {
@@ -127,10 +131,13 @@ impl SameMusic {
             minimal_file_size: 8192,
             maximal_file_size: u64::MAX,
             duplicated_music_entries: vec![],
-            music_to_check: Vec::with_capacity(2048),
+            music_to_check: Default::default(),
             approximate_comparison: true,
+            use_cache: true,
+            delete_outdated_cache: true,
             use_reference_folders: false,
             duplicated_music_entries_referenced: vec![],
+            save_also_as_json: false,
         }
     }
 
@@ -174,6 +181,14 @@ impl SameMusic {
 
     pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
         self.delete_method = delete_method;
+    }
+
+    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
+        self.save_also_as_json = save_also_as_json;
+    }
+
+    pub fn set_use_cache(&mut self, use_cache: bool) {
+        self.use_cache = use_cache;
     }
 
     pub fn set_approximate_comparison(&mut self, approximate_comparison: bool) {
@@ -257,7 +272,9 @@ impl SameMusic {
                 warnings,
             } => {
                 if let Some(music_to_check) = grouped_file_entries.get(&()) {
-                    self.music_to_check = music_to_check.clone();
+                    for fe in music_to_check {
+                        self.music_to_check.insert(fe.path.to_string_lossy().to_string(), fe.to_music_entry());
+                    }
                 }
                 self.text_messages.warnings.extend(warnings);
                 Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
@@ -273,6 +290,35 @@ impl SameMusic {
     fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
+        let loaded_hash_map;
+
+        let mut records_already_cached: HashMap<String, MusicEntry> = Default::default();
+        let mut non_cached_files_to_check: HashMap<String, MusicEntry> = Default::default();
+
+        if self.use_cache {
+            loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache) {
+                Some(t) => t,
+                None => Default::default(),
+            };
+
+            for (name, file_entry) in &self.music_to_check {
+                #[allow(clippy::if_same_then_else)]
+                if !loaded_hash_map.contains_key(name) {
+                    // If loaded data doesn't contains current image info
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                } else if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                    // When size or modification date of image changed, then it is clear that is different image
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                } else {
+                    // Checking may be omitted when already there is entry with same size and modification date
+                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                }
+            }
+        } else {
+            loaded_hash_map = Default::default();
+            mem::swap(&mut self.music_to_check, &mut non_cached_files_to_check);
+        }
+
         let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
@@ -285,7 +331,7 @@ impl SameMusic {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let music_to_check = self.music_to_check.len();
+            let music_to_check = non_cached_files_to_check.len();
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
@@ -307,46 +353,43 @@ impl SameMusic {
         //// PROGRESS THREAD END
 
         // Clean for duplicate files
-        let music_to_check = mem::take(&mut self.music_to_check);
-
-        let vec_file_entry = music_to_check
+        let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
-            .map(|file_entry| {
+            .map(|(path, mut music_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
-                let mut file_entry = file_entry.into_music_entry();
 
-                let tag = match Tag::new().read_from_path(&file_entry.path) {
+                let tag = match Tag::new().read_from_path(&path) {
                     Ok(t) => t,
                     Err(_inspected) => return Some(None), // Data not in utf-8, etc., TODO this should be probably added to warnings, errors
                 };
 
-                file_entry.title = match tag.title() {
+                music_entry.title = match tag.title() {
                     Some(t) => t.to_string(),
                     None => "".to_string(),
                 };
-                file_entry.artist = match tag.artist() {
+                music_entry.artist = match tag.artist() {
                     Some(t) => t.to_string(),
                     None => "".to_string(),
                 };
-                file_entry.album_title = match tag.album_title() {
+                music_entry.album_title = match tag.album_title() {
                     Some(t) => t.to_string(),
                     None => "".to_string(),
                 };
-                file_entry.album_artist = match tag.album_artist() {
+                music_entry.album_artist = match tag.album_artist() {
                     Some(t) => t.to_string(),
                     None => "".to_string(),
                 };
-                file_entry.year = tag.year().unwrap_or(0);
+                music_entry.year = tag.year().unwrap_or(0);
 
-                Some(Some(file_entry))
+                Some(Some(music_entry))
             })
             .while_some()
-            .filter(|file_entry| file_entry.is_some())
-            .map(|file_entry| file_entry.unwrap())
+            .filter(|music_entry| music_entry.is_some())
+            .map(|music_entry| music_entry.unwrap())
             .collect::<Vec<_>>();
 
         // End thread which send info to gui
@@ -358,8 +401,22 @@ impl SameMusic {
             return false;
         }
 
-        // Adding files to Vector
-        self.music_entries = vec_file_entry;
+        // Just connect loaded results with already calculated
+        for (_name, file_entry) in records_already_cached {
+            vec_file_entry.push(file_entry.clone());
+        }
+
+        self.music_entries = vec_file_entry.clone();
+
+        if self.use_cache {
+            // Must save all results to file, old loaded from file with all currently counted results
+            let mut all_results: HashMap<String, MusicEntry> = loaded_hash_map;
+
+            for file_entry in vec_file_entry {
+                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+            save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+        }
 
         Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());
 
@@ -630,6 +687,76 @@ impl SameMusic {
 
         Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
     }
+}
+
+fn save_cache_to_file(hashmap: &HashMap<String, MusicEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
+        {
+            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+            if let Err(e) = bincode::serialize_into(writer, hashmap) {
+                text_messages
+                    .warnings
+                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+                return;
+            }
+        }
+        if save_also_as_json {
+            if let Some(file_handler_json) = file_handler_json {
+                let writer = BufWriter::new(file_handler_json);
+                if let Err(e) = serde_json::to_writer(writer, hashmap) {
+                    text_messages
+                        .warnings
+                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
+                    return;
+                }
+            }
+        }
+
+        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
+    }
+}
+
+fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<HashMap<String, MusicEntry>> {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
+        let mut hashmap_loaded_entries: HashMap<String, MusicEntry>;
+        if let Some(file_handler) = file_handler {
+            let reader = BufReader::new(file_handler);
+            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                    return None;
+                }
+            };
+        } else {
+            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            hashmap_loaded_entries = match serde_json::from_reader(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
+                    return None;
+                }
+            };
+        }
+
+        // Don't load cache data if destination file not exists
+        if delete_outdated_cache {
+            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
+        }
+
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
+
+        return Some(hashmap_loaded_entries);
+    }
+    None
+}
+
+fn get_cache_file() -> String {
+    "cache_same_music.bin".to_string()
 }
 
 impl Default for SameMusic {

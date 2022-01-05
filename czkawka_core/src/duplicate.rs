@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 #[cfg(target_family = "unix")]
 use std::collections::HashSet;
-use std::fs::{File, OpenOptions};
+use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
 use std::io::{self, Error, ErrorKind};
@@ -16,11 +16,10 @@ use std::time::{Duration, SystemTime};
 use std::{fs, mem, thread};
 
 use crossbeam_channel::Receiver;
-use directories_next::ProjectDirs;
 use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
 
-use crate::common::Common;
+use crate::common::{open_cache_folder, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -1262,29 +1261,11 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 }
 
 pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, is_prehash: bool, minimal_cache_file_size: u64) {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        if cache_dir.exists() {
-            if !cache_dir.is_dir() {
-                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
-                return;
-            }
-        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
-            return;
-        }
-        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash, is_prehash).as_str());
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(e) => {
-                text_messages
-                    .messages
-                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
+    if let Some(((file_handler, cache_file), (_json_file, _json_name))) = open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), true, false, &mut text_messages.warnings)
+    {
+        let mut writer = BufWriter::new(file_handler.unwrap()); // Unwrap cannot fail
 
+        let mut how_much = 0;
         for file_entry in hashmap.values() {
             // Only cache bigger than 5MB files
             if file_entry.size >= minimal_cache_file_size {
@@ -1292,60 +1273,27 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 
                 if let Err(e) = writeln!(writer, "{}", string) {
                     text_messages
-                        .messages
+                        .warnings
                         .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                     return;
-                };
+                } else {
+                    how_much += 1;
+                }
             }
         }
+
+        text_messages.messages.push(format!("Properly saved to file {} cache entries.", how_much));
     }
 }
-
-pub trait MyHasher {
-    fn update(&mut self, bytes: &[u8]);
-    fn finalize(&self) -> String;
-}
-
-fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<String, String> {
-    let mut file_handler = match File::open(&file_entry.path) {
-        Ok(t) => t,
-        Err(e) => return Err(format!("Unable to check hash of file {}, reason {}", file_entry.path.display(), e)),
-    };
-    let hasher = &mut *hash_type.hasher();
-    let mut current_file_read_bytes: u64 = 0;
-    loop {
-        let n = match file_handler.read(buffer) {
-            Ok(0) => break,
-            Ok(t) => t,
-            Err(e) => return Err(format!("Error happened when checking hash of file {}, reason {}", file_entry.path.display(), e)),
-        };
-
-        current_file_read_bytes += n as u64;
-        hasher.update(&buffer[..n]);
-
-        if current_file_read_bytes >= limit {
-            break;
-        }
-    }
-    Ok(hasher.finalize())
-}
-
-fn get_file_hash_name(type_of_hash: &HashType, is_prehash: bool) -> String {
-    let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{:?}{}.txt", type_of_hash, prehash_str)
-}
-
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(get_file_hash_name(type_of_hash, is_prehash).as_str());
-        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(_inspected) => {
-                return None;
-            }
+    if let Some(((file_handler, cache_file), (_json_file, _json_name))) =
+        open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, false, &mut text_messages.warnings)
+    {
+        // Unwrap could fail when failed to open cache file, but json would exists
+        let file_handler = match file_handler {
+            Some(t) => t,
+            _ => return Default::default(),
         };
-
         let reader = BufReader::new(file_handler);
 
         let mut hashmap_loaded_entries: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -1409,11 +1357,45 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             }
         }
 
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
+
         return Some(hashmap_loaded_entries);
     }
-
-    text_messages.messages.push("Cannot find or open system config dir to save cache file".to_string());
     None
+}
+
+pub trait MyHasher {
+    fn update(&mut self, bytes: &[u8]);
+    fn finalize(&self) -> String;
+}
+
+fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<String, String> {
+    let mut file_handler = match File::open(&file_entry.path) {
+        Ok(t) => t,
+        Err(e) => return Err(format!("Unable to check hash of file {}, reason {}", file_entry.path.display(), e)),
+    };
+    let hasher = &mut *hash_type.hasher();
+    let mut current_file_read_bytes: u64 = 0;
+    loop {
+        let n = match file_handler.read(buffer) {
+            Ok(0) => break,
+            Ok(t) => t,
+            Err(e) => return Err(format!("Error happened when checking hash of file {}, reason {}", file_entry.path.display(), e)),
+        };
+
+        current_file_read_bytes += n as u64;
+        hasher.update(&buffer[..n]);
+
+        if current_file_read_bytes >= limit {
+            break;
+        }
+    }
+    Ok(hasher.finalize())
+}
+
+fn get_file_hash_name(type_of_hash: &HashType, is_prehash: bool) -> String {
+    let prehash_str = if is_prehash { "_prehash" } else { "" };
+    format!("cache_duplicates_{:?}{}.txt", type_of_hash, prehash_str)
 }
 
 impl MyHasher for blake3::Hasher {
