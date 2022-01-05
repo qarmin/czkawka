@@ -58,17 +58,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "czkawka_gui"
-version = "3.3.1"
-dependencies = [
- "czkawka_core",
- "i18n-embed",
- "i18n-embed-fl",
- "once_cell",
- "rust-embed",
-]
-
-[[package]]
 name = "dashmap"
 version = "4.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,12 +1,17 @@
-[workspace]
-members = [
-    "czkawka_core",
-    "czkawka_gui",
-]
-[profile.release]
-# Panic = "abort" will crash entire app when processing invalid image file.
-# Since crash happens in external library, this is only way to handle this(I think).
-panic = "unwind"
+[package]
+name = "czkawka_core"
+version = "3.3.1"
+authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
+edition = "2018"
+description = "Core of Czkawka app"
+license = "MIT"
+homepage = "https://github.com/qarmin/czkawka"
+repository = "https://github.com/qarmin/czkawka"
 
-# LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
-#lto = "fat"
+
+[dependencies]
+# Language
+i18n-embed = { version = "0.13", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.6"
+rust-embed = "6.2.0"
+once_cell = "1.8.0"
