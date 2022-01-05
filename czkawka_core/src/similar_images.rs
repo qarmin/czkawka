@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::OpenOptions;
 use std::fs::{File, Metadata};
 use std::io::Write;
@@ -118,10 +118,10 @@ pub struct SimilarImages {
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
-    image_hashes: BTreeMap<Vec<u8>, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
+    image_hashes: HashMap<Vec<u8>, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: Similarity,
-    images_to_check: BTreeMap<String, FileEntry>,
+    images_to_check: HashMap<String, FileEntry>,
     hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
@@ -483,8 +483,8 @@ impl SimilarImages {
 
         let loaded_hash_map;
 
-        let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
+        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
 
         if self.use_cache {
             loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, self.hash_size, self.hash_alg, self.image_filter) {
@@ -640,7 +640,7 @@ impl SimilarImages {
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
+            let mut all_results: HashMap<String, FileEntry> = loaded_hash_map;
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
@@ -656,18 +656,20 @@ impl SimilarImages {
         let Similarity::Similar(similarity) = self.similarity;
 
         // Results
-        let mut collected_similar_images: BTreeMap<Vec<u8>, Vec<FileEntry>> = Default::default();
+        let mut collected_similar_images: HashMap<Vec<u8>, Vec<FileEntry>> = Default::default();
 
         let mut temp_hashes = Default::default();
         mem::swap(&mut temp_hashes, &mut self.image_hashes);
 
-        let mut this_time_check_hashes;
-        let mut master_of_group: HashSet<Vec<u8>> = Default::default(); // Lista wszystkich głównych hashy, które odpowiadają za porównywanie
+        let mut this_time_check_hashes; // Temporary variable which
+        let mut master_of_group: HashSet<Vec<u8>> = Default::default(); // Hashes which are "master of groups",
 
-        let mut available_hashes: HashMap<Vec<u8>, Vec<FileEntry>> = Default::default();
+        let mut all_hashes_to_check: HashMap<Vec<u8>, Vec<FileEntry>> = temp_hashes.clone(); // List of all hashes, which are or can be master of group
+        let mut available_hashes: HashMap<Vec<u8>, Vec<FileEntry>> = Default::default(); // List of hashes which can be used as similar images
         for (hash, vec_file_entry) in temp_hashes {
-            // There exists 2 or more hashes with same hash
+            // There exists 2 or more images with same hash
             if vec_file_entry.len() >= 2 {
+                master_of_group.insert(hash.clone());
                 collected_similar_images.insert(hash, vec_file_entry);
             } else {
                 self.bktree.add(hash.clone());
@@ -708,7 +710,7 @@ impl SimilarImages {
         //// PROGRESS THREAD END
         if similarity >= 1 {
             if self.fast_comparing {
-                this_time_check_hashes = available_hashes.clone();
+                this_time_check_hashes = all_hashes_to_check.clone();
 
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
@@ -717,18 +719,23 @@ impl SimilarImages {
                     return false;
                 }
 
-                for (hash, vec_file_entry) in this_time_check_hashes.into_iter() {
+                for (hash, mut vec_file_entry) in this_time_check_hashes.into_iter() {
                     atomic_mode_counter.fetch_add(1, Ordering::Relaxed);
 
-                    // Finds hashes with specific distance to
+                    // It is not available, because in same iteration, was already taken out
+                    if !all_hashes_to_check.contains_key(&hash) {
+                        continue;
+                    }
+
+                    // Finds hashes with specific distance to original one
                     let vector_with_found_similar_hashes = self
                         .bktree
                         .find(&hash, similarity)
-                        .filter(|(_similarity, hash)| !master_of_group.contains(*hash) && available_hashes.contains_key(*hash))
+                        .filter(|(similarity, hash)| *similarity != 0 && available_hashes.contains_key(*hash))
                         .collect::<Vec<_>>();
 
-                    // Not found any hash with specific distance maybe except self
-                    if vector_with_found_similar_hashes.len() <= 1 {
+                    // Not found any hash with specific distance
+                    if vector_with_found_similar_hashes.is_empty() {
                         continue;
                     }
 
@@ -736,15 +743,9 @@ impl SimilarImages {
                     if !master_of_group.contains(&hash) {
                         master_of_group.insert(hash.clone());
                         collected_similar_images.insert(hash.clone(), Vec::new());
+                        let _ = available_hashes.remove(&hash); // Cannot be used anymore as non master
 
-                        let mut things: Vec<FileEntry> = vec_file_entry
-                            .into_iter()
-                            .map(|mut fe| {
-                                fe.similarity = Similarity::Similar(0);
-                                fe
-                            })
-                            .collect();
-                        collected_similar_images.get_mut(&hash).unwrap().append(&mut things);
+                        collected_similar_images.get_mut(&hash).unwrap().append(&mut vec_file_entry);
 
                         // This shouldn't be executed too much times, so it should be quite fast to check this
                         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -756,6 +757,7 @@ impl SimilarImages {
                     }
 
                     vector_with_found_similar_hashes.iter().for_each(|(similarity, other_hash)| {
+                        let _ = all_hashes_to_check.remove(*other_hash); // Cannot be used anymore as master record
                         let mut vec_fe = available_hashes.remove(*other_hash).unwrap();
                         for fe in &mut vec_fe {
                             fe.similarity = Similarity::Similar(*similarity)
@@ -766,7 +768,7 @@ impl SimilarImages {
                 }
             } else {
                 for current_similarity in 1..=similarity {
-                    this_time_check_hashes = available_hashes.clone();
+                    this_time_check_hashes = all_hashes_to_check.clone();
 
                     if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                         // End thread which send info to gui
@@ -775,14 +777,19 @@ impl SimilarImages {
                         return false;
                     }
 
-                    for (hash, vec_file_entry) in this_time_check_hashes.into_iter() {
+                    for (hash, mut vec_file_entry) in this_time_check_hashes.into_iter() {
                         atomic_mode_counter.fetch_add(1, Ordering::Relaxed);
 
-                        // Finds hashes with specific distance to
+                        // It is not available, because in same iteration, was already taken out
+                        if !all_hashes_to_check.contains_key(&hash) {
+                            continue;
+                        }
+
+                        // Finds hashes with specific distance to original one
                         let vector_with_found_similar_hashes = self
                             .bktree
                             .find(&hash, similarity)
-                            .filter(|(similarity, hash)| (*similarity == current_similarity) && !master_of_group.contains(*hash) && available_hashes.contains_key(*hash))
+                            .filter(|(similarity, hash)| (*similarity == current_similarity) && available_hashes.contains_key(*hash))
                             .collect::<Vec<_>>();
 
                         // Not found any hash with specific distance
@@ -794,15 +801,9 @@ impl SimilarImages {
                         if !master_of_group.contains(&hash) {
                             master_of_group.insert(hash.clone());
                             collected_similar_images.insert(hash.clone(), Vec::new());
+                            let _ = available_hashes.remove(&hash); // Cannot be used anymore as non master
 
-                            let mut things: Vec<FileEntry> = vec_file_entry
-                                .into_iter()
-                                .map(|mut fe| {
-                                    fe.similarity = Similarity::Similar(0);
-                                    fe
-                                })
-                                .collect();
-                            collected_similar_images.get_mut(&hash).unwrap().append(&mut things);
+                            collected_similar_images.get_mut(&hash).unwrap().append(&mut vec_file_entry);
 
                             // This shouldn't be executed too much times, so it should be quite fast to check this
                             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -813,10 +814,11 @@ impl SimilarImages {
                             }
                         }
 
-                        vector_with_found_similar_hashes.iter().for_each(|(_similarity, other_hash)| {
+                        vector_with_found_similar_hashes.iter().for_each(|(similarity, other_hash)| {
+                            let _ = all_hashes_to_check.remove(*other_hash); // Cannot be used anymore as master record
                             let mut vec_fe = available_hashes.remove(*other_hash).unwrap();
                             for fe in &mut vec_fe {
-                                fe.similarity = Similarity::Similar(current_similarity)
+                                fe.similarity = Similarity::Similar(*similarity)
                             }
 
                             collected_similar_images.get_mut(&hash).unwrap().append(&mut vec_fe);
@@ -829,6 +831,26 @@ impl SimilarImages {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
+        // Validating if group contains duplicated results
+        #[cfg(debug_assertions)]
+        {
+            let mut result_hashset: HashSet<String> = Default::default();
+            let mut found = false;
+            for (_hash, vec_file_entry) in collected_similar_images.iter() {
+                for file_entry in vec_file_entry {
+                    let st = file_entry.path.to_string_lossy().to_string();
+                    if result_hashset.contains(&st) {
+                        found = true;
+                        println!("Invalid Element {}", st);
+                    } else {
+                        result_hashset.insert(st);
+                    }
+                }
+            }
+            if found {
+                panic!("Found Invalid entries");
+            }
+        }
         // self.similar_vectors = collected_similar_images.into_values().collect(); // TODO use this in Rust 1.54.0
         self.similar_vectors = collected_similar_images.values().cloned().collect(); // 1.53.0 version
 
@@ -876,7 +898,7 @@ impl SimilarImages {
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from BtreeMap".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from HashMap".to_string());
 
         if self.use_reference_folders {
             for (_fe, vector) in &self.similar_referenced_vectors {
@@ -1011,7 +1033,7 @@ impl PrintResults for SimilarImages {
     }
 }
 
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
+pub fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         if cache_dir.exists() {
@@ -1061,7 +1083,7 @@ pub fn load_hashes_from_file(
     hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
-) -> Option<BTreeMap<String, FileEntry>> {
+) -> Option<HashMap<String, FileEntry>> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = PathBuf::from(proj_dirs.cache_dir());
         let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
@@ -1075,7 +1097,7 @@ pub fn load_hashes_from_file(
 
         let reader = BufReader::new(file_handler);
         #[cfg(debug_assertions)]
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match serde_json::from_reader(reader) {
+        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = match serde_json::from_reader(reader) {
             Ok(t) => t,
             Err(e) => {
                 text_messages
@@ -1085,7 +1107,7 @@ pub fn load_hashes_from_file(
             }
         };
         #[cfg(not(debug_assertions))]
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry> = match bincode::deserialize_from(reader) {
+        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = match bincode::deserialize_from(reader) {
             Ok(t) => t,
             Err(e) => {
                 text_messages
