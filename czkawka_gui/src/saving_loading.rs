@@ -27,6 +27,7 @@ const DEFAULT_SHOW_IMAGE_PREVIEW: bool = true;
 const DEFAULT_SHOW_DUPLICATE_IMAGE_PREVIEW: bool = true;
 const DEFAULT_BOTTOM_TEXT_VIEW: bool = true;
 const DEFAULT_USE_CACHE: bool = true;
+const DEFAULT_SAVE_ALSO_AS_JSON: bool = false;
 const DEFAULT_HIDE_HARD_LINKS: bool = true;
 const DEFAULT_USE_PRECACHE: bool = false;
 const DEFAULT_USE_TRASH: bool = false;
@@ -363,6 +364,7 @@ enum LoadText {
     ShowBottomTextPanel,
     HideHardLinks,
     UseCache,
+    UseJsonCacheFile,
     DeleteToTrash,
     MinimalCacheSize,
     ImagePreviewImage,
@@ -388,6 +390,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::ShowBottomTextPanel, "show_bottom_text_panel"),
         (LoadText::HideHardLinks, "hide_hard_links"),
         (LoadText::UseCache, "use_cache"),
+        (LoadText::UseJsonCacheFile, "use_json_cache_file"),
         (LoadText::DeleteToTrash, "delete_to_trash"),
         (LoadText::MinimalCacheSize, "minimal_cache_size"),
         (LoadText::ImagePreviewImage, "image_preview_image"),
@@ -476,6 +479,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_use_cache.is_active(),
     );
     saving_struct.save_var(
+        hashmap_ls.get(&LoadText::UseJsonCacheFile).unwrap().to_string(),
+        settings.check_button_settings_save_also_json.is_active(),
+    );
+    saving_struct.save_var(
         hashmap_ls.get(&LoadText::DeleteToTrash).unwrap().to_string(),
         settings.check_button_settings_use_trash.is_active(),
     );
@@ -546,6 +553,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     let bottom_text_panel: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ShowBottomTextPanel).unwrap().clone(), DEFAULT_BOTTOM_TEXT_VIEW);
     let hide_hard_links: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::HideHardLinks).unwrap().clone(), DEFAULT_HIDE_HARD_LINKS);
     let use_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UseCache).unwrap().clone(), DEFAULT_USE_CACHE);
+    let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UseJsonCacheFile).unwrap().clone(), DEFAULT_SAVE_ALSO_AS_JSON);
     let use_trash: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::DeleteToTrash).unwrap().clone(), DEFAULT_USE_TRASH);
     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
         hashmap_ls.get(&LoadText::DuplicateDeleteOutdatedCacheEntries).unwrap().clone(),
@@ -630,6 +638,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         }
         settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
         settings.check_button_settings_use_cache.set_active(use_cache);
+        settings.check_button_settings_save_also_json.set_active(use_json_cache);
         settings.check_button_duplicates_use_prehash_cache.set_active(use_prehash_cache);
         settings.check_button_settings_use_trash.set_active(use_trash);
         settings.entry_settings_cache_file_minimal_size.set_text(&cache_minimal_size);
@@ -711,6 +720,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_show_text_view.set_active(DEFAULT_BOTTOM_TEXT_VIEW);
         settings.check_button_settings_hide_hard_links.set_active(DEFAULT_HIDE_HARD_LINKS);
         settings.check_button_settings_use_cache.set_active(DEFAULT_USE_CACHE);
+        settings.check_button_settings_save_also_json.set_active(DEFAULT_SAVE_ALSO_AS_JSON);
         settings.check_button_settings_use_trash.set_active(DEFAULT_USE_TRASH);
         settings.entry_settings_cache_file_minimal_size.set_text(DEFAULT_MINIMAL_CACHE_SIZE);
         settings

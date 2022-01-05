@@ -1261,8 +1261,9 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 }
 
 pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, is_prehash: bool, minimal_cache_file_size: u64) {
-    if let Some((file_handler, cache_file)) = open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), true, &mut text_messages.warnings) {
-        let mut writer = BufWriter::new(file_handler);
+    if let Some(((file_handler, cache_file), (_json_file, _json_name))) = open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), true, false, &mut text_messages.warnings)
+    {
+        let mut writer = BufWriter::new(file_handler.unwrap()); // Unwrap cannot fail
 
         let mut how_much = 0;
         for file_entry in hashmap.values() {
@@ -1285,7 +1286,14 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
     }
 }
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
-    if let Some((file_handler, cache_file)) = open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, &mut text_messages.warnings) {
+    if let Some(((file_handler, cache_file), (_json_file, _json_name))) =
+        open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, false, &mut text_messages.warnings)
+    {
+        // Unwrap could fail when failed to open cache file, but json would exists
+        let file_handler = match file_handler {
+            Some(t) => t,
+            _ => return Default::default(),
+        };
         let reader = BufReader::new(file_handler);
 
         let mut hashmap_loaded_entries: BTreeMap<u64, Vec<FileEntry>> = Default::default();

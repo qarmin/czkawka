@@ -17,6 +17,7 @@ pub struct GuiSettings {
     pub check_button_settings_confirm_group_deletion: gtk::CheckButton,
     pub check_button_settings_show_text_view: gtk::CheckButton,
     pub check_button_settings_use_cache: gtk::CheckButton,
+    pub check_button_settings_save_also_json: gtk::CheckButton,
     pub check_button_settings_use_trash: gtk::CheckButton,
     pub label_settings_general_language: gtk::Label,
     pub combo_box_settings_language: gtk::ComboBoxText,
@@ -70,6 +71,7 @@ impl GuiSettings {
         let check_button_settings_confirm_group_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_group_deletion").unwrap();
         let check_button_settings_show_text_view: gtk::CheckButton = builder.object("check_button_settings_show_text_view").unwrap();
         let check_button_settings_use_cache: gtk::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
+        let check_button_settings_save_also_json: gtk::CheckButton = builder.object("check_button_settings_save_also_json").unwrap();
         let check_button_settings_use_trash: gtk::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
         let label_settings_general_language: gtk::Label = builder.object("label_settings_general_language").unwrap();
         let combo_box_settings_language: gtk::ComboBoxText = builder.object("combo_box_settings_language").unwrap();
@@ -112,6 +114,7 @@ impl GuiSettings {
             check_button_settings_confirm_group_deletion,
             check_button_settings_show_text_view,
             check_button_settings_use_cache,
+            check_button_settings_save_also_json,
             check_button_settings_use_trash,
             label_settings_general_language,
             combo_box_settings_language,
@@ -147,6 +150,7 @@ impl GuiSettings {
         self.check_button_settings_confirm_group_deletion.set_label(&fl!("settings_confirm_group_deletion_button"));
         self.check_button_settings_show_text_view.set_label(&fl!("settings_show_text_view_button"));
         self.check_button_settings_use_cache.set_label(&fl!("settings_use_cache_button"));
+        self.check_button_settings_save_also_json.set_label(&fl!("settings_save_also_as_json_button"));
         self.check_button_settings_use_trash.set_label(&fl!("settings_use_trash_button"));
         self.label_settings_general_language.set_label(&fl!("settings_language_label"));
 
@@ -160,6 +164,8 @@ impl GuiSettings {
             .set_tooltip_text(Some(&fl!("settings_confirm_group_deletion_button_tooltip")));
         self.check_button_settings_show_text_view
             .set_tooltip_text(Some(&fl!("settings_show_text_view_button_tooltip")));
+        self.check_button_settings_save_also_json
+            .set_tooltip_text(Some(&fl!("settings_save_also_as_json_button_tooltip")));
         self.check_button_settings_use_cache.set_tooltip_text(Some(&fl!("settings_use_cache_button_tooltip")));
         self.check_button_settings_use_trash.set_tooltip_text(Some(&fl!("settings_use_trash_button_tooltip")));
         self.label_settings_general_language.set_tooltip_text(Some(&fl!("settings_language_label_tooltip")));

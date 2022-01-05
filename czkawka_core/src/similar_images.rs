@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 use std::collections::{BTreeSet, HashMap, HashSet};
-use std::fs::OpenOptions;
-=======
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
->>>>>>> 42e62c3 (Simplify cache code)
 use std::fs::{File, Metadata};
 use std::io::Write;
 use std::io::*;
@@ -133,6 +128,7 @@ pub struct SimilarImages {
     exclude_images_with_same_size: bool,
     use_reference_folders: bool,
     fast_comparing: bool,
+    save_also_as_json: bool,
 }
 
 /// Info struck with helpful information's about results
@@ -176,6 +172,7 @@ impl SimilarImages {
             exclude_images_with_same_size: false,
             use_reference_folders: false,
             fast_comparing: false,
+            save_also_as_json: false,
         }
     }
 
@@ -206,6 +203,9 @@ impl SimilarImages {
 
     pub fn set_fast_comparing(&mut self, fast_comparing: bool) {
         self.fast_comparing = fast_comparing;
+    }
+    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
+        self.save_also_as_json = save_also_as_json;
     }
 
     pub fn get_stopped_search(&self) -> bool {
@@ -647,7 +647,14 @@ impl SimilarImages {
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_hashes_to_file(&all_results, &mut self.text_messages, self.hash_size, self.hash_alg, self.image_filter);
+            save_hashes_to_file(
+                &all_results,
+                &mut self.text_messages,
+                self.save_also_as_json,
+                self.hash_size,
+                self.hash_alg,
+                self.image_filter,
+            );
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
@@ -1036,49 +1043,36 @@ impl PrintResults for SimilarImages {
     }
 }
 
-<<<<<<< HEAD
-pub fn save_hashes_to_file(hashmap: &HashMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        if cache_dir.exists() {
-            if !cache_dir.is_dir() {
-                text_messages.messages.push(format!("Config dir {} is a file!", cache_dir.display()));
-                return;
-            }
-        } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-            text_messages.messages.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
-            return;
-        }
-
-        let cache_file = cache_dir.join(cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter)));
-        let file_handler = match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(e) => {
+pub fn save_hashes_to_file(
+    hashmap: &HashMap<String, FileEntry>,
+    text_messages: &mut Messages,
+    save_also_as_json: bool,
+    hash_size: u8,
+    hash_alg: HashAlg,
+    image_filter: FilterType,
+) {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
+        open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), true, save_also_as_json, &mut text_messages.warnings)
+    {
+        {
+            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+            if let Err(e) = bincode::serialize_into(writer, hashmap) {
                 text_messages
-                    .messages
-                    .push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    .warnings
+                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
                 return;
             }
-        };
-
-=======
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) {
-    if let Some((file_handler, cache_file)) = open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), true, &mut text_messages.warnings) {
->>>>>>> 42e62c3 (Simplify cache code)
-        let writer = BufWriter::new(file_handler);
-        #[cfg(not(debug_assertions))]
-        if let Err(e) = bincode::serialize_into(writer, hashmap) {
-            text_messages
-                .warnings
-                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-            return;
         }
-        #[cfg(debug_assertions)]
-        if let Err(e) = serde_json::to_writer(writer, hashmap) {
-            text_messages
-                .warnings
-                .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-            return;
+        if save_also_as_json {
+            if let Some(file_handler_json) = file_handler_json {
+                let writer = BufWriter::new(file_handler_json);
+                if let Err(e) = serde_json::to_writer(writer, hashmap) {
+                    text_messages
+                        .warnings
+                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
+                    return;
+                }
+            }
         }
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
@@ -1091,44 +1085,34 @@ pub fn load_hashes_from_file(
     hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
-<<<<<<< HEAD
 ) -> Option<HashMap<String, FileEntry>> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(get_cache_file(&hash_size, &hash_alg, &image_filter));
-        let file_handler = match OpenOptions::new().read(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(_inspected) => {
-                // text_messages.messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error warning
-                return None;
-            }
-        };
-
-=======
-) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some((file_handler, cache_file)) = open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), false, &mut text_messages.warnings) {
->>>>>>> 42e62c3 (Simplify cache code)
-        let reader = BufReader::new(file_handler);
-        #[cfg(debug_assertions)]
-        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = match serde_json::from_reader(reader) {
-            Ok(t) => t,
-            Err(e) => {
-                text_messages
-                    .warnings
-                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                return None;
-            }
-        };
-        #[cfg(not(debug_assertions))]
-        let mut hashmap_loaded_entries: HashMap<String, FileEntry> = match bincode::deserialize_from(reader) {
-            Ok(t) => t,
-            Err(e) => {
-                text_messages
-                    .warnings
-                    .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                return None;
-            }
-        };
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
+        open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), false, true, &mut text_messages.warnings)
+    {
+        let mut hashmap_loaded_entries: HashMap<String, FileEntry>;
+        if let Some(file_handler) = file_handler {
+            let reader = BufReader::new(file_handler);
+            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                    return None;
+                }
+            };
+        } else {
+            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            hashmap_loaded_entries = match serde_json::from_reader(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
+                    return None;
+                }
+            };
+        }
 
         // Don't load cache data if destination file not exists
         if delete_outdated_cache {
@@ -1143,22 +1127,11 @@ pub fn load_hashes_from_file(
 }
 
 fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
-    let extension;
-    #[cfg(debug_assertions)]
-    {
-        extension = "json";
-    }
-    #[cfg(not(debug_assertions))]
-    {
-        extension = "bin";
-    }
-
     format!(
-        "cache_similar_images_{}_{}_{}.{}",
+        "cache_similar_images_{}_{}_{}.bin",
         hash_size,
         convert_algorithm_to_string(hash_alg),
         convert_filters_to_string(image_filter),
-        extension
     )
 }
 
