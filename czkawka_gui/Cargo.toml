@@ -10,8 +10,6 @@ repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
 czkawka_core = { path = "../czkawka_core", version = "3.3.1"}
-gdk = "0.14.3"
-glib = "0.14.8"
 
 # Language
 i18n-embed = { version = "0.13", features = ["fluent-system", "desktop-requester"] }
@@ -19,8 +17,4 @@ i18n-embed-fl = "0.6.1"
 rust-embed = "6.3.0"
 once_cell = "1.9.0"
 
-[dependencies.gtk]
-version = "0.14.3"
-default-features = false # just in case
-features = ["v3_24_9"]
 
