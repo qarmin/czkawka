@@ -1,35 +1,26 @@
 use std::collections::BTreeMap;
-use std::fs::{File, Metadata};
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, mem, thread};
+use std::time::{Duration, SystemTime};
+use std::{mem, thread};
 
 use audiotags::Tag;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
 use crate::common::Common;
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::fl;
-use crate::localizer::generate_translation_hashmap;
 use crate::similar_images::AUDIO_FILES_EXTENSIONS;
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub music_checked: usize,
-    pub music_to_check: usize,
-}
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -53,7 +44,7 @@ bitflags! {
 }
 
 #[derive(Clone, Debug)]
-pub struct FileEntry {
+pub struct MusicEntry {
     pub size: u64,
 
     pub path: PathBuf,
@@ -67,6 +58,23 @@ pub struct FileEntry {
 
     pub year: i32,
     // pub time: u32,
+}
+
+impl FileEntry {
+    fn into_music_entry(self) -> MusicEntry {
+        MusicEntry {
+            size: self.size,
+            path: self.path,
+            modified_date: self.modified_date,
+
+            title: "".to_string(),
+
+            artist: "".to_string(),
+            album_title: "".to_string(),
+            album_artist: "".to_string(),
+            year: 0,
+        }
+    }
 }
 
 /// Info struck with helpful information's about results
@@ -87,9 +95,9 @@ pub struct SameMusic {
     text_messages: Messages,
     information: Info,
     music_to_check: Vec<FileEntry>,
-    music_entries: Vec<FileEntry>,
-    duplicated_music_entries: Vec<Vec<FileEntry>>,
-    duplicated_music_entries_referenced: Vec<(FileEntry, Vec<FileEntry>)>,
+    music_entries: Vec<MusicEntry>,
+    duplicated_music_entries: Vec<Vec<MusicEntry>>,
+    duplicated_music_entries_referenced: Vec<(MusicEntry, Vec<MusicEntry>)>,
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
@@ -149,7 +157,7 @@ impl SameMusic {
         self.stopped_search
     }
 
-    pub const fn get_duplicated_music_entries(&self) -> &Vec<Vec<FileEntry>> {
+    pub const fn get_duplicated_music_entries(&self) -> &Vec<Vec<MusicEntry>> {
         &self.duplicated_music_entries
     }
     pub const fn get_music_similarity(&self) -> &MusicSimilarity {
@@ -208,7 +216,7 @@ impl SameMusic {
         };
     }
 
-    pub fn get_similar_music_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+    pub fn get_similar_music_referenced(&self) -> &Vec<(MusicEntry, Vec<MusicEntry>)> {
         &self.duplicated_music_entries_referenced
     }
 
@@ -225,193 +233,41 @@ impl SameMusic {
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-
         if !self.allowed_extensions.using_custom_extensions() {
             self.allowed_extensions.extend_allowed_extensions(&AUDIO_FILES_EXTENSIONS);
         }
-
-        // Add root folders for finding
-        for id in &self.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
-
-        //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 0,
-                        max_stage: 2,
-                        music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        music_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
+        let result = DirTraversalBuilder::new()
+            .root_dirs(self.directories.included_directories.clone())
+            .group_by(|_fe| ())
+            .stop_receiver(stop_receiver)
+            .progress_sender(progress_sender)
+            .minimal_file_size(self.minimal_file_size)
+            .maximal_file_size(self.maximal_file_size)
+            .directories(self.directories.clone())
+            .allowed_extensions(self.allowed_extensions.clone())
+            .excluded_items(self.excluded_items.clone())
+            .recursive_search(self.recursive_search)
+            .max_stage(2)
+            .build()
+            .run();
+        match result {
+            DirTraversalResult::SuccessFiles {
+                start_time,
+                grouped_file_entries,
+                warnings,
+            } => {
+                if let Some(music_to_check) = grouped_file_entries.get(&()) {
+                    self.music_to_check = music_to_check.clone();
                 }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
-
-        while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
-                return false;
-            }
-
-            let segments: Vec<_> = folders_to_check
-                .par_iter()
-                .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
-                    let mut fe_result = vec![];
-                    // Read current dir childrens
-                    let read_dir = match fs::read_dir(&current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(fl!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result);
-                        }
-                    };
-
-                    // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(fl!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(fl!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
-                        if metadata.is_dir() {
-                            if !self.recursive_search {
-                                continue 'dir;
-                            }
-
-                            let next_folder = current_folder.join(entry_data.file_name());
-                            if self.directories.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            if self.excluded_items.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            dir_result.push(next_folder);
-                        } else if metadata.is_file() {
-                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(fl!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
-                            }
-                            .to_lowercase();
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                                let current_file_name = current_folder.join(entry_data.file_name());
-                                if self.excluded_items.is_excluded(&current_file_name) {
-                                    continue 'dir;
-                                }
-
-                                // Creating new file entry
-                                let fe: FileEntry = FileEntry {
-                                    size: metadata.len(),
-                                    path: current_file_name.clone(),
-                                    modified_date: match metadata.modified() {
-                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                            Ok(d) => d.as_secs(),
-                                            Err(_inspected) => {
-                                                warnings.push(fl!(
-                                                    "core_file_modified_before_epoch",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
-                                        Err(e) => {
-                                            warnings.push(fl!(
-                                                "core_file_no_modification_date",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-                                    title: "".to_string(),
-
-                                    artist: "".to_string(),
-                                    album_title: "".to_string(),
-                                    album_artist: "".to_string(),
-                                    year: 0,
-                                };
-
-                                fe_result.push(fe);
-                            }
-                        }
-                    }
-                    (dir_result, warnings, fe_result)
-                })
-                .collect();
-
-            // Advance the frontier
-            folders_to_check.clear();
-
-            // Process collected data
-            for (segment, warnings, fe_result) in segments {
-                folders_to_check.extend(segment);
                 self.text_messages.warnings.extend(warnings);
-                for fe in fe_result {
-                    self.music_to_check.push(fe);
-                }
+                Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+                true
             }
+            DirTraversalResult::SuccessFolders { .. } => {
+                unreachable!()
+            }
+            DirTraversalResult::Stopped => false,
         }
-
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
-
-        Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
-        true
     }
 
     fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -433,10 +289,11 @@ impl SameMusic {
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
+                        checking_method: CheckingMethod::None,
                         current_stage: 1,
                         max_stage: 2,
-                        music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        music_to_check,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_to_check: music_to_check,
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -449,16 +306,18 @@ impl SameMusic {
         };
         //// PROGRESS THREAD END
 
-        let vec_file_entry = self
-            .music_to_check
-            .par_iter()
+        // Clean for duplicate files
+        let music_to_check = mem::replace(&mut self.music_to_check, vec![]);
+
+        let vec_file_entry = music_to_check
+            .into_par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
-                let mut file_entry = file_entry.clone();
+                let mut file_entry = file_entry.into_music_entry();
 
                 let tag = match Tag::new().read_from_path(&file_entry.path) {
                     Ok(t) => t,
@@ -504,9 +363,6 @@ impl SameMusic {
 
         Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());
 
-        // Clean for duplicate files
-        self.music_to_check.clear();
-
         true
     }
     fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -529,10 +385,11 @@ impl SameMusic {
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
+                        checking_method: CheckingMethod::None,
                         current_stage: 2,
                         max_stage: 2,
-                        music_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
-                        music_to_check,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_to_check: music_to_check,
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -545,8 +402,8 @@ impl SameMusic {
         };
         //// PROGRESS THREAD END
 
-        let mut old_duplicates: Vec<Vec<FileEntry>> = vec![self.music_entries.clone()];
-        let mut new_duplicates: Vec<Vec<FileEntry>> = Vec::new();
+        let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
+        let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
         if (self.music_similarity & MusicSimilarity::TITLE) == MusicSimilarity::TITLE {
             for vec_file_entry in old_duplicates {
@@ -557,7 +414,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let mut title = file_entry.title.to_lowercase().trim().to_string();
                     if self.approximate_comparison {
@@ -587,7 +444,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let mut artist = file_entry.artist.to_lowercase().trim().to_string();
                     if self.approximate_comparison {
@@ -617,7 +474,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let mut album_title = file_entry.album_title.to_lowercase().trim().to_string();
                     if self.approximate_comparison {
@@ -647,7 +504,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: BTreeMap<String, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let mut album_artist = file_entry.album_artist.to_lowercase().trim().to_string();
                     if self.approximate_comparison {
@@ -677,7 +534,7 @@ impl SameMusic {
                     progress_thread_handle.join().unwrap();
                     return false;
                 }
-                let mut hash_map: BTreeMap<i32, Vec<FileEntry>> = Default::default();
+                let mut hash_map: BTreeMap<i32, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     let year = file_entry.year;
                     if year != 0 {
@@ -724,7 +581,7 @@ impl SameMusic {
                         Some((files_from_referenced_folders.pop().unwrap(), normal_files))
                     }
                 })
-                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+                .collect::<Vec<(MusicEntry, Vec<MusicEntry>)>>();
         }
 
         if self.use_reference_folders {

@@ -101,8 +101,8 @@ fn main() {
             futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_same_music, futures_receiver_same_music): (
-            futures::channel::mpsc::UnboundedSender<same_music::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>,
+            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
         ) = futures::channel::mpsc::unbounded();
         let (futures_sender_similar_images, futures_receiver_similar_images): (
             futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
