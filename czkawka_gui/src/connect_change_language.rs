@@ -3,35 +3,25 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
 
 use crate::language_functions::get_language_from_combo_box_text;
-use crate::{GuiData, LANGUAGES_ALL};
 
 // use i18n_embed::{DesktopLanguageRequester, Localizer};
 
-pub fn connect_change_language(gui_data: &GuiData) {
-    change_language(gui_data);
-
-    let combo_box_settings_language = gui_data.settings.combo_box_settings_language.clone();
-    let gui_data = gui_data.clone();
-    combo_box_settings_language.connect_changed(move |_| {
-        change_language(&gui_data);
-    });
+pub fn connect_change_language() {
+    change_language();
 }
 
-fn change_language(gui_data: &GuiData) {
+fn change_language() {
     let localizers = vec![("czkawka_gui", czkawka_core::localizer::localizer())];
 
-    let lang_short = get_language_from_combo_box_text(gui_data.settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text;
-
-    let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).unwrap()];
+    let lang_identifier = vec![LanguageIdentifier::from_bytes("en".as_bytes()).unwrap()];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
             eprintln!("Error while loadings languages for {} {:?}", lib, error);
         }
     }
-    gui_data.update_language();
 }
 
-pub fn load_system_language(gui_data: &GuiData) {
+pub fn load_system_language() {
     let requested_languages = DesktopLanguageRequester::requested_languages();
 
     if let Some(language) = requested_languages.get(0) {
@@ -45,18 +35,5 @@ pub fn load_system_language(gui_data: &GuiData) {
                 break;
             }
         }
-        // let mut found: bool = false;
-        for (index, lang) in LANGUAGES_ALL.iter().enumerate() {
-            if lang.short_text == short_lang {
-                // found = true;
-                gui_data.settings.combo_box_settings_language.set_active(Some(index as u32));
-                break;
-            }
-        }
-        // if found {
-        //     println!("INFO: Default system language {} is available, so choosing them", short_lang);
-        // } else {
-        //     println!("INFO: Default system language {} is not available, using English(en) instead", short_lang);
-        // }
     }
 }

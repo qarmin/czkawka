@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "czkawka_core",
-    "czkawka_cli",
     "czkawka_gui",
 ]
 [profile.release]
