@@ -4,10 +4,6 @@
 use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
 
-use crate::connect_change_language::*;
-
-mod connect_change_language;
-
 fn main() {
     load_system_language(); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
     connect_change_language();
@@ -31,6 +27,8 @@ fn change_language() {
 pub fn load_system_language() {
     println!("Load system language");
     let requested_languages = DesktopLanguageRequester::requested_languages();
+
+    println!("requested_languages - {:?} ({})", requested_languages, requested_languages.len());
 
     if let Some(language) = requested_languages.get(0) {
         let old_short_lang = language.to_string();
