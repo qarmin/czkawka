@@ -1,16 +1,12 @@
-use gtk::prelude::*;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
-
-
-
-// use i18n_embed::{DesktopLanguageRequester, Localizer};
 
 pub fn connect_change_language() {
     change_language();
 }
 
 fn change_language() {
+    println!("Change language");
     let localizers = vec![("czkawka_gui", czkawka_core::localizer::localizer())];
 
     let lang_identifier = vec![LanguageIdentifier::from_bytes("en".as_bytes()).unwrap()];
@@ -22,6 +18,7 @@ fn change_language() {
 }
 
 pub fn load_system_language() {
+    println!("Load system language");
     let requested_languages = DesktopLanguageRequester::requested_languages();
 
     if let Some(language) = requested_languages.get(0) {
