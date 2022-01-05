@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use gtk::prelude::*;
 
-use czkawka_core::{big_file, broken_files, common_dir_traversal, same_music, similar_images, similar_videos, temporary};
+use czkawka_core::{big_file, broken_files, common_dir_traversal, similar_images, similar_videos, temporary};
 
 use crate::fl;
 use crate::gui_data::GuiData;
@@ -15,7 +15,7 @@ pub fn connect_progress_window(
     mut futures_receiver_empty_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_empty_folder: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_big_files: futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
-    mut futures_receiver_same_music: futures::channel::mpsc::UnboundedReceiver<same_music::ProgressData>,
+    mut futures_receiver_same_music: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_similar_images: futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
     mut futures_receiver_similar_videos: futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
     mut futures_receiver_temporary: futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
@@ -182,18 +182,19 @@ pub fn connect_progress_window(
                         progress_bar_current_stage.hide();
                         label_stage.set_text(&fl!(
                             "progress_scanning_general_file",
-                            generate_translation_hashmap(vec![("file_number", item.music_checked.to_string())])
+                            generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
                         ));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
                     1 => {
                         progress_bar_current_stage.show();
-                        if item.music_to_check != 0 {
-                            progress_bar_all_stages.set_fraction((1f64 + (item.music_checked) as f64 / item.music_to_check as f64) / (item.max_stage + 1) as f64);
-                            progress_bar_current_stage.set_fraction((item.music_checked) as f64 / item.music_to_check as f64);
-                            taskbar_state
-                                .borrow()
-                                .set_progress_value((item.music_to_check + item.music_checked) as u64, item.music_to_check as u64 * (item.max_stage + 1) as u64);
+                        if item.entries_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((1f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
+                            taskbar_state.borrow().set_progress_value(
+                                (item.entries_to_check + item.entries_checked) as u64,
+                                item.entries_to_check as u64 * (item.max_stage + 1) as u64,
+                            );
                         } else {
                             progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
                             progress_bar_current_stage.set_fraction(0f64);
@@ -201,16 +202,16 @@ pub fn connect_progress_window(
                         }
                         label_stage.set_text(&fl!(
                             "progress_scanning_music_tags",
-                            generate_translation_hashmap(vec![("file_checked", item.music_checked.to_string()), ("all_files", item.music_to_check.to_string())])
+                            generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
                         ));
                     }
                     2 => {
-                        if item.music_to_check != 0 {
-                            progress_bar_all_stages.set_fraction((2f64 + (item.music_checked) as f64 / item.music_to_check as f64) / (item.max_stage + 1) as f64);
-                            progress_bar_current_stage.set_fraction((item.music_checked) as f64 / item.music_to_check as f64);
+                        if item.entries_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((2f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
                             taskbar_state.borrow().set_progress_value(
-                                (2 * item.music_to_check + item.music_checked) as u64,
-                                item.music_to_check as u64 * (item.max_stage + 1) as u64,
+                                (2 * item.entries_to_check + item.entries_checked) as u64,
+                                item.entries_to_check as u64 * (item.max_stage + 1) as u64,
                             );
                         } else {
                             progress_bar_all_stages.set_fraction((2f64) / (item.max_stage + 1) as f64);
@@ -219,7 +220,7 @@ pub fn connect_progress_window(
                         }
                         label_stage.set_text(&fl!(
                             "progress_scanning_music_tags_end",
-                            generate_translation_hashmap(vec![("file_checked", item.music_checked.to_string()), ("all_files", item.music_to_check.to_string())])
+                            generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
                         ));
                     }
                     _ => {

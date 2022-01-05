@@ -35,7 +35,7 @@ pub fn connect_button_search(
     futures_sender_empty_files: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
     futures_sender_empty_folder: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
     futures_sender_big_file: futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
-    futures_sender_same_music: futures::channel::mpsc::UnboundedSender<same_music::ProgressData>,
+    futures_sender_same_music: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
     futures_sender_similar_images: futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
     futures_sender_similar_videos: futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
     futures_sender_temporary: futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
