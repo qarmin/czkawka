@@ -307,7 +307,7 @@ impl SameMusic {
         //// PROGRESS THREAD END
 
         // Clean for duplicate files
-        let music_to_check = mem::replace(&mut self.music_to_check, vec![]);
+        let music_to_check = mem::take(&mut self.music_to_check);
 
         let vec_file_entry = music_to_check
             .into_par_iter()
