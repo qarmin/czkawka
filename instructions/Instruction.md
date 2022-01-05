@@ -9,37 +9,23 @@
 Czkawka for now contains two independent frontends - the terminal and graphical interface which share the core module.
 
 ## GUI GTK
-<img src="https://user-images.githubusercontent.com/41945903/103002387-14d1b800-452f-11eb-967e-9d5905dd6db5.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />
 
 ### GUI overview
 The GUI is built from different pieces:
-- Red - Program settings, contains info about included/excluded directories which user may want to check. Also, there is a tab with allowed extensions, which allows users to choose which type of files they want to check. Next category is Excluded items, which allows to discard specific path by using `*` wildcard - so `/home/ra*` means that e.g. `/home/rafal/` will be ignored but not `/home/czkawka/`. The last one is settings tab which allows to save configuration of the program, reset and load it when needed.
-- Green - This allows to choose which tool we want to use.
-- Blue - Here are settings for the current tool, which we want/need to configure
-- Pink - Window in which results of searching are printed
-- Yellow - Box with buttons like `Search`(starts searching with the currently selected tool), `Hide Text View`(hides text box at the bottom with white overlay), `Symlink`(creates symlink to selected file), `Select`(shows options to select specific rows), `Delete`(deletes selected files), `Save`(save to file the search result) - some buttons are only visible when at least one result is visible.
-- Brown - Small informative field to show informations e.g. about number of found duplicate files
-- White - Text window to show possible errors/warnings e.g. when failed to delete folder due no permissions etc.
+- 1 - Image preview - it is used in duplicate files and similar images finder. Cannot be resized, but can be disabled.
+- 2 - Main Notebook to change used tool.
+- 3 - Main results window - allows to choose, delete, configure results.
+- 4 - Bottom image panels - contains buttons which do specific actions on data(like selecting them) or e.g. hide/show parts of GUI
+- 5 - Text panel - prints messages/warnings/errors about executed actions. User can hide it.
+- 6 - Panel with selecting specific directories to use or exclude. Also here are specified allowed extensions and file sizes.
+- 7 - Buttons which opens About Window(shows info about app) and Settings in which scan can be customized
 
-There is also an option to see image previews in Similar Images tool.
+<img src="https://user-images.githubusercontent.com/41945903/148279809-54ea8684-8bff-436b-af67-ff9859f468f2.png" width="800" />
 
-<img src="https://user-images.githubusercontent.com/41945903/103025544-50ca4480-4552-11eb-9a54-f1b1f6f725b1.png" width="800" />
-
-### Action Buttons
-There are several buttons which do different actions:
-- Search - starts searching and shows progress dialog
-- Stop - button in progress dialog, allows to easily stop current task. Sometimes it may take a few seconds until all atomic operations end and GUI will  become responsive again
-- Select - allows selecting multiple entries at once
-- Delete - deletes entirely all selected entries
-- Symlink - creates symlink to selected files(first file is threaten as original and rest will become symlinks)
-- Save - save initial state of results
-- Hamburger(parallel lines) - used to show/hide bottom text panel which shows warnings/errors
-- Add (directories) - adds directories to include or exclude
-- Remove (directories) - removes directories to search or to exclude
-- Manual Add (directories) - allows to input by typing directories (may be used to enter non visible in file manager directories)
-- Save current configuration - saves current GUI configuration to configuration file
-- Load configuration - loads configuration of file and overrides current GUI config
-- Reset configuration - resets current GUI configuration to defaults
+### Translations
+GUI is fully translatable.  
+For now at least 10 languages are supported(some was translated by computers) 
 
 ### Opening/Manipulating files
 It is possible to open selected files by double clicking on them.
@@ -67,10 +53,13 @@ By default, all tools only write about results to console, but it is possible wi
 ## Config/Cache files
 Currently, Czkawka stores few config and cache files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image_SIZE_HASH_FILTER.txt` - stores cache data and hashes which may be used later without needing to compute image hash again - editing this file manually is not recommended, but it is allowed. Each algorithms uses its own file, because hashes are completely different in each.
+- `cache_similar_image_SIZE_HASH_FILTER.bin/json` - stores cache data and hashes which may be used later without needing to compute image hash again.. Each algorithms uses its own file, because hashes are completely different in each.
 - `cache_broken_files.txt` - stores cache data of broken files
-- `cache_duplicates_Blake3.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
-- `cache_similar_videos.bin/json` - stores cache data of video files. Depending on usage(debug/release build) it will produce bin file(fast, but unable to change) or json(slow, but well formatted).
+- `cache_duplicates_HASH.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
+- `cache_similar_videos.bin/json` - stores cache data of video files.
+
+Editing `bin` files may cause showing strange crashes, so in case of having any, removing these files should help.  
+It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
 
 Config files are located in this path:
 
@@ -92,7 +81,7 @@ Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 - **Not all columns are always visible**
   For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
     - View can be scrolled via horizontal scroll bar (1 on image)
-    - Size of other columns can be slimmed (2 )
+    - Size of other columns can be slimmed (2)
   This is checked if is possible to do in https://github.com/qarmin/czkawka/issues/169
 ![AA](https://user-images.githubusercontent.com/41945903/125684641-728e264a-34ab-41b1-9853-ab45dc25551f.png)
 - **Opening parent folders**
@@ -226,11 +215,11 @@ Next these hashes are saved to file, to be able to open images without needing t
 Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.  
 
 It is possible to choose one of 5 types of hashes - `Gradient`, `Mean`, `VertGradient`, `Blockhash`, `DoubleGradient`.  
-Before calculating hashes usually images are resized with specific algorithm(`Lanczos3`, `Gaussian`, `CatmullRom`, `Triangle`, `Nearest`) to e.g. 8x8 or 16x16 image(allowed sizes - `4x4`, `8x8`, `16x16`), which allows simplifying later computations. Both size and filter can be adjusted in application.
+Before calculating hashes usually images are resized with specific algorithm(`Lanczos3`, `Gaussian`, `CatmullRom`, `Triangle`, `Nearest`) to e.g. 8x8 or 16x16 image(allowed sizes - `8x8`, `16x16`, `32x32`, `64x64`), which allows simplifying later computations. Both size and filter can be adjusted in application.
 
 Each configuration saves results to different cache files to save users from invalid results.
 
-Some images broke hash functions and create hashes full of `0` or `255`, so these images are silently excluded from end results(but still are saved to cache). 
+Some images broke hash functions and create hashes full of `0` or `255`, so these images are silently excluded from end results(but still are saved to cache).
 
 You can test each algorithm with provided CLI tool, just put to folder `test.jpg` file and run inside this command `czkawka_cli tester -i`
 

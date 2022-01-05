@@ -454,6 +454,7 @@ pub fn connect_button_search(
                     br.set_excluded_items(excluded_items);
                     br.set_use_cache(use_cache);
                     br.set_allowed_extensions(allowed_extensions);
+                    br.set_save_also_as_json(save_also_as_json);
                     br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
                     let _ = glib_stop_sender.send(Message::BrokenFiles(br));
                 });

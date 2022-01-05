@@ -11,6 +11,10 @@ pub const LANGUAGES_ALL: [Language; 12] = [
         short_text: "en",
     },
     Language {
+        combo_box_text: "Français (French)",
+        short_text: "fr",
+    },
+    Language {
         combo_box_text: "Italiano (Italian)",
         short_text: "it",
     },
@@ -25,10 +29,6 @@ pub const LANGUAGES_ALL: [Language; 12] = [
     Language {
         combo_box_text: "Deutsch (German) - Computer translation",
         short_text: "de",
-    },
-    Language {
-        combo_box_text: "Français (French) - Computer translation",
-        short_text: "fr",
     },
     Language {
         combo_box_text: "やまと (Japanese) - Computer translation",
