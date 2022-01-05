@@ -266,6 +266,19 @@ pub enum DirTraversalResult<T: Ord + PartialOrd> {
     Stopped,
 }
 
+fn entry_type(metadata: &Metadata) -> EntryType {
+    let file_type = metadata.file_type();
+    if file_type.is_dir() {
+        EntryType::Dir
+    } else if file_type.is_symlink() {
+        EntryType::Symlink
+    } else if file_type.is_file() {
+        EntryType::File
+    } else {
+        EntryType::Other
+    }
+}
+
 impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
 where
     F: Fn(&FileEntry) -> T,
@@ -389,17 +402,7 @@ where
                                 continue 'dir;
                             }
                         };
-                        let entry_type;
-                        if metadata.is_dir() {
-                            entry_type = EntryType::Dir;
-                        } else if metadata.file_type().is_symlink() {
-                            entry_type = EntryType::Symlink;
-                        } else if metadata.is_file() {
-                            entry_type = EntryType::File;
-                        } else {
-                            entry_type = EntryType::Other;
-                        }
-                        match (entry_type, collect) {
+                        match (entry_type(&metadata), collect) {
                             (EntryType::Dir, Collect::Files) | (EntryType::Dir, Collect::InvalidSymlinks) => {
                                 if !recursive_search {
                                     continue 'dir;
