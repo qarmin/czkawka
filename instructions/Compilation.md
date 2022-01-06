@@ -43,6 +43,12 @@ Next install Rust from site https://rustup.rs/
 After that the latest GTK 3 runtime must be installed from https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
 -->
 
+### Docker
+
+```shell
+docker build ./misc/docker/ --tag cargo-gtk
+```
+
 ## Compilation
 
 Czkawka can be installed with Debug or Release build.  
@@ -65,6 +71,17 @@ cargo run --release --bin czkawka_gui
 cargo run --release --bin czkawka_cli
 ```
 
+## Compilation with Docker
+
+```shell
+docker run -t --rm --volume $PWD:/app --workdir /app cargo-gtk cargo build --release --bin czkawka_gui
+```
+
+Run the binary:
+
+```shell
+target/release/czkawka_gui
+```
 
 ## Additional features
 For now, finding broken audio files is temporary disabled by default, because it crashes when audio libraries are not found on the computer.  
