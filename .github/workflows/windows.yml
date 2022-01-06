@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: czkawka_gui-Windows-release-normal-${{ matrix.toolchain }}
-          path: target/release/x86_64-pc-windows-gnu/czkawka_gui.exe
+          path: target/x86_64-pc-windows-gnu/release/czkawka_core.exe
 
   windows-debug-gui:
     strategy:
@@ -98,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: czkawka_gui-Windows-release-normal-${{ matrix.toolchain }}
-          path: target/debug/x86_64-pc-windows-gnu/czkawka_gui.exe
+          path: target/x86_64-pc-windows-gnu/debug/czkawka_core.exe
 
   windows-release-console:
     strategy:
@@ -144,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: czkawka_gui-Windows-release-console-${{ matrix.toolchain }}
-          path: target/release/x86_64-pc-windows-gnu/czkawka_gui.exe
+          path: target/x86_64-pc-windows-gnu/release/czkawka_core.exe
 
   windows-debug-console:
     strategy:
@@ -190,4 +190,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: czkawka_gui-Windows-debug-console-${{ matrix.toolchain }}
-          path: target/debug/x86_64-pc-windows-gnu/czkawka_gui.exe
+          path: target/x86_64-pc-windows-gnu/debug/czkawka_core.exe
