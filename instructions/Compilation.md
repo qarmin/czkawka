@@ -1,6 +1,7 @@
 # Compiling Czkawka from sources
 
 ## Requirements
+
 | Program | Min  | What for                                                                      |
 |---------|------|-------------------------------------------------------------------------------|
 | Rust    | 1.53 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04 |
