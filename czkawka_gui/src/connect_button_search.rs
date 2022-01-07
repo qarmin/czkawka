@@ -18,7 +18,6 @@ use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 use czkawka_core::*;
 
-use crate::fl;
 use crate::gui_data::GuiData;
 use crate::help_combo_box::{
     DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
@@ -26,6 +25,7 @@ use crate::help_combo_box::{
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
+use crate::{fl, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_button_search(
@@ -119,10 +119,22 @@ pub fn connect_button_search(
         let hide_hard_links = check_button_settings_hide_hard_links.is_active();
         let use_cache = check_button_settings_use_cache.is_active();
         let save_also_as_json = check_button_settings_save_also_json.is_active();
-        let minimal_cache_file_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 / 4);
+        let minimal_cache_file_size = entry_settings_cache_file_minimal_size
+            .text()
+            .as_str()
+            .parse::<u64>()
+            .unwrap_or_else(|_| DEFAULT_MINIMAL_CACHE_SIZE.parse::<u64>().unwrap());
 
-        let minimal_file_size = entry_general_minimal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 8);
-        let maximal_file_size = entry_general_maximal_size.text().as_str().parse::<u64>().unwrap_or(1024 * 1024 * 1024 * 1024);
+        let minimal_file_size = entry_general_minimal_size
+            .text()
+            .as_str()
+            .parse::<u64>()
+            .unwrap_or_else(|_| DEFAULT_MINIMAL_FILE_SIZE.parse::<u64>().unwrap());
+        let maximal_file_size = entry_general_maximal_size
+            .text()
+            .as_str()
+            .parse::<u64>()
+            .unwrap_or_else(|_| DEFAULT_MAXIMAL_FILE_SIZE.parse::<u64>().unwrap());
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 

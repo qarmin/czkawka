@@ -127,11 +127,12 @@ fn main() {
 
         initialize_gui(&mut gui_data);
         validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
-        reset_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
+        reset_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
         load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
         load_configuration(
             false,
             &gui_data.upper_notebook,
+            &gui_data.main_notebook,
             &gui_data.settings,
             &gui_data.text_view_errors,
             &gui_data.scrolled_window_errors,
@@ -187,7 +188,7 @@ fn main() {
         let window_main = gui_data.window_main.clone();
         let taskbar_state = gui_data.taskbar_state.clone();
         window_main.connect_delete_event(move |_, _| {
-            save_configuration(false, &gui_data.upper_notebook, &gui_data.settings, &gui_data.text_view_errors); // Save configuration at exit
+            save_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Save configuration at exit
             taskbar_state.borrow_mut().release();
             Inhibit(false)
         });

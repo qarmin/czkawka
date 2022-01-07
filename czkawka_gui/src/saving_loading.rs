@@ -6,8 +6,9 @@ use std::{env, fs};
 
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
-use gtk::{ScrolledWindow, TextView};
+use gtk::{ComboBoxText, ScrolledWindow, TextView};
 
+use crate::gui_main_notebook::GuiMainNotebook;
 use czkawka_core::fl;
 
 use crate::gui_settings::GuiSettings;
@@ -31,11 +32,24 @@ const DEFAULT_SAVE_ALSO_AS_JSON: bool = false;
 const DEFAULT_HIDE_HARD_LINKS: bool = true;
 const DEFAULT_USE_PRECACHE: bool = false;
 const DEFAULT_USE_TRASH: bool = false;
-const DEFAULT_MINIMAL_CACHE_SIZE: &str = "257144";
+pub const DEFAULT_MINIMAL_CACHE_SIZE: &str = "257144";
 const DEFAULT_PREHASH_MINIMAL_CACHE_SIZE: &str = "0";
 const DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE: bool = false;
 const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
+
+pub const DEFAULT_MINIMAL_FILE_SIZE: &str = "16384";
+pub const DEFAULT_MAXIMAL_FILE_SIZE: &str = "999999999999";
+
+#[cfg(target_family = "unix")]
+const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*";
+#[cfg(not(target_family = "unix"))]
+const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*";
+
+#[cfg(target_family = "unix")]
+const DEFAULT_EXCLUDED_DIRECTORIES: [&str; 5] = ["/proc", "/dev", "/sys", "/run", "/snap"];
+#[cfg(not(target_family = "unix"))]
+const DEFAULT_EXCLUDED_DIRECTORIES: [&str; 1] = ["C:\\Windows"];
 
 struct LoadSaveStruct {
     loaded_items: HashMap<String, Vec<String>>,
@@ -84,7 +98,7 @@ impl LoadSaveStruct {
 
         default_value
     }
-    /*    pub fn get_integer<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
+    pub fn get_integer<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
         if self.loaded_items.contains_key(&key) {
             let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
 
@@ -109,7 +123,7 @@ impl LoadSaveStruct {
         }
 
         default_value
-    }*/
+    }
     pub fn get_bool(&self, key: String, default_value: bool) -> bool {
         if self.loaded_items.contains_key(&key) {
             let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
@@ -357,6 +371,8 @@ enum LoadText {
     ExcludedDirectories,
     ExcludedItems,
     AllowedExtensions,
+    MinimalFileSize,
+    MaximalFileSize,
     SaveAtExit,
     LoadAtStart,
     ConfirmDeletionFiles,
@@ -375,6 +391,11 @@ enum LoadText {
     UsePrehashCache,
     MinimalPrehashCacheSize,
     Language,
+    ComboBoxDuplicateHashType,
+    ComboBoxDuplicateCheckMethod,
+    ComboBoxImageResizeAlgorithm,
+    ComboBoxImageHashType,
+    ComboBoxImageHashSize,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -383,6 +404,8 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::ExcludedDirectories, "excluded_directories"),
         (LoadText::ExcludedItems, "excluded_items"),
         (LoadText::AllowedExtensions, "allowed_extensions"),
+        (LoadText::MinimalFileSize, "minimal_file_size"),
+        (LoadText::MaximalFileSize, "maximal_file_size"),
         (LoadText::SaveAtExit, "save_at_exit"),
         (LoadText::LoadAtStart, "load_at_start"),
         (LoadText::ConfirmDeletionFiles, "confirm_deletion_files"),
@@ -401,6 +424,11 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::UsePrehashCache, "use_prehash_cache"),
         (LoadText::MinimalPrehashCacheSize, "minimal_prehash_cache_size"),
         (LoadText::Language, "language"),
+        (LoadText::ComboBoxDuplicateHashType, "combo_box_duplicate_hash_type"),
+        (LoadText::ComboBoxDuplicateCheckMethod, "combo_box_duplicate_check_method"),
+        (LoadText::ComboBoxImageResizeAlgorithm, "combo_box_image_resize_algorithm"),
+        (LoadText::ComboBoxImageHashType, "combo_box_image_hash_type"),
+        (LoadText::ComboBoxImageHashSize, "combo_box_image_hash_size"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -413,7 +441,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
     (hashmap_ls, hashmap_sl)
 }
 
-pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     let check_button_settings_save_at_exit = settings.check_button_settings_save_at_exit.clone();
     let text_view_errors = text_view_errors.clone();
 
@@ -443,6 +471,14 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().to_string(),
         upper_notebook.entry_allowed_extensions.text(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().to_string(),
+        upper_notebook.entry_general_minimal_size.text(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().to_string(),
+        upper_notebook.entry_general_maximal_size.text(),
     );
 
     // Check buttons
@@ -521,10 +557,39 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         get_language_from_combo_box_text(settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text,
     );
 
+    // Comboboxes main notebook
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().to_string(),
+        main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().to_string(),
+        main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().to_string(),
+        main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().to_string(),
+        main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().to_string(),
+        main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
+    );
+
     saving_struct.save_to_file(&text_view_errors);
 }
 
-pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView, scrolled_window_errors: &ScrolledWindow) {
+pub fn load_configuration(
+    manual_execution: bool,
+    upper_notebook: &GuiUpperNotebook,
+    main_notebook: &GuiMainNotebook,
+    settings: &GuiSettings,
+    text_view_errors: &TextView,
+    scrolled_window_errors: &ScrolledWindow,
+) {
     let text_view_errors = text_view_errors.clone();
 
     reset_text_view(&text_view_errors);
@@ -543,6 +608,8 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     let excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().clone(), Vec::new());
     let excluded_items: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(), "".to_string());
     let allowed_extensions: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().clone(), "".to_string());
+    let minimal_file_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
+    let maximal_file_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
 
     let loading_at_start: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::LoadAtStart).unwrap().clone(), DEFAULT_LOAD_AT_START);
     let saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SaveAtExit).unwrap().clone(), DEFAULT_SAVE_ON_EXIT);
@@ -576,6 +643,12 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     let cache_minimal_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
     let short_language = loaded_entries.get_string(hashmap_ls.get(&LoadText::Language).unwrap().clone(), short_language);
 
+    let combo_box_duplicate_hash_type = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().clone(), 0);
+    let combo_box_duplicate_checking_method = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().clone(), 0);
+    let combo_box_image_hash_size = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 0);
+    let combo_box_image_hash_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
+    let combo_box_image_resize_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
+
     // Setting data
     if manual_execution || loading_at_start {
         {
@@ -602,7 +675,7 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
                 list_store.set(&list_store.append(), &values);
             }
         }
-        //// ComboText
+        //// Language ComboBoxText
         {
             for (index, lang) in LANGUAGES_ALL.iter().enumerate() {
                 if short_language == lang.short_text {
@@ -613,6 +686,8 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
 
         upper_notebook.entry_excluded_items.set_text(&excluded_items);
         upper_notebook.entry_allowed_extensions.set_text(&allowed_extensions);
+        upper_notebook.entry_general_minimal_size.set_text(&minimal_file_size);
+        upper_notebook.entry_general_maximal_size.set_text(&maximal_file_size);
 
         //// Buttons
         settings.check_button_settings_load_at_start.set_active(loading_at_start);
@@ -643,12 +718,25 @@ pub fn load_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_settings_use_trash.set_active(use_trash);
         settings.entry_settings_cache_file_minimal_size.set_text(&cache_minimal_size);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&cache_prehash_minimal_size);
+
+        save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_hash_type, combo_box_duplicate_hash_type);
+        save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_check_method, combo_box_duplicate_checking_method);
+        save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_algorithm, combo_box_image_hash_algorithm);
+        save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_size, combo_box_image_hash_size);
+        save_proper_value_to_combo_box(&main_notebook.combo_box_image_resize_algorithm, combo_box_image_resize_algorithm);
     } else {
         settings.check_button_settings_load_at_start.set_active(false);
     }
 }
 
-pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+fn save_proper_value_to_combo_box(combo_box: &ComboBoxText, what_to_save: u32) {
+    combo_box.set_active(Some(what_to_save));
+    if combo_box.active().is_none() {
+        combo_box.set_active(Some(0));
+    }
+}
+
+pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     // TODO Maybe add popup dialog to confirm resetting
     let text_view_errors = text_view_errors.clone();
 
@@ -686,27 +774,15 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
         list_store.clear();
-        if cfg!(target_family = "unix") {
-            for i in ["/proc", "/dev", "/sys", "/run", "/snap"].iter() {
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
-                list_store.set(&list_store.append(), &values);
-            }
+        for i in DEFAULT_EXCLUDED_DIRECTORIES.iter() {
+            let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
+            list_store.set(&list_store.append(), &values);
         }
     }
     // Resetting excluded items
     {
-        let entry_excluded_items = upper_notebook.entry_excluded_items.clone();
-        if cfg!(target_family = "unix") {
-            entry_excluded_items.set_text("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*");
-        }
-        if cfg!(target_family = "windows") {
-            entry_excluded_items.set_text("*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*");
-        }
-    }
-    // Resetting allowed extensions
-    {
-        let entry_allowed_extensions = upper_notebook.entry_allowed_extensions.clone();
-        entry_allowed_extensions.set_text("");
+        upper_notebook.entry_excluded_items.set_text(DEFAULT_EXCLUDED_ITEMS);
+        upper_notebook.entry_allowed_extensions.set_text("");
     }
 
     // Set default settings
@@ -735,6 +811,12 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_duplicates_use_prehash_cache.set_active(DEFAULT_USE_PRECACHE);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(DEFAULT_PREHASH_MINIMAL_CACHE_SIZE);
         settings.combo_box_settings_language.set_active(Some(0));
+
+        main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
+        main_notebook.combo_box_duplicate_check_method.set_active(Some(0));
+        main_notebook.combo_box_image_hash_algorithm.set_active(Some(0));
+        main_notebook.combo_box_image_resize_algorithm.set_active(Some(0));
+        main_notebook.combo_box_image_hash_size.set_active(Some(0));
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, &fl!("saving_loading_reset_configuration"));
