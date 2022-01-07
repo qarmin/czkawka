@@ -2,14 +2,15 @@
 
 ## Requirements
 
+If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
+
+FFmpeg is not included here, because is not needed to build because it is dynamically loaded.
+
+
 | Program | Min  | What for                                                                      |
 |---------|------|-------------------------------------------------------------------------------|
 | Rust    | 1.53 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04 |
 | GTK     | 3.24 | Only for the `GTK` backend                                                    |
-
-If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
-
-FFmpeg is not included here, because is not needed to build because it is dynamically loaded.
 
 #### Debian / Ubuntu
 ```shell
@@ -30,7 +31,7 @@ You need to install Rust via Homebrew and GTK Libraries
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install rust gtk+3 adwaita-icon-theme librsvg
+brew install gtk+3 adwaita-icon-theme librsvg
 ```
 
 ### Windows
@@ -85,7 +86,7 @@ target/release/czkawka_gui
 ```
 
 ## Additional features
-For now, finding broken audio files is temporary disabled by default, because it crashes when audio libraries are not found on the computer.  
+For now, finding broken audio files is temporary disabled by default, because app crashes when audio libraries are not found on the computer.  
 I'm waiting for ability to disable audio playback feature, so after that I will be able to re-enable by default this feature (https://github.com/RustAudio/rodio/issues/349)
 
 To enable checking for broken audio files, just add ` --all-features`
