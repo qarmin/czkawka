@@ -58,6 +58,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let window_compare = gui_data.compare_images.window_compare.clone();
     window_compare.connect_delete_event(move |window_compare, _| {
         window_compare.hide();
+        // TODO clear cached data here
         gtk::Inhibit(true)
     });
 
@@ -119,10 +120,13 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
         returned_vector.push((full_name, used_iter.clone()));
     }
 
+    if !model.iter_next(&used_iter) {
+        panic!("Found only header!");
+    }
+
     loop {
         let name = model.value(&used_iter, column_name).get::<String>().unwrap();
         let path = model.value(&used_iter, column_path).get::<String>().unwrap();
-        let color = model.value(&used_iter, column_color).get::<String>().unwrap();
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
@@ -132,12 +136,14 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
             break;
         }
 
+        let color = model.value(&used_iter, column_color).get::<String>().unwrap();
+
         if color == HEADER_ROW_COLOR {
             break;
         }
     }
 
-    // assert!(returned_vector.len() > 1);
+    assert!(returned_vector.len() > 1);
 
     returned_vector
 }
