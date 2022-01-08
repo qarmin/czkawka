@@ -684,8 +684,26 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
     (number_of_selected_items, number_of_selected_groups)
 }
 
-pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32){
+pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32) -> u32 {
+    let mut number_of_selected_groups = 0;
 
+    let model = get_list_store(tree_view);
+
+    if let Some(iter) = model.iter_first() {
+        assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        number_of_selected_groups += 1;
+
+        loop {
+            if !model.iter_next(&iter) {
+                break;
+            }
+
+            if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                number_of_selected_groups += 1;
+            }
+        }
+    }
+    number_of_selected_groups
 }
 
 pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label {
