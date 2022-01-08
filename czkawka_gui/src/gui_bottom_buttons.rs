@@ -44,7 +44,7 @@ impl GuiBottomButtons {
             "move".to_string(),
             "compare".to_string(),
         ];
-        let buttons_array= [
+        let buttons_array = [
             buttons_search.clone().upcast::<Widget>(),
             buttons_select.clone().upcast::<Widget>(),
             buttons_delete.clone().upcast::<Widget>(),

@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::cmp::Ordering;
 use std::fs;
 use std::ops::Deref;
 use std::path::Path;
@@ -9,7 +8,6 @@ use czkawka_core::common::get_dynamic_image_from_raw_image;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
-use image::imageops::FilterType;
 use image::GenericImageView;
 
 use czkawka_core::fl;
@@ -775,24 +773,7 @@ fn show_preview(
                         );
                         break 'dir;
                     }
-                    let ratio = img.width() / img.height();
-                    let requested_dimensions = (400, 400);
-                    let mut new_size;
-                    match ratio.cmp(&(requested_dimensions.0 / requested_dimensions.1)) {
-                        Ordering::Greater => {
-                            new_size = (requested_dimensions.0, (img.height() * requested_dimensions.0) / img.width());
-                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-                        }
-                        Ordering::Less => {
-                            new_size = ((img.width() * requested_dimensions.1) / img.height(), requested_dimensions.1);
-                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-                        }
-                        Ordering::Equal => {
-                            new_size = requested_dimensions;
-                            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-                        }
-                    }
-                    let img = img.resize(new_size.0, new_size.1, FilterType::Triangle);
+                    let img = resize_dynamic_image_dimension(img, (400, 400));
                     let file_dir = match is_raw_image {
                         true => cache_dir.join("cached_file.jpg"),
                         false => cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase())),

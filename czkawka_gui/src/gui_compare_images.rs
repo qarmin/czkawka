@@ -23,6 +23,7 @@ pub struct GuiCompareImages {
     pub shared_numbers_of_groups: Rc<RefCell<u32>>,
     pub shared_current_of_groups: Rc<RefCell<u32>>,
     pub shared_current_iter: Rc<RefCell<Option<TreeIter>>>,
+    pub shared_image_cache: Rc<RefCell<Vec<(String, gtk::Image, gtk::Image)>>>,
 }
 
 impl GuiCompareImages {
@@ -50,6 +51,7 @@ impl GuiCompareImages {
         let shared_numbers_of_groups = Rc::new(RefCell::new(0));
         let shared_current_of_groups = Rc::new(RefCell::new(0));
         let shared_current_iter = Rc::new(RefCell::new(None));
+        let shared_image_cache = Rc::new(RefCell::new(Vec::new()));
 
         Self {
             window_compare,
@@ -64,6 +66,7 @@ impl GuiCompareImages {
             shared_numbers_of_groups,
             shared_current_of_groups,
             shared_current_iter,
+            shared_image_cache,
         }
     }
     pub fn update_language(&self) {}

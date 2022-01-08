@@ -1,8 +1,12 @@
 use gtk::prelude::*;
 use gtk::{TreeIter, TreeModel};
+use image::DynamicImage;
 
 use crate::gui_data::GuiData;
-use crate::help_functions::{count_number_of_groups, get_full_name_from_path_name, HEADER_ROW_COLOR, NOTEBOOKS_INFOS};
+use crate::help_functions::{count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, resize_dynamic_image_dimension, HEADER_ROW_COLOR, NOTEBOOKS_INFOS};
+
+const BIG_PREVIEW_SIZE: u32 = 500;
+const SMALL_PREVIEW_SIZE: u32 = 100;
 
 pub fn connect_button_compare(gui_data: &GuiData) {
     let button_compare = gui_data.bottom_buttons.buttons_compare.clone();
@@ -18,6 +22,10 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
+
+    let image_compare_left = gui_data.compare_images.image_compare_left.clone();
+    let image_compare_right = gui_data.compare_images.image_compare_right.clone();
 
     button_compare.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
@@ -27,13 +35,11 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let model = tree_view.model().unwrap();
         *shared_current_iter.borrow_mut() = Some(model.iter_first().unwrap());
 
-        let group_number = count_number_of_groups(&tree_view, nb_object.column_color.unwrap());
+        let group_number = count_number_of_groups(tree_view, nb_object.column_color.unwrap());
 
         if group_number == 0 {
             return;
         }
-
-        window_compare.show();
 
         *shared_current_of_groups.borrow_mut() = 1;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -47,12 +53,21 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
         let tree_iter = shared_current_iter.borrow().clone().unwrap();
 
-        println!(
-            "{:?}",
-            get_all_path(&model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name)
-        );
+        let all_vec = get_all_path(&model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
+
+        for (path, _tree_iter) in &all_vec {
+            println!("PATH {}", path);
+        }
+        let cache_all_images = generate_cache_for_results(all_vec);
+
+        image_compare_left.set_from_pixbuf(cache_all_images[0].1.pixbuf().as_ref());
+        image_compare_right.set_from_pixbuf(cache_all_images[1].1.pixbuf().as_ref());
+
+        *shared_image_cache.borrow_mut() = cache_all_images;
 
         label_group_info.set_text(format!("Group 1/{}", group_number).as_str());
+
+        window_compare.show();
     });
 
     let window_compare = gui_data.compare_images.window_compare.clone();
@@ -101,6 +116,31 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
         label_group_info.set_text(format!("Group {}/{}", current_group, number_of_groups).as_str());
     });
+}
+
+fn generate_cache_for_results(vector_with_path: Vec<(String, gtk::TreeIter)>) -> Vec<(String, gtk::Image, gtk::Image)> {
+    let mut cache_all_images = Vec::new();
+    for (path, _tree_iter) in vector_with_path {
+        let dynamic_image = match image::open(&path) {
+            Ok(t) => t,
+            Err(_) => DynamicImage::new_bgr8(1, 1),
+        };
+
+        let big_thumbnail = resize_dynamic_image_dimension(dynamic_image, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE));
+        let big_path = get_image_path_temporary("roman", 1, "jpg");
+        let _ = big_thumbnail.save(&big_path);
+        let big_img = gtk::Image::new();
+        big_img.set_from_file(big_path);
+
+        let small_thumbnail = resize_dynamic_image_dimension(big_thumbnail, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE));
+        let small_path = get_image_path_temporary("roman", 1, "jpg");
+        let _ = small_thumbnail.save(&small_path);
+        let small_img = gtk::Image::new();
+        small_img.set_from_file(small_path);
+
+        cache_all_images.push((path, big_img, small_img));
+    }
+    cache_all_images
 }
 
 fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, TreeIter)> {

@@ -1,4 +1,4 @@
-# Instructionadin_dwa_tri
+# Instruction
 
 - [GUI](#gui-gtk)
 - [CLI](#cli)
