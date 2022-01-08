@@ -684,6 +684,10 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
     (number_of_selected_items, number_of_selected_groups)
 }
 
+pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32){
+
+}
+
 pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label {
     let internal_box = button.child().unwrap().downcast::<gtk::Box>().unwrap();
     for child in internal_box.children() {

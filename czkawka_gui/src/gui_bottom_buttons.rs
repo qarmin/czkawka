@@ -13,10 +13,11 @@ pub struct GuiBottomButtons {
     pub buttons_symlink: gtk::Button,
     pub buttons_hardlink: gtk::Button,
     pub buttons_move: gtk::Button,
+    pub buttons_compare: gtk::Button,
     pub buttons_show_errors: gtk::Button,
     pub buttons_show_upper_notebook: gtk::Button,
-    pub buttons_names: [String; 7],
-    pub buttons_array: [Widget; 7],
+    pub buttons_names: [String; 8],
+    pub buttons_array: [Widget; 8],
 }
 
 impl GuiBottomButtons {
@@ -28,6 +29,7 @@ impl GuiBottomButtons {
         let buttons_symlink: gtk::Button = builder.object("buttons_symlink").unwrap();
         let buttons_hardlink: gtk::Button = builder.object("buttons_hardlink").unwrap();
         let buttons_move: gtk::Button = builder.object("buttons_move").unwrap();
+        let buttons_compare: gtk::Button = builder.object("buttons_compare").unwrap();
 
         let buttons_show_errors: gtk::Button = builder.object("buttons_show_errors").unwrap();
         let buttons_show_upper_notebook: gtk::Button = builder.object("buttons_show_upper_notebook").unwrap();
@@ -40,8 +42,9 @@ impl GuiBottomButtons {
             "symlink".to_string(),
             "hardlink".to_string(),
             "move".to_string(),
+            "compare".to_string(),
         ];
-        let buttons_array: [Widget; 7] = [
+        let buttons_array= [
             buttons_search.clone().upcast::<Widget>(),
             buttons_select.clone().upcast::<Widget>(),
             buttons_delete.clone().upcast::<Widget>(),
@@ -49,6 +52,7 @@ impl GuiBottomButtons {
             buttons_symlink.clone().upcast::<Widget>(),
             buttons_hardlink.clone().upcast::<Widget>(),
             buttons_move.clone().upcast::<Widget>(),
+            buttons_compare.clone().upcast::<Widget>(),
         ];
 
         buttons_select.set_popover(Some(popover_select));
@@ -61,6 +65,7 @@ impl GuiBottomButtons {
             buttons_symlink,
             buttons_hardlink,
             buttons_move,
+            buttons_compare,
             buttons_show_errors,
             buttons_show_upper_notebook,
             buttons_names,

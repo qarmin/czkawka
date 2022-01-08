@@ -16,6 +16,7 @@ use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
+use crate::connect_button_compare::*;
 use crate::connect_change_language::*;
 use crate::connect_duplicate_buttons::connect_duplicate_combo_box;
 use crate::connect_header_buttons::*;
@@ -74,6 +75,8 @@ mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
 mod tests;
+mod gui_compare_images;
+mod connect_button_compare;
 
 fn main() {
     let application = gtk::Application::builder().build();
@@ -161,6 +164,8 @@ fn main() {
         connect_button_stop(&gui_data);
         connect_button_hardlink_symlink(&gui_data);
         connect_button_move(&gui_data);
+        connect_button_compare(&gui_data);
+
         connect_duplicate_combo_box(&gui_data);
         connect_notebook_tabs(&gui_data);
         connect_selection_of_directories(&gui_data);
