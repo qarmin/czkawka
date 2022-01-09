@@ -9,6 +9,7 @@ use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 use image::GenericImageView;
+use image::imageops::FilterType;
 
 use czkawka_core::fl;
 use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
@@ -773,7 +774,7 @@ fn show_preview(
                         );
                         break 'dir;
                     }
-                    let img = resize_dynamic_image_dimension(img, (400, 400));
+                    let img = resize_dynamic_image_dimension(img, (400, 400), &FilterType::Triangle); // Triangle and Nearest is the fastest
                     let file_dir = match is_raw_image {
                         true => cache_dir.join("cached_file.jpg"),
                         false => cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase())),
