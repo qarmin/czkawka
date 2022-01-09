@@ -12,8 +12,8 @@ pub struct GuiCompareImages {
     pub button_go_previous_compare_group: gtk::Button,
     pub button_go_next_compare_group: gtk::Button,
 
-    pub check_button_first_text: gtk::CheckButton,
-    pub check_button_second_text: gtk::CheckButton,
+    pub check_button_left_preview_text: gtk::CheckButton,
+    pub check_button_right_preview_text: gtk::CheckButton,
 
     pub image_compare_left: gtk::Image,
     pub image_compare_right: gtk::Image,
@@ -23,7 +23,8 @@ pub struct GuiCompareImages {
     pub shared_numbers_of_groups: Rc<RefCell<u32>>,
     pub shared_current_of_groups: Rc<RefCell<u32>>,
     pub shared_current_iter: Rc<RefCell<Option<TreeIter>>>,
-    pub shared_image_cache: Rc<RefCell<Vec<(String,String, gtk::Image, gtk::Image)>>>,
+    pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
+    pub shared_using_for_preview: Rc<RefCell<(u32, u32)>>,
 }
 
 impl GuiCompareImages {
@@ -41,8 +42,8 @@ impl GuiCompareImages {
         let button_go_previous_compare_group: gtk::Button = builder.object("button_go_previous_compare_group").unwrap();
         let button_go_next_compare_group: gtk::Button = builder.object("button_go_next_compare_group").unwrap();
 
-        let check_button_first_text: gtk::CheckButton = builder.object("check_button_first_text").unwrap();
-        let check_button_second_text: gtk::CheckButton = builder.object("check_button_second_text").unwrap();
+        let check_button_left_preview_text: gtk::CheckButton = builder.object("check_button_left_preview_text").unwrap();
+        let check_button_right_preview_text: gtk::CheckButton = builder.object("check_button_right_preview_text").unwrap();
 
         let image_compare_left: gtk::Image = builder.object("image_compare_left").unwrap();
         let image_compare_right: gtk::Image = builder.object("image_compare_right").unwrap();
@@ -53,14 +54,15 @@ impl GuiCompareImages {
         let shared_current_of_groups = Rc::new(RefCell::new(0));
         let shared_current_iter = Rc::new(RefCell::new(None));
         let shared_image_cache = Rc::new(RefCell::new(Vec::new()));
+        let shared_using_for_preview = Rc::new(RefCell::new((0, 1)));
 
         Self {
             window_compare,
             label_group_info,
             button_go_previous_compare_group,
             button_go_next_compare_group,
-            check_button_first_text,
-            check_button_second_text,
+            check_button_left_preview_text,
+            check_button_right_preview_text,
             image_compare_left,
             image_compare_right,
             scrolled_window_compare_choose_images,
@@ -68,6 +70,7 @@ impl GuiCompareImages {
             shared_current_of_groups,
             shared_current_iter,
             shared_image_cache,
+            shared_using_for_preview,
         }
     }
     pub fn update_language(&self) {}

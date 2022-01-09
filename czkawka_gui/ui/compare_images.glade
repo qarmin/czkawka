@@ -101,7 +101,7 @@
                 <property name="can-focus">False</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkCheckButton" id="check_button_first_text">
+                  <object class="GtkCheckButton" id="check_button_left_preview_text">
                     <property name="label" translatable="yes">First Game</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -115,7 +115,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="check_button_second_text">
+                  <object class="GtkCheckButton" id="check_button_right_preview_text">
                     <property name="label" translatable="yes">Second Game</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>

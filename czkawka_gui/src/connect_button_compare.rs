@@ -1,7 +1,7 @@
 use czkawka_core::common::get_dynamic_image_from_raw_image;
 use czkawka_core::similar_images::RAW_IMAGE_EXTENSIONS;
 use gtk::prelude::*;
-use gtk::{Image, Orientation, ScrolledWindow, TreeIter, TreeModel};
+use gtk::{CheckButton, Image, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath};
 use image::imageops::FilterType;
 use image::DynamicImage;
 use std::cell::RefCell;
@@ -28,8 +28,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let button_go_previous_compare_group = gui_data.compare_images.button_go_previous_compare_group.clone();
     let button_go_next_compare_group = gui_data.compare_images.button_go_next_compare_group.clone();
 
-    let check_button_first_text = gui_data.compare_images.check_button_first_text.clone();
-    let check_button_second_text = gui_data.compare_images.check_button_second_text.clone();
+    let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
+    let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
 
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
@@ -73,8 +73,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &image_compare_right,
             current_group,
             group_number,
-            &check_button_first_text,
-            &check_button_second_text,
+            &check_button_left_preview_text,
+            &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
             shared_image_cache.clone(),
@@ -99,8 +99,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let scrolled_window_compare_choose_images = gui_data.compare_images.scrolled_window_compare_choose_images.clone();
 
-    let check_button_first_text = gui_data.compare_images.check_button_first_text.clone();
-    let check_button_second_text = gui_data.compare_images.check_button_second_text.clone();
+    let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
+    let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
 
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
@@ -137,8 +137,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &image_compare_right,
             current_group,
             group_number,
-            &check_button_first_text,
-            &check_button_second_text,
+            &check_button_left_preview_text,
+            &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
             shared_image_cache.clone(),
@@ -152,8 +152,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let scrolled_window_compare_choose_images = gui_data.compare_images.scrolled_window_compare_choose_images.clone();
 
-    let check_button_first_text = gui_data.compare_images.check_button_first_text.clone();
-    let check_button_second_text = gui_data.compare_images.check_button_second_text.clone();
+    let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
+    let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
 
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
@@ -190,8 +190,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &image_compare_right,
             current_group,
             group_number,
-            &check_button_first_text,
-            &check_button_second_text,
+            &check_button_left_preview_text,
+            &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
             shared_image_cache.clone(),
@@ -209,11 +209,11 @@ fn populate_groups_at_start(
     image_compare_right: &gtk::Image,
     current_group: u32,
     group_number: u32,
-    check_button_first_text: &gtk::CheckButton,
-    check_button_second_text: &gtk::CheckButton,
+    check_button_left_preview_text: &gtk::CheckButton,
+    check_button_right_preview_text: &gtk::CheckButton,
     scrolled_window_compare_choose_images: &gtk::ScrolledWindow,
     label_group_info: &gtk::Label,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image)>>>,
+    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
 ) {
     let all_vec = get_all_path(model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
     *shared_current_iter.borrow_mut() = Some(tree_iter);
@@ -224,22 +224,29 @@ fn populate_groups_at_start(
     image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
     image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
 
-    check_button_first_text.set_label(&format!("1. {}", get_max_file_name(&cache_all_images[0].0, 70)));
-    check_button_second_text.set_label(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 70)));
+    check_button_left_preview_text.set_label(&format!("1. {}", get_max_file_name(&cache_all_images[0].0, 70)));
+    check_button_right_preview_text.set_label(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 70)));
 
     label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number, cache_all_images.len()).as_str());
 
-    populate_similar_scrolled_view(scrolled_window_compare_choose_images, &cache_all_images, image_compare_left, image_compare_right);
+    populate_similar_scrolled_view(
+        scrolled_window_compare_choose_images,
+        &cache_all_images,
+        image_compare_left,
+        image_compare_right,
+        check_button_left_preview_text,
+        check_button_right_preview_text,
+    );
 
     *shared_image_cache.borrow_mut() = cache_all_images;
 }
 
 /// Generate images which will be used later as preview images without needing to open them again and again
-fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreeIter)>) -> Vec<(String, String, gtk::Image, gtk::Image)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreePath)>) -> Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)> {
     // TODO use here threads,
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
-    for (full_path, name, _tree_iter) in vector_with_path {
+    for (full_path, name, tree_path) in vector_with_path {
         let name_lowercase = name.to_lowercase();
         let dynamic_image = if RAW_IMAGE_EXTENSIONS.iter().any(|f| name_lowercase.ends_with(f)) {
             match get_dynamic_image_from_raw_image(&full_path) {
@@ -271,13 +278,13 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreeIt
         let small_img = gtk::Image::new();
         small_img.set_from_file(small_path);
 
-        cache_all_images.push((full_path, name, big_img, small_img));
+        cache_all_images.push((full_path, name, big_img, small_img, tree_path));
     }
     cache_all_images
 }
 
 /// Takes info about current items in groups like path
-fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, TreeIter)> {
+fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk::TreePath)> {
     let used_iter = current_iter.clone();
 
     assert_eq!(model.value(&used_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
@@ -291,7 +298,7 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
-        returned_vector.push((full_name, name, used_iter.clone()));
+        returned_vector.push((full_name, name, model.path(&used_iter).unwrap()));
     }
 
     if !model.iter_next(&used_iter) {
@@ -304,7 +311,7 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
-        returned_vector.push((full_name, name, used_iter.clone()));
+        returned_vector.push((full_name, name, model.path(&used_iter).unwrap()));
 
         if !model.iter_next(&used_iter) {
             break;
@@ -356,15 +363,28 @@ fn move_iter(model: &gtk::TreeModel, tree_iter: &TreeIter, column_color: i32, go
     tree_iter.clone()
 }
 
+// Klikam na przycisk
+// Blokada obu przycisków
+// Odblokowanie całej reszty przycisków
+// Zaznaczenie checkboxa jeśli to wymagane(jeśli TreeIter jest zaznaczony)
+//
+
 /// Populate bottom Scrolled View with small thumbnails
-fn populate_similar_scrolled_view(scrolled_window: &ScrolledWindow, image_cache: &[(String, String, Image, Image)], image_compare_left: &Image, image_compare_right: &Image) {
+fn populate_similar_scrolled_view(
+    scrolled_window: &ScrolledWindow,
+    image_cache: &[(String, String, Image, Image, TreePath)],
+    image_compare_left: &Image,
+    image_compare_right: &Image,
+    check_button_left_preview_text: &CheckButton,
+    check_button_right_preview_text: &CheckButton,
+) {
     if let Some(child) = scrolled_window.child() {
         scrolled_window.remove(&child);
     };
     scrolled_window.set_propagate_natural_height(true);
 
     let all_gtk_box = gtk::Box::new(Orientation::Horizontal, 5);
-    for (number, (_path, _name, big_thumbnail, small_thumbnail)) in image_cache.iter().enumerate() {
+    for (number, (_path, _name, big_thumbnail, small_thumbnail, _tree_path)) in image_cache.iter().enumerate() {
         let small_box = gtk::Box::new(Orientation::Vertical, 3);
 
         let smaller_box = gtk::Box::new(Orientation::Horizontal, 2);
