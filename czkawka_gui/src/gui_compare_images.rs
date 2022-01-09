@@ -23,7 +23,7 @@ pub struct GuiCompareImages {
     pub shared_numbers_of_groups: Rc<RefCell<u32>>,
     pub shared_current_of_groups: Rc<RefCell<u32>>,
     pub shared_current_iter: Rc<RefCell<Option<TreeIter>>>,
-    pub shared_image_cache: Rc<RefCell<Vec<(String, gtk::Image, gtk::Image)>>>,
+    pub shared_image_cache: Rc<RefCell<Vec<(String,String, gtk::Image, gtk::Image)>>>,
 }
 
 impl GuiCompareImages {

@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use gtk::{TreeIter, TreeModel};
+use gtk::{Image, Orientation, ScrolledWindow, TreeIter, TreeModel};
 use image::DynamicImage;
 use image::imageops::FilterType;
 
@@ -14,6 +14,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let window_compare = gui_data.compare_images.window_compare.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let scrolled_window_compare_choose_images = gui_data.compare_images.scrolled_window_compare_choose_images.clone();
 
     let label_group_info = gui_data.compare_images.label_group_info.clone();
 
@@ -62,14 +63,16 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let cache_all_images = generate_cache_for_results(all_vec);
 
         // This is safe, because cache have at least 2 results
-        image_compare_left.set_from_pixbuf(cache_all_images[0].1.pixbuf().as_ref());
-        image_compare_right.set_from_pixbuf(cache_all_images[1].1.pixbuf().as_ref());
+        image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
+        image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
 
         check_button_first_text.set_label(&format!("0. {}",get_max_file_name(&cache_all_images[0].0,70)));
         check_button_second_text.set_label(&format!("1. {}",get_max_file_name(&cache_all_images[1].0,70)));
 
 
         label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number,cache_all_images.len()).as_str());
+
+        populate_similar_scrolled_view(&scrolled_window_compare_choose_images,&cache_all_images);
 
         *shared_image_cache.borrow_mut() = cache_all_images;
 
@@ -90,6 +93,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let label_group_info = gui_data.compare_images.label_group_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let scrolled_window_compare_choose_images = gui_data.compare_images.scrolled_window_compare_choose_images.clone();
 
     let check_button_first_text = gui_data.compare_images.check_button_first_text.clone();
     let check_button_second_text = gui_data.compare_images.check_button_second_text.clone();
@@ -127,13 +131,15 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         *shared_current_iter.borrow_mut() = Some(tree_iter);
 
         // This is safe, because cache have at least 2 results
-        image_compare_left.set_from_pixbuf(cache_all_images[0].1.pixbuf().as_ref());
-        image_compare_right.set_from_pixbuf(cache_all_images[1].1.pixbuf().as_ref());
+        image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
+        image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
 
         check_button_first_text.set_label(&format!("0. {}",get_max_file_name(&cache_all_images[0].0,70)));
         check_button_second_text.set_label(&format!("1. {}",get_max_file_name(&cache_all_images[1].0,70)));
 
         label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number,cache_all_images.len()).as_str());
+
+        populate_similar_scrolled_view(&scrolled_window_compare_choose_images,&cache_all_images);
 
         *shared_image_cache.borrow_mut() = cache_all_images;
     });
@@ -143,6 +149,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let label_group_info = gui_data.compare_images.label_group_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let scrolled_window_compare_choose_images = gui_data.compare_images.scrolled_window_compare_choose_images.clone();
 
     let check_button_first_text = gui_data.compare_images.check_button_first_text.clone();
     let check_button_second_text = gui_data.compare_images.check_button_second_text.clone();
@@ -179,21 +186,23 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         *shared_current_iter.borrow_mut() = Some(tree_iter);
 
         // This is safe, because cache have at least 2 results
-        image_compare_left.set_from_pixbuf(cache_all_images[0].1.pixbuf().as_ref());
-        image_compare_right.set_from_pixbuf(cache_all_images[1].1.pixbuf().as_ref());
+        image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
+        image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
 
         check_button_first_text.set_label(&format!("0. {}",get_max_file_name(&cache_all_images[0].0,70)));
         check_button_second_text.set_label(&format!("1. {}",get_max_file_name(&cache_all_images[1].0,70)));
 
         label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number,cache_all_images.len()).as_str());
 
+        populate_similar_scrolled_view(&scrolled_window_compare_choose_images,&cache_all_images);
+
         *shared_image_cache.borrow_mut() = cache_all_images;
     });
 }
 
-fn generate_cache_for_results(vector_with_path: Vec<(String, gtk::TreeIter)>) -> Vec<(String, gtk::Image, gtk::Image)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String,String, gtk::TreeIter)>) -> Vec<(String, String, gtk::Image, gtk::Image)> {
     let mut cache_all_images = Vec::new();
-    for (path, _tree_iter) in vector_with_path {
+    for (path,name, _tree_iter) in vector_with_path {
         let dynamic_image = match image::open(&path) {
             Ok(t) => t,
             Err(_) => DynamicImage::new_bgr8(1, 1),
@@ -211,12 +220,12 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, gtk::TreeIter)>) ->
         let small_img = gtk::Image::new();
         small_img.set_from_file(small_path);
 
-        cache_all_images.push((path, big_img, small_img));
+        cache_all_images.push((path,name,big_img, small_img));
     }
     cache_all_images
 }
 
-fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, TreeIter)> {
+fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String,String, TreeIter)> {
     let used_iter = current_iter.clone();
 
     assert_eq!(model.value(&used_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
@@ -230,7 +239,7 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
-        returned_vector.push((full_name, used_iter.clone()));
+        returned_vector.push((full_name,name, used_iter.clone()));
     }
 
     if !model.iter_next(&used_iter) {
@@ -243,7 +252,7 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
-        returned_vector.push((full_name, used_iter.clone()));
+        returned_vector.push((full_name,name, used_iter.clone()));
 
         if !model.iter_next(&used_iter) {
             break;
@@ -261,36 +270,65 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
     returned_vector
 }
 fn move_iter(model: &gtk::TreeModel, tree_iter: &TreeIter, column_color: i32, go_next: bool) -> TreeIter {
-    assert_eq!(model.value(&tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
+    assert_eq!(model.value(tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
 
     if go_next {
-        if !model.iter_next(&tree_iter) {
+        if !model.iter_next(tree_iter) {
             panic!("Found only header!");
         }
     }
     else{
-        if !model.iter_previous(&tree_iter) {
+        if !model.iter_previous(tree_iter) {
             panic!("Found only header!");
         }
     }
 
     loop {
         if go_next {
-            if !model.iter_next(&tree_iter) {
+            if !model.iter_next(tree_iter) {
                 break;
             }
         }
         else{
-            if !model.iter_previous(&tree_iter) {
+            if !model.iter_previous(tree_iter) {
                 break;
             }
         }
 
-        let color = model.value(&tree_iter, column_color).get::<String>().unwrap();
+        let color = model.value(tree_iter, column_color).get::<String>().unwrap();
 
         if color == HEADER_ROW_COLOR {
             break;
         }
     }
     tree_iter.clone()
+}
+
+fn populate_similar_scrolled_view(scrolled_window : &ScrolledWindow, image_cache: &[(String,String, Image, Image)]){
+    if let Some(child) = scrolled_window.child(){
+        scrolled_window.remove(&child);
+    };
+   scrolled_window.set_propagate_natural_height(true);
+
+    let all_gtk_box = gtk::Box::new(Orientation::Horizontal,5);
+    for (_path,_name ,_big_thumbnail,small_thumbnail) in image_cache{
+        let small_box = gtk::Box::new(Orientation::Vertical,5);
+
+        let smaller_box = gtk::Box::new(Orientation::Horizontal,5);
+
+        let button_left = gtk::Button::builder().label("L").build();
+        // let label_name = gtk::Label::builder().label(name).build();
+        let button_right = gtk::Button::builder().label("R").build();
+
+        smaller_box.add(&button_left);
+        // smaller_box.add(&label_name);
+        smaller_box.add(&button_right);
+
+        small_box.add(&smaller_box);
+        small_box.add(small_thumbnail);
+
+        all_gtk_box.add(&small_box);
+    }
+    all_gtk_box.show_all();
+    scrolled_window.add(&all_gtk_box);
 }

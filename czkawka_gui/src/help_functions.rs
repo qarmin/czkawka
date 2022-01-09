@@ -728,7 +728,7 @@ pub fn resize_dynamic_image_dimension(img: DynamicImage, requested_size: (u32, u
             new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
     }
-    img.resize(new_size.0, new_size.1, filter_type.clone())
+    img.resize(new_size.0, new_size.1, *filter_type)
 }
 
 pub fn get_image_path_temporary(file_name: &str, number: u32, extension: &str) -> PathBuf {
