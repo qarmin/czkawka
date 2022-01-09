@@ -229,7 +229,7 @@ fn populate_groups_at_start(
 
     label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number, cache_all_images.len()).as_str());
 
-    populate_similar_scrolled_view(scrolled_window_compare_choose_images, &cache_all_images);
+    populate_similar_scrolled_view(scrolled_window_compare_choose_images, &cache_all_images, image_compare_left, image_compare_right);
 
     *shared_image_cache.borrow_mut() = cache_all_images;
 }
@@ -357,17 +357,17 @@ fn move_iter(model: &gtk::TreeModel, tree_iter: &TreeIter, column_color: i32, go
 }
 
 /// Populate bottom Scrolled View with small thumbnails
-fn populate_similar_scrolled_view(scrolled_window: &ScrolledWindow, image_cache: &[(String, String, Image, Image)]) {
+fn populate_similar_scrolled_view(scrolled_window: &ScrolledWindow, image_cache: &[(String, String, Image, Image)], image_compare_left: &Image, image_compare_right: &Image) {
     if let Some(child) = scrolled_window.child() {
         scrolled_window.remove(&child);
     };
     scrolled_window.set_propagate_natural_height(true);
 
     let all_gtk_box = gtk::Box::new(Orientation::Horizontal, 5);
-    for (number, (_path, _name, _big_thumbnail, small_thumbnail)) in image_cache.iter().enumerate() {
-        let small_box = gtk::Box::new(Orientation::Vertical, 5);
+    for (number, (_path, _name, big_thumbnail, small_thumbnail)) in image_cache.iter().enumerate() {
+        let small_box = gtk::Box::new(Orientation::Vertical, 3);
 
-        let smaller_box = gtk::Box::new(Orientation::Horizontal, 5);
+        let smaller_box = gtk::Box::new(Orientation::Horizontal, 2);
 
         let button_left = gtk::Button::builder().label("L").build();
         let label = gtk::Label::builder().label(&(number + 1).to_string()).build();
@@ -377,6 +377,26 @@ fn populate_similar_scrolled_view(scrolled_window: &ScrolledWindow, image_cache:
             button_left.set_sensitive(false);
             button_right.set_sensitive(false);
         }
+
+        let image_compare_left = image_compare_left.clone();
+        let image_compare_right = image_compare_right.clone();
+
+        let button_left_clone = button_left.clone();
+        let button_right_clone = button_right.clone();
+
+        let big_thumbnail_clone = big_thumbnail.clone();
+        button_left.connect_clicked(move |button_left| {
+            // TODO Renable all others buttons - only 2 max groups should be selected
+            button_left.set_sensitive(false);
+            button_right_clone.set_sensitive(false);
+            image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
+        });
+        let big_thumbnail_clone = big_thumbnail.clone();
+        button_right.connect_clicked(move |button_right| {
+            button_right.set_sensitive(false);
+            button_left_clone.set_sensitive(false);
+            image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
+        });
 
         smaller_box.add(&button_left);
         smaller_box.add(&label);

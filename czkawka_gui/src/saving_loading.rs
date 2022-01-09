@@ -602,11 +602,17 @@ pub fn load_configuration(
         .short_text
         .to_string();
 
+    let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
+    let excluded_directories = get_string_from_list_store(&upper_notebook.tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
+
     let (hashmap_ls, _hashmap_sl) = create_hash_map();
 
-    let included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().clone(), Vec::new());
-    let excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().clone(), Vec::new());
-    let excluded_items: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(), "".to_string());
+    let included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().clone(), included_directories);
+    let excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().clone(), excluded_directories);
+    let excluded_items: String = loaded_entries.get_string(
+        hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(),
+        upper_notebook.entry_excluded_items.text().to_string(),
+    );
     let allowed_extensions: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().clone(), "".to_string());
     let minimal_file_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
     let maximal_file_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
@@ -729,6 +735,7 @@ pub fn load_configuration(
     }
 }
 
+/// Function do not allow to set invalid index to combobox because this would cause to show empty value and function would crash
 fn save_proper_value_to_combo_box(combo_box: &ComboBoxText, what_to_save: u32) {
     combo_box.set_active(Some(what_to_save));
     if combo_box.active().is_none() {
