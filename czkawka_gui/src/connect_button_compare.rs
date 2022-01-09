@@ -4,10 +4,13 @@ use gtk::prelude::*;
 use gtk::{Image, Orientation, ScrolledWindow, TreeIter, TreeModel};
 use image::imageops::FilterType;
 use image::DynamicImage;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::gui_data::GuiData;
 use crate::help_functions::{
-    count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, get_max_file_name, resize_dynamic_image_dimension, HEADER_ROW_COLOR, NOTEBOOKS_INFOS,
+    count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, get_max_file_name, resize_dynamic_image_dimension, NotebookObject, HEADER_ROW_COLOR,
+    NOTEBOOKS_INFOS,
 };
 
 const BIG_PREVIEW_SIZE: u32 = 600;
@@ -42,8 +45,6 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
         let model = tree_view.model().unwrap();
 
-        *shared_current_iter.borrow_mut() = Some(model.iter_first().unwrap());
-
         let current_group = 1;
         let group_number = count_number_of_groups(tree_view, nb_object.column_color.unwrap());
 
@@ -61,9 +62,11 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             button_go_next_compare_group.set_sensitive(true);
         }
 
-        let tree_iter = shared_current_iter.borrow().clone().unwrap();
+        let tree_iter = model.iter_first().unwrap();
 
         let all_vec = get_all_path(&model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
+        *shared_current_iter.borrow_mut() = Some(tree_iter);
+
         let cache_all_images = generate_cache_for_results(all_vec);
 
         // This is safe, because cache have at least 2 results
@@ -127,16 +130,10 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
         let tree_iter = move_iter(&model, shared_current_iter.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
 
-        let all_vec = get_all_path(
-            &model,
-            shared_current_iter.borrow().as_ref().unwrap(),
-            nb_object.column_color.unwrap(),
-            nb_object.column_path,
-            nb_object.column_name,
-        );
-        let cache_all_images = generate_cache_for_results(all_vec);
-
+        let all_vec = get_all_path(&model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
         *shared_current_iter.borrow_mut() = Some(tree_iter);
+
+        let cache_all_images = generate_cache_for_results(all_vec);
 
         // This is safe, because cache have at least 2 results
         image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
@@ -188,16 +185,10 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
         let tree_iter = move_iter(&model, shared_current_iter.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), true);
 
-        let all_vec = get_all_path(
-            &model,
-            shared_current_iter.borrow().as_ref().unwrap(),
-            nb_object.column_color.unwrap(),
-            nb_object.column_path,
-            nb_object.column_name,
-        );
-        let cache_all_images = generate_cache_for_results(all_vec);
-
+        let all_vec = get_all_path(&model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
         *shared_current_iter.borrow_mut() = Some(tree_iter);
+
+        let cache_all_images = generate_cache_for_results(all_vec);
 
         // This is safe, because cache have at least 2 results
         image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
@@ -214,7 +205,35 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     });
 }
 
+// fn populate_groups_at_start(nb_object: NotebookObject,model : &TreeModel,shared_current_iter : Rc<RefCell<Option<TreeIter>>>, tree_iter) {
+//     let all_vec = get_all_path(
+//         &model,
+//         shared_current_iter.borrow().as_ref().unwrap(),
+//         nb_object.column_color.unwrap(),
+//         nb_object.column_path,
+//         nb_object.column_name,
+//     );
+//     let cache_all_images = generate_cache_for_results(all_vec);
+//
+//     *shared_current_iter.borrow_mut() = Some(tree_iter);
+//
+//     // This is safe, because cache have at least 2 results
+//     image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
+//     image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
+//
+//     check_button_first_text.set_label(&format!("0. {}", get_max_file_name(&cache_all_images[0].0, 70)));
+//     check_button_second_text.set_label(&format!("1. {}", get_max_file_name(&cache_all_images[1].0, 70)));
+//
+//     label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number, cache_all_images.len()).as_str());
+//
+//     populate_similar_scrolled_view(&scrolled_window_compare_choose_images, &cache_all_images);
+//
+//     *shared_image_cache.borrow_mut() = cache_all_images;
+// }
+
 fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreeIter)>) -> Vec<(String, String, gtk::Image, gtk::Image)> {
+    // TODO use here threads,
+    // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
     for (full_path, name, _tree_iter) in vector_with_path {
         let name_lowercase = name.to_lowercase();
@@ -337,17 +356,20 @@ fn populate_similar_scrolled_view(scrolled_window: &ScrolledWindow, image_cache:
     scrolled_window.set_propagate_natural_height(true);
 
     let all_gtk_box = gtk::Box::new(Orientation::Horizontal, 5);
-    for (_path, _name, _big_thumbnail, small_thumbnail) in image_cache {
+    for (number, (_path, _name, _big_thumbnail, small_thumbnail)) in image_cache.iter().enumerate() {
         let small_box = gtk::Box::new(Orientation::Vertical, 5);
 
         let smaller_box = gtk::Box::new(Orientation::Horizontal, 5);
 
         let button_left = gtk::Button::builder().label("L").build();
-        // let label_name = gtk::Label::builder().label(name).build();
         let button_right = gtk::Button::builder().label("R").build();
 
+        if number == 0 || number == 1 {
+            button_left.set_sensitive(false);
+            button_right.set_sensitive(false);
+        }
+
         smaller_box.add(&button_left);
-        // smaller_box.add(&label_name);
         smaller_box.add(&button_right);
 
         small_box.add(&smaller_box);
@@ -355,6 +377,7 @@ fn populate_similar_scrolled_view(scrolled_window: &ScrolledWindow, image_cache:
 
         all_gtk_box.add(&small_box);
     }
+
     all_gtk_box.show_all();
     scrolled_window.add(&all_gtk_box);
 }
