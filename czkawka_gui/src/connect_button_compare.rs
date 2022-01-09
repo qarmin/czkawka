@@ -1,7 +1,7 @@
 use czkawka_core::common::get_dynamic_image_from_raw_image;
 use czkawka_core::similar_images::RAW_IMAGE_EXTENSIONS;
 use gtk::prelude::*;
-use gtk::{CheckButton, Image, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath};
+use gtk::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath};
 use image::imageops::FilterType;
 use image::DynamicImage;
 use std::cell::RefCell;
@@ -35,6 +35,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
 
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
@@ -78,6 +79,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &scrolled_window_compare_choose_images,
             &label_group_info,
             shared_image_cache.clone(),
+            shared_using_for_preview.clone(),
         );
 
         window_compare.show();
@@ -106,6 +108,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
     let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
 
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
@@ -142,6 +145,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &scrolled_window_compare_choose_images,
             &label_group_info,
             shared_image_cache.clone(),
+            shared_using_for_preview.clone(),
         );
     });
 
@@ -159,6 +163,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
     let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
 
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
@@ -195,7 +200,52 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &scrolled_window_compare_choose_images,
             &label_group_info,
             shared_image_cache.clone(),
+            shared_using_for_preview.clone(),
         );
+    });
+
+    let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    check_button_left_preview_text.connect_clicked(move |check_button_left_preview_text| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
+
+        let main_tree_path = model.path(shared_current_iter.borrow().as_ref().unwrap()).unwrap();
+        let this_tree_path = shared_using_for_preview.borrow().0.clone().unwrap();
+        if main_tree_path == this_tree_path {
+            return; // Selected header, so we don't need to select result in treeview
+                    // TODO this should be handled by disabling entirely check box
+        }
+
+        let is_active = check_button_left_preview_text.is_active();
+        model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
+    });
+
+    let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
+    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    check_button_right_preview_text.connect_clicked(move |check_button_right_preview_text| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
+
+        let main_tree_path = model.path(shared_current_iter.borrow().as_ref().unwrap()).unwrap();
+        let this_tree_path = shared_using_for_preview.borrow().1.clone().unwrap();
+        if main_tree_path == this_tree_path {
+            return; // Selected header, so we don't need to select result in treeview
+                    // TODO this should be handled by disabling entirely check box
+        }
+
+        let is_active = check_button_right_preview_text.is_active();
+        model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
     });
 }
 
@@ -214,6 +264,7 @@ fn populate_groups_at_start(
     scrolled_window_compare_choose_images: &gtk::ScrolledWindow,
     label_group_info: &gtk::Label,
     shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
+    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
 ) {
     let all_vec = get_all_path(model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
     *shared_current_iter.borrow_mut() = Some(tree_iter);
@@ -223,6 +274,8 @@ fn populate_groups_at_start(
     // This is safe, because cache have at least 2 results
     image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
     image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
+
+    *shared_using_for_preview.borrow_mut() = (Some(cache_all_images[0].4.clone()), Some(cache_all_images[1].4.clone()));
 
     check_button_left_preview_text.set_label(&format!("1. {}", get_max_file_name(&cache_all_images[0].0, 70)));
     check_button_right_preview_text.set_label(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 70)));
@@ -234,11 +287,31 @@ fn populate_groups_at_start(
         &cache_all_images,
         image_compare_left,
         image_compare_right,
+        shared_using_for_preview.clone(),
+        shared_image_cache.clone(),
         check_button_left_preview_text,
         check_button_right_preview_text,
+        model,
+        nb_object.column_selection,
     );
 
-    *shared_image_cache.borrow_mut() = cache_all_images;
+    *shared_image_cache.borrow_mut() = cache_all_images.clone();
+
+    let mut found = false;
+    for i in scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk::Viewport>().unwrap().children() {
+        if i.widget_name() == "all_box" {
+            let gtk_box = i.downcast::<gtk::Box>().unwrap();
+            update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
+            found = true;
+            break;
+        }
+    }
+    assert!(found);
+
+    let is_active = model.value(&model.iter(&cache_all_images[0].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
+    check_button_left_preview_text.set_active(is_active);
+    let is_active = model.value(&model.iter(&cache_all_images[1].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
+    check_button_right_preview_text.set_active(is_active);
 }
 
 /// Generate images which will be used later as preview images without needing to open them again and again
@@ -363,20 +436,18 @@ fn move_iter(model: &gtk::TreeModel, tree_iter: &TreeIter, column_color: i32, go
     tree_iter.clone()
 }
 
-// Klikam na przycisk
-// Blokada obu przycisków
-// Odblokowanie całej reszty przycisków
-// Zaznaczenie checkboxa jeśli to wymagane(jeśli TreeIter jest zaznaczony)
-//
-
 /// Populate bottom Scrolled View with small thumbnails
 fn populate_similar_scrolled_view(
     scrolled_window: &ScrolledWindow,
     image_cache: &[(String, String, Image, Image, TreePath)],
     image_compare_left: &Image,
     image_compare_right: &Image,
+    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
+    model: &TreeModel,
+    column_selection: i32,
 ) {
     if let Some(child) = scrolled_window.child() {
         scrolled_window.remove(&child);
@@ -384,7 +455,9 @@ fn populate_similar_scrolled_view(
     scrolled_window.set_propagate_natural_height(true);
 
     let all_gtk_box = gtk::Box::new(Orientation::Horizontal, 5);
-    for (number, (_path, _name, big_thumbnail, small_thumbnail, _tree_path)) in image_cache.iter().enumerate() {
+    all_gtk_box.set_widget_name("all_box");
+
+    for (number, (path, _name, big_thumbnail, small_thumbnail, tree_path)) in image_cache.iter().enumerate() {
         let small_box = gtk::Box::new(Orientation::Vertical, 3);
 
         let smaller_box = gtk::Box::new(Orientation::Horizontal, 2);
@@ -393,29 +466,45 @@ fn populate_similar_scrolled_view(
         let label = gtk::Label::builder().label(&(number + 1).to_string()).build();
         let button_right = gtk::Button::builder().label("R").build();
 
-        if number == 0 || number == 1 {
-            button_left.set_sensitive(false);
-            button_right.set_sensitive(false);
-        }
-
         let image_compare_left = image_compare_left.clone();
         let image_compare_right = image_compare_right.clone();
 
-        let button_left_clone = button_left.clone();
-        let button_right_clone = button_right.clone();
+        let big_thumbnail_clone = big_thumbnail.clone();
+        let tree_path_clone = tree_path.clone();
+        let all_gtk_box_clone = all_gtk_box.clone();
+        let shared_using_for_preview_clone = shared_using_for_preview.clone();
+        let shared_image_cache_clone = shared_image_cache.clone();
+        let check_button_left_preview_text_clone = check_button_left_preview_text.clone();
+        let model_clone = model.clone();
+        let path_clone = path.clone();
+
+        button_left.connect_clicked(move |_button_left| {
+            shared_using_for_preview_clone.borrow_mut().0 = Some(tree_path_clone.clone());
+            update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
+            image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
+
+            let is_active = model_clone.value(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
+            check_button_left_preview_text_clone.set_active(is_active);
+            check_button_left_preview_text_clone.set_label(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70)));
+        });
 
         let big_thumbnail_clone = big_thumbnail.clone();
-        button_left.connect_clicked(move |button_left| {
-            // TODO Renable all others buttons - only 2 max groups should be selected
-            button_left.set_sensitive(false);
-            button_right_clone.set_sensitive(false);
-            image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
-        });
-        let big_thumbnail_clone = big_thumbnail.clone();
-        button_right.connect_clicked(move |button_right| {
-            button_right.set_sensitive(false);
-            button_left_clone.set_sensitive(false);
+        let tree_path_clone = tree_path.clone();
+        let all_gtk_box_clone = all_gtk_box.clone();
+        let shared_using_for_preview_clone = shared_using_for_preview.clone();
+        let shared_image_cache_clone = shared_image_cache.clone();
+        let check_button_right_preview_text_clone = check_button_right_preview_text.clone();
+        let model_clone = model.clone();
+        let path_clone = path.clone();
+
+        button_right.connect_clicked(move |_button_right| {
+            shared_using_for_preview_clone.borrow_mut().1 = Some(tree_path_clone.clone());
+            update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
             image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
+
+            let is_active = model_clone.value(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
+            check_button_right_preview_text_clone.set_active(is_active);
+            check_button_right_preview_text_clone.set_label(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70)));
         });
 
         smaller_box.add(&button_left);
@@ -430,4 +519,26 @@ fn populate_similar_scrolled_view(
 
     all_gtk_box.show_all();
     scrolled_window.add(&all_gtk_box);
+}
+
+fn update_bottom_buttons(
+    all_gtk_box: &gtk::Box,
+    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+) {
+    let left_tree_view = (*shared_using_for_preview.borrow()).0.clone().unwrap();
+    let right_tree_view = (*shared_using_for_preview.borrow()).1.clone().unwrap();
+
+    for (number, i) in all_gtk_box.children().into_iter().enumerate() {
+        let cache_tree_path = (*image_cache.borrow())[number].4.clone();
+        let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
+
+        let bx = i.downcast::<gtk::Box>().unwrap();
+        let smaller_bx = bx.children()[0].clone().downcast::<gtk::Box>().unwrap();
+        for items in smaller_bx.children() {
+            if let Ok(btn) = items.downcast::<gtk::Button>() {
+                btn.set_sensitive(is_chosen);
+            }
+        }
+    }
 }

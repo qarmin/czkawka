@@ -10,6 +10,7 @@ use czkawka_core::*;
 
 use crate::compute_results::*;
 use crate::connect_about_buttons::*;
+use crate::connect_button_compare::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_hardlink::*;
 use crate::connect_button_move::*;
@@ -17,7 +18,6 @@ use crate::connect_button_save::*;
 use crate::connect_button_search::*;
 use crate::connect_button_select::*;
 use crate::connect_button_stop::*;
-use crate::connect_button_compare::*;
 use crate::connect_change_language::*;
 use crate::connect_duplicate_buttons::connect_duplicate_combo_box;
 use crate::connect_header_buttons::*;
@@ -36,6 +36,7 @@ use crate::tests::validate_notebook_data;
 
 mod compute_results;
 mod connect_about_buttons;
+mod connect_button_compare;
 mod connect_button_delete;
 mod connect_button_hardlink;
 mod connect_button_move;
@@ -56,6 +57,7 @@ mod connect_similar_image_size_change;
 mod create_tree_view;
 mod gui_about;
 mod gui_bottom_buttons;
+mod gui_compare_images;
 mod gui_data;
 mod gui_header;
 mod gui_main_notebook;
@@ -76,8 +78,6 @@ mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
 mod tests;
-mod gui_compare_images;
-mod connect_button_compare;
 
 fn main() {
     let application = gtk::Application::builder().build();

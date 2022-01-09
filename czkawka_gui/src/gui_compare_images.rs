@@ -24,7 +24,7 @@ pub struct GuiCompareImages {
     pub shared_current_of_groups: Rc<RefCell<u32>>,
     pub shared_current_iter: Rc<RefCell<Option<TreeIter>>>,
     pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
-    pub shared_using_for_preview: Rc<RefCell<(u32, u32)>>,
+    pub shared_using_for_preview: Rc<RefCell<(Option<gtk::TreePath>, Option<gtk::TreePath>)>>,
 }
 
 impl GuiCompareImages {
@@ -54,7 +54,7 @@ impl GuiCompareImages {
         let shared_current_of_groups = Rc::new(RefCell::new(0));
         let shared_current_iter = Rc::new(RefCell::new(None));
         let shared_image_cache = Rc::new(RefCell::new(Vec::new()));
-        let shared_using_for_preview = Rc::new(RefCell::new((0, 1)));
+        let shared_using_for_preview = Rc::new(RefCell::new((None, None)));
 
         Self {
             window_compare,
