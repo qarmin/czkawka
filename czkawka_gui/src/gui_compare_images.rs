@@ -74,5 +74,7 @@ impl GuiCompareImages {
             shared_using_for_preview,
         }
     }
-    pub fn update_language(&self) {}
+    pub fn update_language(&self) {
+        self.window_compare.set_title(&fl!("window_compare_images"));
+    }
 }
