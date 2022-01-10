@@ -54,18 +54,11 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             return;
         }
 
-        *shared_current_of_groups.borrow_mut() = 1;
-        *shared_numbers_of_groups.borrow_mut() = group_number;
-
-        button_go_previous_compare_group.set_sensitive(false);
-        if group_number == 1 {
-            button_go_next_compare_group.set_sensitive(false);
-        } else {
-            button_go_next_compare_group.set_sensitive(true);
-        }
-
         // Check selected items
         let (current_group, tree_iter) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_color.unwrap());
+
+        *shared_current_of_groups.borrow_mut() = current_group;
+        *shared_numbers_of_groups.borrow_mut() = group_number;
 
         populate_groups_at_start(
             nb_object,
@@ -82,6 +75,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &label_group_info,
             shared_image_cache.clone(),
             shared_using_for_preview.clone(),
+            &button_go_previous_compare_group,
+            &button_go_next_compare_group,
         );
 
         window_compare.show();
@@ -137,11 +132,6 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        if current_group == 1 {
-            button_go_previous_compare_group.set_sensitive(false);
-        }
-        button_go_next_compare_group.set_sensitive(true);
-
         let tree_iter = move_iter(&model, shared_current_iter.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
 
         populate_groups_at_start(
@@ -159,6 +149,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &label_group_info,
             shared_image_cache.clone(),
             shared_using_for_preview.clone(),
+            button_go_previous_compare_group,
+            &button_go_next_compare_group,
         );
     });
 
@@ -192,11 +184,6 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        if group_number == current_group {
-            button_go_next_compare_group.set_sensitive(false);
-        }
-        button_go_previous_compare_group.set_sensitive(true);
-
         let tree_iter = move_iter(&model, shared_current_iter.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), true);
 
         populate_groups_at_start(
@@ -214,6 +201,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &label_group_info,
             shared_image_cache.clone(),
             shared_using_for_preview.clone(),
+            &button_go_previous_compare_group,
+            button_go_next_compare_group,
         );
     });
 
@@ -278,7 +267,20 @@ fn populate_groups_at_start(
     label_group_info: &gtk::Label,
     shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    button_go_previous_compare_group: &gtk::Button,
+    button_go_next_compare_group: &gtk::Button,
 ) {
+    if current_group == 1 {
+        button_go_previous_compare_group.set_sensitive(false);
+    } else {
+        button_go_previous_compare_group.set_sensitive(true);
+    }
+    if current_group == group_number {
+        button_go_next_compare_group.set_sensitive(false);
+    } else {
+        button_go_next_compare_group.set_sensitive(true);
+    }
+
     let all_vec = get_all_path(model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
     *shared_current_iter.borrow_mut() = Some(tree_iter);
 
