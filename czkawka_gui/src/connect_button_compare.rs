@@ -1,7 +1,8 @@
 use czkawka_core::common::get_dynamic_image_from_raw_image;
+use czkawka_core::fl;
 use czkawka_core::similar_images::RAW_IMAGE_EXTENSIONS;
 use gtk::prelude::*;
-use gtk::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath};
+use gtk::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
 use image::imageops::FilterType;
 use image::DynamicImage;
 use std::cell::RefCell;
@@ -12,6 +13,7 @@ use crate::help_functions::{
     count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, get_max_file_name, resize_dynamic_image_dimension, NotebookObject, HEADER_ROW_COLOR,
     NOTEBOOKS_INFOS,
 };
+use crate::localizer::generate_translation_hashmap;
 
 const BIG_PREVIEW_SIZE: u32 = 600;
 const SMALL_PREVIEW_SIZE: u32 = 100;
@@ -46,7 +48,6 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
         let model = tree_view.model().unwrap();
 
-        let current_group = 1;
         let group_number = count_number_of_groups(tree_view, nb_object.column_color.unwrap());
 
         if group_number == 0 {
@@ -63,7 +64,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             button_go_next_compare_group.set_sensitive(true);
         }
 
-        let tree_iter = model.iter_first().unwrap();
+        // Check selected items
+        let (current_group, tree_iter) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_color.unwrap());
 
         populate_groups_at_start(
             nb_object,
@@ -86,11 +88,22 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     });
 
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
+    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
+    let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
+    let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
     let window_compare = gui_data.compare_images.window_compare.clone();
+    let image_compare_left = gui_data.compare_images.image_compare_left.clone();
+    let image_compare_right = gui_data.compare_images.image_compare_right.clone();
     window_compare.connect_delete_event(move |window_compare, _| {
         window_compare.hide();
-        // TODO clear cached data here
         *shared_image_cache.borrow_mut() = Vec::new();
+        *shared_current_iter.borrow_mut() = None;
+        *shared_current_of_groups.borrow_mut() = 0;
+        *shared_numbers_of_groups.borrow_mut() = 0;
+        *shared_using_for_preview.borrow_mut() = (None, None);
+        image_compare_left.set_from_pixbuf(None);
+        image_compare_right.set_from_pixbuf(None);
         gtk::Inhibit(true)
     });
 
@@ -280,7 +293,17 @@ fn populate_groups_at_start(
     check_button_left_preview_text.set_label(&format!("1. {}", get_max_file_name(&cache_all_images[0].0, 70)));
     check_button_right_preview_text.set_label(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 70)));
 
-    label_group_info.set_text(format!("Group {}/{} ({} images)", current_group, group_number, cache_all_images.len()).as_str());
+    label_group_info.set_text(
+        fl!(
+            "compare_groups_number",
+            generate_translation_hashmap(vec![
+                ("current_group", current_group.to_string()),
+                ("all_groups", group_number.to_string()),
+                ("images_in_group", cache_all_images.len().to_string())
+            ])
+        )
+        .as_str(),
+    );
 
     populate_similar_scrolled_view(
         scrolled_window_compare_choose_images,
@@ -462,9 +485,9 @@ fn populate_similar_scrolled_view(
 
         let smaller_box = gtk::Box::new(Orientation::Horizontal, 2);
 
-        let button_left = gtk::Button::builder().label("L").build();
+        let button_left = gtk::Button::builder().label(&fl!("compare_move_left_button")).build();
         let label = gtk::Label::builder().label(&(number + 1).to_string()).build();
-        let button_right = gtk::Button::builder().label("R").build();
+        let button_right = gtk::Button::builder().label(&fl!("compare_move_right_button")).build();
 
         let image_compare_left = image_compare_left.clone();
         let image_compare_right = image_compare_right.clone();
@@ -521,6 +544,7 @@ fn populate_similar_scrolled_view(
     scrolled_window.add(&all_gtk_box);
 }
 
+/// Disables/Enables L/R buttons at the bottom scrolled view
 fn update_bottom_buttons(
     all_gtk_box: &gtk::Box,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
@@ -541,4 +565,39 @@ fn update_bottom_buttons(
             }
         }
     }
+}
+
+fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeSelection, column_color: i32) -> (u32, TreeIter) {
+    let mut current_group = 1;
+    let mut possible_group = 1;
+    let mut header_clone: TreeIter;
+    let mut possible_header: TreeIter;
+
+    let selected_records = selection.selected_rows().0;
+
+    let iter = model.iter_first().unwrap(); // Checking that treeview is not empty should be done before
+    header_clone = iter.clone(); // if nothing selected, use first group
+    possible_header = iter.clone(); // if nothing selected, use first group
+    assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+
+    if !selected_records.is_empty() {
+        let first_selected_record = selected_records[0].clone();
+        loop {
+            if !model.iter_next(&iter) {
+                break;
+            }
+
+            if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                possible_group += 1;
+                possible_header = iter.clone();
+            }
+
+            if model.path(&iter).unwrap() == first_selected_record {
+                header_clone = possible_header.clone();
+                current_group = possible_group;
+            }
+        }
+    }
+
+    (current_group, header_clone)
 }

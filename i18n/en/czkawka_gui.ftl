@@ -19,6 +19,7 @@ core_folder_no_modification_date = Unable to get modification date from folder {
 window_settings_title = Options
 window_main_title = Czkawka (Hiccup)
 window_progress_title = Scanning
+window_compare_images = Compare Images
 
 # General
 general_ok_button = Ok
@@ -486,3 +487,8 @@ preview_0_size = Cannot create preview of image {$name}, with 0 width or height.
 preview_temporary_image_save = Failed to save temporary image file to {$name}, reason {$reason}.
 preview_temporary_image_remove = Failed to delete temporary image file {$name}, reason {$reason}.
 preview_failed_to_create_cache_dir = Failed to create dir {$name} needed by image preview, reason {$reason}.
+
+# Compare images (L is short Left, R is short Right - they can't take too much space)
+compare_groups_number = Group { $current_group }/{ $all_groups } ({ $images_in_group } images)
+compare_move_left_button = L
+compare_move_right_button = R
