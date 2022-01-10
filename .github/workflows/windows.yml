@@ -84,7 +84,6 @@ jobs:
 
 
 
-
           target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen -m 1024
           python misc/check_results.py TestSuite 7 8
 
