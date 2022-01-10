@@ -148,7 +148,7 @@ jobs:
           python misc/check_results.py TestSuite 14 8
         if: ${{ matrix.type == 'release' }}
 
-  windows-gui:
+  windows-gui-release-normal-app:
     strategy:
       matrix:
         toolchain: [ stable ]
@@ -161,14 +161,6 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: windows-gui-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            windows-gui-${{github.ref}}-${{github.sha}}
 
       - name: Install Gtk, Mingw, unzip, zip and wget
         run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
@@ -239,16 +231,14 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store Windows GUI CrossComplile
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-Windows-${{ matrix.toolchain }}
+          name: czkawka_gui-release-normal-app-${{ matrix.toolchain }}
           path: gtk_app.zip
-        if: ${{ matrix.type == 'release' }}
 
-  windows-gui-relase-console:
+  windows-gui-release-console:
     strategy:
       matrix:
         toolchain: [ stable ]
@@ -261,14 +251,6 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: windows-gui-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            windows-gui-${{github.ref}}-${{github.sha}}
 
       - name: Install Gtk, Mingw, unzip, zip and wget
         run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
@@ -340,16 +322,14 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store Windows GUI CrossComplile
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-Windows-release-console-${{ matrix.toolchain }}
+          name: czkawka_gui-release-console-${{ matrix.toolchain }}
           path: gtk_app.zip
-        if: ${{ matrix.type == 'release' }}
 
-  windows-gui-windows:
+  windows-gui-debug-normal-app:
     strategy:
       matrix:
         toolchain: [ stable ]
@@ -362,14 +342,6 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: windows-gui-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            windows-gui-${{github.ref}}-${{github.sha}}
 
       - name: Install Gtk, Mingw, unzip, zip and wget
         run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
@@ -440,17 +412,15 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store Windows GUI CrossComplile
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-Windows-windows-${{ matrix.toolchain }}
+          name: czkawka_gui-debug-normal-app-${{ matrix.toolchain }}
           path: gtk_app.zip
-        if: ${{ matrix.type == 'release' }}
 
 
-  windows-gui-console:
+  windows-gui-debug-console:
     strategy:
       matrix:
         toolchain: [ stable ]
@@ -463,14 +433,6 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: windows-gui-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            windows-gui-${{github.ref}}-${{github.sha}}
 
       - name: Install Gtk, Mingw, unzip, zip and wget
         run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
@@ -542,11 +504,9 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store Windows GUI CrossComplile
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-Windows-console-${{ matrix.toolchain }}
+          name: czkawka_gui-debug-console-${{ matrix.toolchain }}
           path: gtk_app.zip
-        if: ${{ matrix.type == 'release' }}
