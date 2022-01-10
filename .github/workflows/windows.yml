@@ -84,7 +84,6 @@ jobs:
 
 
 
-
           target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen -m 1024
           python misc/check_results.py TestSuite 7 8
 
@@ -148,7 +147,7 @@ jobs:
           python misc/check_results.py TestSuite 14 8
         if: ${{ matrix.type == 'release' }}
 
-  windows-gui:
+  windows-gui-release-normal-app:
     strategy:
       matrix:
         toolchain: [ stable ]
@@ -162,49 +161,8 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-            target
-          key: windows-gui-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            windows-gui-${{github.ref}}-${{github.sha}}
-
       - name: Install Gtk, Mingw, unzip, zip and wget
         run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
-
-      - name: Build GUI Debug Cross Compile
-        run: |
-          rustup target add x86_64-pc-windows-gnu
-
-          echo "[target.x86_64-pc-windows-gnu]" > ~/.cargo/config
-          echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
-          echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
-
-          GTK_LIBRARY="$(pwd)/gtk_library"
-          GTK_APP="$(pwd)/gtk_app"
-
-          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
-          unzip mingw64.zip -d $GTK_LIBRARY
-          GTK_LIBRARY="$GTK_LIBRARY/mingw64"
-
-          PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui
-
-          mkdir $GTK_APP
-          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe $GTK_APP
-          cp $GTK_LIBRARY/bin/*.dll $GTK_APP
-          mkdir -p $GTK_APP/share/glib-2.0/schemas
-          mkdir $GTK_APP/share/icons
-          cp $GTK_LIBRARY/share/glib-2.0/schemas/* $GTK_APP/share/glib-2.0/schemas
-          cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
-          mkdir $GTK_APP/lib
-          cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
-
-          zip -r gtk_app.zip $GTK_APP
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'debug'}}
 
       - name: Build GUI Release Cross Compile
         run: |
@@ -247,15 +205,307 @@ jobs:
           echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
           cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r -L
 
+          # This part is only unique for Czkawka
+          # This code allows to check which icons are used in Czkawka
+          # cd czkawka/ui
+          # rg icon-name
+          rm -rf $GTK_APP/share/icons/Adwaita/16x16
+          rm -rf $GTK_APP/share/icons/Adwaita/22x22
+          rm -rf $GTK_APP/share/icons/Adwaita/24x24
+          rm -rf $GTK_APP/share/icons/Adwaita/256x256
+          rm -rf $GTK_APP/share/icons/Adwaita/32x32
+          rm -rf $GTK_APP/share/icons/Adwaita/48x48
+          rm -rf $GTK_APP/share/icons/Adwaita/512x512
+          rm -rf $GTK_APP/share/icons/Adwaita/64x64
+          rm -rf $GTK_APP/share/icons/Adwaita/8x8
+          rm -rf $GTK_APP/share/icons/Adwaita/96x96
+          rm -rf $GTK_APP/share/icons/Adwaita/cursors
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable-up-to-32
+          rm -rf $GTK_APP/share/icons/hicolor
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/czkawka_icons.zip
+          unzip czkawka_icons.zip -d $GTK_APP/share/icons/Adwaita
+
           zip -r gtk_app.zip $GTK_APP
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store Windows GUI CrossComplile
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_gui-Windows-${{ matrix.toolchain }}
+          name: czkawka_gui-release-normal-app-${{ matrix.toolchain }}
           path: gtk_app.zip
-        if: ${{ matrix.type == 'release' }}
+
+  windows-gui-release-console:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Install Gtk, Mingw, unzip, zip and wget
+        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+
+      - name: Build GUI Release Cross Compile
+        run: |
+          sed -i 's/windows_subsystem = "windows"/windows_subsystem = "console"/' czkawka_gui/src/main.rs 
+          rustup target add x86_64-pc-windows-gnu
+
+          echo "[target.x86_64-pc-windows-gnu]" > ~/.cargo/config
+          echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
+          echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
+
+          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_APP="$(pwd)/gtk_app"
+          GTK_THEME="$(pwd)/gtk_theme"
+
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
+          unzip mingw64.zip -d $GTK_LIBRARY
+          GTK_LIBRARY="$GTK_LIBRARY/mingw64"
+
+          wget https://github.com/nrhodes91/AdMin/archive/master.zip
+          unzip master.zip -d $GTK_THEME
+
+          PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui --release
+
+          strip target/x86_64-pc-windows-gnu/release/czkawka_gui.exe
+
+          mkdir $GTK_APP
+          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe $GTK_APP
+          cp $GTK_LIBRARY/bin/*.dll $GTK_APP
+          mkdir -p $GTK_APP/share/glib-2.0/schemas
+          mkdir $GTK_APP/share/icons
+          cp $GTK_LIBRARY/share/glib-2.0/schemas/* $GTK_APP/share/glib-2.0/schemas
+          cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
+          mkdir $GTK_APP/lib
+          cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
+
+          mkdir -p $GTK_APP/share/themes
+          mkdir -p $GTK_APP/share/gtk-3.0
+          echo "[Settings]" > $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-theme-name = admin-gtk3-dark-osx" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-font-name = Segoe UI 10" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
+          cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r -L
+
+          # This part is only unique for Czkawka
+          # This code allows to check which icons are used in Czkawka
+          # cd czkawka/ui
+          # rg icon-name
+          rm -rf $GTK_APP/share/icons/Adwaita/16x16
+          rm -rf $GTK_APP/share/icons/Adwaita/22x22
+          rm -rf $GTK_APP/share/icons/Adwaita/24x24
+          rm -rf $GTK_APP/share/icons/Adwaita/256x256
+          rm -rf $GTK_APP/share/icons/Adwaita/32x32
+          rm -rf $GTK_APP/share/icons/Adwaita/48x48
+          rm -rf $GTK_APP/share/icons/Adwaita/512x512
+          rm -rf $GTK_APP/share/icons/Adwaita/64x64
+          rm -rf $GTK_APP/share/icons/Adwaita/8x8
+          rm -rf $GTK_APP/share/icons/Adwaita/96x96
+          rm -rf $GTK_APP/share/icons/Adwaita/cursors
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable-up-to-32
+          rm -rf $GTK_APP/share/icons/hicolor
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/czkawka_icons.zip
+          unzip czkawka_icons.zip -d $GTK_APP/share/icons/Adwaita
+
+          zip -r gtk_app.zip $GTK_APP
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+
+      - name: Store Windows GUI CrossComplile
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-release-console-${{ matrix.toolchain }}
+          path: gtk_app.zip
+
+  windows-gui-debug-normal-app:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Install Gtk, Mingw, unzip, zip and wget
+        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+
+      - name: Build GUI Debug Cross Compile
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+
+          echo "[target.x86_64-pc-windows-gnu]" > ~/.cargo/config
+          echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
+          echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
+
+          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_APP="$(pwd)/gtk_app"
+          GTK_THEME="$(pwd)/gtk_theme"
+
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
+          unzip mingw64.zip -d $GTK_LIBRARY
+          GTK_LIBRARY="$GTK_LIBRARY/mingw64"
+
+          wget https://github.com/nrhodes91/AdMin/archive/master.zip
+          unzip master.zip -d $GTK_THEME
+
+          PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui
+
+          strip target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe
+
+          mkdir $GTK_APP
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe $GTK_APP
+          cp $GTK_LIBRARY/bin/*.dll $GTK_APP
+          mkdir -p $GTK_APP/share/glib-2.0/schemas
+          mkdir $GTK_APP/share/icons
+          cp $GTK_LIBRARY/share/glib-2.0/schemas/* $GTK_APP/share/glib-2.0/schemas
+          cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
+          mkdir $GTK_APP/lib
+          cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
+
+          mkdir -p $GTK_APP/share/themes
+          mkdir -p $GTK_APP/share/gtk-3.0
+          echo "[Settings]" > $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-theme-name = admin-gtk3-dark-osx" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-font-name = Segoe UI 10" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
+          cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r -L
+
+          # This part is only unique for Czkawka
+          # This code allows to check which icons are used in Czkawka
+          # cd czkawka/ui
+          # rg icon-name
+          rm -rf $GTK_APP/share/icons/Adwaita/16x16
+          rm -rf $GTK_APP/share/icons/Adwaita/22x22
+          rm -rf $GTK_APP/share/icons/Adwaita/24x24
+          rm -rf $GTK_APP/share/icons/Adwaita/256x256
+          rm -rf $GTK_APP/share/icons/Adwaita/32x32
+          rm -rf $GTK_APP/share/icons/Adwaita/48x48
+          rm -rf $GTK_APP/share/icons/Adwaita/512x512
+          rm -rf $GTK_APP/share/icons/Adwaita/64x64
+          rm -rf $GTK_APP/share/icons/Adwaita/8x8
+          rm -rf $GTK_APP/share/icons/Adwaita/96x96
+          rm -rf $GTK_APP/share/icons/Adwaita/cursors
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable-up-to-32
+          rm -rf $GTK_APP/share/icons/hicolor
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/czkawka_icons.zip
+          unzip czkawka_icons.zip -d $GTK_APP/share/icons/Adwaita
+
+          zip -r gtk_app.zip $GTK_APP
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+
+      - name: Store Windows GUI CrossComplile
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-debug-normal-app-${{ matrix.toolchain }}
+          path: gtk_app.zip
+
+
+  windows-gui-debug-console:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Install Gtk, Mingw, unzip, zip and wget
+        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+
+      - name: Build GUI Debug Cross Compile
+        run: |
+          sed -i 's/windows_subsystem = "windows"/windows_subsystem = "console"/' czkawka_gui/src/main.rs 
+          rustup target add x86_64-pc-windows-gnu
+
+          echo "[target.x86_64-pc-windows-gnu]" > ~/.cargo/config
+          echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
+          echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
+
+          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_APP="$(pwd)/gtk_app"
+          GTK_THEME="$(pwd)/gtk_theme"
+
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
+          unzip mingw64.zip -d $GTK_LIBRARY
+          GTK_LIBRARY="$GTK_LIBRARY/mingw64"
+
+          wget https://github.com/nrhodes91/AdMin/archive/master.zip
+          unzip master.zip -d $GTK_THEME
+
+          PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin czkawka_gui
+
+          strip target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe
+
+          mkdir $GTK_APP
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe $GTK_APP
+          cp $GTK_LIBRARY/bin/*.dll $GTK_APP
+          mkdir -p $GTK_APP/share/glib-2.0/schemas
+          mkdir $GTK_APP/share/icons
+          cp $GTK_LIBRARY/share/glib-2.0/schemas/* $GTK_APP/share/glib-2.0/schemas
+          cp -r $GTK_LIBRARY/share/icons/* $GTK_APP/share/icons
+          mkdir $GTK_APP/lib
+          cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
+
+          mkdir -p $GTK_APP/share/themes
+          mkdir -p $GTK_APP/share/gtk-3.0
+          echo "[Settings]" > $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-theme-name = admin-gtk3-dark-osx" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-font-name = Segoe UI 10" >> $GTK_APP/share/gtk-3.0/settings.ini
+          echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
+          cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r -L
+
+          # This part is only unique for Czkawka
+          # This code allows to check which icons are used in Czkawka
+          # cd czkawka/ui
+          # rg icon-name
+          rm -rf $GTK_APP/share/icons/Adwaita/16x16
+          rm -rf $GTK_APP/share/icons/Adwaita/22x22
+          rm -rf $GTK_APP/share/icons/Adwaita/24x24
+          rm -rf $GTK_APP/share/icons/Adwaita/256x256
+          rm -rf $GTK_APP/share/icons/Adwaita/32x32
+          rm -rf $GTK_APP/share/icons/Adwaita/48x48
+          rm -rf $GTK_APP/share/icons/Adwaita/512x512
+          rm -rf $GTK_APP/share/icons/Adwaita/64x64
+          rm -rf $GTK_APP/share/icons/Adwaita/8x8
+          rm -rf $GTK_APP/share/icons/Adwaita/96x96
+          rm -rf $GTK_APP/share/icons/Adwaita/cursors
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable
+          rm -rf $GTK_APP/share/icons/Adwaita/scalable-up-to-32
+          rm -rf $GTK_APP/share/icons/hicolor
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/czkawka_icons.zip
+          unzip czkawka_icons.zip -d $GTK_APP/share/icons/Adwaita
+
+          zip -r gtk_app.zip $GTK_APP
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0 -D warnings"
+
+      - name: Store Windows GUI CrossComplile
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-debug-console-${{ matrix.toolchain }}
+          path: gtk_app.zip
