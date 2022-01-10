@@ -495,6 +495,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
         gui_data.main_notebook.tree_view_broken_files.clone(),
     ] {
         tree_view.connect_button_press_event(opening_double_click_function);
+        tree_view.connect_button_release_event(opening_middle_mouse_function);
     }
     // Duplicate
     {

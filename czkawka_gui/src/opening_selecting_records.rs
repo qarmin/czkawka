@@ -61,6 +61,16 @@ pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::Eve
     gtk::Inhibit(false)
 }
 
+pub fn opening_middle_mouse_function(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+    let nt_object = get_notebook_object_from_tree_view(tree_view);
+    if let Some(column_color) = nt_object.column_color {
+        if event.button() == 2 {
+            reverse_selection(tree_view, column_color, nt_object.column_selection);
+        }
+    }
+    gtk::Inhibit(false)
+}
+
 pub fn opening_double_click_function_directories(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
     if event.event_type() == gdk::EventType::DoubleButtonPress && (event.button() == 1 || event.button() == 3) {
         match get_notebook_upper_enum_from_tree_view(tree_view) {
@@ -144,6 +154,50 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
         // if let Err(e) = open::that(&end_path) {
         //     println!("Failed to open {} - Error {}", end_path, e);
         // }
+    }
+}
+fn reverse_selection(tree_view: &gtk::TreeView, column_color: i32, column_selection: i32) {
+    let (selected_rows, model) = tree_view.selection().selected_rows();
+    let model = model.downcast::<gtk::ListStore>().unwrap();
+
+    if selected_rows.len() != 1 {
+        return; // Multiple selection is not supported because it is a lot of harder to do it properly
+    }
+    let tree_path = selected_rows[0].clone();
+    let current_iter = model.iter(&tree_path).unwrap();
+
+    if model.value(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+        return; // Selecting header is not supported(this is available by using reference)
+    }
+
+    // This will revert selection of current selected item, but I don't think that this is needed
+    // let current_value = model.value(&current_iter, column_selection).get::<bool>().unwrap();
+    // model.set_value(&current_iter, column_selection as u32, &(!current_value).to_value());
+
+    let to_upper_iter = current_iter.clone();
+    loop {
+        if !model.iter_previous(&to_upper_iter) {
+            break;
+        }
+        if model.value(&to_upper_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            break;
+        }
+
+        let current_value = model.value(&to_upper_iter, column_selection).get::<bool>().unwrap();
+        model.set_value(&to_upper_iter, column_selection as u32, &(!current_value).to_value());
+    }
+
+    let to_lower_iter = current_iter;
+    loop {
+        if !model.iter_next(&to_lower_iter) {
+            break;
+        }
+        if model.value(&to_lower_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            break;
+        }
+
+        let current_value = model.value(&to_lower_iter, column_selection).get::<bool>().unwrap();
+        model.set_value(&to_lower_iter, column_selection as u32, &(!current_value).to_value());
     }
 }
 
