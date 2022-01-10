@@ -17,6 +17,7 @@ core_folder_no_modification_date = Nie udało się pobrać daty modyfikacji z fo
 window_settings_title = Opcje
 window_main_title = Czkawka
 window_progress_title = Skanowanie
+window_compare_images = Porównywanie Obrazów
 # General
 general_ok_button = Ok
 general_close_button = Zamknij
@@ -233,6 +234,7 @@ settings_confirm_link_button_tooltip = Wyświetla okno potwierdzające usuwanie,
 settings_confirm_group_deletion_button_tooltip = Wyświetla okno potwierdzające usuwanie, gdy wszystkie rekordy w danej grupie są zaznaczone.
 settings_show_text_view_button_tooltip = Pokazuje na dole ekranu panel tekstowy.
 settings_use_cache_button_tooltip = Umożliwia zapisywanie rekordów do pamięci podręcznej.
+settings_save_also_as_json_button_tooltip = Zapisz pamięć podręczną do pliku w formacie JSON umożliwiającym zmiany zawartości. Pamięć podręczna z tego pliku zostanie odczytana automatycznie przez aplikację, jeśli nie istnieje plik z pamięcią podręczną w formacie binarnym (z rozszerzeniem bin).
 settings_use_trash_button_tooltip = Przenosi pliki do kosza zamiast usuwać je permanentnie.
 settings_language_label_tooltip = Pozwala wybrać język interfejsu.
 settings_save_at_exit_button = Zapisuj konfigurację przy wyłączaniu
@@ -242,6 +244,7 @@ settings_confirm_link_button = Pokazuj potwierdzenie usuwania hard/symlinków
 settings_confirm_group_deletion_button = Pokazuj okno potwierdzające usuwanie wszystkich obiektów w grupie
 settings_show_text_view_button = Pokazuj panel tekstowy na dole
 settings_use_cache_button = Używaj pamięci podręcznej
+settings_save_also_as_json_button = Zapisz pamięć podręczną również do pliku JSON
 settings_use_trash_button = Przenoś pliki do kosza
 settings_language_label = Język
 settings_multiple_delete_outdated_cache_checkbutton = Usuwaj automatycznie nieaktualne rekordy z pamięci podręcznej
@@ -270,7 +273,7 @@ settings_multiple_clear_cache_button = Usuń nieaktualne dane z pamięci podręc
 settings_duplicates_hide_hard_link_button_tooltip =
     Ukrywa wszystkie pliki oprócz jednego, jeśli wskazują na dokładnie ten sam plik(to samo inode).
     
-    Przykładowo - gdy program znalazł 7 plików na dokładnie ten sam plik(to samo inode) a dodatkowo jeden na inny, to w wynikach wyszukiwania wyświetlą się jedynie 2 wyniki - jeden z pierwszej grupy i drugi z drugiej.
+    Przykładowo - gdy program znalazł 7 plików na dokładnie ten sam plik(z tym samym inode) a dodatkowo jeden na inny, to w wynikach wyszukiwania wyświetlą się jedynie 2 wyniki - jeden z pierwszej grupy i drugi z drugiej.
 settings_duplicates_minimal_size_entry_tooltip =
     Opcja umożliwia ustawienie minimalnej wielkości pliku, której hash będzie zapisywany do pamięci podręcznej.
     
@@ -411,3 +414,7 @@ preview_0_size = Nie można stworzyć podglądu obrazu { $name }, z wysokością
 preview_temporary_image_save = Nie udało się zapisać tymczasowego obrazu do { $name }, powód { $reason }.
 preview_temporary_image_remove = Nie udało się usunąć tymczasowego obrazu { $name }, powód { $reason }.
 preview_failed_to_create_cache_dir = Nie udało stworzyć się katalogu { $name } wymaganego do stworzenia podglądu obrazu, powód { $reason }.
+# Compare images (L is short Left, R is short Right - they can't take too much space)
+compare_groups_number = Grupa { $current_group }/{ $all_groups } ({ $images_in_group } obrazów)
+compare_move_left_button = L
+compare_move_right_button = P

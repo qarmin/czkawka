@@ -1,8 +1,13 @@
+use directories_next::ProjectDirs;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use gtk::prelude::*;
 use gtk::{ListStore, TextView, TreeView, Widget};
+use image::imageops::FilterType;
+use image::DynamicImage;
+use image::GenericImageView;
 
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -682,6 +687,74 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
     }
 
     (number_of_selected_items, number_of_selected_groups)
+}
+
+/// Counts how much headers/groups is in treeview
+pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32) -> u32 {
+    let mut number_of_selected_groups = 0;
+
+    let model = get_list_store(tree_view);
+
+    if let Some(iter) = model.iter_first() {
+        assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        number_of_selected_groups += 1;
+
+        loop {
+            if !model.iter_next(&iter) {
+                break;
+            }
+
+            if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                number_of_selected_groups += 1;
+            }
+        }
+    }
+    number_of_selected_groups
+}
+
+pub fn resize_dynamic_image_dimension(img: DynamicImage, requested_size: (u32, u32), filter_type: &FilterType) -> DynamicImage {
+    let current_ratio = img.width() as f32 / img.height() as f32;
+    let mut new_size;
+    match current_ratio.partial_cmp(&(requested_size.0 as f32 / requested_size.1 as f32)).unwrap() {
+        Ordering::Greater => {
+            new_size = (requested_size.0, (img.height() * requested_size.0) / img.width());
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+        }
+        Ordering::Less => {
+            new_size = ((img.width() * requested_size.1) / img.height(), requested_size.1);
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+        }
+        Ordering::Equal => {
+            new_size = (requested_size.0, requested_size.1);
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+        }
+    }
+    img.resize(new_size.0, new_size.1, *filter_type)
+}
+
+pub fn get_image_path_temporary(file_name: &str, number: u32, extension: &str) -> PathBuf {
+    let path_buf;
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        path_buf = PathBuf::from(proj_dirs.cache_dir());
+    } else {
+        path_buf = PathBuf::new().join("/var");
+    }
+    path_buf.join(format!("{}{}.{}", file_name, number, extension))
+}
+
+pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
+    assert!(max_length > 10); // Maybe in future will be supported lower values
+    if file_name.len() > max_length {
+        let difference = file_name.len() - max_length;
+
+        let mut string = "".to_string();
+        string += &file_name[0..10];
+        string += " ... ";
+        string += &file_name[10 + difference..];
+        string
+    } else {
+        file_name.to_string()
+    }
 }
 
 pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label {

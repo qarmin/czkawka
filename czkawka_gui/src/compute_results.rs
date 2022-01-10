@@ -940,7 +940,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::SimilarImages,
-                            &["save", "delete", "select", "symlink", "hardlink", "move"],
+                            &["save", "delete", "select", "symlink", "hardlink", "move", "compare"],
                             found_any_duplicates,
                         );
 

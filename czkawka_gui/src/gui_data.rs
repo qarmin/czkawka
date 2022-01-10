@@ -21,6 +21,7 @@ use czkawka_core::temporary::Temporary;
 
 use crate::gui_about::GuiAbout;
 use crate::gui_bottom_buttons::GuiBottomButtons;
+use crate::gui_compare_images::GuiCompareImages;
 use crate::gui_header::GuiHeader;
 use crate::gui_main_notebook::GuiMainNotebook;
 use crate::gui_popovers::GuiPopovers;
@@ -49,6 +50,7 @@ pub struct GuiData {
     pub about: GuiAbout,
     pub settings: GuiSettings,
     pub header: GuiHeader,
+    pub compare_images: GuiCompareImages,
 
     // Taskbar state
     pub taskbar_state: Rc<RefCell<TaskbarProgress>>,
@@ -106,6 +108,7 @@ impl GuiData {
         let about = GuiAbout::create_from_builder(&window_main, &pixbuf);
         let header = GuiHeader::create_from_builder(&builder);
         let settings = GuiSettings::create_from_builder(&window_main);
+        let compare_images = GuiCompareImages::create_from_builder(&window_main);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -166,6 +169,7 @@ impl GuiData {
             about,
             settings,
             header,
+            compare_images,
             taskbar_state,
             shared_buttons,
             shared_duplication_state,
@@ -198,5 +202,6 @@ impl GuiData {
         self.about.update_language();
         self.header.update_language();
         self.settings.update_language();
+        self.compare_images.update_language();
     }
 }

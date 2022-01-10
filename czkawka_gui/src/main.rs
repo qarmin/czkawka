@@ -2,6 +2,7 @@
 #![windows_subsystem = "windows"]
 #![allow(clippy::collapsible_else_if)]
 #![allow(clippy::too_many_arguments)]
+#![allow(clippy::type_complexity)]
 
 use gtk::prelude::*;
 
@@ -9,6 +10,7 @@ use czkawka_core::*;
 
 use crate::compute_results::*;
 use crate::connect_about_buttons::*;
+use crate::connect_button_compare::*;
 use crate::connect_button_delete::*;
 use crate::connect_button_hardlink::*;
 use crate::connect_button_move::*;
@@ -34,6 +36,7 @@ use crate::tests::validate_notebook_data;
 
 mod compute_results;
 mod connect_about_buttons;
+mod connect_button_compare;
 mod connect_button_delete;
 mod connect_button_hardlink;
 mod connect_button_move;
@@ -54,6 +57,7 @@ mod connect_similar_image_size_change;
 mod create_tree_view;
 mod gui_about;
 mod gui_bottom_buttons;
+mod gui_compare_images;
 mod gui_data;
 mod gui_header;
 mod gui_main_notebook;
@@ -161,6 +165,8 @@ fn main() {
         connect_button_stop(&gui_data);
         connect_button_hardlink_symlink(&gui_data);
         connect_button_move(&gui_data);
+        connect_button_compare(&gui_data);
+
         connect_duplicate_combo_box(&gui_data);
         connect_notebook_tabs(&gui_data);
         connect_selection_of_directories(&gui_data);
