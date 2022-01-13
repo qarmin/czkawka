@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::KEY_ENTER;
 
 pub fn connect_button_stop(gui_data: &GuiData) {

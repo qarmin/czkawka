@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 
 pub fn connect_show_hide_ui(gui_data: &GuiData) {
     let check_button_settings_show_text_view = gui_data.settings.check_button_settings_show_text_view.clone();

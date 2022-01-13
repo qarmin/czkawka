@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use crate::fl;
+use czkawka_core::fl;
 
 #[derive(Clone)]
 pub struct GuiHeader {

@@ -2,7 +2,7 @@ use gtk::prelude::*;
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 
 pub fn connect_duplicate_combo_box(gui_data: &GuiData) {

@@ -7,7 +7,7 @@ use gtk::{ResponseType, TreeView, Window};
 use czkawka_core::common::Common;
 use czkawka_core::fl;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {

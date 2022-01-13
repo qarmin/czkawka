@@ -1,0 +1,10 @@
+mod gui_about;
+mod gui_bottom_buttons;
+mod gui_compare_images;
+pub mod gui_data;
+mod gui_header;
+pub mod gui_main_notebook;
+pub mod gui_popovers;
+mod gui_progress_dialog;
+pub mod gui_settings;
+pub mod gui_upper_notebook;

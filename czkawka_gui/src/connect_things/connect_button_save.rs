@@ -8,7 +8,7 @@ use gtk::{Button, Entry};
 use czkawka_core::common_traits::SaveResults;
 use czkawka_core::fl;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::*;
 

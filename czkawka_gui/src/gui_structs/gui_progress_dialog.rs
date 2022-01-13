@@ -1,8 +1,8 @@
 use gtk::prelude::*;
 use gtk::{Bin, Builder, EventControllerKey, Window};
 
-use crate::fl;
 use crate::help_functions::get_custom_label_from_button_with_image;
+use czkawka_core::fl;
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
@@ -24,7 +24,7 @@ pub struct GuiProgressDialog {
 
 impl GuiProgressDialog {
     pub fn create_from_builder(window_main: &Window) -> Self {
-        let glade_src = include_str!("../ui/progress.glade").to_string();
+        let glade_src = include_str!("../../ui/progress.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_progress: gtk::Dialog = builder.object("window_progress").unwrap();

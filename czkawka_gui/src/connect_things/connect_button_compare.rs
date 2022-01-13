@@ -8,7 +8,7 @@ use image::DynamicImage;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{
     count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, get_max_file_name, resize_dynamic_image_dimension, NotebookObject, HEADER_ROW_COLOR,
     NOTEBOOKS_INFOS,

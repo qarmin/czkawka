@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 
-use crate::gui_data::GuiData;
-use crate::gui_popovers::GuiPopovers;
+use crate::gui_structs::gui_data::GuiData;
+use crate::gui_structs::gui_popovers::GuiPopovers;
 use crate::help_functions::{PopoverTypes, NOTEBOOKS_INFOS};
 use crate::notebook_enums::*;
 

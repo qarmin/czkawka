@@ -19,19 +19,19 @@ use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 
-use crate::gui_about::GuiAbout;
-use crate::gui_bottom_buttons::GuiBottomButtons;
-use crate::gui_compare_images::GuiCompareImages;
-use crate::gui_header::GuiHeader;
-use crate::gui_main_notebook::GuiMainNotebook;
-use crate::gui_popovers::GuiPopovers;
-use crate::gui_progress_dialog::GuiProgressDialog;
-use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notebook::GuiUpperNotebook;
+use crate::gui_structs::gui_about::GuiAbout;
+use crate::gui_structs::gui_bottom_buttons::GuiBottomButtons;
+use crate::gui_structs::gui_compare_images::GuiCompareImages;
+use crate::gui_structs::gui_header::GuiHeader;
+use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
+use crate::gui_structs::gui_popovers::GuiPopovers;
+use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
+use crate::gui_structs::gui_settings::GuiSettings;
+use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
-const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../snap/gui/czkawka.png");
+const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../../snap/gui/czkawka.png");
 
 #[derive(Clone)]
 pub struct GuiData {
@@ -87,7 +87,7 @@ pub struct GuiData {
 impl GuiData {
     pub fn new_with_application(application: &gtk::Application) -> Self {
         //// Loading glade file content and build with it help UI
-        let glade_src = include_str!("../ui/main_window.glade").to_string();
+        let glade_src = include_str!("../../ui/main_window.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         //// Windows
