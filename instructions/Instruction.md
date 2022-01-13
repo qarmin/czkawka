@@ -34,6 +34,7 @@ To open multiple file just select desired files with CTRL key pressed and still 
 
 To open folder containing selected file, just click twice on it with right mouse button.
 
+To invert a selection of files, click on a file with the middle mouse button and it will invert the selection of the other files in the same group.
 
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
