@@ -24,8 +24,6 @@ core_included_directory_zero_valid_directories = Included Directory ERROR: Not f
 core_excluded_directory_pointless_slash = Directories: Excluding / is pointless, because it means that no files will be scanned
 core_directory_overlap = Directories: All directories to search overlaps with excluded directories
 
-core_excluded_directory_must_exits
-
 # Window titles
 window_settings_title = Options
 window_main_title = Czkawka (Hiccup)

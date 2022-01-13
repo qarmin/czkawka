@@ -48,7 +48,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
-    let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
+    let buttons_names = gui_data.bottom_buttons.buttons_names;
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
