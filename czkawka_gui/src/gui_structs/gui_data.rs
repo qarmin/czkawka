@@ -28,6 +28,7 @@ use crate::gui_structs::gui_popovers::GuiPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
+use crate::help_functions::BottomButtonsEnum;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
@@ -56,7 +57,7 @@ pub struct GuiData {
     pub taskbar_state: Rc<RefCell<TaskbarProgress>>,
 
     // Buttons state
-    pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
+    pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
 
     // State of search results
     pub shared_duplication_state: Rc<RefCell<DuplicateFinder>>,
@@ -116,16 +117,16 @@ impl GuiData {
         let taskbar_state = Rc::new(RefCell::new(TaskbarProgress::new()));
 
         // Buttons State - to remember existence of different buttons on pages
-        let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<String, bool>>::new()));
+        let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>::new()));
 
         // Show by default only search button
         for i in get_all_main_tabs().iter() {
-            let mut temp_hashmap: HashMap<String, bool> = Default::default();
+            let mut temp_hashmap: HashMap<BottomButtonsEnum, bool> = Default::default();
             for button_name in bottom_buttons.buttons_names.iter() {
-                if *button_name == "search" {
-                    temp_hashmap.insert(button_name.to_string(), true);
+                if *button_name == BottomButtonsEnum::Search {
+                    temp_hashmap.insert(*button_name, true);
                 } else {
-                    temp_hashmap.insert(button_name.to_string(), false);
+                    temp_hashmap.insert(*button_name, false);
                 }
             }
             shared_buttons.borrow_mut().insert(i.clone(), temp_hashmap);

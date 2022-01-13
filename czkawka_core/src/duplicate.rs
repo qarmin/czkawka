@@ -19,7 +19,7 @@ use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
 
-use crate::common::{open_cache_folder, Common};
+use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -54,7 +54,6 @@ pub enum DeleteMethod {
     HardLink,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_groups_by_size: usize,
@@ -73,7 +72,6 @@ impl Info {
     }
 }
 
-/// Struct with required information's to work
 pub struct DuplicateFinder {
     text_messages: Messages,
     information: Info,
@@ -489,7 +487,6 @@ impl DuplicateFinder {
         let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
@@ -655,7 +652,6 @@ impl DuplicateFinder {
         /////////////////////////
 
         //// PROGRESS THREAD START
-        // const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));

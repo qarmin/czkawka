@@ -15,6 +15,17 @@ core_folder_modified_before_epoch = Folder {$name} seems to be modified before U
 core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}
 core_folder_no_modification_date = Unable to get modification date from folder {$name}, reason {$reason}
 
+core_missing_no_chosen_included_directory = At least one directory must be provided
+core_directory_wildcard_no_supported = Directories: Wildcards in path are not supported, ignoring { $path }
+core_directory_relative_path = Directories: Relative path are not supported, ignoring { $path }
+core_directory_must_exists = Directories:  Provided folder path must exits, ignoring { $path }
+core_directory_must_be_directory = Directories: Provided path must point at the directory, ignoring { $path }
+core_included_directory_zero_valid_directories = Included Directory ERROR: Not found even one correct path to included which is required
+core_excluded_directory_pointless_slash = Directories: Excluding / is pointless, because it means that no files will be scanned
+core_directory_overlap = Directories: All directories to search overlaps with excluded directories
+
+core_excluded_directory_must_exits
+
 # Window titles
 window_settings_title = Options
 window_main_title = Czkawka (Hiccup)

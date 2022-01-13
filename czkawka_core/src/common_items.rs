@@ -28,12 +28,13 @@ impl ExcludedItems {
         for expression in expressions {
             let expression: String = expression.trim().to_string();
 
-            #[cfg(target_family = "windows")]
-            let expression = expression.replace("/", "\\");
-
             if expression.is_empty() {
                 continue;
             }
+
+            #[cfg(target_family = "windows")]
+            let expression = expression.replace("/", "\\");
+
             if expression == "DEFAULT" {
                 if cfg!(target_family = "unix") {
                     checked_expressions.push("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*".to_string());

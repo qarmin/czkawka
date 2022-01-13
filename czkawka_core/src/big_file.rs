@@ -14,7 +14,7 @@ use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use rayon::prelude::*;
 
-use crate::common::Common;
+use crate::common::{Common, LOOP_DURATION};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -131,7 +131,6 @@ impl BigFile {
         }
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicU64::new(0));
@@ -326,17 +325,14 @@ impl BigFile {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    /// Remove unused entries when included or excluded overlaps with each other or are duplicated etc.
     fn optimize_directories(&mut self) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
     }
 
-    /// Setting included directories, at least one must be provided
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
 
-    /// Setting absolute path to exclude
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
     }

@@ -50,6 +50,18 @@ pub enum PopoverTypes {
     None,
 }
 
+#[derive(Eq, PartialEq, Copy, Clone, Hash)]
+pub enum BottomButtonsEnum {
+    Search,
+    Select,
+    Delete,
+    Save,
+    Symlink,
+    Hardlink,
+    Move,
+    Compare,
+}
+
 pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,
     pub available_modes: [PopoverTypes; 5],
@@ -437,9 +449,9 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     }
 }
 
-pub fn set_buttons(hashmap: &mut HashMap<String, bool>, buttons_array: &[gtk::Widget], button_names: &[String]) {
+pub fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[gtk::Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
-        if *hashmap.get_mut(button_names[index].as_str()).unwrap() {
+        if *hashmap.get_mut(&button_names[index]).unwrap() {
             button.show();
         } else {
             button.hide();

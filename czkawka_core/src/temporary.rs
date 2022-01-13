@@ -11,7 +11,7 @@ use std::{fs, thread};
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
-use crate::common::Common;
+use crate::common::{Common, LOOP_DURATION};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
@@ -131,7 +131,6 @@ impl Temporary {
         }
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));

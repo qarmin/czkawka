@@ -18,7 +18,7 @@ use img_hash::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common};
+use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, LOOP_DURATION};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -61,7 +61,6 @@ pub struct ProgressData {
     pub images_checked: usize,
     pub images_to_check: usize,
 }
-const LOOP_DURATION: u32 = 200; //ms
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum Similarity {
