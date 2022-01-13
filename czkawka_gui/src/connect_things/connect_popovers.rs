@@ -4,9 +4,9 @@ use regex::Regex;
 
 use czkawka_core::common::Common;
 
-use crate::fl;
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
+use czkawka_core::fl;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.

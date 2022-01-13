@@ -30,7 +30,7 @@ pub struct GuiCompareImages {
 
 impl GuiCompareImages {
     pub fn create_from_builder(window_main: &gtk::Window) -> Self {
-        let glade_src = include_str!("../ui/compare_images.glade").to_string();
+        let glade_src = include_str!("../../ui/compare_images.glade").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_compare: gtk::Window = builder.object("window_compare").unwrap();

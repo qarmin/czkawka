@@ -8,11 +8,11 @@ use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{ComboBoxText, ScrolledWindow, TextView};
 
-use crate::gui_main_notebook::GuiMainNotebook;
+use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use czkawka_core::fl;
 
-use crate::gui_settings::GuiSettings;
-use crate::gui_upper_notebook::GuiUpperNotebook;
+use crate::gui_structs::gui_settings::GuiSettings;
+use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_functions::*;
 use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
 use crate::localizer::generate_translation_hashmap;

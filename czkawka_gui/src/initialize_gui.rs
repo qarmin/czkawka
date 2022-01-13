@@ -17,7 +17,7 @@ use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
 use crate::delete_things;
-use crate::gui_data::*;
+use crate::gui_structs::gui_data::*;
 use crate::help_combo_box::{
     DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };

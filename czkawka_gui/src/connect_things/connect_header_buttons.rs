@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 
 pub fn connect_button_about(gui_data: &GuiData) {
     let about_dialog = gui_data.about.about_dialog.clone();

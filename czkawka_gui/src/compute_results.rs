@@ -13,7 +13,7 @@ use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
 
 use crate::fl;
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;

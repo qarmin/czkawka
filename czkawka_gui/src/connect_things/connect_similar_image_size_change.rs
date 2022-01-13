@@ -2,7 +2,7 @@ use gtk::prelude::*;
 
 use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
 
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 
 pub fn connect_similar_image_size_change(gui_data: &GuiData) {

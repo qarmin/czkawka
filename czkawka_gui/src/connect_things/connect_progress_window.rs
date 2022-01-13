@@ -3,10 +3,10 @@ use gtk::prelude::*;
 
 use czkawka_core::{big_file, broken_files, common_dir_traversal, similar_images, similar_videos, temporary};
 
-use crate::fl;
-use crate::gui_data::GuiData;
+use crate::gui_structs::gui_data::GuiData;
 use crate::localizer::generate_translation_hashmap;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
+use czkawka_core::fl;
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(
