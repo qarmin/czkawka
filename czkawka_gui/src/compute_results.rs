@@ -1346,7 +1346,6 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 BottomButtonsEnum::Symlink,
                                 BottomButtonsEnum::Hardlink,
                                 BottomButtonsEnum::Move,
-                                BottomButtonsEnum::Compare,
                             ],
                             same_music_number > 0,
                         );
