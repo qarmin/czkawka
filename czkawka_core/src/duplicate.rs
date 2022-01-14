@@ -495,7 +495,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = self.files_with_identical_size.iter().map(|e| e.1.len()).sum();
+            let files_to_check = self.files_with_identical_size.values().map(|e| e.len()).sum();
             let checking_method = self.check_method;
             thread::spawn(move || loop {
                 progress_send
@@ -1263,7 +1263,6 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
 
         let mut how_much = 0;
         for file_entry in hashmap.values() {
-            // Only cache bigger than 5MB files
             if file_entry.size >= minimal_cache_file_size {
                 let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
 
@@ -1353,7 +1352,10 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             }
         }
 
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
+        text_messages.messages.push(format!(
+            "Properly loaded {} cache entries.",
+            hashmap_loaded_entries.values().map(|e| e.len()).sum::<usize>()
+        ));
 
         return Some(hashmap_loaded_entries);
     }

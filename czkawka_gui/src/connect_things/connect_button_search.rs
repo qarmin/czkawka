@@ -414,6 +414,7 @@ pub fn connect_button_search(
                         mf.set_recursive_search(recursive_search);
                         mf.set_music_similarity(music_similarity);
                         mf.set_approximate_comparison(approximate_comparison);
+                        mf.set_save_also_as_json(save_also_as_json);
                         mf.find_same_music(Some(&stop_receiver), Some(&futures_sender_same_music));
                         let _ = glib_stop_sender.send(Message::SameMusic(mf));
                     });
