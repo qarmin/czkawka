@@ -24,6 +24,9 @@ core_included_directory_zero_valid_directories = Included Directory ERROR: Not f
 core_excluded_directory_pointless_slash = Directories: Excluding / is pointless, because it means that no files will be scanned
 core_directory_overlap = Directories: All directories to search overlaps with excluded directories
 
+core_ffmpeg_not_found = Cannot find proper installation of FFmpeg
+core_ffmpeg_missing_in_snap = Similar Videos don't work currently with snap, if you want help look at - { $url }
+
 # Window titles
 window_settings_title = Options
 window_main_title = Czkawka (Hiccup)

@@ -363,7 +363,7 @@ impl SameMusic {
 
                 let tag = match Tag::new().read_from_path(&path) {
                     Ok(t) => t,
-                    Err(_inspected) => return Some(None), // Data not in utf-8, etc., TODO this should be probably added to warnings, errors
+                    Err(_inspected) => return Some(Some(music_entry)), // Data not in utf-8, etc., TODO this should be probably added to warnings, errors
                 };
 
                 music_entry.title = match tag.title() {

@@ -482,21 +482,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 }
 
 fn connect_event_mouse(gui_data: &GuiData) {
-    for tree_view in [
-        gui_data.main_notebook.tree_view_duplicate_finder.clone(),
-        gui_data.main_notebook.tree_view_empty_folder_finder.clone(),
-        gui_data.main_notebook.tree_view_empty_files_finder.clone(),
-        gui_data.main_notebook.tree_view_temporary_files_finder.clone(),
-        gui_data.main_notebook.tree_view_big_files_finder.clone(),
-        gui_data.main_notebook.tree_view_similar_images_finder.clone(),
-        gui_data.main_notebook.tree_view_similar_videos_finder.clone(),
-        gui_data.main_notebook.tree_view_same_music_finder.clone(),
-        gui_data.main_notebook.tree_view_invalid_symlinks.clone(),
-        gui_data.main_notebook.tree_view_broken_files.clone(),
-    ] {
+    for tree_view in gui_data.main_notebook.get_main_tree_views() {
         tree_view.connect_button_press_event(opening_double_click_function);
         tree_view.connect_button_release_event(opening_middle_mouse_function);
     }
+
     // Duplicate
     {
         let text_view_errors = gui_data.text_view_errors.clone();

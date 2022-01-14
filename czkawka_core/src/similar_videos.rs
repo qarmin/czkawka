@@ -197,7 +197,11 @@ impl SimilarVideos {
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
-            self.text_messages.errors.push("Cannot find proper installation of FFmpeg.".to_string());
+            self.text_messages.errors.push(fl!("core_ffmpeg_not_found"));
+            self.text_messages.errors.push(fl!(
+                "core_ffmpeg_missing_in_snap",
+                generate_translation_hashmap(vec![("url", "https://github.com/snapcrafters/ffmpeg/issues/73".to_string())])
+            ));
         } else {
             self.directories.optimize_directories(true, &mut self.text_messages);
             self.use_reference_folders = !self.directories.reference_directories.is_empty();

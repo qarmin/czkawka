@@ -425,10 +425,6 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     //     messages += "\n";
     // }
 
-    if !text_messages.messages.is_empty() || !text_messages.warnings.is_empty() || !text_messages.errors.is_empty() {
-        messages += "\n";
-    }
-
     text_view.buffer().unwrap().set_text(messages.as_str());
 }
 

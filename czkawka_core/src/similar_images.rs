@@ -77,7 +77,7 @@ pub struct FileEntry {
     pub similarity: Similarity,
 }
 
-// This is used by CLI tool when we cann
+/// Used by CLI tool when we cannot use directly values
 #[derive(Clone, Debug)]
 pub enum SimilarityPreset {
     VeryHigh,
