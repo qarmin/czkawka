@@ -7,6 +7,7 @@ use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
+use crate::common::LOOP_DURATION;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
@@ -308,7 +309,6 @@ where
         folders_to_check.extend(self.root_dirs);
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_entry_counter = Arc::new(AtomicUsize::new(0));

@@ -605,6 +605,7 @@ pub fn load_configuration(
     let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
     let excluded_directories = get_string_from_list_store(&upper_notebook.tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
 
+    // Loading data from hashmaps
     let (hashmap_ls, _hashmap_sl) = create_hash_map();
 
     let included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().clone(), included_directories);
@@ -743,6 +744,7 @@ fn save_proper_value_to_combo_box(combo_box: &ComboBoxText, what_to_save: u32) {
     }
 }
 
+/// Reset configuration to defaults
 pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     // TODO Maybe add popup dialog to confirm resetting
     let text_view_errors = text_view_errors.clone();

@@ -115,7 +115,7 @@ fn main() {
             &gui_data.scrolled_window_errors,
         );
 
-        // Needs to run when entire GUI is initialized and
+        // Needs to run when entire GUI is initialized
         connect_change_language(&gui_data);
 
         connect_button_delete(&gui_data);

@@ -10,6 +10,8 @@ use std::time::SystemTime;
 
 /// Class for common functions used across other class/functions
 
+pub const LOOP_DURATION: u32 = 200; //ms
+
 pub struct Common();
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
@@ -72,7 +74,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     let file_handler = match OpenOptions::new().read(true).open(&path) {
         Ok(t) => t,
         Err(_e) => {
-            // println!("Failed to open image {:?}, reason {}", path, e);
             return None;
         }
     };
@@ -81,7 +82,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     let raw = match rawloader::decode(&mut reader) {
         Ok(raw) => raw,
         Err(_e) => {
-            // println!("Failed to decode raw image {:?}, reason {}", path, e);
             return None;
         }
     };
@@ -93,7 +93,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     let mut pipeline = match Pipeline::new_from_source(source, width, height, true) {
         Ok(pipeline) => pipeline,
         Err(_e) => {
-            // println!("Failed to create pipeline {:?}, reason {}", path, e);
             return None;
         }
     };
@@ -102,7 +101,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     let image = match pipeline.output_8bit(None) {
         Ok(image) => image,
         Err(_e) => {
-            // println!("Failed to process image {:?}, reason {}", path, e);
             return None;
         }
     };
@@ -110,7 +108,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     let image = match ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) {
         Some(image) => image,
         None => {
-            // println!("Failed to get image {:?}", path);
             return None;
         }
     };

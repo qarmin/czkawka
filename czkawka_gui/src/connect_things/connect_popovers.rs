@@ -390,7 +390,13 @@ fn popover_custom_select_unselect(
 
                     let model = get_list_store(&tree_view);
 
-                    let iter = model.iter_first().unwrap(); // Never should be available button where there is no available records
+                    let iter = match model.iter_first() {
+                        Some(t) => t,
+                        None => {
+                            confirmation_dialog_select_unselect.close();
+                            return;
+                        }
+                    };
 
                     let mut number_of_all_things = 0;
                     let mut number_of_already_selected_things = 0;

@@ -13,7 +13,7 @@ use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{open_cache_folder, Common};
+use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -67,7 +67,6 @@ impl Info {
     }
 }
 
-/// Struct with required information's to work
 pub struct BrokenFiles {
     text_messages: Messages,
     information: Info,
@@ -174,7 +173,6 @@ impl BrokenFiles {
         }
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
@@ -382,7 +380,6 @@ impl BrokenFiles {
         let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
-        const LOOP_DURATION: u32 = 200; //in ms
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 

@@ -50,7 +50,7 @@ pub fn connect_button_search(
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let check_button_image_ignore_same_size = gui_data.main_notebook.check_button_image_ignore_same_size.clone();
     let check_button_video_ignore_same_size = gui_data.main_notebook.check_button_video_ignore_same_size.clone();
-    let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
+    let buttons_names = gui_data.bottom_buttons.buttons_names;
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
     let check_button_music_album_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_album_artist.clone();

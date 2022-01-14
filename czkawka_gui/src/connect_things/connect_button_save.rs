@@ -9,6 +9,7 @@ use czkawka_core::common_traits::SaveResults;
 use czkawka_core::fl;
 
 use crate::gui_structs::gui_data::GuiData;
+use crate::help_functions::BottomButtonsEnum;
 use crate::localizer::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
@@ -96,7 +97,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
 fn post_save_things(
     file_name: &str,
     type_of_tab: &NotebookMainEnum,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
+    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     entry_info: &Entry,
     buttons_save: &Button,
 ) {
@@ -104,6 +105,6 @@ fn post_save_things(
     // Set state
     {
         buttons_save.hide();
-        *shared_buttons.borrow_mut().get_mut(type_of_tab).unwrap().get_mut("save").unwrap() = false;
+        *shared_buttons.borrow_mut().get_mut(type_of_tab).unwrap().get_mut(&BottomButtonsEnum::Save).unwrap() = false;
     }
 }

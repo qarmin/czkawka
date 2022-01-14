@@ -48,7 +48,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
-    let buttons_names = gui_data.bottom_buttons.buttons_names.clone();
+    let buttons_names = gui_data.bottom_buttons.buttons_names;
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
@@ -500,7 +500,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::Duplicate,
-                            &["save", "delete", "select", "symlink", "hardlink", "move"],
+                            &[
+                                BottomButtonsEnum::Save,
+                                BottomButtonsEnum::Delete,
+                                BottomButtonsEnum::Select,
+                                BottomButtonsEnum::Symlink,
+                                BottomButtonsEnum::Hardlink,
+                                BottomButtonsEnum::Move,
+                            ],
                             duplicates_number > 0,
                         );
 
@@ -565,7 +572,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::EmptyDirectories,
-                            &["save", "delete", "select", "move"],
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
                             empty_folder_number > 0,
                         );
 
@@ -631,7 +638,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::EmptyFiles,
-                            &["save", "delete", "select", "move"],
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
                             empty_files_number > 0,
                         );
 
@@ -699,7 +706,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::BigFiles,
-                            &["save", "delete", "select", "move"],
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
                             biggest_files_number > 0,
                         );
 
@@ -764,7 +771,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::Temporary,
-                            &["save", "delete", "select", "move"],
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
                             temporary_files_number > 0,
                         );
 
@@ -940,7 +947,15 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::SimilarImages,
-                            &["save", "delete", "select", "symlink", "hardlink", "move", "compare"],
+                            &[
+                                BottomButtonsEnum::Save,
+                                BottomButtonsEnum::Delete,
+                                BottomButtonsEnum::Select,
+                                BottomButtonsEnum::Symlink,
+                                BottomButtonsEnum::Hardlink,
+                                BottomButtonsEnum::Move,
+                                BottomButtonsEnum::Compare,
+                            ],
                             found_any_duplicates,
                         );
 
@@ -1102,7 +1117,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::SimilarVideos,
-                            &["save", "delete", "select", "symlink", "hardlink", "move"],
+                            &[
+                                BottomButtonsEnum::Save,
+                                BottomButtonsEnum::Delete,
+                                BottomButtonsEnum::Select,
+                                BottomButtonsEnum::Symlink,
+                                BottomButtonsEnum::Hardlink,
+                                BottomButtonsEnum::Move,
+                            ],
                             found_any_duplicates,
                         );
 
@@ -1317,7 +1339,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::SameMusic,
-                            &["save", "delete", "select", "symlink", "hardlink", "move"],
+                            &[
+                                BottomButtonsEnum::Save,
+                                BottomButtonsEnum::Delete,
+                                BottomButtonsEnum::Select,
+                                BottomButtonsEnum::Symlink,
+                                BottomButtonsEnum::Hardlink,
+                                BottomButtonsEnum::Move,
+                            ],
                             same_music_number > 0,
                         );
 
@@ -1387,7 +1416,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         *shared_same_invalid_symlinks.borrow_mut() = ifs;
 
-                        set_specific_buttons_as_active(&shared_buttons, &NotebookMainEnum::Symlinks, &["save", "delete", "select", "move"], invalid_symlinks > 0);
+                        set_specific_buttons_as_active(
+                            &shared_buttons,
+                            &NotebookMainEnum::Symlinks,
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+                            invalid_symlinks > 0,
+                        );
 
                         set_buttons(
                             &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(),
@@ -1452,7 +1486,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         set_specific_buttons_as_active(
                             &shared_buttons,
                             &NotebookMainEnum::BrokenFiles,
-                            &["save", "delete", "select", "move"],
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
                             broken_files_number > 0,
                         );
 
@@ -1471,12 +1505,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 }
 
 fn set_specific_buttons_as_active(
-    buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<String, bool>>>>,
+    buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     notebook_enum: &NotebookMainEnum,
-    buttons: &[&str],
+    buttons: &[BottomButtonsEnum],
     value_to_set: bool,
 ) {
     for i in buttons {
-        *buttons_array.borrow_mut().get_mut(notebook_enum).unwrap().get_mut(*i).unwrap() = value_to_set;
+        *buttons_array.borrow_mut().get_mut(notebook_enum).unwrap().get_mut(i).unwrap() = value_to_set;
     }
 }

@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 use gtk::{Bin, Widget};
 
-use crate::help_functions::get_custom_label_from_button_with_image;
+use crate::help_functions::{get_custom_label_from_button_with_image, BottomButtonsEnum};
 use czkawka_core::fl;
 
 #[derive(Clone)]
@@ -16,7 +16,7 @@ pub struct GuiBottomButtons {
     pub buttons_compare: gtk::Button,
     pub buttons_show_errors: gtk::Button,
     pub buttons_show_upper_notebook: gtk::Button,
-    pub buttons_names: [String; 8],
+    pub buttons_names: [BottomButtonsEnum; 8],
     pub buttons_array: [Widget; 8],
 }
 
@@ -35,14 +35,14 @@ impl GuiBottomButtons {
         let buttons_show_upper_notebook: gtk::Button = builder.object("buttons_show_upper_notebook").unwrap();
 
         let buttons_names = [
-            "search".to_string(),
-            "select".to_string(),
-            "delete".to_string(),
-            "save".to_string(),
-            "symlink".to_string(),
-            "hardlink".to_string(),
-            "move".to_string(),
-            "compare".to_string(),
+            BottomButtonsEnum::Search,
+            BottomButtonsEnum::Select,
+            BottomButtonsEnum::Delete,
+            BottomButtonsEnum::Save,
+            BottomButtonsEnum::Symlink,
+            BottomButtonsEnum::Hardlink,
+            BottomButtonsEnum::Move,
+            BottomButtonsEnum::Compare,
         ];
         let buttons_array = [
             buttons_search.clone().upcast::<Widget>(),
