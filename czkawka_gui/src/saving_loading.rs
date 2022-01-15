@@ -10,6 +10,7 @@ use gtk::{ComboBoxText, ScrolledWindow, TextView};
 
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use czkawka_core::fl;
+use czkawka_core::similar_images::SIMILAR_VALUES;
 
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
@@ -37,6 +38,13 @@ const DEFAULT_PREHASH_MINIMAL_CACHE_SIZE: &str = "0";
 const DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE: bool = false;
 const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
+
+const DEFAULT_NUMBER_OF_BIGGEST_FILES: &str = "50";
+const DEFAULT_SIMILAR_IMAGES_SIMILARITY: i32 = 0;
+const DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE: bool = false;
+const DEFAULT_SIMILAR_IMAGES_FAST_COMPARE: bool = false;
+const DEFAULT_SIMILAR_VIDEOS_SIMILARITY: i32 = 15;
+const DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE: bool = false;
 
 pub const DEFAULT_MINIMAL_FILE_SIZE: &str = "16384";
 pub const DEFAULT_MAXIMAL_FILE_SIZE: &str = "999999999999";
@@ -76,6 +84,18 @@ impl LoadSaveStruct {
         }
 
         default_value
+    }
+    pub fn get_integer_string(&self, key: String, default_value: String) -> String {
+        if default_value.parse::<i64>().is_err() {
+            println!("Default value {} can't be convert to integer value", default_value);
+            panic!();
+        }
+        assert!(default_value.parse::<i64>().is_ok());
+        let mut returned_value = self.get_string(key, default_value.clone());
+        if returned_value.parse::<i64>().is_err() {
+            returned_value = default_value;
+        }
+        returned_value
     }
     pub fn get_string(&self, key: String, default_value: String) -> String {
         if self.loaded_items.contains_key(&key) {
@@ -396,6 +416,13 @@ enum LoadText {
     ComboBoxImageResizeAlgorithm,
     ComboBoxImageHashType,
     ComboBoxImageHashSize,
+    NumberOfBiggestFiles,
+    SimilarImagesSimilarity,
+    SimilarImagesIgnoreSameSize,
+    SimilarImagesFastCompare,
+    SimilarVideosSimilarity,
+    SimilarVideosIgnoreSameSize,
+    MusicApproximateComparison,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -429,6 +456,13 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::ComboBoxImageResizeAlgorithm, "combo_box_image_resize_algorithm"),
         (LoadText::ComboBoxImageHashType, "combo_box_image_hash_type"),
         (LoadText::ComboBoxImageHashSize, "combo_box_image_hash_size"),
+        (LoadText::NumberOfBiggestFiles, "number_of_biggest_files"),
+        (LoadText::SimilarImagesSimilarity, "similar_images_similarity"),
+        (LoadText::SimilarImagesIgnoreSameSize, "similar_images_ignore_same_size"),
+        (LoadText::SimilarImagesFastCompare, "similar_images_fast_compare"),
+        (LoadText::SimilarVideosSimilarity, "similar_videos_similarity"),
+        (LoadText::SimilarVideosIgnoreSameSize, "similar_videos_ignore_same_size"),
+        (LoadText::MusicApproximateComparison, "music_approximate_comparison"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -579,6 +613,36 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
     );
 
+    // Other2
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().to_string(),
+        main_notebook.entry_big_files_number.text(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().to_string(),
+        main_notebook.scale_similarity_similar_images.value(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::SimilarImagesIgnoreSameSize).unwrap().to_string(),
+        main_notebook.check_button_image_ignore_same_size.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::SimilarImagesFastCompare).unwrap().to_string(),
+        main_notebook.check_button_image_fast_compare.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().to_string(),
+        main_notebook.scale_similarity_similar_videos.value(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().to_string(),
+        main_notebook.check_button_video_ignore_same_size.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::MusicApproximateComparison).unwrap().to_string(),
+        main_notebook.check_button_music_approximate_comparison.is_active(),
+    );
+
     saving_struct.save_to_file(&text_view_errors);
 }
 
@@ -615,8 +679,8 @@ pub fn load_configuration(
         upper_notebook.entry_excluded_items.text().to_string(),
     );
     let allowed_extensions: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().clone(), "".to_string());
-    let minimal_file_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
-    let maximal_file_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
+    let minimal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
+    let maximal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
 
     let loading_at_start: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::LoadAtStart).unwrap().clone(), DEFAULT_LOAD_AT_START);
     let saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SaveAtExit).unwrap().clone(), DEFAULT_SAVE_ON_EXIT);
@@ -643,11 +707,11 @@ pub fn load_configuration(
     );
     let use_prehash_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UsePrehashCache).unwrap().clone(), DEFAULT_USE_PRECACHE);
 
-    let cache_prehash_minimal_size: String = loaded_entries.get_string(
+    let cache_prehash_minimal_size: String = loaded_entries.get_integer_string(
         hashmap_ls.get(&LoadText::MinimalPrehashCacheSize).unwrap().clone(),
         DEFAULT_PREHASH_MINIMAL_CACHE_SIZE.to_string(),
     );
-    let cache_minimal_size: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
+    let cache_minimal_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
     let short_language = loaded_entries.get_string(hashmap_ls.get(&LoadText::Language).unwrap().clone(), short_language);
 
     let combo_box_duplicate_hash_type = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().clone(), 0);
@@ -655,6 +719,22 @@ pub fn load_configuration(
     let combo_box_image_hash_size = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 0);
     let combo_box_image_hash_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
     let combo_box_image_resize_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
+
+    let number_of_biggest_files = loaded_entries.get_integer_string(
+        hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().clone(),
+        DEFAULT_NUMBER_OF_BIGGEST_FILES.to_string(),
+    );
+    let similar_images_similarity = loaded_entries.get_integer(hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().clone(), DEFAULT_SIMILAR_IMAGES_SIMILARITY);
+    let similar_images_ignore_same_size = loaded_entries.get_bool(
+        hashmap_ls.get(&LoadText::SimilarImagesIgnoreSameSize).unwrap().clone(),
+        DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE,
+    );
+    let similar_images_fast_compare = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SimilarImagesFastCompare).unwrap().clone(), DEFAULT_SIMILAR_IMAGES_FAST_COMPARE);
+    let similar_videos_similarity = loaded_entries.get_integer(hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
+    let similar_videos_ignore_same_size = loaded_entries.get_bool(
+        hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().clone(),
+        DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE,
+    );
 
     // Setting data
     if manual_execution || loading_at_start {
@@ -731,6 +811,19 @@ pub fn load_configuration(
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_algorithm, combo_box_image_hash_algorithm);
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_size, combo_box_image_hash_size);
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_resize_algorithm, combo_box_image_resize_algorithm);
+
+        main_notebook.entry_big_files_number.set_text(&number_of_biggest_files);
+        main_notebook.check_button_image_ignore_same_size.set_active(similar_images_ignore_same_size);
+        main_notebook.check_button_image_fast_compare.set_active(similar_images_fast_compare);
+        main_notebook.check_button_video_ignore_same_size.set_active(similar_videos_ignore_same_size);
+        main_notebook.scale_similarity_similar_videos.set_value(similar_videos_similarity as f64);
+
+        // Set size of similarity scale gtk node, must be set BEFORE setting value of this
+        let index = main_notebook.combo_box_image_hash_size.active().unwrap() as usize;
+
+        main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[index][5] as f64);
+
+        main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
     } else {
         settings.check_button_settings_load_at_start.set_active(false);
     }
@@ -792,6 +885,8 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
     {
         upper_notebook.entry_excluded_items.set_text(DEFAULT_EXCLUDED_ITEMS);
         upper_notebook.entry_allowed_extensions.set_text("");
+        upper_notebook.entry_general_minimal_size.set_text(DEFAULT_MINIMAL_FILE_SIZE);
+        upper_notebook.entry_general_maximal_size.set_text(DEFAULT_MAXIMAL_FILE_SIZE);
     }
 
     // Set default settings
@@ -826,6 +921,15 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_image_hash_algorithm.set_active(Some(0));
         main_notebook.combo_box_image_resize_algorithm.set_active(Some(0));
         main_notebook.combo_box_image_hash_size.set_active(Some(0));
+
+        main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
+
+        main_notebook.entry_big_files_number.set_text(DEFAULT_NUMBER_OF_BIGGEST_FILES);
+        main_notebook.scale_similarity_similar_images.set_value(DEFAULT_SIMILAR_IMAGES_SIMILARITY as f64);
+        main_notebook.check_button_image_ignore_same_size.set_active(DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE);
+        main_notebook.check_button_image_fast_compare.set_active(DEFAULT_SIMILAR_IMAGES_FAST_COMPARE);
+        main_notebook.check_button_video_ignore_same_size.set_active(DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
+        main_notebook.scale_similarity_similar_videos.set_value(DEFAULT_SIMILAR_VIDEOS_SIMILARITY as f64);
     }
     if manual_clearing {
         add_text_to_text_view(&text_view_errors, &fl!("saving_loading_reset_configuration"));
