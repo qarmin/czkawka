@@ -6,7 +6,7 @@
 - Written in memory safe Rust
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
 - Free, Open Source without ads
-- Multiplatform - works on Linux, Windows and macOS
+- Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
 - Cache support - second and further scans should be a lot faster than the first one
 - CLI frontend - for easy automation
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
@@ -19,7 +19,7 @@
   - Empty Files - Looks for empty files across the drive
   - Temporary Files - Finds temporary files
   - Similar Images - Finds images which are not exactly the same (different resolution, watermarks)
-  - Similar Videos - Looks for similar visually videos
+  - Similar Videos - Looks for visually similar videos
   - Same Music - Searches for music with the same artist, album etc.
   - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
   - Broken Files - Finds files with an invalid extension or that are corrupted
@@ -118,7 +118,7 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 | In active development  |     Yes     |     No     |        Yes        |     Yes     |
 
 ## Other apps
-There are many similar applications to Czkawka on the Internet, which do some things better and some things worse.  
+There are many similar applications to Czkawka on the Internet, which do some things better and some things worse:  
 ### GUI
 - [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize, great photo compare tool
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
