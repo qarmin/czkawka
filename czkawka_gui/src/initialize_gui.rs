@@ -311,7 +311,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_same_music_finder.clone();
 
-                let col_types: [glib::types::Type; 15] = [
+                let col_types: [glib::types::Type; 17] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Size
@@ -320,9 +320,11 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Path
                     glib::types::Type::STRING, // Title
                     glib::types::Type::STRING, // Artist
-                    glib::types::Type::STRING, // AlbumTitle
-                    glib::types::Type::STRING, // AlbumArtist
                     glib::types::Type::STRING, // Year
+                    glib::types::Type::STRING, // Bitrate
+                    glib::types::Type::U64,    // BitrateAsNumber
+                    glib::types::Type::STRING, // Length
+                    glib::types::Type::STRING, // Genre
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                     glib::types::Type::STRING, // Color

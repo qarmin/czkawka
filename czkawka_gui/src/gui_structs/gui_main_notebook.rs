@@ -104,9 +104,10 @@ pub struct GuiMainNotebook {
     // Music
     pub check_button_music_title: gtk::CheckButton,
     pub check_button_music_artist: gtk::CheckButton,
-    pub check_button_music_album_title: gtk::CheckButton,
-    pub check_button_music_album_artist: gtk::CheckButton,
     pub check_button_music_year: gtk::CheckButton,
+    pub check_button_music_bitrate: gtk::CheckButton,
+    pub check_button_music_genre: gtk::CheckButton,
+    pub check_button_music_length: gtk::CheckButton,
     pub check_button_music_approximate_comparison: gtk::CheckButton,
 }
 
@@ -199,9 +200,10 @@ impl GuiMainNotebook {
         //// Check Buttons
         let check_button_music_title: gtk::CheckButton = builder.object("check_button_music_title").unwrap();
         let check_button_music_artist: gtk::CheckButton = builder.object("check_button_music_artist").unwrap();
-        let check_button_music_album_title: gtk::CheckButton = builder.object("check_button_music_album_title").unwrap();
-        let check_button_music_album_artist: gtk::CheckButton = builder.object("check_button_music_album_artist").unwrap();
         let check_button_music_year: gtk::CheckButton = builder.object("check_button_music_year").unwrap();
+        let check_button_music_bitrate: gtk::CheckButton = builder.object("check_button_music_bitrate").unwrap();
+        let check_button_music_genre: gtk::CheckButton = builder.object("check_button_music_genre").unwrap();
+        let check_button_music_length: gtk::CheckButton = builder.object("check_button_music_length").unwrap();
         let check_button_music_approximate_comparison: gtk::CheckButton = builder.object("check_button_music_approximate_comparison").unwrap();
 
         //// Radio Buttons
@@ -270,9 +272,10 @@ impl GuiMainNotebook {
             entry_big_files_number,
             check_button_music_title,
             check_button_music_artist,
-            check_button_music_album_title,
-            check_button_music_album_artist,
             check_button_music_year,
+            check_button_music_bitrate,
+            check_button_music_genre,
+            check_button_music_length,
             check_button_music_approximate_comparison,
             scale_similarity_similar_images,
             scale_similarity_similar_videos,
@@ -319,9 +322,10 @@ impl GuiMainNotebook {
     pub fn update_language(&self) {
         self.check_button_music_title.set_label(&flg!("music_title_checkbox"));
         self.check_button_music_artist.set_label(&flg!("music_artist_checkbox"));
-        self.check_button_music_album_title.set_label(&flg!("music_album_title_checkbox"));
-        self.check_button_music_album_artist.set_label(&flg!("music_album_artist_checkbox"));
         self.check_button_music_year.set_label(&flg!("music_year_checkbox"));
+        self.check_button_music_bitrate.set_label(&flg!("music_bitrate_checkbox"));
+        self.check_button_music_genre.set_label(&flg!("music_genre_checkbox"));
+        self.check_button_music_length.set_label(&flg!("music_length_checkbox"));
         self.check_button_music_approximate_comparison.set_label(&flg!("music_comparison_checkbox"));
 
         self.check_button_music_approximate_comparison
@@ -460,12 +464,13 @@ impl GuiMainNotebook {
             vec![
                 flg!("main_tree_view_column_size"),
                 flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
                 flg!("main_tree_view_column_title"),
                 flg!("main_tree_view_column_artist"),
                 flg!("main_tree_view_column_year"),
-                flg!("main_tree_view_column_album_title"),
-                flg!("main_tree_view_column_album_artist"),
+                flg!("main_tree_view_column_bitrate"),
+                flg!("main_tree_view_column_length"),
+                flg!("main_tree_view_column_genre"),
+                flg!("main_tree_view_column_path"),
                 flg!("main_tree_view_column_modification"),
             ], // Music Dupliactes
             vec![

@@ -31,7 +31,7 @@ pub struct GuiPopovers {
 
 impl GuiPopovers {
     pub fn create_from_builder() -> Self {
-        let glade_src = include_str!("../../ui/popover_select.glade").to_string();
+        let glade_src = include_str!("../../ui/popover_select.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let buttons_popover_select_all: gtk::Button = builder.object("buttons_popover_select_all").unwrap();
@@ -54,7 +54,7 @@ impl GuiPopovers {
         let popover_select: gtk::Popover = builder.object("popover_select").unwrap();
 
         // Popover right click(not implemented for now)
-        let glade_src = include_str!("../../ui/popover_right_click.glade").to_string();
+        let glade_src = include_str!("../../ui/popover_right_click.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let buttons_popover_right_click_open_file: gtk::Button = builder.object("buttons_popover_right_click_open_file").unwrap();

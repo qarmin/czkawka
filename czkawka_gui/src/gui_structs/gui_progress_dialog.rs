@@ -24,7 +24,7 @@ pub struct GuiProgressDialog {
 
 impl GuiProgressDialog {
     pub fn create_from_builder(window_main: &Window) -> Self {
-        let glade_src = include_str!("../../ui/progress.glade").to_string();
+        let glade_src = include_str!("../../ui/progress.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_progress: gtk::Dialog = builder.object("window_progress").unwrap();

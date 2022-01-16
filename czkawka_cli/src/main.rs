@@ -1,3 +1,5 @@
+#![allow(clippy::needless_late_init)]
+
 use std::process;
 
 use structopt::StructOpt;

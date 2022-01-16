@@ -1,5 +1,6 @@
 #![allow(clippy::collapsible_else_if)]
 #![allow(clippy::type_complexity)]
+#![allow(clippy::needless_late_init)]
 
 #[macro_use]
 extern crate bitflags;
