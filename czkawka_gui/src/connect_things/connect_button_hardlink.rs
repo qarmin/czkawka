@@ -193,9 +193,7 @@ pub fn hardlink_symlink(
         }
     }
     if hardlinking {
-        dbg!(&vec_symhardlink_data);
         for symhardlink_data in vec_symhardlink_data {
-            dbg!(&symhardlink_data);
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", fl!("hardlink_failed"), file_to_hardlink, e).as_str());
