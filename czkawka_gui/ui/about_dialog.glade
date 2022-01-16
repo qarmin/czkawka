@@ -43,7 +43,7 @@ Author: Rafał Mikrut
 This program is free to use and will always be.
 </property>
     <property name="authors">Rafał Mikrut(qarmin)</property>
-    <property name="logo"/>
+    <property name="logo-icon-name">help-about</property>
     <property name="license-type">mit-x11</property>
     <child internal-child="vbox">
       <object class="GtkBox">

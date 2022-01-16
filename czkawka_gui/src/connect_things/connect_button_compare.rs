@@ -35,7 +35,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
-    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
 
@@ -55,7 +55,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         }
 
         // Check selected items
-        let (current_group, tree_iter) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_color.unwrap());
+        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_color.unwrap());
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -63,8 +63,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         populate_groups_at_start(
             nb_object,
             &model,
-            shared_current_iter.clone(),
-            tree_iter,
+            shared_current_path.clone(),
+            tree_path,
             &image_compare_left,
             &image_compare_right,
             current_group,
@@ -83,7 +83,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     });
 
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
-    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
@@ -93,7 +93,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     window_compare.connect_delete_event(move |window_compare, _| {
         window_compare.hide();
         *shared_image_cache.borrow_mut() = Vec::new();
-        *shared_current_iter.borrow_mut() = None;
+        *shared_current_path.borrow_mut() = None;
         *shared_current_of_groups.borrow_mut() = 0;
         *shared_numbers_of_groups.borrow_mut() = 0;
         *shared_using_for_preview.borrow_mut() = (None, None);
@@ -114,7 +114,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
-    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
 
@@ -132,12 +132,12 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_iter = move_iter(&model, shared_current_iter.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
+        let tree_iter = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
 
         populate_groups_at_start(
             nb_object,
             &model,
-            shared_current_iter.clone(),
+            shared_current_path.clone(),
             tree_iter,
             &image_compare_left,
             &image_compare_right,
@@ -166,7 +166,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
     let shared_current_of_groups = gui_data.compare_images.shared_current_of_groups.clone();
     let shared_numbers_of_groups = gui_data.compare_images.shared_numbers_of_groups.clone();
-    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
 
@@ -184,13 +184,13 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_iter = move_iter(&model, shared_current_iter.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), true);
+        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), true);
 
         populate_groups_at_start(
             nb_object,
             &model,
-            shared_current_iter.clone(),
-            tree_iter,
+            shared_current_path.clone(),
+            tree_path,
             &image_compare_left,
             &image_compare_right,
             current_group,
@@ -209,7 +209,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     check_button_left_preview_text.connect_clicked(move |check_button_left_preview_text| {
         let nb_number = notebook_main.current_page().unwrap();
@@ -217,7 +217,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
         let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
 
-        let main_tree_path = model.path(shared_current_iter.borrow().as_ref().unwrap()).unwrap();
+        let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
         let this_tree_path = shared_using_for_preview.borrow().0.clone().unwrap();
         if main_tree_path == this_tree_path {
             return; // Selected header, so we don't need to select result in treeview
@@ -230,7 +230,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
     let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
-    let shared_current_iter = gui_data.compare_images.shared_current_iter.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     check_button_right_preview_text.connect_clicked(move |check_button_right_preview_text| {
@@ -239,7 +239,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
         let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
 
-        let main_tree_path = model.path(shared_current_iter.borrow().as_ref().unwrap()).unwrap();
+        let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
         let this_tree_path = shared_using_for_preview.borrow().1.clone().unwrap();
         if main_tree_path == this_tree_path {
             return; // Selected header, so we don't need to select result in treeview
@@ -255,8 +255,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 fn populate_groups_at_start(
     nb_object: &NotebookObject,
     model: &TreeModel,
-    shared_current_iter: Rc<RefCell<Option<TreeIter>>>,
-    tree_iter: TreeIter,
+    shared_current_path: Rc<RefCell<Option<TreePath>>>,
+    tree_path: TreePath,
     image_compare_left: &gtk::Image,
     image_compare_right: &gtk::Image,
     current_group: u32,
@@ -281,8 +281,8 @@ fn populate_groups_at_start(
         button_go_next_compare_group.set_sensitive(true);
     }
 
-    let all_vec = get_all_path(model, &tree_iter, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
-    *shared_current_iter.borrow_mut() = Some(tree_iter);
+    let all_vec = get_all_path(model, &tree_path, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
+    *shared_current_path.borrow_mut() = Some(tree_path);
 
     let cache_all_images = generate_cache_for_results(all_vec);
 
@@ -382,8 +382,8 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreePa
 }
 
 /// Takes info about current items in groups like path
-fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk::TreePath)> {
-    let used_iter = current_iter.clone();
+fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk::TreePath)> {
+    let used_iter = model.iter(current_path).unwrap();
 
     assert_eq!(model.value(&used_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
     let using_reference = !model.value(&used_iter, column_path).get::<String>().unwrap().is_empty();
@@ -428,37 +428,38 @@ fn get_all_path(model: &TreeModel, current_iter: &TreeIter, column_color: i32, c
 }
 
 /// Moves iterator to previous/next header
-fn move_iter(model: &gtk::TreeModel, tree_iter: &TreeIter, column_color: i32, go_next: bool) -> TreeIter {
-    assert_eq!(model.value(tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
+fn move_iter(model: &gtk::TreeModel, tree_path: &TreePath, column_color: i32, go_next: bool) -> TreePath {
+    let tree_iter = model.iter(tree_path).unwrap();
+    assert_eq!(model.value(&tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
 
     if go_next {
-        if !model.iter_next(tree_iter) {
+        if !model.iter_next(&tree_iter) {
             panic!("Found only header!");
         }
     } else {
-        if !model.iter_previous(tree_iter) {
+        if !model.iter_previous(&tree_iter) {
             panic!("Found only header!");
         }
     }
 
     loop {
         if go_next {
-            if !model.iter_next(tree_iter) {
+            if !model.iter_next(&tree_iter) {
                 break;
             }
         } else {
-            if !model.iter_previous(tree_iter) {
+            if !model.iter_previous(&tree_iter) {
                 break;
             }
         }
 
-        let color = model.value(tree_iter, column_color).get::<String>().unwrap();
+        let color = model.value(&tree_iter, column_color).get::<String>().unwrap();
 
         if color == HEADER_ROW_COLOR {
             break;
         }
     }
-    tree_iter.clone()
+    model.path(&tree_iter).unwrap()
 }
 
 /// Populate bottom Scrolled View with small thumbnails
@@ -569,7 +570,7 @@ fn update_bottom_buttons(
     }
 }
 
-fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeSelection, column_color: i32) -> (u32, TreeIter) {
+fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeSelection, column_color: i32) -> (u32, TreePath) {
     let mut current_group = 1;
     let mut possible_group = 1;
     let mut header_clone: TreeIter;
@@ -601,5 +602,5 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
         }
     }
 
-    (current_group, header_clone)
+    (current_group, model.path(&header_clone).unwrap())
 }

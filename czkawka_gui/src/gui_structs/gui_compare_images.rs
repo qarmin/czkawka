@@ -1,6 +1,6 @@
 use czkawka_core::fl;
 use gtk::prelude::*;
-use gtk::{Builder, TreeIter};
+use gtk::{Builder, TreePath};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -23,7 +23,7 @@ pub struct GuiCompareImages {
 
     pub shared_numbers_of_groups: Rc<RefCell<u32>>,
     pub shared_current_of_groups: Rc<RefCell<u32>>,
-    pub shared_current_iter: Rc<RefCell<Option<TreeIter>>>,
+    pub shared_current_path: Rc<RefCell<Option<TreePath>>>,
     pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
     pub shared_using_for_preview: Rc<RefCell<(Option<gtk::TreePath>, Option<gtk::TreePath>)>>,
 }
@@ -53,7 +53,7 @@ impl GuiCompareImages {
 
         let shared_numbers_of_groups = Rc::new(RefCell::new(0));
         let shared_current_of_groups = Rc::new(RefCell::new(0));
-        let shared_current_iter = Rc::new(RefCell::new(None));
+        let shared_current_path = Rc::new(RefCell::new(None));
         let shared_image_cache = Rc::new(RefCell::new(Vec::new()));
         let shared_using_for_preview = Rc::new(RefCell::new((None, None)));
 
@@ -69,7 +69,7 @@ impl GuiCompareImages {
             scrolled_window_compare_choose_images,
             shared_numbers_of_groups,
             shared_current_of_groups,
-            shared_current_iter,
+            shared_current_path,
             shared_image_cache,
             shared_using_for_preview,
         }
