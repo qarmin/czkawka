@@ -822,6 +822,7 @@ pub fn load_configuration(
         let index = main_notebook.combo_box_image_hash_size.active().unwrap() as usize;
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[index][5] as f64);
+        main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[index][5] as f64);
 
         main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
     } else {
@@ -923,6 +924,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_image_hash_size.set_active(Some(0));
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
+        main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
 
         main_notebook.entry_big_files_number.set_text(DEFAULT_NUMBER_OF_BIGGEST_FILES);
         main_notebook.scale_similarity_similar_images.set_value(DEFAULT_SIMILAR_IMAGES_SIMILARITY as f64);

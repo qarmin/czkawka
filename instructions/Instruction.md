@@ -127,16 +127,13 @@ Duplicate Finder allows you to search for files and group them according to a pr
     - Checking the hash - After leaving files that have the same beginning in groups, you should now check the whole contents
       of the file to make sure they are identical.
 
-- **By hashmb** - Works the same way as via hash, only in the last phase it does not calculate the hash of the whole file but only of its first
-  megabyte. It is perfect for quick search of possible duplicate files.
-
 ### Empty Files
 Searching for empty files is easy and fast, because we only need to check the file metadata and its length.
 
 ### Empty Directories
 At the beginning, a special entry is created for each directory containing - the parent path (only if it is not a folder
 directly selected by the user) and a flag to indicate whether the given directory is empty (at the beginning each one is
-set to be potentionally empty).
+set to be potentially empty).
 
 First, user-defined folders are put into the pool of folders to be checked.
 
@@ -158,7 +155,7 @@ For each file inside the given path its size is read and then after sorting the 
 ### Temporary Files
 Searching for temporary files only involves comparing their extensions with a previously prepared list.
 
-Currently files with these extensions are considered temporary files -
+Currently, files with these extensions are considered temporary files -
 ```
 ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"]
 ```
@@ -166,7 +163,7 @@ Currently files with these extensions are considered temporary files -
 This only removes the most basic temporary files, for more I suggest to use BleachBit.
 
 ### Invalid Symlinks
-To find invalid symlinks we must first find symlnks.
+To find invalid symlinks we must first find symlinks.
 
 After searching for them you should check at which element it points to and if it does not exist, add this symlinks into the list of invalid symlinks, pointing to a non-existent path.
 
@@ -234,7 +231,7 @@ Tool works similar as Similar Images.
 
 To work require `FFmpeg`, so it will show an error when it is not found in OS.  
 Also only checks files which are longer than 30s.  
-For now it is limiting to check video files with almost equal length.
+For now, it is limiting to check video files with almost equal length.
 
 At first, it collects video files by extension (`mp4`, `mpv`, `avi` etc.).  
 Next each file is hashed. Implementation is hidden in library but looks that generate 10 images from this video and hash them with help of perceptual hash.
