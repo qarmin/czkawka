@@ -1,5 +1,4 @@
 use czkawka_core::common::get_dynamic_image_from_raw_image;
-use czkawka_core::fl;
 use czkawka_core::similar_images::RAW_IMAGE_EXTENSIONS;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
@@ -13,7 +12,7 @@ use crate::help_functions::{
     count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, get_max_file_name, resize_dynamic_image_dimension, NotebookObject, HEADER_ROW_COLOR,
     NOTEBOOKS_INFOS,
 };
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 
 const BIG_PREVIEW_SIZE: u32 = 600;
 const SMALL_PREVIEW_SIZE: u32 = 100;

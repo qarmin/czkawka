@@ -9,7 +9,7 @@ use czkawka_core::fl;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file

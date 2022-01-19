@@ -18,7 +18,7 @@ pub fn connect_change_language(gui_data: &GuiData) {
 }
 
 fn change_language(gui_data: &GuiData) {
-    let localizers = vec![("czkawka_gui", czkawka_core::localizer::localizer())];
+    let localizers = vec![("czkawka_gui", czkawka_core::localizer_core::localizer())];
 
     let lang_short = get_language_from_combo_box_text(gui_data.settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text;
 

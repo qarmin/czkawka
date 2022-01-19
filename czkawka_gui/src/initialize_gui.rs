@@ -23,7 +23,7 @@ use crate::help_combo_box::{
 };
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
 

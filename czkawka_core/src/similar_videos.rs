@@ -23,8 +23,8 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-use crate::fl;
-use crate::localizer::generate_translation_hashmap;
+use crate::fl2;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::similar_images::VIDEO_FILES_EXTENSIONS;
 
 pub const MAX_TOLERANCE: i32 = 20;
@@ -197,8 +197,8 @@ impl SimilarVideos {
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
-            self.text_messages.errors.push(fl!("core_ffmpeg_not_found"));
-            self.text_messages.errors.push(fl!(
+            self.text_messages.errors.push(fl2!("core_ffmpeg_not_found"));
+            self.text_messages.errors.push(fl2!(
                 "core_ffmpeg_missing_in_snap",
                 generate_translation_hashmap(vec![("url", "https://github.com/snapcrafters/ffmpeg/issues/73".to_string())])
             ));
@@ -285,7 +285,7 @@ impl SimilarVideos {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!(
+                            warnings.push(fl2!(
                                 "core_cannot_open_dir",
                                 generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                             ));
@@ -298,7 +298,7 @@ impl SimilarVideos {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!(
+                                warnings.push(fl2!(
                                     "core_cannot_read_entry_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -308,7 +308,7 @@ impl SimilarVideos {
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!(
+                                warnings.push(fl2!(
                                     "core_cannot_read_metadata_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -336,7 +336,7 @@ impl SimilarVideos {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!(
+                                    warnings.push(fl2!(
                                         "core_file_not_utf8_name",
                                         generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
                                     ));
@@ -363,7 +363,7 @@ impl SimilarVideos {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!(
+                                                warnings.push(fl2!(
                                                     "core_file_modified_before_epoch",
                                                     generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
                                                 ));
@@ -371,7 +371,7 @@ impl SimilarVideos {
                                             }
                                         },
                                         Err(e) => {
-                                            warnings.push(fl!(
+                                            warnings.push(fl2!(
                                                 "core_file_no_modification_date",
                                                 generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
                                             ));

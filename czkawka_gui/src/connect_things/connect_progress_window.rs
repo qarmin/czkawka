@@ -4,7 +4,7 @@ use gtk::prelude::*;
 use czkawka_core::{big_file, broken_files, common_dir_traversal, similar_images, similar_videos, temporary};
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use czkawka_core::fl;
 

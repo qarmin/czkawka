@@ -14,8 +14,8 @@ use rayon::prelude::*;
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
-use crate::fl;
-use crate::localizer::generate_translation_hashmap;
+use crate::fl2;
+use crate::localizer_core::generate_translation_hashmap;
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -372,7 +372,7 @@ where
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!(
+                            warnings.push(fl2!(
                                 "core_cannot_open_dir",
                                 generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                             ));
@@ -385,7 +385,7 @@ where
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!(
+                                warnings.push(fl2!(
                                     "core_cannot_read_entry_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -395,7 +395,7 @@ where
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!(
+                                warnings.push(fl2!(
                                     "core_cannot_read_metadata_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -436,7 +436,7 @@ where
                                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                                 Ok(d) => d.as_secs(),
                                                 Err(_inspected) => {
-                                                    warnings.push(fl!(
+                                                    warnings.push(fl2!(
                                                         "core_folder_modified_before_epoch",
                                                         generate_translation_hashmap(vec![("name", current_folder.display().to_string())])
                                                     ));
@@ -444,7 +444,7 @@ where
                                                 }
                                             },
                                             Err(e) => {
-                                                warnings.push(fl!(
+                                                warnings.push(fl2!(
                                                     "core_folder_no_modification_date",
                                                     generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])
                                                 ));
@@ -460,7 +460,7 @@ where
                                 let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                     Ok(t) => t,
                                     Err(_inspected) => {
-                                        warnings.push(fl!(
+                                        warnings.push(fl2!(
                                             "core_file_not_utf8_name",
                                             generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
                                         ));
@@ -487,7 +487,7 @@ where
                                             Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                                 Ok(d) => d.as_secs(),
                                                 Err(_inspected) => {
-                                                    warnings.push(fl!(
+                                                    warnings.push(fl2!(
                                                         "core_file_modified_before_epoch",
                                                         generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
                                                     ));
@@ -495,7 +495,7 @@ where
                                                 }
                                             },
                                             Err(e) => {
-                                                warnings.push(fl!(
+                                                warnings.push(fl2!(
                                                     "core_file_no_modification_date",
                                                     generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
                                                 ));
@@ -521,7 +521,7 @@ where
                                 let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                     Ok(t) => t,
                                     Err(_inspected) => {
-                                        warnings.push(fl!(
+                                        warnings.push(fl2!(
                                             "core_file_not_utf8_name",
                                             generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
                                         ));
@@ -581,7 +581,7 @@ where
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!(
+                                                warnings.push(fl2!(
                                                     "core_file_modified_before_epoch",
                                                     generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
                                                 ));
@@ -589,7 +589,7 @@ where
                                             }
                                         },
                                         Err(e) => {
-                                            warnings.push(fl!(
+                                            warnings.push(fl2!(
                                                 "core_file_no_modification_date",
                                                 generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
                                             ));

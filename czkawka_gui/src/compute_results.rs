@@ -18,7 +18,7 @@ use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::opening_selecting_records::*;
-use czkawka_core::localizer::generate_translation_hashmap;
+use czkawka_core::localizer_core::generate_translation_hashmap;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
