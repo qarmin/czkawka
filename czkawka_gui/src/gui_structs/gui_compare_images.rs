@@ -1,4 +1,4 @@
-use czkawka_core::fl;
+use crate::flg;
 use gtk::prelude::*;
 use gtk::{Builder, TreePath};
 use std::cell::RefCell;
@@ -34,7 +34,7 @@ impl GuiCompareImages {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_compare: gtk::Window = builder.object("window_compare").unwrap();
-        window_compare.set_title(&fl!("window_compare_images"));
+        window_compare.set_title(&flg!("window_compare_images"));
         window_compare.set_modal(true);
         window_compare.set_transient_for(Some(window_main));
 
@@ -75,6 +75,6 @@ impl GuiCompareImages {
         }
     }
     pub fn update_language(&self) {
-        self.window_compare.set_title(&fl!("window_compare_images"));
+        self.window_compare.set_title(&flg!("window_compare_images"));
     }
 }

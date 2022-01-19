@@ -11,7 +11,7 @@ use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 use image::imageops::FilterType;
 use image::GenericImageView;
 
-use czkawka_core::fl;
+use crate::flg;
 use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
@@ -23,7 +23,7 @@ use crate::help_combo_box::{
 };
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
 
@@ -697,7 +697,7 @@ fn show_preview(
                 } else if let Err(e) = fs::create_dir_all(cache_dir) {
                     add_text_to_text_view(
                         text_view_errors,
-                        fl!(
+                        flg!(
                             "preview_failed_to_create_cache_dir",
                             generate_translation_hashmap(vec![("name", cache_dir.display().to_string()), ("reason", e.to_string())])
                         )
@@ -733,7 +733,7 @@ fn show_preview(
                             Err(e) => {
                                 add_text_to_text_view(
                                     text_view_errors,
-                                    fl!(
+                                    flg!(
                                         "preview_temporary_file",
                                         generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
                                     )
@@ -748,7 +748,7 @@ fn show_preview(
                             None => {
                                 add_text_to_text_view(
                                     text_view_errors,
-                                    fl!(
+                                    flg!(
                                         "preview_temporary_file",
                                         generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", "None".to_string())])
                                     )
@@ -761,7 +761,7 @@ fn show_preview(
                     if img.width() == 0 || img.height() == 0 {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!("preview_0_size", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str(),
+                            flg!("preview_0_size", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str(),
                         );
                         break 'dir;
                     }
@@ -773,7 +773,7 @@ fn show_preview(
                     if let Err(e) = img.save(&file_dir) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!(
+                            flg!(
                                 "preview_temporary_image_save",
                                 generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])
                             )
@@ -793,7 +793,7 @@ fn show_preview(
                     if let Err(e) = fs::remove_file(&file_dir) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!(
+                            flg!(
                                 "preview_temporary_image_remove",
                                 generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])
                             )

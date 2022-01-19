@@ -1,0 +1,25 @@
+# Core
+core_similarity_very_high = 非常に高い
+core_similarity_high = 高い
+core_similarity_medium = ミディアム
+core_similarity_small = 小
+core_similarity_very_small = 非常に小さい
+core_similarity_minimal = 最小
+core_cannot_open_dir = ディレクトリを開くことができません { $dir }、理由 { $reason }
+core_cannot_read_entry_dir = Dir { $dir } でエントリを読み込めません、理由 { $reason }
+core_cannot_read_metadata_dir = Dir { $dir } でメタデータを読み込めません、理由 { $reason }
+core_file_not_utf8_name = ファイル { $name } に有効な UTF-8 名がありません (一部の文字は表示されない可能性があります)
+core_file_modified_before_epoch = ファイル { $name } は Unix Epoch より前に変更されているようです
+core_folder_modified_before_epoch = フォルダ { $name } は、Unix Epoch の前に変更されているようです
+core_file_no_modification_date = ファイル { $name } から変更日を取得できません、理由 { $reason }
+core_folder_no_modification_date = フォルダ { $name } から変更日を取得できません、理由 { $reason }
+core_missing_no_chosen_included_directory = 少なくとも 1 つのディレクトリを指定する必要があります。
+core_directory_wildcard_no_supported = ディレクトリ: パス内のワイルドカードはサポートされていません。 { $path } を無視してください
+core_directory_relative_path = ディレクトリ: 相対パスはサポートされていません。 { $path } を無視してください
+core_directory_must_exists = ディレクトリ: 指定されたフォルダパスは、 { $path } を無視して終了する必要があります
+core_directory_must_be_directory = ディレクトリ: 指定されたパスはディレクトリを指す必要があります。 { $path } を無視します
+core_included_directory_zero_valid_directories = 含まれるディレクトリエラー: 必須の正しいパスが1つも見つかりません
+core_excluded_directory_pointless_slash = ディレクトリ: ファイルがスキャンされないことを意味するため、除外/無意味です
+core_directory_overlap = ディレクトリ: 除外されたディレクトリとオーバーラップを検索するすべてのディレクトリ
+core_ffmpeg_not_found = 適切なFFmpegのインストールが見つかりません
+core_ffmpeg_missing_in_snap = ヘルプを見たい場合は、現在同様のビデオはスナップでは動作しません - { $url }

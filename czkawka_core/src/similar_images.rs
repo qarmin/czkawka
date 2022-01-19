@@ -24,8 +24,8 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-use crate::fl;
-use crate::localizer::generate_translation_hashmap;
+use crate::flc;
+use crate::localizer_core::generate_translation_hashmap;
 
 pub const RAW_IMAGE_EXTENSIONS: [&str; 24] = [
     ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
@@ -346,7 +346,7 @@ impl SimilarImages {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl!(
+                            warnings.push(flc!(
                                 "core_cannot_open_dir",
                                 generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                             ));
@@ -359,7 +359,7 @@ impl SimilarImages {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!(
+                                warnings.push(flc!(
                                     "core_cannot_read_entry_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -369,7 +369,7 @@ impl SimilarImages {
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl!(
+                                warnings.push(flc!(
                                     "core_cannot_read_metadata_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -397,7 +397,7 @@ impl SimilarImages {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl!(
+                                    warnings.push(flc!(
                                         "core_file_not_utf8_name",
                                         generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
                                     ));
@@ -425,7 +425,7 @@ impl SimilarImages {
                                         Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                             Ok(d) => d.as_secs(),
                                             Err(_inspected) => {
-                                                warnings.push(fl!(
+                                                warnings.push(flc!(
                                                     "core_file_modified_before_epoch",
                                                     generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
                                                 ));
@@ -433,7 +433,7 @@ impl SimilarImages {
                                             }
                                         },
                                         Err(e) => {
-                                            warnings.push(fl!(
+                                            warnings.push(flc!(
                                                 "core_file_no_modification_date",
                                                 generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
                                             ));
@@ -1149,17 +1149,17 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
             // #[cfg(debug_assertions)]
             // {
             //     if *h <= SIMILAR_VALUES[index_preset][0] {
-            //         format!("{} {}", fl!("core_similarity_very_high"), *h)
+            //         format!("{} {}", flc!("core_similarity_very_high"), *h)
             //     } else if *h <= SIMILAR_VALUES[index_preset][1] {
-            //         format!("{} {}", fl!("core_similarity_high"), *h)
+            //         format!("{} {}", flc!("core_similarity_high"), *h)
             //     } else if *h <= SIMILAR_VALUES[index_preset][2] {
-            //         format!("{} {}", fl!("core_similarity_medium"), *h)
+            //         format!("{} {}", flc!("core_similarity_medium"), *h)
             //     } else if *h <= SIMILAR_VALUES[index_preset][3] {
-            //         format!("{} {}", fl!("core_similarity_small"), *h)
+            //         format!("{} {}", flc!("core_similarity_small"), *h)
             //     } else if *h <= SIMILAR_VALUES[index_preset][4] {
-            //         format!("{} {}", fl!("core_similarity_very_small"), *h)
+            //         format!("{} {}", flc!("core_similarity_very_small"), *h)
             //     } else if *h <= SIMILAR_VALUES[index_preset][5] {
-            //         format!("{} {}", fl!("core_similarity_minimal"), *h)
+            //         format!("{} {}", flc!("core_similarity_minimal"), *h)
             //     } else {
             //         panic!();
             //     }
@@ -1167,17 +1167,17 @@ pub fn get_string_from_similarity(similarity: &Similarity, hash_size: u8) -> Str
             // #[cfg(not(debug_assertions))]
             {
                 if *h <= SIMILAR_VALUES[index_preset][0] {
-                    fl!("core_similarity_very_high")
+                    flc!("core_similarity_very_high")
                 } else if *h <= SIMILAR_VALUES[index_preset][1] {
-                    fl!("core_similarity_high")
+                    flc!("core_similarity_high")
                 } else if *h <= SIMILAR_VALUES[index_preset][2] {
-                    fl!("core_similarity_medium")
+                    flc!("core_similarity_medium")
                 } else if *h <= SIMILAR_VALUES[index_preset][3] {
-                    fl!("core_similarity_small")
+                    flc!("core_similarity_small")
                 } else if *h <= SIMILAR_VALUES[index_preset][4] {
-                    fl!("core_similarity_very_small")
+                    flc!("core_similarity_very_small")
                 } else if *h <= SIMILAR_VALUES[index_preset][5] {
-                    fl!("core_similarity_minimal")
+                    flc!("core_similarity_minimal")
                 } else {
                     panic!();
                 }

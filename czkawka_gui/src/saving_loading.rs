@@ -8,15 +8,15 @@ use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{ComboBoxText, ScrolledWindow, TextView};
 
+use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
-use czkawka_core::fl;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_functions::*;
 use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 
 // TODO organize this better, add specific functions that will allow to load from files specific strings
 const SAVE_FILE_NAME: &str = "czkawka_gui_config_4.txt";
@@ -107,7 +107,7 @@ impl LoadSaveStruct {
             } else {
                 add_text_to_text_view(
                     &self.text_view,
-                    &fl!(
+                    &flg!(
                         "saving_loading_invalid_string",
                         generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
                     ),
@@ -133,7 +133,7 @@ impl LoadSaveStruct {
             } else {
                 add_text_to_text_view(
                     &self.text_view,
-                    &fl!(
+                    &flg!(
                         "saving_loading_invalid_int",
                         generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
                     ),
@@ -156,7 +156,7 @@ impl LoadSaveStruct {
                 } else {
                     add_text_to_text_view(
                         &self.text_view,
-                        &fl!(
+                        &flg!(
                             "saving_loading_decode_problem_bool",
                             generate_translation_hashmap(vec![("key", key), ("result", item[0].to_string())])
                         ),
@@ -166,7 +166,7 @@ impl LoadSaveStruct {
             } else {
                 add_text_to_text_view(
                     &self.text_view,
-                    &fl!(
+                    &flg!(
                         "saving_loading_invalid_bool",
                         generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
                     ),
@@ -183,7 +183,7 @@ impl LoadSaveStruct {
         if self.loaded_items.contains_key(&key) {
             add_text_to_text_view(
                 &self.text_view,
-                &fl!("saving_loading_saving_same_keys", generate_translation_hashmap(vec![("key", key.clone())])),
+                &flg!("saving_loading_saving_same_keys", generate_translation_hashmap(vec![("key", key.clone())])),
             );
         }
 
@@ -219,7 +219,7 @@ impl LoadSaveStruct {
                     if !config_dir.is_dir() {
                         add_text_to_text_view(
                             text_view_errors,
-                            &fl!(
+                            &flg!(
                                 "saving_loading_folder_config_instead_file",
                                 generate_translation_hashmap(vec![("path", config_dir.display().to_string())])
                             ),
@@ -229,7 +229,7 @@ impl LoadSaveStruct {
                 } else if let Err(e) = fs::create_dir_all(config_dir) {
                     add_text_to_text_view(
                         text_view_errors,
-                        &fl!(
+                        &flg!(
                             "saving_loading_failed_to_create_configuration_folder",
                             generate_translation_hashmap(vec![("path", config_dir.display().to_string()), ("reason", e.to_string())])
                         ),
@@ -242,7 +242,7 @@ impl LoadSaveStruct {
                     Err(e) => {
                         add_text_to_text_view(
                             text_view_errors,
-                            &fl!(
+                            &flg!(
                                 "saving_loading_failed_to_create_config_file",
                                 generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
                             ),
@@ -257,7 +257,7 @@ impl LoadSaveStruct {
                         // Don't show errors when there is no configuration file when starting app
                         add_text_to_text_view(
                             text_view_errors,
-                            &fl!(
+                            &flg!(
                                 "saving_loading_failed_to_read_config_file",
                                 generate_translation_hashmap(vec![("path", config_file.display().to_string())])
                             ),
@@ -271,7 +271,7 @@ impl LoadSaveStruct {
                     Err(e) => {
                         add_text_to_text_view(
                             text_view_errors,
-                            &fl!(
+                            &flg!(
                                 "saving_loading_failed_to_create_config_file",
                                 generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
                             ),
@@ -282,7 +282,7 @@ impl LoadSaveStruct {
                 return Some((config_file_handler, config_file));
             }
         } else {
-            add_text_to_text_view(text_view_errors, fl!("saving_loading_failed_to_get_home_directory").as_str());
+            add_text_to_text_view(text_view_errors, flg!("saving_loading_failed_to_get_home_directory").as_str());
         }
         None
     }
@@ -293,7 +293,7 @@ impl LoadSaveStruct {
             if let Err(e) = config_file_handler.read_to_string(&mut loaded_data) {
                 add_text_to_text_view(
                     text_view_errors,
-                    &fl!(
+                    &flg!(
                         "saving_loading_failed_to_read_data_from_file",
                         generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
                     ),
@@ -313,7 +313,7 @@ impl LoadSaveStruct {
                 } else {
                     add_text_to_text_view(
                         text_view_errors,
-                        &fl!(
+                        &flg!(
                             "saving_loading_orphan_data",
                             generate_translation_hashmap(vec![("data", line.to_string()), ("index", index.to_string())])
                         ),
@@ -326,13 +326,13 @@ impl LoadSaveStruct {
                 if !hashmap_sl.contains_key(setting) {
                     add_text_to_text_view(
                         text_view_errors,
-                        &fl!("saving_loading_not_valid", generate_translation_hashmap(vec![("data", setting.to_string())])),
+                        &flg!("saving_loading_not_valid", generate_translation_hashmap(vec![("data", setting.to_string())])),
                     );
                 }
             }
 
             if manual_execution {
-                add_text_to_text_view(text_view_errors, &fl!("saving_loading_loading_success"));
+                add_text_to_text_view(text_view_errors, &flg!("saving_loading_loading_success"));
             }
         }
     }
@@ -365,7 +365,7 @@ impl LoadSaveStruct {
             if data_saved {
                 add_text_to_text_view(
                     text_view_errors,
-                    fl!(
+                    flg!(
                         "saving_loading_saving_success",
                         generate_translation_hashmap(vec![("name", config_file.display().to_string())])
                     )
@@ -374,7 +374,7 @@ impl LoadSaveStruct {
             } else {
                 add_text_to_text_view(
                     text_view_errors,
-                    fl!(
+                    flg!(
                         "saving_loading_saving_failure",
                         generate_translation_hashmap(vec![("name", config_file.display().to_string())])
                     )
@@ -934,6 +934,6 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.scale_similarity_similar_videos.set_value(DEFAULT_SIMILAR_VIDEOS_SIMILARITY as f64);
     }
     if manual_clearing {
-        add_text_to_text_view(&text_view_errors, &fl!("saving_loading_reset_configuration"));
+        add_text_to_text_view(&text_view_errors, &flg!("saving_loading_reset_configuration"));
     }
 }

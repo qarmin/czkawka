@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use czkawka_core::fl;
+use crate::flg;
 
 #[derive(Clone)]
 pub struct GuiHeader {
@@ -17,7 +17,7 @@ impl GuiHeader {
     }
 
     pub fn update_language(&self) {
-        self.button_settings.set_tooltip_text(Some(&fl!("header_setting_button_tooltip")));
-        self.button_app_info.set_tooltip_text(Some(&fl!("header_about_button_tooltip")));
+        self.button_settings.set_tooltip_text(Some(&flg!("header_setting_button_tooltip")));
+        self.button_app_info.set_tooltip_text(Some(&flg!("header_about_button_tooltip")));
     }
 }

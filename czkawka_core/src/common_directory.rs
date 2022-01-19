@@ -3,8 +3,8 @@ use std::time::SystemTime;
 
 use crate::common::Common;
 use crate::common_messages::Messages;
-use crate::fl;
-use crate::localizer::generate_translation_hashmap;
+use crate::flc;
+use crate::localizer_core::generate_translation_hashmap;
 
 #[derive(Clone, Default)]
 pub struct Directories {
@@ -27,7 +27,7 @@ impl Directories {
         let start_time: SystemTime = SystemTime::now();
 
         if included_directory.is_empty() {
-            text_messages.errors.push(fl!("core_missing_no_chosen_included_directory"));
+            text_messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
             return false;
         }
 
@@ -36,7 +36,7 @@ impl Directories {
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {
             if directory.to_string_lossy().contains('*') {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_wildcard_no_supported",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -45,7 +45,7 @@ impl Directories {
 
             #[cfg(not(target_family = "windows"))]
             if directory.is_relative() {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_relative_path",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -53,7 +53,7 @@ impl Directories {
             }
             #[cfg(target_family = "windows")]
             if directory.is_relative() && !directory.starts_with("\\") {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_relative_path",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -61,14 +61,14 @@ impl Directories {
             }
 
             if !directory.exists() {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_must_exists",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
                 continue;
             }
             if !directory.is_dir() {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_must_be_directory",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -78,7 +78,7 @@ impl Directories {
         }
 
         if checked_directories.is_empty() {
-            text_messages.warnings.push(fl!("core_included_directory_zero_valid_directories"));
+            text_messages.warnings.push(flc!("core_included_directory_zero_valid_directories"));
             return false;
         }
 
@@ -101,11 +101,11 @@ impl Directories {
         for directory in directories {
             let directory_as_string = directory.to_string_lossy();
             if directory_as_string == "/" {
-                text_messages.errors.push(fl!("core_excluded_directory_pointless_slash"));
+                text_messages.errors.push(flc!("core_excluded_directory_pointless_slash"));
                 break;
             }
             if directory_as_string.contains('*') {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_wildcard_no_supported",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -113,7 +113,7 @@ impl Directories {
             }
             #[cfg(not(target_family = "windows"))]
             if directory.is_relative() {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_relative_path",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -121,7 +121,7 @@ impl Directories {
             }
             #[cfg(target_family = "windows")]
             if directory.is_relative() && !directory.starts_with("\\") {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_relative_path",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -133,7 +133,7 @@ impl Directories {
                 continue;
             }
             if !directory.is_dir() {
-                text_messages.warnings.push(fl!(
+                text_messages.warnings.push(flc!(
                     "core_directory_must_be_directory",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
@@ -276,7 +276,7 @@ impl Directories {
         }
 
         if self.included_directories.is_empty() {
-            text_messages.errors.push(fl!("core_directory_overlap"));
+            text_messages.errors.push(flc!("core_directory_overlap"));
             return false;
         }
 

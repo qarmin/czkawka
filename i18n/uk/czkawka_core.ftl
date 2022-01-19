@@ -1,1 +1,0 @@
-czkawka_gui.ftl

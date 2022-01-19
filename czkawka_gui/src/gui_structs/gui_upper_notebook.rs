@@ -1,9 +1,9 @@
 use gtk::prelude::*;
 use gtk::{Bin, EventControllerKey, TreeView};
 
+use crate::flg;
 use crate::help_functions::get_custom_label_from_button_with_image;
 use crate::notebook_enums::NotebookUpperEnum;
-use czkawka_core::fl;
 
 #[derive(Clone)]
 pub struct GuiUpperNotebook {
@@ -101,50 +101,50 @@ impl GuiUpperNotebook {
         }
     }
     pub fn update_language(&self) {
-        self.check_button_recursive.set_label(&fl!("upper_recursive_button"));
-        self.check_button_recursive.set_tooltip_text(Some(&fl!("upper_recursive_button_tooltip")));
+        self.check_button_recursive.set_label(&flg!("upper_recursive_button"));
+        self.check_button_recursive.set_tooltip_text(Some(&flg!("upper_recursive_button_tooltip")));
 
-        get_custom_label_from_button_with_image(&self.buttons_manual_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_included_button"));
-        get_custom_label_from_button_with_image(&self.buttons_add_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_included_button"));
-        get_custom_label_from_button_with_image(&self.buttons_remove_included_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_included_button"));
-        get_custom_label_from_button_with_image(&self.buttons_manual_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_manual_add_excluded_button"));
-        get_custom_label_from_button_with_image(&self.buttons_add_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_add_excluded_button"));
-        get_custom_label_from_button_with_image(&self.buttons_remove_excluded_directory.clone().upcast::<Bin>()).set_text(&fl!("upper_remove_excluded_button"));
+        get_custom_label_from_button_with_image(&self.buttons_manual_add_included_directory.clone().upcast::<Bin>()).set_text(&flg!("upper_manual_add_included_button"));
+        get_custom_label_from_button_with_image(&self.buttons_add_included_directory.clone().upcast::<Bin>()).set_text(&flg!("upper_add_included_button"));
+        get_custom_label_from_button_with_image(&self.buttons_remove_included_directory.clone().upcast::<Bin>()).set_text(&flg!("upper_remove_included_button"));
+        get_custom_label_from_button_with_image(&self.buttons_manual_add_excluded_directory.clone().upcast::<Bin>()).set_text(&flg!("upper_manual_add_excluded_button"));
+        get_custom_label_from_button_with_image(&self.buttons_add_excluded_directory.clone().upcast::<Bin>()).set_text(&flg!("upper_add_excluded_button"));
+        get_custom_label_from_button_with_image(&self.buttons_remove_excluded_directory.clone().upcast::<Bin>()).set_text(&flg!("upper_remove_excluded_button"));
 
         // GTK 4
-        // get_custom_label_from_label_with_image(&self.buttons_manual_add_included_directory.clone()).set_text(&fl!("upper_manual_add_included_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_add_included_directory.clone()).set_text(&fl!("upper_add_included_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_remove_included_directory.clone()).set_text(&fl!("upper_remove_included_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_manual_add_excluded_directory.clone()).set_text(&fl!("upper_manual_add_excluded_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&fl!("upper_add_excluded_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&fl!("upper_remove_excluded_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_manual_add_included_directory.clone()).set_text(&flg!("upper_manual_add_included_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_add_included_directory.clone()).set_text(&flg!("upper_add_included_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_remove_included_directory.clone()).set_text(&flg!("upper_remove_included_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_manual_add_excluded_directory.clone()).set_text(&flg!("upper_manual_add_excluded_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&flg!("upper_add_excluded_button"));
+        // get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&flg!("upper_remove_excluded_button"));
 
         self.buttons_manual_add_included_directory
-            .set_tooltip_text(Some(&fl!("upper_manual_add_included_button_tooltip")));
-        self.buttons_add_included_directory.set_tooltip_text(Some(&fl!("upper_add_included_button_tooltip")));
-        self.buttons_remove_included_directory.set_tooltip_text(Some(&fl!("upper_remove_included_button_tooltip")));
+            .set_tooltip_text(Some(&flg!("upper_manual_add_included_button_tooltip")));
+        self.buttons_add_included_directory.set_tooltip_text(Some(&flg!("upper_add_included_button_tooltip")));
+        self.buttons_remove_included_directory.set_tooltip_text(Some(&flg!("upper_remove_included_button_tooltip")));
         self.buttons_manual_add_excluded_directory
-            .set_tooltip_text(Some(&fl!("upper_manual_add_excluded_button_tooltip")));
-        self.buttons_add_excluded_directory.set_tooltip_text(Some(&fl!("upper_add_excluded_button_tooltip")));
-        self.buttons_remove_excluded_directory.set_tooltip_text(Some(&fl!("upper_remove_excluded_button_tooltip")));
+            .set_tooltip_text(Some(&flg!("upper_manual_add_excluded_button_tooltip")));
+        self.buttons_add_excluded_directory.set_tooltip_text(Some(&flg!("upper_add_excluded_button_tooltip")));
+        self.buttons_remove_excluded_directory.set_tooltip_text(Some(&flg!("upper_remove_excluded_button_tooltip")));
 
-        self.label_allowed_extensions.set_tooltip_text(Some(&fl!("upper_allowed_extensions_tooltip")));
-        self.entry_allowed_extensions.set_tooltip_text(Some(&fl!("upper_allowed_extensions_tooltip")));
-        self.label_excluded_items.set_tooltip_text(Some(&fl!("upper_excluded_items_tooltip")));
-        self.entry_excluded_items.set_tooltip_text(Some(&fl!("upper_excluded_items_tooltip")));
+        self.label_allowed_extensions.set_tooltip_text(Some(&flg!("upper_allowed_extensions_tooltip")));
+        self.entry_allowed_extensions.set_tooltip_text(Some(&flg!("upper_allowed_extensions_tooltip")));
+        self.label_excluded_items.set_tooltip_text(Some(&flg!("upper_excluded_items_tooltip")));
+        self.entry_excluded_items.set_tooltip_text(Some(&flg!("upper_excluded_items_tooltip")));
 
-        self.label_excluded_items.set_label(&fl!("upper_excluded_items"));
-        self.label_allowed_extensions.set_label(&fl!("upper_allowed_extensions"));
+        self.label_excluded_items.set_label(&flg!("upper_excluded_items"));
+        self.label_allowed_extensions.set_label(&flg!("upper_allowed_extensions"));
 
-        self.label_general_size_bytes.set_label(&fl!("main_label_size_bytes"));
-        self.label_general_min_size.set_label(&fl!("main_label_min_size"));
-        self.label_general_max_size.set_label(&fl!("main_label_max_size"));
+        self.label_general_size_bytes.set_label(&flg!("main_label_size_bytes"));
+        self.label_general_min_size.set_label(&flg!("main_label_min_size"));
+        self.label_general_max_size.set_label(&flg!("main_label_max_size"));
 
-        self.label_general_size_bytes.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
-        self.label_general_min_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
-        self.label_general_max_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
-        self.entry_general_minimal_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
-        self.entry_general_maximal_size.set_tooltip_text(Some(&fl!("main_label_size_bytes_tooltip")));
+        self.label_general_size_bytes.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
+        self.label_general_min_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
+        self.label_general_max_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
+        self.entry_general_minimal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
+        self.entry_general_maximal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
 
         let vec_children: Vec<gtk::Widget> = self.notebook_upper.children();
 
@@ -153,9 +153,9 @@ impl GuiUpperNotebook {
 
         // Change name of upper notebook tabs
         for (upper_enum, fl_thing) in [
-            (NotebookUpperEnum::ItemsConfiguration as usize, fl!("upper_notebook_items_configuration")),
-            (NotebookUpperEnum::ExcludedDirectories as usize, fl!("upper_notebook_excluded_directories")),
-            (NotebookUpperEnum::IncludedDirectories as usize, fl!("upper_notebook_included_directories")),
+            (NotebookUpperEnum::ItemsConfiguration as usize, flg!("upper_notebook_items_configuration")),
+            (NotebookUpperEnum::ExcludedDirectories as usize, flg!("upper_notebook_excluded_directories")),
+            (NotebookUpperEnum::IncludedDirectories as usize, flg!("upper_notebook_included_directories")),
         ] {
             self.notebook_upper
                 .tab_label(&vec_children[upper_enum])
@@ -166,7 +166,10 @@ impl GuiUpperNotebook {
         }
 
         let names_of_columns = [
-            vec![fl!("upper_tree_view_included_folder_column_title"), fl!("upper_tree_view_included_reference_column_title")], // Included folders
+            vec![
+                flg!("upper_tree_view_included_folder_column_title"),
+                flg!("upper_tree_view_included_reference_column_title"),
+            ], // Included folders
         ];
 
         for (notebook_index, tree_view) in [self.tree_view_included_directories.clone()].iter().enumerate() {

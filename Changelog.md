@@ -1,4 +1,4 @@
-## Version 4.0.0 - ?
+## Version 4.0.0 - 20.01.2022r
 - Multithreading support for collecting files to check(2/3x speedup on 4 thread processor and SSD) - [#502](https://github.com/qarmin/czkawka/pull/502), [#504](https://github.com/qarmin/czkawka/pull/504)
 - Add multiple translations - Polish, Italian, French, German, Russian ... - [#469](https://github.com/qarmin/czkawka/pull/469), [#508](https://github.com/qarmin/czkawka/pull/508), [5be](https://github.com/qarmin/czkawka/commit/5be801e76395855f07ab1da43cdbb8bd0b843834)
 - Add support for finding similar videos - [#460](https://github.com/qarmin/czkawka/pull/460)

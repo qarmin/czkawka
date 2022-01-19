@@ -5,11 +5,11 @@ use std::fs::Metadata;
 use gtk::prelude::*;
 use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
 
-use czkawka_core::fl;
+use crate::flg;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -140,22 +140,22 @@ pub async fn check_if_can_delete_files(
 }
 
 fn create_dialog_ask_for_deletion(window_main: &gtk::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder().title(&fl!("delete_title_dialog")).transient_for(window_main).modal(true).build();
-    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    let dialog = gtk::Dialog::builder().title(&flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
+    let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&fl!("delete_question_label")));
+    let label: gtk::Label = gtk::Label::new(Some(&flg!("delete_question_label")));
     let label2: gtk::Label = match number_of_selected_groups {
-        0 => gtk::Label::new(Some(&fl!(
+        0 => gtk::Label::new(Some(&flg!(
             "delete_items_label",
             generate_translation_hashmap(vec![("items", number_of_selected_items.to_string())])
         ))),
-        _ => gtk::Label::new(Some(&fl!(
+        _ => gtk::Label::new(Some(&flg!(
             "delete_items_groups_label",
             generate_translation_hashmap(vec![("items", number_of_selected_items.to_string()), ("groups", number_of_selected_groups.to_string())])
         ))),
     };
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&fl!("dialogs_ask_next_time"));
+    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
@@ -174,16 +174,16 @@ fn create_dialog_ask_for_deletion(window_main: &gtk::Window, number_of_selected_
 
 fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let dialog = gtk::Dialog::builder()
-        .title(&fl!("delete_all_files_in_group_title"))
+        .title(&flg!("delete_all_files_in_group_title"))
         .transient_for(window_main)
         .modal(true)
         .build();
-    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&fl!("delete_all_files_in_group_label1")));
-    let label2: gtk::Label = gtk::Label::new(Some(&fl!("delete_all_files_in_group_label2")));
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&fl!("dialogs_ask_next_time"));
+    let label: gtk::Label = gtk::Label::new(Some(&flg!("delete_all_files_in_group_label1")));
+    let label2: gtk::Label = gtk::Label::new(Some(&flg!("delete_all_files_in_group_label2")));
+    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
@@ -364,7 +364,7 @@ pub fn empty_folder_remover(
             }
         }
         if error_happened {
-            messages += &fl!(
+            messages += &flg!(
                 "delete_folder_failed",
                 generate_translation_hashmap(vec![("dir", get_full_name_from_path_name(&path, &name))])
             );
@@ -421,7 +421,7 @@ pub fn basic_remove(
                 }
 
                 Err(e) => {
-                    messages += fl!(
+                    messages += flg!(
                         "delete_file_failed",
                         generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])
                     )
@@ -435,7 +435,7 @@ pub fn basic_remove(
                     model.remove(&iter);
                 }
                 Err(e) => {
-                    messages += fl!(
+                    messages += flg!(
                         "delete_file_failed",
                         generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])
                     )
@@ -510,7 +510,7 @@ pub fn tree_remove(
         for file_name in vec_file_name {
             if !use_trash {
                 if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
-                    messages += fl!(
+                    messages += flg!(
                         "delete_file_failed",
                         generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])
                     )
@@ -518,7 +518,7 @@ pub fn tree_remove(
                     messages += "\n";
                 }
             } else if let Err(e) = trash::delete(get_full_name_from_path_name(&path, &file_name)) {
-                messages += fl!(
+                messages += flg!(
                     "delete_file_failed",
                     generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])
                 )

@@ -3,7 +3,7 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
 
 use crate::language_functions::get_language_from_combo_box_text;
-use crate::{GuiData, LANGUAGES_ALL};
+use crate::{localizer_gui, GuiData, LANGUAGES_ALL};
 
 // use i18n_embed::{DesktopLanguageRequester, Localizer};
 
@@ -18,7 +18,10 @@ pub fn connect_change_language(gui_data: &GuiData) {
 }
 
 fn change_language(gui_data: &GuiData) {
-    let localizers = vec![("czkawka_gui", czkawka_core::localizer::localizer())];
+    let localizers = vec![
+        ("czkawka_core", czkawka_core::localizer_core::localizer_core()),
+        ("czkawka_gui", localizer_gui::localizer_gui()),
+    ];
 
     let lang_short = get_language_from_combo_box_text(gui_data.settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text;
 

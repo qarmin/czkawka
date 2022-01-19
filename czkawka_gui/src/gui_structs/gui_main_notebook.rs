@@ -1,12 +1,13 @@
 use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use gtk::prelude::*;
 use gtk::{EventControllerKey, TreeView};
 
 use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
 
+use crate::flg;
 use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
-use czkawka_core::fl;
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {
@@ -316,52 +317,52 @@ impl GuiMainNotebook {
     }
 
     pub fn update_language(&self) {
-        self.check_button_music_title.set_label(&fl!("music_title_checkbox"));
-        self.check_button_music_artist.set_label(&fl!("music_artist_checkbox"));
-        self.check_button_music_album_title.set_label(&fl!("music_album_title_checkbox"));
-        self.check_button_music_album_artist.set_label(&fl!("music_album_artist_checkbox"));
-        self.check_button_music_year.set_label(&fl!("music_year_checkbox"));
-        self.check_button_music_approximate_comparison.set_label(&fl!("music_comparison_checkbox"));
+        self.check_button_music_title.set_label(&flg!("music_title_checkbox"));
+        self.check_button_music_artist.set_label(&flg!("music_artist_checkbox"));
+        self.check_button_music_album_title.set_label(&flg!("music_album_title_checkbox"));
+        self.check_button_music_album_artist.set_label(&flg!("music_album_artist_checkbox"));
+        self.check_button_music_year.set_label(&flg!("music_year_checkbox"));
+        self.check_button_music_approximate_comparison.set_label(&flg!("music_comparison_checkbox"));
 
         self.check_button_music_approximate_comparison
-            .set_tooltip_text(Some(&fl!("music_comparison_checkbox_tooltip")));
+            .set_tooltip_text(Some(&flg!("music_comparison_checkbox_tooltip")));
 
-        self.label_duplicate_check_method.set_label(&fl!("main_label_check_method"));
-        self.label_duplicate_hash_type.set_label(&fl!("main_label_hash_type"));
-        self.label_big_shown_files.set_label(&fl!("main_label_shown_files"));
-        self.label_image_resize_algorithm.set_label(&fl!("main_label_resize_algorithm"));
-        self.label_image_hash_type.set_label(&fl!("main_label_hash_type"));
-        self.label_image_hash_size.set_label(&fl!("main_label_hash_size"));
-        self.label_image_similarity.set_label(&fl!("main_label_similarity"));
-        self.label_image_similarity_max.set_label(&fl!("core_similarity_very_high"));
-        self.label_video_similarity.set_label(&fl!("main_label_similarity"));
-        self.label_video_similarity_min.set_label(&fl!("core_similarity_minimal"));
-        self.label_video_similarity_max.set_label(&fl!("core_similarity_very_high"));
+        self.label_duplicate_check_method.set_label(&flg!("main_label_check_method"));
+        self.label_duplicate_hash_type.set_label(&flg!("main_label_hash_type"));
+        self.label_big_shown_files.set_label(&flg!("main_label_shown_files"));
+        self.label_image_resize_algorithm.set_label(&flg!("main_label_resize_algorithm"));
+        self.label_image_hash_type.set_label(&flg!("main_label_hash_type"));
+        self.label_image_hash_size.set_label(&flg!("main_label_hash_size"));
+        self.label_image_similarity.set_label(&flg!("main_label_similarity"));
+        self.label_image_similarity_max.set_label(&fnc_get_similarity_very_high());
+        self.label_video_similarity.set_label(&flg!("main_label_similarity"));
+        self.label_video_similarity_min.set_label(&fnc_get_similarity_minimal());
+        self.label_video_similarity_max.set_label(&fnc_get_similarity_very_high());
 
-        self.label_duplicate_check_method.set_tooltip_text(Some(&fl!("duplicate_check_method_tooltip")));
-        self.combo_box_duplicate_check_method.set_tooltip_text(Some(&fl!("duplicate_check_method_tooltip")));
-        self.label_duplicate_hash_type.set_tooltip_text(Some(&fl!("duplicate_hash_type_tooltip")));
-        self.combo_box_duplicate_hash_type.set_tooltip_text(Some(&fl!("duplicate_hash_type_tooltip")));
+        self.label_duplicate_check_method.set_tooltip_text(Some(&flg!("duplicate_check_method_tooltip")));
+        self.combo_box_duplicate_check_method.set_tooltip_text(Some(&flg!("duplicate_check_method_tooltip")));
+        self.label_duplicate_hash_type.set_tooltip_text(Some(&flg!("duplicate_hash_type_tooltip")));
+        self.combo_box_duplicate_hash_type.set_tooltip_text(Some(&flg!("duplicate_hash_type_tooltip")));
 
-        self.combo_box_image_hash_size.set_tooltip_text(Some(&fl!("image_hash_size_tooltip")));
-        self.label_image_hash_size.set_tooltip_text(Some(&fl!("image_hash_size_tooltip")));
+        self.combo_box_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));
+        self.label_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));
 
-        self.combo_box_image_resize_algorithm.set_tooltip_text(Some(&fl!("image_resize_filter_tooltip")));
-        self.label_image_resize_algorithm.set_tooltip_text(Some(&fl!("image_resize_filter_tooltip")));
+        self.combo_box_image_resize_algorithm.set_tooltip_text(Some(&flg!("image_resize_filter_tooltip")));
+        self.label_image_resize_algorithm.set_tooltip_text(Some(&flg!("image_resize_filter_tooltip")));
 
-        self.combo_box_image_hash_algorithm.set_tooltip_text(Some(&fl!("image_hash_alg_tooltip")));
-        self.label_image_hash_type.set_tooltip_text(Some(&fl!("image_hash_alg_tooltip")));
+        self.combo_box_image_hash_algorithm.set_tooltip_text(Some(&flg!("image_hash_alg_tooltip")));
+        self.label_image_hash_type.set_tooltip_text(Some(&flg!("image_hash_alg_tooltip")));
 
         self.check_button_image_ignore_same_size
-            .set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
+            .set_tooltip_text(Some(&flg!("check_button_general_same_size_tooltip")));
         self.check_button_video_ignore_same_size
-            .set_tooltip_text(Some(&fl!("check_button_general_same_size_tooltip")));
-        self.check_button_image_ignore_same_size.set_label(&fl!("check_button_general_same_size"));
-        self.check_button_video_ignore_same_size.set_label(&fl!("check_button_general_same_size"));
+            .set_tooltip_text(Some(&flg!("check_button_general_same_size_tooltip")));
+        self.check_button_image_ignore_same_size.set_label(&flg!("check_button_general_same_size"));
+        self.check_button_video_ignore_same_size.set_label(&flg!("check_button_general_same_size"));
 
-        self.check_button_image_fast_compare.set_label(&fl!("main_notebook_image_fast_compare"));
+        self.check_button_image_fast_compare.set_label(&flg!("main_notebook_image_fast_compare"));
         self.check_button_image_fast_compare
-            .set_tooltip_text(Some(&fl!("main_notebook_image_fast_compare_tooltip")));
+            .set_tooltip_text(Some(&flg!("main_notebook_image_fast_compare_tooltip")));
 
         {
             let hash_size_index = self.combo_box_image_hash_size.active().unwrap() as usize;
@@ -394,16 +395,16 @@ impl GuiMainNotebook {
 
         // Change name of main notebook tabs
         for (main_enum, fl_thing) in [
-            (NotebookMainEnum::Duplicate as usize, fl!("main_notebook_duplicates")),
-            (NotebookMainEnum::EmptyDirectories as usize, fl!("main_notebook_empty_directories")),
-            (NotebookMainEnum::BigFiles as usize, fl!("main_notebook_big_files")),
-            (NotebookMainEnum::EmptyFiles as usize, fl!("main_notebook_empty_files")),
-            (NotebookMainEnum::Temporary as usize, fl!("main_notebook_temporary")),
-            (NotebookMainEnum::SimilarImages as usize, fl!("main_notebook_similar_images")),
-            (NotebookMainEnum::SimilarVideos as usize, fl!("main_notebook_similar_videos")),
-            (NotebookMainEnum::SameMusic as usize, fl!("main_notebook_same_music")),
-            (NotebookMainEnum::Symlinks as usize, fl!("main_notebook_symlinks")),
-            (NotebookMainEnum::BrokenFiles as usize, fl!("main_notebook_broken_files")),
+            (NotebookMainEnum::Duplicate as usize, flg!("main_notebook_duplicates")),
+            (NotebookMainEnum::EmptyDirectories as usize, flg!("main_notebook_empty_directories")),
+            (NotebookMainEnum::BigFiles as usize, flg!("main_notebook_big_files")),
+            (NotebookMainEnum::EmptyFiles as usize, flg!("main_notebook_empty_files")),
+            (NotebookMainEnum::Temporary as usize, flg!("main_notebook_temporary")),
+            (NotebookMainEnum::SimilarImages as usize, flg!("main_notebook_similar_images")),
+            (NotebookMainEnum::SimilarVideos as usize, flg!("main_notebook_similar_videos")),
+            (NotebookMainEnum::SameMusic as usize, flg!("main_notebook_same_music")),
+            (NotebookMainEnum::Symlinks as usize, flg!("main_notebook_symlinks")),
+            (NotebookMainEnum::BrokenFiles as usize, flg!("main_notebook_broken_files")),
         ] {
             self.notebook_main
                 .tab_label(&vec_children[main_enum])
@@ -416,69 +417,69 @@ impl GuiMainNotebook {
         // Change names of columns
         let names_of_columns = [
             vec![
-                fl!("main_tree_view_column_size"),
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_size"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Duplicates
             vec![
-                fl!("main_tree_view_column_folder_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_folder_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Empty Folders
             vec![
-                fl!("main_tree_view_column_size"),
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_size"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Big files
             vec![
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Empty files
             vec![
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Temporary Files
             vec![
-                fl!("main_tree_view_column_similarity"),
-                fl!("main_tree_view_column_size"),
-                fl!("main_tree_view_column_dimensions"),
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_similarity"),
+                flg!("main_tree_view_column_size"),
+                flg!("main_tree_view_column_dimensions"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Similar Images
             vec![
-                fl!("main_tree_view_column_size"),
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_size"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_modification"),
             ], // Similar Videos
             vec![
-                fl!("main_tree_view_column_size"),
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_title"),
-                fl!("main_tree_view_column_artist"),
-                fl!("main_tree_view_column_year"),
-                fl!("main_tree_view_column_album_title"),
-                fl!("main_tree_view_column_album_artist"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_size"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_title"),
+                flg!("main_tree_view_column_artist"),
+                flg!("main_tree_view_column_year"),
+                flg!("main_tree_view_column_album_title"),
+                flg!("main_tree_view_column_album_artist"),
+                flg!("main_tree_view_column_modification"),
             ], // Music Dupliactes
             vec![
-                fl!("main_tree_view_column_symlink_file_name"),
-                fl!("main_tree_view_column_symlink_folder"),
-                fl!("main_tree_view_column_destination_path"),
-                fl!("main_tree_view_column_type_of_error"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_symlink_file_name"),
+                flg!("main_tree_view_column_symlink_folder"),
+                flg!("main_tree_view_column_destination_path"),
+                flg!("main_tree_view_column_type_of_error"),
+                flg!("main_tree_view_column_modification"),
             ], // Invalid Symlinks
             vec![
-                fl!("main_tree_view_column_file_name"),
-                fl!("main_tree_view_column_path"),
-                fl!("main_tree_view_column_type_of_error"),
-                fl!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_type_of_error"),
+                flg!("main_tree_view_column_modification"),
             ], // Broken Files
         ];
 
@@ -496,9 +497,9 @@ impl GuiMainNotebook {
             self.combo_box_duplicate_check_method.remove_all();
             for i in &DUPLICATES_CHECK_METHOD_COMBO_BOX {
                 let text = match i.check_method {
-                    CheckingMethod::Hash => fl!("duplicate_mode_hash_combo_box"),
-                    CheckingMethod::Size => fl!("duplicate_mode_size_combo_box"),
-                    CheckingMethod::Name => fl!("duplicate_mode_name_combo_box"),
+                    CheckingMethod::Hash => flg!("duplicate_mode_hash_combo_box"),
+                    CheckingMethod::Size => flg!("duplicate_mode_size_combo_box"),
+                    CheckingMethod::Name => flg!("duplicate_mode_name_combo_box"),
                     _ => {
                         panic!()
                     }

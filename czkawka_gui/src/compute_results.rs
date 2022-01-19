@@ -12,13 +12,13 @@ use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
 
-use crate::fl;
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::opening_selecting_records::*;
-use czkawka_core::localizer::generate_translation_hashmap;
+use czkawka_core::localizer_core::generate_translation_hashmap;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -76,7 +76,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
         match msg {
             Message::Duplicates(df) => {
                 if df.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if df.get_use_reference() {
                         tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
@@ -97,7 +97,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             // duplicates_size = 0;
                             duplicates_group = information.number_of_groups_by_name;
                             entry_info.set_text(
-                                fl!(
+                                flg!(
                                     "compute_found_duplicates_name",
                                     generate_translation_hashmap(vec![("number_files", duplicates_number.to_string()), ("number_groups", duplicates_group.to_string())])
                                 )
@@ -109,7 +109,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
                             entry_info.set_text(
-                                fl!(
+                                flg!(
                                     "compute_found_duplicates_hash_size",
                                     generate_translation_hashmap(vec![
                                         ("number_files", duplicates_number.to_string()),
@@ -125,7 +125,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
                             entry_info.set_text(
-                                fl!(
+                                flg!(
                                     "compute_found_duplicates_hash_size",
                                     generate_translation_hashmap(vec![
                                         ("number_files", duplicates_number.to_string()),
@@ -521,7 +521,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::EmptyFolders(ef) => {
                 if ef.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     let information = ef.get_information();
                     let text_messages = ef.get_text_messages();
@@ -529,7 +529,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let empty_folder_number: usize = information.number_of_empty_folders;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_empty_folders",
                             generate_translation_hashmap(vec![("number_files", empty_folder_number.to_string()),])
                         )
@@ -586,7 +586,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::EmptyFiles(vf) => {
                 if vf.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     let information = vf.get_information();
                     let text_messages = vf.get_text_messages();
@@ -594,7 +594,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let empty_files_number: usize = information.number_of_empty_files;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_empty_files",
                             generate_translation_hashmap(vec![("number_files", empty_files_number.to_string()),])
                         )
@@ -652,7 +652,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::BigFiles(bf) => {
                 if bf.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     let information = bf.get_information();
                     let text_messages = bf.get_text_messages();
@@ -660,7 +660,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let biggest_files_number: usize = information.number_of_real_files;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_big_files",
                             generate_translation_hashmap(vec![("number_files", biggest_files_number.to_string()),])
                         )
@@ -720,14 +720,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::Temporary(tf) => {
                 if tf.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     let information = tf.get_information();
                     let text_messages = tf.get_text_messages();
 
                     let temporary_files_number: usize = information.number_of_temporary_files;
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_temporary_files",
                             generate_translation_hashmap(vec![("number_files", temporary_files_number.to_string()),])
                         )
@@ -785,7 +785,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SimilarImages(sf) => {
                 if sf.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if sf.get_use_reference() {
                         tree_view_similar_images_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
@@ -800,7 +800,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let found_any_duplicates = information.number_of_duplicates > 0;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_images",
                             generate_translation_hashmap(vec![
                                 ("number_files", information.number_of_duplicates.to_string()),
@@ -969,7 +969,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SimilarVideos(ff) => {
                 if ff.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if ff.get_use_reference() {
                         tree_view_similar_videos_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
@@ -983,7 +983,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let found_any_duplicates = information.number_of_duplicates > 0;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_videos",
                             generate_translation_hashmap(vec![
                                 ("number_files", information.number_of_duplicates.to_string()),
@@ -1138,7 +1138,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::SameMusic(mf) => {
                 if mf.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if mf.get_use_reference() {
                         tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
@@ -1152,7 +1152,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let same_music_number: usize = information.number_of_duplicates;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_music",
                             generate_translation_hashmap(vec![
                                 ("number_files", information.number_of_duplicates.to_string()),
@@ -1360,7 +1360,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::InvalidSymlinks(ifs) => {
                 if ifs.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     let information = ifs.get_information();
                     let text_messages = ifs.get_text_messages();
@@ -1368,7 +1368,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let invalid_symlinks: usize = information.number_of_invalid_symlinks;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_invalid_symlinks",
                             generate_translation_hashmap(vec![("number_files", invalid_symlinks.to_string()),])
                         )
@@ -1433,7 +1433,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
             Message::BrokenFiles(br) => {
                 if br.get_stopped_search() {
-                    entry_info.set_text(&fl!("compute_stopped_by_user"));
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     let information = br.get_information();
                     let text_messages = br.get_text_messages();
@@ -1441,7 +1441,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     let broken_files_number: usize = information.number_of_broken_files;
 
                     entry_info.set_text(
-                        fl!(
+                        flg!(
                             "compute_found_broken_files",
                             generate_translation_hashmap(vec![("number_files", broken_files_number.to_string()),])
                         )

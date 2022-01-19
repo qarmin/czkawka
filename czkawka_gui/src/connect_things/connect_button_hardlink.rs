@@ -4,12 +4,12 @@ use std::path::PathBuf;
 use gtk::prelude::*;
 use gtk::{Align, CheckButton, Dialog, ResponseType, TextView, TreeIter, TreePath};
 
+use crate::flg;
 use czkawka_core::duplicate::make_hard_link;
-use czkawka_core::fl;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
@@ -196,7 +196,7 @@ pub fn hardlink_symlink(
         for symhardlink_data in vec_symhardlink_data {
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
-                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", fl!("hardlink_failed"), file_to_hardlink, e).as_str());
+                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
                 }
             }
@@ -207,7 +207,7 @@ pub fn hardlink_symlink(
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,
-                        fl!(
+                        flg!(
                             "delete_file_failed",
                             generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
                         )
@@ -221,7 +221,7 @@ pub fn hardlink_symlink(
                     if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!(
+                            flg!(
                                 "delete_file_failed",
                                 generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
                             )
@@ -235,7 +235,7 @@ pub fn hardlink_symlink(
                     if let Err(e) = std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
                         add_text_to_text_view(
                             text_view_errors,
-                            fl!(
+                            flg!(
                                 "delete_file_failed",
                                 generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
                             )
@@ -256,16 +256,16 @@ pub fn hardlink_symlink(
 
 fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
     let dialog = gtk::Dialog::builder()
-        .title(&fl!("hard_sym_invalid_selection_title_dialog"))
+        .title(&flg!("hard_sym_invalid_selection_title_dialog"))
         .transient_for(window_main)
         .modal(true)
         .build();
-    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_invalid_selection_label_1")));
-    let label2: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_invalid_selection_label_2")));
-    let label3: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_invalid_selection_label_3")));
+    let label: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_invalid_selection_label_1")));
+    let label2: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_invalid_selection_label_2")));
+    let label3: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_invalid_selection_label_3")));
 
     button_ok.grab_focus();
 
@@ -364,15 +364,15 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk::C
 
 fn create_dialog_ask_for_linking(window_main: &gtk::Window) -> (Dialog, CheckButton) {
     let dialog = gtk::Dialog::builder()
-        .title(&fl!("hard_sym_link_title_dialog"))
+        .title(&flg!("hard_sym_link_title_dialog"))
         .transient_for(window_main)
         .modal(true)
         .build();
-    let button_ok = dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&fl!("hard_sym_link_label")));
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&fl!("dialogs_ask_next_time"));
+    let label: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_link_label")));
+    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 

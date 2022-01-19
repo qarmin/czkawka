@@ -2,7 +2,7 @@ use gdk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::{Builder, Window};
 
-use czkawka_core::fl;
+use crate::flg;
 
 #[derive(Clone)]
 pub struct GuiAbout {
@@ -81,17 +81,17 @@ impl GuiAbout {
     }
     pub fn update_language(&self) {
         let mut comment_text: String = "2020 - 2022  Rafał Mikrut(qarmin)\n\n".to_string();
-        comment_text += &fl!("about_window_motto");
+        comment_text += &flg!("about_window_motto");
         self.about_dialog.set_comments(Some(&comment_text));
 
-        self.button_repository.set_tooltip_text(Some(&fl!("about_repository_button_tooltip")));
-        self.button_donation.set_tooltip_text(Some(&fl!("about_donation_button_tooltip")));
-        self.button_instruction.set_tooltip_text(Some(&fl!("about_instruction_button_tooltip")));
-        self.button_translation.set_tooltip_text(Some(&fl!("about_translation_button_tooltip")));
+        self.button_repository.set_tooltip_text(Some(&flg!("about_repository_button_tooltip")));
+        self.button_donation.set_tooltip_text(Some(&flg!("about_donation_button_tooltip")));
+        self.button_instruction.set_tooltip_text(Some(&flg!("about_instruction_button_tooltip")));
+        self.button_translation.set_tooltip_text(Some(&flg!("about_translation_button_tooltip")));
 
-        self.button_repository.set_label(&fl!("about_repository_button"));
-        self.button_donation.set_label(&fl!("about_donation_button"));
-        self.button_instruction.set_label(&fl!("about_instruction_button"));
-        self.button_translation.set_label(&fl!("about_translation_button"));
+        self.button_repository.set_label(&flg!("about_repository_button"));
+        self.button_donation.set_label(&flg!("about_donation_button"));
+        self.button_instruction.set_label(&flg!("about_instruction_button"));
+        self.button_translation.set_label(&flg!("about_translation_button"));
     }
 }

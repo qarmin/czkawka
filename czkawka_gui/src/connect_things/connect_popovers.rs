@@ -4,9 +4,9 @@ use regex::Regex;
 
 use czkawka_core::common::Common;
 
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use czkawka_core::fl;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
@@ -244,21 +244,21 @@ fn popover_custom_select_unselect(
     popover.popdown();
 
     let window_title = match select_things {
-        false => fl!("popover_custom_mode_unselect"),
-        true => fl!("popover_custom_mode_select"),
+        false => flg!("popover_custom_mode_unselect"),
+        true => flg!("popover_custom_mode_select"),
     };
 
     // Dialog for select/unselect items
     {
         let dialog = gtk::Dialog::builder().title(&window_title).transient_for(window_main).modal(true).build();
-        dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-        dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+        dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+        dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-        let check_button_path = gtk::CheckButton::builder().label(&fl!("popover_custom_regex_path_label")).build();
-        let check_button_name = gtk::CheckButton::builder().label(&fl!("popover_custom_regex_name_label")).build();
-        let check_button_rust_regex = gtk::CheckButton::builder().label(&fl!("popover_custom_regex_regex_label")).build();
+        let check_button_path = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_path_label")).build();
+        let check_button_name = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_name_label")).build();
+        let check_button_rust_regex = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_regex_label")).build();
 
-        let check_button_select_not_all_results = gtk::CheckButton::builder().label(&fl!("popover_custom_all_in_group_label")).build();
+        let check_button_select_not_all_results = gtk::CheckButton::builder().label(&flg!("popover_custom_all_in_group_label")).build();
         check_button_select_not_all_results.set_active(true);
 
         let entry_path = gtk::Entry::new();
@@ -270,16 +270,16 @@ fn popover_custom_select_unselect(
 
         // Tooltips
         {
-            check_button_path.set_tooltip_text(Some(&fl!("popover_custom_path_check_button_entry_tooltip")));
-            entry_path.set_tooltip_text(Some(&fl!("popover_custom_path_check_button_entry_tooltip")));
+            check_button_path.set_tooltip_text(Some(&flg!("popover_custom_path_check_button_entry_tooltip")));
+            entry_path.set_tooltip_text(Some(&flg!("popover_custom_path_check_button_entry_tooltip")));
 
-            check_button_name.set_tooltip_text(Some(&fl!("popover_custom_name_check_button_entry_tooltip")));
-            entry_name.set_tooltip_text(Some(&fl!("popover_custom_name_check_button_entry_tooltip")));
+            check_button_name.set_tooltip_text(Some(&flg!("popover_custom_name_check_button_entry_tooltip")));
+            entry_name.set_tooltip_text(Some(&flg!("popover_custom_name_check_button_entry_tooltip")));
 
-            check_button_rust_regex.set_tooltip_text(Some(&fl!("popover_custom_regex_check_button_entry_tooltip")));
-            entry_rust_regex.set_tooltip_text(Some(&fl!("popover_custom_regex_check_button_entry_tooltip")));
+            check_button_rust_regex.set_tooltip_text(Some(&flg!("popover_custom_regex_check_button_entry_tooltip")));
+            entry_rust_regex.set_tooltip_text(Some(&flg!("popover_custom_regex_check_button_entry_tooltip")));
 
-            check_button_select_not_all_results.set_tooltip_text(Some(&fl!("popover_custom_not_all_check_button_tooltip")));
+            check_button_select_not_all_results.set_tooltip_text(Some(&flg!("popover_custom_not_all_check_button_tooltip")));
         }
         {
             let label_regex_valid = label_regex_valid.clone();
@@ -290,8 +290,8 @@ fn popover_custom_select_unselect(
                     message = "".to_string();
                 } else {
                     match Regex::new(&text_to_check) {
-                        Ok(_) => message = fl!("popover_valid_regex"),
-                        Err(_) => message = fl!("popover_invalid_regex"),
+                        Ok(_) => message = flg!("popover_valid_regex"),
+                        Err(_) => message = flg!("popover_invalid_regex"),
                     }
                 }
 

@@ -3,11 +3,11 @@ use std::path::{Path, PathBuf};
 use gtk::prelude::*;
 use gtk::{ResponseType, TreePath};
 
-use czkawka_core::fl;
+use crate::flg;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::localizer::generate_translation_hashmap;
+use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 pub fn connect_button_move(gui_data: &GuiData) {
@@ -76,13 +76,13 @@ fn move_things(
     reset_text_view(text_view_errors);
 
     let chooser = gtk::FileChooserDialog::builder()
-        .title(&fl!("move_files_title_dialog"))
+        .title(&flg!("move_files_title_dialog"))
         .action(gtk::FileChooserAction::SelectFolder)
         .transient_for(window_main)
         .modal(true)
         .build();
-    chooser.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    chooser.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    chooser.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     chooser.set_select_multiple(false);
     chooser.show_all();
@@ -111,7 +111,7 @@ fn move_things(
             if folders.len() != 1 {
                 add_text_to_text_view(
                     &text_view_errors,
-                    fl!(
+                    flg!(
                         "move_files_choose_more_than_1_path",
                         generate_translation_hashmap(vec![("path_number", folders.len().to_string())])
                     )
@@ -234,13 +234,13 @@ fn move_files_common(
         let destination_file = destination_folder.join(file_name);
         if Path::new(&thing).is_dir() {
             if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &fs_extra::dir::CopyOptions::new()) {
-                messages += fl!("move_folder_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
+                messages += flg!("move_folder_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
                 messages += "\n";
                 continue 'next_result;
             }
         } else {
             if let Err(e) = fs_extra::file::move_file(&thing, &destination_file, &fs_extra::file::CopyOptions::new()) {
-                messages += fl!("move_file_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
+                messages += flg!("move_file_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
                 messages += "\n";
 
                 continue 'next_result;
@@ -251,7 +251,7 @@ fn move_files_common(
     }
 
     entry_info.set_text(
-        fl!(
+        flg!(
             "move_stats",
             generate_translation_hashmap(vec![("num_files", moved_files.to_string()), ("all_files", selected_rows.len().to_string())])
         )

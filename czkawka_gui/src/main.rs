@@ -42,6 +42,7 @@ mod help_combo_box;
 mod help_functions;
 mod initialize_gui;
 mod language_functions;
+mod localizer_gui;
 mod notebook_enums;
 mod opening_selecting_records;
 mod saving_loading;

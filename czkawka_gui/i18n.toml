@@ -9,5 +9,5 @@ fallback_language = "en"
 # (Required) The path to the assets directory.
 # The paths inside the assets directory should be structured like so:
 # `assets_dir/{language}/{domain}.ftl`
-assets_dir = "../i18n"
+assets_dir = "i18n"
 

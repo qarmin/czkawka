@@ -7,9 +7,9 @@ use gtk::{LabelBuilder, ResponseType, Window};
 use image::imageops::FilterType;
 use img_hash::HashAlg;
 
+use crate::flg;
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::HashType;
-use czkawka_core::fl;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_dialog_box_child;
@@ -95,7 +95,7 @@ pub fn connect_settings(gui_data: &GuiData) {
             let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
 
             button_settings_duplicates_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog(fl!("cache_clear_duplicates_title"), &settings_window);
+                let dialog = create_clear_cache_dialog(flg!("cache_clear_duplicates_title"), &settings_window);
                 dialog.show_all();
 
                 let text_view_errors = text_view_errors.clone();
@@ -123,7 +123,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                                 }
                             }
 
-                            messages.messages.push(fl!("cache_properly_cleared"));
+                            messages.messages.push(flg!("cache_properly_cleared"));
                             text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
                         }
                     }
@@ -137,7 +137,7 @@ pub fn connect_settings(gui_data: &GuiData) {
             let text_view_errors = gui_data.text_view_errors.clone();
 
             button_settings_similar_images_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog(fl!("cache_clear_similar_images_title"), &settings_window);
+                let dialog = create_clear_cache_dialog(flg!("cache_clear_similar_images_title"), &settings_window);
                 dialog.show_all();
 
                 let text_view_errors = text_view_errors.clone();
@@ -163,7 +163,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                             }
                         }
 
-                        messages.messages.push(fl!("cache_properly_cleared"));
+                        messages.messages.push(flg!("cache_properly_cleared"));
                         text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
                     }
                     dialog.close();
@@ -176,7 +176,7 @@ pub fn connect_settings(gui_data: &GuiData) {
             let text_view_errors = gui_data.text_view_errors.clone();
 
             button_settings_similar_videos_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog(fl!("cache_clear_similar_videos_title"), &settings_window);
+                let dialog = create_clear_cache_dialog(flg!("cache_clear_similar_videos_title"), &settings_window);
                 dialog.show_all();
 
                 let text_view_errors = text_view_errors.clone();
@@ -188,7 +188,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                             czkawka_core::similar_videos::save_hashes_to_file(&cache_entries, &mut messages, false);
                         }
 
-                        messages.messages.push(fl!("cache_properly_cleared"));
+                        messages.messages.push(flg!("cache_properly_cleared"));
                         text_view_errors.buffer().unwrap().set_text(messages.create_messages_text().as_str());
                     }
                     dialog.close();
@@ -200,13 +200,13 @@ pub fn connect_settings(gui_data: &GuiData) {
 
 fn create_clear_cache_dialog(title_str: String, window_settings: &Window) -> gtk::Dialog {
     let dialog = gtk::Dialog::builder().title(&title_str).modal(true).transient_for(window_settings).build();
-    dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label = LabelBuilder::new().label(&fl!("cache_clear_message_label_1")).build();
-    let label2 = LabelBuilder::new().label(&fl!("cache_clear_message_label_2")).build();
-    let label3 = LabelBuilder::new().label(&fl!("cache_clear_message_label_3")).build();
-    let label4 = LabelBuilder::new().label(&fl!("cache_clear_message_label_4")).build();
+    let label = LabelBuilder::new().label(&flg!("cache_clear_message_label_1")).build();
+    let label2 = LabelBuilder::new().label(&flg!("cache_clear_message_label_2")).build();
+    let label3 = LabelBuilder::new().label(&flg!("cache_clear_message_label_3")).build();
+    let label4 = LabelBuilder::new().label(&flg!("cache_clear_message_label_4")).build();
 
     let internal_box = get_dialog_box_child(&dialog);
     internal_box.add(&label);

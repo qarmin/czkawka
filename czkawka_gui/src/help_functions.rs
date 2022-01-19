@@ -9,8 +9,10 @@ use image::imageops::FilterType;
 use image::DynamicImage;
 use image::GenericImageView;
 
+use crate::flg;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
+use czkawka_core::common_dir_traversal;
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
@@ -20,7 +22,6 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use czkawka_core::{common_dir_traversal, fl};
 
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
@@ -395,7 +396,7 @@ pub fn split_path(path: &Path) -> (String, String) {
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk::TextView) {
     let mut messages: String = String::from("");
     if !text_messages.messages.is_empty() {
-        messages += format!("############### {}({}) ###############\n", fl!("text_view_messages"), text_messages.messages.len()).as_str();
+        messages += format!("############### {}({}) ###############\n", flg!("text_view_messages"), text_messages.messages.len()).as_str();
     }
     for text in &text_messages.messages {
         messages += text.as_str();
@@ -405,7 +406,7 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     //     messages += "\n";
     // }
     if !text_messages.warnings.is_empty() {
-        messages += format!("############### {}({}) ###############\n", fl!("text_view_warnings"), text_messages.warnings.len()).as_str();
+        messages += format!("############### {}({}) ###############\n", flg!("text_view_warnings"), text_messages.warnings.len()).as_str();
     }
     for text in &text_messages.warnings {
         messages += text.as_str();
@@ -415,7 +416,7 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gt
     //     messages += "\n";
     // }
     if !text_messages.errors.is_empty() {
-        messages += format!("############### {}({}) ###############\n", fl!("text_view_errors"), text_messages.errors.len()).as_str();
+        messages += format!("############### {}({}) ###############\n", flg!("text_view_errors"), text_messages.errors.len()).as_str();
     }
     for text in &text_messages.errors {
         messages += text.as_str();
@@ -463,8 +464,8 @@ pub fn hide_all_buttons(buttons_array: &[Widget]) {
 
 pub fn get_text_from_invalid_symlink_cause(error: &common_dir_traversal::ErrorType) -> String {
     match error {
-        common_dir_traversal::ErrorType::InfiniteRecursion => fl!("invalid_symlink_infinite_recursion"),
-        common_dir_traversal::ErrorType::NonExistentFile => fl!("invalid_symlink_non_existent_destination"),
+        common_dir_traversal::ErrorType::InfiniteRecursion => flg!("invalid_symlink_infinite_recursion"),
+        common_dir_traversal::ErrorType::NonExistentFile => flg!("invalid_symlink_non_existent_destination"),
     }
 }
 

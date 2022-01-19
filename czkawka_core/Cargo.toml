@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_core"
-version = "3.3.1"
+version = "4.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2018"
 description = "Core of Czkawka app"
