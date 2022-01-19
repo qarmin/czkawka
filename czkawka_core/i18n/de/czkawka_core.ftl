@@ -1,0 +1,25 @@
+# Core
+core_similarity_very_high = Sehr Hoch
+core_similarity_high = Hoch
+core_similarity_medium = Mittel
+core_similarity_small = Klein
+core_similarity_very_small = Sehr klein
+core_similarity_minimal = Minimale
+core_cannot_open_dir = Verzeichnis { $dir } kann nicht geöffnet werden, Grund { $reason }
+core_cannot_read_entry_dir = Kann Eintrag in Verzeichnis { $dir } nicht lesen, Grund { $reason }
+core_cannot_read_metadata_dir = Metadaten können in Verzeichnis { $dir } nicht gelesen werden, Grund { $reason }
+core_file_not_utf8_name = Datei { $name } hat keinen gültigen UTF-8-Namen (einige Zeichen dürfen nicht angezeigt werden)
+core_file_modified_before_epoch = Datei { $name } scheint vor der Unix-Epoche geändert zu werden
+core_folder_modified_before_epoch = Ordner { $name } scheint vor der Unix-Epoche geändert zu werden
+core_file_no_modification_date = Konnte das Änderungsdatum von Datei { $name } nicht abrufen, Grund { $reason }
+core_folder_no_modification_date = Konnte das Änderungsdatum aus dem Ordner { $name } nicht abrufen, Grund { $reason }
+core_missing_no_chosen_included_directory = Mindestens ein Verzeichnis muss angegeben werden
+core_directory_wildcard_no_supported = Verzeichnisse: Wildcards im Pfad werden nicht unterstützt, { $path } wird ignoriert
+core_directory_relative_path = Verzeichnisse: Relativer Pfad wird nicht unterstützt, { $path } wird ignoriert
+core_directory_must_exists = Verzeichnisse: Der angegebene Ordnerpfad muss beendet werden, { $path } wird ignoriert
+core_directory_must_be_directory = Verzeichnisse: Der angegebene Pfad muss auf das Verzeichnis zeigen und { $path } ignorieren
+core_included_directory_zero_valid_directories = Inklusive Verzeichnis-FEHLER: Nicht einmal einen korrekten Pfad zu inkludiert, der erforderlich ist
+core_excluded_directory_pointless_slash = Verzeichnisse: Ausschließen / ist sinnlos, weil es bedeutet, dass keine Dateien gescannt werden
+core_directory_overlap = Verzeichnisse: Alle Verzeichnisse zum Suchen von Überlappungen mit ausgeschlossenen Verzeichnissen
+core_ffmpeg_not_found = Keine richtige Installation von FFmpeg gefunden
+core_ffmpeg_missing_in_snap = Ähnliche Videos funktionieren derzeit nicht mit Snap, wenn du Hilfe möchtest - { $url }

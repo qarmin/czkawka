@@ -20,7 +20,7 @@ pub static LANGUAGE_LOADER_CORE: Lazy<FluentLanguageLoader> = Lazy::new(|| {
 });
 
 #[macro_export]
-macro_rules! fl2 {
+macro_rules! flc {
     ($message_id:literal) => {{
         i18n_embed_fl::fl!($crate::localizer_core::LANGUAGE_LOADER_CORE, $message_id)
     }};
@@ -41,4 +41,11 @@ pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap
         hashmap.insert(key, value);
     }
     hashmap
+}
+
+pub fn fnc_get_similarity_very_high() -> String {
+    flc!("core_similarity_very_high")
+}
+pub fn fnc_get_similarity_minimal() -> String {
+    flc!("core_similarity_minimal")
 }

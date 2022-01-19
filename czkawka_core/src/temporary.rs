@@ -16,7 +16,7 @@ use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::fl2;
+use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
 #[derive(Debug)]
@@ -175,7 +175,7 @@ impl Temporary {
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
-                            warnings.push(fl2!(
+                            warnings.push(flc!(
                                 "core_cannot_open_dir",
                                 generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                             ));
@@ -188,7 +188,7 @@ impl Temporary {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl2!(
+                                warnings.push(flc!(
                                     "core_cannot_read_entry_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -198,7 +198,7 @@ impl Temporary {
                         let metadata: Metadata = match entry_data.metadata() {
                             Ok(t) => t,
                             Err(e) => {
-                                warnings.push(fl2!(
+                                warnings.push(flc!(
                                     "core_cannot_read_metadata_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
@@ -226,7 +226,7 @@ impl Temporary {
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
                                 Err(_inspected) => {
-                                    warnings.push(fl2!(
+                                    warnings.push(flc!(
                                         "core_file_not_utf8_name",
                                         generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
                                     ));
@@ -267,7 +267,7 @@ impl Temporary {
                                     Ok(t) => match t.duration_since(UNIX_EPOCH) {
                                         Ok(d) => d.as_secs(),
                                         Err(_inspected) => {
-                                            warnings.push(fl2!(
+                                            warnings.push(flc!(
                                                 "core_file_modified_before_epoch",
                                                 generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
                                             ));
@@ -275,7 +275,7 @@ impl Temporary {
                                         }
                                     },
                                     Err(e) => {
-                                        warnings.push(fl2!(
+                                        warnings.push(flc!(
                                             "core_file_no_modification_date",
                                             generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
                                         ));

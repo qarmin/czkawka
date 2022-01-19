@@ -1,3 +1,4 @@
+use crate::flg;
 use czkawka_core::common::get_dynamic_image_from_raw_image;
 use czkawka_core::similar_images::RAW_IMAGE_EXTENSIONS;
 use gtk::prelude::*;
@@ -295,7 +296,7 @@ fn populate_groups_at_start(
     check_button_right_preview_text.set_label(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 70)));
 
     label_group_info.set_text(
-        fl!(
+        flg!(
             "compare_groups_number",
             generate_translation_hashmap(vec![
                 ("current_group", current_group.to_string()),
@@ -487,9 +488,9 @@ fn populate_similar_scrolled_view(
 
         let smaller_box = gtk::Box::new(Orientation::Horizontal, 2);
 
-        let button_left = gtk::Button::builder().label(&fl!("compare_move_left_button")).build();
+        let button_left = gtk::Button::builder().label(&flg!("compare_move_left_button")).build();
         let label = gtk::Label::builder().label(&(number + 1).to_string()).build();
-        let button_right = gtk::Button::builder().label(&fl!("compare_move_right_button")).build();
+        let button_right = gtk::Button::builder().label(&flg!("compare_move_right_button")).build();
 
         let image_compare_left = image_compare_left.clone();
         let image_compare_right = image_compare_right.clone();

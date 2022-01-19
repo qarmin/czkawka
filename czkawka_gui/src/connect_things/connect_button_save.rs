@@ -5,8 +5,8 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use gtk::{Button, Entry};
 
+use crate::flg;
 use czkawka_core::common_traits::SaveResults;
-use czkawka_core::fl;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
@@ -101,7 +101,7 @@ fn post_save_things(
     entry_info: &Entry,
     buttons_save: &Button,
 ) {
-    entry_info.set_text(fl!("save_results_to_file", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str());
+    entry_info.set_text(flg!("save_results_to_file", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str());
     // Set state
     {
         buttons_save.hide();

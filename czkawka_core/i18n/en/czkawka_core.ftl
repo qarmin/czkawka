@@ -27,3 +27,5 @@ core_directory_overlap = Directories: All directories to search overlaps with ex
 core_ffmpeg_not_found = Cannot find proper installation of FFmpeg
 core_ffmpeg_missing_in_snap = Similar Videos don't work currently with snap, if you want help look at - { $url }
 
+core_saving_to_cache = Saved to file { $number } cache entries
+core_loading_from_cache = Loaded from cache { $number } entries

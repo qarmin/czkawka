@@ -1,8 +1,8 @@
 use gtk::prelude::*;
 use gtk::{Bin, Builder, EventControllerKey, Window};
 
+use crate::flg;
 use crate::help_functions::get_custom_label_from_button_with_image;
-use czkawka_core::fl;
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
@@ -28,7 +28,7 @@ impl GuiProgressDialog {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_progress: gtk::Dialog = builder.object("window_progress").unwrap();
-        window_progress.set_title(&fl!("window_progress_title"));
+        window_progress.set_title(&flg!("window_progress_title"));
         window_progress.set_transient_for(Some(window_main));
         window_progress.set_modal(true);
 
@@ -61,11 +61,11 @@ impl GuiProgressDialog {
         }
     }
     pub fn update_language(&self) {
-        self.window_progress.set_title(&fl!("window_progress_title"));
+        self.window_progress.set_title(&flg!("window_progress_title"));
 
-        get_custom_label_from_button_with_image(&self.button_stop_in_dialog.clone().upcast::<Bin>()).set_text(&fl!("progress_stop_button"));
+        get_custom_label_from_button_with_image(&self.button_stop_in_dialog.clone().upcast::<Bin>()).set_text(&flg!("progress_stop_button"));
 
-        self.label_progress_current_stage.set_label(&fl!("progress_current_stage"));
-        self.label_progress_all_stages.set_label(&fl!("progress_all_stages"));
+        self.label_progress_current_stage.set_label(&flg!("progress_current_stage"));
+        self.label_progress_all_stages.set_label(&flg!("progress_all_stages"));
     }
 }

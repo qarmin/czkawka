@@ -1,0 +1,25 @@
+# Core
+core_similarity_very_high = Muy alta
+core_similarity_high = Alta
+core_similarity_medium = Medio
+core_similarity_small = Pequeño
+core_similarity_very_small = Muy pequeño
+core_similarity_minimal = Mínimo
+core_cannot_open_dir = No se puede abrir el directorio { $dir }, razón { $reason }
+core_cannot_read_entry_dir = No se puede leer la entrada en directorio { $dir }, razón { $reason }
+core_cannot_read_metadata_dir = No se pueden leer metadatos en el directorio { $dir }, razón { $reason }
+core_file_not_utf8_name = El archivo { $name } no tiene un nombre UTF-8 válido (algunos caracteres pueden no mostrarse)
+core_file_modified_before_epoch = El archivo { $name } parece ser modificado antes de Unix Epoch
+core_folder_modified_before_epoch = La carpeta { $name } parece ser modificada antes del Epoch Unix
+core_file_no_modification_date = No se puede obtener la fecha de modificación del archivo { $name }, razón { $reason }
+core_folder_no_modification_date = No se puede obtener la fecha de modificación de la carpeta { $name }, razón { $reason }
+core_missing_no_chosen_included_directory = Debe proporcionarse al menos un directorio
+core_directory_wildcard_no_supported = Directorios: Los comodines en la ruta no son compatibles, ignorando { $path }
+core_directory_relative_path = Directorios: No se admite la ruta relativa, ignorando { $path }
+core_directory_must_exists = Directorios: La ruta de la carpeta debe salir, ignorando { $path }
+core_directory_must_be_directory = Directorios: La ruta proporcionada debe apuntar al directorio, ignorando { $path }
+core_included_directory_zero_valid_directories = ERROR del directorio incluido: No se ha encontrado ni una ruta correcta a incluida que es necesaria
+core_excluded_directory_pointless_slash = Directorios: Excluyendo / es inútil, ya que no se analizarán archivos
+core_directory_overlap = Directorios: Todos los directorios para buscar superposiciones con directorios excluidos
+core_ffmpeg_not_found = No se puede encontrar la instalación correcta de FFmpeg
+core_ffmpeg_missing_in_snap = Los Videos Similares no funcionan actualmente con el snap, si quieres ayuda mira - { $url }

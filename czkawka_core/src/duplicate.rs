@@ -26,6 +26,8 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
+use crate::flc;
+use crate::localizer_core::generate_translation_hashmap;
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
@@ -1277,7 +1279,9 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             }
         }
 
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", how_much));
+        text_messages
+            .messages
+            .push(flc!("core_saving_to_cache", generate_translation_hashmap(vec![("number", how_much.to_string())])));
     }
 }
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
@@ -1352,9 +1356,9 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
             }
         }
 
-        text_messages.messages.push(format!(
-            "Properly loaded {} cache entries.",
-            hashmap_loaded_entries.values().map(|e| e.len()).sum::<usize>()
+        text_messages.messages.push(flc!(
+            "core_loading_from_cache",
+            generate_translation_hashmap(vec![("number", hashmap_loaded_entries.values().map(|e| e.len()).sum::<usize>().to_string())])
         ));
 
         return Some(hashmap_loaded_entries);

@@ -7,12 +7,12 @@ use gdk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::Builder;
 
+use crate::flg;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
-use czkawka_core::fl;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
@@ -93,7 +93,7 @@ impl GuiData {
 
         //// Windows
         let window_main: gtk::Window = builder.object("window_main").unwrap();
-        window_main.set_title(&fl!("window_main_title"));
+        window_main.set_title(&flg!("window_main_title"));
         window_main.show_all();
 
         let pixbuf = Pixbuf::from_read(std::io::BufReader::new(&ICON_ABOUT[..])).unwrap();
@@ -193,7 +193,7 @@ impl GuiData {
     }
 
     pub fn update_language(&self) {
-        self.window_main.set_title(&fl!("window_main_title"));
+        self.window_main.set_title(&flg!("window_main_title"));
 
         self.main_notebook.update_language();
         self.upper_notebook.update_language();

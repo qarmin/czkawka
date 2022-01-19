@@ -3,9 +3,9 @@ use std::path::PathBuf;
 use gtk::prelude::*;
 use gtk::{ResponseType, TreeView, Window};
 
+use crate::flg;
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
-use czkawka_core::fl;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
@@ -81,9 +81,9 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
 
 fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let folders_to = if excluded_items {
-        fl!("exclude_folders_dialog_title")
+        flg!("exclude_folders_dialog_title")
     } else {
-        fl!("include_folders_dialog_title")
+        flg!("include_folders_dialog_title")
     };
 
     let file_chooser = gtk::FileChooserDialog::builder()
@@ -92,8 +92,8 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
         .transient_for(window_main)
         .modal(true)
         .build();
-    file_chooser.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    file_chooser.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    file_chooser.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    file_chooser.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     file_chooser.set_select_multiple(true);
     file_chooser.show_all();
@@ -140,12 +140,12 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let dialog = gtk::Dialog::builder()
-        .title(&fl!("include_manually_directories_dialog_title"))
+        .title(&flg!("include_manually_directories_dialog_title"))
         .transient_for(window_main)
         .modal(true)
         .build();
-    dialog.add_button(&fl!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&fl!("general_close_button"), ResponseType::Cancel);
+    dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     let entry: gtk::Entry = gtk::Entry::new();
 

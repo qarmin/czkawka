@@ -25,7 +25,7 @@ use crate::help_combo_box::{
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
-use crate::{fl, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
+use crate::{flg, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_button_search(
@@ -145,7 +145,7 @@ pub fn connect_button_search(
         button_settings.set_sensitive(false);
         button_app_info.set_sensitive(false);
 
-        entry_info.set_text(&fl!("searching_for_data"));
+        entry_info.set_text(&flg!("searching_for_data"));
 
         // Resets progress bars
         progress_bar_all_stages.set_fraction(0 as f64);
@@ -424,7 +424,7 @@ pub fn connect_button_search(
                         &buttons_array,
                         &buttons_names,
                     );
-                    entry_info.set_text(&fl!("search_not_choosing_any_music"));
+                    entry_info.set_text(&flg!("search_not_choosing_any_music"));
                     show_dialog.store(false, Ordering::Relaxed);
                 }
             }

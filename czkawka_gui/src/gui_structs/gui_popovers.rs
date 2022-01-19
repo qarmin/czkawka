@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 use gtk::Builder;
 
-use czkawka_core::fl;
+use crate::flg;
 
 #[derive(Clone)]
 pub struct GuiPopovers {
@@ -85,18 +85,18 @@ impl GuiPopovers {
         }
     }
     pub fn update_language(&self) {
-        self.buttons_popover_select_all.set_label(&fl!("popover_select_all"));
-        self.buttons_popover_unselect_all.set_label(&fl!("popover_unselect_all"));
-        self.buttons_popover_reverse.set_label(&fl!("popover_reverse"));
-        self.buttons_popover_select_all_except_oldest.set_label(&fl!("popover_select_all_except_oldest"));
-        self.buttons_popover_select_all_except_newest.set_label(&fl!("popover_select_all_except_newest"));
-        self.buttons_popover_select_one_oldest.set_label(&fl!("popover_select_one_oldest"));
-        self.buttons_popover_select_one_newest.set_label(&fl!("popover_select_one_newest"));
-        self.buttons_popover_select_custom.set_label(&fl!("popover_select_custom"));
-        self.buttons_popover_unselect_custom.set_label(&fl!("popover_unselect_custom"));
+        self.buttons_popover_select_all.set_label(&flg!("popover_select_all"));
+        self.buttons_popover_unselect_all.set_label(&flg!("popover_unselect_all"));
+        self.buttons_popover_reverse.set_label(&flg!("popover_reverse"));
+        self.buttons_popover_select_all_except_oldest.set_label(&flg!("popover_select_all_except_oldest"));
+        self.buttons_popover_select_all_except_newest.set_label(&flg!("popover_select_all_except_newest"));
+        self.buttons_popover_select_one_oldest.set_label(&flg!("popover_select_one_oldest"));
+        self.buttons_popover_select_one_newest.set_label(&flg!("popover_select_one_newest"));
+        self.buttons_popover_select_custom.set_label(&flg!("popover_select_custom"));
+        self.buttons_popover_unselect_custom.set_label(&flg!("popover_unselect_custom"));
         self.buttons_popover_select_all_images_except_biggest
-            .set_label(&fl!("popover_select_all_images_except_biggest"));
+            .set_label(&flg!("popover_select_all_images_except_biggest"));
         self.buttons_popover_select_all_images_except_smallest
-            .set_label(&fl!("popover_select_all_images_except_smallest"));
+            .set_label(&flg!("popover_select_all_images_except_smallest"));
     }
 }
