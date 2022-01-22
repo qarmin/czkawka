@@ -8,5 +8,6 @@ Comment=Multi functional app to clean OS which allow to find duplicates, empty f
 Comment[it]=Programma multifunzionale per pulire il sistema, che permette di trovare file duplicati, cartelle vuote, file simili, ecc...
 Icon=com.github.qarmin.czkawka
 Categories=System;FileTools
+Keywords=Hiccup;duplicate;same;similar;cleaner
 StartupWMClass=czkawka_gui
 TryExec=czkawka_gui
