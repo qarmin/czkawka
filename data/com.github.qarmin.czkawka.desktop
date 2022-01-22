@@ -7,6 +7,6 @@ Name[it]=Singhiozzo
 Comment=Multi functional app to clean OS which allow to find duplicates, empty folders, similar files etc.
 Comment[it]=Programma multifunzionale per pulire il sistema, che permette di trovare file duplicati, cartelle vuote, file simili, ecc...
 Icon=com.github.qarmin.czkawka
-Categories=System;
+Categories=System;FileTools
 StartupWMClass=czkawka_gui
 TryExec=czkawka_gui
