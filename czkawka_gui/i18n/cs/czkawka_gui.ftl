@@ -49,7 +49,7 @@ main_notebook_image_fast_compare_tooltip =
     V protikladu k normálnímu režimu, kde je každá pomlčka porovnávána s x krát, kde x je podobnost zvolená uživatelem, v tomto režimu se vždy používá pouze jedno porovnávání.
     
     Tato možnost je doporučena při porovnávání >10000 obrázků s jinou než 0(Very High) podobností.
-main_notebook_duplicates = Duplikovat soubory
+main_notebook_duplicates = Duplicitní soubory
 main_notebook_empty_directories = Prázdné adresáře
 main_notebook_big_files = Velké soubory
 main_notebook_empty_files = Prázdné soubory
