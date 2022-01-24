@@ -20,7 +20,7 @@ sudo dnf -y install ffmpeg
 ```
 #### Void Linux (CLI only)
 ```
-sudo xbps-install gcc pkg-config ffpmeg
+sudo xbps-install gcc pkg-config ffmpeg
 ```
 
 ### macOS
