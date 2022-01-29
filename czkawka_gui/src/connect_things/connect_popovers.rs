@@ -112,7 +112,7 @@ fn popover_all_except_oldest_newest(
                     }
                     break;
                 }
-                tree_iter_array.push(iter.clone());
+                tree_iter_array.push(iter);
                 let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
                 let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
                 if except_oldest {
@@ -187,7 +187,7 @@ fn popover_one_oldest_newest(
                     }
                     break;
                 }
-                tree_iter_array.push(iter.clone());
+                tree_iter_array.push(iter);
                 let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
                 let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
                 if check_oldest {
@@ -454,10 +454,10 @@ fn popover_custom_select_unselect(
                                 if is_selected {
                                     number_of_already_selected_things += 1;
                                 } else {
-                                    vec_of_iters.push(iter.clone());
+                                    vec_of_iters.push(iter);
                                 }
                             } else {
-                                vec_of_iters.push(iter.clone());
+                                vec_of_iters.push(iter);
                             }
                         }
 
@@ -518,7 +518,7 @@ fn popover_all_except_biggest_smallest(
                     }
                     break;
                 }
-                tree_iter_array.push(iter.clone());
+                tree_iter_array.push(iter);
                 let size_as_bytes = model.value(&iter, column_size_as_bytes).get::<u64>().unwrap();
 
                 // If dimension exists, then needs to be checked images

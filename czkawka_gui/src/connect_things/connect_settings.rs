@@ -2,8 +2,9 @@ use std::collections::BTreeMap;
 use std::default::Default;
 
 use directories_next::ProjectDirs;
+use gtk::builders::LabelBuilder;
 use gtk::prelude::*;
-use gtk::{LabelBuilder, ResponseType, Window};
+use gtk::{ResponseType, Window};
 use image::imageops::FilterType;
 use img_hash::HashAlg;
 
