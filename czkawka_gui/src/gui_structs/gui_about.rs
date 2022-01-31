@@ -51,7 +51,7 @@ impl GuiAbout {
             "Mek101",
             "Michael Grigoryan",
             "Nikita Karamov",
-            "Proprietary Chrome-chan",
+            "TheEvilSkeleton",
             "Sbgodin",
             "Spirit",
             "Stefan Seering",
