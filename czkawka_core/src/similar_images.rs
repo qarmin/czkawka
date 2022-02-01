@@ -858,8 +858,7 @@ impl SimilarImages {
                 panic!("Found Invalid entries");
             }
         }
-        // self.similar_vectors = collected_similar_images.into_values().collect(); // TODO use this in Rust 1.54.0
-        self.similar_vectors = collected_similar_images.values().cloned().collect(); // 1.53.0 version
+        self.similar_vectors = collected_similar_images.into_values().collect();
 
         if self.exclude_images_with_same_size {
             let mut new_vector = Default::default();

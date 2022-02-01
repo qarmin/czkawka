@@ -783,7 +783,7 @@ fn show_preview(
                         break 'dir;
                     }
                     let string_dir = file_dir.to_string_lossy().to_string();
-                    image_preview.set_from_file(string_dir);
+                    image_preview.set_from_file(Some(string_dir));
 
                     {
                         let mut preview_path = preview_path.borrow_mut();

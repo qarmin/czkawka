@@ -132,13 +132,13 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_iter = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
+        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
 
         populate_groups_at_start(
             nb_object,
             &model,
             shared_current_path.clone(),
-            tree_iter,
+            tree_path,
             &image_compare_left,
             &image_compare_right,
             current_group,
@@ -368,13 +368,13 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreePa
         let big_path = get_image_path_temporary("roman", 1, "jpg");
         let _ = big_thumbnail.save(&big_path);
         let big_img = gtk::Image::new();
-        big_img.set_from_file(big_path);
+        big_img.set_from_file(Some(big_path));
 
         let small_thumbnail = resize_dynamic_image_dimension(big_thumbnail, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), &FilterType::Triangle);
         let small_path = get_image_path_temporary("roman", 1, "jpg");
         let _ = small_thumbnail.save(&small_path);
         let small_img = gtk::Image::new();
-        small_img.set_from_file(small_path);
+        small_img.set_from_file(Some(small_path));
 
         cache_all_images.push((full_path, name, big_img, small_img, tree_path));
     }
@@ -430,6 +430,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
 /// Moves iterator to previous/next header
 fn move_iter(model: &gtk::TreeModel, tree_path: &TreePath, column_color: i32, go_next: bool) -> TreePath {
     let tree_iter = model.iter(tree_path).unwrap();
+
     assert_eq!(model.value(&tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
 
     if go_next {
@@ -579,8 +580,8 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
     let selected_records = selection.selected_rows().0;
 
     let iter = model.iter_first().unwrap(); // Checking that treeview is not empty should be done before
-    header_clone = iter.clone(); // if nothing selected, use first group
-    possible_header = iter.clone(); // if nothing selected, use first group
+    header_clone = iter; // if nothing selected, use first group
+    possible_header = iter; // if nothing selected, use first group
     assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
 
     if !selected_records.is_empty() {
@@ -592,11 +593,11 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
 
             if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 possible_group += 1;
-                possible_header = iter.clone();
+                possible_header = iter;
             }
 
             if model.path(&iter).unwrap() == first_selected_record {
-                header_clone = possible_header.clone();
+                header_clone = possible_header;
                 current_group = possible_group;
             }
         }
