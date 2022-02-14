@@ -41,6 +41,8 @@ pub const KEY_SPACE: u32 = 65;
 // pub const KEY_HOME: u32 = 115;
 // pub const KEY_END: u32 = 110;
 
+pub const CHECK_GTK_EVENTS_INTERVAL: usize = 100;
+
 #[derive(Eq, PartialEq)]
 pub enum PopoverTypes {
     All,
@@ -774,6 +776,21 @@ pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label 
         }
     }
     panic!("Button doesn't have proper custom label child");
+}
+
+pub fn handle_gtk_pending_event() -> bool {
+    let have_pending = gtk::events_pending();
+    if have_pending {
+        gtk::main_iteration();
+    }
+    have_pending
+}
+
+pub fn handle_gtk_pending_event_counter(counter: usize) -> bool {
+    if counter > 0 && (counter % CHECK_GTK_EVENTS_INTERVAL) == 0 {
+        return handle_gtk_pending_event();
+    }
+    false
 }
 
 // GTK 4

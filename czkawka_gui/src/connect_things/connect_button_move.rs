@@ -224,7 +224,8 @@ fn move_files_common(
     let mut moved_files: u32 = 0;
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
-    'next_result: for tree_path in selected_rows.iter().rev() {
+    'next_result: for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
+        handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
         let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();

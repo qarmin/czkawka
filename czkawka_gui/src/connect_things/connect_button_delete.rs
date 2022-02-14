@@ -292,7 +292,8 @@ pub fn empty_folder_remover(
     let mut messages: String = "".to_string();
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selected_rows.iter().rev() {
+    for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
+        handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
@@ -408,7 +409,8 @@ pub fn basic_remove(
     }
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selected_rows.iter().rev() {
+    for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
+        handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.value(&iter, column_file_name).get::<String>().unwrap();
@@ -504,10 +506,13 @@ pub fn tree_remove(
     }
 
     // Delete duplicated entries, and remove real files
+    let mut counter = 0_usize;
     for (path, mut vec_file_name) in map_with_path_to_delete {
         vec_file_name.sort();
         vec_file_name.dedup();
         for file_name in vec_file_name {
+            handle_gtk_pending_event_counter(counter);
+            counter += 1;
             if !use_trash {
                 if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
                     messages += flg!(
