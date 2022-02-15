@@ -155,6 +155,8 @@ pub fn connect_button_search(
 
         let glib_stop_sender = glib_stop_sender.clone();
         let stop_receiver = stop_receiver.clone();
+        // Consume any stale stop messages.
+        stop_receiver.try_iter().for_each(|_| ());
 
         match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {

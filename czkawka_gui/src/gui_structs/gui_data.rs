@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crossbeam_channel::unbounded;
+use crossbeam_channel::bounded;
 use gdk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::Builder;
@@ -156,7 +156,7 @@ impl GuiData {
         scrolled_window_errors.show_all(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
-        let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = unbounded();
+        let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = bounded(1);
 
         Self {
             glade_src,
