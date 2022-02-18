@@ -449,14 +449,16 @@ fn popover_custom_select_unselect(
                             }
                         }
 
-                        if need_to_change_thing {
-                            if select_things {
-                                if is_selected {
-                                    number_of_already_selected_things += 1;
-                                } else {
+                        if select_things {
+                            if is_selected {
+                                number_of_already_selected_things += 1;
+                            } else {
+                                if need_to_change_thing {
                                     vec_of_iters.push(iter);
                                 }
-                            } else {
+                            }
+                        } else {
+                            if need_to_change_thing {
                                 vec_of_iters.push(iter);
                             }
                         }
