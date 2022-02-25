@@ -11,9 +11,10 @@ general_close_button = Close
 # Main window
 music_title_checkbox = Title
 music_artist_checkbox = Artist
-music_album_title_checkbox = Album Title
-music_album_artist_checkbox = Album Artist
 music_year_checkbox = Year
+music_bitrate_checkbox = Bitrate
+music_genre_checkbox = Genre
+music_length_checkbox = Length
 music_comparison_checkbox = Approximate Comparison
 
 music_comparison_checkbox_tooltip =
@@ -83,8 +84,9 @@ main_tree_view_column_dimensions = Dimensions
 main_tree_view_column_title = Title
 main_tree_view_column_artist = Artist
 main_tree_view_column_year = Year
-main_tree_view_column_album_title = Album Title
-main_tree_view_column_album_artist = Album Artist
+main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_length = Length
+main_tree_view_column_genre = Genre
 main_tree_view_column_symlink_file_name = Symlink File Name
 main_tree_view_column_symlink_folder = Symlnik Folder
 main_tree_view_column_destination_path = Destination Path

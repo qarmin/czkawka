@@ -16,7 +16,7 @@ pub struct GuiAbout {
 
 impl GuiAbout {
     pub fn create_from_builder(window_main: &Window, logo: &Pixbuf) -> Self {
-        let glade_src = include_str!("../../ui/about_dialog.glade").to_string();
+        let glade_src = include_str!("../../ui/about_dialog.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let about_dialog: gtk::AboutDialog = builder.object("about_dialog").unwrap();

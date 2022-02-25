@@ -1168,11 +1168,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         let music_similarity = *mf.get_music_similarity();
 
-                        let is_title = (MusicSimilarity::TITLE & music_similarity) != MusicSimilarity::NONE;
-                        let is_artist = (MusicSimilarity::ARTIST & music_similarity) != MusicSimilarity::NONE;
-                        let is_album_title = (MusicSimilarity::ALBUM_TITLE & music_similarity) != MusicSimilarity::NONE;
-                        let is_album_artist = (MusicSimilarity::ALBUM_ARTIST & music_similarity) != MusicSimilarity::NONE;
+                        let is_track_title = (MusicSimilarity::TRACK_TITLE & music_similarity) != MusicSimilarity::NONE;
+                        let is_track_artist = (MusicSimilarity::TRACK_ARTIST & music_similarity) != MusicSimilarity::NONE;
                         let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
+                        let is_bitrate = (MusicSimilarity::BITRATE & music_similarity) != MusicSimilarity::NONE;
+                        let is_length = (MusicSimilarity::LENGTH & music_similarity) != MusicSimilarity::NONE;
+                        let is_genre = (MusicSimilarity::GENRE & music_similarity) != MusicSimilarity::NONE;
 
                         if mf.get_use_reference() {
                             let vector = mf.get_similar_music_referenced();
@@ -1191,18 +1192,20 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 };
 
                                 let (directory, file) = split_path(&base_file_entry.path);
-                                let values: [(u32, &dyn ToValue); 15] = [
+                                let values: [(u32, &dyn ToValue); 17] = [
                                     (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
                                     (ColumnsSameMusic::SelectionButton as u32, &false),
                                     (ColumnsSameMusic::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
                                     (ColumnsSameMusic::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSameMusic::Name as u32, &file),
                                     (ColumnsSameMusic::Path as u32, &directory),
-                                    (ColumnsSameMusic::Title as u32, &base_file_entry.title),
-                                    (ColumnsSameMusic::Artist as u32, &base_file_entry.artist),
-                                    (ColumnsSameMusic::AlbumTitle as u32, &base_file_entry.album_title),
-                                    (ColumnsSameMusic::AlbumArtist as u32, &base_file_entry.album_artist),
+                                    (ColumnsSameMusic::Title as u32, &base_file_entry.track_title),
+                                    (ColumnsSameMusic::Artist as u32, &base_file_entry.track_artist),
                                     (ColumnsSameMusic::Year as u32, &base_file_entry.year.to_string()),
+                                    (ColumnsSameMusic::Genre as u32, &base_file_entry.genre),
+                                    (ColumnsSameMusic::Bitrate as u32, &(format!("{} kbps", base_file_entry.bitrate))),
+                                    (ColumnsSameMusic::BitrateAsNumber as u32, &(base_file_entry.bitrate)),
+                                    (ColumnsSameMusic::Length as u32, &base_file_entry.length),
                                     (
                                         ColumnsSameMusic::Modification as u32,
                                         &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
@@ -1214,18 +1217,20 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 list_store.set(&list_store.append(), &values);
                                 for file_entry in vec_file_entry {
                                     let (directory, file) = split_path(&file_entry.path);
-                                    let values: [(u32, &dyn ToValue); 15] = [
+                                    let values: [(u32, &dyn ToValue); 17] = [
                                         (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
                                         (ColumnsSameMusic::SelectionButton as u32, &false),
                                         (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
                                         (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSameMusic::Name as u32, &file),
                                         (ColumnsSameMusic::Path as u32, &directory),
-                                        (ColumnsSameMusic::Title as u32, &file_entry.title),
-                                        (ColumnsSameMusic::Artist as u32, &file_entry.artist),
-                                        (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
-                                        (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
-                                        (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                        (ColumnsSameMusic::Title as u32, &base_file_entry.track_title),
+                                        (ColumnsSameMusic::Artist as u32, &base_file_entry.track_artist),
+                                        (ColumnsSameMusic::Year as u32, &base_file_entry.year.to_string()),
+                                        (ColumnsSameMusic::Genre as u32, &base_file_entry.genre),
+                                        (ColumnsSameMusic::Bitrate as u32, &(format!("{} kbps", base_file_entry.bitrate))),
+                                        (ColumnsSameMusic::BitrateAsNumber as u32, &(base_file_entry.bitrate)),
+                                        (ColumnsSameMusic::Length as u32, &base_file_entry.length),
                                         (
                                             ColumnsSameMusic::Modification as u32,
                                             &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
@@ -1255,7 +1260,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     vec_file_entry.clone()
                                 };
 
-                                let values: [(u32, &dyn ToValue); 15] = [
+                                let values: [(u32, &dyn ToValue); 17] = [
                                     (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
                                     (ColumnsSameMusic::SelectionButton as u32, &false),
                                     (ColumnsSameMusic::Size as u32, &"".to_string()),
@@ -1264,28 +1269,14 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (ColumnsSameMusic::Path as u32, &"".to_string()),
                                     (
                                         ColumnsSameMusic::Title as u32,
-                                        &(match is_title {
+                                        &(match is_track_title {
                                             true => text.clone(),
                                             false => "".to_string(),
                                         }),
                                     ),
                                     (
                                         ColumnsSameMusic::Artist as u32,
-                                        &(match is_artist {
-                                            true => text.clone(),
-                                            false => "".to_string(),
-                                        }),
-                                    ),
-                                    (
-                                        ColumnsSameMusic::AlbumTitle as u32,
-                                        &(match is_album_title {
-                                            true => text.clone(),
-                                            false => "".to_string(),
-                                        }),
-                                    ),
-                                    (
-                                        ColumnsSameMusic::AlbumArtist as u32,
-                                        &(match is_album_artist {
+                                        &(match is_track_artist {
                                             true => text.clone(),
                                             false => "".to_string(),
                                         }),
@@ -1293,6 +1284,28 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (
                                         ColumnsSameMusic::Year as u32,
                                         &(match is_year {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::Bitrate as u32,
+                                        &(match is_bitrate {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (ColumnsSameMusic::BitrateAsNumber as u32, &(0)),
+                                    (
+                                        ColumnsSameMusic::Genre as u32,
+                                        &(match is_genre {
+                                            true => text.clone(),
+                                            false => "".to_string(),
+                                        }),
+                                    ),
+                                    (
+                                        ColumnsSameMusic::Length as u32,
+                                        &(match is_length {
                                             true => text.clone(),
                                             false => "".to_string(),
                                         }),
@@ -1305,18 +1318,20 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 list_store.set(&list_store.append(), &values);
                                 for file_entry in vec_file_entry {
                                     let (directory, file) = split_path(&file_entry.path);
-                                    let values: [(u32, &dyn ToValue); 15] = [
+                                    let values: [(u32, &dyn ToValue); 17] = [
                                         (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
                                         (ColumnsSameMusic::SelectionButton as u32, &false),
                                         (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
                                         (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSameMusic::Name as u32, &file),
                                         (ColumnsSameMusic::Path as u32, &directory),
-                                        (ColumnsSameMusic::Title as u32, &file_entry.title),
-                                        (ColumnsSameMusic::Artist as u32, &file_entry.artist),
-                                        (ColumnsSameMusic::AlbumTitle as u32, &file_entry.album_title),
-                                        (ColumnsSameMusic::AlbumArtist as u32, &file_entry.album_artist),
+                                        (ColumnsSameMusic::Title as u32, &file_entry.track_title),
+                                        (ColumnsSameMusic::Artist as u32, &file_entry.track_artist),
                                         (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
+                                        (ColumnsSameMusic::Genre as u32, &file_entry.genre),
+                                        (ColumnsSameMusic::Bitrate as u32, &(format!("{} kbps", file_entry.bitrate))),
+                                        (ColumnsSameMusic::BitrateAsNumber as u32, &(file_entry.bitrate)),
+                                        (ColumnsSameMusic::Length as u32, &file_entry.length),
                                         (
                                             ColumnsSameMusic::Modification as u32,
                                             &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),

@@ -141,7 +141,7 @@ pub enum Commands {
         excluded_items: ExcludedItems,
         // #[structopt(short = "D", long, help = "Delete found files")]
         // delete_files: bool, TODO
-        #[structopt(short = "z", long, default_value = "artist,title", parse(try_from_str = parse_music_duplicate_type), help = "Search method (title, artist, album_title, album_artist, year)", long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas).")]
+        #[structopt(short = "z", long, default_value = "track_title,track_artist", parse(try_from_str = parse_music_duplicate_type), help = "Search method (track_title,track_artist,year,bitrate,genre,length))", long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas).")]
         music_similarity: MusicSimilarity,
         #[structopt(flatten)]
         file_to_save: FileToSave,
@@ -414,26 +414,29 @@ fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
 
     let mut similarity: MusicSimilarity = MusicSimilarity::NONE;
 
-    let parts: Vec<&str> = src.split(',').collect();
+    let parts: Vec<String> = src.split(',').map(|e| e.to_lowercase().replace('_', "")).collect();
 
-    if parts.iter().any(|e| e.to_lowercase().contains("title") && !e.to_lowercase().contains("album")) {
-        similarity |= MusicSimilarity::TITLE;
+    if parts.iter().any(|e| e.contains("tracktitle")) {
+        similarity |= MusicSimilarity::TRACK_TITLE;
     }
-    if parts.iter().any(|e| e.to_lowercase().contains("artist") && !e.to_lowercase().contains("album")) {
-        similarity |= MusicSimilarity::ARTIST;
+    if parts.iter().any(|e| e.contains("trackartist")) {
+        similarity |= MusicSimilarity::TRACK_ARTIST;
     }
-    if parts.iter().any(|e| e.to_lowercase().contains("title") && e.to_lowercase().contains("album")) {
-        similarity |= MusicSimilarity::ALBUM_TITLE;
-    }
-    if parts.iter().any(|e| e.to_lowercase().contains("artist") && e.to_lowercase().contains("album")) {
-        similarity |= MusicSimilarity::ALBUM_ARTIST;
-    }
-    if parts.iter().any(|e| e.to_lowercase().contains("year")) {
+    if parts.iter().any(|e| e.contains("year")) {
         similarity |= MusicSimilarity::YEAR;
+    }
+    if parts.iter().any(|e| e.contains("bitrate")) {
+        similarity |= MusicSimilarity::BITRATE;
+    }
+    if parts.iter().any(|e| e.contains("genre")) {
+        similarity |= MusicSimilarity::GENRE;
+    }
+    if parts.iter().any(|e| e.contains("length")) {
+        similarity |= MusicSimilarity::LENGTH;
     }
 
     if similarity == MusicSimilarity::NONE {
-        return Err("Couldn't parse the music search method (allowed: title,artist,album_title,album_artist,year)".to_string());
+        return Err("Couldn't parse the music search method (allowed: track_title,track_artist,year,bitrate,genre,length)".to_string());
     }
 
     Ok(similarity)

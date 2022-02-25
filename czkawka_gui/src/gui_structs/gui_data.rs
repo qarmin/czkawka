@@ -88,7 +88,7 @@ pub struct GuiData {
 impl GuiData {
     pub fn new_with_application(application: &gtk::Application) -> Self {
         //// Loading glade file content and build with it help UI
-        let glade_src = include_str!("../../ui/main_window.glade").to_string();
+        let glade_src = include_str!("../../ui/main_window.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         //// Windows

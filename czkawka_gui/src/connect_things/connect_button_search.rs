@@ -53,11 +53,12 @@ pub fn connect_button_search(
     let buttons_names = gui_data.bottom_buttons.buttons_names;
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
-    let check_button_music_album_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_album_artist.clone();
-    let check_button_music_album_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_album_title.clone();
     let check_button_music_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
     let check_button_music_year: gtk::CheckButton = gui_data.main_notebook.check_button_music_year.clone();
+    let check_button_music_genre: gtk::CheckButton = gui_data.main_notebook.check_button_music_genre.clone();
+    let check_button_music_length: gtk::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
+    let check_button_music_bitrate: gtk::CheckButton = gui_data.main_notebook.check_button_music_bitrate.clone();
     let check_button_recursive = gui_data.upper_notebook.check_button_recursive.clone();
     let check_button_settings_duplicates_delete_outdated_cache = gui_data.settings.check_button_settings_duplicates_delete_outdated_cache.clone();
     let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
@@ -385,19 +386,22 @@ pub fn connect_button_search(
                 let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
 
                 if check_button_music_title.is_active() {
-                    music_similarity |= MusicSimilarity::TITLE;
+                    music_similarity |= MusicSimilarity::TRACK_TITLE;
                 }
                 if check_button_music_artist.is_active() {
-                    music_similarity |= MusicSimilarity::ARTIST;
-                }
-                if check_button_music_album_title.is_active() {
-                    music_similarity |= MusicSimilarity::ALBUM_TITLE;
-                }
-                if check_button_music_album_artist.is_active() {
-                    music_similarity |= MusicSimilarity::ALBUM_ARTIST;
+                    music_similarity |= MusicSimilarity::TRACK_ARTIST;
                 }
                 if check_button_music_year.is_active() {
                     music_similarity |= MusicSimilarity::YEAR;
+                }
+                if check_button_music_bitrate.is_active() {
+                    music_similarity |= MusicSimilarity::BITRATE;
+                }
+                if check_button_music_genre.is_active() {
+                    music_similarity |= MusicSimilarity::GENRE;
+                }
+                if check_button_music_length.is_active() {
+                    music_similarity |= MusicSimilarity::LENGTH;
                 }
 
                 if music_similarity != MusicSimilarity::NONE {
