@@ -902,10 +902,10 @@ fn get_approximate_conversion(what: &mut String) {
     let mut space_before = true;
     for character in what.chars() {
         match character {
-            '(' => {
+            '(' | '[' => {
                 tab_number += 1;
             }
-            ')' => {
+            ')' | ']' => {
                 if tab_number == 0 {
                     // Nothing to do, not even save it to output
                 } else {
@@ -956,5 +956,9 @@ mod tests {
         let mut what = "  fsf.f.  ".to_string();
         get_approximate_conversion(&mut what);
         assert_eq!(what, "fsf f");
+
+        let mut what = "Kekistan (feat. roman) [Mix on Mix]".to_string();
+        get_approximate_conversion(&mut what);
+        assert_eq!(what, "Kekistan");
     }
 }
