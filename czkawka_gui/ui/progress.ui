@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.9.0 -->
 <!-- Generated with glade 3.39.0 
 
 The MIT License (MIT)
@@ -27,15 +28,15 @@ Author: Rafał Mikrut
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.24"/>
-  <!-- interface-license-type mit -->
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
+  <!-- interface-license-id mit_x11 -->
+  <requires lib="gtk+" version="3.24"/>
   <object class="GtkDialog" id="window_progress">
     <property name="can-focus">False</property>
-    <property name="type-hint">dialog</property>
     <property name="gravity">center</property>
+    <property name="type-hint">dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -45,12 +46,6 @@ Author: Rafał Mikrut
           <object class="GtkButtonBox">
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -60,29 +55,29 @@ Author: Rafał Mikrut
         </child>
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-start">10</property>
+            <property name="margin-top">10</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
+            <property name="visible">True</property>
             <child>
               <!-- n-columns=2 n-rows=2 -->
               <object class="GtkGrid" id="grid_progress_stages">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="valign">center</property>
-                <property name="margin-start">2</property>
                 <property name="margin-end">2</property>
+                <property name="margin-start">2</property>
                 <property name="margin-top">2</property>
+                <property name="valign">center</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkLabel" id="label_progress_all_stages">
-                    <property name="name">label_progress_all_stages</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">All stages: </property>
+                    <property name="name">label_progress_all_stages</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -91,11 +86,11 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkProgressBar" id="progress_bar_all_stages">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="hexpand">True</property>
                     <property name="pulse-step">0.099999999776482579</property>
                     <property name="show-text">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -104,10 +99,10 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkLabel" id="label_progress_current_stage">
-                    <property name="name">label_progress_current_stage</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Current stage:  </property>
+                    <property name="name">label_progress_current_stage</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -116,9 +111,9 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkProgressBar" id="progress_bar_current_stage">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="show-text">True</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -134,9 +129,9 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkLabel" id="label_stage">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Stage 1/2</property>
+                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -146,20 +141,20 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkButton" id="button_stop_in_dialog">
-                <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
                 <property name="halign">end</property>
                 <property name="margin-end">2</property>
+                <property name="receives-default">True</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkImage">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="icon-name">dialog-cancel</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -169,9 +164,9 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Stop</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>

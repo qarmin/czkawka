@@ -1,6 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.9.0 -->
 <!-- Generated with glade 3.39.0 -->
 <interface>
+  <!-- interface-name compare_images.ui -->
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkDialog" id="window_compare">
     <property name="can-focus">False</property>
@@ -14,12 +16,6 @@
           <object class="GtkButtonBox">
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -29,19 +25,19 @@
         </child>
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
+            <property name="visible">True</property>
             <child>
               <object class="GtkBox">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkLabel" id="label_group_info">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="label" translatable="yes">Group XD/PER XD (99 images in current group)</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -51,14 +47,14 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="button_go_next_compare_group">
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkImage">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="icon-name">go-next</property>
+                        <property name="visible">True</property>
                       </object>
                     </child>
                   </object>
@@ -71,14 +67,14 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="button_go_previous_compare_group">
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkImage">
-                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="icon-name">go-previous</property>
+                        <property name="visible">True</property>
                       </object>
                     </child>
                   </object>
@@ -97,16 +93,16 @@
             </child>
             <child>
               <object class="GtkBox">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="homogeneous">True</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkCheckButton" id="check_button_left_preview_text">
-                    <property name="label" translatable="yes">First Game</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
                     <property name="draw-indicator">True</property>
+                    <property name="label" translatable="yes">First Game</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -116,11 +112,11 @@
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="check_button_right_preview_text">
-                    <property name="label" translatable="yes">Second Game</property>
-                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
                     <property name="draw-indicator">True</property>
+                    <property name="label" translatable="yes">Second Game</property>
+                    <property name="receives-default">False</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -137,14 +133,14 @@
             </child>
             <child>
               <object class="GtkBox">
-                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="homogeneous">True</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkImage" id="image_compare_left">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="stock">gtk-missing-image</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -154,9 +150,9 @@
                 </child>
                 <child>
                   <object class="GtkImage" id="image_compare_right">
-                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="stock">gtk-missing-image</property>
+                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -173,12 +169,9 @@
             </child>
             <child>
               <object class="GtkScrolledWindow" id="scrolled_window_compare_choose_images">
-                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="shadow-type">in</property>
-                <child>
-                  <placeholder/>
-                </child>
+                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>

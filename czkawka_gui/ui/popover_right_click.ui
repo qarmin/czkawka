@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.9.0 -->
 <!-- Generated with glade 3.38.2 
 
 The MIT License (MIT)
@@ -27,25 +28,25 @@ Author: Rafał Mikrut
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.24"/>
-  <!-- interface-license-type mit -->
   <!-- interface-name Czkawka -->
   <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
   <!-- interface-authors Rafa\305\202 Mikrut -->
+  <!-- interface-license-id mit_x11 -->
+  <requires lib="gtk+" version="3.24"/>
   <object class="GtkPopover" id="popover_right_click">
     <property name="can-focus">False</property>
     <property name="position">left</property>
     <child>
       <object class="GtkBox">
-        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
+        <property name="visible">True</property>
         <child>
           <object class="GtkButton" id="buttons_popover_right_click_open_file">
-            <property name="label" translatable="yes">Open File</property>
-            <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="label" translatable="yes">Open File</property>
             <property name="receives-default">True</property>
+            <property name="visible">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -55,10 +56,10 @@ Author: Rafał Mikrut
         </child>
         <child>
           <object class="GtkButton" id="buttons_popover_right_click_open_folder">
-            <property name="label" translatable="yes">Open Folder</property>
-            <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="label" translatable="yes">Open Folder</property>
             <property name="receives-default">True</property>
+            <property name="visible">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
