@@ -14,7 +14,7 @@ FFmpeg is not included here, because is not needed to build because it is dynami
 
 #### Debian / Ubuntu
 ```shell
-sudo apt install -y curl  # Needed by Rust update tool
+sudo apt install -y curl git build-essential # Needed by Rust update tool
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
 sudo apt install -y libgtk-3-dev
 ```
