@@ -182,6 +182,11 @@ popover_custom_regex_check_button_entry_tooltip =
 
         This uses the default Rust regex implementation. You can read more about it here: https://docs.rs/regex.
 
+popover_custom_ignore_size_check_button_tooltip =
+        Ignore size of letters.
+
+        When enabled /home/* finds both /HoMe/roman and /home/roman
+
 popover_custom_not_all_check_button_tooltip = 
         Prevents selecting all records in group.
 
@@ -192,6 +197,7 @@ popover_custom_not_all_check_button_tooltip =
 popover_custom_regex_path_label = Path
 popover_custom_regex_name_label = Name
 popover_custom_regex_regex_label = Regex Path + Name
+popover_custom_ignore_size = Ignore size of letters
 popover_custom_all_in_group_label = Don't select all records in group
 
 popover_custom_mode_unselect = Unselect Custom
@@ -237,7 +243,7 @@ progress_stop_button = Stop
 about_repository_button_tooltip = Link to repository page with source code.
 about_donation_button_tooltip = Link to donation page.
 about_instruction_button_tooltip = Link to instruction page.
-about_translation_button_tooltip = Link to Crowdin page with app translations. Officially Polish and English are supported, but any help with other language will be appreciated.
+about_translation_button_tooltip = Link to Crowdin page with app translations. Officially Polish and English are supported.
 
 about_repository_button = Repository
 about_donation_button = Donation

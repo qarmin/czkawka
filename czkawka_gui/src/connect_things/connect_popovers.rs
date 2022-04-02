@@ -258,6 +258,9 @@ fn popover_custom_select_unselect(
         let check_button_name = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_name_label")).build();
         let check_button_rust_regex = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_regex_label")).build();
 
+        let check_button_ignore_size = gtk::CheckButton::builder().label(&flg!("popover_custom_ignore_size")).build();
+        check_button_ignore_size.set_active(true);
+
         let check_button_select_not_all_results = gtk::CheckButton::builder().label(&flg!("popover_custom_all_in_group_label")).build();
         check_button_select_not_all_results.set_active(true);
 
@@ -279,6 +282,7 @@ fn popover_custom_select_unselect(
             check_button_rust_regex.set_tooltip_text(Some(&flg!("popover_custom_regex_check_button_entry_tooltip")));
             entry_rust_regex.set_tooltip_text(Some(&flg!("popover_custom_regex_check_button_entry_tooltip")));
 
+            check_button_ignore_size.set_tooltip_text(Some(&flg!("popover_custom_ignore_size_check_button_tooltip")));
             check_button_select_not_all_results.set_tooltip_text(Some(&flg!("popover_custom_not_all_check_button_tooltip")));
         }
         {
@@ -347,8 +351,10 @@ fn popover_custom_select_unselect(
 
             grid.attach(&label_regex_valid, 0, 4, 2, 1);
 
+            grid.attach(&check_button_ignore_size, 0, 5, 2, 1);
+
             if select_things {
-                grid.attach(&check_button_select_not_all_results, 0, 5, 2, 1);
+                grid.attach(&check_button_select_not_all_results, 0, 6, 2, 1);
             }
 
             let box_widget = get_dialog_box_child(&dialog);
@@ -372,6 +378,7 @@ fn popover_custom_select_unselect(
                 let check_path = check_button_path.is_active();
                 let check_name = check_button_name.is_active();
                 let check_regex = check_button_rust_regex.is_active();
+                let ignore_size = check_button_ignore_size.is_active();
 
                 let check_all_selected = check_button_select_not_all_results.is_active();
 
@@ -441,11 +448,27 @@ fn popover_custom_select_unselect(
                         if check_regex && compiled_regex.find(&path_and_name).is_some() {
                             need_to_change_thing = true;
                         } else {
-                            if check_name && Common::regex_check(&name_wildcard, &name) {
-                                need_to_change_thing = true;
+                            if check_name {
+                                if !ignore_size {
+                                    if Common::regex_check(&name_wildcard, &name) {
+                                        need_to_change_thing = true;
+                                    }
+                                } else {
+                                    if Common::regex_check(&name_wildcard.to_lowercase(), &name.to_lowercase()) {
+                                        need_to_change_thing = true;
+                                    }
+                                }
                             }
-                            if check_path && Common::regex_check(&path_wildcard, &path) {
-                                need_to_change_thing = true;
+                            if check_path {
+                                if !ignore_size {
+                                    if Common::regex_check(&path_wildcard, &path) {
+                                        need_to_change_thing = true;
+                                    }
+                                } else {
+                                    if Common::regex_check(&path_wildcard.to_lowercase(), &path.to_lowercase()) {
+                                        need_to_change_thing = true;
+                                    }
+                                }
                             }
                         }
 
