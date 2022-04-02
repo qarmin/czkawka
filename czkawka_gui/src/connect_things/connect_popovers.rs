@@ -371,7 +371,7 @@ fn popover_custom_select_unselect(
             dbg!(&name_wildcard);
             dbg!(&path_wildcard);
             dbg!(&regex_wildcard);
-            
+
             if response_type == gtk::ResponseType::Ok {
                 let check_path = check_button_path.is_active();
                 let check_name = check_button_name.is_active();
