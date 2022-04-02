@@ -366,7 +366,7 @@ fn popover_custom_select_unselect(
             #[cfg(target_family = "windows")]
             let name_wildcard = name_wildcard.replace("/", "\\");
             #[cfg(target_family = "windows")]
-            let path_wildcard = name_wildcard.replace("/", "\\");
+            let path_wildcard = path_wildcard.replace("/", "\\");
 
             dbg!(&name_wildcard);
             dbg!(&path_wildcard);
