@@ -7,7 +7,6 @@ use gtk::prelude::*;
 use gtk::{ListStore, TextView, TreeView, Widget};
 use image::imageops::FilterType;
 use image::DynamicImage;
-use image::GenericImageView;
 
 use crate::flg;
 use czkawka_core::big_file::BigFile;

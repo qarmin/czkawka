@@ -29,13 +29,13 @@ directories-next = "2.0.0"
 open = "2.1.1"
 
 # To get image preview
-image = "0.23.14"
+image = "0.24.1"
 
 # To be able to use custom select
 regex = "1.5.5"
 
-# To get image_hash types
-img_hash = "3.2.0"
+# To get image_hasher types
+image_hasher = "1.0.0"
 
 # Move files to trash
 trash = "1.3.0"

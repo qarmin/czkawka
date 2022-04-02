@@ -1,4 +1,4 @@
-use img_hash::{FilterType, HashAlg};
+use image_hasher::{FilterType, HashAlg};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::duplicate::HashType;

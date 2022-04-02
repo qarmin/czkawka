@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use img_hash::{FilterType, HashAlg};
+use image_hasher::{FilterType, HashAlg};
 use structopt::StructOpt;
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
