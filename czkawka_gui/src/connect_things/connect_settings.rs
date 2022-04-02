@@ -6,7 +6,7 @@ use gtk::builders::LabelBuilder;
 use gtk::prelude::*;
 use gtk::{ResponseType, Window};
 use image::imageops::FilterType;
-use img_hash::HashAlg;
+use image_hasher::HashAlg;
 
 use crate::flg;
 use czkawka_core::common_messages::Messages;

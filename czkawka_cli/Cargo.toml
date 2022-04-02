@@ -10,7 +10,7 @@ repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
 czkawka_core = { path = "../czkawka_core", version = "4.0.0" }
-structopt = "0.3.25"
+structopt = "0.3.26"
 
 # For enum types
-img_hash = "3.2.0"
+image_hasher = "1.0.0"

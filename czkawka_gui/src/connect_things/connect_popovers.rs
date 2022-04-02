@@ -359,14 +359,14 @@ fn popover_custom_select_unselect(
 
         let tree_view = tree_view.clone();
         dialog.connect_response(move |confirmation_dialog_select_unselect, response_type| {
-            let name_widcard = entry_name.text().trim().to_string();
-            let path_widcard = entry_path.text().trim().to_string();
-            let regex_widcard = entry_rust_regex.text().trim().to_string();
+            let name_wildcard = entry_name.text().trim().to_string();
+            let path_wildcard = entry_path.text().trim().to_string();
+            let regex_wildcard = entry_rust_regex.text().trim().to_string();
 
             #[cfg(target_family = "windows")]
-            let name_widcard = name_widcard.replace("/", "\\");
+            let name_wildcard = name_wildcard.replace("/", "\\");
             #[cfg(target_family = "windows")]
-            let path_widcard = name_widcard.replace("/", "\\");
+            let path_wildcard = path_wildcard.replace("/", "\\");
 
             if response_type == gtk::ResponseType::Ok {
                 let check_path = check_button_path.is_active();
@@ -377,7 +377,7 @@ fn popover_custom_select_unselect(
 
                 if check_button_path.is_active() || check_button_name.is_active() || check_button_rust_regex.is_active() {
                     let compiled_regex = match check_regex {
-                        true => match Regex::new(&regex_widcard) {
+                        true => match Regex::new(&regex_wildcard) {
                             Ok(t) => t,
                             Err(_) => {
                                 eprintln!("What? Regex should compile properly.");
@@ -441,10 +441,10 @@ fn popover_custom_select_unselect(
                         if check_regex && compiled_regex.find(&path_and_name).is_some() {
                             need_to_change_thing = true;
                         } else {
-                            if check_name && Common::regex_check(&name_widcard, &name) {
+                            if check_name && Common::regex_check(&name_wildcard, &name) {
                                 need_to_change_thing = true;
                             }
-                            if check_path && Common::regex_check(&path_widcard, &path) {
+                            if check_path && Common::regex_check(&path_wildcard, &path) {
                                 need_to_change_thing = true;
                             }
                         }

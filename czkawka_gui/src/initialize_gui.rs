@@ -9,7 +9,6 @@ use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 use image::imageops::FilterType;
-use image::GenericImageView;
 
 use crate::flg;
 use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};

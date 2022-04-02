@@ -14,7 +14,7 @@ use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
 use humansize::{file_size_opts as options, FileSize};
 use image::GenericImageView;
-use img_hash::{FilterType, HashAlg, HasherConfig};
+use image_hasher::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -1222,7 +1222,6 @@ fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
         HashAlg::Blockhash => "Blockhash",
         HashAlg::VertGradient => "VertGradient",
         HashAlg::DoubleGradient => "DoubleGradient",
-        HashAlg::__Nonexhaustive => panic!(),
     }
     .to_string()
 }
