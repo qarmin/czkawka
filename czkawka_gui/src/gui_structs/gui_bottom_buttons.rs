@@ -1,8 +1,11 @@
 use gtk::prelude::*;
 use gtk::{Bin, Widget};
 
-use crate::flg;
-use crate::help_functions::{get_custom_label_from_button_with_image, BottomButtonsEnum};
+use crate::help_functions::{get_custom_label_from_button_with_image, set_icon_of_button, set_icon_of_menubutton, BottomButtonsEnum};
+use crate::{
+    flg, CZK_ICON_COMPARE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_MOVE, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SYMLINK,
+    CZK_ICON_TRASH,
+};
 
 #[derive(Clone)]
 pub struct GuiBottomButtons {
@@ -33,6 +36,17 @@ impl GuiBottomButtons {
 
         let buttons_show_errors: gtk::Button = builder.object("buttons_show_errors").unwrap();
         let buttons_show_upper_notebook: gtk::Button = builder.object("buttons_show_upper_notebook").unwrap();
+
+        set_icon_of_button(&buttons_search, CZK_ICON_SEARCH);
+        set_icon_of_menubutton(&buttons_select, CZK_ICON_SELECT);
+        set_icon_of_button(&buttons_delete, CZK_ICON_TRASH);
+        set_icon_of_button(&buttons_save, CZK_ICON_SAVE);
+        set_icon_of_button(&buttons_symlink, CZK_ICON_SYMLINK);
+        set_icon_of_button(&buttons_hardlink, CZK_ICON_HARDLINK);
+        set_icon_of_button(&buttons_move, CZK_ICON_MOVE);
+        set_icon_of_button(&buttons_compare, CZK_ICON_COMPARE);
+        set_icon_of_button(&buttons_show_errors, CZK_ICON_HIDE_DOWN);
+        set_icon_of_button(&buttons_show_upper_notebook, CZK_ICON_HIDE_UP);
 
         let buttons_names = [
             BottomButtonsEnum::Search,

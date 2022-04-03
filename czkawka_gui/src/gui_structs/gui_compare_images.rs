@@ -1,4 +1,5 @@
-use crate::flg;
+use crate::help_functions::set_icon_of_button;
+use crate::{flg, CZK_ICON_LEFT, CZK_ICON_RIGHT};
 use gtk::prelude::*;
 use gtk::{Builder, TreePath};
 use std::cell::RefCell;
@@ -56,6 +57,9 @@ impl GuiCompareImages {
         let shared_current_path = Rc::new(RefCell::new(None));
         let shared_image_cache = Rc::new(RefCell::new(Vec::new()));
         let shared_using_for_preview = Rc::new(RefCell::new((None, None)));
+
+        set_icon_of_button(&button_go_previous_compare_group, CZK_ICON_LEFT);
+        set_icon_of_button(&button_go_next_compare_group, CZK_ICON_RIGHT);
 
         Self {
             window_compare,

@@ -1,6 +1,7 @@
 use gtk::prelude::*;
 
-use crate::flg;
+use crate::help_functions::set_icon_of_button;
+use crate::{flg, CZK_ICON_INFO, CZK_ICON_SETTINGS};
 
 #[derive(Clone)]
 pub struct GuiHeader {
@@ -12,6 +13,9 @@ impl GuiHeader {
     pub fn create_from_builder(builder: &gtk::Builder) -> Self {
         let button_settings: gtk::Button = builder.object("button_settings").unwrap();
         let button_app_info: gtk::Button = builder.object("button_app_info").unwrap();
+
+        set_icon_of_button(&button_settings, CZK_ICON_SETTINGS);
+        set_icon_of_button(&button_app_info, CZK_ICON_INFO);
 
         Self { button_settings, button_app_info }
     }

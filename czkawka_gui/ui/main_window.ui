@@ -84,7 +84,7 @@ Author: Rafał Mikrut
                                 <child>
                                   <object class="GtkImage">
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">list-add</property>
+                                    <property name="icon-name">image-missing</property>
                                     <property name="visible">True</property>
                                   </object>
                                   <packing>
@@ -128,7 +128,7 @@ Author: Rafał Mikrut
                                 <child>
                                   <object class="GtkImage">
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">list-remove</property>
+                                    <property name="icon-name">image-missing</property>
                                     <property name="visible">True</property>
                                   </object>
                                   <packing>
@@ -172,7 +172,7 @@ Author: Rafał Mikrut
                                 <child>
                                   <object class="GtkImage">
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">insert-link</property>
+                                    <property name="icon-name">image-missing</property>
                                     <property name="visible">True</property>
                                   </object>
                                   <packing>
@@ -280,7 +280,7 @@ Author: Rafał Mikrut
                                 <child>
                                   <object class="GtkImage">
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">list-add</property>
+                                    <property name="icon-name">image-missing</property>
                                     <property name="visible">True</property>
                                   </object>
                                   <packing>
@@ -324,7 +324,7 @@ Author: Rafał Mikrut
                                 <child>
                                   <object class="GtkImage">
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">list-remove</property>
+                                    <property name="icon-name">image-missing</property>
                                     <property name="visible">True</property>
                                   </object>
                                   <packing>
@@ -368,7 +368,7 @@ Author: Rafał Mikrut
                                 <child>
                                   <object class="GtkImage">
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">insert-link</property>
+                                    <property name="icon-name">image-missing</property>
                                     <property name="visible">True</property>
                                   </object>
                                   <packing>
@@ -1479,7 +1479,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">edit-find</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1525,7 +1525,7 @@ Author: Rafał Mikrut
                   <object class="GtkImage">
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
-                    <property name="icon-name">format-justify-fill</property>
+                    <property name="icon-name">image-missing</property>
                     <property name="visible">True</property>
                   </object>
                 </child>
@@ -1546,7 +1546,7 @@ Author: Rafał Mikrut
                   <object class="GtkImage">
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
-                    <property name="icon-name">utilities-system-monitor</property>
+                    <property name="icon-name">image-missing</property>
                     <property name="visible">True</property>
                   </object>
                 </child>
@@ -1578,7 +1578,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">edit-select-all</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1622,7 +1622,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">video-display</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1666,7 +1666,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">list-remove</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1710,7 +1710,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">folder</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1754,7 +1754,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">document-save</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1798,7 +1798,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">network-transmit-receive</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1842,7 +1842,7 @@ Author: Rafał Mikrut
                         <child>
                           <object class="GtkImage">
                             <property name="can-focus">False</property>
-                            <property name="icon-name">text-x-generic-template</property>
+                            <property name="icon-name">image-missing</property>
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -1977,7 +1977,7 @@ Author: Rafał Mikrut
                 <child>
                   <object class="GtkImage">
                     <property name="can-focus">False</property>
-                    <property name="icon-name">applications-engineering</property>
+                    <property name="icon-name">image-missing</property>
                     <property name="visible">True</property>
                   </object>
                 </child>
@@ -1996,7 +1996,7 @@ Author: Rafał Mikrut
                 <child>
                   <object class="GtkImage">
                     <property name="can-focus">False</property>
-                    <property name="icon-name">dialog-information</property>
+                    <property name="icon-name">image-missing</property>
                     <property name="visible">True</property>
                   </object>
                 </child>

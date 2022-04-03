@@ -32,7 +32,25 @@ use crate::help_functions::BottomButtonsEnum;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
-const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../../snap/gui/czkawka.png");
+pub const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../../snap/gui/czkawka.png");
+pub const CZK_ICON_ADD: &[u8; 677] = include_bytes!("../../icons/czk_add.svg");
+pub const CZK_ICON_COMPARE: &[u8; 5700] = include_bytes!("../../icons/czk_compare.svg");
+pub const CZK_ICON_DELETE: &[u8; 489] = include_bytes!("../../icons/czk_delete.svg");
+pub const CZK_ICON_HARDLINK: &[u8; 17326] = include_bytes!("../../icons/czk_hardlink.svg");
+pub const CZK_ICON_HIDE_DOWN: &[u8; 711] = include_bytes!("../../icons/czk_hide_down.svg");
+pub const CZK_ICON_HIDE_UP: &[u8; 634] = include_bytes!("../../icons/czk_hide_up.svg");
+pub const CZK_ICON_INFO: &[u8; 3325] = include_bytes!("../../icons/czk_info.svg");
+pub const CZK_ICON_LEFT: &[u8; 245] = include_bytes!("../../icons/czk_left.svg");
+pub const CZK_ICON_MANUAL_ADD: &[u8; 677] = include_bytes!("../../icons/czk_manual_add.svg");
+pub const CZK_ICON_MOVE: &[u8; 2535] = include_bytes!("../../icons/czk_move.svg");
+pub const CZK_ICON_RIGHT: &[u8; 278] = include_bytes!("../../icons/czk_right.svg");
+pub const CZK_ICON_SAVE: &[u8; 462] = include_bytes!("../../icons/czk_save.svg");
+pub const CZK_ICON_SEARCH: &[u8; 1517] = include_bytes!("../../icons/czk_search.svg");
+pub const CZK_ICON_SELECT: &[u8; 370] = include_bytes!("../../icons/czk_select.svg");
+pub const CZK_ICON_SETTINGS: &[u8; 2851] = include_bytes!("../../icons/czk_settings.svg");
+pub const CZK_ICON_STOP: &[u8; 618] = include_bytes!("../../icons/czk_stop.svg");
+pub const CZK_ICON_SYMLINK: &[u8; 2455] = include_bytes!("../../icons/czk_symlink.svg");
+pub const CZK_ICON_TRASH: &[u8; 709] = include_bytes!("../../icons/czk_trash.svg");
 
 #[derive(Clone)]
 pub struct GuiData {
