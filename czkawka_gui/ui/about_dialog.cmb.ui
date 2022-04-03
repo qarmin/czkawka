@@ -40,7 +40,7 @@ Author: Rafał Mikrut
 This program is free to use and will always be.
 </property>
     <property name="license-type">mit-x11</property>
-    <property name="logo-icon-name">help-about</property>
+    <property name="logo-icon-name">image-missing</property>
     <property name="program-name">Czkawka</property>
     <property name="type-hint">dialog</property>
     <property name="version">4.0.0</property>

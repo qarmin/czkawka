@@ -1,9 +1,9 @@
 use gtk::prelude::*;
 use gtk::{Bin, EventControllerKey, TreeView};
 
-use crate::flg;
-use crate::help_functions::get_custom_label_from_button_with_image;
+use crate::help_functions::{get_custom_label_from_button_with_image, set_icon_of_button};
 use crate::notebook_enums::NotebookUpperEnum;
+use crate::{flg, CZK_ICON_ADD, CZK_ICON_DELETE, CZK_ICON_MANUAL_ADD};
 
 #[derive(Clone)]
 pub struct GuiUpperNotebook {
@@ -73,6 +73,13 @@ impl GuiUpperNotebook {
         let label_general_size_bytes: gtk::Label = builder.object("label_general_size_bytes").unwrap();
         let label_general_min_size: gtk::Label = builder.object("label_general_min_size").unwrap();
         let label_general_max_size: gtk::Label = builder.object("label_general_max_size").unwrap();
+
+        set_icon_of_button(&buttons_add_included_directory, CZK_ICON_ADD);
+        set_icon_of_button(&buttons_manual_add_included_directory, CZK_ICON_MANUAL_ADD);
+        set_icon_of_button(&buttons_remove_included_directory, CZK_ICON_DELETE);
+        set_icon_of_button(&buttons_add_excluded_directory, CZK_ICON_ADD);
+        set_icon_of_button(&buttons_manual_add_excluded_directory, CZK_ICON_MANUAL_ADD);
+        set_icon_of_button(&buttons_remove_excluded_directory, CZK_ICON_DELETE);
 
         Self {
             notebook_upper,

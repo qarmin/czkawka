@@ -165,6 +165,8 @@ Icon was created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4
 
 Windows dark theme is used from [AdMin repo](https://github.com/nrhodes91/AdMin) with MIT license.
 
+Some icons were taken from [ReShot](https://www.reshot.com) site and are licensed under Reshot Free License
+
 The program is completely free to use.
 
 "Gratis to uczciwa cena" - "Free is a fair price"

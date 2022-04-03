@@ -1,10 +1,11 @@
 use directories_next::ProjectDirs;
+use gdk::gdk_pixbuf::{InterpType, Pixbuf};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use gtk::prelude::*;
-use gtk::{ListStore, TextView, TreeView, Widget};
+use gtk::{Bin, ListStore, TextView, TreeView, Widget};
 use image::imageops::FilterType;
 use image::DynamicImage;
 
@@ -776,6 +777,20 @@ pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label 
     }
     panic!("Button doesn't have proper custom label child");
 }
+pub fn get_custom_image_from_button_with_image(button: &gtk::Bin) -> gtk::Image {
+    let internal_box = match button.child().unwrap().downcast::<gtk::Box>() {
+        Ok(t) => t,
+        Err(wid) => {
+            return wid.downcast::<gtk::Image>().unwrap();
+        }
+    };
+    for child in internal_box.children() {
+        if let Ok(t) = child.downcast::<gtk::Image>() {
+            return t;
+        }
+    }
+    panic!("Button doesn't have proper custom label child");
+}
 
 // GTK 4
 // pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
@@ -818,3 +833,19 @@ pub fn get_custom_label_from_button_with_image(button: &gtk::Bin) -> gtk::Label 
 //
 //     return vector;
 // }
+
+const SIZE_OF_ICON: i32 = 18;
+const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
+
+pub fn set_icon_of_button(button: &gtk::Button, data: &'static [u8]) {
+    let image = get_custom_image_from_button_with_image(&button.clone().upcast::<Bin>());
+    let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
+    let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
+    image.set_pixbuf(Some(&pixbuf));
+}
+pub fn set_icon_of_menubutton(button: &gtk::MenuButton, data: &'static [u8]) {
+    let image = get_custom_image_from_button_with_image(&button.clone().upcast::<Bin>());
+    let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
+    let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
+    image.set_pixbuf(Some(&pixbuf));
+}

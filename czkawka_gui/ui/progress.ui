@@ -153,7 +153,7 @@ Author: Rafał Mikrut
                     <child>
                       <object class="GtkImage">
                         <property name="can-focus">False</property>
-                        <property name="icon-name">dialog-cancel</property>
+                        <property name="icon-name">image-missing</property>
                         <property name="visible">True</property>
                       </object>
                       <packing>

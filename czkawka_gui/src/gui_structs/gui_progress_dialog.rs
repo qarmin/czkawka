@@ -1,8 +1,8 @@
 use gtk::prelude::*;
 use gtk::{Bin, Builder, EventControllerKey, Window};
 
-use crate::flg;
-use crate::help_functions::get_custom_label_from_button_with_image;
+use crate::help_functions::{get_custom_label_from_button_with_image, set_icon_of_button};
+use crate::{flg, CZK_ICON_STOP};
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {
@@ -47,6 +47,8 @@ impl GuiProgressDialog {
         // button_stop_in_dialog.add_controller(&evk_button_stop_in_dialog);
         // let gc_button_stop_in_dialog = gtk4::GestureClick::new();
         // button_stop_in_dialog.add_controller(&gc_button_stop_in_dialog);
+
+        set_icon_of_button(&button_stop_in_dialog, CZK_ICON_STOP);
 
         Self {
             window_progress,

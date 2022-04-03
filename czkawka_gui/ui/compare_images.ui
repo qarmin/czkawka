@@ -53,7 +53,7 @@
                     <child>
                       <object class="GtkImage">
                         <property name="can-focus">False</property>
-                        <property name="icon-name">go-next</property>
+                        <property name="icon-name">image-missing</property>
                         <property name="visible">True</property>
                       </object>
                     </child>
@@ -73,7 +73,7 @@
                     <child>
                       <object class="GtkImage">
                         <property name="can-focus">False</property>
-                        <property name="icon-name">go-previous</property>
+                        <property name="icon-name">image-missing</property>
                         <property name="visible">True</property>
                       </object>
                     </child>
