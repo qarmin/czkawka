@@ -743,6 +743,26 @@ pub fn resize_dynamic_image_dimension(img: DynamicImage, requested_size: (u32, u
     img.resize(new_size.0, new_size.1, *filter_type)
 }
 
+pub fn resize_pixbuf_dimension(pixbuf: Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
+    let current_ratio = pixbuf.width() as f32 / pixbuf.height() as f32;
+    let mut new_size;
+    match current_ratio.partial_cmp(&(requested_size.0 as f32 / requested_size.1 as f32)).unwrap() {
+        Ordering::Greater => {
+            new_size = (requested_size.0, (pixbuf.height() * requested_size.0) / pixbuf.width());
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+        }
+        Ordering::Less => {
+            new_size = ((pixbuf.width() * requested_size.1) / pixbuf.height(), requested_size.1);
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+        }
+        Ordering::Equal => {
+            new_size = (requested_size.0, requested_size.1);
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+        }
+    }
+    pixbuf.scale_simple(new_size.0, new_size.1, interp_type)
+}
+
 pub fn get_image_path_temporary(file_name: &str, number: u32, extension: &str) -> PathBuf {
     let path_buf;
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
