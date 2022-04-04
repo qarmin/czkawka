@@ -1,22 +1,16 @@
 use crate::flg;
-use czkawka_core::common::get_dynamic_image_from_raw_image;
-use czkawka_core::similar_images::RAW_IMAGE_EXTENSIONS;
+use gdk::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
-use image::imageops::FilterType;
-use image::DynamicImage;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{
-    count_number_of_groups, get_full_name_from_path_name, get_image_path_temporary, get_max_file_name, resize_dynamic_image_dimension, NotebookObject, HEADER_ROW_COLOR,
-    NOTEBOOKS_INFOS,
-};
+use crate::help_functions::{count_number_of_groups, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, HEADER_ROW_COLOR, NOTEBOOKS_INFOS};
 use crate::localizer_core::generate_translation_hashmap;
 
-const BIG_PREVIEW_SIZE: u32 = 600;
-const SMALL_PREVIEW_SIZE: u32 = 100;
+const BIG_PREVIEW_SIZE: i32 = 600;
+const SMALL_PREVIEW_SIZE: i32 = 100;
 
 pub fn connect_button_compare(gui_data: &GuiData) {
     let button_compare = gui_data.bottom_buttons.buttons_compare.clone();
@@ -345,36 +339,38 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreePa
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
     for (full_path, name, tree_path) in vector_with_path {
-        let name_lowercase = name.to_lowercase();
-        let dynamic_image = if RAW_IMAGE_EXTENSIONS.iter().any(|f| name_lowercase.ends_with(f)) {
-            match get_dynamic_image_from_raw_image(&full_path) {
-                Some(t) => t,
-                None => {
-                    println!("Failed to convert rawimage {}", full_path);
-                    DynamicImage::new_rgb8(1, 1)
+        let small_img = gtk::Image::new();
+        let big_img = gtk::Image::new();
+
+        match Pixbuf::from_file(&full_path) {
+            Ok(pixbuf) =>
+            {
+                #[allow(clippy::never_loop)]
+                loop {
+                    let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Nearest) {
+                        None => {
+                            println!("Failed to resize image {}.", full_path);
+                            break;
+                        }
+                        Some(pixbuf) => pixbuf,
+                    };
+                    let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Nearest) {
+                        None => {
+                            println!("Failed to resize image {}.", full_path);
+                            break;
+                        }
+                        Some(pixbuf) => pixbuf,
+                    };
+
+                    big_img.set_pixbuf(Some(&pixbuf_big));
+                    small_img.set_pixbuf(Some(&pixbuf_small));
+                    break;
                 }
             }
-        } else {
-            match image::open(&full_path) {
-                Ok(t) => t,
-                Err(_) => {
-                    println!("Failed to open image {}", full_path);
-                    DynamicImage::new_rgb8(1, 1)
-                }
+            Err(e) => {
+                println!("Failed to open image {}, reason {}", full_path, e);
             }
         };
-
-        let big_thumbnail = resize_dynamic_image_dimension(dynamic_image, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), &FilterType::Triangle);
-        let big_path = get_image_path_temporary("roman", 1, "jpg");
-        let _ = big_thumbnail.save(&big_path);
-        let big_img = gtk::Image::new();
-        big_img.set_from_file(Some(big_path));
-
-        let small_thumbnail = resize_dynamic_image_dimension(big_thumbnail, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), &FilterType::Triangle);
-        let small_path = get_image_path_temporary("roman", 1, "jpg");
-        let _ = small_thumbnail.save(&small_path);
-        let small_img = gtk::Image::new();
-        small_img.set_from_file(Some(small_path));
 
         cache_all_images.push((full_path, name, big_img, small_img, tree_path));
     }
