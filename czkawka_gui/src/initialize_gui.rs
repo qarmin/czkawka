@@ -1,17 +1,14 @@
 use std::cell::RefCell;
-use std::fs;
 use std::ops::Deref;
-use std::path::Path;
 use std::rc::Rc;
 
-use czkawka_core::common::get_dynamic_image_from_raw_image;
-use directories_next::ProjectDirs;
+use gdk::gdk_pixbuf::Pixbuf;
+use gtk::gdk_pixbuf::InterpType;
 use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
-use image::imageops::FilterType;
 
 use crate::flg;
-use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
+use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
@@ -682,130 +679,58 @@ fn show_preview(
     // Only show preview when selected is only one item, because there is no method to recognize current clicked item in multiselection
     if selected_rows.len() == 1 && check_button_settings_show_preview.is_active() {
         let tree_path = selected_rows[0].clone();
-        if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-            // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
-            #[allow(clippy::never_loop)]
-            'dir: loop {
-                let cache_dir = proj_dirs.cache_dir();
-                if cache_dir.exists() {
-                    if !cache_dir.is_dir() {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            format!("Path {} doesn't point at folder, which is needed by image preview", cache_dir.display()).as_str(),
-                        );
-                        break 'dir;
-                    }
-                } else if let Err(e) = fs::create_dir_all(cache_dir) {
+        // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
+        #[allow(clippy::never_loop)]
+        'dir: loop {
+            let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
+            let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
+
+            let file_name = get_full_name_from_path_name(&path, &name);
+            let file_name = file_name.as_str();
+
+            {
+                let preview_path = preview_path.borrow();
+                let preview_path = preview_path.deref();
+                if file_name == preview_path {
+                    return; // Preview is already created, no need to recreate it
+                }
+            }
+
+            let mut pixbuf = match Pixbuf::from_file(file_name) {
+                Ok(pixbuf) => pixbuf,
+                Err(e) => {
                     add_text_to_text_view(
                         text_view_errors,
                         flg!(
-                            "preview_failed_to_create_cache_dir",
-                            generate_translation_hashmap(vec![("name", cache_dir.display().to_string()), ("reason", e.to_string())])
+                            "preview_image_opening_failure",
+                            generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
                         )
                         .as_str(),
                     );
                     break 'dir;
                 }
-                let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
-                let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
+            };
 
-                let file_name = get_full_name_from_path_name(&path, &name);
-                let file_name = file_name.as_str();
-
-                if let Some(extension) = Path::new(file_name).extension() {
-                    let extension_lowercase = format!(".{}", extension.to_string_lossy().to_lowercase());
-
-                    let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&extension_lowercase.as_str());
-                    if !IMAGE_RS_EXTENSIONS.contains(&extension_lowercase.as_str()) && !is_raw_image {
-                        break 'dir;
-                    }
-
-                    {
-                        let preview_path = preview_path.borrow();
-                        let preview_path = preview_path.deref();
-                        if file_name == preview_path {
-                            return; // Preview is already created, no need to recreate it
-                        }
-                    }
-                    let img;
-                    if !is_raw_image {
-                        img = match image::open(&file_name) {
-                            Ok(t) => t,
-                            Err(e) => {
-                                add_text_to_text_view(
-                                    text_view_errors,
-                                    flg!(
-                                        "preview_temporary_file",
-                                        generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
-                                    )
-                                    .as_str(),
-                                );
-                                break 'dir;
-                            }
-                        };
-                    } else {
-                        img = match get_dynamic_image_from_raw_image(file_name) {
-                            Some(t) => t,
-                            None => {
-                                add_text_to_text_view(
-                                    text_view_errors,
-                                    flg!(
-                                        "preview_temporary_file",
-                                        generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", "None".to_string())])
-                                    )
-                                    .as_str(),
-                                );
-                                break 'dir;
-                            }
-                        }
-                    }
-                    if img.width() == 0 || img.height() == 0 {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            flg!("preview_0_size", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str(),
-                        );
-                        break 'dir;
-                    }
-                    let img = resize_dynamic_image_dimension(img, (400, 400), &FilterType::Triangle); // Triangle and Nearest is the fastest
-                    let file_dir = match is_raw_image {
-                        true => cache_dir.join("cached_file.jpg"),
-                        false => cache_dir.join(format!("cached_file.{}", extension.to_string_lossy().to_lowercase())),
-                    };
-                    if let Err(e) = img.save(&file_dir) {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            flg!(
-                                "preview_temporary_image_save",
-                                generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])
-                            )
-                            .as_str(),
-                        );
-                        let _ = fs::remove_file(&file_dir);
-                        break 'dir;
-                    }
-                    let string_dir = file_dir.to_string_lossy().to_string();
-                    image_preview.set_from_file(Some(string_dir));
-
-                    {
-                        let mut preview_path = preview_path.borrow_mut();
-                        *preview_path = file_name.to_string();
-                    }
-
-                    if let Err(e) = fs::remove_file(&file_dir) {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            flg!(
-                                "preview_temporary_image_remove",
-                                generate_translation_hashmap(vec![("name", file_dir.display().to_string()), ("reason", e.to_string())])
-                            )
-                            .as_str(),
-                        );
-                        break 'dir;
-                    }
-                    created_image = true;
+            pixbuf = match resize_pixbuf_dimension(pixbuf, (400, 400), InterpType::Nearest) {
+                None => {
+                    add_text_to_text_view(
+                        text_view_errors,
+                        flg!("preview_image_resize_failure", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str(),
+                    );
+                    break 'dir;
                 }
-                break 'dir;
+                Some(pixbuf) => pixbuf,
+            };
+
+            image_preview.set_pixbuf(Some(&pixbuf));
+            {
+                let mut preview_path = preview_path.borrow_mut();
+                *preview_path = file_name.to_string();
             }
+
+            created_image = true;
+
+            break 'dir;
         }
     }
     if created_image {
