@@ -12,6 +12,12 @@ use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
+#[derive(PartialEq, Eq)]
+enum TypeOfTool {
+    Hardlinking,
+    Symlinking,
+}
+
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     // Hardlinking
     {
@@ -20,7 +26,7 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
         let gui_data = gui_data.clone();
 
         buttons_hardlink.connect_clicked(move |_| {
-            glib::MainContext::default().spawn_local(sym_hard_link_things(gui_data.clone(), true));
+            glib::MainContext::default().spawn_local(sym_hard_link_things(gui_data.clone(), TypeOfTool::Hardlinking));
         });
     }
 
@@ -31,12 +37,12 @@ pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
         let gui_data = gui_data.clone();
 
         buttons_symlink.connect_clicked(move |_| {
-            glib::MainContext::default().spawn_local(sym_hard_link_things(gui_data.clone(), false));
+            glib::MainContext::default().spawn_local(sym_hard_link_things(gui_data.clone(), TypeOfTool::Symlinking));
         });
     }
 }
 
-pub async fn sym_hard_link_things(gui_data: GuiData, hardlinking: bool) {
+async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
@@ -90,13 +96,13 @@ pub async fn sym_hard_link_things(gui_data: GuiData, hardlinking: bool) {
     }
 }
 
-pub fn hardlink_symlink(
+fn hardlink_symlink(
     tree_view: &gtk::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_color: i32,
     column_selection: i32,
-    hardlinking: bool,
+    hardlinking: TypeOfTool,
     text_view_errors: &TextView,
 ) {
     reset_text_view(text_view_errors);
@@ -192,10 +198,16 @@ pub fn hardlink_symlink(
             break;
         }
     }
-    if hardlinking {
+    if hardlinking == TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
+                #[cfg(target_family = "unix")]
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
+                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
+                    continue;
+                }
+                #[cfg(target_family = "windows")]
+                if let Err(e) = fs::hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
                 }
