@@ -31,7 +31,7 @@ lofty="0.5.3"
 futures = "0.3.21"
 
 # Needed by broken files
-zip = "0.5.13"
+zip = { version = "0.6.2", features=["aes-crypto", "bzip2", "deflate", "time"], default-features = false}
 rodio = { version = "0.15.0", optional = true }
 
 # Hashes for duplicate files
