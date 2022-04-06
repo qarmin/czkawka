@@ -1248,13 +1248,20 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
 }
 
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
+    dbg!("1");
     let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
+    dbg!("2");
     let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
+    dbg!("3");
     fs::rename(dst, temp.path())?;
+    dbg!("4");
     let result = fs::hard_link(src, dst);
+    dbg!("5");
     if result.is_err() {
+        dbg!("6");
         fs::rename(temp.path(), dst)?;
     }
+    dbg!("7");
     result
 }
 
