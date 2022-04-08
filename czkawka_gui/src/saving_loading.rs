@@ -836,15 +836,17 @@ pub fn load_configuration(
             let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().unwrap();
 
             if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Hash {
-                main_notebook.combo_box_duplicate_hash_type.set_sensitive(true);
+                main_notebook.combo_box_duplicate_hash_type.set_visible(true);
+                main_notebook.label_duplicate_hash_type.set_visible(true);
             } else {
-                main_notebook.combo_box_duplicate_hash_type.set_sensitive(false);
+                main_notebook.combo_box_duplicate_hash_type.set_visible(false);
+                main_notebook.label_duplicate_hash_type.set_visible(false);
             }
 
             if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Name {
-                main_notebook.check_button_duplicate_case_sensitive_name.set_sensitive(true);
+                main_notebook.check_button_duplicate_case_sensitive_name.set_visible(true);
             } else {
-                main_notebook.check_button_duplicate_case_sensitive_name.set_sensitive(false);
+                main_notebook.check_button_duplicate_case_sensitive_name.set_visible(false);
             }
         }
 
