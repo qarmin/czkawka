@@ -29,6 +29,8 @@ use crate::common_traits::*;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
+const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
+
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum HashType {
     Blake3,
@@ -1249,12 +1251,13 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
 
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
-    let temp = tempfile::Builder::new().tempfile_in(dst_dir)?;
-    fs::rename(dst, temp.path())?;
+    let temp = dst_dir.join(TEMP_HARDLINK_FILE);
+    fs::rename(dst, temp.as_path())?;
     let result = fs::hard_link(src, dst);
     if result.is_err() {
-        fs::rename(temp.path(), dst)?;
+        fs::rename(temp.as_path(), dst)?;
     }
+    fs::remove_file(temp)?;
     result
 }
 
