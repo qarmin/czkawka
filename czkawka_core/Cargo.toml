@@ -39,8 +39,6 @@ blake3 = "1.3.1"
 crc32fast = "1.3.2"
 xxhash-rust = { version = "0.8.4", features = ["xxh3"] }
 
-tempfile = "3.3.0"
-
 # Video Duplactes
 vid_dup_finder_lib = "0.1.0"
 ffmpeg_cmdline_utils = "0.1.1"
