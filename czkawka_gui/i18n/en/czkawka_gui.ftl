@@ -22,6 +22,12 @@ music_comparison_checkbox_tooltip =
         
         Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 
+duplicate_case_sensitive_name = Case Sensitive
+duplicate_case_sensitive_name_tooltip =
+        When enabled, group only records when they have exactly same name e.g. Żołd <-> Żołd
+
+        Disabling such option will group names without checking if each letter is same size e.g. żoŁD <-> Żołd
+
 duplicate_mode_name_combo_box = Name
 duplicate_mode_size_combo_box = Size
 duplicate_mode_hash_combo_box = Hash

@@ -173,11 +173,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
                                                 ColumnsDuplicates::Modification as u32,
-                                                &(format!(
-                                                    "{} - ({})",
-                                                    NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0),
-                                                    base_file_entry.size.file_size(options::BINARY).unwrap()
-                                                )),
+                                                &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
                                             ),
                                             (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                             (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -197,11 +193,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(format!(
-                                                        "{} - ({})",
-                                                        NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
-                                                        entry.size.file_size(options::BINARY).unwrap()
-                                                    )),
+                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),

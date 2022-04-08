@@ -103,6 +103,7 @@ pub struct DuplicateFinder {
     minimal_prehash_cache_file_size: u64,
     delete_outdated_cache: bool,
     use_reference_folders: bool,
+    case_sensitive_name_comparison: bool,
 }
 
 impl DuplicateFinder {
@@ -134,6 +135,7 @@ impl DuplicateFinder {
             minimal_prehash_cache_file_size: 0,
             delete_outdated_cache: true,
             use_reference_folders: false,
+            case_sensitive_name_comparison: false,
         }
     }
 
@@ -174,6 +176,10 @@ impl DuplicateFinder {
 
     pub fn set_delete_outdated_cache(&mut self, delete_outdated_cache: bool) {
         self.delete_outdated_cache = delete_outdated_cache;
+    }
+
+    pub fn set_case_sensitive_name_comparison(&mut self, case_sensitive_name_comparison: bool) {
+        self.case_sensitive_name_comparison = case_sensitive_name_comparison;
     }
 
     pub const fn get_check_method(&self) -> &CheckingMethod {
@@ -293,9 +299,15 @@ impl DuplicateFinder {
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        let group_by_func = if self.case_sensitive_name_comparison {
+            |fe: &FileEntry| fe.path.file_name().unwrap().to_string_lossy().to_string()
+        } else {
+            |fe: &FileEntry| fe.path.file_name().unwrap().to_string_lossy().to_lowercase()
+        };
+
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
-            .group_by(|fe| fe.path.file_name().unwrap().to_string_lossy().to_string())
+            .group_by(group_by_func)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .checking_method(CheckingMethod::Name)

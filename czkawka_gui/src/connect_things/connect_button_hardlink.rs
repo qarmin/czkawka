@@ -201,16 +201,10 @@ fn hardlink_symlink(
     if hardlinking == TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
-                // #[cfg(target_family = "unix")]
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
                 }
-                // #[cfg(target_family = "windows")]
-                // if let Err(e) = fs::hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
-                //     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
-                //     continue;
-                // }
             }
         }
     } else {

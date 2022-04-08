@@ -4,6 +4,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use directories_next::ProjectDirs;
 use gtk::prelude::*;
 use gtk::{ComboBoxText, ScrolledWindow, TextView};
@@ -14,6 +15,7 @@ use czkawka_core::similar_images::SIMILAR_VALUES;
 
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
+use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 use crate::help_functions::*;
 use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
 use crate::localizer_core::generate_translation_hashmap;
@@ -38,6 +40,7 @@ const DEFAULT_PREHASH_MINIMAL_CACHE_SIZE: &str = "0";
 const DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE: bool = false;
 const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
+const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
 
 const DEFAULT_NUMBER_OF_BIGGEST_FILES: &str = "50";
 const DEFAULT_SIMILAR_IMAGES_SIMILARITY: i32 = 0;
@@ -423,6 +426,7 @@ enum LoadText {
     SimilarVideosSimilarity,
     SimilarVideosIgnoreSameSize,
     MusicApproximateComparison,
+    DuplicateNameCaseSensitive,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -463,6 +467,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::SimilarVideosSimilarity, "similar_videos_similarity"),
         (LoadText::SimilarVideosIgnoreSameSize, "similar_videos_ignore_same_size"),
         (LoadText::MusicApproximateComparison, "music_approximate_comparison"),
+        (LoadText::DuplicateNameCaseSensitive, "duplicate_name_case_sensitive"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -615,6 +620,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
 
     // Other2
     saving_struct.save_var(
+        hashmap_ls.get(&LoadText::DuplicateNameCaseSensitive).unwrap().to_string(),
+        main_notebook.check_button_duplicate_case_sensitive_name.is_active(),
+    );
+    saving_struct.save_var(
         hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().to_string(),
         main_notebook.entry_big_files_number.text(),
     );
@@ -735,6 +744,10 @@ pub fn load_configuration(
         hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().clone(),
         DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE,
     );
+    let check_button_case_sensitive_name = loaded_entries.get_integer(
+        hashmap_ls.get(&LoadText::DuplicateNameCaseSensitive).unwrap().clone(),
+        DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING,
+    );
 
     // Setting data
     if manual_execution || loading_at_start {
@@ -812,11 +825,28 @@ pub fn load_configuration(
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_size, combo_box_image_hash_size);
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_resize_algorithm, combo_box_image_resize_algorithm);
 
+        main_notebook.check_button_duplicate_case_sensitive_name.set_active(check_button_case_sensitive_name);
         main_notebook.entry_big_files_number.set_text(&number_of_biggest_files);
         main_notebook.check_button_image_ignore_same_size.set_active(similar_images_ignore_same_size);
         main_notebook.check_button_image_fast_compare.set_active(similar_images_fast_compare);
         main_notebook.check_button_video_ignore_same_size.set_active(similar_videos_ignore_same_size);
         main_notebook.scale_similarity_similar_videos.set_value(similar_videos_similarity as f64);
+
+        {
+            let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().unwrap();
+
+            if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Hash {
+                main_notebook.combo_box_duplicate_hash_type.set_sensitive(true);
+            } else {
+                main_notebook.combo_box_duplicate_hash_type.set_sensitive(false);
+            }
+
+            if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Name {
+                main_notebook.check_button_duplicate_case_sensitive_name.set_sensitive(true);
+            } else {
+                main_notebook.check_button_duplicate_case_sensitive_name.set_sensitive(false);
+            }
+        }
 
         // Set size of similarity scale gtk node, must be set BEFORE setting value of this
         let index = main_notebook.combo_box_image_hash_size.active().unwrap() as usize;
