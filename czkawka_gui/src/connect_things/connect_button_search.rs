@@ -53,6 +53,7 @@ pub fn connect_button_search(
     let buttons_names = gui_data.bottom_buttons.buttons_names;
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
+    let check_button_duplicate_case_sensitive_name: gtk::CheckButton = gui_data.main_notebook.check_button_duplicate_case_sensitive_name.clone();
     let check_button_music_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
     let check_button_music_year: gtk::CheckButton = gui_data.main_notebook.check_button_music_year.clone();
@@ -178,6 +179,8 @@ pub fn connect_button_search(
                 let use_prehash_cache = check_button_duplicates_use_prehash_cache.is_active();
                 let minimal_prehash_cache_file_size = entry_settings_prehash_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(0);
 
+                let case_sensitive_name_comparison = check_button_duplicate_case_sensitive_name.is_active();
+
                 let delete_outdated_cache = check_button_settings_duplicates_delete_outdated_cache.is_active();
 
                 let futures_sender_duplicate_files = futures_sender_duplicate_files.clone();
@@ -200,6 +203,7 @@ pub fn connect_button_search(
                     df.set_use_cache(use_cache);
                     df.set_use_prehash_cache(use_prehash_cache);
                     df.set_delete_outdated_cache(delete_outdated_cache);
+                    df.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
                     df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
                     let _ = glib_stop_sender.send(Message::Duplicates(df));
                 });

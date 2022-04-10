@@ -65,6 +65,7 @@ pub struct GuiMainNotebook {
     pub combo_box_duplicate_hash_type: gtk::ComboBoxText,
     pub label_duplicate_check_method: gtk::Label,
     pub label_duplicate_hash_type: gtk::Label,
+    pub check_button_duplicate_case_sensitive_name: gtk::CheckButton,
 
     pub image_preview_duplicates: gtk::Image,
 
@@ -198,6 +199,7 @@ impl GuiMainNotebook {
         let entry_big_files_number: gtk::Entry = builder.object("entry_big_files_number").unwrap();
 
         //// Check Buttons
+        let check_button_duplicate_case_sensitive_name: gtk::CheckButton = builder.object("check_button_duplicate_case_sensitive_name").unwrap();
         let check_button_music_title: gtk::CheckButton = builder.object("check_button_music_title").unwrap();
         let check_button_music_artist: gtk::CheckButton = builder.object("check_button_music_artist").unwrap();
         let check_button_music_year: gtk::CheckButton = builder.object("check_button_music_year").unwrap();
@@ -301,6 +303,7 @@ impl GuiMainNotebook {
             combo_box_image_hash_size,
             check_button_video_ignore_same_size,
             check_button_image_fast_compare,
+            check_button_duplicate_case_sensitive_name,
         }
     }
 
@@ -320,6 +323,7 @@ impl GuiMainNotebook {
     }
 
     pub fn update_language(&self) {
+        self.check_button_duplicate_case_sensitive_name.set_label(&flg!("duplicate_case_sensitive_name"));
         self.check_button_music_title.set_label(&flg!("music_title_checkbox"));
         self.check_button_music_artist.set_label(&flg!("music_artist_checkbox"));
         self.check_button_music_year.set_label(&flg!("music_year_checkbox"));
@@ -347,6 +351,8 @@ impl GuiMainNotebook {
         self.combo_box_duplicate_check_method.set_tooltip_text(Some(&flg!("duplicate_check_method_tooltip")));
         self.label_duplicate_hash_type.set_tooltip_text(Some(&flg!("duplicate_hash_type_tooltip")));
         self.combo_box_duplicate_hash_type.set_tooltip_text(Some(&flg!("duplicate_hash_type_tooltip")));
+        self.check_button_duplicate_case_sensitive_name
+            .set_tooltip_text(Some(&flg!("duplicate_case_sensitive_name_tooltip")));
 
         self.combo_box_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));
         self.label_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));

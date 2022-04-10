@@ -687,6 +687,14 @@ Author: Rafał Mikrut
                                 <property name="position">3</property>
                               </packing>
                             </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_button_duplicate_case_sensitive_name">
+                                <property name="label">Case sensitive</property>
+                              </object>
+                              <packing>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
