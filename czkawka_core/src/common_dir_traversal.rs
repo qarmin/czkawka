@@ -213,6 +213,15 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
+    #[cfg(target_family = "unix")]
+    pub fn exclude_other_filesystems(mut self, exclude_other_filesystems: bool) -> Self {
+        match self.directories {
+            Some(ref mut directories) => directories.set_exclude_other_filesystems(exclude_other_filesystems),
+            None => panic!("Directories is None"),
+        }
+        self
+    }
+
     pub fn group_by<G, T>(self, group_by: G) -> DirTraversalBuilder<'a, 'b, G>
     where
         G: Fn(&FileEntry) -> T,
@@ -417,6 +426,15 @@ where
                                     continue 'dir;
                                 }
 
+                                #[cfg(target_family = "unix")]
+                                if directories.exclude_other_filesystems() {
+                                    match directories.is_on_other_filesystems(&next_folder) {
+                                        Ok(true) => continue 'dir,
+                                        Err(e) => warnings.push(e.to_string()),
+                                        _ => (),
+                                    }
+                                }
+
                                 dir_result.push(next_folder);
                             }
                             (EntryType::Dir, Collect::EmptyFolders) => {
@@ -426,6 +444,16 @@ where
                                     set_as_not_empty_folder_list.push(current_folder.clone());
                                     continue 'dir;
                                 }
+
+                                #[cfg(target_family = "unix")]
+                                if directories.exclude_other_filesystems() {
+                                    match directories.is_on_other_filesystems(&next_folder) {
+                                        Ok(true) => continue 'dir,
+                                        Err(e) => warnings.push(e.to_string()),
+                                        _ => (),
+                                    }
+                                }
+
                                 dir_result.push(next_folder.clone());
                                 folder_entries_list.push((
                                     next_folder.clone(),
@@ -479,6 +507,15 @@ where
                                         continue 'dir;
                                     }
 
+                                    #[cfg(target_family = "unix")]
+                                    if directories.exclude_other_filesystems() {
+                                        match directories.is_on_other_filesystems(&current_file_name) {
+                                            Ok(true) => continue 'dir,
+                                            Err(e) => warnings.push(e.to_string()),
+                                            _ => (),
+                                        }
+                                    }
+
                                     // Creating new file entry
                                     let fe: FileEntry = FileEntry {
                                         path: current_file_name.clone(),
@@ -510,6 +547,15 @@ where
                                 }
                             }
                             (EntryType::File, Collect::EmptyFolders) | (EntryType::Symlink, Collect::EmptyFolders) => {
+                                #[cfg(target_family = "unix")]
+                                if directories.exclude_other_filesystems() {
+                                    match directories.is_on_other_filesystems(&current_folder) {
+                                        Ok(true) => continue 'dir,
+                                        Err(e) => warnings.push(e.to_string()),
+                                        _ => (),
+                                    }
+                                }
+
                                 set_as_not_empty_folder_list.push(current_folder.clone());
                             }
                             (EntryType::File, Collect::InvalidSymlinks) => {
@@ -537,6 +583,15 @@ where
                                 let current_file_name = current_folder.join(entry_data.file_name());
                                 if excluded_items.is_excluded(&current_file_name) {
                                     continue 'dir;
+                                }
+
+                                #[cfg(target_family = "unix")]
+                                if directories.exclude_other_filesystems() {
+                                    match directories.is_on_other_filesystems(&current_folder) {
+                                        Ok(true) => continue 'dir,
+                                        Err(e) => warnings.push(e.to_string()),
+                                        _ => (),
+                                    }
                                 }
 
                                 let mut destination_path = PathBuf::new();

@@ -23,6 +23,7 @@ core_directory_must_be_directory = Directories: Provided path must point at the 
 core_included_directory_zero_valid_directories = Included Directory ERROR: Not found even one correct path to included which is required
 core_excluded_directory_pointless_slash = Directories: Excluding / is pointless, because it means that no files will be scanned
 core_directory_overlap = Directories: All directories to search overlaps with excluded directories
+core_directory_unable_to_get_device_id = Directories: Unable to get device id from folder { $path }
 
 core_ffmpeg_not_found = Cannot find proper installation of FFmpeg
 core_ffmpeg_missing_in_snap = Similar Videos don't work currently with snap, if you want help look at - { $url }

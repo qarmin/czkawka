@@ -148,6 +148,11 @@ impl BrokenFiles {
         self.recursive_search = recursive_search;
     }
 
+    #[cfg(target_family = "unix")]
+    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
+        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
+    }
+
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
         self.directories.set_included_directory(included_directory, &mut self.text_messages)
     }
@@ -260,6 +265,15 @@ impl BrokenFiles {
 
                             if self.excluded_items.is_excluded(&next_folder) {
                                 continue 'dir;
+                            }
+
+                            #[cfg(target_family = "unix")]
+                            if self.directories.exclude_other_filesystems() {
+                                match self.directories.is_on_other_filesystems(&next_folder) {
+                                    Ok(true) => continue 'dir,
+                                    Err(e) => warnings.push(e.to_string()),
+                                    _ => (),
+                                }
                             }
 
                             dir_result.push(next_folder);
@@ -565,6 +579,8 @@ impl DebugPrint for BrokenFiles {
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
+        #[cfg(target_family = "unix")]
+        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }
