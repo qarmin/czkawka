@@ -36,6 +36,16 @@ To open folder containing selected file, just click twice on it with right mouse
 
 To invert a selection of files, click on a file with the middle mouse button and it will invert the selection of the other files in the same group.
 
+### Adding directories 
+
+By default current path is loaded to included directory and excluded directories are filled with default paths.
+
+It is possible to override this, by adding arguments when opening app e.g. `czkawka_gui /home /usr --/home/rafal --/home/zaba` which means that `/home` and `/usr` directories will be checked and `/home/rafal` and `/home/zaba` will be excluded.
+
+When using additional command line arguments, saving at exit option become disabled, so this current info about directories will not be saved until user save it manually.
+
+Both relative and absolute path are supported, so used can use both `../home` and `/home`.
+
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
 

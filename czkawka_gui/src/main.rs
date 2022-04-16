@@ -5,7 +5,11 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
+use gtk::gio::ApplicationFlags;
 use gtk::prelude::*;
+use gtk::Application;
+use std::env;
+use std::ffi::OsString;
 
 use czkawka_core::*;
 
@@ -55,125 +59,134 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    let application = gtk::Application::builder().build();
-    application.connect_activate(move |application| {
-        let mut gui_data: GuiData = GuiData::new_with_application(application);
-
-        // Used for getting data from thread
-        let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
-
-        // Futures progress report
-        let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (
-            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_empty_files, futures_receiver_empty_files): (
-            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_empty_folder, futures_receiver_empty_folder): (
-            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_big_file, futures_receiver_big_file): (
-            futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_same_music, futures_receiver_same_music): (
-            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_similar_images, futures_receiver_similar_images): (
-            futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_similar_videos, futures_receiver_similar_videos): (
-            futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_temporary, futures_receiver_temporary): (
-            futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (
-            futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-        let (futures_sender_broken_files, futures_receiver_broken_files): (
-            futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
-            futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
-        ) = futures::channel::mpsc::unbounded();
-
-        initialize_gui(&mut gui_data);
-        validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
-        reset_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
-        load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
-        load_configuration(
-            false,
-            &gui_data.upper_notebook,
-            &gui_data.main_notebook,
-            &gui_data.settings,
-            &gui_data.text_view_errors,
-            &gui_data.scrolled_window_errors,
-        );
-
-        // Needs to run when entire GUI is initialized
-        connect_change_language(&gui_data);
-
-        connect_button_delete(&gui_data);
-        connect_button_save(&gui_data);
-        connect_button_search(
-            &gui_data,
-            glib_stop_sender,
-            futures_sender_duplicate_files,
-            futures_sender_empty_files,
-            futures_sender_empty_folder,
-            futures_sender_big_file,
-            futures_sender_same_music,
-            futures_sender_similar_images,
-            futures_sender_similar_videos,
-            futures_sender_temporary,
-            futures_sender_invalid_symlinks,
-            futures_sender_broken_files,
-        );
-        connect_button_select(&gui_data);
-        connect_button_stop(&gui_data);
-        connect_button_hardlink_symlink(&gui_data);
-        connect_button_move(&gui_data);
-        connect_button_compare(&gui_data);
-
-        connect_duplicate_combo_box(&gui_data);
-        connect_notebook_tabs(&gui_data);
-        connect_selection_of_directories(&gui_data);
-        connect_popovers(&gui_data);
-        connect_compute_results(&gui_data, glib_stop_receiver);
-        connect_progress_window(
-            &gui_data,
-            futures_receiver_duplicate_files,
-            futures_receiver_empty_files,
-            futures_receiver_empty_folder,
-            futures_receiver_big_file,
-            futures_receiver_same_music,
-            futures_receiver_similar_images,
-            futures_receiver_similar_videos,
-            futures_receiver_temporary,
-            futures_receiver_invalid_symlinks,
-            futures_receiver_broken_files,
-        );
-        connect_show_hide_ui(&gui_data);
-        connect_settings(&gui_data);
-        connect_button_about(&gui_data);
-        connect_about_buttons(&gui_data);
-        connect_similar_image_size_change(&gui_data);
-
-        let window_main = gui_data.window_main.clone();
-        let taskbar_state = gui_data.taskbar_state.clone();
-        window_main.connect_delete_event(move |_, _| {
-            save_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Save configuration at exit
-            taskbar_state.borrow_mut().release();
-            Inhibit(false)
-        });
+    let application = gtk::Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
+    application.connect_command_line(move |app, cmdline| {
+        build_ui(app, cmdline.arguments());
+        0
     });
+    application.run_with_args(&env::args().collect::<Vec<_>>());
+}
+fn build_ui(application: &Application, arguments: Vec<OsString>) {
+    let mut gui_data: GuiData = GuiData::new_with_application(application);
 
-    application.run();
+    // Used for getting data from thread
+    let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+
+    // Futures progress report
+    let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (
+        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_empty_files, futures_receiver_empty_files): (
+        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_empty_folder, futures_receiver_empty_folder): (
+        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_big_file, futures_receiver_big_file): (
+        futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_same_music, futures_receiver_same_music): (
+        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_similar_images, futures_receiver_similar_images): (
+        futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_similar_videos, futures_receiver_similar_videos): (
+        futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_temporary, futures_receiver_temporary): (
+        futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (
+        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_broken_files, futures_receiver_broken_files): (
+        futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+
+    initialize_gui(&mut gui_data);
+    validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
+    reset_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
+    load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
+    load_configuration(
+        false,
+        &gui_data.upper_notebook,
+        &gui_data.main_notebook,
+        &gui_data.settings,
+        &gui_data.text_view_errors,
+        &gui_data.scrolled_window_errors,
+        arguments.clone(),
+    );
+
+    // Needs to run when entire GUI is initialized
+    connect_change_language(&gui_data);
+
+    connect_button_delete(&gui_data);
+    connect_button_save(&gui_data);
+    connect_button_search(
+        &gui_data,
+        glib_stop_sender,
+        futures_sender_duplicate_files,
+        futures_sender_empty_files,
+        futures_sender_empty_folder,
+        futures_sender_big_file,
+        futures_sender_same_music,
+        futures_sender_similar_images,
+        futures_sender_similar_videos,
+        futures_sender_temporary,
+        futures_sender_invalid_symlinks,
+        futures_sender_broken_files,
+    );
+    connect_button_select(&gui_data);
+    connect_button_stop(&gui_data);
+    connect_button_hardlink_symlink(&gui_data);
+    connect_button_move(&gui_data);
+    connect_button_compare(&gui_data);
+
+    connect_duplicate_combo_box(&gui_data);
+    connect_notebook_tabs(&gui_data);
+    connect_selection_of_directories(&gui_data);
+    connect_popovers(&gui_data);
+    connect_compute_results(&gui_data, glib_stop_receiver);
+    connect_progress_window(
+        &gui_data,
+        futures_receiver_duplicate_files,
+        futures_receiver_empty_files,
+        futures_receiver_empty_folder,
+        futures_receiver_big_file,
+        futures_receiver_same_music,
+        futures_receiver_similar_images,
+        futures_receiver_similar_videos,
+        futures_receiver_temporary,
+        futures_receiver_invalid_symlinks,
+        futures_receiver_broken_files,
+    );
+    connect_show_hide_ui(&gui_data);
+    connect_settings(&gui_data);
+    connect_button_about(&gui_data);
+    connect_about_buttons(&gui_data);
+    connect_similar_image_size_change(&gui_data);
+
+    let window_main = gui_data.window_main.clone();
+    let taskbar_state = gui_data.taskbar_state.clone();
+    let used_additional_arguments = arguments.len() > 1;
+    window_main.connect_delete_event(move |_, _| {
+        // Not save configuration when using non default arguments
+        if !used_additional_arguments {
+            save_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors);
+            // Save configuration at exit
+        }
+        taskbar_state.borrow_mut().release();
+        Inhibit(false)
+    });
 }
