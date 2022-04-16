@@ -53,7 +53,7 @@ pub fn connect_settings(gui_data: &GuiData) {
         let button_settings_load_configuration = gui_data.settings.button_settings_load_configuration.clone();
         let scrolled_window_errors = gui_data.scrolled_window_errors.clone();
         button_settings_load_configuration.connect_clicked(move |_| {
-            load_configuration(true, &upper_notebook, &main_notebook, &settings, &text_view_errors, &scrolled_window_errors);
+            load_configuration(true, &upper_notebook, &main_notebook, &settings, &text_view_errors, &scrolled_window_errors, Vec::new());
         });
     }
     // Connect reset configuration button

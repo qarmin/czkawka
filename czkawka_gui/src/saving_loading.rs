@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ffi::OsString;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -20,7 +21,6 @@ use crate::help_functions::*;
 use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
 use crate::localizer_core::generate_translation_hashmap;
 
-// TODO organize this better, add specific functions that will allow to load from files specific strings
 const SAVE_FILE_NAME: &str = "czkawka_gui_config_4.txt";
 
 const DEFAULT_SAVE_ON_EXIT: bool = true;
@@ -662,6 +662,7 @@ pub fn load_configuration(
     settings: &GuiSettings,
     text_view_errors: &TextView,
     scrolled_window_errors: &ScrolledWindow,
+    arguments: Vec<OsString>,
 ) {
     let text_view_errors = text_view_errors.clone();
 
@@ -681,8 +682,8 @@ pub fn load_configuration(
     // Loading data from hashmaps
     let (hashmap_ls, _hashmap_sl) = create_hash_map();
 
-    let included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().clone(), included_directories);
-    let excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().clone(), excluded_directories);
+    let mut included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().clone(), included_directories);
+    let mut excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().clone(), excluded_directories);
     let excluded_items: String = loaded_entries.get_string(
         hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(),
         upper_notebook.entry_excluded_items.text().to_string(),
@@ -752,6 +753,46 @@ pub fn load_configuration(
     // Setting data
     if manual_execution || loading_at_start {
         {
+            // Handle here arguments that were added to app e.g. czkawka_gui /home --/home/roman
+            if loading_at_start && arguments.len() > 1 {
+                let iter_i = arguments.iter().skip(1);
+                let iter_e = iter_i.clone();
+                included_directories = iter_i
+                    .filter_map(|e| {
+                        let r = e.to_string_lossy().to_string();
+                        if !r.starts_with("--") {
+                            let path = Path::new(&r);
+                            if !path.exists() {
+                                return None;
+                            }
+                            match path.canonicalize() {
+                                Ok(r) => Some(r.to_string_lossy().to_string()),
+                                Err(_) => None,
+                            }
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                excluded_directories = iter_e
+                    .filter_map(|e| {
+                        let r = e.to_string_lossy().to_string();
+                        if let Some(r) = r.strip_prefix("--") {
+                            let path = Path::new(&r);
+                            if !path.exists() {
+                                return None;
+                            }
+                            match path.canonicalize() {
+                                Ok(r) => Some(r.to_string_lossy().to_string()),
+                                Err(_) => None,
+                            }
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>();
+            }
+
             // Include Directories
             let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
             let list_store = get_list_store(&tree_view_included_directories);
