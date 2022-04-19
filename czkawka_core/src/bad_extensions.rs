@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{File, Metadata};
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter};
@@ -10,11 +10,12 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, panic, thread};
 
 use crossbeam_channel::Receiver;
+use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, ProgressData};
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -22,14 +23,6 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::similar_images::{IMAGE_RS_bad_extensions_files_EXTENSIONS, AUDIO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
-
-#[derive(Clone)]
-pub struct FileEntry {
-    pub path: PathBuf,
-    pub modified_date: u64,
-    pub size: u64,
-}
 
 #[derive(Clone)]
 pub struct BadFileEntry {
@@ -54,16 +47,17 @@ impl Info {
 pub struct BadExtensions {
     text_messages: Messages,
     information: Info,
-    files_to_check: Vec<String>,
-    bad_extensions_files: Vec<FileEntry>,
+    files_to_check: Vec<FileEntry>,
+    bad_extensions_files: Vec<BadFileEntry>,
     directories: Directories,
     allowed_extensions: Extensions,
     excluded_items: ExcludedItems,
+    minimal_file_size: u64,
+    maximal_file_size: u64,
     recursive_search: bool,
     stopped_search: bool,
-    use_cache: bool,
-    delete_outdated_cache: bool, // TODO add this to GUI
     save_also_as_json: bool,
+    include_files_without_extension: bool,
 }
 
 impl BadExtensions {
@@ -77,10 +71,11 @@ impl BadExtensions {
             excluded_items: ExcludedItems::new(),
             files_to_check: Default::default(),
             stopped_search: false,
+            minimal_file_size: 8192,
+            maximal_file_size: u64::MAX,
             bad_extensions_files: Default::default(),
-            use_cache: true,
-            delete_outdated_cache: true,
             save_also_as_json: false,
+            include_files_without_extension: true,
         }
     }
 
@@ -94,7 +89,6 @@ impl BadExtensions {
             self.stopped_search = true;
             return;
         }
-        self.delete_files();
         self.debug_print();
     }
 
@@ -102,8 +96,21 @@ impl BadExtensions {
         self.stopped_search
     }
 
-    pub const fn get_bad_extensions_files(&self) -> &Vec<FileEntry> {
+    pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
         &self.bad_extensions_files
+    }
+
+    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
+        self.maximal_file_size = match maximal_file_size {
+            0 => 1,
+            t => t,
+        };
+    }
+    pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
+        self.minimal_file_size = match minimal_file_size {
+            0 => 1,
+            t => t,
+        };
     }
 
     pub const fn get_text_messages(&self) -> &Messages {
@@ -116,10 +123,6 @@ impl BadExtensions {
 
     pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
         self.save_also_as_json = save_also_as_json;
-    }
-
-    pub fn set_use_cache(&mut self, use_cache: bool) {
-        self.use_cache = use_cache;
     }
 
     pub fn set_recursive_search(&mut self, recursive_search: bool) {
@@ -164,7 +167,6 @@ impl BadExtensions {
                 if let Some(files_to_check) = grouped_file_entries.get(&()) {
                     self.files_to_check = files_to_check.clone();
                 }
-                self.information.number_of_empty_files = self.empty_files.len();
                 self.text_messages.warnings.extend(warnings);
                 Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
                 true
@@ -179,6 +181,8 @@ impl BadExtensions {
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
+        let include_files_without_extension = self.include_files_without_extension;
+
         let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
@@ -189,7 +193,7 @@ impl BadExtensions {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let entries_to_check = non_cached_files_to_check.len();
+            let entries_to_check = self.files_to_check.len();
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
@@ -208,28 +212,79 @@ impl BadExtensions {
         } else {
             thread::spawn(|| {})
         };
+
+        let mut files_to_check = Default::default();
+        mem::swap(&mut files_to_check, &mut self.files_to_check);
+
         //// PROGRESS THREAD END
-        let mut vec_file_entry: Vec<FileEntry> = self.files_to_checkfiles_to_checkf
-            .into_iter() // TODO into par iter after
-            .map(|(_, file_entry)| {
+        self.bad_extensions_files = files_to_check
+            .into_par_iter() // TODO into par iter after
+            .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_breaked.store(true, Ordering::Relaxed);
                     return None;
                 }
 
-
-
+                let full_path = file_entry.path.to_string_lossy().to_string();
                 let current_extension;
-                if file_entry
+                if let Some(dot_index) = full_path.find('.') {
+                    let after_dot = &full_path[dot_index..];
+                    // Text longer than 10 characters is not considered as extension
+                    if after_dot.len() > 10 {
+                        current_extension = "";
+                    } else {
+                        current_extension = after_dot;
+                    }
+                } else {
+                    current_extension = "";
+                }
+                let proper_extension: &str;
 
+                let mi_guess = mime_guess::from_path(&file_entry.path);
 
+                let mut all_available_extensions: BTreeSet<_> = Default::default();
 
+                for mim in mi_guess {
+                    if let Some(all_ext) = get_mime_extensions(&mim) {
+                        for ext in all_ext {
+                            all_available_extensions.insert(ext);
+                        }
+                    }
+                }
+
+                if current_extension.is_empty() {
+                    if include_files_without_extension {
+                        // TODO change this to last of first when function will be stable
+                        if !all_available_extensions.is_empty() {
+                            proper_extension = *all_available_extensions.iter().next().unwrap();
+                        } else {
+                            println!("Not available type for file {}", full_path);
+                            return Some(None);
+                        }
+                    } else {
+                        println!("Empty extension which is disabled by settings");
+                        return Some(None);
+                    }
+                } else if all_available_extensions.take(&current_extension).is_some() {
+                    proper_extension = current_extension;
+                } else {
+                    // Not found any file that can be used for search
+                    return Some(None);
+                }
+
+                Some(Some(BadFileEntry {
+                    path: file_entry.path,
+                    modified_date: file_entry.modified_date,
+                    size: file_entry.size,
+                    current_extension: current_extension.to_string(),
+                    proper_extensions: proper_extension.to_string(),
+                }))
             })
             .while_some()
             .filter(|file_entry| file_entry.is_some())
             .map(|file_entry| file_entry.unwrap())
-            .collect::<Vec<FileEntry>>();
+            .collect::<Vec<_>>();
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
@@ -239,16 +294,6 @@ impl BadExtensions {
         if check_was_breaked.load(Ordering::Relaxed) {
             return false;
         }
-
-        // Just connect loaded results with already calculated
-        for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry.clone());
-        }
-
-        self.bad_extensions_files = vec_file_entry
-            .iter()
-            .filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) })
-            .collect();
 
         self.information.number_of_files_with_bad_extension = self.bad_extensions_files.len();
 
@@ -289,7 +334,6 @@ impl DebugPrint for BadExtensions {
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
-        println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }
 }
@@ -323,7 +367,7 @@ impl SaveResults for BadExtensions {
         if !self.bad_extensions_files.is_empty() {
             writeln!(writer, "Found {} files with invalid extension.", self.information.number_of_files_with_bad_extension).unwrap();
             for file_entry in self.bad_extensions_files.iter() {
-                writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.error_string).unwrap();
+                writeln!(writer, "{}", file_entry.path.display()).unwrap();
             }
         } else {
             write!(writer, "Not found any files with invalid extension.").unwrap();
@@ -340,7 +384,7 @@ impl PrintResults for BadExtensions {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
         for file_entry in self.bad_extensions_files.iter() {
-            println!("{} - {}", file_entry.path.display(), file_entry.error_string);
+            println!("{}", file_entry.path.display());
         }
 
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
