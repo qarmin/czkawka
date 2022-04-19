@@ -522,6 +522,7 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk::TreeView) -> NotebookMa
         "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
         "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
         "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
+        "tree_view_bad_extensions" => NotebookMainEnum::BadExtensions,
         e => {
             panic!("{}", e)
         }

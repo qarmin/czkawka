@@ -1,8 +1,8 @@
-use std::collections::{BTreeSet};
-use std::fs::{File};
+use std::collections::BTreeSet;
+use std::fs::File;
 use std::io::prelude::*;
-use std::io::{BufWriter};
-use std::path::{PathBuf};
+use std::io::BufWriter;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
@@ -13,7 +13,6 @@ use crossbeam_channel::Receiver;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
-
 use crate::common::{Common, LOOP_DURATION};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
@@ -21,8 +20,6 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-
-
 
 #[derive(Clone)]
 pub struct BadFileEntry {
@@ -226,20 +223,20 @@ impl BadExtensions {
                     return None;
                 }
 
-                let full_path = file_entry.path.to_string_lossy().to_string();
                 let current_extension;
-                if let Some(dot_index) = full_path.find('.') {
-                    let after_dot = &full_path[dot_index..];
+
+                if let Some(extension) = file_entry.path.extension() {
+                    let extension = extension.to_string_lossy().to_lowercase();
                     // Text longer than 10 characters is not considered as extension
-                    if after_dot.len() > 10 {
-                        current_extension = "";
+                    if extension.len() > 10 {
+                        current_extension = "".to_string();
                     } else {
-                        current_extension = after_dot;
+                        current_extension = extension;
                     }
                 } else {
-                    current_extension = "";
+                    current_extension = "".to_string();
                 }
-                let proper_extension: &str;
+                let mut proper_extension = "".to_string();
 
                 let mi_guess = mime_guess::from_path(&file_entry.path);
 
@@ -249,27 +246,25 @@ impl BadExtensions {
                     if let Some(all_ext) = get_mime_extensions(&mim) {
                         for ext in all_ext {
                             all_available_extensions.insert(ext);
+                            proper_extension.push_str(ext);
+                            proper_extension.push(',');
                         }
                     }
+                    proper_extension.push_str(mim.essence_str());
+                    proper_extension.push(',');
                 }
+                proper_extension.pop();
 
-                if current_extension.is_empty() {
-                    if include_files_without_extension {
-                        // TODO change this to last of first when function will be stable
-                        if !all_available_extensions.is_empty() {
-                            proper_extension = *all_available_extensions.iter().next().unwrap();
-                        } else {
-                            println!("Not available type for file {}", full_path);
-                            return Some(None);
-                        }
-                    } else {
+                if all_available_extensions.is_empty() {
+                    // Not found any extension
+                    return Some(None);
+                } else if current_extension.is_empty() {
+                    if !include_files_without_extension {
                         println!("Empty extension which is disabled by settings");
                         return Some(None);
                     }
-                } else if all_available_extensions.take(&current_extension).is_some() {
-                    proper_extension = current_extension;
-                } else {
-                    // Not found any file that can be used for search
+                } else if all_available_extensions.take(&current_extension.as_str()).is_some() {
+                    // Found proper extension
                     return Some(None);
                 }
 
@@ -277,7 +272,7 @@ impl BadExtensions {
                     path: file_entry.path,
                     modified_date: file_entry.modified_date,
                     size: file_entry.size,
-                    current_extension: current_extension.to_string(),
+                    current_extension,
                     proper_extensions: proper_extension.to_string(),
                 }))
             })

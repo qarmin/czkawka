@@ -507,6 +507,13 @@ impl GuiMainNotebook {
                 flg!("main_tree_view_column_type_of_error"),
                 flg!("main_tree_view_column_modification"),
             ], // Broken Files
+            vec![
+                flg!("main_tree_view_column_file_name"),
+                flg!("main_tree_view_column_path"),
+                flg!("main_tree_view_column_current_extension"),
+                flg!("main_tree_view_column_proper_extensions"),
+                flg!("main_tree_view_column_modification"),
+            ], // Broken Files
         ];
 
         for (notebook_index, tree_view) in self.get_main_tree_views().iter().enumerate() {

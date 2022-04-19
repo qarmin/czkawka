@@ -13,16 +13,16 @@ use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(
     gui_data: &GuiData,
-    mut futures_receiver_duplicate_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_empty_files: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_empty_folder: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_big_files: futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
-    mut futures_receiver_same_music: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_similar_images: futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
-    mut futures_receiver_similar_videos: futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
-    mut futures_receiver_temporary: futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
-    mut futures_receiver_invalid_symlinks: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
+    mut futures_receiver_duplicate_files: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_empty_files: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_empty_folder: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_big_files: UnboundedReceiver<big_file::ProgressData>,
+    mut futures_receiver_same_music: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_similar_images: UnboundedReceiver<similar_images::ProgressData>,
+    mut futures_receiver_similar_videos: UnboundedReceiver<similar_videos::ProgressData>,
+    mut futures_receiver_temporary: UnboundedReceiver<temporary::ProgressData>,
+    mut futures_receiver_invalid_symlinks: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_broken_files: UnboundedReceiver<broken_files::ProgressData>,
     mut futures_receiver_bad_extensions: UnboundedReceiver<ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
@@ -404,6 +404,50 @@ pub fn connect_progress_window(
                         label_stage.set_text(&flg!(
                             "progress_scanning_broken_files",
                             generate_translation_hashmap(vec![("file_checked", item.files_checked.to_string()), ("all_files", item.files_to_check.to_string())])
+                        ));
+                    }
+                    _ => {
+                        panic!();
+                    }
+                }
+            }
+        };
+        main_context.spawn_local(future);
+    }
+    {
+        // Broken Files
+        let label_stage = gui_data.progress_window.label_stage.clone();
+        let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+        let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
+        let taskbar_state = gui_data.taskbar_state.clone();
+        let future = async move {
+            while let Some(item) = futures_receiver_bad_extensions.next().await {
+                match item.current_stage {
+                    0 => {
+                        progress_bar_current_stage.hide();
+                        label_stage.set_text(&flg!(
+                            "progress_scanning_general_file",
+                            generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
+                        ));
+                        taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+                    }
+                    1 => {
+                        progress_bar_current_stage.show();
+                        if item.entries_to_check != 0 {
+                            progress_bar_all_stages.set_fraction((1f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
+                            taskbar_state.borrow().set_progress_value(
+                                (item.entries_to_check + item.entries_checked) as u64,
+                                item.entries_to_check as u64 * (item.max_stage + 1) as u64,
+                            );
+                        } else {
+                            progress_bar_all_stages.set_fraction((1f64) / (item.max_stage + 1) as f64);
+                            progress_bar_current_stage.set_fraction(0f64);
+                            taskbar_state.borrow().set_progress_value(1, (item.max_stage + 1) as u64);
+                        }
+                        label_stage.set_text(&flg!(
+                            "progress_scanning_extension_of_files",
+                            generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
                         ));
                     }
                     _ => {
