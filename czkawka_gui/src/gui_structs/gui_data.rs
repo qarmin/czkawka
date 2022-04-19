@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crossbeam_channel::bounded;
+use czkawka_core::bad_extensions::BadExtensions;
 use gdk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::*;
 use gtk::Builder;
@@ -88,6 +89,7 @@ pub struct GuiData {
     pub shared_same_music_state: Rc<RefCell<SameMusic>>,
     pub shared_same_invalid_symlinks: Rc<RefCell<InvalidSymlinks>>,
     pub shared_broken_files_state: Rc<RefCell<BrokenFiles>>,
+    pub shared_bad_extensions_state: Rc<RefCell<BadExtensions>>,
 
     pub preview_path: Rc<RefCell<String>>,
 
@@ -162,6 +164,7 @@ impl GuiData {
         let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
         let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(InvalidSymlinks::new()));
         let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BrokenFiles::new()));
+        let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BadExtensions::new()));
 
         let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new("".to_string()));
 
@@ -201,6 +204,7 @@ impl GuiData {
             shared_same_music_state,
             shared_same_invalid_symlinks,
             shared_broken_files_state,
+            shared_bad_extensions_state,
             preview_path,
             entry_info,
             text_view_errors,

@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+use czkawka_core::bad_extensions::BadExtensions;
 use gtk::prelude::*;
 use gtk::{Bin, ListStore, TextView, TreeView, Widget};
 
@@ -205,6 +206,19 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_size_as_bytes: None,
         column_modification_as_secs: None,
     },
+    NotebookObject {
+        notebook_type: NotebookMainEnum::BadExtensions,
+        available_modes: [PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::None, PopoverTypes::None],
+        column_activatable_button: None,
+        column_path: ColumnsBadExtensions::Path as i32,
+        column_name: ColumnsBadExtensions::Name as i32,
+        column_selection: ColumnsBadExtensions::SelectionButton as i32,
+        column_color: None,
+        column_dimensions: None,
+        column_size: None,
+        column_size_as_bytes: None,
+        column_modification_as_secs: None,
+    },
 ];
 
 pub enum Message {
@@ -218,6 +232,7 @@ pub enum Message {
     SameMusic(SameMusic),
     InvalidSymlinks(InvalidSymlinks),
     BrokenFiles(BrokenFiles),
+    BadExtensions(BadExtensions),
 }
 
 pub enum ColumnsDuplicates {
@@ -341,6 +356,16 @@ pub enum ColumnsBrokenFiles {
     Name,
     Path,
     ErrorType,
+    Modification,
+    ModificationAsSecs,
+}
+
+pub enum ColumnsBadExtensions {
+    SelectionButton = 0,
+    Name,
+    Path,
+    CurrentExtension,
+    ValidExtensions,
     Modification,
     ModificationAsSecs,
 }

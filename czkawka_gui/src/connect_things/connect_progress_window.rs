@@ -1,6 +1,8 @@
+use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
 use gtk::prelude::*;
 
+use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::{big_file, broken_files, common_dir_traversal, similar_images, similar_videos, temporary};
 
 use crate::flg;
@@ -21,6 +23,7 @@ pub fn connect_progress_window(
     mut futures_receiver_temporary: futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
     mut futures_receiver_invalid_symlinks: futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     mut futures_receiver_broken_files: futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
+    mut futures_receiver_bad_extensions: UnboundedReceiver<ProgressData>,
 ) {
     let main_context = glib::MainContext::default();
     let _guard = main_context.acquire().unwrap();

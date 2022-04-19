@@ -1,28 +1,28 @@
-use std::collections::{BTreeMap, BTreeSet};
-use std::fs::{File, Metadata};
+use std::collections::{BTreeSet};
+use std::fs::{File};
 use std::io::prelude::*;
-use std::io::{BufReader, BufWriter};
-use std::path::{Path, PathBuf};
+use std::io::{BufWriter};
+use std::path::{PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, mem, panic, thread};
+use std::time::{Duration, SystemTime};
+use std::{mem, thread};
 
 use crossbeam_channel::Receiver;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 
-use crate::common::{open_cache_folder, Common, LOOP_DURATION};
+
+use crate::common::{Common, LOOP_DURATION};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::flc;
-use crate::localizer_core::generate_translation_hashmap;
+
+
 
 #[derive(Clone)]
 pub struct BadFileEntry {

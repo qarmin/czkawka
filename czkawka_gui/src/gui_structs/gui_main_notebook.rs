@@ -23,6 +23,7 @@ pub struct GuiMainNotebook {
     pub scrolled_window_same_music_finder: gtk::ScrolledWindow,
     pub scrolled_window_invalid_symlinks: gtk::ScrolledWindow,
     pub scrolled_window_broken_files: gtk::ScrolledWindow,
+    pub scrolled_window_bad_extensions: gtk::ScrolledWindow,
 
     pub tree_view_duplicate_finder: gtk::TreeView,
     pub tree_view_empty_folder_finder: gtk::TreeView,
@@ -34,6 +35,7 @@ pub struct GuiMainNotebook {
     pub tree_view_same_music_finder: gtk::TreeView,
     pub tree_view_invalid_symlinks: gtk::TreeView,
     pub tree_view_broken_files: gtk::TreeView,
+    pub tree_view_bad_extensions: gtk::TreeView,
 
     // TODO, in GTK4 this can be changed to e.g. add_controller which is not 100% compatible with this  - https://discourse.gnome.org/t/how-to-convert-code-to-use-eventcontrollerkey/8198/2
     pub evk_tree_view_duplicate_finder: gtk::EventControllerKey,
@@ -46,6 +48,7 @@ pub struct GuiMainNotebook {
     pub evk_tree_view_same_music_finder: gtk::EventControllerKey,
     pub evk_tree_view_invalid_symlinks: gtk::EventControllerKey,
     pub evk_tree_view_broken_files: gtk::EventControllerKey,
+    pub evk_tree_view_bad_extensions: gtk::EventControllerKey,
 
     // pub gc_tree_view_duplicate_finder: gtk4::GestureClick,
     // pub gc_tree_view_empty_folder_finder: gtk::GestureClick,
@@ -57,6 +60,7 @@ pub struct GuiMainNotebook {
     // pub gc_tree_view_same_music_finder: gtk::GestureClick,
     // pub gc_tree_view_invalid_symlinks: gtk::GestureClick,
     // pub gc_tree_view_broken_files: gtk::GestureClick,
+    // pub gc_tree_view_bad_extensions: gtk::GestureClick,
 
     // General
 
@@ -126,6 +130,7 @@ impl GuiMainNotebook {
         let scrolled_window_same_music_finder: gtk::ScrolledWindow = builder.object("scrolled_window_same_music_finder").unwrap();
         let scrolled_window_invalid_symlinks: gtk::ScrolledWindow = builder.object("scrolled_window_invalid_symlinks").unwrap();
         let scrolled_window_broken_files: gtk::ScrolledWindow = builder.object("scrolled_window_broken_files").unwrap();
+        let scrolled_window_bad_extensions: gtk::ScrolledWindow = builder.object("scrolled_window_bad_extensions").unwrap();
 
         let tree_view_duplicate_finder: gtk::TreeView = TreeView::new();
         tree_view_duplicate_finder.set_widget_name("PIERD");
@@ -138,6 +143,7 @@ impl GuiMainNotebook {
         let tree_view_same_music_finder: gtk::TreeView = TreeView::new();
         let tree_view_invalid_symlinks: gtk::TreeView = TreeView::new();
         let tree_view_broken_files: gtk::TreeView = TreeView::new();
+        let tree_view_bad_extensions: gtk::TreeView = TreeView::new();
 
         let evk_tree_view_duplicate_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_duplicate_finder);
         let evk_tree_view_empty_folder_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_empty_folder_finder);
@@ -149,6 +155,7 @@ impl GuiMainNotebook {
         let evk_tree_view_same_music_finder: gtk::EventControllerKey = EventControllerKey::new(&tree_view_same_music_finder);
         let evk_tree_view_invalid_symlinks: gtk::EventControllerKey = EventControllerKey::new(&tree_view_invalid_symlinks);
         let evk_tree_view_broken_files: gtk::EventControllerKey = EventControllerKey::new(&tree_view_broken_files);
+        let evk_tree_view_bad_extensions: gtk::EventControllerKey = EventControllerKey::new(&tree_view_bad_extensions);
 
         // TODO GTK 4
         // let evk_tree_view_duplicate_finder: gtk4::EventControllerKey = EventControllerKey::new();
@@ -171,6 +178,8 @@ impl GuiMainNotebook {
         // tree_view_invalid_symlinks.add_controller(&evk_tree_view_invalid_symlinks);
         // let evk_tree_view_broken_files: gtk4::EventControllerKey = EventControllerKey::new();
         // tree_view_broken_files.add_controller(&evk_tree_view_broken_files);
+        // let evk_tree_view_bad_extensions: gtk4::EventControllerKey = EventControllerKey::new();
+        // tree_view_bad_extensions.add_controller(&evk_tree_view_bad_extensions);
 
         // let gc_tree_view_duplicate_finder: gtk4::GestureClick = GestureClick::new();
         // tree_view_duplicate_finder.add_controller(&gc_tree_view_duplicate_finder);
@@ -192,6 +201,8 @@ impl GuiMainNotebook {
         // tree_view_invalid_symlinks.add_controller(&gc_tree_view_invalid_symlinks);
         // let gc_tree_view_broken_files: gtk4::GestureClick = GestureClick::new();
         // tree_view_broken_files.add_controller(&gc_tree_view_broken_files);
+        // let gc_tree_view_bad_extensions: gtk4::GestureClick = GestureClick::new();
+        // tree_view_bad_extensions.add_controller(&gc_tree_view_bad_extensions);
 
         let combo_box_duplicate_check_method: gtk::ComboBoxText = builder.object("combo_box_duplicate_check_method").unwrap();
         let combo_box_duplicate_hash_type: gtk::ComboBoxText = builder.object("combo_box_duplicate_hash_type").unwrap();
@@ -251,6 +262,7 @@ impl GuiMainNotebook {
             scrolled_window_same_music_finder,
             scrolled_window_invalid_symlinks,
             scrolled_window_broken_files,
+            scrolled_window_bad_extensions,
             tree_view_duplicate_finder,
             tree_view_empty_folder_finder,
             tree_view_empty_files_finder,
@@ -261,6 +273,7 @@ impl GuiMainNotebook {
             tree_view_same_music_finder,
             tree_view_invalid_symlinks,
             tree_view_broken_files,
+            tree_view_bad_extensions,
             evk_tree_view_duplicate_finder,
             evk_tree_view_empty_folder_finder,
             evk_tree_view_empty_files_finder,
@@ -304,6 +317,7 @@ impl GuiMainNotebook {
             check_button_video_ignore_same_size,
             check_button_image_fast_compare,
             check_button_duplicate_case_sensitive_name,
+            evk_tree_view_bad_extensions,
         }
     }
 
@@ -319,6 +333,7 @@ impl GuiMainNotebook {
             self.tree_view_same_music_finder.clone(),
             self.tree_view_invalid_symlinks.clone(),
             self.tree_view_broken_files.clone(),
+            self.tree_view_bad_extensions.clone(),
         ]
     }
 
