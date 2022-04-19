@@ -1,91 +1,60 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.9.0 -->
-<!-- Generated with glade 3.39.0 
-
-The MIT License (MIT)
-
-Copyright (c) 
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-Author: Rafał Mikrut
-
--->
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
 <interface>
-  <!-- interface-name Czkawka -->
-  <!-- interface-description Czkawka is simple and fast app to find duplicates, empty folders, similar images etc. -->
-  <!-- interface-authors Rafa\305\202 Mikrut -->
-  <!-- interface-license-id mit_x11 -->
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkAdjustment" id="adjustment1">
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
     <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkWindow" id="window_main">
     <property name="can-focus">False</property>
-    <property name="default-height">800</property>
     <property name="default-width">1100</property>
+    <property name="default-height">800</property>
     <child>
       <object class="GtkBox">
+        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
-        <property name="visible">True</property>
         <child>
           <object class="GtkPaned">
+            <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="orientation">vertical</property>
-            <property name="visible">True</property>
             <child>
               <object class="GtkNotebook" id="notebook_upper">
-                <property name="can-focus">True</property>
                 <property name="visible">True</property>
+                <property name="can-focus">True</property>
                 <child>
                   <object class="GtkBox" id="notebook_upper_included_directories">
-                    <property name="can-focus">False</property>
-                    <property name="margin-end">5</property>
-                    <property name="margin-start">5</property>
-                    <property name="spacing">5</property>
                     <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="margin-start">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkButton" id="buttons_add_included_directory">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="visible">True</property>
                             <child>
                               <object class="GtkBox">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="spacing">4</property>
-                                <property name="visible">True</property>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="icon-name">image-missing</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -95,9 +64,9 @@ Author: Rafał Mikrut
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Add </property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -116,20 +85,20 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkButton" id="buttons_remove_included_directory">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="visible">True</property>
                             <child>
                               <object class="GtkBox">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="spacing">4</property>
-                                <property name="visible">True</property>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="icon-name">image-missing</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -139,9 +108,9 @@ Author: Rafał Mikrut
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Remove  </property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -160,20 +129,20 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkButton" id="buttons_manual_add_included_directory">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="visible">True</property>
                             <child>
                               <object class="GtkBox">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="spacing">4</property>
-                                <property name="visible">True</property>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="icon-name">image-missing</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -183,9 +152,9 @@ Author: Rafał Mikrut
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Manual Add</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -211,9 +180,9 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_included_directories">
+                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="shadow-type">in</property>
-                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -223,13 +192,13 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="check_button_recursive">
-                        <property name="active">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="draw-indicator">True</property>
                         <property name="label" translatable="yes">Recursive</property>
-                        <property name="margin-end">5</property>
-                        <property name="receives-default">False</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="margin-end">5</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -244,9 +213,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Included Directories</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="tab-fill">False</property>
@@ -254,34 +223,34 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkBox" id="notebook_upper_excluded_directories">
-                    <property name="can-focus">False</property>
-                    <property name="margin-end">5</property>
-                    <property name="margin-start">5</property>
-                    <property name="spacing">6</property>
                     <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="spacing">6</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="margin-start">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkButton" id="buttons_add_excluded_directory">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="visible">True</property>
                             <child>
                               <object class="GtkBox">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="spacing">4</property>
-                                <property name="visible">True</property>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="icon-name">image-missing</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -291,9 +260,9 @@ Author: Rafał Mikrut
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Add </property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -312,20 +281,20 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkButton" id="buttons_remove_excluded_directory">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="visible">True</property>
                             <child>
                               <object class="GtkBox">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="spacing">4</property>
-                                <property name="visible">True</property>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="icon-name">image-missing</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -335,9 +304,9 @@ Author: Rafał Mikrut
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Remove  </property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -356,20 +325,20 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkButton" id="buttons_manual_add_excluded_directory">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="visible">True</property>
                             <child>
                               <object class="GtkBox">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="spacing">4</property>
-                                <property name="visible">True</property>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="icon-name">image-missing</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -379,9 +348,9 @@ Author: Rafał Mikrut
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Manual Add</property>
-                                    <property name="visible">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -407,9 +376,9 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_excluded_directories">
+                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="shadow-type">in</property>
-                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -424,9 +393,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Excluded Directories</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -435,22 +404,22 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkBox" id="notebook_upper_excluded_items">
-                    <property name="can-focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <property name="valign">center</property>
                     <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
-                        <property name="can-focus">False</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
-                        <property name="spacing">5</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel" id="label_excluded_items">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Excluded items</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -460,9 +429,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkEntry" id="entry_excluded_items">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="text" translatable="yes">*/.git,*/node_modules,*/lost+found</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -479,16 +448,16 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkBox">
-                        <property name="can-focus">False</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
-                        <property name="spacing">5</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel" id="label_allowed_extensions">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Allowed Extensions</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -498,8 +467,8 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkEntry" id="entry_allowed_extensions">
-                            <property name="can-focus">True</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -516,16 +485,16 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkBox">
-                        <property name="can-focus">False</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
-                        <property name="spacing">8</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="spacing">8</property>
                         <child>
                           <object class="GtkLabel" id="label_general_size_bytes">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">File Size(bytes)</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -535,9 +504,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel" id="label_general_min_size">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Min:</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -547,12 +516,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkEntry" id="entry_general_minimal_size">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
                             <property name="max-length">15</property>
                             <property name="text" translatable="yes">8192</property>
-                            <property name="visible">True</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -562,9 +531,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel" id="label_general_max_size">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Max:</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -574,12 +543,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkEntry" id="entry_general_maximal_size">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
                             <property name="max-length">15</property>
                             <property name="text" translatable="yes">1099512000000</property>
-                            <property name="visible">True</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -601,9 +570,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Items Configuration</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
@@ -618,32 +587,32 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkNotebook" id="notebook_main">
-                <property name="can-focus">True</property>
-                <property name="scrollable">True</property>
-                <property name="tab-pos">left</property>
                 <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="tab-pos">left</property>
+                <property name="scrollable">True</property>
                 <child>
                   <object class="GtkBox">
-                    <property name="can-focus">False</property>
                     <property name="visible">True</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="can-focus">False</property>
-                            <property name="margin-end">5</property>
-                            <property name="margin-start">5</property>
-                            <property name="margin-top">2</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-top">2</property>
                             <child>
                               <object class="GtkLabel" id="label_duplicate_check_method">
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Check method</property>
-                                <property name="margin-end">3</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-end">3</property>
+                                <property name="label" translatable="yes">Check method</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -653,8 +622,8 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkComboBoxText" id="combo_box_duplicate_check_method">
-                                <property name="can-focus">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -664,11 +633,11 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_duplicate_hash_type">
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Hash type</property>
-                                <property name="margin-end">2</property>
-                                <property name="margin-start">5</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Hash type</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -678,8 +647,8 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkComboBoxText" id="combo_box_duplicate_hash_type">
-                                <property name="can-focus">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -690,8 +659,13 @@ Author: Rafał Mikrut
                             <child>
                               <object class="GtkCheckButton" id="check_button_duplicate_case_sensitive_name">
                                 <property name="label">Case sensitive</property>
+                                <property name="can-focus">False</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">False</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">4</property>
                               </packing>
                             </child>
@@ -704,10 +678,10 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_duplicate_finder">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="margin-end">5</property>
                             <property name="shadow-type">in</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -724,11 +698,11 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkImage" id="image_preview_duplicates">
-                        <property name="can-focus">False</property>
-                        <property name="height-request">80</property>
-                        <property name="valign">center</property>
-                        <property name="visible">True</property>
                         <property name="width-request">100</property>
+                        <property name="height-request">80</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">center</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -740,9 +714,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Duplicates files</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="tab-fill">False</property>
@@ -750,9 +724,9 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_empty_folder_finder">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="shadow-type">in</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -760,9 +734,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Empty Directories</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -771,22 +745,22 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkBox">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-end">5</property>
                         <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
                         <property name="margin-top">2</property>
                         <property name="spacing">8</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkLabel" id="label_big_shown_files">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Number of shown files</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -796,12 +770,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkEntry" id="entry_big_files_number">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="caps-lock-warning">False</property>
-                            <property name="input-purpose">number</property>
                             <property name="max-length">15</property>
                             <property name="text" translatable="yes">50</property>
-                            <property name="visible">True</property>
+                            <property name="caps-lock-warning">False</property>
+                            <property name="input-purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -818,9 +792,9 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_big_files_finder">
+                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="shadow-type">in</property>
-                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -835,9 +809,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Big Files</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
@@ -846,9 +820,9 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_empty_files_finder">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="shadow-type">in</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">3</property>
@@ -856,9 +830,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Empty Files</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">3</property>
@@ -867,9 +841,9 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_temporary_files_finder">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="shadow-type">in</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">4</property>
@@ -877,9 +851,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Temporary Files</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">4</property>
@@ -888,26 +862,26 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="can-focus">False</property>
                     <property name="visible">True</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="can-focus">False</property>
-                            <property name="margin-end">5</property>
-                            <property name="margin-start">5</property>
-                            <property name="margin-top">2</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-top">2</property>
                             <child>
                               <object class="GtkLabel" id="label_image_resize_algorithm">
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Resize algorithm</property>
-                                <property name="margin-end">2</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Resize algorithm</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -917,8 +891,8 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkComboBoxText" id="combo_box_image_resize_algorithm">
-                                <property name="can-focus">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -928,11 +902,11 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_image_hash_size">
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Hash size:</property>
-                                <property name="margin-end">2</property>
-                                <property name="margin-start">5</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Hash size:</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -942,8 +916,8 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkComboBoxText" id="combo_box_image_hash_size">
-                                <property name="can-focus">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -953,11 +927,11 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_image_hash_type">
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Hash type:</property>
-                                <property name="margin-end">2</property>
-                                <property name="margin-start">5</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">2</property>
+                                <property name="label" translatable="yes">Hash type:</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -967,8 +941,8 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkComboBoxText" id="combo_box_image_hash_algorithm">
-                                <property name="can-focus">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -985,16 +959,16 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkBox">
-                            <property name="can-focus">False</property>
-                            <property name="margin-bottom">2</property>
-                            <property name="margin-end">5</property>
-                            <property name="margin-start">5</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-bottom">2</property>
                             <child>
                               <object class="GtkLabel" id="label_image_similarity">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Similarity </property>
-                                <property name="visible">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1004,9 +978,9 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_image_similarity_max">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">  Very High  </property>
-                                <property name="visible">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1016,12 +990,12 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkScale" id="scale_similarity_similar_images">
+                                <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="digits">0</property>
                                 <property name="fill-level">100</property>
                                 <property name="round-digits">1</property>
+                                <property name="digits">0</property>
                                 <property name="value-pos">right</property>
-                                <property name="visible">True</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1031,11 +1005,11 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_similar_images_minimal_similarity">
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Minimal</property>
-                                <property name="margin-end">5</property>
-                                <property name="margin-start">5</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-end">5</property>
+                                <property name="label" translatable="yes">Minimal</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1045,12 +1019,12 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_image_ignore_same_size">
-                                <property name="can-focus">True</property>
-                                <property name="draw-indicator">True</property>
                                 <property name="label" translatable="yes">Ignore same size</property>
-                                <property name="margin-start">7</property>
-                                <property name="receives-default">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="margin-start">7</property>
+                                <property name="draw-indicator">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1060,12 +1034,12 @@ Author: Rafał Mikrut
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_image_fast_compare">
-                                <property name="can-focus">True</property>
-                                <property name="draw-indicator">True</property>
                                 <property name="label" translatable="yes">Fast compare</property>
-                                <property name="margin-start">7</property>
-                                <property name="receives-default">False</property>
                                 <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="margin-start">7</property>
+                                <property name="draw-indicator">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1082,10 +1056,10 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_similar_images_finder">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="margin-end">5</property>
                             <property name="shadow-type">in</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1102,11 +1076,11 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkImage" id="image_preview_similar_images">
-                        <property name="can-focus">False</property>
-                        <property name="height-request">80</property>
-                        <property name="valign">center</property>
-                        <property name="visible">True</property>
                         <property name="width-request">100</property>
+                        <property name="height-request">80</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">center</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1121,9 +1095,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Similar Images</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">5</property>
@@ -1132,21 +1106,21 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkBox">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
-                        <property name="can-focus">False</property>
-                        <property name="margin-bottom">2</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-bottom">2</property>
                         <child>
                           <object class="GtkLabel" id="label_video_similarity">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Similarity </property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1156,9 +1130,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel" id="label_video_similarity_max">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">  Very High  </property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1168,12 +1142,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkScale" id="scale_similarity_similar_videos">
+                            <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="digits">0</property>
                             <property name="fill-level">100</property>
                             <property name="round-digits">0</property>
+                            <property name="digits">0</property>
                             <property name="value-pos">right</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1183,11 +1157,11 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel" id="label_video_similarity_min">
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Minimal</property>
-                            <property name="margin-end">5</property>
-                            <property name="margin-start">5</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="label" translatable="yes">Minimal</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1197,12 +1171,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_video_ignore_same_size">
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label" translatable="yes">Ignore same size</property>
-                            <property name="margin-start">7</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">7</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1219,9 +1193,9 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_similar_videos_finder">
+                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="shadow-type">in</property>
-                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1236,9 +1210,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Similar Videos</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">6</property>
@@ -1247,24 +1221,24 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkBox">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
-                        <property name="can-focus">False</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
-                        <property name="spacing">8</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="spacing">8</property>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_title">
-                            <property name="active">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label" translatable="yes">Title</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1274,12 +1248,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_artist">
-                            <property name="active">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label" translatable="yes">Artist</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1289,12 +1263,12 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_year">
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
-                            <property name="halign">start</property>
                             <property name="label">Year</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="halign">start</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1304,11 +1278,11 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_bitrate">
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label">Bitrate</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1318,11 +1292,11 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_genre">
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label">Genre</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1332,14 +1306,19 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_length">
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label">Length</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
-                            <property name="xalign">1.0</property>
-                            <property name="yalign">0.9</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="xalign">1</property>
+                            <property name="yalign">0.89999997615814209</property>
+                            <property name="draw-indicator">True</property>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -1350,18 +1329,18 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkBox">
-                        <property name="can-focus">False</property>
-                        <property name="margin-bottom">2</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
                         <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-bottom">2</property>
                         <child>
                           <object class="GtkCheckButton" id="check_button_music_approximate_comparison">
-                            <property name="can-focus">True</property>
-                            <property name="draw-indicator">True</property>
                             <property name="label" translatable="yes">Approximate Comparison</property>
-                            <property name="receives-default">False</property>
                             <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1378,10 +1357,10 @@ Author: Rafał Mikrut
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolled_window_same_music_finder">
+                        <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="margin-end">5</property>
                         <property name="shadow-type">in</property>
-                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1396,9 +1375,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Music Duplicates</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">7</property>
@@ -1407,9 +1386,9 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_invalid_symlinks">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="shadow-type">in</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">8</property>
@@ -1417,9 +1396,9 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Invalid Symlinks</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">8</property>
@@ -1428,9 +1407,9 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolled_window_broken_files">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="shadow-type">in</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">9</property>
@@ -1438,12 +1417,36 @@ Author: Rafał Mikrut
                 </child>
                 <child type="tab">
                   <object class="GtkLabel">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Broken Files</property>
-                    <property name="visible">True</property>
                   </object>
                   <packing>
                     <property name="position">9</property>
+                    <property name="tab-fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolled_window_bad_extensions">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">10</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Bad Extensions</property>
+                  </object>
+                  <packing>
+                    <property name="position">10</property>
                     <property name="tab-fill">False</property>
                   </packing>
                 </child>
@@ -1462,33 +1465,33 @@ Author: Rafał Mikrut
         </child>
         <child>
           <object class="GtkBox" id="buttons">
-            <property name="can-focus">False</property>
-            <property name="margin-bottom">5</property>
-            <property name="margin-end">5</property>
-            <property name="margin-start">5</property>
-            <property name="margin-top">2</property>
             <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-top">2</property>
+            <property name="margin-bottom">5</property>
             <child>
               <object class="GtkBox" id="control_buttons">
+                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">2</property>
-                <property name="visible">True</property>
                 <child>
                   <object class="GtkButton" id="buttons_search">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1498,9 +1501,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Search</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1526,15 +1529,15 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkButton" id="buttons_show_errors">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="visible">True</property>
                 <child>
                   <object class="GtkImage">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="icon-name">image-missing</property>
-                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
@@ -1547,15 +1550,15 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkButton" id="buttons_show_upper_notebook">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="visible">True</property>
                 <child>
                   <object class="GtkImage">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="icon-name">image-missing</property>
-                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
@@ -1568,26 +1571,26 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkBox" id="action_buttons">
+                <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">2</property>
-                <property name="visible">True</property>
                 <child>
                   <object class="GtkMenuButton" id="buttons_select">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1597,9 +1600,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Select</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1618,20 +1621,20 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkButton" id="buttons_compare">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1641,9 +1644,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Compare</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1662,20 +1665,20 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkButton" id="buttons_delete">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1685,9 +1688,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Delete</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1706,20 +1709,20 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkButton" id="buttons_move">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1729,9 +1732,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Move</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1750,20 +1753,20 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkButton" id="buttons_save">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1773,9 +1776,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Save</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1794,20 +1797,20 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkButton" id="buttons_symlink">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1817,9 +1820,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Symlink</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1838,20 +1841,20 @@ Author: Rafał Mikrut
                 </child>
                 <child>
                   <object class="GtkButton" id="buttons_hardlink">
+                    <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">2</property>
-                        <property name="visible">True</property>
                         <child>
                           <object class="GtkImage">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="icon-name">image-missing</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1861,9 +1864,9 @@ Author: Rafał Mikrut
                         </child>
                         <child>
                           <object class="GtkLabel">
+                            <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Hardlink</property>
-                            <property name="visible">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1897,19 +1900,19 @@ Author: Rafał Mikrut
         </child>
         <child>
           <object class="GtkBox">
-            <property name="can-focus">False</property>
-            <property name="margin-bottom">5</property>
-            <property name="margin-end">5</property>
-            <property name="margin-start">5</property>
-            <property name="margin-top">5</property>
             <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
             <child>
               <object class="GtkEntry" id="entry_info">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="editable">False</property>
                 <property name="has-frame">False</property>
                 <property name="shadow-type">none</property>
-                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -1919,14 +1922,14 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkEntry">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="caps-lock-warning">False</property>
                 <property name="editable">False</property>
                 <property name="has-frame">False</property>
-                <property name="shadow-type">none</property>
                 <property name="text" translatable="yes">Czkawka 4.0.0</property>
-                <property name="visible">True</property>
                 <property name="xalign">1</property>
+                <property name="shadow-type">none</property>
+                <property name="caps-lock-warning">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1944,17 +1947,17 @@ Author: Rafał Mikrut
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window_errors">
+            <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="min-content-height">100</property>
             <property name="resize-mode">queue</property>
             <property name="shadow-type">in</property>
-            <property name="visible">True</property>
+            <property name="min-content-height">100</property>
             <child>
               <object class="GtkTextView" id="text_view_errors">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="editable">False</property>
                 <property name="monospace">True</property>
-                <property name="visible">True</property>
               </object>
             </child>
           </object>
@@ -1969,24 +1972,24 @@ Author: Rafał Mikrut
     </child>
     <child type="titlebar">
       <object class="GtkHeaderBar">
+        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="show-close-button">True</property>
-        <property name="visible">True</property>
         <child>
           <object class="GtkBox">
+            <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">5</property>
-            <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button_settings">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="visible">True</property>
                 <child>
                   <object class="GtkImage">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="icon-name">image-missing</property>
-                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
@@ -1998,14 +2001,14 @@ Author: Rafał Mikrut
             </child>
             <child>
               <object class="GtkButton" id="button_app_info">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="visible">True</property>
                 <child>
                   <object class="GtkImage">
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="icon-name">image-missing</property>
-                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
