@@ -21,6 +21,55 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 
+static WORKAROUNDS: &[(&str, &str)] = &[
+    // Wine/Windows
+    ("exe", "dll"),
+    ("exe", "com"),
+    ("exe", "cpl"),
+    ("exe", "drv"),
+    ("exe", "dll16"),
+    ("exe", "drv16"),
+    ("exe", "cpl"),
+    ("exe", "exe16"),
+    ("exe", "orig"),
+    ("exe", "sys"),
+    ("exe", "vxd"),
+    ("exe", "fon"), // Type of font or something else
+    ("exe", "acm"),
+    ("exe", "tlb"),
+    ("exe", "msstyles"),
+    ("exe", "ax"),
+    ("exe", "ds"),
+    ("exe", "bck"),
+    // Other
+    ("exe", "doc"), // Not sure whe docx is not recognized
+    ("gz", "crate"),
+    ("obj", "o"),
+    ("xml", "svg"),
+    ("xml", "dae"),
+    ("ogg", "ogv"),
+    ("exe", "sys"),
+    ("gz", "blend"),
+    ("sh", "py"),
+    ("zip", "jar"),
+    ("zip", "apk"),
+    ("jpg", "jfif"),
+    ("xml", "glade"),
+    ("xml", "ui"),
+    ("xml", "gir"),
+    ("html", "svg"), // Quite strange, but yes it works
+    ("sh", "rs"),
+    ("zip", "nupkg"),
+    ("gz", "svgz"),
+    ("gz", "tgz"),
+    ("zip", "xpi"),
+    ("xml", "cmb"),
+    ("html", "md"),
+    ("zip", "dat"),
+    ("zip", "kra"),
+    ("xml", "html"),
+];
+
 #[derive(Clone)]
 pub struct BadFileEntry {
     pub path: PathBuf,
@@ -225,6 +274,17 @@ impl BadExtensions {
 
                 let current_extension;
 
+                // Check what exactly content file contains
+                let kind = match infer::get_from_path(&file_entry.path) {
+                    Ok(k) => match k {
+                        Some(t) => t,
+                        None => return Some(None),
+                    },
+                    Err(_) => return Some(None),
+                };
+                let proper_extension = kind.extension();
+
+                // Extract current extension from file
                 if let Some(extension) = file_entry.path.extension() {
                     let extension = extension.to_string_lossy().to_lowercase();
                     // Text longer than 10 characters is not considered as extension
@@ -236,24 +296,42 @@ impl BadExtensions {
                 } else {
                     current_extension = "".to_string();
                 }
-                let mut proper_extension = "".to_string();
 
-                let mi_guess = mime_guess::from_path(&file_entry.path);
-
-                let mut all_available_extensions: BTreeSet<_> = Default::default();
-
-                for mim in mi_guess {
-                    if let Some(all_ext) = get_mime_extensions(&mim) {
-                        for ext in all_ext {
-                            all_available_extensions.insert(ext);
-                            proper_extension.push_str(ext);
-                            proper_extension.push(',');
-                        }
-                    }
-                    proper_extension.push_str(mim.essence_str());
-                    proper_extension.push(',');
+                // Already have proper extension, no need to do more things
+                if current_extension == proper_extension {
+                    return Some(None);
                 }
-                proper_extension.pop();
+
+                // Check for all extensions that file can use(not sure if it is worth to do it)
+                let mut all_available_extensions: BTreeSet<_> = Default::default();
+                let think_extension = match current_extension.is_empty() {
+                    true => "".to_string(),
+                    false => {
+                        for mim in mime_guess::from_ext(proper_extension) {
+                            if let Some(all_ext) = get_mime_extensions(&mim) {
+                                for ext in all_ext {
+                                    all_available_extensions.insert(ext);
+                                }
+                            }
+                        }
+
+                        // Workarounds
+                        for (pre, post) in WORKAROUNDS {
+                            if post == &current_extension.as_str() && all_available_extensions.contains(&pre) {
+                                all_available_extensions.insert(post);
+                            }
+                        }
+
+                        let mut guessed_multiple_extensions = "".to_string();
+                        for ext in &all_available_extensions {
+                            guessed_multiple_extensions.push_str(ext);
+                            guessed_multiple_extensions.push(',');
+                        }
+                        guessed_multiple_extensions.pop();
+
+                        guessed_multiple_extensions
+                    }
+                };
 
                 if all_available_extensions.is_empty() {
                     // Not found any extension
@@ -273,7 +351,7 @@ impl BadExtensions {
                     modified_date: file_entry.modified_date,
                     size: file_entry.size,
                     current_extension,
-                    proper_extensions: proper_extension.to_string(),
+                    proper_extensions: think_extension,
                 }))
             })
             .while_some()

@@ -62,6 +62,7 @@ imagepipe = "0.4.0"
 
 # Checking for invalid extensions
 mime_guess = "2.0.4"
+infer = "0.7.0"
 
 [features]
 default = []
