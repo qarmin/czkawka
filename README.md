@@ -22,7 +22,7 @@
   - Similar Videos - Looks for visually similar videos
   - Same Music - Searches for music with the same artist, album etc.
   - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
-  - Broken Files - Finds files with an invalid extension or that are corrupted
+  - Broken Files - Finds files that are invalid or corrupted
 
 <!-- The GIF thingy -->
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)

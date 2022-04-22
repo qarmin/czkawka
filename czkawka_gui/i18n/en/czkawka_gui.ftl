@@ -79,6 +79,7 @@ main_notebook_similar_videos = Similar Videos
 main_notebook_same_music = Music Duplicates
 main_notebook_symlinks = Invalid Symlinks
 main_notebook_broken_files = Broken Files
+main_notebook_bad_extensions = Bad Extensions
 
 main_tree_view_column_file_name = File Name
 main_tree_view_column_folder_name = Folder Name

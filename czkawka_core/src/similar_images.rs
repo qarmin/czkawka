@@ -41,7 +41,7 @@ pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: [&str; 10] = [
 ];
 pub const ZIP_FILES_EXTENSIONS: [&str; 1] = [".zip"];
 
-pub const AUDIO_FILES_EXTENSIONS: [&str; 4] = [".mp3", ".flac", ".wav", ".ogg"];
+pub const AUDIO_FILES_EXTENSIONS: [&str; 8] = [".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".aiff", ".pcm"];
 
 pub const VIDEO_FILES_EXTENSIONS: [&str; 16] = [
     ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",

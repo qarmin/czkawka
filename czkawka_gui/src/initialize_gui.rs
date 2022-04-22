@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::ops::Deref;
+use std::path::Path;
 use std::rc::Rc;
 
 use gdk::gdk_pixbuf::Pixbuf;
@@ -8,7 +9,7 @@ use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
 use crate::flg;
-use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
@@ -721,6 +722,15 @@ fn show_preview(
                 if file_name == preview_path {
                     return; // Preview is already created, no need to recreate it
                 }
+            }
+
+            if let Some(extension) = Path::new(&name).extension() {
+                let extension = format!(".{}", extension.to_string_lossy());
+                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) {
+                    break 'dir;
+                }
+            } else {
+                break 'dir;
             }
 
             let mut pixbuf = match Pixbuf::from_file(file_name) {
