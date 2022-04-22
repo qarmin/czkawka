@@ -5,6 +5,7 @@ use std::thread;
 use glib::Sender;
 use gtk::prelude::*;
 
+use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_dir_traversal;
@@ -41,6 +42,7 @@ pub fn connect_button_search(
     futures_sender_temporary: futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
     futures_sender_invalid_symlinks: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
     futures_sender_broken_files: futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
+    futures_sender_bad_extensions: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
 ) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
@@ -99,6 +101,7 @@ pub fn connect_button_search(
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
     let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
+    let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
     let entry_info = gui_data.entry_info.clone();
     let button_settings = gui_data.header.button_settings.clone();
@@ -480,6 +483,29 @@ pub fn connect_button_search(
                     br.set_save_also_as_json(save_also_as_json);
                     br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
                     let _ = glib_stop_sender.send(Message::BrokenFiles(br));
+                });
+            }
+            NotebookMainEnum::BadExtensions => {
+                label_stage.show();
+                grid_progress_stages.show_all();
+                window_progress.resize(1, 1);
+
+                get_list_store(&tree_view_bad_extensions).clear();
+
+                let futures_sender_bad_extensions = futures_sender_bad_extensions.clone();
+                // Find Similar music
+                thread::spawn(move || {
+                    let mut be = BadExtensions::new();
+
+                    be.set_included_directory(included_directories);
+                    be.set_excluded_directory(excluded_directories);
+                    be.set_excluded_items(excluded_items);
+                    be.set_minimal_file_size(minimal_file_size);
+                    be.set_maximal_file_size(maximal_file_size);
+                    be.set_allowed_extensions(allowed_extensions);
+                    be.set_recursive_search(recursive_search);
+                    be.find_bad_extensions_files(Some(&stop_receiver), Some(&futures_sender_bad_extensions));
+                    let _ = glib_stop_sender.send(Message::BadExtensions(be));
                 });
             }
         }

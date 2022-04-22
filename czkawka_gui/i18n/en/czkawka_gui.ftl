@@ -79,6 +79,7 @@ main_notebook_similar_videos = Similar Videos
 main_notebook_same_music = Music Duplicates
 main_notebook_symlinks = Invalid Symlinks
 main_notebook_broken_files = Broken Files
+main_notebook_bad_extensions = Bad Extensions
 
 main_tree_view_column_file_name = File Name
 main_tree_view_column_folder_name = Folder Name
@@ -97,6 +98,8 @@ main_tree_view_column_symlink_file_name = Symlink File Name
 main_tree_view_column_symlink_folder = Symlnik Folder
 main_tree_view_column_destination_path = Destination Path
 main_tree_view_column_type_of_error = Type Of Error
+main_tree_view_column_current_extension = Current Extension
+main_tree_view_column_proper_extensions = Proper Extension
 
 main_label_check_method = Check method
 main_label_hash_type = Hash type
@@ -379,10 +382,12 @@ compute_found_videos = Found { $number_files } similar videos in { $number_group
 compute_found_music = Found { $number_files } similar music files in { $number_groups } groups
 compute_found_invalid_symlinks = Found { $number_files } invalid symlinks
 compute_found_broken_files = Found { $number_files } broken files
+compute_found_bad_extensions = Found { $number_files } files with invalid extensions
 
 # Progress window
 progress_scanning_general_file = Scanning {$file_number} file
 
+progress_scanning_extension_of_files = Checking extension of {$file_checked}/{$all_files} file
 progress_scanning_broken_files = Checking {$file_checked}/{$all_files} file
 progress_scanning_video = Hashing of {$file_checked}/{$all_files} video
 progress_scanning_image = Hashing of {$file_checked}/{$all_files} image

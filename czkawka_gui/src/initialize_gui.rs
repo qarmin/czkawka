@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::ops::Deref;
+use std::path::Path;
 use std::rc::Rc;
 
 use gdk::gdk_pixbuf::Pixbuf;
@@ -8,7 +9,7 @@ use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
 use crate::flg;
-use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
@@ -387,6 +388,31 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 scrolled_window.add(&tree_view);
                 scrolled_window.show_all();
             }
+            // Bad Extensions
+            {
+                let scrolled_window = gui_data.main_notebook.scrolled_window_bad_extensions.clone();
+                let tree_view = gui_data.main_notebook.tree_view_bad_extensions.clone();
+
+                let col_types: [glib::types::Type; 7] = [
+                    glib::types::Type::BOOL,   // SelectionButton
+                    glib::types::Type::STRING, // Name
+                    glib::types::Type::STRING, // Path
+                    glib::types::Type::STRING, // CurrentExtension
+                    glib::types::Type::STRING, // ProperExtensions
+                    glib::types::Type::STRING, // Modification
+                    glib::types::Type::U64,    // ModificationAsSecs
+                ];
+                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+
+                tree_view.set_model(Some(&list_store));
+                tree_view.selection().set_mode(SelectionMode::Multiple);
+
+                create_tree_view_broken_files(&tree_view);
+
+                tree_view.set_widget_name("tree_view_bad_extensions");
+                scrolled_window.add(&tree_view);
+                scrolled_window.show_all();
+            }
         }
     }
 
@@ -545,6 +571,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
     //     gui_data.main_notebook.gc_tree_view_same_music_finder.clone(),
     //     gui_data.main_notebook.gc_tree_view_invalid_symlinks.clone(),
     //     gui_data.main_notebook.gc_tree_view_broken_files.clone(),
+    //     gui_data.main_notebook.gc_tree_view_bad_extensions.clone(),
     // ] {
     //     gc.set_button(0);
     //     gc.connect_pressed(opening_double_click_function);
@@ -595,6 +622,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
         gui_data.main_notebook.evk_tree_view_same_music_finder.clone(),
         gui_data.main_notebook.evk_tree_view_invalid_symlinks.clone(),
         gui_data.main_notebook.evk_tree_view_broken_files.clone(),
+        gui_data.main_notebook.evk_tree_view_bad_extensions.clone(),
     ] {
         let gui_data_clone = gui_data.clone();
         evk.connect_key_pressed(opening_enter_function_ported);
@@ -694,6 +722,15 @@ fn show_preview(
                 if file_name == preview_path {
                     return; // Preview is already created, no need to recreate it
                 }
+            }
+
+            if let Some(extension) = Path::new(&name).extension() {
+                let extension = format!(".{}", extension.to_string_lossy());
+                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) {
+                    break 'dir;
+                }
+            } else {
+                break 'dir;
             }
 
             let mut pixbuf = match Pixbuf::from_file(file_name) {

@@ -43,9 +43,11 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
+    let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
+    let shared_bad_extensions_state = gui_data.shared_bad_extensions_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names;
@@ -1499,6 +1501,73 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         set_buttons(
                             &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(),
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                }
+            }
+            Message::BadExtensions(be) => {
+                if be.get_stopped_search() {
+                    entry_info.set_text(&flg!("compute_stopped_by_user"));
+                } else {
+                    let information = be.get_information();
+                    let text_messages = be.get_text_messages();
+
+                    let bad_extensions_number: usize = information.number_of_files_with_bad_extension;
+                    entry_info.set_text(
+                        flg!(
+                            "compute_found_bad_extensions",
+                            generate_translation_hashmap(vec![("number_files", bad_extensions_number.to_string()),])
+                        )
+                        .as_str(),
+                    );
+
+                    // Create GUI
+                    {
+                        let list_store = get_list_store(&tree_view_bad_extensions);
+
+                        let vector = be.get_bad_extensions_files();
+
+                        // Sort
+                        let mut vector = vector.clone();
+                        vector.sort_by_key(|e| {
+                            let t = split_path(e.path.as_path());
+                            (t.0, t.1)
+                        });
+
+                        for file_entry in vector {
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [(u32, &dyn ToValue); 7] = [
+                                (ColumnsBadExtensions::SelectionButton as u32, &false),
+                                (ColumnsBadExtensions::Name as u32, &file),
+                                (ColumnsBadExtensions::Path as u32, &directory),
+                                (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
+                                (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions),
+                                (
+                                    ColumnsBadExtensions::Modification as u32,
+                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                ),
+                                (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+                            ];
+                            list_store.set(&list_store.append(), &values);
+                        }
+                        print_text_messages_to_text_view(text_messages, &text_view_errors);
+                    }
+
+                    // Set state
+                    {
+                        *shared_bad_extensions_state.borrow_mut() = be;
+
+                        set_specific_buttons_as_active(
+                            &shared_buttons,
+                            &NotebookMainEnum::Temporary,
+                            &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+                            bad_extensions_number > 0,
+                        );
+
+                        set_buttons(
+                            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(),
                             &buttons_array,
                             &buttons_names,
                         );

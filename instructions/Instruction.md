@@ -231,6 +231,8 @@ Some images broke hash functions and create hashes full of `0` or `255`, so thes
 
 You can test each algorithm with provided CLI tool, just put to folder `test.jpg` file and run inside this command `czkawka_cli tester -i`
 
+Faster compare option allows to only once compare results, so checking should works a lot of faster when using higher number of similarity.
+
 Some tidbits:
 - Smaller hash size not always means that calculating it will take more time
 - `Blockhash` is the only algorithm that don't resize images before hashing
@@ -253,8 +255,20 @@ Next, with provided by user tolerance, they are compared to each other and group
 ### Broken Files
 This tool finds files which are corrupted or have an invalid extension.
 
-At first files from specific group (image,archive,audio) are collected and then these files are opened(due to additional dependencies, audio files are disabled by default).
+At first app collects image and archive files(only this two types are supported now, but also I plan to support audio, but this is currently blocked by https://github.com/RustAudio/rodio/issues/349) and then these files are simply opened.
 
 If an error happens when opening such file it means that this file is corrupted or unsupported.
 
 Only some file extensions are handled, because I rely on external crates. Also, some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.
+
+### Bad Extensions
+Mode allows to find files with content that not match with their extensions.
+
+It works in this way:
+- Takes current file extension e.g. `źrebię.zip` -> `zip`
+- Read few bytes of file
+- Matches bytes with signatures to guess file extension e.g. `7z`
+- Takes mime type(may return more than 1) from extension e.g. `Mime::Archive`
+- Returns all file extensions that are connected to this mime type e.g. `rar,7z,zip,p7`
+- Basing on file extension, adds more elements to list from above(needed because some files e.g. `exe` and `dll` begins with similar/same bytes)
+- If current file extensions is inside list then probably have proper extension, if is not inside, then is shown as file with invalid extension

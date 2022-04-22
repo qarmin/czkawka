@@ -85,7 +85,7 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
         futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
         futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_big_file, futures_receiver_big_file): (
+    let (futures_sender_big_file, futures_receiver_big_files): (
         futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
         futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
     ) = futures::channel::mpsc::unbounded();
@@ -112,6 +112,10 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
     let (futures_sender_broken_files, futures_receiver_broken_files): (
         futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
         futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
+    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_bad_extensions, futures_receiver_bad_extensions): (
+        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
     ) = futures::channel::mpsc::unbounded();
 
     initialize_gui(&mut gui_data);
@@ -146,6 +150,7 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
         futures_sender_temporary,
         futures_sender_invalid_symlinks,
         futures_sender_broken_files,
+        futures_sender_bad_extensions,
     );
     connect_button_select(&gui_data);
     connect_button_stop(&gui_data);
@@ -163,13 +168,14 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
         futures_receiver_duplicate_files,
         futures_receiver_empty_files,
         futures_receiver_empty_folder,
-        futures_receiver_big_file,
+        futures_receiver_big_files,
         futures_receiver_same_music,
         futures_receiver_similar_images,
         futures_receiver_similar_videos,
         futures_receiver_temporary,
         futures_receiver_invalid_symlinks,
         futures_receiver_broken_files,
+        futures_receiver_bad_extensions,
     );
     connect_show_hide_ui(&gui_data);
     connect_settings(&gui_data);

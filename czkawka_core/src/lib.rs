@@ -16,6 +16,7 @@ pub mod similar_images;
 pub mod similar_videos;
 pub mod temporary;
 
+pub mod bad_extensions;
 pub mod common;
 pub mod common_dir_traversal;
 pub mod common_directory;

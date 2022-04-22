@@ -26,6 +26,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
     let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
+    let shared_bad_extensions_state = gui_data.shared_bad_extensions_state.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
@@ -82,6 +83,11 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 file_name = "results_broken_files.txt";
 
                 shared_broken_files_state.borrow_mut().save_results_to_file(file_name);
+            }
+            NotebookMainEnum::BadExtensions => {
+                file_name = "results_bad_extensions.txt";
+
+                shared_bad_extensions_state.borrow_mut().save_results_to_file(file_name);
             }
         }
         post_save_things(

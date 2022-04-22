@@ -1,3 +1,18 @@
+## Version 4.1.0 - .04.2022r
+- New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)
+- Builtin icons - no more invalid, theme/OS dependant icons - [#659](https://github.com/qarmin/czkawka/pull/659)
+- Big(usually 2x) speedup of showing previews of images(both previews in scan and compare window) - [#660](https://github.com/qarmin/czkawka/pull/660)
+- Fix selecting records by custom selection popup - [#632](https://github.com/qarmin/czkawka/pull/632)
+- Support more tags when comparing music files - [#590](https://github.com/qarmin/czkawka/pull/590)
+- Fix not proper selecting path - [#656](https://github.com/qarmin/czkawka/pull/656)
+- No more popups during scan for similar videos on Windows - [#656](https://github.com/qarmin/czkawka/pull/656) - external change [4056](https://github.com/Farmadupe/ffmpeg_cmdline_utils/commit/405687514f9d9e8984cbe2547c53e85b71e08b27)
+- Custom selecting is now case-insensitive by default - [#657](https://github.com/qarmin/czkawka/pull/657)
+- Better approximate comparison of tags - [#641](https://github.com/qarmin/czkawka/pull/641)
+- Fix search problem due accumulated stop events - [#623](https://github.com/qarmin/czkawka/pull/623)
+- Fix file hardlinking on Windows - [#668](https://github.com/qarmin/czkawka/pull/668)
+- Support for case-insensitive name grouping of files - [#669](https://github.com/qarmin/czkawka/pull/669)
+- Directories for search GUI can be passed by CLI - [#677](https://github.com/qarmin/czkawka/pull/677)
+
 ## Version 4.0.0 - 20.01.2022r
 - Multithreading support for collecting files to check(2/3x speedup on 4 thread processor and SSD) - [#502](https://github.com/qarmin/czkawka/pull/502), [#504](https://github.com/qarmin/czkawka/pull/504)
 - Add multiple translations - Polish, Italian, French, German, Russian ... - [#469](https://github.com/qarmin/czkawka/pull/469), [#508](https://github.com/qarmin/czkawka/pull/508), [5be](https://github.com/qarmin/czkawka/commit/5be801e76395855f07ab1da43cdbb8bd0b843834)

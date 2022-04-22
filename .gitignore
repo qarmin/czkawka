@@ -7,3 +7,4 @@ results*.txt
 TestSuite*
 *.snap
 flatpak/
+*.zip
