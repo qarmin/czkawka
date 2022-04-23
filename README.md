@@ -3,11 +3,11 @@
 **Czkawka** (_tch•kav•ka_ (IPA: [ʈ͡ʂkafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary files from your computer.
 
 ## Features
-- Written in memory safe Rust
+- Written in memory-safe Rust
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
 - Free, Open Source without ads
 - Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
-- Cache support - second and further scans should be a lot faster than the first one
+- Cache support - second and further scans should be much faster than the first one
 - CLI frontend - for easy automation
 - GUI frontend - uses modern GTK 3 and looks similar to FSlint
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
@@ -44,7 +44,7 @@ Since Czkawka is written in Rust and it aims to be a faster alternative to FSlin
 
 I tested it on a 256 GB SSD and a i7-4770 CPU.
 
-I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links which contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which occupied 4,1 GB.
+I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links. The disk contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which occupied 4,1 GB.
 
 I set the minimal file size to check to 1KB on all programs.
 
@@ -66,8 +66,8 @@ I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for
 | Czkawka 3.0.0  |  12 MB   |          122 MB           |          60 MB          |
 
 
-In Dupeguru I enabled checking images with different dimensions to match Czkawka behavior.
-Both apps use caching mechanism, so second scan is really fast.
+In Dupeguru, I enabled checking images with different dimensions to match Czkawka behavior.
+Both apps use a caching mechanism, so the second scan is really fast.
 
 Similar images which check 10949 files that occupied 6.6 GB
 
@@ -120,13 +120,13 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse:  
 ### GUI
-- [DupeGuru](https://github.com/arsenetar/dupeguru) - A lot of options to customize, great photo compare tool
+- [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize; great photo compare tool
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
 - [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
 - [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it), supports video thumbnails
 ### CLI
 Due to limited time, the biggest emphasis is on the GUI version so if you are looking for really good and feature-packed console apps, then take a look at these:
-- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates, it is written also in Rust
+- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is written also in Rust
 - [Rmlint](https://github.com/sahib/rmlint) - Really good console interface and also is feature packed
 - [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
 
@@ -141,10 +141,10 @@ You can help by creating:
 - Documentation - There is an [instruction](instructions/Instruction.md) which you can improve.
 - Translations - Instruction how to translate files is available [here](instructions/Translations.md)
 
-You can also help by doing different things:
+You can also help by doing other things:
 - Creating text articles - [LinuxUprising](https://www.linuxuprising.com/2021/03/find-and-remove-duplicate-files-similar.html) or [Ubunlog](https://ubunlog.com/en/czkawka-finds-and-removes-empty-and-broken-duplicate-files/)
 - Adding Czkawka to repositories - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=czkawka&branch=edge) or [NixOS](https://github.com/NixOS/nixpkgs/pull/116441) or [OpenMandriva](https://github.com/OpenMandrivaAssociation/czkawka)
-- Creating videos - [First Video](https://www.youtube.com/watch?v=CWlRiTD4vDc) or [Tutorial Spanish](https://www.youtube.com/watch?v=V9x-pHJRmKY)
+- Creating videos - [First Video](https://www.youtube.com/watch?v=CWlRiTD4vDc) or [Spanish Tutorial](https://www.youtube.com/watch?v=V9x-pHJRmKY)
 - Recommending it to others
 
 ## Name
