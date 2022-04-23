@@ -430,7 +430,7 @@ impl GuiMainNotebook {
             (NotebookMainEnum::SameMusic as usize, flg!("main_notebook_same_music")),
             (NotebookMainEnum::Symlinks as usize, flg!("main_notebook_symlinks")),
             (NotebookMainEnum::BrokenFiles as usize, flg!("main_notebook_broken_files")),
-            (NotebookMainEnum::BrokenFiles as usize, flg!("main_notebook_bad_extensions")),
+            (NotebookMainEnum::BadExtensions as usize, flg!("main_notebook_bad_extensions")),
         ] {
             self.notebook_main
                 .tab_label(&vec_children[main_enum])

@@ -23,3 +23,5 @@ core_excluded_directory_pointless_slash = 目录：不包括 / 无意义，因�
 core_directory_overlap = 目录：所有要搜索与排除目录重叠的目录
 core_ffmpeg_not_found = 找不到正确安装FFmpeg
 core_ffmpeg_missing_in_snap = 类似的视频目前不适用于快照，如果您想要帮助查看- { $url }
+core_saving_to_cache = 保存到文件 { $number } 缓存条目
+core_loading_from_cache = 从缓存 { $number } 项加载

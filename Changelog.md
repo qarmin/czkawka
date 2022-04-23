@@ -1,4 +1,4 @@
-## Version 4.1.0 - .04.2022r
+## Version 4.1.0 - 24.04.2022r
 - New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)
 - Builtin icons - no more invalid, theme/OS dependant icons - [#659](https://github.com/qarmin/czkawka/pull/659)
 - Big(usually 2x) speedup of showing previews of images(both previews in scan and compare window) - [#660](https://github.com/qarmin/czkawka/pull/660)
@@ -9,9 +9,11 @@
 - Custom selecting is now case-insensitive by default - [#657](https://github.com/qarmin/czkawka/pull/657)
 - Better approximate comparison of tags - [#641](https://github.com/qarmin/czkawka/pull/641)
 - Fix search problem due accumulated stop events - [#623](https://github.com/qarmin/czkawka/pull/623)
+- Option to ignore other filesystems in Unix OS(for now only in CLI) - [#673](https://github.com/qarmin/czkawka/pull/673)
 - Fix file hardlinking on Windows - [#668](https://github.com/qarmin/czkawka/pull/668)
 - Support for case-insensitive name grouping of files - [#669](https://github.com/qarmin/czkawka/pull/669)
 - Directories for search GUI can be passed by CLI - [#677](https://github.com/qarmin/czkawka/pull/677)
+- Prevent from getting non respond app notification from display servers - [#625](https://github.com/qarmin/czkawka/pull/625)
 
 ## Version 4.0.0 - 20.01.2022r
 - Multithreading support for collecting files to check(2/3x speedup on 4 thread processor and SSD) - [#502](https://github.com/qarmin/czkawka/pull/502), [#504](https://github.com/qarmin/czkawka/pull/504)

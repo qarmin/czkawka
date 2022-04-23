@@ -487,7 +487,7 @@ impl DuplicateFinder {
                     }
                 }
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {

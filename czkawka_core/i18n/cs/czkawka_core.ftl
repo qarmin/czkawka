@@ -23,3 +23,5 @@ core_excluded_directory_pointless_slash = Adresáře: Vyloučení / je bezúčel
 core_directory_overlap = Adresáře: Všechny adresáře pro vyhledávání se překrývají s vyloučením adresářů
 core_ffmpeg_not_found = Nelze najít správnou instalaci FFmpeg
 core_ffmpeg_missing_in_snap = Podobná videa v současné době nefungují se snapem, pokud chcete nápovědu sledovat - { $url }
+core_saving_to_cache = Uloženo do souboru { $number } položek mezipaměti
+core_loading_from_cache = Načteno z { $number } položek keše

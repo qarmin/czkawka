@@ -23,3 +23,5 @@ core_excluded_directory_pointless_slash = Répertoires: Exclure / est inutile, c
 core_directory_overlap = Répertoires : Tous les répertoires pour rechercher des chevauchements avec des répertoires exclus
 core_ffmpeg_not_found = Impossible de trouver une installation correcte de FFmpeg
 core_ffmpeg_missing_in_snap = Les vidéos similaires ne fonctionnent pas actuellement avec un instantané, si vous voulez de l'aide - { $url }
+core_saving_to_cache = Enregistré dans le fichier { $number } entrées du cache
+core_loading_from_cache = Chargé depuis l'entrées { $number } du cache

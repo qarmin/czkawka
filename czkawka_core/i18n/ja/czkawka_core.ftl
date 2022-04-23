@@ -23,3 +23,5 @@ core_excluded_directory_pointless_slash = ディレクトリ: ファイルがス
 core_directory_overlap = ディレクトリ: 除外されたディレクトリとオーバーラップを検索するすべてのディレクトリ
 core_ffmpeg_not_found = 適切なFFmpegのインストールが見つかりません
 core_ffmpeg_missing_in_snap = ヘルプを見たい場合は、現在同様のビデオはスナップでは動作しません - { $url }
+core_saving_to_cache = { $number } 個のキャッシュエントリをファイルに保存しました
+core_loading_from_cache = キャッシュから { $number } 個のエントリが読み込まれました

@@ -23,3 +23,5 @@ core_excluded_directory_pointless_slash = Directorios: Excluyendo / es inútil, 
 core_directory_overlap = Directorios: Todos los directorios para buscar superposiciones con directorios excluidos
 core_ffmpeg_not_found = No se puede encontrar la instalación correcta de FFmpeg
 core_ffmpeg_missing_in_snap = Los Videos Similares no funcionan actualmente con el snap, si quieres ayuda mira - { $url }
+core_saving_to_cache = Guardado en el archivo { $number } entradas de caché
+core_loading_from_cache = Cargado desde { $number } entradas de caché

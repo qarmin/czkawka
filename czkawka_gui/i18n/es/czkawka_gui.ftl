@@ -1,5 +1,5 @@
 # Window titles
-window_settings_title = Opciones
+window_settings_title = Configuración
 window_main_title = Czkawka (Hipo)
 window_progress_title = Escaneando
 window_compare_images = Comparar imágenes
@@ -9,25 +9,31 @@ general_close_button = Cerrar
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
-music_album_title_checkbox = Título del álbum
-music_album_artist_checkbox = Artista del álbum
 music_year_checkbox = Año
+music_bitrate_checkbox = Tasa de bits
+music_genre_checkbox = Género
+music_length_checkbox = Duración
 music_comparison_checkbox = Comparación aproximada
 music_comparison_checkbox_tooltip =
-    Busca archivos de música similares usando IA, que utiliza el aprendizaje automático para eliminar paréntesis de una frase, p. ej. con esta opción habilitada, los archivos en cuestión se considerarán duplicados:
+    Busca archivos de música similares usando IA, que usa el aprendizaje automático para eliminar paréntesis de una frase. Por ejemplo, con esta opción activada, los archivos en cuestión se considerarán duplicados:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
+duplicate_case_sensitive_name = Sensible a mayúsculas
+duplicate_case_sensitive_name_tooltip =
+    Cuando está habilitado, agrupa registros sólo cuando tienen exactamente el mismo nombre p.ej. Żołd <-> Żołd
+    
+    Deshabilitar tal opción agrupará nombres sin comprobar si cada letra tiene el mismo tamaño, p. ej. żoŁD <-> Żołd
 duplicate_mode_name_combo_box = Nombre
 duplicate_mode_size_combo_box = Tamaño
 duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
-    Kawka ofrece 3 tipos de hashes, que pueden ser usados:
+    Czkawka ofrece 3 tipos de hashes, que pueden ser usados:
     
-    Función de hash Blake3 criptográfica. Se utiliza como algoritmo hash por defecto porque es muy rápido.
+    Blake3 - función de hash criptográfica. Se usa como algoritmo hash predeterminado porque es muy rápido.
     
     CRC32 - función hash simple. Debe ser más rápido que Blake3, pero probablemente tenga algunas colisiones muy raras.
     
-    XXH3 - muy similar en caso de rendimiento y calidad de hash a Blake3, por lo que tales modos pueden ser fácilmente usados.
+    XXH3 - muy similar en caso de rendimiento y calidad de hash a Blake3 (pero no criptográfico). Por lo que tales modos pueden ser fácilmente usados.
 duplicate_check_method_tooltip =
     Por ahora, el kawka ofrece tres tipos de métodos para encontrar duplicados por:
     
@@ -35,20 +41,20 @@ duplicate_check_method_tooltip =
     
     Tamaño - Encuentra archivos con el mismo tamaño.
     
-    Hash - Encuentra archivos con el mismo contenido. Este modo apaga el archivo y luego compara este hash para encontrar duplicados. Este modo es la manera más segura de encontrar duplicados. La herramienta utiliza la caché en gran medida, por lo que segundo y posterior análisis de los mismos datos debe ser mucho más rápido que el primero.
+    Hash - Encuentra archivos con el mismo contenido. Este modo molesta el archivo y luego compara este hash para encontrar duplicados. Este modo es la forma más segura de encontrar duplicados. La aplicación utiliza mucho caché, por lo que segundo y más análisis de los mismos datos debe ser mucho más rápido que el primero.
 image_hash_size_tooltip =
-    Kawka ofrece un cambio de tamaño del hash generado para cada imagen. La causa hash de Bigger permite encontrar imágenes con menor cantidad de diferencias entre imágenes, pero también es un poco más lento de usar.
+    Kawka ofrece cambiar el tamaño del hash generado para cada imagen. Un mayor tamaño de hash permite encontrar imágenes con una menor cantidad de diferencias entre imágenes, pero también es un poco más lento de usar.
     
-    El valor predeterminado para el hash es de 8 bytes, lo que permite encontrar imágenes muy similares y diferentes. 16 y 32 hashes deben utilizarse sólo para imágenes casi idénticas. El hash de 64 bytes no debería ser usado, excepto en una situación en la que se necesitan diferencias realmente pequeñas para encontrar
+    El valor predeterminado para el hash es de 8 bytes, lo que permite encontrar imágenes muy similares y diferentes. El hash de 16 bytes y 32 bytes debe utilizarse sólo para imágenes casi idénticas. El hash de 64 bytes no debería ser usado, excepto en situaciones en las que necesita encontrar diferencias realmente pequeñas.
 image_resize_filter_tooltip = Para calcular el hash de la imagen, la librería primero debe redimensionarla. Depende del algoritmo elegido, la imagen resultante se verá poco diferente. El algoritmo más rápido de usar, pero también uno que da los peores resultados es el más cercano.
-image_hash_alg_tooltip = Los usuarios pueden elegir uno de muchos algoritmos de cálculo de hash. Cada uno tiene puntos fuertes y débiles y dará a veces mejores y a veces peores resultados para diferentes imágenes, para elegir el mejor, se requieren pruebas manuales.
+image_hash_alg_tooltip = Los usuarios pueden elegir uno de los muchos algoritmos de cálculo del hash. Cada uno tiene puntos fuertes y débiles y a veces dará mejores y a veces peores resultados para diferentes imágenes. Por lo tanto, para determinar cuál es la mejor para usted, se requiere la prueba manual.
 main_notebook_image_fast_compare = Comparación rápida
 main_notebook_image_fast_compare_tooltip =
     Acelera la búsqueda y la comparación de hashes.
     
-    En frente del modo normal donde cada hash es comparado entre sí x veces, donde x es la similitud que el usuario elija, en este modo siempre se utiliza sólo una comparación.
+    A diferencia del modo normal - donde cada hash es comparado entre sí x veces (donde x es la similitud elegida por el usuario) - en este modo, se utilizará exactamente una comparación.
     
-    Esta opción se recomienda cuando se compara >10000 imágenes con una similitud que no es 0(Muy Alta).
+    Esta opción se recomienda al comparar >10000 imágenes con la similitud non 0 (Muy Alta).
 main_notebook_duplicates = Duplicar archivos
 main_notebook_empty_directories = Directorios vacíos
 main_notebook_big_files = Archivos grandes
@@ -59,6 +65,7 @@ main_notebook_similar_videos = Videos similares
 main_notebook_same_music = Duplicados de música
 main_notebook_symlinks = Enlaces simbólicos inválidos
 main_notebook_broken_files = Archivos rotos
+main_notebook_bad_extensions = Extensiones incorrectas
 main_tree_view_column_file_name = Nombre del archivo
 main_tree_view_column_folder_name = Nombre de carpeta
 main_tree_view_column_path = Ruta
@@ -69,16 +76,19 @@ main_tree_view_column_dimensions = Dimensiones
 main_tree_view_column_title = Título
 main_tree_view_column_artist = Artista
 main_tree_view_column_year = Año
-main_tree_view_column_album_title = Título del álbum
-main_tree_view_column_album_artist = Artista del álbum
+main_tree_view_column_bitrate = Tasa de bits
+main_tree_view_column_length = Duración
+main_tree_view_column_genre = Género
 main_tree_view_column_symlink_file_name = Nombre del archivo Symlink
-main_tree_view_column_symlink_folder = Carpeta de Symlnik
+main_tree_view_column_symlink_folder = Carpeta Symlink
 main_tree_view_column_destination_path = Ruta de destino
 main_tree_view_column_type_of_error = Tipo de error
+main_tree_view_column_current_extension = Extensión actual
+main_tree_view_column_proper_extensions = Extensión adecuada
 main_label_check_method = Comprobar método
 main_label_hash_type = Tipo de Hash
 main_label_hash_size = Tamaño hash
-main_label_size_bytes = Tamaño(bytes)
+main_label_size_bytes = Tamaño (bytes)
 main_label_min_size = Mínimo
 main_label_max_size = Máx
 main_label_shown_files = Número de archivos mostrados
@@ -98,10 +108,10 @@ upper_remove_included_button = Eliminar
 upper_manual_add_excluded_button = Añadir manual
 upper_add_excluded_button = Añadir
 upper_remove_excluded_button = Eliminar
-upper_manual_add_included_button_tooltip = Permite añadir el nombre del directorio para buscar a mano.
+upper_manual_add_included_button_tooltip = Añadir el nombre del directorio para buscar a mano.
 upper_add_included_button_tooltip = Añadir nuevo directorio para buscar.
 upper_remove_included_button_tooltip = Eliminar directorio de la búsqueda.
-upper_manual_add_excluded_button_tooltip = Permite añadir el nombre del directorio excluido a mano.
+upper_manual_add_excluded_button_tooltip = Añadir el nombre del directorio excluido a mano.
 upper_add_excluded_button_tooltip = Añadir directorio para ser excluido en la búsqueda.
 upper_remove_excluded_button_tooltip = Eliminar directorio de excluidos.
 upper_notebook_items_configuration = Configuración de artículos
@@ -110,12 +120,12 @@ upper_notebook_included_directories = Directorios incluidos
 upper_allowed_extensions_tooltip =
     Las extensiones permitidas deben estar separadas por comas (por defecto todas están disponibles).
     
-    Macros IMAGE, VIDEO, MUSIC, TEXT que añade múltiples extensiones a la vez también están disponibles.
+    Las siguientes Macros, que añaden múltiples extensiones a la vez, también están disponibles: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Ejemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - esto significa que image(e. . jpg, png), video(p. ej., avi, mp4), archivos exe, rar y 7z serán escaneados.
+    Ejemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - esto significa que imágenes (e. . jpg, png), videos (ej: avi, mp4), archivos exe, rar, y 7z serán escaneados.
 upper_excluded_items_tooltip =
     Los artículos excluidos deben contener * comodín y deben estar separados por comas.
-    Esto es más lento que los Directorios excluidos, así que úsala con cuidado.
+    Esto es más lento que los Directorios Excluidos, así que úselo con cuidado.
 upper_excluded_items = Elementos excluidos:
 upper_allowed_extensions = Extensiones permitidas:
 # Popovers
@@ -131,33 +141,38 @@ popover_unselect_custom = Deseleccionar personalizado
 popover_select_all_images_except_biggest = Seleccionar todo excepto mayor
 popover_select_all_images_except_smallest = Seleccionar todo excepto menor
 popover_custom_path_check_button_entry_tooltip =
-    Permite seleccionar registros por su ruta.
+    Seleccionar registros por ruta.
     
-    Ejemplo de uso:
-    /home/pmañk/rzecz.txt puede encontrarse con /home/pim*
+    Ejemplo:
+    /home/pmañk/rzecz.txt se puede encontrar con /home/pim*
 popover_custom_name_check_button_entry_tooltip =
-    Permite seleccionar registros por nombres de archivo.
+    Seleccionar registros por nombres de archivos.
     
     Ejemplo:
     /usr/ping/pong.txt puede encontrarse con *a lo largo*
 popover_custom_regex_check_button_entry_tooltip =
-    Permite seleccionar registros por Regex.
+    Seleccione registros por Regex.
     
     En este modo, el texto buscado es Ruta con Nombre.
     
     Ejemplo:
     /usr/bin/ziemniak. xt se puede encontrar con /ziem[a-z]+
     
-    Esto utiliza la implementación predeterminada de expresiones regulares de Rust, así que puedes leer más al respecto en https://docs.rs/regex.
+    Esto utiliza la implementación predeterminada de expresiones regulares de Rust. Puedes leer más al respecto aquí: https://docs.rs/regex.
+popover_custom_case_sensitive_check_button_tooltip =
+    Habilita la detección de mayúsculas y minúsculas.
+    
+    Cuando se desactiva /home/* encuentra /HoMe/roman y /home/roman.
 popover_custom_not_all_check_button_tooltip =
-    Evita seleccionar todos los registros en el grupo.
+    Previene la selección de todos los registros en grupo.
     
-    Esto está activado por defecto, porque en la mayoría de las situaciones el usuario no quiere eliminar archivos originales y duplicados. pero quiere dejar al menos un archivo.
+    Esto está activado por defecto, porque en la mayoría de las situaciones, no quiere eliminar tanto los archivos originales como los duplicados, pero quiere dejar al menos un archivo.
     
-    Advertencia: Esta configuración no funciona si el usuario ya ha seleccionado todos los resultados en el grupo manualmente.
+    ADVERTENCIA: Esta configuración no funciona si ya has seleccionado manualmente todos los resultados en un grupo.
 popover_custom_regex_path_label = Ruta
 popover_custom_regex_name_label = Nombre
 popover_custom_regex_regex_label = Ruta de Regex + Nombre
+popover_custom_case_sensitive_check_button = Distingue mayúsculas y minúsculas
 popover_custom_all_in_group_label = No seleccionar todos los registros en el grupo
 popover_custom_mode_unselect = Deseleccionar Personalizado
 popover_custom_mode_select = Seleccionar Personalizado
@@ -171,23 +186,23 @@ bottom_save_button = Guardar
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Mover
-bottom_search_button_tooltip = Empezar a buscar archivos/carpetas.
-bottom_select_button_tooltip = Selecciona registros. Sólo los archivos/carpetas seleccionados pueden ser procesados más tarde.
+bottom_search_button_tooltip = Iniciar búsqueda
+bottom_select_button_tooltip = Seleccionar registros. Sólo los archivos/carpetas seleccionados pueden ser procesados más tarde.
 bottom_delete_button_tooltip = Eliminar archivos/carpetas seleccionadas.
 bottom_save_button_tooltip = Guardar datos sobre la búsqueda en el archivo
 bottom_symlink_button_tooltip =
-    Crea enlaces simbólicos.
-    Solo funciona cuando al menos 2 resultados en grupo son seleccionados.
+    Crear enlaces simbólicos.
+    Sólo funciona cuando al menos dos resultados en grupo son seleccionados.
     El primero no ha cambiado y el segundo y más tarde están enlazados con el primero.
 bottom_hardlink_button_tooltip =
-    Crea enlaces hardlinks.
-    Solo funciona cuando al menos 2 resultados en grupo son seleccionados.
-    El primero no ha cambiado y el segundo y más tarde están estrechamente vinculados a la primera.
+    Crear enlaces hardlinks.
+    Solo funciona cuando al menos dos resultados en grupo son seleccionados.
+    El primero no ha cambiado y el segundo y más tarde están enlazados por hardlinks a la primera.
 bottom_move_button_tooltip =
-    Mueve los archivos a la carpeta elegida.
+    Mover los archivos a la carpeta elegida.
     Copia todos los archivos a la carpeta sin preservar el árbol de directorios.
-    Al intentar mover 2 archivos con el mismo nombre a la carpeta, el segundo fallará y mostrará el error.
-bottom_show_errors_tooltip = Mostrar / Ocultar panel de error inferior.
+    Al intentar mover dos archivos con el mismo nombre a la carpeta, el segundo fallará y mostrará el error.
+bottom_show_errors_tooltip = Mostrar/Ocultar panel de texto inferior.
 bottom_show_upper_notebook_tooltip = Mostrar / Ocultar panel de cuaderno superior.
 # Progress Window
 progress_stop_button = Parar
@@ -195,7 +210,7 @@ progress_stop_button = Parar
 about_repository_button_tooltip = Enlace a la página del repositorio con código fuente.
 about_donation_button_tooltip = Enlace a la página de donación.
 about_instruction_button_tooltip = Enlace a la página de instrucciones.
-about_translation_button_tooltip = Enlace a la página de Crowdin con traducciones de aplicaciones. Oficialmente se admiten polaco e inglés, pero se agradecerá cualquier ayuda con otro idioma.
+about_translation_button_tooltip = Enlace a la página de Crowdin con traducciones de aplicaciones. Oficialmente se admiten polaco e inglés.
 about_repository_button = Repositorio
 about_donation_button = Donación
 about_instruction_button = Instrucción
@@ -209,38 +224,38 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 
 ## General
 
-settings_save_at_exit_button_tooltip = Guarda la configuración en el archivo al cerrar la aplicación.
+settings_save_at_exit_button_tooltip = Guardar configuración en archivo al cerrar la aplicación.
 settings_load_at_start_button_tooltip =
-    Cargando la configuración de inicio desde el archivo.
+    Cargar la configuración desde el archivo al abrir la aplicación.
     
-    Si no selecciona esta opción cargará la configuración por defecto.
-settings_confirm_deletion_button_tooltip = Muestra el diálogo de confirmación al hacer clic en el botón Eliminar.
-settings_confirm_link_button_tooltip = Muestra el diálogo de confirmación al hacer clic en el botón duro/symlink.
-settings_confirm_group_deletion_button_tooltip = Muestra el diálogo cuando intenta eliminar todos los registros del grupo.
-settings_show_text_view_button_tooltip = Muestra el panel de error en la parte inferior.
-settings_use_cache_button_tooltip = Opción que permite no utilizar la función de caché.
-settings_save_also_as_json_button_tooltip = Guardar caché en formato JSON humano. Es posible modificar su contenido. La caché de este archivo será leída automáticamente por la aplicación si la caché del formato binario (con la extensión binaria) faltará.
-settings_use_trash_button_tooltip = Cuando está habilitado mueve archivos a la papelera en su lugar eliminándolos permanentemente.
-settings_language_label_tooltip = Permite elegir el idioma de la interfaz entre los disponibles.
-settings_save_at_exit_button = Guardar configuración al salir
-settings_load_at_start_button = Cargar configuración al iniciar
+    Si no está habilitado, se usarán los ajustes por defecto.
+settings_confirm_deletion_button_tooltip = Mostrar el diálogo de confirmación al hacer clic en el botón borrar.
+settings_confirm_link_button_tooltip = Mostrar el diálogo de confirmación al hacer clic en el botón hard/symlink.
+settings_confirm_group_deletion_button_tooltip = Mostrar el diálogo de advertencia al intentar eliminar todos los registros del grupo.
+settings_show_text_view_button_tooltip = Mostrar el panel de texto en la parte inferior de la interfaz de usuario.
+settings_use_cache_button_tooltip = Usar caché de archivos.
+settings_save_also_as_json_button_tooltip = Guardar caché en formato JSON (legible por seres humanos). Es posible modificar su contenido. La caché de este archivo será leída automáticamente por la aplicación si la caché del formato binario (con la extensión binaria) no se encuentra.
+settings_use_trash_button_tooltip = Mueve archivos a la papelera en su lugar eliminándolos permanentemente.
+settings_language_label_tooltip = Idioma para la interfaz de usuario.
+settings_save_at_exit_button = Guardar configuración al cerrar la aplicación
+settings_load_at_start_button = Cargar configuración al abrir la aplicación
 settings_confirm_deletion_button = Mostrar diálogo de confirmación al eliminar cualquier archivo
 settings_confirm_link_button = Mostrar diálogo de confirmación cuando vincule archivos de forma dura o simbólica
 settings_confirm_group_deletion_button = Mostrar diálogo de confirmación al eliminar todos los archivos del grupo
 settings_show_text_view_button = Mostrar panel de texto inferior
 settings_use_cache_button = Usar caché
-settings_save_also_as_json_button = Guardar caché también en archivo JSON
+settings_save_also_as_json_button = Guarda también la caché como archivo JSON
 settings_use_trash_button = Mover archivos borrados a la papelera
 settings_language_label = Idioma
 settings_multiple_delete_outdated_cache_checkbutton = Borrar automáticamente entradas de caché obsoletas
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Permite eliminar resultados de caché obsoletos que apuntan a archivos inexistentes.
+    Eliminar resultados de caché obsoletos que apuntan a archivos inexistentes.
     
-    Cuando esté habilitada, asegúrese de que al cargar registros, todos los puntos a archivos válidos e ignore los rotos.
+    Cuando está activado, la aplicación se asegura al cargar registros, de que todos los registros apuntan a archivos válidos (los rotos son ignorados).
     
-    Desactivar esta opción, ayudará a escanear archivos en unidades externas, por lo que las entradas de caché sobre ellas no serán purgadas en el próximo escaneo.
+    Desactivar esto ayudará al escanear archivos en unidades externas, por lo que las entradas de caché sobre ellas no serán purgadas en el siguiente escaneo.
     
-    En caso de tener cientos de miles de registros en caché, se sugiere habilitar esta opción, para acelerar la carga y guardado de caché al inicio y final de la búsqueda.
+    En el caso de tener cientos de miles de registros en caché, se sugiere habilitar esto, lo que acelerará la carga/guardado del caché al inicio/final del escaneo.
 settings_notebook_general = General
 settings_notebook_duplicates = Duplicados
 settings_notebook_images = Imágenes similares
@@ -248,39 +263,39 @@ settings_notebook_videos = Vídeo similar
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_image_preview_checkbutton_tooltip = Muestra la vista previa en el lado derecho, al seleccionar el archivo de imagen.
+settings_multiple_image_preview_checkbutton_tooltip = Muestra la vista previa en el lado derecho (al seleccionar un archivo de imagen).
 settings_multiple_image_preview_checkbutton = Mostrar vista previa de la imagen
 settings_multiple_clear_cache_button_tooltip =
-    Borrar manualmente la caché de entradas desactualizadas.
-    Debe utilizarse sólo si se deshabilita la limpieza automática.
+    Limpiar manualmente la caché de entradas desactualizadas.
+    Esto solo debe utilizarse si se ha desactivado la limpieza automática.
 settings_multiple_clear_cache_button = Eliminar resultados desactualizados de la caché de imágenes
 
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =
-    Oculta todos los archivos excepto uno, si son puntos a los mismos datos(están en línea dura).
+    Oculta todos los archivos excepto uno, si todos apuntan a los mismos datos (están en línea dura).
     
-    Por ejemplo, en caso de que en el disco haya 7 archivos que están enlazados duramente a datos específicos y un archivo diferente con los mismos datos pero diferente inode, entonces en el buscador duplicado sólo será visible un archivo único y un archivo de los enlazados.
+    Ejemplo: En el caso en que hay (en el disco) siete archivos que están estrechamente vinculados a datos específicos y un archivo diferente con los mismos datos pero un inodio diferente, luego en el buscador duplicado, sólo se mostrará un archivo único y un archivo de los enlazados.
 settings_duplicates_minimal_size_entry_tooltip =
-    Permite establecer el tamaño mínimo del archivo, que será almacenado en caché.
+    Establece el tamaño mínimo de archivo que se almacenará en caché.
     
-    Eligiendo un valor menor, generará más registros que acelerarán la búsqueda, pero ralentizarán la carga/guardado de la caché.
+    Al elegir un valor más pequeño se generarán más registros. Esto acelerará la búsqueda, pero ralentizará la carga/guardado de la caché.
 settings_duplicates_prehash_checkbutton_tooltip =
-    Activa el almacenamiento en caché de prehash(hash calculado desde una pequeña parte del archivo) que permite descartar resultados no duplicados anteriormente.
+    Activa el almacenamiento en caché de prehash (un hash calculado desde una pequeña parte del archivo) que permite despedir los resultados no duplicados anteriormente.
     
-    Está deshabilitado por defecto porque puede causar en algunas situaciones ralentizaciones.
+    Está deshabilitado por defecto porque puede causar derribos lentos en algunas situaciones.
     
-    Es muy recomendable usarlo para escanear cientos de miles o millones de archivos, ya que puede acelerar la búsqueda varias veces.
+    Es altamente recomendable usarlo para escanear cientos de miles o millones de archivos, ya que puede acelerar la búsqueda varias veces.
 settings_duplicates_prehash_minimal_entry_tooltip = Tamaño mínimo de la entrada en caché.
-settings_duplicates_hide_hard_link_button = Ocultar enlaces duros (sólo Linux y MacOS)
+settings_duplicates_hide_hard_link_button = Ocultar enlaces duros (sólo Linux y macOS)
 settings_duplicates_prehash_checkbutton = Usar caché prehash
-settings_duplicates_minimal_size_cache_label = Tamaño mínimo de los archivos en bytes guardados en la caché
-settings_duplicates_minimal_size_cache_prehash_label = Tamaño mínimo de archivos en bytes guardados en caché prehash
+settings_duplicates_minimal_size_cache_label = Tamaño mínimo de los archivos (en bytes) guardados en la caché
+settings_duplicates_minimal_size_cache_prehash_label = Tamaño mínimo de archivos (en bytes) guardados en caché prehash
 
 ## Saving/Loading settings
 
-settings_saving_button_tooltip = Guardar configuración de configuración actual al archivo.
-settings_loading_button_tooltip = Carga los ajustes desde el archivo y reemplaza la configuración actual con ellos.
+settings_saving_button_tooltip = Guardar la configuración de configuración actual en el archivo.
+settings_loading_button_tooltip = Cargar los ajustes desde el archivo y reemplazar la configuración actual con ellos.
 settings_reset_button_tooltip = Restablecer la configuración actual a la predeterminada.
 settings_saving_button = Guardar configuración
 settings_loading_button = Cargar configuración
@@ -289,17 +304,17 @@ settings_reset_button = Restablecer configuración
 ## Opening cache/config folders
 
 settings_folder_cache_open_tooltip =
-    Abre la carpeta donde se almacenan archivos txt con caché.
+    Abre la carpeta donde se almacenan los archivos txt.
     
-    Modificarlos puede causar que se muestren resultados inválidos pero también se modifique e., puede ahorrar tiempo al mover gran cantidad de archivos a un lugar diferente.
+    Modificar los archivos de caché puede causar que se muestren resultados no válidos. Sin embargo, modificar la ruta puede ahorrar tiempo al mover una gran cantidad de archivos a una ubicación diferente.
     
     Puede copiar estos archivos entre ordenadores para ahorrar tiempo al escanear de nuevo para archivos (por supuesto, si tienen una estructura de directorios similar).
     
-    En caso de problemas con la caché, estos archivos pueden ser eliminados, por lo que la aplicación los regenerará automáticamente.
+    En caso de problemas con la caché, estos archivos pueden ser eliminados. La aplicación los regenerará automáticamente.
 settings_folder_settings_open_tooltip =
-    Abre la carpeta donde se almacenan las configuraciones del kawka.
+    Abrir la carpeta donde se almacena la configuración de Czkawka.
     
-    Modificándolas a mano, puede causar que se rompa el flujo de trabajo.
+    ADVERTENCIA: Modificar manualmente la configuración puede romper su flujo de trabajo.
 settings_folder_cache_open = Abrir carpeta de caché
 settings_folder_settings_open = Abrir carpeta de ajustes
 # Compute results
@@ -315,8 +330,10 @@ compute_found_videos = Se encontraron { $number_files } vídeos similares en { $
 compute_found_music = Se encontraron { $number_files } archivos de música similares en { $number_groups } grupos
 compute_found_invalid_symlinks = Se encontraron { $number_files } enlaces simbólicos no válidos
 compute_found_broken_files = Se encontraron { $number_files } archivos rotos
+compute_found_bad_extensions = Se encontraron { $number_files } archivos con extensiones no válidas
 # Progress window
 progress_scanning_general_file = Escaneando archivo { $file_number }
+progress_scanning_extension_of_files = Comprobando extensión de { $file_checked }/{ $all_files } archivo
 progress_scanning_broken_files = Comprobando { $file_checked }/{ $all_files } archivo
 progress_scanning_video = Hash de { $file_checked }/{ $all_files } vídeo
 progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagen
@@ -347,10 +364,10 @@ saving_loading_failed_to_create_config_file = Error al crear el archivo de confi
 saving_loading_failed_to_read_config_file = No se puede cargar la configuración de "{ $path }" porque no existe o no es un archivo.
 saving_loading_failed_to_read_data_from_file = No se pueden leer los datos del archivo "{ $path }", razón "{ $reason }".
 saving_loading_orphan_data = Se encontraron datos huérfanos "{ $data }" en la línea "{ $line }".
-saving_loading_not_valid = Ajustando "{ $data }" no existe en la versión actual de la aplicación.
+saving_loading_not_valid = La configuración "{ $data }" no existe en la versión actual de la aplicación.
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Recursión infinita
-invalid_symlink_non_existent_destination = Archivo de destino no existente
+invalid_symlink_non_existent_destination = Archivo de destino inexistente
 # Other
 searching_for_data = Buscando datos, puede tardar un tiempo, por favor espere...
 text_view_messages = MENSAJES
@@ -365,20 +382,20 @@ delete_question_label = ¿Está seguro que desea eliminar los archivos?
 delete_all_files_in_group_title = Confirmación de borrar todos los archivos del grupo
 delete_all_files_in_group_label1 = En algunos grupos se seleccionan todos los registros.
 delete_all_files_in_group_label2 = ¿Estás seguro de que quieres eliminarlos?
-delete_folder_failed = Error al eliminar la carpeta { $dir } porque la carpeta no existe, no tiene permisos o no está vacía.
+delete_folder_failed = Error al eliminar la carpeta { $dir } porque la carpeta no existe, no tiene permiso o la carpeta no está vacía.
 delete_items_label = { $items } archivos serán eliminados.
 delete_items_groups_label = { $items } archivos de { $groups } grupos serán eliminados.
 hardlink_failed = Error al vincular
 hard_sym_invalid_selection_title_dialog = Selección no válida con algunos grupos
-hard_sym_invalid_selection_label_1 = En algunos grupos sólo hay 1 registro seleccionado y será ignorado.
-hard_sym_invalid_selection_label_2 = Para poder enlazar estos archivos, al menos 2 resultados en grupo deben ser seleccionados.
+hard_sym_invalid_selection_label_1 = En algunos grupos sólo hay un registro seleccionado y será ignorado.
+hard_sym_invalid_selection_label_2 = Para poder vincular estos archivos con el sistema, al menos dos resultados en el grupo deben ser seleccionados.
 hard_sym_invalid_selection_label_3 = El primero en el grupo es reconocido como original y no se cambia, pero el segundo y posterior son modificados.
 hard_sym_link_title_dialog = Confirmación de enlace
 hard_sym_link_label = ¿Está seguro que desea enlazar estos archivos?
 move_folder_failed = Error al mover la carpeta { $name }, razón { $reason }
 move_file_failed = Error al mover el archivo { $name }, razón { $reason }
 move_files_title_dialog = Elija la carpeta a la que desea mover los archivos duplicados
-move_files_choose_more_than_1_path = Solo debe seleccionarse una ruta para poder copiar los archivos duplicados, seleccionados { $path_number }.
+move_files_choose_more_than_1_path = Solo se puede seleccionar una ruta para poder copiar sus archivos duplicados, seleccionado { $path_number }.
 move_stats = Mudado correctamente { $num_files }/{ $all_files } elementos
 save_results_to_file = Resultados guardados en el archivo { $name }
 search_not_choosing_any_music = ERROR: Debe seleccionar al menos una casilla de verificación con tipos de búsqueda de música.
@@ -389,16 +406,13 @@ cache_properly_cleared = Caché correctamente borrada
 cache_clear_duplicates_title = Limpiando caché duplicada
 cache_clear_similar_images_title = Limpiando caché de imágenes similares
 cache_clear_similar_videos_title = Limpiando caché de vídeos similares
-cache_clear_message_label_1 = ¿Quieres borrar la caché de entradas desactualizadas?
+cache_clear_message_label_1 = ¿Quiere borrar la caché de entradas obsoletas?
 cache_clear_message_label_2 = Esta operación eliminará todas las entradas de caché que apunten a archivos no válidos.
-cache_clear_message_label_3 = Esto puede acelerar un poco la carga/guardado en la caché.
-cache_clear_message_label_4 = ATENCIÓN: La operación eliminará todos los datos almacenados en caché de unidades externas desconectadas, así que el hash tendrá que ser generado de nuevo.
+cache_clear_message_label_3 = Esto puede acelerar ligeramente la carga/guardado en caché.
+cache_clear_message_label_4 = ATENCIÓN: La operación eliminará todos los datos almacenados en caché de unidades externas desconectadas. Por lo tanto, cada hash tendrá que ser regenerado.
 # Show preview
-preview_temporary_file = Error al abrir el archivo de imagen temporal { $name }, razón { $reason }.
-preview_0_size = No se puede crear la vista previa de la imagen { $name }, con 0 de ancho o alto.
-preview_temporary_image_save = Error al guardar el archivo de imagen temporal en { $name }, razón { $reason }.
-preview_temporary_image_remove = Error al eliminar el archivo de imagen temporal { $name }, razón { $reason }.
-preview_failed_to_create_cache_dir = Error al crear el directorio { $name } necesario para la vista previa de la imagen, razón { $reason }.
+preview_image_resize_failure = Error al redimensionar la imagen { $name }.
+preview_image_opening_failure = Error al abrir la imagen { $name }, razón { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Grupo { $current_group }/{ $all_groups } ({ $images_in_group } imágenes)
 compare_move_left_button = L

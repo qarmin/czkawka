@@ -23,6 +23,5 @@ core_excluded_directory_pointless_slash = Katalogi: Wykluczanie folderu / jest b
 core_directory_overlap = Katalogi: Wszystkie katalogi do wyszukiwania pokrywają się z wykluczonymi
 core_ffmpeg_not_found = Nie można odnaleźć poprawnej instalacji FFmpeg
 core_ffmpeg_missing_in_snap = Wyszukiwanie podobnych filmów nie działa obecnie w snapach, jeśli chcesz pomóc spójrz na - { $url }
-
-core_saving_to_cache = Saved to file { $number } cache entries
-core_loading_from_cache = Loaded from cache { $number } entries
+core_saving_to_cache = Zapisano do pliku { $number } obiektów
+core_loading_from_cache = Załadowano z pamięci podręcznej { $number } obiektów

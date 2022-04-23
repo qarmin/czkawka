@@ -1,5 +1,5 @@
 # Window titles
-window_settings_title = Opcje
+window_settings_title = Ustawienia
 window_main_title = Czkawka
 window_progress_title = Skanowanie
 window_compare_images = Porównywanie Obrazów
@@ -9,46 +9,52 @@ general_close_button = Zamknij
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
-music_album_title_checkbox = Tytuł Albumu
-music_album_artist_checkbox = Wykonawca Albumu
 music_year_checkbox = Rok
+music_bitrate_checkbox = Bitrate
+music_genre_checkbox = Gatunek
+music_length_checkbox = Długość
 music_comparison_checkbox = Przybliżone Porównywanie
 music_comparison_checkbox_tooltip =
-    Wyszukuje podobne pliki muzyczne za pomocą AI, która to za pomocą uczenia maszynowego usuwa nawiasy z wyrażenia np. z włączoną opcją, dane pliki zostaną uznane za duplikaty:
+    Wyszukuje podobne pliki muzyczne za pomocą AI, która używa nauki maszynowej, aby usunąć nawiasy z frazy. Na przykład, z tą opcją włączoną, rozpatrywane pliki będą traktowane jako duplikaty:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
+duplicate_case_sensitive_name = Uwzględnij Wielkość Liter
+duplicate_case_sensitive_name_tooltip =
+    Gdy włączone, grupowe rekordy tylko wtedy, gdy mają dokładnie taką samą nazwę, np. Żołd <-> Żołd
+    
+    Wyłączenie tej opcji spowoduje grupowanie nazw bez sprawdzania, czy każda litera ma ten sam rozmiar, np. żoŁD <-> Żołd
 duplicate_mode_name_combo_box = Nazwa
 duplicate_mode_size_combo_box = Rozmiar
 duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
-    Czkawka oferuje 3 różne algorytmy do tworzenia hashu pliku:
+    Czkawka oferuje 3 typy hashów:
     
-    Blake3 - kryptograficzna funkcja haszująca. Z racji połączenia szybkości i niskiej ilości kolizji jest to domyślny tryb.
+    Blake3 - kryptograficzna funkcja skrótu. Domyślnie używane, ponieważ jest bardzo szybkie.
     
-    CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może mogą wystąpić kolizje hashów.
+    CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może prowadzić do kolizji haszów.
     
-    XXH3 - zarówno pod względem jakości hashu jak i wydajności jest podobny do Blake3, dlatego te algorytmy mogą być używane wymiennie.
+    XXH3 - bardzo podobna pod względem wydajności i jakości do Blake3 (lecz nie jest kryptograficzna).
 duplicate_check_method_tooltip =
-    Na chwilę obecną, Czkawka oferuje 3 tryby wyszukiwania duplikatów poprzez:
+    Na razie Czkawka oferuje trzy typy metod do znalezienia duplikatów przez:
     
-    Nazwę - Znajduje identycznie nazywające się pliki.
+    Nazwa - Znajduje pliki o tej samej nazwie.
     
-    Rozmiar - Znajduje pliki o identycznych rozmiarach.
+    Rozmiar - Znajduje pliki o tym samym rozmiarze.
     
-    Hash - Wyszukuje pliki o tej samej zawartości. W tym trybie, każdy plik jest hasowany a następnie każdy hash jest porównywany z innymi. Ten tryb używa pamięci podręcznej do przechowywania raz obliczonych hashy, dlatego drugie i kolejne skanowanie, powinno być o wiele szybsze niż pierwsze. Jest to najbezpieczniejszy sposób na znalezienie duplikatów.
+    Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót(hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
 image_hash_size_tooltip =
-    Czkawka umożliwia zmianę wielkości generowanego hashu dla każdego obrazu. Im większy, tym mniejsze różnice może znaleźć pomiędzy obrazami, lecz również jest nieco wolniejszy w użytkowaniu.
+    Czkawka oferuje zmianę rozmiaru wygenerowanego hashu dla każdego obrazu. Większy rozmiar umożliwia wyszukiwanie plików z mniejszą ilością różnic między innymi obrazami, ale jest również nieco wolniejszy w użyciu.
     
-    Domyślną wielkością hashu jest 8, które pozwala wyszukiwać zarówno bardzo jak i mało podobne do siebie obrazy. Hashe 16 i 32 powinny być głównie używane dla niemal identycznych plików. Hash 64 bajtowy nie powinien być stosowany, chyba że wymagane jest znalezienie bardzo małych różnic pomiędzy obrazami.
+    Domyślna wartość 8 bajtów jest dla znacznej większości przypadków wystarczająca, dlatego jest opcją domyslną, jednak w razie konieczności znalezienia identycznych obrazów z jeszcze większą dokładnością, należy użyć większego haszu.
 image_resize_filter_tooltip = By obliczyć hash obrazu, biblioteka musi najpierw go zmniejszyć. W zależności od wybranego algorytmu, obraz będzie wyglądał nieco inaczej. Najszybszym, lecz za razem dającym najgorsze efekty jest algorytm Nearest.
-image_hash_alg_tooltip = Do wyboru jest kilka algorytmów obliczenia hashu obrazu. Każdy z nich ma swoje słabe i silne punkty i będzie dawał czasem lepsze a czasem gorsze rezultaty w zależności od obrazów, dlatego najlepiej będzie przetestować je na własną rękę.
+image_hash_alg_tooltip = Użytkownicy mogą wybrać jeden z wielu algorytmów obliczania haszu. Każda z nich ma zarówno silne jak i słabsze punkty i czasami przyniesie lepsze i czasami gorsze wyniki w odniesieniu do różnych obrazów. W związku z tym, aby określić najlepszy dla siebie, wymagane jest ręczne testowanie każdego z nich.
 main_notebook_image_fast_compare = Szybkie porównywanie
 main_notebook_image_fast_compare_tooltip =
     Przyśpieszenie wyszukiwania i porównywania hashów.
     
-    W przeciwieństwie do zwykłego trybu, w którym każdy skrót jest porównywany ze sobą x razy, gdzie x jest podobieństwem, które wybiera użytkownik, w tym trybie zawsze stosuje się tylko jedno porównanie.
+    W przeciwieństwie do normalnego trybu - w którym każdy skrót jest porównywany ze sobą x razy (gdzie x jest podobieństwem wybranym przez użytkownika) - w tym trybie, dokładnie jedno porównanie zostanie wykonane.
     
-    Ta opcja jest zalecana podczas porównywania >10000 obrazów z podobieństwem innym niż 0 (Bardzo Duże).
+    Ta opcja jest zalecana podczas porównywania >10000 obrazów z podobieństwem innym niż 0 (Bardzo wysokie).
 main_notebook_duplicates = Duplikaty
 main_notebook_empty_directories = Puste Katalogi
 main_notebook_big_files = Duże Pliki
@@ -59,6 +65,7 @@ main_notebook_similar_videos = Podobne Wideo
 main_notebook_same_music = Podobna Muzyka
 main_notebook_symlinks = Niepoprawne Symlinki
 main_notebook_broken_files = Zepsute Pliki
+main_notebook_bad_extensions = Błędne rozszerzenia
 main_tree_view_column_file_name = Nazwa
 main_tree_view_column_folder_name = Nazwa
 main_tree_view_column_path = Ścieżka
@@ -69,16 +76,19 @@ main_tree_view_column_dimensions = Wymiary
 main_tree_view_column_title = Tytuł
 main_tree_view_column_artist = Wykonawca
 main_tree_view_column_year = Rok
-main_tree_view_column_album_title = Tytuł Albumu
-main_tree_view_column_album_artist = Wykonawca Albumu
+main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_length = Długość
+main_tree_view_column_genre = Gatunek
 main_tree_view_column_symlink_file_name = Nazwa Symlinka
 main_tree_view_column_symlink_folder = Folder Symlinka
 main_tree_view_column_destination_path = Docelowa Ścieżka
 main_tree_view_column_type_of_error = Typ Błędu
+main_tree_view_column_current_extension = Aktualne rozszerzenie
+main_tree_view_column_proper_extensions = Poprawne rozszerzenia
 main_label_check_method = Metoda sprawdzania
 main_label_hash_type = Typ hashu
 main_label_hash_size = Rozmiar hashu
-main_label_size_bytes = Rozmiar(bajty)
+main_label_size_bytes = Rozmiar (bajty)
 main_label_min_size = Min
 main_label_max_size = Max
 main_label_shown_files = Liczba wyświetlanych plików
@@ -98,24 +108,24 @@ upper_remove_included_button = Usuń
 upper_manual_add_excluded_button = Ręcznie Dodaj
 upper_add_excluded_button = Dodaj
 upper_remove_excluded_button = Usuń
-upper_manual_add_included_button_tooltip = Pozwala ręcznie dodać foldery do skanowania.
+upper_manual_add_included_button_tooltip = Dodaj nazwę katalogu do ręcznego wyszukiwania.
 upper_add_included_button_tooltip = Dodaje wybrany folder do przeskanowania.
 upper_remove_included_button_tooltip = Usuwa zaznaczony folder z listy do skanowania.
-upper_manual_add_excluded_button_tooltip = Pozwala ręcznie dodać ignorowane foldery.
+upper_manual_add_excluded_button_tooltip = Dodaj ręcznie wyodrębnioną nazwę katalogu.
 upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych.
 upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych.
 upper_notebook_items_configuration = Konfiguracja Skanowania
 upper_notebook_excluded_directories = Ignorowane Foldery
 upper_notebook_included_directories = Przeszukiwane Foldery
 upper_allowed_extensions_tooltip =
-    Dozwolone rozszerzenia muszą być oddzielone za pomocą przecinków - brak rozszerzeń oznacza że wszystkie rozszerzenia są używane.
+    Dozwolone rozszerzenia muszą być oddzielone przecinkami (domyślnie wszystkie są dostępne).
     
-    Makra IMAGE, VIDEO, MUSIC, TEXT które dodają rozszerzenia w paczkach, również są wspierane.
+    Istnieją makra, które umożliwiają dołączenie za jednym razem określonych typów plików IMAGE, VIDEO, MUSIC, TEXT.
     
-    Przykładowe użycie ".exe, IMAGE, VIDEO, .rar, 7z" oznacza że obrazy(np. jpg, png), widea(np. avi, mp4) oraz pliki z rozszerzeniami exe, rar i 7z będą przeskanowane.
+    Przykład użycia ".exe, IMAGE, VIDEO, .rar, 7z" - oznacza że obrazy (np. jpg, png), filmy (np. avi, mp4), exe, rar i 7z zostaną sprawdzone.
 upper_excluded_items_tooltip =
-    Ignorowane obiekty mogą zawierać *(oznaczający dowolny ciąg znaków) i muszą być oddzielone za pomocą przecinków.
-    Działa o wiele wolniej niż Ignorowane Foldery, dlatego należy używać tego ostrożnie.
+    Wykluczone elementy muszą zawierać znak * (który odpowiada za dowolny ciąg znaków) i powinny być oddzielone przecinkami.
+    Jest to wolniejszy sposób od zwykłego wykluczania katalogów, więc należy używać go ostrożnie.
 upper_excluded_items = Ignorowane Obiekty:
 upper_allowed_extensions = Dozwolone Rozszerzenia:
 # Popovers
@@ -131,33 +141,38 @@ popover_unselect_custom = Własne odznaczanie
 popover_select_all_images_except_biggest = Zaznacz wszystkie oprócz największego
 popover_select_all_images_except_smallest = Zaznacz wszystkie oprócz najmniejszego
 popover_custom_path_check_button_entry_tooltip =
-    Pozwala zaznaczać rekordy według ścieżki.
+    Zaznacza rekordy według ścieżki.
     
     Przykładowe użycie:
-    /home/pimpek/rzecz.txt może zostać znalezione poprzez /home/pim*
+    /home/pimpek/rzecz.txt można znaleźć używając /home/pim*
 popover_custom_name_check_button_entry_tooltip =
-    Pozwala zaznaczać rekordy według ścieżki.
+    Zaznacza rekordy według nazw plików.
     
     Przykładowe użycie:
-    /usr/ping/pong.txt może zostać znalezione poprzez *ong*
+    /usr/ping/pong.txt można znaleźć za pomocą *ong*
 popover_custom_regex_check_button_entry_tooltip =
-    Pozwala wyszukiwać rekordy za pomocą regexów.
+    Wybierz rekordy według określonego Regexa.
     
-    W tym trybie przeszukiwanym tekstem jest pełna ścieżka(nazwa pliku + ścieżka do niego).
+    W tym trybie wyszukiwanym tekstem jest pełna ścieżka(wraz z nazwą).
     
     Przykładowe użycie:
-    /usr/bin/ziemniak.txt może zostać znalezione with /ziem[a-z]+
+    /usr/bin/ziemniak. xt można znaleźć za pomocą /ziem[a-z]+
     
-    Używana jest domyśla implementacja Rust regex o której użyciu można więcej przeczytać tutaj - https://docs.rs/regex.
+    Używana jest tutaj domyślnej implementacja Regexa w Rust. Więcej informacji na ten temat można znaleźć tutaj: https://docs.rs/regex.
+popover_custom_case_sensitive_check_button_tooltip =
+    Umożliwia wykrywanie wielkości liter.
+    
+    Wykluczenie /home/* znajdzie zarówno /HoMe/roman, jak i /home/roman.
 popover_custom_not_all_check_button_tooltip =
-    Zapobiega przed zaznaczeniem wszystkich rekordów w danej grupie.
+    Zapobiega wybraniu wszystkich rekordów w grupie.
     
-    Tryb jest domyślnie aktywny, ponieważ w większości przypadków zaznaczenie wszystkich rekordów w grupie nie jest czymś czego oczekuje użytkownik.
+    Ta opcja jest domyślnie włączona, ponieważ w większości sytuacji prawdopodobnie nie chcesz usuwać zarówno oryginałów jak i duplikatów, lecz chcesz pozostawić co najmniej jeden plik.
     
-    Uwaga: To ustawienie nie powoduje pomija grupy w których to użytkownik wcześniej zaznaczył wszystkie rekordy ręcznie.
+    OSTRZEŻENIE: To ustawienie nie działa jeśli wcześniej ręcznie zostały wybrane wszystkie rekordy w grupie.
 popover_custom_regex_path_label = Ścieżka
 popover_custom_regex_name_label = Nazwa
 popover_custom_regex_regex_label = Regex - Pełna ścieżka
+popover_custom_case_sensitive_check_button = Rozróżniaj wielkość liter
 popover_custom_all_in_group_label = Nie zaznaczaj wszystkich rekordów w grupie
 popover_custom_mode_unselect = Własne odznaczanie
 popover_custom_mode_select = Własne zaznaczanie
@@ -171,23 +186,23 @@ bottom_save_button = Zapisz
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Przenieś
-bottom_search_button_tooltip = Rozpocznij przeszukiwanie.
-bottom_select_button_tooltip = Zaznacz elementy.
+bottom_search_button_tooltip = Rozpocznij wyszukiwanie
+bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
 bottom_save_button_tooltip = Zapisz informacje o skanowaniu.
 bottom_symlink_button_tooltip =
-    Tworzy linki symboliczne.
-    Działa tylko jeśli przynajmniej 2 wyniki są zaznaczone w danej grupie.
-    Pierwszy zaznaczony nie jest modyfikowany, a drugi i kolejne są usuwane i tworzone linki symboliczne w ich miejscach.
+    Utwórz linki symboliczne.
+    Działa tylko wtedy, gdy co najmniej dwa wyniki w grupie są zaznaczone.
+    Pierwszy jest niezmieniony, drugi i następny jest powiązywany z pierwszym.
 bottom_hardlink_button_tooltip =
-    Tworzy twarde linki.
-    Działa tylko jeśli przynajmniej 2 wyniki są zaznaczone w danej grupie.
-    Pierwszy zaznaczony nie jest modyfikowany, a drugi i kolejne są usuwane i tworzone twarde linki w ich miejscach.
+    Tworzenie twardych linków.
+    Działa tylko wtedy, gdy wybrano co najmniej dwa rekordy w grupie.
+    Pierwszy jest niezmieniony, drugi i następny jest dowiązywany z pierwszym.
 bottom_move_button_tooltip =
-    Przenosi pliki do podanej lokalizacji.
-    Kopiuje pliki bez zachowywania struktury katalogów.
-    Podczas próby skopiowania 2 plików z identycznymi nazwami, drugi nie zostanie przeniesiony i błąd zostanie wyświetlony.
-bottom_show_errors_tooltip = Pokazuje/ukrywa dolny panel z informacjami.
+    Przenosi pliki do wybranego katalogu.
+    Kopiuje wszystkie pliki do katalogu bez zachowania struktury plików.
+    Podczas próby przeniesienia dwóch plików o identycznej nazwie do folderu, drugi plik nie zostanie przeniesiony i pojawi się błąd.
+bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
 progress_stop_button = Stop
@@ -195,7 +210,7 @@ progress_stop_button = Stop
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
-about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficjalnie polski i angielski są wspierane ale za każdą pomoc w tłumaczeniu innych języków będę wdzięczny.
+about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.
 about_repository_button = Repozytorium
 about_donation_button = Dotacje
 about_instruction_button = Instrukcja(ENG)
@@ -209,21 +224,21 @@ header_about_button_tooltip = Otwórz okno z informacjami o programie.
 
 ## General
 
-settings_save_at_exit_button_tooltip = Zapisuje konfigurację programu podczas wychodzenia z niego.
+settings_save_at_exit_button_tooltip = Zapisz konfigurację do pliku podczas zamykania aplikacji.
 settings_load_at_start_button_tooltip =
-    Ładowanie plików na starcie z plików.
+    Wczytaj konfigurację z pliku podczas otwierania aplikacji.
     
-    Nie zaznaczenie tej opcji, spowoduje załadowanie domyślnych ustawień.
-settings_confirm_deletion_button_tooltip = Wyświetla okno potwierdzające usuwanie plików.
-settings_confirm_link_button_tooltip = Wyświetla okno potwierdzające usuwanie, gdy tworzone są hard/symlinki.
-settings_confirm_group_deletion_button_tooltip = Wyświetla okno potwierdzające usuwanie, gdy wszystkie rekordy w danej grupie są zaznaczone.
-settings_show_text_view_button_tooltip = Pokazuje na dole ekranu panel tekstowy.
-settings_use_cache_button_tooltip = Umożliwia zapisywanie rekordów do pamięci podręcznej.
-settings_save_also_as_json_button_tooltip = Zapisz pamięć podręczną do pliku w formacie JSON umożliwiającym zmiany zawartości. Pamięć podręczna z tego pliku zostanie odczytana automatycznie przez aplikację, jeśli nie istnieje plik z pamięcią podręczną w formacie binarnym (z rozszerzeniem bin).
-settings_use_trash_button_tooltip = Przenosi pliki do kosza zamiast usuwać je permanentnie.
-settings_language_label_tooltip = Pozwala wybrać język interfejsu.
-settings_save_at_exit_button = Zapisuj konfigurację przy wyłączaniu
-settings_load_at_start_button = Ładuj ustawienia na starcie z pliku
+    Jeśli nieaktywny, zostaną użyte domyślne ustawienia.
+settings_confirm_deletion_button_tooltip = Pokaż okno dialogowe potwierdzające usuwanie przy próbie usunięcia rekordu.
+settings_confirm_link_button_tooltip = Pokaż dodatkowe okno dialogowe przy próbie utworzenia hard/symlinków.
+settings_confirm_group_deletion_button_tooltip = Pokaż okno dialogowe ostrzegające przy próbie usunięcia wszystkich rekordów z grupy.
+settings_show_text_view_button_tooltip = Pokaż dolny panel tekstowy.
+settings_use_cache_button_tooltip = Użyj pamięci podręcznej plików.
+settings_save_also_as_json_button_tooltip = Zapisz pamięć podręczną do formatu JSON (czytelnego dla człowieka). Można modyfikować jego zawartość. Pamięć podręczna z tego pliku zostanie odczytana automatycznie przez aplikację, jeśli brakuje pamięci podręcznej formatu binarnego (z rozszerzeniem bin).
+settings_use_trash_button_tooltip = Przenosi pliki do kosza zamiast usuwać je na stałe.
+settings_language_label_tooltip = Język interfejsu użytkownika.
+settings_save_at_exit_button = Zapisz konfigurację podczas zamykania aplikacji
+settings_load_at_start_button = Załaduj konfigurację z pliku podczas otwierania aplikacji
 settings_confirm_deletion_button = Pokazuj okno potwierdzające usuwanie plików
 settings_confirm_link_button = Pokazuj potwierdzenie usuwania hard/symlinków
 settings_confirm_group_deletion_button = Pokazuj okno potwierdzające usuwanie wszystkich obiektów w grupie
@@ -234,13 +249,13 @@ settings_use_trash_button = Przenoś pliki do kosza
 settings_language_label = Język
 settings_multiple_delete_outdated_cache_checkbutton = Usuwaj automatycznie nieaktualne rekordy z pamięci podręcznej
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Pozwala na automatyczne usuwanie rekordów, które wskazują na nieaktualne pliki.
+    Usuń nieaktualne rekordy z pamięci podręcznej, które wskazują na nieistniejące pliki.
     
-    W przypadku gdy pole jest zaznaczone, upewnij się, że wszystkie dyski zewnętrzne są podpięte by nie stracić zapisanych hashy z pamięci podręcznej.
+    Po włączeniu aplikacja upewnia się, że podczas ładowania rekordów wszystkie wskazują na prawidłowe pliki (uszkodzone czy zmienione pliki są ignorowane).
     
-    Wyłączenie tej opcji spowoduje, że nawet przy skanowaniu odpiętych dysków, rekordy w pamięci podręcznej nie będą usuwane.
+    Wyłączenie tej opcji, pomoże podczas skanowania plików na zewnętrznych dyskach, więc wpisy dotyczące ich nie zostaną usunięte w następnym skanowaniu.
     
-    W przypadku posiadania dziesiątek czy setek tysięcy rekordów w pamięci podręcznej, zalecane jest zaznaczenie tej opcji, ponieważ przyspiesza to ładowanie i zapisywanie pamięci podręcznej.
+    W przypadku posiadania stu tysięcy rekordów w pamięci podręcznej, sugeruje się, aby włączyć tę opcję, ponieważ przyspieszy ładowanie/zapisywanie pamięci podręcznej na początku/końcu skanowania.
 settings_notebook_general = Ogólne
 settings_notebook_duplicates = Duplikaty
 settings_notebook_images = Podobne Obrazy
@@ -248,38 +263,40 @@ settings_notebook_videos = Podobne Wideo
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_image_preview_checkbutton_tooltip = Pokazuje podgląd obrazów po ich zaznaczeniu po prawej stronie aplikacji.
+settings_multiple_image_preview_checkbutton_tooltip = Pokazuje podgląd po prawej stronie (podczas zaznaczania obrazu).
 settings_multiple_image_preview_checkbutton = Pokazuj podgląd obrazów
-settings_multiple_clear_cache_button_tooltip = Ręcznie czyści pamięć podręczną z nieaktualnych danych.
+settings_multiple_clear_cache_button_tooltip =
+    Ręcznie wyczyść pamięć podręczną przestarzałych wpisów.
+    To powinno być używane tylko wtedy, gdy automatyczne czyszczenie zostało wyłączone.
 settings_multiple_clear_cache_button = Usuń nieaktualne dane z pamięci podręcznej
 
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =
-    Ukrywa wszystkie pliki oprócz jednego, jeśli wskazują na dokładnie ten sam plik(to samo inode).
+    Ukrywa wszystkie pliki z wyjątkiem jednego, jeśli wszystkie wskazują na te same dane (są połączone twardym dowiązaniem).
     
-    Przykładowo - gdy program znalazł 7 plików na dokładnie ten sam plik(z tym samym inode) a dodatkowo jeden na inny, to w wynikach wyszukiwania wyświetlą się jedynie 2 wyniki - jeden z pierwszej grupy i drugi z drugiej.
+    Przykład: W przypadku gdy istnieje (na dysku) siedem plików, które są twardo dowiązane ze sobą i jeden inny plik z tymi samymi danymi, ale innym inode, wtedy w oknie wyników, wyświetlony zostanie tylko jeden unikalny plik i jeden plik z siedmiu dowiązanych ze sobą plików.
 settings_duplicates_minimal_size_entry_tooltip =
-    Opcja umożliwia ustawienie minimalnej wielkości pliku, której hash będzie zapisywany do pamięci podręcznej.
+    Ustaw minimalny rozmiar pliku, który zapisywany będzie do pliku z pamięcią podręcznej.
     
-    Im mniejsza wartość, tym hash większej ilości plików będzie przechowywany w pamięci podręcznej, co przyspieszy wyszukiwanie plików lecz jednocześnie spowolni wczytywanie/zapisywanie hashu do pliku.
+    Wybór mniejszej wartości spowoduje wygenerowanie większej ilości rekordów. To przyspieszy wyszukiwanie, ale spowolni ładowanie/zapisywanie danych do pamięci podręcznej.
 settings_duplicates_prehash_checkbutton_tooltip =
-    Umożliwia zapisywanie cząstkowego hashu do pamięci podręcznej, który umożliwia na wcześniejsze wyrzucenie plików z unikalnymi rozmiarami.
+    Włącza zapisywanie częściowych haszów do pamięci podręcznej (hash obliczany jest tylko z małej części pliku), które pozwala na wcześniejsze odrzucenie unikalnych plików.
     
-    Domyślnie jest zablokowane, ponieważ może powodować spowolnione skanowanie w niektórych sytuacjach.
+    Jest domyślnie wyłączona opcja, ponieważ może spowodować spowolnienie w niektórych sytuacjach.
     
-    Jest mocno polecane osobom które skanują tylko i wyłącznie katalogi zawierające dziesiątki lub setki tysięcy lub nawet miliony plików, ponieważ może to wielokrotnie przyspieszyć proces skanowania.
+    Zaleca się używanie tej opcji podczas skanowania setek tysięcy lub milionów plików, ponieważ może przyspieszyć wielokrotnie przeszukiwanie i wyłaczać gdy skanuje się niewielką ilość danych.
 settings_duplicates_prehash_minimal_entry_tooltip = Minimalny rozmiar pliku, którego cząstkowy hash będzie zapisywany do pamięci podręcznej.
-settings_duplicates_hide_hard_link_button = Ukrywaj twarde dowiązania(nie działa na Windowsie)
+settings_duplicates_hide_hard_link_button = Ukryj twarde dowiązania (tylko Linux i macOS)
 settings_duplicates_prehash_checkbutton = Używaj pamięci podręcznej dla hashy cząstkowych
-settings_duplicates_minimal_size_cache_label = Wielkość pliku, od którego hash będzie zapisywany w pamięci podręcznej
-settings_duplicates_minimal_size_cache_prehash_label = Wielkość pliku, od którego cząstkowy hash będzie zapisywany w pamięci podręcznej
+settings_duplicates_minimal_size_cache_label = Minimalny rozmiar plików (w bajtach) zapisywanych do pamięci podręcznej
+settings_duplicates_minimal_size_cache_prehash_label = Minimalny rozmiar plików (w bajtach) przy zapisywaniu ich częściowego haszu do pamięci podręcznej
 
 ## Saving/Loading settings
 
-settings_saving_button_tooltip = Zapisuje aktualne ustawienia do pliku.
-settings_loading_button_tooltip = Ładuje ustawienia z pliku.
-settings_reset_button_tooltip = Resetuje aktualne ustawienia do domyślnie używanych przez aplikację.
+settings_saving_button_tooltip = Zapisz aktualną konfigurację ustawień do pliku.
+settings_loading_button_tooltip = Załaduj ustawienia z pliku i nadpisz bieżącą konfigurację.
+settings_reset_button_tooltip = Przywróć domyślną konfigurację.
 settings_saving_button = Zapisanie ustawień
 settings_loading_button = Załadowanie ustawień
 settings_reset_button = Reset ustawień
@@ -289,13 +306,15 @@ settings_reset_button = Reset ustawień
 settings_folder_cache_open_tooltip =
     Otwiera folder gdzie przechowywana jest pamięć podręczna aplikacji.
     
-    Jej ręczne modyfikowanie może powodować wyświetlanie niepoprawnych wyników lub jej uszkodzenie spowoduje konieczność ponownej generacji, lecz umożliwia też oszczędzenie czasu przy przesuwaniu większej ilości plików.
+    Ręczne modyfikowanie może powodować wyświetlanie niepoprawnych wyników lub jej uszkodzenie spowoduje konieczność ponownej generacji, lecz umożliwia też oszczędzenie czasu przy przesuwaniu większej ilości plików.
     
-    Można pliki kopiować pomiędzy komputerami by zaoszczędzić czas na hashowaniu plików(oczywiście tylko gdy dane są przechowywane w identycznej strukturze katalogów na komputerach).
+    Pliki można kopiować pomiędzy komputerami by zaoszczędzić czas na hashowaniu plików (oczywiście tylko gdy dane są przechowywane w identycznej strukturze katalogów na komputerach).
+    
+    W razie problemów z pamięcią podręczną, pliki mogą zostać usunięte. Aplikacja automatycznie je zregeneuje.
 settings_folder_settings_open_tooltip =
-    Otwiera folder gdzie Czkawka przechowuje ustawienia.
+    Otwiera folder, w którym konfiguracja Czkawki jest przechowywana.
     
-    Ich ręczna zmiana, może spowodować różne błędy i kataklizmy, o których fizjologom się nie śniło.
+    OSTRZEŻENIE: ręczna modyfikacja konfiguracji może zakłócić przepływ twojej pracy.
 settings_folder_cache_open = Otwórz folder pamięci podręcznej
 settings_folder_settings_open = Otwórz folder ustawień
 # Compute results
@@ -311,9 +330,11 @@ compute_found_videos = Znaleziono { $number_files } podobnych plików wideo w { 
 compute_found_music = Znaleziono { $number_files } podobnych plików muzycznych w { $number_groups } grupach
 compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych dowiązań symbolicznych
 compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików
+compute_found_bad_extensions = Znaleziono { $number_files } plików z nieprawidłowymi rozszerzeniami
 # Progress window
 progress_scanning_general_file = Skanowanie { $file_number } pliku
-progress_scanning_broken_files = Sprawdzanie { $file_checked }/{ $all_files } pliku
+progress_scanning_extension_of_files = Sprawdzanie rozszerzenia { $file_checked }/{ $all_files } pliku
+progress_scanning_broken_files = Sprawdzanie { $file_checked }/{ $all_files } plików
 progress_scanning_video = Hashowanie { $file_checked }/{ $all_files } pliku wideo
 progress_scanning_image = Hashowanie { $file_checked }/{ $all_files } obrazu
 progress_comparing_image_hashes = Porównywanie { $file_checked }/{ $all_files } hashu obrazu
@@ -346,7 +367,7 @@ saving_loading_orphan_data = Znaleziono osierocone dane "{ $data }" w wierszu "{
 saving_loading_not_valid = Ustawienie "{ $data }" nie istnieje w bieżącej wersji aplikacji.
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Nieskończona rekurencja
-invalid_symlink_non_existent_destination = Nie istniejący docelowy plik
+invalid_symlink_non_existent_destination = Nieistniejący docelowy plik
 # Other
 searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę czekać...
 text_view_messages = WIADOMOŚCI
@@ -363,22 +384,22 @@ delete_file_failed = Nie udało się usunąć pliku { $name }, powód { $reason 
 delete_title_dialog = Potwierdzenie usunięcia
 delete_question_label = Czy na pewno usunąć te pliki?
 delete_all_files_in_group_title = Potwierdzenie usunięcia wszystkich plików w grupie
-delete_all_files_in_group_label1 = W niektórych grupach zaznaczono wszystkie rekordy.
+delete_all_files_in_group_label1 = W niektórych grupach wszystkie rekordy są zaznaczone.
 delete_all_files_in_group_label2 = Czy na pewno je usunąć?
 delete_folder_failed = Nie udało się usunąć folderu { $dir } ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
 delete_items_label = { $items } plików będzie usuniętych.
-delete_items_groups_label = { $items } plików z { $groups } grup będzie usuniętych.
+delete_items_groups_label = { $items } plików z { $groups } grup zostanie usuniętych.
 hardlink_failed = Nie udało się utworzyć twardego dowiązania
 hard_sym_invalid_selection_title_dialog = Niepoprawne zaznaczenie w niektórych grupach
-hard_sym_invalid_selection_label_1 = W niektórych grupach zaznaczono tylko 1 rekord, który zostanie zignorowany.
-hard_sym_invalid_selection_label_2 = Aby móc używać dowiązań, należy zaznaczyć przynajmniej 2 obiekty w danej grupie.
+hard_sym_invalid_selection_label_1 = W niektórych grupach jest zaznaczony tylko jeden rekord i zostanie zignorowany.
+hard_sym_invalid_selection_label_2 = Aby móc mocno połączyć te pliki, należy wybrać co najmniej dwa rekordy w grupie.
 hard_sym_invalid_selection_label_3 = Pierwszy pozostaje nienaruszony a drugi i kolejne są dowiązywane do tego pierwszego.
 hard_sym_link_title_dialog = Potwierdzenie dowiązania
-hard_sym_link_label = Czy na pewno dowiązać te pliki?
+hard_sym_link_label = Czy na pewno chcesz dowiązać te pliki?
 move_folder_failed = Nie można przenieść folderu { $name }, powód { $reason }
 move_file_failed = Nie można przenieść pliku { $name }, powód { $reason }
 move_files_title_dialog = Wybierz folder, do którego zostaną przeniesione pliki
-move_files_choose_more_than_1_path = Można przenieść elementy tylko do 1 folderu, zaznaczono { $path_number }.
+move_files_choose_more_than_1_path = Tylko jedna ścieżka może być wybrana, aby móc skopiować zduplikowane pliki, wybrano { $path_number }.
 move_stats = Poprawnie przeniesiono { $num_files }/{ $all_files } elementów
 save_results_to_file = Zapisano wyniki do pliku { $name }
 search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
@@ -391,14 +412,11 @@ cache_clear_similar_images_title = Czyszczenie pamięci podręcznej podobnych ob
 cache_clear_similar_videos_title = Czyszczenie pamięci podręcznej podobnych plików wideo
 cache_clear_message_label_1 = Czy na pewno chcesz oczyścić pamięć podręczną z przestarzałych wpisów?
 cache_clear_message_label_2 = Ta operacja usunie wszystkie rekordy, które wskazują na nieistniejące pliki.
-cache_clear_message_label_3 = Może spowodować to przyspieszenie ładowania i zapisywania danych do pamięci w trakcie skanowania.
-cache_clear_message_label_4 = OSTRZEŻENIE: Usunięte zostaną wszystkie rekordy z odpiętych dyskach zewnętrznych i konieczne będzie ich ponowne sprawdzenie po podpięciu.
+cache_clear_message_label_3 = Może to nieznacznie przyspieszyć ładowanie/oszczędzanie pamięci podręcznej.
+cache_clear_message_label_4 = OSTRZEŻENIE: Operacja usunie wszystkie dane w pamięci podręcznej z wyłączonych dysków zewnętrznych. Zatem każdy hash będzie musiał zostać zregenerowany.
 # Show preview
-preview_temporary_file = Nie udało się otworzyć tymczasowego obrazu { $name }, powód { $reason }.
-preview_0_size = Nie można stworzyć podglądu obrazu { $name }, z wysokością lub szerokością 0 pikseli.
-preview_temporary_image_save = Nie udało się zapisać tymczasowego obrazu do { $name }, powód { $reason }.
-preview_temporary_image_remove = Nie udało się usunąć tymczasowego obrazu { $name }, powód { $reason }.
-preview_failed_to_create_cache_dir = Nie udało stworzyć się katalogu { $name } wymaganego do stworzenia podglądu obrazu, powód { $reason }.
+preview_image_resize_failure = Nie udało się zmienić rozmiaru obrazu { $name }.
+preview_image_opening_failure = Nie udało się otworzyć obrazu { $name }, powód { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Grupa { $current_group }/{ $all_groups } ({ $images_in_group } obrazów)
 compare_move_left_button = L
