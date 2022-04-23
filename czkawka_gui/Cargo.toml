@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "4.0.0"
+version = "4.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
 description = "GTK frontend of Czkawka"
@@ -9,7 +9,7 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-czkawka_core = { path = "../czkawka_core", version = "4.0.0"}
+czkawka_core = { path = "../czkawka_core", version = "4.1.0"}
 gdk = "0.15.4"
 glib = "0.15.10"
 

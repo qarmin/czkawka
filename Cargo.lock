@@ -587,7 +587,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "czkawka_core",
  "image_hasher",
@@ -596,7 +596,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "bincode",
  "bitflags",
@@ -632,7 +632,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",

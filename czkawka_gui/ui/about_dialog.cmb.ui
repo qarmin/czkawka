@@ -43,7 +43,7 @@ This program is free to use and will always be.
     <property name="logo-icon-name">image-missing</property>
     <property name="program-name">Czkawka</property>
     <property name="type-hint">dialog</property>
-    <property name="version">4.0.0</property>
+    <property name="version">4.1.0</property>
     <property name="window-position">center</property>
     <child internal-child="vbox">
       <object class="GtkBox">
