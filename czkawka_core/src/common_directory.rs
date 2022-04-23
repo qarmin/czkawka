@@ -1,5 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+#[cfg(target_family = "unix")]
+use std::{fs, os::unix::fs::MetadataExt};
 
 use crate::common::Common;
 use crate::common_messages::Messages;
@@ -11,6 +13,10 @@ pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,
     pub reference_directories: Vec<PathBuf>,
+    #[cfg(target_family = "unix")]
+    exclude_other_filesystems: Option<bool>,
+    #[cfg(target_family = "unix")]
+    included_dev_ids: Vec<u64>,
 }
 
 impl Directories {
@@ -144,6 +150,11 @@ impl Directories {
         self.excluded_directories = checked_directories;
 
         Common::print_time(start_time, SystemTime::now(), "set_excluded_directory".to_string());
+    }
+
+    #[cfg(target_family = "unix")]
+    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
+        self.exclude_other_filesystems = Some(exclude_other_filesystems)
     }
 
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated etc.
@@ -284,6 +295,21 @@ impl Directories {
         self.excluded_directories.sort();
         self.included_directories.sort();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
+
+        // Get device IDs for included directories
+        #[cfg(target_family = "unix")]
+        if self.exclude_other_filesystems() {
+            for d in &self.included_directories {
+                match fs::metadata(d) {
+                    Ok(m) => self.included_dev_ids.push(m.dev()),
+                    Err(_) => text_messages.errors.push(flc!(
+                        "core_directory_unable_to_get_device_id",
+                        generate_translation_hashmap(vec![("path", d.display().to_string())])
+                    )),
+                }
+            }
+        }
+
         true
     }
 
@@ -294,5 +320,24 @@ impl Directories {
         let path = Common::normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
         self.excluded_directories.iter().any(|p| p.as_path() == path)
+    }
+
+    #[cfg(target_family = "unix")]
+    pub fn exclude_other_filesystems(&self) -> bool {
+        self.exclude_other_filesystems.unwrap_or(false)
+    }
+
+    /// Checks whether a specified directory is on other filesystems rather then include
+    /// directories
+    #[cfg(target_family = "unix")]
+    pub fn is_on_other_filesystems(&self, path: impl AsRef<Path>) -> Result<bool, String> {
+        let path = path.as_ref();
+        match fs::metadata(path) {
+            Ok(m) => Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev())),
+            Err(_) => Err(flc!(
+                "core_directory_unable_to_get_device_id",
+                generate_translation_hashmap(vec![("path", path.display().to_string())])
+            )),
+        }
     }
 }

@@ -37,6 +37,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
         #[structopt(flatten)]
         allow_hard_links: AllowHardLinks,
         #[structopt(flatten)]
@@ -54,6 +57,9 @@ pub enum Commands {
         delete_folders: bool,
         #[structopt(flatten)]
         file_to_save: FileToSave,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
     },
     #[structopt(name = "big", about = "Finds big files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt")]
     BiggestFiles {
@@ -73,6 +79,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
     },
     #[structopt(name = "empty-files", about = "Finds empty files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt")]
     EmptyFiles {
@@ -90,6 +99,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
     },
     #[structopt(name = "temp", about = "Finds temporary files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D")]
     Temporary {
@@ -105,6 +117,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
     },
     #[structopt(name = "image", about = "Finds similar images", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka image -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt")]
     SimilarImages {
@@ -124,6 +139,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
         #[structopt(short = "g", long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
         hash_alg: HashAlg,
         #[structopt(short = "z", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
@@ -147,6 +165,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
         #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
         #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
@@ -168,6 +189,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
     },
     #[structopt(name = "broken", about = "Finds broken files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt")]
     BrokenFiles {
@@ -185,6 +209,9 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
     },
     #[structopt(name = "video", about = "Finds similar video files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka videos -d /home/rafal -f results.txt")]
     SimilarVideos {
@@ -202,6 +229,9 @@ pub enum Commands {
         allowed_extensions: AllowedExtensions,
         #[structopt(flatten)]
         not_recursive: NotRecursive,
+        #[cfg(target_family = "unix")]
+        #[structopt(flatten)]
+        exclude_other_filesystems: ExcludeOtherFilesystems,
         #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
         #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
@@ -267,6 +297,13 @@ pub struct AllowedExtensions {
 pub struct NotRecursive {
     #[structopt(short = "R", long, help = "Prevents from recursive check of folders")]
     pub not_recursive: bool,
+}
+
+#[cfg(target_family = "unix")]
+#[derive(Debug, StructOpt)]
+pub struct ExcludeOtherFilesystems {
+    #[structopt(short = "X", long, help = "Exclude files on other filesystmes")]
+    pub exclude_other_filesystems: bool,
 }
 
 #[derive(Debug, StructOpt)]

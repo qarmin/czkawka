@@ -116,6 +116,11 @@ impl BigFile {
         self.recursive_search = recursive_search;
     }
 
+    #[cfg(target_family = "unix")]
+    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
+        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
+    }
+
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
@@ -215,6 +220,15 @@ impl BigFile {
 
                             if self.excluded_items.is_excluded(&next_folder) {
                                 continue 'dir;
+                            }
+
+                            #[cfg(target_family = "unix")]
+                            if self.directories.exclude_other_filesystems() {
+                                match self.directories.is_on_other_filesystems(&next_folder) {
+                                    Ok(true) => continue 'dir,
+                                    Err(e) => warnings.push(e.to_string()),
+                                    _ => (),
+                                }
                             }
 
                             dir_result.push(next_folder);
@@ -388,6 +402,8 @@ impl DebugPrint for BigFile {
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
+        #[cfg(target_family = "unix")]
+        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
         println!("Number of files to check - {:?}", self.number_of_files_to_check);
         println!("-----------------------------------------");
     }

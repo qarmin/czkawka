@@ -267,6 +267,11 @@ impl DuplicateFinder {
         self.recursive_search = recursive_search;
     }
 
+    #[cfg(target_family = "unix")]
+    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
+        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
+    }
+
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
@@ -986,6 +991,8 @@ impl DebugPrint for DuplicateFinder {
         println!("Included directories - {:?}", self.directories.included_directories);
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
+        #[cfg(target_family = "unix")]
+        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
         println!("Minimum file size - {:?}", self.minimal_file_size);
         println!("Checking Method - {:?}", self.check_method);
         println!("Delete Method - {:?}", self.delete_method);
