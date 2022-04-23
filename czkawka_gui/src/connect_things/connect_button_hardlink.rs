@@ -200,7 +200,8 @@ fn hardlink_symlink(
     }
     if hardlinking == TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
-            for file_to_hardlink in symhardlink_data.files_to_symhardlink {
+            for (counter, file_to_hardlink) in symhardlink_data.files_to_symhardlink.into_iter().enumerate() {
+                handle_gtk_pending_event_counter(counter);
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
@@ -209,7 +210,8 @@ fn hardlink_symlink(
         }
     } else {
         for symhardlink_data in vec_symhardlink_data {
-            for file_to_symlink in symhardlink_data.files_to_symhardlink {
+            for (counter, file_to_symlink) in symhardlink_data.files_to_symhardlink.into_iter().enumerate() {
+                handle_gtk_pending_event_counter(counter);
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,
