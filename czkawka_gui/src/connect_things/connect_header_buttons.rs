@@ -1,4 +1,5 @@
 use gtk::prelude::*;
+use gtk::ResponseType;
 
 use crate::gui_structs::gui_data::GuiData;
 
@@ -12,6 +13,11 @@ pub fn connect_button_about(gui_data: &GuiData) {
         about_dialog.connect_delete_event(|dialog, _| {
             dialog.hide();
             Inhibit(true)
+        });
+        about_dialog.connect_response(|dialog, response| {
+            if response == ResponseType::Close {
+                dialog.hide();
+            }
         });
     });
 }
