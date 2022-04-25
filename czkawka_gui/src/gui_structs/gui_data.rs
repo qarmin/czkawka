@@ -33,7 +33,7 @@ use crate::help_functions::BottomButtonsEnum;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
-pub const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../../snap/gui/czkawka.png");
+pub const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../icons/icon_about.png");
 pub const CZK_ICON_ADD: &[u8; 677] = include_bytes!("../../icons/czk_add.svg");
 pub const CZK_ICON_COMPARE: &[u8; 5700] = include_bytes!("../../icons/czk_compare.svg");
 pub const CZK_ICON_DELETE: &[u8; 489] = include_bytes!("../../icons/czk_delete.svg");
