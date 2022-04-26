@@ -725,7 +725,7 @@ fn show_preview(
             }
 
             if let Some(extension) = Path::new(&name).extension() {
-                let extension = format!(".{}", extension.to_string_lossy());
+                let extension = format!(".{}", extension.to_string_lossy().to_lowercase());
                 if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) {
                     break 'dir;
                 }
