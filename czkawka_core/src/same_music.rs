@@ -372,6 +372,14 @@ impl SameMusic {
 
                 let properties = tagged_file.properties();
 
+                let mut track_title;
+                let mut track_artist;
+                let mut year;
+                let mut length;
+                let mut genre;
+
+                let bitrate = properties.audio_bitrate().unwrap_or(0);
+
                 let tag = match tagged_file.primary_tag() {
                     Some(t) => t,
                     None => {
@@ -379,21 +387,49 @@ impl SameMusic {
                         return Some(Some(music_entry));
                     }
                 };
+                {
+                    track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or("").to_string();
+                    track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or("").to_string();
+                    year = tag.get_string(&ItemKey::Year).unwrap_or("").to_string();
+                    length = tag.get_string(&ItemKey::Length).unwrap_or("").to_string();
+                    genre = tag.get_string(&ItemKey::Genre).unwrap_or("").to_string();
+                }
+
+                for tag in tagged_file.tags() {
+                    if track_title.is_empty() {
+                        if let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle) {
+                            track_title = tag_value.to_string();
+                        }
+                    }
+                    if track_artist.is_empty() {
+                        if let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist) {
+                            track_artist = tag_value.to_string();
+                        }
+                    }
+                    if year.is_empty() {
+                        if let Some(tag_value) = tag.get_string(&ItemKey::Year) {
+                            year = tag_value.to_string();
+                        }
+                    }
+                    if length.is_empty() {
+                        if let Some(tag_value) = tag.get_string(&ItemKey::Length) {
+                            length = tag_value.to_string();
+                        }
+                    }
+                    if genre.is_empty() {
+                        if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
+                            genre = tag_value.to_string();
+                        }
+                    }
+                }
 
                 // println!("{:?}", tag.items());
-
-                let track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or("").to_string();
-                let track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or("").to_string();
-                let year = tag.get_string(&ItemKey::Year).unwrap_or("").to_string();
-                let mut length = tag.get_string(&ItemKey::Length).unwrap_or("").to_string();
-                let genre = tag.get_string(&ItemKey::Genre).unwrap_or("").to_string();
-                let bitrate = properties.audio_bitrate().unwrap_or(0);
 
                 if let Ok(mut length_number) = length.parse::<u32>() {
                     length_number /= 60;
                     let minutes = length_number / 1000;
                     let seconds = (length_number % 1000) * 6 / 100;
-                    if minutes != 0 && seconds != 0 {
+                    if minutes != 0 || seconds != 0 {
                         length = format!("{}:{:02}", minutes, seconds);
                     } else {
                         length = "".to_string();
