@@ -14,8 +14,9 @@ pub fn connect_button_about(gui_data: &GuiData) {
             dialog.hide();
             Inhibit(true)
         });
+
         about_dialog.connect_response(|dialog, response| {
-            if response == ResponseType::Close {
+            if response == ResponseType::Cancel {
                 dialog.hide();
             }
         });
