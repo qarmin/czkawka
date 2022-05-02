@@ -44,7 +44,7 @@ It is possible to override this, by adding arguments when opening app e.g. `czka
 
 When using additional command line arguments, saving at exit option become disabled, so this current info about directories will not be saved until user save it manually.
 
-Both relative and absolute path are supported, so used can use both `../home` and `/home`.
+Both relative and absolute path are supported, so user can use both `../home` and `/home`.
 
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
