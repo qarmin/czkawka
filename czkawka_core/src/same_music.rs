@@ -372,26 +372,18 @@ impl SameMusic {
 
                 let properties = tagged_file.properties();
 
-                let mut track_title;
-                let mut track_artist;
-                let mut year;
-                let mut length;
-                let mut genre;
+                let mut track_title = "".to_string();
+                let mut track_artist = "".to_string();
+                let mut year = "".to_string();
+                let mut genre = "".to_string();
 
                 let bitrate = properties.audio_bitrate().unwrap_or(0);
+                let mut length = properties.duration().as_millis().to_string();
 
-                let tag = match tagged_file.primary_tag() {
-                    Some(t) => t,
-                    None => {
-                        // println!("File {} don't have valid tag", path);
-                        return Some(Some(music_entry));
-                    }
-                };
-                {
+                if let Some(tag) = tagged_file.primary_tag() {
                     track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or("").to_string();
                     track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or("").to_string();
                     year = tag.get_string(&ItemKey::Year).unwrap_or("").to_string();
-                    length = tag.get_string(&ItemKey::Length).unwrap_or("").to_string();
                     genre = tag.get_string(&ItemKey::Genre).unwrap_or("").to_string();
                 }
 
@@ -411,16 +403,12 @@ impl SameMusic {
                             year = tag_value.to_string();
                         }
                     }
-                    if length.is_empty() {
-                        if let Some(tag_value) = tag.get_string(&ItemKey::Length) {
-                            length = tag_value.to_string();
-                        }
-                    }
                     if genre.is_empty() {
                         if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
                             genre = tag_value.to_string();
                         }
                     }
+                    // println!("{:?}", tag.items());
                 }
 
                 // println!("{:?}", tag.items());
@@ -431,6 +419,9 @@ impl SameMusic {
                     let seconds = (length_number % 1000) * 6 / 100;
                     if minutes != 0 || seconds != 0 {
                         length = format!("{}:{:02}", minutes, seconds);
+                    } else if length_number > 0 {
+                        // That means, that audio have length smaller that second, but length is properly read
+                        length = "0:01".to_string();
                     } else {
                         length = "".to_string();
                     }

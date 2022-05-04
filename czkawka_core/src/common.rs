@@ -86,11 +86,9 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
         }
     };
 
-    let width = raw.width;
-    let height = raw.height;
     let source = ImageSource::Raw(raw);
 
-    let mut pipeline = match Pipeline::new_from_source(source, width, height, true) {
+    let mut pipeline = match Pipeline::new_from_source(source) {
         Ok(pipeline) => pipeline,
         Err(_e) => {
             return None;

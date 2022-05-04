@@ -138,7 +138,7 @@ You can help by creating:
 - Bug reports - memory leaks, unexpected behavior, crashes
 - Feature proposals - proposal to change/add/delete some features
 - Pull Requests - implementing a new feature yourself or fixing bugs.
-  If the change is bigger, then it's a good idea to open a new issue to discuss changes.
+  If the change is bigger, then it's a good idea to open a new issue to discuss changes, but issues with label `PR welcome` are already checked and accepted to implement.
 - Documentation - There is an [instruction](instructions/Instruction.md) which you can improve.
 - Translations - Instruction how to translate files is available [here](instructions/Translations.md)
 
@@ -177,6 +177,8 @@ The program is completely free to use.
 Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
 
 Thanks also to all the people who create patches for this program, make it available on other systems, create videos, articles about it etc.
+
+Also I really appreciate work of people that create crates on which Czkawka basing and for that I try to report bugs to make it even better.
 
 ## Donations
 If you are using the app, I would appreciate a donation for its further development, which can be done [here](https://github.com/sponsors/qarmin).
