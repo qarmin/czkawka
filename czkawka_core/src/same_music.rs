@@ -411,15 +411,13 @@ impl SameMusic {
                     // println!("{:?}", tag.items());
                 }
 
-                // println!("{:?}", tag.items());
-
-                if let Ok(mut length_number) = length.parse::<u32>() {
-                    length_number /= 60;
+                if let Ok(old_length_number) = length.parse::<u32>() {
+                    let length_number = old_length_number / 60;
                     let minutes = length_number / 1000;
                     let seconds = (length_number % 1000) * 6 / 100;
                     if minutes != 0 || seconds != 0 {
                         length = format!("{}:{:02}", minutes, seconds);
-                    } else if length_number > 0 {
+                    } else if old_length_number > 0 {
                         // That means, that audio have length smaller that second, but length is properly read
                         length = "0:01".to_string();
                     } else {

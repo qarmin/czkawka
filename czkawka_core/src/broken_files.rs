@@ -51,7 +51,6 @@ pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
     ArchiveZip,
-    #[cfg(feature = "broken_audio")]
     Audio,
 }
 
@@ -296,7 +295,7 @@ impl BrokenFiles {
                                 continue 'dir;
                             }
 
-                            let type_of_file = check_extension_avaibility(&file_name_lowercase);
+                            let type_of_file = check_extension_availability(&file_name_lowercase);
                             if type_of_file == TypeOfFile::Unknown {
                                 continue 'dir;
                             }
@@ -468,9 +467,8 @@ impl BrokenFiles {
                         },
                         Err(_inspected) => Some(None), // TODO maybe throw error or something
                     },
-                    #[cfg(feature = "broken_audio")]
                     TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
-                        Ok(file) => match rodio::Decoder::new(BufReader::new(file)) {
+                        Ok(file) => match audio_checker::parse_audio_file(file) {
                             Ok(_) => Some(None),
                             Err(e) => {
                                 file_entry.error_string = e.to_string();
@@ -717,21 +715,13 @@ fn get_cache_file() -> String {
     "cache_broken_files.bin".to_string()
 }
 
-fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
+fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
     if IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::Image
     } else if ZIP_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::ArchiveZip
     } else if AUDIO_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-        #[cfg(feature = "broken_audio")]
-        {
-            TypeOfFile::Audio
-        }
-
-        #[cfg(not(feature = "broken_audio"))]
-        {
-            TypeOfFile::Unknown
-        }
+        TypeOfFile::Audio
     } else {
         TypeOfFile::Unknown
     }
