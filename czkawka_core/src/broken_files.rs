@@ -468,12 +468,27 @@ impl BrokenFiles {
                         Err(_inspected) => Some(None), // TODO maybe throw error or something
                     },
                     TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
-                        Ok(file) => match audio_checker::parse_audio_file(file) {
-                            Ok(_) => Some(None),
-                            Err(e) => {
-                                file_entry.error_string = e.to_string();
-                                Some(Some(file_entry))
-                            }
+                        Ok(file) =>
+                            {
+                                let file_entry_clone = file_entry.clone();
+
+                                let result = panic::catch_unwind(|| {
+                                    match audio_checker::parse_audio_file(file) {
+                                        Ok(_) => Some(None),
+                                        Err(e) => {
+                                            file_entry.error_string = e.to_string();
+                                            Some(Some(file_entry))
+                                        }
+                                    }
+                                });
+
+                                if let Ok(audio_result) = result {
+                                    audio_result
+                                } else {
+                                    println!("External parsing audio library crashed when opening \"{:?}\" audio file, please report bug here - https://github.com/qarmin/audio_checker/issues", file_entry_clone.path);
+                                    Some(Some(file_entry_clone))
+                                }
+
                         },
                         Err(_inspected) => Some(None), // TODO maybe throw error or something
                     },

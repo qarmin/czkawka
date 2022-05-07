@@ -10,7 +10,7 @@ env:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
 
