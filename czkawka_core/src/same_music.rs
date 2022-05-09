@@ -320,7 +320,7 @@ impl SameMusic {
             mem::swap(&mut self.music_to_check, &mut non_cached_files_to_check);
         }
 
-        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -358,7 +358,7 @@ impl SameMusic {
             .map(|(path, mut music_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_breaked.store(true, Ordering::Relaxed);
+                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
@@ -456,11 +456,6 @@ impl SameMusic {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        // Check if user aborted search(only from GUI)
-        if check_was_breaked.load(Ordering::Relaxed) {
-            return false;
-        }
-
         // Just connect loaded results with already calculated
         for (_name, file_entry) in records_already_cached {
             vec_file_entry.push(file_entry.clone());
@@ -476,6 +471,11 @@ impl SameMusic {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
             save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+        }
+
+        // Break if stop was clicked after saving to cache
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return false;
         }
 
         Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());

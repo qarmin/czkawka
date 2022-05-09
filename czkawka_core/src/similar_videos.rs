@@ -464,6 +464,7 @@ impl SimilarVideos {
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
@@ -496,7 +497,7 @@ impl SimilarVideos {
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // This will not break
+                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
                 let mut file_entry = file_entry.1.clone();
@@ -549,6 +550,11 @@ impl SimilarVideos {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
             save_hashes_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+        }
+
+        // Break if stop was clicked after saving to cache
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return false;
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files".to_string());

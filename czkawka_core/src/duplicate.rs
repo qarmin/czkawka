@@ -504,7 +504,7 @@ impl DuplicateFinder {
         let check_type = Arc::new(self.hash_type);
 
         let start_time: SystemTime = SystemTime::now();
-        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         //// PROGRESS THREAD START
@@ -597,7 +597,7 @@ impl DuplicateFinder {
                     atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                     for file_entry in vec_file_entry {
                         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                            check_was_breaked.store(true, Ordering::Relaxed);
+                            check_was_stopped.store(true, Ordering::Relaxed);
                             return None;
                         }
                         match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
@@ -618,7 +618,7 @@ impl DuplicateFinder {
             progress_thread_handle.join().unwrap();
 
             // Check if user aborted search(only from GUI)
-            if check_was_breaked.load(Ordering::Relaxed) {
+            if check_was_stopped.load(Ordering::Relaxed) {
                 return false;
             }
 
@@ -761,7 +761,7 @@ impl DuplicateFinder {
                     atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                     for mut file_entry in vec_file_entry {
                         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                            check_was_breaked.store(true, Ordering::Relaxed);
+                            check_was_stopped.store(true, Ordering::Relaxed);
                             return None;
                         }
 
@@ -821,8 +821,8 @@ impl DuplicateFinder {
             progress_thread_run.store(false, Ordering::Relaxed);
             progress_thread_handle.join().unwrap();
 
-            // Check if user aborted search(only from GUI)
-            if check_was_breaked.load(Ordering::Relaxed) {
+            // Break if stop was clicked after saving to cache
+            if check_was_stopped.load(Ordering::Relaxed) {
                 return false;
             }
 

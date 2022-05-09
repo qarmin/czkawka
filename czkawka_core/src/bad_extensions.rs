@@ -242,7 +242,7 @@ impl BadExtensions {
 
         let include_files_without_extension = self.include_files_without_extension;
 
-        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -281,7 +281,7 @@ impl BadExtensions {
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_breaked.store(true, Ordering::Relaxed);
+                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
@@ -377,7 +377,7 @@ impl BadExtensions {
         progress_thread_handle.join().unwrap();
 
         // Break if stop was clicked
-        if check_was_breaked.load(Ordering::Relaxed) {
+        if check_was_stopped.load(Ordering::Relaxed) {
             return false;
         }
 
