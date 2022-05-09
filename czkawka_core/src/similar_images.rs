@@ -535,6 +535,7 @@ impl SimilarImages {
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
@@ -568,6 +569,7 @@ impl SimilarImages {
             .map(|(_s, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
                 let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
@@ -667,6 +669,11 @@ impl SimilarImages {
                 self.hash_alg,
                 self.image_filter,
             );
+        }
+
+        // Break if stop was clicked after saving to cache
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return false;
         }
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());

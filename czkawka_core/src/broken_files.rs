@@ -391,9 +391,9 @@ impl BrokenFiles {
             mem::swap(&mut self.files_to_check, &mut non_cached_files_to_check);
         }
 
-        let check_was_breaked = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
         //// PROGRESS THREAD START
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
@@ -425,7 +425,7 @@ impl BrokenFiles {
             .map(|(_, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_breaked.store(true, Ordering::Relaxed);
+                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
@@ -493,26 +493,16 @@ impl BrokenFiles {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        // Break if stop was clicked
-        if check_was_breaked.load(Ordering::Relaxed) {
-            return false;
-        }
-
         // Just connect loaded results with already calculated
         for (_name, file_entry) in records_already_cached {
             vec_file_entry.push(file_entry.clone());
         }
 
-        self.broken_files = vec_file_entry
-            .iter()
-            .filter_map(|f| if f.error_string.is_empty() { None } else { Some(f.clone()) })
-            .collect();
-
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, FileEntry> = self.files_to_check.clone();
 
-            for file_entry in vec_file_entry {
+            for file_entry in vec_file_entry.clone() {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
             for (_name, file_entry) in loaded_hash_map {
@@ -520,6 +510,16 @@ impl BrokenFiles {
             }
             save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
         }
+
+        // Break if stop was clicked after saving to cache
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return false;
+        }
+
+        self.broken_files = vec_file_entry
+            .into_par_iter()
+            .filter_map(|f| if f.error_string.is_empty() { None } else { Some(f) })
+            .collect();
 
         self.information.number_of_broken_files = self.broken_files.len();
 
