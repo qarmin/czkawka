@@ -1212,7 +1212,7 @@ dependencies = [
  "color_quant",
  "exr",
  "gif",
- "jpeg-decoder 0.2.5",
+ "jpeg-decoder 0.2.6",
  "num-iter",
  "num-rational 0.4.0",
  "num-traits",
@@ -1328,9 +1328,9 @@ dependencies = [
 
 [[package]]
 name = "jpeg-decoder"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be7ef4b99870f0c9f2fc2f20dbef72707e2bcca675bb9196734cf433e999b0c5"
+checksum = "9478aa10f73e7528198d75109c8be5cd7d15fb530238040148d5f9a22d4c5b3b"
 dependencies = [
  "rayon",
 ]
@@ -2550,7 +2550,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7cfada0986f446a770eca461e8c6566cb879682f7d687c8348aa0c857bd52286"
 dependencies = [
  "flate2",
- "jpeg-decoder 0.2.5",
+ "jpeg-decoder 0.2.6",
  "weezl",
 ]
 

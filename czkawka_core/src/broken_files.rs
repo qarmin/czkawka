@@ -430,62 +430,55 @@ impl BrokenFiles {
 
                 match file_entry.type_of_file {
                     TypeOfFile::Image => {
-                        let file_entry_clone = file_entry.clone();
+                        let mut file_entry_clone = file_entry.clone();
 
                         let result = panic::catch_unwind(|| {
-                            match image::open(&file_entry.path) {
-                                Ok(_) => Some(None),
-                                Err(t) => {
-                                    let error_string = t.to_string();
-                                    // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
-                                    if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                                        file_entry.error_string = error_string;
-                                        Some(Some(file_entry))
-                                    } else {
-                                        Some(None)
-                                    }
+                            if let Err(e) = image::open(&file_entry.path){
+                                let error_string = e.to_string();
+                                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
+                                if error_string.contains("spectral selection is not allowed in non-progressive scan") {
+                                    return Some(None);
                                 }
+                                file_entry.error_string = error_string;
                             }
+                            Some(Some(file_entry))
                         });
 
-                        // If image crashed during opening, we just skip checking its hash and go on
+                        // If image crashed during opening, needs to be printed info about crashes thing
                         if let Ok(image_result) = result {
                              image_result
                         } else {
                             println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry_clone.path);
-                             Some(Some(file_entry_clone))
+                            file_entry_clone.error_string = "Image crashes due parsing, please check if problem happens with updated https://github.com/qarmin/ImageOpening and later report here https://github.com/image-rs/image/issues".to_string();
+                            Some(Some(file_entry_clone))
                         }
                     }
                     TypeOfFile::ArchiveZip => match fs::File::open(&file_entry.path) {
-                        Ok(file) => match zip::ZipArchive::new(file) {
-                            Ok(_) => Some(None),
-                            Err(e) => {
-                                // TODO Maybe filter out unnecessary types of errors
+                        Ok(file) => {
+                            if let Err(e) = zip::ZipArchive::new(file){
                                 file_entry.error_string = e.to_string();
-                                Some(Some(file_entry))
                             }
+                            Some(Some(file_entry))
                         },
-                        Err(_inspected) => Some(None), // TODO maybe throw error or something
+                        Err(_inspected) => Some(None)
                     },
                     TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
                         Ok(file) =>
                             {
-                                let file_entry_clone = file_entry.clone();
+                                let mut file_entry_clone = file_entry.clone();
 
                                 let result = panic::catch_unwind(|| {
-                                    match audio_checker::parse_audio_file(file) {
-                                        Ok(_) => Some(None),
-                                        Err(e) => {
-                                            file_entry.error_string = e.to_string();
-                                            Some(Some(file_entry))
-                                        }
+                                    if let Err(e) =  audio_checker::parse_audio_file(file) {
+                                        file_entry.error_string = e.to_string();
                                     }
+                                    Some(Some(file_entry))
                                 });
 
                                 if let Ok(audio_result) = result {
                                     audio_result
                                 } else {
                                     println!("External parsing audio library crashed when opening \"{:?}\" audio file, please report bug here - https://github.com/qarmin/audio_checker/issues", file_entry_clone.path);
+                                    file_entry_clone.error_string = "Audio crashes due parsing, please report bug here - https://github.com/qarmin/audio_checker/issues".to_string();
                                     Some(Some(file_entry_clone))
                                 }
 
@@ -513,7 +506,7 @@ impl BrokenFiles {
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, FileEntry> = self.files_to_check.clone();
+            let mut all_results: BTreeMap<String, FileEntry> = Default::default();
 
             for file_entry in vec_file_entry.clone() {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
