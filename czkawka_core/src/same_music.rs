@@ -14,6 +14,7 @@ use lofty::{read_from_path, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::common::AUDIO_FILES_EXTENSIONS;
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
@@ -21,7 +22,6 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::similar_images::AUDIO_FILES_EXTENSIONS;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -250,7 +250,7 @@ impl SameMusic {
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         if !self.allowed_extensions.using_custom_extensions() {
-            self.allowed_extensions.extend_allowed_extensions(&AUDIO_FILES_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         }
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())

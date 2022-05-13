@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
+use crate::common::VIDEO_FILES_EXTENSIONS;
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -25,7 +26,6 @@ use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::similar_images::VIDEO_FILES_EXTENSIONS;
 
 pub const MAX_TOLERANCE: i32 = 20;
 
@@ -236,7 +236,7 @@ impl SimilarVideos {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
-            self.allowed_extensions.extend_allowed_extensions(&VIDEO_FILES_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         }
 
         // Add root folders for finding

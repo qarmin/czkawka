@@ -9,7 +9,8 @@ use gtk::prelude::*;
 use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
 use crate::flg;
-use czkawka_core::similar_images::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, SIMILAR_VALUES};
+use czkawka_core::common::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;

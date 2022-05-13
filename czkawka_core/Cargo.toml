@@ -32,7 +32,7 @@ futures = "0.3.21"
 
 # Needed by broken files
 zip = { version = "0.6.2", features=["aes-crypto", "bzip2", "deflate", "time"], default-features = false}
-audio_checker = "0.1.0"
+audio_checker = {path = "/home/rafal/test/Symlpp"}
 
 # Hashes for duplicate files
 blake3 = "1.3.1"

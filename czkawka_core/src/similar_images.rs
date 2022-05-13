@@ -18,7 +18,7 @@ use image_hasher::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, LOOP_DURATION};
+use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -26,26 +26,6 @@ use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
-
-pub const RAW_IMAGE_EXTENSIONS: [&str; 24] = [
-    ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
-    ".cr2", ".ari",
-];
-pub const IMAGE_RS_EXTENSIONS: [&str; 13] = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico"];
-
-pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: [&str; 9] = [
-    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", //,".bmp",
-];
-pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: [&str; 10] = [
-    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", //,".bmp", ".ico"
-];
-pub const ZIP_FILES_EXTENSIONS: [&str; 1] = [".zip"];
-
-pub const AUDIO_FILES_EXTENSIONS: [&str; 8] = [".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".aiff", ".pcm"];
-
-pub const VIDEO_FILES_EXTENSIONS: [&str; 16] = [
-    ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
-];
 
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [0, 2, 5, 7, 14, 20],    // 8
@@ -297,8 +277,8 @@ impl SimilarImages {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
-            self.allowed_extensions.extend_allowed_extensions(&IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
-            self.allowed_extensions.extend_allowed_extensions(&RAW_IMAGE_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(RAW_IMAGE_EXTENSIONS);
         }
 
         // Add root folders for finding

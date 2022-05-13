@@ -14,6 +14,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
+use crate::common::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -21,7 +22,6 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::similar_images::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -391,8 +391,6 @@ impl BrokenFiles {
         }
 
         //// PROGRESS THREAD START
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
@@ -424,7 +422,6 @@ impl BrokenFiles {
             .map(|(_, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
@@ -515,11 +512,6 @@ impl BrokenFiles {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
             save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
-        }
-
-        // Break if stop was clicked after saving to cache
-        if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
         }
 
         self.broken_files = vec_file_entry

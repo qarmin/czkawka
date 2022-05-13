@@ -9,6 +9,33 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 /// Class for common functions used across other class/functions
+pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
+    ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
+    ".cr2", ".ari",
+];
+pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
+    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr", ".hdr", "dds",
+];
+
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr", ".hdr", "dds",
+];
+
+pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr", ".hdr", "dds",
+];
+pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
+
+pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
+    ".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".aiff", ".pcm", ".aif", ".aiff", ".aifc", ".m3a", ".mp2", ".mp4a", ".mp2a", ".mpga", ".wave", ".weba",
+    ".wma",
+    /*".ac3",*/
+    /*".oga", https://github.com/Serial-ATA/lofty-rs/issues/47#issuecomment-1120414259*/
+];
+
+pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
+    ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
+];
 
 pub const LOOP_DURATION: u32 = 200; //ms
 
