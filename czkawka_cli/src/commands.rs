@@ -31,7 +31,7 @@ pub enum Commands {
         search_method: CheckingMethod,
         #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
-        #[structopt(short = "ht", long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help = "Hash type (BLAKE3, CRC32, XXH3)")]
+        #[structopt(short = "t", long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help = "Hash type (BLAKE3, CRC32, XXH3)")]
         hash_type: HashType,
         #[structopt(flatten)]
         file_to_save: FileToSave,
