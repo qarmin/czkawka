@@ -24,7 +24,10 @@ pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
     ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr", ".hdr", "dds",
 ];
+
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
+
+pub const PDF_FILES_EXTENSIONS: &[&str] = &[".pdf"];
 
 pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
     ".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".aiff", ".pcm", ".aif", ".aiff", ".aifc", ".m3a", ".mp2", ".mp4a", ".mp2a", ".mpga", ".wave", ".weba",
