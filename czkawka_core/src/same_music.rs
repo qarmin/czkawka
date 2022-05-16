@@ -7,13 +7,14 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime};
-use std::{mem, thread};
+use std::{mem, panic, thread};
 
 use crossbeam_channel::Receiver;
 use lofty::{read_from_path, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::common::AUDIO_FILES_EXTENSIONS;
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
@@ -21,7 +22,6 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::similar_images::AUDIO_FILES_EXTENSIONS;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DeleteMethod {
@@ -250,7 +250,7 @@ impl SameMusic {
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         if !self.allowed_extensions.using_custom_extensions() {
-            self.allowed_extensions.extend_allowed_extensions(&AUDIO_FILES_EXTENSIONS);
+            self.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         }
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
@@ -362,36 +362,43 @@ impl SameMusic {
                     return None;
                 }
 
-                let tagged_file = match read_from_path(&path, true) {
-                    Ok(t) => t,
-                    Err(_inspected) => {
-                        // println!("Failed to open {}", path);
-                        return Some(Some(music_entry));
+                let result = panic::catch_unwind(|| {
+                    match read_from_path(&path, true) {
+                        Ok(t) => Some(t),
+                        Err(_inspected) => {
+                            // println!("Failed to open {}", path);
+                            None
+                        }
+                    }
+                });
+
+                let tagged_file = match result {
+                    Ok(t) => match t {
+                        Some(r) => r,
+                        None => {
+                            return Some(Some(music_entry));
+                        }
+                    },
+                    Err(_) => {
+                        println!("File {} crashed during reading tags, please report bug", path);
+                        return Some(None);
                     }
                 };
 
                 let properties = tagged_file.properties();
 
-                let mut track_title;
-                let mut track_artist;
-                let mut year;
-                let mut length;
-                let mut genre;
+                let mut track_title = "".to_string();
+                let mut track_artist = "".to_string();
+                let mut year = "".to_string();
+                let mut genre = "".to_string();
 
                 let bitrate = properties.audio_bitrate().unwrap_or(0);
+                let mut length = properties.duration().as_millis().to_string();
 
-                let tag = match tagged_file.primary_tag() {
-                    Some(t) => t,
-                    None => {
-                        // println!("File {} don't have valid tag", path);
-                        return Some(Some(music_entry));
-                    }
-                };
-                {
+                if let Some(tag) = tagged_file.primary_tag() {
                     track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or("").to_string();
                     track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or("").to_string();
                     year = tag.get_string(&ItemKey::Year).unwrap_or("").to_string();
-                    length = tag.get_string(&ItemKey::Length).unwrap_or("").to_string();
                     genre = tag.get_string(&ItemKey::Genre).unwrap_or("").to_string();
                 }
 
@@ -411,26 +418,23 @@ impl SameMusic {
                             year = tag_value.to_string();
                         }
                     }
-                    if length.is_empty() {
-                        if let Some(tag_value) = tag.get_string(&ItemKey::Length) {
-                            length = tag_value.to_string();
-                        }
-                    }
                     if genre.is_empty() {
                         if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
                             genre = tag_value.to_string();
                         }
                     }
+                    // println!("{:?}", tag.items());
                 }
 
-                // println!("{:?}", tag.items());
-
-                if let Ok(mut length_number) = length.parse::<u32>() {
-                    length_number /= 60;
+                if let Ok(old_length_number) = length.parse::<u32>() {
+                    let length_number = old_length_number / 60;
                     let minutes = length_number / 1000;
                     let seconds = (length_number % 1000) * 6 / 100;
                     if minutes != 0 || seconds != 0 {
                         length = format!("{}:{:02}", minutes, seconds);
+                    } else if old_length_number > 0 {
+                        // That means, that audio have length smaller that second, but length is properly read
+                        length = "0:01".to_string();
                     } else {
                         length = "".to_string();
                     }

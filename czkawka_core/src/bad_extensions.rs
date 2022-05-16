@@ -21,6 +21,8 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 
+static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak"]; // Such files can have any type inside
+
 // This adds several workarounds for bugs/invalid recognizing types by external libraries
 // ("real_content_extension", "current_file_extension")
 static WORKAROUNDS: &[(&str, &str)] = &[
@@ -43,9 +45,14 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "sys"),
     ("exe", "tlb"),
     ("exe", "vxd"),
-    // Other
-    ("exe", "doc"), // Not sure whe docx is not recognized
     ("exe", "sys"),
+    ("exe", "mod16"),
+    // Other
+    ("zip", "odg"), // Libreoffice
+    ("ods", "ots"), // Libreoffice
+    ("exe", "efi"),
+    ("sh", "sample"), // Git
+    ("exe", "signed"),
     ("gz", "blend"),
     ("gz", "crate"),
     ("gz", "svgz"),
@@ -53,16 +60,28 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("html", "md"),
     ("html", "svg"), // Quite strange, but yes it works
     ("jpg", "jfif"),
+    ("mobi", "azw3"),
     ("obj", "o"),
+    ("obj", "bin"),
     ("odp", "otp"),
     ("odt", "ott"),
     ("ogg", "ogv"),
     ("pptx", "ppsx"),
     ("sh", "bash"),
     ("sh", "py"),
+    ("sh", "pyx"),
+    ("xml", "sopcinfo"), // Quartus
+    ("xml", "bsp"),      // Quartus
+    ("xml", "fb2"),
+    ("xml", "user"), // Qtcreator
     ("sh", "rs"),
+    ("sh", "pl"),   // Gnome/Linux
+    ("sh", "pm"),   // Gnome/Linux
+    ("xml", "cbp"), // CodeBlocks config
     ("xml", "cmb"),
+    ("xml", "cfg"),
     ("xml", "conf"),
+    ("xml", "config"),
     ("xml", "dae"),
     ("xml", "docbook"),
     ("xml", "gir"),
@@ -71,16 +90,29 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "kdenlive"),
     ("xml", "lang"),
     ("xml", "svg"),
-    ("xml", "ui"),
-    ("xml", "vcproj"),
+    ("xml", "ui"),     // Cambalache, Glade
+    ("xml", "vcproj"), // VisualStudio
+    ("xml", "iml"),    // Intelij Idea
+    ("xml", "manifest"),
+    ("xml", "xcd"), // Libreoffice files
+    ("xml", "policy"),
+    ("xml", "qsys"), // Quartus
+    ("xml", "xba"),  // Libreoffice
     ("zip", "apk"),
+    ("zip", "doc"),
+    ("zip", "docx"),
     ("zip", "dat"),
-    ("zip", "jar"),
-    ("zip", "kra"),
+    ("zip", "jar"), // Java
+    ("zip", "kra"), // Krita
     ("zip", "nupkg"),
     ("zip", "pptx"),
     ("zip", "whl"),
     ("zip", "xpi"),
+    ("zip", "zcos"),
+    ("zip", "cbr"), // Komiksy
+    // Probably bug in external library
+    ("exe", "doc"), // Not sure whe doc is not recognized
+    ("exe", "xls"), // Not sure whe xls is not recognized
 ];
 
 #[derive(Clone)]
@@ -285,8 +317,6 @@ impl BadExtensions {
                     return None;
                 }
 
-                let current_extension;
-
                 // Check what exactly content file contains
                 let kind = match infer::get_from_path(&file_entry.path) {
                     Ok(k) => match k {
@@ -298,8 +328,12 @@ impl BadExtensions {
                 let proper_extension = kind.extension();
 
                 // Extract current extension from file
+                let current_extension;
                 if let Some(extension) = file_entry.path.extension() {
                     let extension = extension.to_string_lossy().to_lowercase();
+                    if DISABLED_EXTENSIONS.contains(&extension.as_str()) {
+                        return Some(None);
+                    }
                     // Text longer than 10 characters is not considered as extension
                     if extension.len() > 10 {
                         current_extension = "".to_string();
@@ -335,7 +369,7 @@ impl BadExtensions {
                             }
                         }
 
-                        let mut guessed_multiple_extensions = "".to_string();
+                        let mut guessed_multiple_extensions = format!("({}) - ", proper_extension);
                         for ext in &all_available_extensions {
                             guessed_multiple_extensions.push_str(ext);
                             guessed_multiple_extensions.push(',');

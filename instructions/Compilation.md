@@ -9,7 +9,7 @@ FFmpeg is not included here, because is not needed to build because it is dynami
 
 | Program | Min  | What for                                                                      |
 |---------|------|-------------------------------------------------------------------------------|
-| Rust    | 1.57 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04 |
+| Rust    | 1.60 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04 |
 | GTK     | 3.24 | Only for the `GTK` backend                                                    |
 
 #### Debian / Ubuntu

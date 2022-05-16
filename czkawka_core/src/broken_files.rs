@@ -10,10 +10,13 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, panic, thread};
 
 use crossbeam_channel::Receiver;
+use pdf::PdfError;
+use pdf::PdfError::Try;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{open_cache_folder, Common, LOOP_DURATION};
+use crate::common::{open_cache_folder, Common, LOOP_DURATION, PDF_FILES_EXTENSIONS};
+use crate::common::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -21,7 +24,6 @@ use crate::common_messages::Messages;
 use crate::common_traits::*;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::similar_images::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -51,8 +53,8 @@ pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
     ArchiveZip,
-    #[cfg(feature = "broken_audio")]
     Audio,
+    PDF,
 }
 
 /// Info struck with helpful information's about results
@@ -296,7 +298,7 @@ impl BrokenFiles {
                                 continue 'dir;
                             }
 
-                            let type_of_file = check_extension_avaibility(&file_name_lowercase);
+                            let type_of_file = check_extension_availability(&file_name_lowercase);
                             if type_of_file == TypeOfFile::Unknown {
                                 continue 'dir;
                             }
@@ -392,8 +394,6 @@ impl BrokenFiles {
         }
 
         //// PROGRESS THREAD START
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
@@ -425,60 +425,100 @@ impl BrokenFiles {
             .map(|(_, mut file_entry)| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
                 match file_entry.type_of_file {
                     TypeOfFile::Image => {
-                        let file_entry_clone = file_entry.clone();
+                        let mut file_entry_clone = file_entry.clone();
 
                         let result = panic::catch_unwind(|| {
-                            match image::open(&file_entry.path) {
-                                Ok(_) => Some(None),
-                                Err(t) => {
-                                    let error_string = t.to_string();
-                                    // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
-                                    if !error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                                        file_entry.error_string = error_string;
-                                        Some(Some(file_entry))
-                                    } else {
-                                        Some(None)
-                                    }
+                            if let Err(e) = image::open(&file_entry.path) {
+                                let error_string = e.to_string();
+                                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
+                                if error_string.contains("spectral selection is not allowed in non-progressive scan") {
+                                    return Some(None);
                                 }
+                                file_entry.error_string = error_string;
                             }
+                            Some(Some(file_entry))
                         });
 
-                        // If image crashed during opening, we just skip checking its hash and go on
+                        // If image crashed during opening, needs to be printed info about crashes thing
                         if let Ok(image_result) = result {
-                             image_result
+                            image_result
                         } else {
                             println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry_clone.path);
-                             Some(Some(file_entry_clone))
+                            file_entry_clone.error_string = "Image crashes due parsing, please check if problem happens with updated https://github.com/qarmin/ImageOpening and later report here https://github.com/image-rs/image/issues".to_string();
+                            Some(Some(file_entry_clone))
                         }
                     }
                     TypeOfFile::ArchiveZip => match fs::File::open(&file_entry.path) {
-                        Ok(file) => match zip::ZipArchive::new(file) {
-                            Ok(_) => Some(None),
-                            Err(e) => {
-                                // TODO Maybe filter out unnecessary types of errors
+                        Ok(file) => {
+                            if let Err(e) = zip::ZipArchive::new(file) {
                                 file_entry.error_string = e.to_string();
-                                Some(Some(file_entry))
                             }
+                            Some(Some(file_entry))
                         },
-                        Err(_inspected) => Some(None), // TODO maybe throw error or something
+                        Err(_inspected) => Some(None)
                     },
-                    #[cfg(feature = "broken_audio")]
                     TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
-                        Ok(file) => match rodio::Decoder::new(BufReader::new(file)) {
-                            Ok(_) => Some(None),
-                            Err(e) => {
-                                file_entry.error_string = e.to_string();
-                                Some(Some(file_entry))
-                            }
-                        },
+                        Ok(file) =>
+                            {
+                                let mut file_entry_clone = file_entry.clone();
+
+                                let result = panic::catch_unwind(|| {
+                                    if let Err(e) = audio_checker::parse_audio_file(file) {
+                                        file_entry.error_string = e.to_string();
+                                    }
+                                    Some(Some(file_entry))
+                                });
+
+                                if let Ok(audio_result) = result {
+                                    audio_result
+                                } else {
+                                    println!("External parsing audio library crashed when opening \"{:?}\" audio file, please report bug here - https://github.com/qarmin/audio_checker/issues", file_entry_clone.path);
+                                    file_entry_clone.error_string = "Audio crashes due parsing, please report bug here - https://github.com/qarmin/audio_checker/issues".to_string();
+                                    Some(Some(file_entry_clone))
+                                }
+                            },
                         Err(_inspected) => Some(None), // TODO maybe throw error or something
                     },
+
+                    TypeOfFile::PDF => {
+                        match fs::read(&file_entry.path) {
+                            Ok(content) => {
+                                // Will be available in pdf > 0.7.2
+                                // let parser_options = ParseOptions {
+                                //     allow_error_in_option: true,
+                                //     allow_xref_error: true,
+                                //     allow_invalid_ops: true,
+                                //     allow_missing_endobj: true,
+                                // };
+                                // if let Err(e) = pdf::file::File::from_data_with_options(content, parser_options) {
+
+                                let mut file_entry_clone = file_entry.clone();
+                                let result = panic::catch_unwind(|| {
+                                    if let Err(e) = pdf::file::File::from_data(content) {
+                                        file_entry.error_string = e.to_string();
+                                        let error = unpack_pdf_error(e);
+                                        if let pdf::PdfError::InvalidPassword = error {
+                                            return Some(None);
+                                        }
+                                    }
+                                    Some(Some(file_entry))
+                                });
+                                if let Ok(pdf_result) = result {
+                                    pdf_result
+                                } else {
+                                    println!("PDF-rs library crashed when opening \"{:?}\" pdf, and if it is not reported, please report bug here - https://github.com/pdf-rs/pdf", file_entry_clone.path);
+                                    file_entry_clone.error_string = "PDF-rs library crashed when opening pdf, and if it is not reported, please report bug here - https://github.com/pdf-rs/pdf".to_string();
+                                    Some(Some(file_entry_clone))
+                                }
+                            },
+                            Err(_inspected) => Some(None)
+                        }
+                    }
 
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
                     TypeOfFile::Unknown => Some(None),
@@ -500,7 +540,7 @@ impl BrokenFiles {
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, FileEntry> = self.files_to_check.clone();
+            let mut all_results: BTreeMap<String, FileEntry> = Default::default();
 
             for file_entry in vec_file_entry.clone() {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
@@ -509,11 +549,6 @@ impl BrokenFiles {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
             save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
-        }
-
-        // Break if stop was clicked after saving to cache
-        if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
         }
 
         self.broken_files = vec_file_entry
@@ -717,22 +752,31 @@ fn get_cache_file() -> String {
     "cache_broken_files.bin".to_string()
 }
 
-fn check_extension_avaibility(file_name_lowercase: &str) -> TypeOfFile {
+fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
     if IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::Image
     } else if ZIP_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::ArchiveZip
     } else if AUDIO_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-        #[cfg(feature = "broken_audio")]
-        {
-            TypeOfFile::Audio
-        }
-
-        #[cfg(not(feature = "broken_audio"))]
-        {
-            TypeOfFile::Unknown
-        }
+        TypeOfFile::Audio
+    } else if PDF_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
+        TypeOfFile::PDF
     } else {
         TypeOfFile::Unknown
+    }
+}
+
+fn unpack_pdf_error(e: PdfError) -> PdfError {
+    if let Try {
+        file: _,
+        line: _,
+        column: _,
+        // context: _,
+        source,
+    } = e
+    {
+        unpack_pdf_error(*source)
+    } else {
+        e
     }
 }

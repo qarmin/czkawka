@@ -102,7 +102,8 @@ Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
   By default for all files grouped by same size are computed partial hash(hash from only of 2KB each file). Such hash is computed usually very fast, especially on SSD and fast multicore processors. But when scanning a hundred of thousands or millions of files with HDD or slow processor, usually this step can take much time. In settings exists option `Use prehash cache` which enables caching such things. It is disabled by default because can increase time of loading/saving cache, with big number of entries.
 - **Permanent store of cache entries**  
   After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed. This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again. In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled. Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
-
+- **Partial scanning**
+  If you know that you can't scan all files at once, you can still try to scan all files and during scan just stop it, so already calculated hashes/data will be saved to cache and will speedup later scans.
 
 # Tools
 
@@ -272,3 +273,7 @@ It works in this way:
 - Returns all file extensions that are connected to this mime type e.g. `rar,7z,zip,p7`
 - Basing on file extension, adds more elements to list from above(needed because some files e.g. `exe` and `dll` begins with similar/same bytes)
 - If current file extensions is inside list then probably have proper extension, if is not inside, then is shown as file with invalid extension
+
+In `Proper Extension` column, inside parentheses is visible extension guessed by Infer library, and outside there are extensions which have same mime type as guessed one. 
+![ABC](https://user-images.githubusercontent.com/41945903/167214811-7d811829-6dba-4da0-9788-9e2f780e7279.png)
+

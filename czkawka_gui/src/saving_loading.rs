@@ -58,9 +58,9 @@ const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*
 const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*";
 
 #[cfg(target_family = "unix")]
-const DEFAULT_EXCLUDED_DIRECTORIES: [&str; 5] = ["/proc", "/dev", "/sys", "/run", "/snap"];
+const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
 #[cfg(not(target_family = "unix"))]
-const DEFAULT_EXCLUDED_DIRECTORIES: [&str; 1] = ["C:\\Windows"];
+const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
 struct LoadSaveStruct {
     loaded_items: HashMap<String, Vec<String>>,
