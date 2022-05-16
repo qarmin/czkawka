@@ -20,12 +20,12 @@ directories-next = "2.0.0"
 # Needed by similar images
 image_hasher = "1.0.0"
 bk-tree = "0.4.0"
-image = "0.24.1"
+image = "0.24.2"
 hamming = "0.1.3"
 
 # Needed by same music
 bitflags = "1.3.2"
-lofty="0.6.0"
+lofty="0.6.2"
 
 # Futures - needed by async progress sender
 futures = "0.3.21"
@@ -38,7 +38,7 @@ pdf = "0.7.2"
 # Hashes for duplicate files
 blake3 = "1.3.1"
 crc32fast = "1.3.2"
-xxhash-rust = { version = "0.8.4", features = ["xxh3"] }
+xxhash-rust = { version = "0.8.5", features = ["xxh3"] }
 
 tempfile = "3.3.0"
 
@@ -47,9 +47,9 @@ vid_dup_finder_lib = "0.1.0"
 ffmpeg_cmdline_utils = "0.1.1"
 
 # Saving/Loading Cache
-serde = "1.0.136"
+serde = "1.0.137"
 bincode = "1.3.3"
-serde_json = "1.0.79"
+serde_json = "1.0.81"
 
 # Language
 i18n-embed = { version = "0.13.4", features = ["fluent-system", "desktop-requester"] }
@@ -63,4 +63,4 @@ imagepipe = "0.5.0"
 
 # Checking for invalid extensions
 mime_guess = "2.0.4"
-infer = "0.7.0"
+infer = "0.8.0"

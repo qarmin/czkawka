@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime};
-use std::{mem, thread};
+use std::{mem, panic, thread};
 
 use crossbeam_channel::Receiver;
 use lofty::{read_from_path, AudioFile, ItemKey};
@@ -362,11 +362,26 @@ impl SameMusic {
                     return None;
                 }
 
-                let tagged_file = match read_from_path(&path, true) {
-                    Ok(t) => t,
-                    Err(_inspected) => {
-                        // println!("Failed to open {}", path);
-                        return Some(Some(music_entry));
+                let result = panic::catch_unwind(|| {
+                    match read_from_path(&path, true) {
+                        Ok(t) => Some(t),
+                        Err(_inspected) => {
+                            // println!("Failed to open {}", path);
+                            None
+                        }
+                    }
+                });
+
+                let tagged_file = match result {
+                    Ok(t) => match t {
+                        Some(r) => r,
+                        None => {
+                            return Some(Some(music_entry));
+                        }
+                    },
+                    Err(_) => {
+                        println!("File {} crashed during reading tags, please report bug", path);
+                        return Some(None);
                     }
                 };
 
