@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::thread;
 
 use glib::Sender;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
@@ -168,7 +168,7 @@ pub fn connect_button_search(
                 image_preview_duplicates.hide();
 
                 label_stage.show();
-                grid_progress_stages.show_all();
+                grid_progress_stages.show();
                 window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_duplicate_finder).clear();
@@ -298,7 +298,7 @@ pub fn connect_button_search(
                 image_preview_similar_images.hide();
 
                 label_stage.show();
-                grid_progress_stages.show_all();
+                grid_progress_stages.show();
                 window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_similar_images_finder).clear();
@@ -348,7 +348,7 @@ pub fn connect_button_search(
             }
             NotebookMainEnum::SimilarVideos => {
                 label_stage.show();
-                grid_progress_stages.show_all();
+                grid_progress_stages.show();
                 window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_similar_videos_finder).clear();
@@ -383,7 +383,7 @@ pub fn connect_button_search(
             }
             NotebookMainEnum::SameMusic => {
                 label_stage.show();
-                grid_progress_stages.show_all();
+                grid_progress_stages.show();
                 window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_same_music_finder).clear();
@@ -487,7 +487,7 @@ pub fn connect_button_search(
             }
             NotebookMainEnum::BadExtensions => {
                 label_stage.show();
-                grid_progress_stages.show_all();
+                grid_progress_stages.show();
                 window_progress.resize(1, 1);
 
                 get_list_store(&tree_view_bad_extensions).clear();

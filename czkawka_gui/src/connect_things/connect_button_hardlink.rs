@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, ResponseType, TextView, TreeIter, TreePath};
 
 use crate::flg;
@@ -201,7 +201,6 @@ fn hardlink_symlink(
     if hardlinking == TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
             for (counter, file_to_hardlink) in symhardlink_data.files_to_symhardlink.into_iter().enumerate() {
-                handle_gtk_pending_event_counter(counter);
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
@@ -211,7 +210,6 @@ fn hardlink_symlink(
     } else {
         for symhardlink_data in vec_symhardlink_data {
             for (counter, file_to_symlink) in symhardlink_data.files_to_symhardlink.into_iter().enumerate() {
-                handle_gtk_pending_event_counter(counter);
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,
@@ -282,7 +280,7 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     internal_box.append(&label2);
     internal_box.append(&label3);
 
-    dialog.show_all();
+    dialog.show();
     dialog
 }
 
@@ -390,6 +388,6 @@ fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckBu
     internal_box.append(&label);
     internal_box.append(&check_button);
 
-    dialog.show_all();
+    dialog.show();
     (dialog, check_button)
 }

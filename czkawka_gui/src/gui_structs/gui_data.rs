@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crossbeam_channel::bounded;
 use czkawka_core::bad_extensions::BadExtensions;
 use gdk4::gdk_pixbuf::Pixbuf;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::Builder;
 
 use crate::flg;
@@ -113,11 +113,11 @@ impl GuiData {
 
         //// Windows
         let window_main: gtk4::Window = builder.object("window_main").unwrap();
-        window_main.set_title(&flg!("window_main_title"));
-        window_main.show_all();
+        window_main.set_title(Some(&flg!("window_main_title")));
+        window_main.show();
 
         let pixbuf = Pixbuf::from_read(std::io::BufReader::new(&ICON_ABOUT[..])).unwrap();
-        window_main.set_icon(Some(&pixbuf));
+        // window_main.set_icon(Some(&pixbuf)); // TODO
 
         window_main.set_application(Some(application));
 
@@ -174,7 +174,7 @@ impl GuiData {
         //// Bottom
         let text_view_errors: gtk4::TextView = builder.object("text_view_errors").unwrap();
         let scrolled_window_errors: gtk4::ScrolledWindow = builder.object("scrolled_window_errors").unwrap();
-        scrolled_window_errors.show_all(); // Not sure why needed, but without it text view errors sometimes hide itself
+        scrolled_window_errors.show(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
         let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = bounded(1);
@@ -215,7 +215,7 @@ impl GuiData {
     }
 
     pub fn update_language(&self) {
-        self.window_main.set_title(&flg!("window_main_title"));
+        self.window_main.set_title(Some(&flg!("window_main_title")));
 
         self.main_notebook.update_language();
         self.upper_notebook.update_language();

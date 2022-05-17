@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use czkawka_core::bad_extensions::BadExtensions;
-use gtk4::prelude::*;use gtk4::Inhibit;
-use gtk4::{ ListStore, TextView, TreeView, Widget};
+use gtk4::prelude::*;
+use gtk4::{ListStore, TextView, TreeView, Widget};
 
 use crate::flg;
 use czkawka_core::big_file::BigFile;
@@ -805,21 +805,6 @@ pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::I
         }
     }
     panic!("Button doesn't have proper custom label child");
-}
-
-pub fn handle_gtk_pending_event() -> bool {
-    let have_pending = gtk4::events_pending();
-    if have_pending {
-        gtk4::main_iteration();
-    }
-    have_pending
-}
-
-pub fn handle_gtk_pending_event_counter(counter: usize) -> bool {
-    if counter > 0 && (counter % CHECK_GTK_EVENTS_INTERVAL) == 0 {
-        return handle_gtk_pending_event();
-    }
-    false
 }
 
 // GTK 4

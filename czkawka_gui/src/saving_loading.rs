@@ -7,7 +7,7 @@ use std::{env, fs};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use directories_next::ProjectDirs;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView};
 
 use crate::flg;

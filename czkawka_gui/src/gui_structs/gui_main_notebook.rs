@@ -1,6 +1,6 @@
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{EventControllerKey, TreeView};
 
 use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
@@ -338,14 +338,14 @@ impl GuiMainNotebook {
     }
 
     pub fn update_language(&self) {
-        self.check_button_duplicate_case_sensitive_name.set_label(&flg!("duplicate_case_sensitive_name"));
-        self.check_button_music_title.set_label(&flg!("music_title_checkbox"));
-        self.check_button_music_artist.set_label(&flg!("music_artist_checkbox"));
-        self.check_button_music_year.set_label(&flg!("music_year_checkbox"));
-        self.check_button_music_bitrate.set_label(&flg!("music_bitrate_checkbox"));
-        self.check_button_music_genre.set_label(&flg!("music_genre_checkbox"));
-        self.check_button_music_length.set_label(&flg!("music_length_checkbox"));
-        self.check_button_music_approximate_comparison.set_label(&flg!("music_comparison_checkbox"));
+        self.check_button_duplicate_case_sensitive_name.set_label(Some(&flg!("duplicate_case_sensitive_name")));
+        self.check_button_music_title.set_label(Some(&flg!("music_title_checkbox")));
+        self.check_button_music_artist.set_label(Some(&flg!("music_artist_checkbox")));
+        self.check_button_music_year.set_label(Some(&flg!("music_year_checkbox")));
+        self.check_button_music_bitrate.set_label(Some(&flg!("music_bitrate_checkbox")));
+        self.check_button_music_genre.set_label(Some(&flg!("music_genre_checkbox")));
+        self.check_button_music_length.set_label(Some(&flg!("music_length_checkbox")));
+        self.check_button_music_approximate_comparison.set_label(Some(&flg!("music_comparison_checkbox")));
 
         self.check_button_music_approximate_comparison
             .set_tooltip_text(Some(&flg!("music_comparison_checkbox_tooltip")));
@@ -382,10 +382,10 @@ impl GuiMainNotebook {
             .set_tooltip_text(Some(&flg!("check_button_general_same_size_tooltip")));
         self.check_button_video_ignore_same_size
             .set_tooltip_text(Some(&flg!("check_button_general_same_size_tooltip")));
-        self.check_button_image_ignore_same_size.set_label(&flg!("check_button_general_same_size"));
-        self.check_button_video_ignore_same_size.set_label(&flg!("check_button_general_same_size"));
+        self.check_button_image_ignore_same_size.set_label(Some(&flg!("check_button_general_same_size")));
+        self.check_button_video_ignore_same_size.set_label(Some(&flg!("check_button_general_same_size")));
 
-        self.check_button_image_fast_compare.set_label(&flg!("main_notebook_image_fast_compare"));
+        self.check_button_image_fast_compare.set_label(Some(&flg!("main_notebook_image_fast_compare")));
         self.check_button_image_fast_compare
             .set_tooltip_text(Some(&flg!("main_notebook_image_fast_compare_tooltip")));
 

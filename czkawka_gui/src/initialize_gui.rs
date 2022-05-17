@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::gdk_pixbuf::InterpType;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
 use crate::flg;

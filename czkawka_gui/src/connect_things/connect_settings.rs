@@ -3,7 +3,7 @@ use std::default::Default;
 
 use directories_next::ProjectDirs;
 use gtk4::builders::LabelBuilder;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{ResponseType, Window};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
@@ -97,7 +97,7 @@ pub fn connect_settings(gui_data: &GuiData) {
 
             button_settings_duplicates_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(flg!("cache_clear_duplicates_title"), &settings_window);
-                dialog.show_all();
+                dialog.show();
 
                 let text_view_errors = text_view_errors.clone();
                 let entry_settings_cache_file_minimal_size = entry_settings_cache_file_minimal_size.clone();
@@ -139,7 +139,7 @@ pub fn connect_settings(gui_data: &GuiData) {
 
             button_settings_similar_images_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(flg!("cache_clear_similar_images_title"), &settings_window);
-                dialog.show_all();
+                dialog.show();
 
                 let text_view_errors = text_view_errors.clone();
 
@@ -178,7 +178,7 @@ pub fn connect_settings(gui_data: &GuiData) {
 
             button_settings_similar_videos_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(flg!("cache_clear_similar_videos_title"), &settings_window);
-                dialog.show_all();
+                dialog.show();
 
                 let text_view_errors = text_view_errors.clone();
 

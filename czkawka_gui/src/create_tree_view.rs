@@ -1,4 +1,4 @@
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::TreeViewColumn;
 
 use crate::help_functions::*;

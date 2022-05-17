@@ -1,5 +1,5 @@
-use gtk4::prelude::*;use gtk4::Inhibit;
-use gtk4::{ Widget};
+use gtk4::prelude::*;
+use gtk4::Widget;
 
 use crate::help_functions::{get_custom_label_from_button_with_image, set_icon_of_button, set_icon_of_menubutton, BottomButtonsEnum};
 use crate::{

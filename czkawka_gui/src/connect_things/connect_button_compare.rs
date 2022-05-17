@@ -1,6 +1,6 @@
 use crate::flg;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -540,7 +540,7 @@ fn populate_similar_scrolled_view(
         all_gtk_box.append(&small_box);
     }
 
-    all_gtk_box.show_all();
+    all_gtk_box.show();
     scrolled_window.append(&all_gtk_box);
 }
 

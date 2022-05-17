@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{ResponseType, TreeView, Window};
 
 use crate::flg;
@@ -96,7 +96,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
     file_chooser.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     file_chooser.set_select_multiple(true);
-    file_chooser.show_all();
+    file_chooser.show();
 
     let tree_view = tree_view.clone();
     file_chooser.connect_response(move |file_chooser, response_type| {
@@ -151,7 +151,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
 
     get_dialog_box_child(&dialog).append(&entry);
 
-    dialog.show_all();
+    dialog.show();
 
     let tree_view = tree_view.clone();
     dialog.connect_response(move |dialog, response_type| {

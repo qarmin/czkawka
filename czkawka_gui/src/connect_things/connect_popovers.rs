@@ -1,4 +1,4 @@
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{ResponseType, TreeIter, Window};
 use regex::Regex;
 
@@ -360,7 +360,7 @@ fn popover_custom_select_unselect(
             let box_widget = get_dialog_box_child(&dialog);
             box_widget.append(&grid);
 
-            dialog.show_all();
+            dialog.show();
         }
 
         let tree_view = tree_view.clone();

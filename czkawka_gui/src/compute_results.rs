@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use chrono::NaiveDateTime;
 use glib::Receiver;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use humansize::{file_size_opts as options, FileSize};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
@@ -81,9 +81,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if df.get_use_reference() {
-                        tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                        tree_view_duplicate_finder.selection().set_select_function(select_function_always_true);
                     } else {
-                        tree_view_duplicate_finder.selection().set_select_function(Some(Box::new(select_function_duplicates)));
+                        tree_view_duplicate_finder.selection().set_select_function(select_function_duplicates);
                     }
 
                     let information = df.get_information();
@@ -782,11 +782,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if sf.get_use_reference() {
-                        tree_view_similar_images_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                        tree_view_similar_images_finder.selection().set_select_function(select_function_always_true);
                     } else {
-                        tree_view_similar_images_finder
-                            .selection()
-                            .set_select_function(Some(Box::new(select_function_similar_images)));
+                        tree_view_similar_images_finder.selection().set_select_function(select_function_similar_images);
                     }
                     let information = sf.get_information();
                     let text_messages = sf.get_text_messages();
@@ -966,11 +964,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if ff.get_use_reference() {
-                        tree_view_similar_videos_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                        tree_view_similar_videos_finder.selection().set_select_function(select_function_always_true);
                     } else {
-                        tree_view_similar_videos_finder
-                            .selection()
-                            .set_select_function(Some(Box::new(select_function_similar_videos)));
+                        tree_view_similar_videos_finder.selection().set_select_function(select_function_similar_videos);
                     }
                     let information = ff.get_information();
                     let text_messages = ff.get_text_messages();
@@ -1135,9 +1131,9 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     entry_info.set_text(&flg!("compute_stopped_by_user"));
                 } else {
                     if mf.get_use_reference() {
-                        tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_always_true)));
+                        tree_view_same_music_finder.selection().set_select_function(select_function_always_true);
                     } else {
-                        tree_view_same_music_finder.selection().set_select_function(Some(Box::new(select_function_same_music)));
+                        tree_view_same_music_finder.selection().set_select_function(select_function_same_music);
                     }
 
                     let information = mf.get_information();

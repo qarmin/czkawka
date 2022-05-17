@@ -1,5 +1,5 @@
 use gdk4::gdk_pixbuf::Pixbuf;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{Builder, Window};
 
 use crate::flg;

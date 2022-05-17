@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
 
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, ResponseType, TextView};
 
 use crate::flg;
@@ -165,10 +165,10 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
     internal_box.append(&label);
     internal_box.append(&label2);
     internal_box.append(&check_button);
-    internal_box.set_margin(5);
+    // internal_box.set_margin(5); // TODO
     check_button.set_margin_top(5);
 
-    dialog.show_all();
+    dialog.show();
     (dialog, check_button)
 }
 
@@ -194,7 +194,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
     internal_box.append(&label2);
     internal_box.append(&check_button);
 
-    dialog.show_all();
+    dialog.show();
     (dialog, check_button)
 }
 
@@ -276,7 +276,7 @@ pub fn empty_folder_remover(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>().unwrap() {
+            if model.get(&iter, column_selection).get::<bool>() {
                 selected_rows.push(model.path(&iter));
             }
             if !model.iter_next(&iter) {
@@ -293,7 +293,6 @@ pub fn empty_folder_remover(
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
-        handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.get(&iter, column_file_name).get::<String>().unwrap();
@@ -410,7 +409,6 @@ pub fn basic_remove(
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
-        handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.get(&iter, column_file_name).get::<String>().unwrap();
@@ -506,13 +504,10 @@ pub fn tree_remove(
     }
 
     // Delete duplicated entries, and remove real files
-    let mut counter = 0_usize;
     for (path, mut vec_file_name) in map_with_path_to_delete {
         vec_file_name.sort();
         vec_file_name.dedup();
         for file_name in vec_file_name {
-            handle_gtk_pending_event_counter(counter);
-            counter += 1;
             if !use_trash {
                 if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
                     messages += flg!(

@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
 
 use crate::flg;
@@ -85,7 +85,7 @@ fn move_things(
     chooser.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     chooser.set_select_multiple(false);
-    chooser.show_all();
+    chooser.show();
 
     let entry_info = entry_info.clone();
     let text_view_errors = text_view_errors.clone();
@@ -225,7 +225,6 @@ fn move_files_common(
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
     'next_result: for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
-        handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
         let file_name = model.get(&iter, column_file_name).get::<String>().unwrap();

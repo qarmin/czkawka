@@ -1,5 +1,4 @@
 use crossbeam_channel::{Sender, TrySendError};
-use gtk4::prelude::*;use gtk4::Inhibit;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::KEY_ENTER;

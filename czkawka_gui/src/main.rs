@@ -6,8 +6,9 @@
 #![allow(clippy::needless_late_init)]
 
 use gtk4::gio::ApplicationFlags;
-use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::prelude::*;
 use gtk4::Application;
+use gtk4::Inhibit;
 use std::env;
 use std::ffi::OsString;
 
