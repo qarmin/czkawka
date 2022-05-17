@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::thread;
 
 use glib::Sender;
-use gtk::prelude::*;
+use gtk4::prelude::*;use gtk4::Inhibit;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
@@ -55,13 +55,13 @@ pub fn connect_button_search(
     let buttons_names = gui_data.bottom_buttons.buttons_names;
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let check_button_duplicates_use_prehash_cache = gui_data.settings.check_button_duplicates_use_prehash_cache.clone();
-    let check_button_duplicate_case_sensitive_name: gtk::CheckButton = gui_data.main_notebook.check_button_duplicate_case_sensitive_name.clone();
-    let check_button_music_artist: gtk::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
-    let check_button_music_title: gtk::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
-    let check_button_music_year: gtk::CheckButton = gui_data.main_notebook.check_button_music_year.clone();
-    let check_button_music_genre: gtk::CheckButton = gui_data.main_notebook.check_button_music_genre.clone();
-    let check_button_music_length: gtk::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
-    let check_button_music_bitrate: gtk::CheckButton = gui_data.main_notebook.check_button_music_bitrate.clone();
+    let check_button_duplicate_case_sensitive_name: gtk4::CheckButton = gui_data.main_notebook.check_button_duplicate_case_sensitive_name.clone();
+    let check_button_music_artist: gtk4::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
+    let check_button_music_title: gtk4::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
+    let check_button_music_year: gtk4::CheckButton = gui_data.main_notebook.check_button_music_year.clone();
+    let check_button_music_genre: gtk4::CheckButton = gui_data.main_notebook.check_button_music_genre.clone();
+    let check_button_music_length: gtk4::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
+    let check_button_music_bitrate: gtk4::CheckButton = gui_data.main_notebook.check_button_music_bitrate.clone();
     let check_button_recursive = gui_data.upper_notebook.check_button_recursive.clone();
     let check_button_settings_duplicates_delete_outdated_cache = gui_data.settings.check_button_settings_duplicates_delete_outdated_cache.clone();
     let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();

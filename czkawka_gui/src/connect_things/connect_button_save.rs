@@ -2,8 +2,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use gtk::prelude::*;
-use gtk::{Button, Entry};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{Button, Entry};
 
 use crate::flg;
 use czkawka_core::common_traits::SaveResults;

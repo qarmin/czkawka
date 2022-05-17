@@ -1,6 +1,6 @@
 use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
-use gtk::prelude::*;
+use gtk4::prelude::*;use gtk4::Inhibit;
 
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::{big_file, broken_files, common_dir_traversal, similar_images, similar_videos, temporary};

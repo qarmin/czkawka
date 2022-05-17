@@ -1,5 +1,5 @@
-use gtk::prelude::*;
-use gtk::{ResponseType, TreeIter, Window};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{ResponseType, TreeIter, Window};
 use regex::Regex;
 
 use czkawka_core::common::Common;
@@ -11,13 +11,13 @@ use crate::help_functions::*;
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
-fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
+fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         if let Some(column_color) = column_color {
             loop {
-                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
                     model.set_value(&iter, column_button_selection, &true.to_value());
                 }
                 if !model.iter_next(&iter) {
@@ -37,7 +37,7 @@ fn popover_select_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_
     popover.popdown();
 }
 
-fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32) {
+fn popover_unselect_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
@@ -52,14 +52,14 @@ fn popover_unselect_all(popover: &gtk::Popover, tree_view: &gtk::TreeView, colum
     popover.popdown();
 }
 
-fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_button_selection: u32, column_color: Option<i32>) {
+fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32, column_color: Option<i32>) {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
         if let Some(column_color) = column_color {
             loop {
-                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    let current_value: bool = model.get(&iter, column_button_selection as i32).get::<bool>().unwrap();
                     model.set_value(&iter, column_button_selection, &(!current_value).to_value());
                 }
                 if !model.iter_next(&iter) {
@@ -68,7 +68,7 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_but
             }
         } else {
             loop {
-                let current_value: bool = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                let current_value: bool = model.get(&iter, column_button_selection as i32).get::<bool>().unwrap();
                 model.set_value(&iter, column_button_selection, &(!current_value).to_value());
 
                 if !model.iter_next(&iter) {
@@ -81,8 +81,8 @@ fn popover_reverse(popover: &gtk::Popover, tree_view: &gtk::TreeView, column_but
 }
 
 fn popover_all_except_oldest_newest(
-    popover: &gtk::Popover,
-    tree_view: &gtk::TreeView,
+    popover: &gtk4::Popover,
+    tree_view: &gtk4::TreeView,
     column_color: i32,
     column_modification_as_secs: i32,
     column_file_name: i32,
@@ -105,7 +105,7 @@ fn popover_all_except_oldest_newest(
             let mut file_length: usize = 0;
 
             loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                let color = model.get(&iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !model.iter_next(&iter) {
                         end = true;
@@ -113,8 +113,8 @@ fn popover_all_except_oldest_newest(
                     break;
                 }
                 tree_iter_array.push(iter);
-                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
+                let modification = model.get(&iter, column_modification_as_secs).get::<u64>().unwrap();
+                let current_file_length = model.get(&iter, column_file_name).get::<String>().unwrap().len();
                 if except_oldest {
                     if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
                         file_length = current_file_length;
@@ -156,8 +156,8 @@ fn popover_all_except_oldest_newest(
 }
 
 fn popover_one_oldest_newest(
-    popover: &gtk::Popover,
-    tree_view: &gtk::TreeView,
+    popover: &gtk4::Popover,
+    tree_view: &gtk4::TreeView,
     column_color: i32,
     column_modification_as_secs: i32,
     column_file_name: i32,
@@ -180,7 +180,7 @@ fn popover_one_oldest_newest(
             let mut file_length: usize = 0;
 
             loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                let color = model.get(&iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !model.iter_next(&iter) {
                         end = true;
@@ -188,8 +188,8 @@ fn popover_one_oldest_newest(
                     break;
                 }
                 tree_iter_array.push(iter);
-                let modification = model.value(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.value(&iter, column_file_name).get::<String>().unwrap().len();
+                let modification = model.get(&iter, column_modification_as_secs).get::<u64>().unwrap();
+                let current_file_length = model.get(&iter, column_file_name).get::<String>().unwrap().len();
                 if check_oldest {
                     if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
                         file_length = current_file_length;
@@ -232,9 +232,9 @@ fn popover_one_oldest_newest(
 }
 
 fn popover_custom_select_unselect(
-    popover: &gtk::Popover,
+    popover: &gtk4::Popover,
     window_main: &Window,
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_color: Option<i32>,
     column_file_name: i32,
     column_path: i32,
@@ -250,26 +250,26 @@ fn popover_custom_select_unselect(
 
     // Dialog for select/unselect items
     {
-        let dialog = gtk::Dialog::builder().title(&window_title).transient_for(window_main).modal(true).build();
+        let dialog = gtk4::Dialog::builder().title(&window_title).transient_for(window_main).modal(true).build();
         dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
         dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-        let check_button_path = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_path_label")).build();
-        let check_button_name = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_name_label")).build();
-        let check_button_rust_regex = gtk::CheckButton::builder().label(&flg!("popover_custom_regex_regex_label")).build();
+        let check_button_path = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_path_label")).build();
+        let check_button_name = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_name_label")).build();
+        let check_button_rust_regex = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_regex_label")).build();
 
-        let check_button_case_sensitive = gtk::CheckButton::builder().label(&flg!("popover_custom_case_sensitive_check_button")).build();
+        let check_button_case_sensitive = gtk4::CheckButton::builder().label(&flg!("popover_custom_case_sensitive_check_button")).build();
         check_button_case_sensitive.set_active(false);
 
-        let check_button_select_not_all_results = gtk::CheckButton::builder().label(&flg!("popover_custom_all_in_group_label")).build();
+        let check_button_select_not_all_results = gtk4::CheckButton::builder().label(&flg!("popover_custom_all_in_group_label")).build();
         check_button_select_not_all_results.set_active(true);
 
-        let entry_path = gtk::Entry::new();
-        let entry_name = gtk::Entry::new();
-        let entry_rust_regex = gtk::Entry::new();
+        let entry_path = gtk4::Entry::new();
+        let entry_name = gtk4::Entry::new();
+        let entry_rust_regex = gtk4::Entry::new();
         entry_rust_regex.set_sensitive(false); // By default check button regex is disabled
 
-        let label_regex_valid = gtk::Label::new(None);
+        let label_regex_valid = gtk4::Label::new(None);
 
         // Tooltips
         {
@@ -337,7 +337,7 @@ fn popover_custom_select_unselect(
         // Configure look of things
         {
             // TODO Label should have const width, and rest should fill entry, but for now is 50%-50%
-            let grid = gtk::Grid::new();
+            let grid = gtk4::Grid::new();
             grid.set_row_homogeneous(true);
             grid.set_column_homogeneous(true);
 
@@ -358,7 +358,7 @@ fn popover_custom_select_unselect(
             }
 
             let box_widget = get_dialog_box_child(&dialog);
-            box_widget.add(&grid);
+            box_widget.append(&grid);
 
             dialog.show_all();
         }
@@ -374,7 +374,7 @@ fn popover_custom_select_unselect(
             #[cfg(target_family = "windows")]
             let path_wildcard = path_wildcard.replace("/", "\\");
 
-            if response_type == gtk::ResponseType::Ok {
+            if response_type == gtk4::ResponseType::Ok {
                 let check_path = check_button_path.is_active();
                 let check_name = check_button_name.is_active();
                 let check_regex = check_button_rust_regex.is_active();
@@ -410,7 +410,7 @@ fn popover_custom_select_unselect(
                     let mut vec_of_iters: Vec<TreeIter> = Vec::new();
                     loop {
                         if let Some(column_color) = column_color {
-                            let color = model.value(&iter, column_color).get::<String>().unwrap();
+                            let color = model.get(&iter, column_color).get::<String>().unwrap();
                             if color == HEADER_ROW_COLOR {
                                 if select_things {
                                     if check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
@@ -436,9 +436,9 @@ fn popover_custom_select_unselect(
                             }
                         }
 
-                        let is_selected = model.value(&iter, column_button_selection as i32).get::<bool>().unwrap();
-                        let path = model.value(&iter, column_path).get::<String>().unwrap();
-                        let name = model.value(&iter, column_file_name).get::<String>().unwrap();
+                        let is_selected = model.get(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                        let path = model.get(&iter, column_path).get::<String>().unwrap();
+                        let name = model.get(&iter, column_file_name).get::<String>().unwrap();
 
                         let path_and_name = get_full_name_from_path_name(&path, &name);
 
@@ -510,8 +510,8 @@ fn popover_custom_select_unselect(
 }
 
 fn popover_all_except_biggest_smallest(
-    popover: &gtk::Popover,
-    tree_view: &gtk::TreeView,
+    popover: &gtk4::Popover,
+    tree_view: &gtk4::TreeView,
     column_color: i32,
     column_size_as_bytes: i32,
     column_dimensions: Option<i32>,
@@ -536,7 +536,7 @@ fn popover_all_except_biggest_smallest(
             };
 
             loop {
-                let color = model.value(&iter, column_color).get::<String>().unwrap();
+                let color = model.get(&iter, column_color).get::<String>().unwrap();
                 if color == HEADER_ROW_COLOR {
                     if !model.iter_next(&iter) {
                         end = true;
@@ -544,11 +544,11 @@ fn popover_all_except_biggest_smallest(
                     break;
                 }
                 tree_iter_array.push(iter);
-                let size_as_bytes = model.value(&iter, column_size_as_bytes).get::<u64>().unwrap();
+                let size_as_bytes = model.get(&iter, column_size_as_bytes).get::<u64>().unwrap();
 
                 // If dimension exists, then needs to be checked images
                 if let Some(column_dimensions) = column_dimensions {
-                    let dimensions_string = model.value(&iter, column_dimensions).get::<String>().unwrap();
+                    let dimensions_string = model.get(&iter, column_dimensions).get::<String>().unwrap();
 
                     let dimensions = change_dimension_to_krotka(dimensions_string);
                     let number_of_pixels = dimensions.0 * dimensions.1;

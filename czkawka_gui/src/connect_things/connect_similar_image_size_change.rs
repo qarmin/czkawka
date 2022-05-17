@@ -1,4 +1,4 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;use gtk4::Inhibit;
 
 use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
 

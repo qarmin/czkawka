@@ -1,13 +1,13 @@
-use gdk::ModifierType;
-use gtk::prelude::*;
+use gdk4::ModifierType;
+use gtk4::prelude::*;use gtk4::Inhibit;
 
 use crate::help_functions::*;
 use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
-pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
-    let tree_view = event_controller.widget().unwrap().downcast::<gtk::TreeView>().unwrap();
+pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
+    let tree_view = event_controller.widget().unwrap().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
         println!("key_code {}", key_code);
@@ -25,8 +25,8 @@ pub fn opening_enter_function_ported(event_controller: &gtk::EventControllerKey,
     false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
 }
 
-pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
-    let tree_view = event_controller.widget().unwrap().downcast::<gtk::TreeView>().unwrap();
+pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
+    let tree_view = event_controller.widget().unwrap().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
         println!("key_code {}", key_code);
@@ -51,28 +51,28 @@ pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk::E
     false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
 }
 
-pub fn opening_double_click_function(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+pub fn opening_double_click_function(tree_view: &gtk4::TreeView, event: &gdk4::EventButton) -> gtk4::Inhibit {
     let nt_object = get_notebook_object_from_tree_view(tree_view);
-    if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 1 {
+    if event.event_type() == gdk4::EventType::DoubleButtonPress && event.button() == 1 {
         common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::PathAndName);
-    } else if event.event_type() == gdk::EventType::DoubleButtonPress && event.button() == 3 {
+    } else if event.event_type() == gdk4::EventType::DoubleButtonPress && event.button() == 3 {
         common_open_function(tree_view, nt_object.column_name, nt_object.column_path, OpenMode::OnlyPath);
     }
-    gtk::Inhibit(false)
+    gtk4::Inhibit(false)
 }
 
-pub fn opening_middle_mouse_function(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
+pub fn opening_middle_mouse_function(tree_view: &gtk4::TreeView, event: &gdk4::EventButton) -> gtk4::Inhibit {
     let nt_object = get_notebook_object_from_tree_view(tree_view);
     if let Some(column_color) = nt_object.column_color {
         if event.button() == 2 {
             reverse_selection(tree_view, column_color, nt_object.column_selection);
         }
     }
-    gtk::Inhibit(false)
+    gtk4::Inhibit(false)
 }
 
-pub fn opening_double_click_function_directories(tree_view: &gtk::TreeView, event: &gdk::EventButton) -> gtk::Inhibit {
-    if event.event_type() == gdk::EventType::DoubleButtonPress && (event.button() == 1 || event.button() == 3) {
+pub fn opening_double_click_function_directories(tree_view: &gtk4::TreeView, event: &gdk4::EventButton) -> gtk4::Inhibit {
+    if event.event_type() == gdk4::EventType::DoubleButtonPress && (event.button() == 1 || event.button() == 3) {
         match get_notebook_upper_enum_from_tree_view(tree_view) {
             NotebookUpperEnum::IncludedDirectories => {
                 common_open_function_upper_directories(tree_view, ColumnsIncludedDirectory::Path as i32);
@@ -85,7 +85,7 @@ pub fn opening_double_click_function_directories(tree_view: &gtk::TreeView, even
             }
         }
     }
-    gtk::Inhibit(false)
+    gtk4::Inhibit(false)
 }
 
 // // GTK 4
@@ -119,7 +119,7 @@ enum OpenMode {
     PathAndName,
 }
 
-fn common_mark_function(tree_view: &gtk::TreeView, column_selection: i32, column_color: Option<i32>) {
+fn common_mark_function(tree_view: &gtk4::TreeView, column_selection: i32, column_color: Option<i32>) {
     let selection = tree_view.selection();
     let (selected_rows, tree_model) = selection.selected_rows();
 
@@ -127,22 +127,22 @@ fn common_mark_function(tree_view: &gtk::TreeView, column_selection: i32, column
 
     for tree_path in selected_rows.iter().rev() {
         if let Some(column_color) = column_color {
-            if model.value(&model.iter(tree_path).unwrap(), column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get(&model.iter(tree_path).unwrap(), column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 continue;
             }
         }
-        let value = !tree_model.value(&tree_model.iter(tree_path).unwrap(), column_selection).get::<bool>().unwrap();
+        let value = !tree_model.get(&tree_model.iter(tree_path).unwrap(), column_selection).get::<bool>().unwrap();
         model.set_value(&tree_model.iter(tree_path).unwrap(), column_selection as u32, &value.to_value());
     }
 }
 
-fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path: i32, opening_mode: OpenMode) {
+fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_path: i32, opening_mode: OpenMode) {
     let selection = tree_view.selection();
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let name = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_name).get::<String>().unwrap();
-        let path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
+        let name = tree_model.get(&tree_model.iter(tree_path).unwrap(), column_name).get::<String>().unwrap();
+        let path = tree_model.get(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>().unwrap();
 
         let end_path = match opening_mode {
             OpenMode::OnlyPath => path,
@@ -156,9 +156,9 @@ fn common_open_function(tree_view: &gtk::TreeView, column_name: i32, column_path
         // }
     }
 }
-fn reverse_selection(tree_view: &gtk::TreeView, column_color: i32, column_selection: i32) {
+fn reverse_selection(tree_view: &gtk4::TreeView, column_color: i32, column_selection: i32) {
     let (selected_rows, model) = tree_view.selection().selected_rows();
-    let model = model.downcast::<gtk::ListStore>().unwrap();
+    let model = model.downcast::<gtk4::ListStore>().unwrap();
 
     if selected_rows.len() != 1 {
         return; // Multiple selection is not supported because it is a lot of harder to do it properly
@@ -166,12 +166,12 @@ fn reverse_selection(tree_view: &gtk::TreeView, column_color: i32, column_select
     let tree_path = selected_rows[0].clone();
     let current_iter = model.iter(&tree_path).unwrap();
 
-    if model.value(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+    if model.get(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
         return; // Selecting header is not supported(this is available by using reference)
     }
 
     // This will revert selection of current selected item, but I don't think that this is needed
-    // let current_value = model.value(&current_iter, column_selection).get::<bool>().unwrap();
+    // let current_value = model.get(&current_iter, column_selection).get::<bool>().unwrap();
     // model.set_value(&current_iter, column_selection as u32, &(!current_value).to_value());
 
     let to_upper_iter = current_iter;
@@ -179,11 +179,11 @@ fn reverse_selection(tree_view: &gtk::TreeView, column_color: i32, column_select
         if !model.iter_previous(&to_upper_iter) {
             break;
         }
-        if model.value(&to_upper_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+        if model.get(&to_upper_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
             break;
         }
 
-        let current_value = model.value(&to_upper_iter, column_selection).get::<bool>().unwrap();
+        let current_value = model.get(&to_upper_iter, column_selection).get::<bool>().unwrap();
         model.set_value(&to_upper_iter, column_selection as u32, &(!current_value).to_value());
     }
 
@@ -192,27 +192,27 @@ fn reverse_selection(tree_view: &gtk::TreeView, column_color: i32, column_select
         if !model.iter_next(&to_lower_iter) {
             break;
         }
-        if model.value(&to_lower_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+        if model.get(&to_lower_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
             break;
         }
 
-        let current_value = model.value(&to_lower_iter, column_selection).get::<bool>().unwrap();
+        let current_value = model.get(&to_lower_iter, column_selection).get::<bool>().unwrap();
         model.set_value(&to_lower_iter, column_selection as u32, &(!current_value).to_value());
     }
 }
 
-fn common_open_function_upper_directories(tree_view: &gtk::TreeView, column_full_path: i32) {
+fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_full_path: i32) {
     let selection = tree_view.selection();
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let full_path = tree_model.value(&tree_model.iter(tree_path).unwrap(), column_full_path).get::<String>().unwrap();
+        let full_path = tree_model.get(&tree_model.iter(tree_path).unwrap(), column_full_path).get::<String>().unwrap();
 
         open::that_in_background(&full_path);
     }
 }
 
-fn handle_tree_keypress_upper_directories(tree_view: &gtk::TreeView, key_code: u32, full_path_column: i32, mark_column: Option<i32>) {
+fn handle_tree_keypress_upper_directories(tree_view: &gtk4::TreeView, key_code: u32, full_path_column: i32, mark_column: Option<i32>) {
     match key_code {
         KEY_ENTER => {
             common_open_function_upper_directories(tree_view, full_path_column);
@@ -226,7 +226,7 @@ fn handle_tree_keypress_upper_directories(tree_view: &gtk::TreeView, key_code: u
     }
 }
 
-fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32, column_color: Option<i32>) {
+fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: i32, path_column: i32, mark_column: i32, column_color: Option<i32>) {
     match key_code {
         KEY_ENTER => {
             common_open_function(tree_view, name_column, path_column, OpenMode::PathAndName);
@@ -238,9 +238,9 @@ fn handle_tree_keypress(tree_view: &gtk::TreeView, key_code: u32, name_column: i
     }
 }
 
-pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+pub fn select_function_duplicates(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model
-        .value(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32)
+        .get(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32)
         .get::<String>()
         .unwrap();
 
@@ -251,9 +251,9 @@ pub fn select_function_duplicates(_tree_selection: &gtk::TreeSelection, tree_mod
     true
 }
 
-pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+pub fn select_function_same_music(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model
-        .value(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32)
+        .get(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32)
         .get::<String>()
         .unwrap();
 
@@ -264,9 +264,9 @@ pub fn select_function_same_music(_tree_selection: &gtk::TreeSelection, tree_mod
     true
 }
 
-pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+pub fn select_function_similar_images(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model
-        .value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32)
+        .get(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::Color as i32)
         .get::<String>()
         .unwrap();
 
@@ -277,9 +277,9 @@ pub fn select_function_similar_images(_tree_selection: &gtk::TreeSelection, tree
     true
 }
 
-pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree_model: &gtk::TreeModel, tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+pub fn select_function_similar_videos(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     let color = tree_model
-        .value(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32)
+        .get(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32)
         .get::<String>()
         .unwrap();
 
@@ -289,6 +289,6 @@ pub fn select_function_similar_videos(_tree_selection: &gtk::TreeSelection, tree
 
     true
 }
-pub fn select_function_always_true(_tree_selection: &gtk::TreeSelection, _tree_model: &gtk::TreeModel, _tree_path: &gtk::TreePath, _is_path_currently_selected: bool) -> bool {
+pub fn select_function_always_true(_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     true
 }

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use gtk::prelude::*;
-use gtk::{ResponseType, TreeView, Window};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{ResponseType, TreeView, Window};
 
 use crate::flg;
 #[cfg(target_family = "windows")]
@@ -86,9 +86,9 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
         flg!("include_folders_dialog_title")
     };
 
-    let file_chooser = gtk::FileChooserDialog::builder()
+    let file_chooser = gtk4::FileChooserDialog::builder()
         .title(&folders_to)
-        .action(gtk::FileChooserAction::SelectFolder)
+        .action(gtk4::FileChooserAction::SelectFolder)
         .transient_for(window_main)
         .modal(true)
         .build();
@@ -100,7 +100,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 
     let tree_view = tree_view.clone();
     file_chooser.connect_response(move |file_chooser, response_type| {
-        if response_type == gtk::ResponseType::Ok {
+        if response_type == gtk4::ResponseType::Ok {
             let folders: Vec<PathBuf> = file_chooser.filenames();
             // GTK 4
             // folders = Vec::new();
@@ -139,7 +139,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
-    let dialog = gtk::Dialog::builder()
+    let dialog = gtk4::Dialog::builder()
         .title(&flg!("include_manually_directories_dialog_title"))
         .transient_for(window_main)
         .modal(true)
@@ -147,15 +147,15 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
     dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let entry: gtk::Entry = gtk::Entry::new();
+    let entry: gtk4::Entry = gtk4::Entry::new();
 
-    get_dialog_box_child(&dialog).add(&entry);
+    get_dialog_box_child(&dialog).append(&entry);
 
     dialog.show_all();
 
     let tree_view = tree_view.clone();
     dialog.connect_response(move |dialog, response_type| {
-        if response_type == gtk::ResponseType::Ok {
+        if response_type == gtk4::ResponseType::Ok {
             let text = entry.text().to_string().trim().to_string();
 
             #[cfg(target_family = "windows")]

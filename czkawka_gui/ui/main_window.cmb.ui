@@ -1,35 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.9.1 -->
 <interface>
+  <!-- interface-name main_window.ui -->
   <requires lib="gtk" version="4.0"/>
   <object class="GtkAdjustment" id="adjustment1">
-    <property name="upper">100</property>
-    <property name="step-increment">1</property>
     <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">100</property>
   </object>
   <object class="GtkWindow" id="window_main">
-    <property name="default-width">1100</property>
-    <property name="default-height">800</property>
     <property name="child">
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkPaned">
-            <property name="vexpand">1</property>
-            <property name="shrink-end-child">0</property>
-            <property name="shrink-start-child">0</property>
-            <property name="resize-start-child">0</property>
             <property name="focusable">1</property>
             <property name="orientation">vertical</property>
+            <property name="resize-start-child">0</property>
+            <property name="shrink-end-child">0</property>
+            <property name="shrink-start-child">0</property>
+            <property name="vexpand">1</property>
             <child>
               <object class="GtkNotebook" id="notebook_upper">
                 <property name="focusable">1</property>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="tab-fill">False</property>
                     <property name="child">
                       <object class="GtkBox" id="notebook_upper_included_directories">
-                        <property name="margin-start">5</property>
                         <property name="margin-end">5</property>
+                        <property name="margin-start">5</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox">
@@ -52,7 +51,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="1">Add </property>
+                                        <property name="label" translatable="yes">Add </property>
                                       </object>
                                     </child>
                                   </object>
@@ -74,7 +73,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="1">Remove  </property>
+                                        <property name="label" translatable="yes">Remove  </property>
                                       </object>
                                     </child>
                                   </object>
@@ -83,9 +82,9 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="buttons_manual_add_included_directory">
-                                <property name="valign">center</property>
                                 <property name="focusable">1</property>
                                 <property name="receives-default">1</property>
+                                <property name="valign">center</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="halign">center</property>
@@ -97,7 +96,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="1">Manual Add</property>
+                                        <property name="label" translatable="yes">Manual Add</property>
                                       </object>
                                     </child>
                                   </object>
@@ -108,36 +107,35 @@
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_included_directories">
-                            <property name="hexpand">1</property>
                             <property name="focusable">1</property>
-                            <property name="shadow-type">in</property>
+                            <property name="hexpand">1</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="check_button_recursive">
-                            <property name="halign">center</property>
-                            <property name="label" translatable="1">Recursive</property>
-                            <property name="focusable">1</property>
-                            <property name="margin-end">5</property>
                             <property name="active">1</property>
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Recursive</property>
+                            <property name="margin-end">5</property>
                           </object>
                         </child>
                       </object>
                     </property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Included Directories</property>
+                        <property name="label" translatable="yes">Included Directories</property>
                       </object>
                     </property>
+                    <property name="tab-fill">False</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">1</property>
                     <property name="child">
                       <object class="GtkBox" id="notebook_upper_excluded_directories">
-                        <property name="margin-start">5</property>
                         <property name="margin-end">5</property>
+                        <property name="margin-start">5</property>
                         <property name="spacing">6</property>
                         <child>
                           <object class="GtkBox">
@@ -159,7 +157,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="1">Add </property>
+                                        <property name="label" translatable="yes">Add </property>
                                       </object>
                                     </child>
                                   </object>
@@ -181,7 +179,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="1">Remove  </property>
+                                        <property name="label" translatable="yes">Remove  </property>
                                       </object>
                                     </child>
                                   </object>
@@ -190,9 +188,9 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="buttons_manual_add_excluded_directory">
-                                <property name="valign">center</property>
                                 <property name="focusable">1</property>
                                 <property name="receives-default">1</property>
+                                <property name="valign">center</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="halign">center</property>
@@ -204,7 +202,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkLabel">
-                                        <property name="label" translatable="1">Manual Add</property>
+                                        <property name="label" translatable="yes">Manual Add</property>
                                       </object>
                                     </child>
                                   </object>
@@ -215,111 +213,109 @@
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_excluded_directories">
-                            <property name="hexpand">1</property>
                             <property name="focusable">1</property>
-                            <property name="shadow-type">in</property>
+                            <property name="hexpand">1</property>
                           </object>
                         </child>
                       </object>
                     </property>
+                    <property name="position">1</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Excluded Directories</property>
+                        <property name="label" translatable="yes">Excluded Directories</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">2</property>
                     <property name="child">
                       <object class="GtkBox" id="notebook_upper_excluded_items">
-                        <property name="valign">center</property>
                         <property name="orientation">vertical</property>
+                        <property name="valign">center</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
                             <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="label_excluded_items">
-                                <property name="label" translatable="1">Excluded items</property>
+                                <property name="label" translatable="yes">Excluded items</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkEntry" id="entry_excluded_items">
-                                <property name="hexpand">1</property>
                                 <property name="focusable">1</property>
-                                <property name="text" translatable="1">*/.git,*/node_modules,*/lost+found</property>
+                                <property name="hexpand">1</property>
+                                <property name="text" translatable="yes">*/.git,*/node_modules,*/lost+found</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
                             <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="label_allowed_extensions">
-                                <property name="label" translatable="1">Allowed Extensions</property>
+                                <property name="label" translatable="yes">Allowed Extensions</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkEntry" id="entry_allowed_extensions">
-                                <property name="hexpand">1</property>
                                 <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
                             <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <property name="spacing">8</property>
                             <child>
                               <object class="GtkLabel" id="label_general_size_bytes">
-                                <property name="label" translatable="1">File Size(bytes)</property>
+                                <property name="label" translatable="yes">File Size(bytes)</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_general_min_size">
-                                <property name="label" translatable="1">Min:</property>
+                                <property name="label" translatable="yes">Min:</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkEntry" id="entry_general_minimal_size">
-                                <property name="hexpand">1</property>
                                 <property name="focusable">1</property>
-                                <property name="max-length">15</property>
-                                <property name="text" translatable="1">8192</property>
-                                <property name="caps-lock-warning">False</property>
+                                <property name="hexpand">1</property>
                                 <property name="input-purpose">number</property>
+                                <property name="max-length">15</property>
+                                <property name="text" translatable="yes">8192</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_general_max_size">
-                                <property name="label" translatable="1">Max:</property>
+                                <property name="label" translatable="yes">Max:</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkEntry" id="entry_general_maximal_size">
-                                <property name="hexpand">1</property>
                                 <property name="focusable">1</property>
-                                <property name="max-length">15</property>
-                                <property name="text" translatable="1">1099512000000</property>
-                                <property name="caps-lock-warning">False</property>
+                                <property name="hexpand">1</property>
                                 <property name="input-purpose">number</property>
+                                <property name="max-length">15</property>
+                                <property name="text" translatable="yes">1099512000000</property>
                               </object>
                             </child>
                           </object>
                         </child>
                       </object>
                     </property>
+                    <property name="position">2</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Items Configuration</property>
+                        <property name="label" translatable="yes">Items Configuration</property>
                       </object>
                     </property>
                   </object>
@@ -329,8 +325,8 @@
             <child>
               <object class="GtkNotebook" id="notebook_main">
                 <property name="focusable">1</property>
-                <property name="tab-pos">left</property>
                 <property name="scrollable">1</property>
+                <property name="tab-pos">left</property>
                 <child>
                   <object class="GtkNotebookPage">
                     <property name="child">
@@ -341,13 +337,13 @@
                             <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkBox">
-                                <property name="margin-start">5</property>
                                 <property name="margin-end">5</property>
+                                <property name="margin-start">5</property>
                                 <property name="margin-top">2</property>
                                 <child>
                                   <object class="GtkLabel" id="label_duplicate_check_method">
+                                    <property name="label" translatable="yes">Check method</property>
                                     <property name="margin-end">3</property>
-                                    <property name="label" translatable="1">Check method</property>
                                   </object>
                                 </child>
                                 <child>
@@ -355,9 +351,9 @@
                                 </child>
                                 <child>
                                   <object class="GtkLabel" id="label_duplicate_hash_type">
-                                    <property name="margin-start">5</property>
+                                    <property name="label" translatable="yes">Hash type</property>
                                     <property name="margin-end">2</property>
-                                    <property name="label" translatable="1">Hash type</property>
+                                    <property name="margin-start">5</property>
                                   </object>
                                 </child>
                                 <child>
@@ -365,134 +361,127 @@
                                 </child>
                                 <child>
                                   <object class="GtkCheckButton" id="check_button_duplicate_case_sensitive_name">
-                                    <property name="visible">0</property>
                                     <property name="label">Case sensitive</property>
+                                    <property name="visible">0</property>
                                   </object>
                                 </child>
                               </object>
                             </child>
                             <child>
                               <object class="GtkScrolledWindow" id="scrolled_window_duplicate_finder">
-                                <property name="vexpand">1</property>
                                 <property name="focusable">1</property>
                                 <property name="margin-end">5</property>
-                                <property name="shadow-type">in</property>
+                                <property name="vexpand">1</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkImage" id="image_preview_duplicates">
-                            <property name="width-request">100</property>
                             <property name="height-request">80</property>
                             <property name="valign">center</property>
+                            <property name="width-request">100</property>
                           </object>
                         </child>
                       </object>
                     </property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Duplicates files</property>
+                        <property name="label" translatable="yes">Duplicates files</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">1</property>
                     <property name="child">
                       <object class="GtkScrolledWindow" id="scrolled_window_empty_folder_finder">
                         <property name="focusable">1</property>
-                        <property name="shadow-type">in</property>
                       </object>
                     </property>
+                    <property name="position">1</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Empty Directories</property>
+                        <property name="label" translatable="yes">Empty Directories</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">2</property>
                     <property name="child">
                       <object class="GtkBox">
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
                             <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <property name="margin-top">2</property>
                             <property name="spacing">8</property>
                             <child>
                               <object class="GtkLabel" id="label_big_shown_files">
-                                <property name="label" translatable="1">Number of shown files</property>
+                                <property name="label" translatable="yes">Number of shown files</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkEntry" id="entry_big_files_number">
-                                <property name="hexpand">1</property>
                                 <property name="focusable">1</property>
-                                <property name="max-length">15</property>
-                                <property name="text" translatable="1">50</property>
-                                <property name="caps-lock-warning">False</property>
+                                <property name="hexpand">1</property>
                                 <property name="input-purpose">number</property>
+                                <property name="max-length">15</property>
+                                <property name="text" translatable="yes">50</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_big_files_finder">
-                            <property name="vexpand">1</property>
                             <property name="focusable">1</property>
-                            <property name="shadow-type">in</property>
+                            <property name="vexpand">1</property>
                           </object>
                         </child>
                       </object>
                     </property>
+                    <property name="position">2</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Big Files</property>
+                        <property name="label" translatable="yes">Big Files</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">3</property>
                     <property name="child">
                       <object class="GtkScrolledWindow" id="scrolled_window_empty_files_finder">
                         <property name="focusable">1</property>
-                        <property name="shadow-type">in</property>
                       </object>
                     </property>
+                    <property name="position">3</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Empty Files</property>
+                        <property name="label" translatable="yes">Empty Files</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">4</property>
                     <property name="child">
                       <object class="GtkScrolledWindow" id="scrolled_window_temporary_files_finder">
                         <property name="focusable">1</property>
-                        <property name="shadow-type">in</property>
                       </object>
                     </property>
+                    <property name="position">4</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Temporary Files</property>
+                        <property name="label" translatable="yes">Temporary Files</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">5</property>
                     <property name="child">
                       <object class="GtkBox">
                         <child>
@@ -501,13 +490,13 @@
                             <property name="orientation">vertical</property>
                             <child>
                               <object class="GtkBox">
-                                <property name="margin-start">5</property>
                                 <property name="margin-end">5</property>
+                                <property name="margin-start">5</property>
                                 <property name="margin-top">2</property>
                                 <child>
                                   <object class="GtkLabel" id="label_image_resize_algorithm">
+                                    <property name="label" translatable="yes">Resize algorithm</property>
                                     <property name="margin-end">2</property>
-                                    <property name="label" translatable="1">Resize algorithm</property>
                                   </object>
                                 </child>
                                 <child>
@@ -515,9 +504,9 @@
                                 </child>
                                 <child>
                                   <object class="GtkLabel" id="label_image_hash_size">
-                                    <property name="margin-start">5</property>
+                                    <property name="label" translatable="yes">Hash size:</property>
                                     <property name="margin-end">2</property>
-                                    <property name="label" translatable="1">Hash size:</property>
+                                    <property name="margin-start">5</property>
                                   </object>
                                 </child>
                                 <child>
@@ -525,9 +514,9 @@
                                 </child>
                                 <child>
                                   <object class="GtkLabel" id="label_image_hash_type">
-                                    <property name="margin-start">5</property>
+                                    <property name="label" translatable="yes">Hash type:</property>
                                     <property name="margin-end">2</property>
-                                    <property name="label" translatable="1">Hash type:</property>
+                                    <property name="margin-start">5</property>
                                   </object>
                                 </child>
                                 <child>
@@ -537,48 +526,48 @@
                             </child>
                             <child>
                               <object class="GtkBox">
-                                <property name="margin-start">5</property>
-                                <property name="margin-end">5</property>
                                 <property name="margin-bottom">2</property>
+                                <property name="margin-end">5</property>
+                                <property name="margin-start">5</property>
                                 <child>
                                   <object class="GtkLabel" id="label_image_similarity">
-                                    <property name="label" translatable="1">Similarity </property>
+                                    <property name="label" translatable="yes">Similarity </property>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="GtkLabel" id="label_image_similarity_max">
-                                    <property name="label" translatable="1">  Very High  </property>
+                                    <property name="label" translatable="yes">  Very High  </property>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="GtkScale" id="scale_similarity_similar_images">
-                                    <property name="hexpand">1</property>
-                                    <property name="draw-value">1</property>
-                                    <property name="focusable">1</property>
-                                    <property name="fill-level">100</property>
-                                    <property name="round-digits">1</property>
                                     <property name="digits">0</property>
+                                    <property name="draw-value">1</property>
+                                    <property name="fill-level">100</property>
+                                    <property name="focusable">1</property>
+                                    <property name="hexpand">1</property>
+                                    <property name="round-digits">1</property>
                                     <property name="value-pos">right</property>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="GtkLabel" id="label_similar_images_minimal_similarity">
-                                    <property name="margin-start">5</property>
+                                    <property name="label" translatable="yes">Minimal</property>
                                     <property name="margin-end">5</property>
-                                    <property name="label" translatable="1">Minimal</property>
+                                    <property name="margin-start">5</property>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="GtkCheckButton" id="check_button_image_ignore_same_size">
-                                    <property name="label" translatable="1">Ignore same size</property>
                                     <property name="focusable">1</property>
+                                    <property name="label" translatable="yes">Ignore same size</property>
                                     <property name="margin-start">7</property>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="GtkCheckButton" id="check_button_image_fast_compare">
-                                    <property name="label" translatable="1">Fast compare</property>
                                     <property name="focusable">1</property>
+                                    <property name="label" translatable="yes">Fast compare</property>
                                     <property name="margin-start">7</property>
                                   </object>
                                 </child>
@@ -586,73 +575,72 @@
                             </child>
                             <child>
                               <object class="GtkScrolledWindow" id="scrolled_window_similar_images_finder">
-                                <property name="vexpand">1</property>
                                 <property name="focusable">1</property>
                                 <property name="margin-end">5</property>
-                                <property name="shadow-type">in</property>
+                                <property name="vexpand">1</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkImage" id="image_preview_similar_images">
-                            <property name="width-request">100</property>
                             <property name="height-request">80</property>
                             <property name="valign">center</property>
+                            <property name="width-request">100</property>
                           </object>
                         </child>
                       </object>
                     </property>
+                    <property name="position">5</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Similar Images</property>
+                        <property name="label" translatable="yes">Similar Images</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">6</property>
                     <property name="child">
                       <object class="GtkBox">
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
-                            <property name="margin-end">5</property>
                             <property name="margin-bottom">2</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <child>
                               <object class="GtkLabel" id="label_video_similarity">
-                                <property name="label" translatable="1">Similarity </property>
+                                <property name="label" translatable="yes">Similarity </property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_video_similarity_max">
-                                <property name="label" translatable="1">  Very High  </property>
+                                <property name="label" translatable="yes">  Very High  </property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkScale" id="scale_similarity_similar_videos">
-                                <property name="hexpand">1</property>
-                                <property name="draw-value">1</property>
-                                <property name="focusable">1</property>
-                                <property name="fill-level">100</property>
-                                <property name="round-digits">0</property>
                                 <property name="digits">0</property>
+                                <property name="draw-value">1</property>
+                                <property name="fill-level">100</property>
+                                <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="round-digits">0</property>
                                 <property name="value-pos">right</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_video_similarity_min">
-                                <property name="margin-start">5</property>
+                                <property name="label" translatable="yes">Minimal</property>
                                 <property name="margin-end">5</property>
-                                <property name="label" translatable="1">Minimal</property>
+                                <property name="margin-start">5</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_video_ignore_same_size">
-                                <property name="label" translatable="1">Ignore same size</property>
                                 <property name="focusable">1</property>
+                                <property name="label" translatable="yes">Ignore same size</property>
                                 <property name="margin-start">7</property>
                               </object>
                             </child>
@@ -660,151 +648,142 @@
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_similar_videos_finder">
-                            <property name="vexpand">1</property>
                             <property name="focusable">1</property>
-                            <property name="shadow-type">in</property>
+                            <property name="vexpand">1</property>
                           </object>
                         </child>
                       </object>
                     </property>
+                    <property name="position">6</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Similar Videos</property>
+                        <property name="label" translatable="yes">Similar Videos</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">7</property>
                     <property name="child">
                       <object class="GtkBox">
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
                             <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <property name="spacing">8</property>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_title">
-                                <property name="label" translatable="1">Title</property>
-                                <property name="focusable">1</property>
                                 <property name="active">1</property>
+                                <property name="focusable">1</property>
+                                <property name="label" translatable="yes">Title</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_artist">
-                                <property name="label" translatable="1">Artist</property>
-                                <property name="focusable">1</property>
                                 <property name="active">1</property>
+                                <property name="focusable">1</property>
+                                <property name="label" translatable="yes">Artist</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_year">
-                                <property name="label">Year</property>
                                 <property name="focusable">1</property>
                                 <property name="halign">start</property>
+                                <property name="label">Year</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_bitrate">
-                                <property name="label">Bitrate</property>
                                 <property name="focusable">1</property>
+                                <property name="label">Bitrate</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_genre">
-                                <property name="label">Genre</property>
                                 <property name="focusable">1</property>
+                                <property name="label">Genre</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_length">
-                                <property name="label">Length</property>
                                 <property name="focusable">1</property>
-                                <property name="xalign">1</property>
-                                <property name="yalign">0.89999997615814209</property>
+                                <property name="label">Length</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkBox">
-                            <property name="margin-start">5</property>
-                            <property name="margin-end">5</property>
                             <property name="margin-bottom">2</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
                             <child>
                               <object class="GtkCheckButton" id="check_button_music_approximate_comparison">
-                                <property name="label" translatable="1">Approximate Comparison</property>
                                 <property name="focusable">1</property>
+                                <property name="label" translatable="yes">Approximate Comparison</property>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolled_window_same_music_finder">
-                            <property name="vexpand">1</property>
                             <property name="focusable">1</property>
                             <property name="margin-end">5</property>
-                            <property name="shadow-type">in</property>
+                            <property name="vexpand">1</property>
                           </object>
                         </child>
                       </object>
                     </property>
+                    <property name="position">7</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Music Duplicates</property>
+                        <property name="label" translatable="yes">Music Duplicates</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">8</property>
                     <property name="child">
                       <object class="GtkScrolledWindow" id="scrolled_window_invalid_symlinks">
                         <property name="focusable">1</property>
-                        <property name="shadow-type">in</property>
                       </object>
                     </property>
+                    <property name="position">8</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Invalid Symlinks</property>
+                        <property name="label" translatable="yes">Invalid Symlinks</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">9</property>
                     <property name="child">
                       <object class="GtkScrolledWindow" id="scrolled_window_broken_files">
                         <property name="focusable">1</property>
-                        <property name="shadow-type">in</property>
                       </object>
                     </property>
+                    <property name="position">9</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Broken Files</property>
+                        <property name="label" translatable="yes">Broken Files</property>
                       </object>
                     </property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkNotebookPage">
-                    <property name="position">10</property>
                     <property name="child">
                       <object class="GtkScrolledWindow" id="scrolled_window_bad_extensions">
                         <property name="focusable">1</property>
-                        <property name="shadow-type">in</property>
-                        <child>
-                          <placeholder/>
-                        </child>
                       </object>
                     </property>
+                    <property name="position">10</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="1">Bad Extensions</property>
+                        <property name="label" translatable="yes">Bad Extensions</property>
                       </object>
                     </property>
                   </object>
@@ -815,10 +794,10 @@
         </child>
         <child>
           <object class="GtkBox" id="buttons">
-            <property name="margin-start">5</property>
-            <property name="margin-end">5</property>
-            <property name="margin-top">2</property>
             <property name="margin-bottom">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-start">5</property>
+            <property name="margin-top">2</property>
             <child>
               <object class="GtkBox" id="control_buttons">
                 <property name="spacing">2</property>
@@ -837,7 +816,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Search</property>
+                            <property name="label" translatable="yes">Search</property>
                           </object>
                         </child>
                       </object>
@@ -875,8 +854,8 @@
                 <property name="spacing">2</property>
                 <child>
                   <object class="GtkMenuButton" id="buttons_select">
-                    <property name="focusable">1</property>
                     <property name="focus-on-click">0</property>
+                    <property name="focusable">1</property>
                     <property name="receives-default">1</property>
                     <child>
                       <object class="GtkBox">
@@ -889,7 +868,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Select</property>
+                            <property name="label" translatable="yes">Select</property>
                           </object>
                         </child>
                       </object>
@@ -911,7 +890,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Compare</property>
+                            <property name="label" translatable="yes">Compare</property>
                           </object>
                         </child>
                       </object>
@@ -933,7 +912,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Delete</property>
+                            <property name="label" translatable="yes">Delete</property>
                           </object>
                         </child>
                       </object>
@@ -955,7 +934,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Move</property>
+                            <property name="label" translatable="yes">Move</property>
                           </object>
                         </child>
                       </object>
@@ -977,7 +956,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Save</property>
+                            <property name="label" translatable="yes">Save</property>
                           </object>
                         </child>
                       </object>
@@ -999,7 +978,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Symlink</property>
+                            <property name="label" translatable="yes">Symlink</property>
                           </object>
                         </child>
                       </object>
@@ -1021,7 +1000,7 @@
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="label" translatable="1">Hardlink</property>
+                            <property name="label" translatable="yes">Hardlink</property>
                           </object>
                         </child>
                       </object>
@@ -1034,49 +1013,46 @@
         </child>
         <child>
           <object class="GtkBox">
-            <property name="margin-start">5</property>
-            <property name="margin-end">5</property>
-            <property name="margin-top">5</property>
             <property name="margin-bottom">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-start">5</property>
+            <property name="margin-top">5</property>
             <child>
               <object class="GtkEntry" id="entry_info">
-                <property name="hexpand">1</property>
-                <property name="focusable">1</property>
                 <property name="editable">0</property>
+                <property name="focusable">1</property>
                 <property name="has-frame">0</property>
-                <property name="shadow-type">none</property>
+                <property name="hexpand">1</property>
               </object>
             </child>
             <child>
               <object class="GtkEntry">
-                <property name="focusable">1</property>
                 <property name="editable">0</property>
+                <property name="focusable">1</property>
                 <property name="has-frame">0</property>
-                <property name="text" translatable="1">Czkawka 4.1.0</property>
+                <property name="text" translatable="yes">Czkawka 4.1.0</property>
                 <property name="xalign">1</property>
-                <property name="shadow-type">none</property>
-                <property name="caps-lock-warning">False</property>
               </object>
             </child>
           </object>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window_errors">
-            <property name="focusable">1</property>
-            <property name="resize-mode">queue</property>
-            <property name="shadow-type">in</property>
-            <property name="min-content-height">100</property>
             <property name="child">
               <object class="GtkTextView" id="text_view_errors">
-                <property name="focusable">1</property>
                 <property name="editable">0</property>
+                <property name="focusable">1</property>
                 <property name="monospace">1</property>
               </object>
             </property>
+            <property name="focusable">1</property>
+            <property name="min-content-height">100</property>
           </object>
         </child>
       </object>
     </property>
+    <property name="default-height">800</property>
+    <property name="default-width">1100</property>
     <child type="titlebar">
       <object class="GtkHeaderBar">
         <child type="end">

@@ -1,18 +1,18 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;use gtk4::Inhibit;
 
 use crate::help_functions::set_icon_of_button;
 use crate::{flg, CZK_ICON_INFO, CZK_ICON_SETTINGS};
 
 #[derive(Clone)]
 pub struct GuiHeader {
-    pub button_settings: gtk::Button,
-    pub button_app_info: gtk::Button,
+    pub button_settings: gtk4::Button,
+    pub button_app_info: gtk4::Button,
 }
 
 impl GuiHeader {
-    pub fn create_from_builder(builder: &gtk::Builder) -> Self {
-        let button_settings: gtk::Button = builder.object("button_settings").unwrap();
-        let button_app_info: gtk::Button = builder.object("button_app_info").unwrap();
+    pub fn create_from_builder(builder: &gtk4::Builder) -> Self {
+        let button_settings: gtk4::Button = builder.object("button_settings").unwrap();
+        let button_app_info: gtk4::Button = builder.object("button_app_info").unwrap();
 
         set_icon_of_button(&button_settings, CZK_ICON_SETTINGS);
         set_icon_of_button(&button_app_info, CZK_ICON_INFO);

@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use gtk::prelude::*;
-use gtk::{Align, CheckButton, Dialog, ResponseType, TextView, TreeIter, TreePath};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{Align, CheckButton, Dialog, ResponseType, TextView, TreeIter, TreePath};
 
 use crate::flg;
 use czkawka_core::duplicate::make_hard_link;
@@ -97,7 +97,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
 }
 
 fn hardlink_symlink(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_color: i32,
@@ -125,9 +125,9 @@ fn hardlink_symlink(
     let mut selected_rows = Vec::new();
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    selected_rows.push(model.path(&iter).unwrap());
+            if model.get(&iter, column_selection).get::<bool>().unwrap() {
+                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
                 }
@@ -145,7 +145,7 @@ fn hardlink_symlink(
     let mut current_symhardlink_data: Option<SymHardlinkData> = None;
     let mut current_selected_index = 0;
     loop {
-        if model.value(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+        if model.get(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
             if let Some(current_symhardlink_data) = current_symhardlink_data {
                 if !current_symhardlink_data.files_to_symhardlink.is_empty() {
                     vec_symhardlink_data.push(current_symhardlink_data);
@@ -159,13 +159,13 @@ fn hardlink_symlink(
             continue;
         }
 
-        if model.path(&current_iter).unwrap() == selected_rows[current_selected_index] {
-            let file_name = model.value(&current_iter, column_file_name).get::<String>().unwrap();
-            let path = model.value(&current_iter, column_path).get::<String>().unwrap();
+        if model.path(&current_iter) == selected_rows[current_selected_index] {
+            let file_name = model.get(&current_iter, column_file_name).get::<String>().unwrap();
+            let path = model.get(&current_iter, column_path).get::<String>().unwrap();
             let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
             if current_symhardlink_data.is_some() {
-                vec_tree_path_to_remove.push(model.path(&current_iter).unwrap());
+                vec_tree_path_to_remove.push(model.path(&current_iter));
                 let mut temp_data = current_symhardlink_data.unwrap();
                 temp_data.files_to_symhardlink.push(full_file_path);
                 current_symhardlink_data = Some(temp_data);
@@ -262,8 +262,8 @@ fn hardlink_symlink(
     clean_invalid_headers(&model, column_color, column_path);
 }
 
-fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
-    let dialog = gtk::Dialog::builder()
+fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
+    let dialog = gtk4::Dialog::builder()
         .title(&flg!("hard_sym_invalid_selection_title_dialog"))
         .transient_for(window_main)
         .modal(true)
@@ -271,41 +271,41 @@ fn create_dialog_non_group(window_main: &gtk::Window) -> Dialog {
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_invalid_selection_label_1")));
-    let label2: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_invalid_selection_label_2")));
-    let label3: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_invalid_selection_label_3")));
+    let label: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_invalid_selection_label_1")));
+    let label2: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_invalid_selection_label_2")));
+    let label3: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_invalid_selection_label_3")));
 
     button_ok.grab_focus();
 
     let internal_box = get_dialog_box_child(&dialog);
-    internal_box.add(&label);
-    internal_box.add(&label2);
-    internal_box.add(&label3);
+    internal_box.append(&label);
+    internal_box.append(&label2);
+    internal_box.append(&label3);
 
     dialog.show_all();
     dialog
 }
 
-pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk::TreeView, column_color: i32, column_selection: i32, window_main: &gtk::Window) -> bool {
+pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::TreeView, column_color: i32, column_selection: i32, window_main: &gtk4::Window) -> bool {
     let model = get_list_store(tree_view);
 
     let mut selected_values_in_group = 0;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 if selected_values_in_group == 1 {
                     break;
                 }
                 selected_values_in_group = 0;
             } else {
-                if model.value(&iter, column_selection).get::<bool>().unwrap() {
+                if model.get(&iter, column_selection).get::<bool>().unwrap() {
                     selected_values_in_group += 1;
                 }
             }
@@ -318,7 +318,7 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk::T
         let confirmation_dialog = create_dialog_non_group(window_main);
 
         let response_type = confirmation_dialog.run_future().await;
-        if response_type != gtk::ResponseType::Ok {
+        if response_type != gtk4::ResponseType::Ok {
             confirmation_dialog.hide();
             confirmation_dialog.close();
             return false;
@@ -330,18 +330,18 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk::T
     true
 }
 
-pub async fn check_if_anything_is_selected_async(tree_view: &gtk::TreeView, column_color: i32, column_selection: i32) -> bool {
+pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_color: i32, column_selection: i32) -> bool {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR && model.value(&iter, column_selection).get::<bool>().unwrap() {
+            if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR && model.get(&iter, column_selection).get::<bool>().unwrap() {
                 return true;
             }
         }
@@ -350,12 +350,12 @@ pub async fn check_if_anything_is_selected_async(tree_view: &gtk::TreeView, colu
     false
 }
 
-pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk::CheckButton, window_main: &gtk::Window) -> bool {
+pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk4::CheckButton, window_main: &gtk4::Window) -> bool {
     if check_button_settings_confirm_link.is_active() {
         let (confirmation_dialog_link, check_button) = create_dialog_ask_for_linking(window_main);
 
         let response_type = confirmation_dialog_link.run_future().await;
-        if response_type == gtk::ResponseType::Ok {
+        if response_type == gtk4::ResponseType::Ok {
             if !check_button.is_active() {
                 check_button_settings_confirm_link.set_active(false);
             }
@@ -370,8 +370,8 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk::C
     true
 }
 
-fn create_dialog_ask_for_linking(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder()
+fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
+    let dialog = gtk4::Dialog::builder()
         .title(&flg!("hard_sym_link_title_dialog"))
         .transient_for(window_main)
         .modal(true)
@@ -379,16 +379,16 @@ fn create_dialog_ask_for_linking(window_main: &gtk::Window) -> (Dialog, CheckBut
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&flg!("hard_sym_link_label")));
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
+    let label: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_link_label")));
+    let check_button: gtk4::CheckButton = gtk4::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
     button_ok.grab_focus();
 
     let internal_box = get_dialog_box_child(&dialog);
-    internal_box.add(&label);
-    internal_box.add(&check_button);
+    internal_box.append(&label);
+    internal_box.append(&check_button);
 
     dialog.show_all();
     (dialog, check_button)

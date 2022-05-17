@@ -1,108 +1,108 @@
-use gtk::prelude::*;
-use gtk::{Builder, Window};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{Builder, Window};
 
 use crate::flg;
 
 #[derive(Clone)]
 pub struct GuiSettings {
-    pub window_settings: gtk::Window,
+    pub window_settings: gtk4::Window,
 
-    pub notebook_settings: gtk::Notebook,
+    pub notebook_settings: gtk4::Notebook,
 
     // General
-    pub check_button_settings_save_at_exit: gtk::CheckButton,
-    pub check_button_settings_load_at_start: gtk::CheckButton,
-    pub check_button_settings_confirm_deletion: gtk::CheckButton,
-    pub check_button_settings_confirm_link: gtk::CheckButton,
-    pub check_button_settings_confirm_group_deletion: gtk::CheckButton,
-    pub check_button_settings_show_text_view: gtk::CheckButton,
-    pub check_button_settings_use_cache: gtk::CheckButton,
-    pub check_button_settings_save_also_json: gtk::CheckButton,
-    pub check_button_settings_use_trash: gtk::CheckButton,
-    pub label_settings_general_language: gtk::Label,
-    pub combo_box_settings_language: gtk::ComboBoxText,
+    pub check_button_settings_save_at_exit: gtk4::CheckButton,
+    pub check_button_settings_load_at_start: gtk4::CheckButton,
+    pub check_button_settings_confirm_deletion: gtk4::CheckButton,
+    pub check_button_settings_confirm_link: gtk4::CheckButton,
+    pub check_button_settings_confirm_group_deletion: gtk4::CheckButton,
+    pub check_button_settings_show_text_view: gtk4::CheckButton,
+    pub check_button_settings_use_cache: gtk4::CheckButton,
+    pub check_button_settings_save_also_json: gtk4::CheckButton,
+    pub check_button_settings_use_trash: gtk4::CheckButton,
+    pub label_settings_general_language: gtk4::Label,
+    pub combo_box_settings_language: gtk4::ComboBoxText,
 
     // Duplicates
-    pub check_button_settings_hide_hard_links: gtk::CheckButton,
-    pub entry_settings_cache_file_minimal_size: gtk::Entry,
-    pub entry_settings_prehash_cache_file_minimal_size: gtk::Entry,
-    pub check_button_duplicates_use_prehash_cache: gtk::CheckButton,
-    pub check_button_settings_show_preview_duplicates: gtk::CheckButton,
-    pub check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton,
-    pub button_settings_duplicates_clear_cache: gtk::Button,
-    pub label_settings_duplicate_minimal_size_cache: gtk::Label,
-    pub label_settings_duplicate_minimal_size_cache_prehash: gtk::Label,
+    pub check_button_settings_hide_hard_links: gtk4::CheckButton,
+    pub entry_settings_cache_file_minimal_size: gtk4::Entry,
+    pub entry_settings_prehash_cache_file_minimal_size: gtk4::Entry,
+    pub check_button_duplicates_use_prehash_cache: gtk4::CheckButton,
+    pub check_button_settings_show_preview_duplicates: gtk4::CheckButton,
+    pub check_button_settings_duplicates_delete_outdated_cache: gtk4::CheckButton,
+    pub button_settings_duplicates_clear_cache: gtk4::Button,
+    pub label_settings_duplicate_minimal_size_cache: gtk4::Label,
+    pub label_settings_duplicate_minimal_size_cache_prehash: gtk4::Label,
 
     // Similar Images
-    pub check_button_settings_show_preview_similar_images: gtk::CheckButton,
-    pub check_button_settings_similar_images_delete_outdated_cache: gtk::CheckButton,
-    pub button_settings_similar_images_clear_cache: gtk::Button,
+    pub check_button_settings_show_preview_similar_images: gtk4::CheckButton,
+    pub check_button_settings_similar_images_delete_outdated_cache: gtk4::CheckButton,
+    pub button_settings_similar_images_clear_cache: gtk4::Button,
 
     // Similar Videos
-    pub check_button_settings_similar_videos_delete_outdated_cache: gtk::CheckButton,
-    pub button_settings_similar_videos_clear_cache: gtk::Button,
+    pub check_button_settings_similar_videos_delete_outdated_cache: gtk4::CheckButton,
+    pub button_settings_similar_videos_clear_cache: gtk4::Button,
 
     // Buttons
-    pub button_settings_save_configuration: gtk::Button,
-    pub button_settings_load_configuration: gtk::Button,
-    pub button_settings_reset_configuration: gtk::Button,
+    pub button_settings_save_configuration: gtk4::Button,
+    pub button_settings_load_configuration: gtk4::Button,
+    pub button_settings_reset_configuration: gtk4::Button,
 
-    pub button_settings_open_cache_folder: gtk::Button,
-    pub button_settings_open_settings_folder: gtk::Button,
+    pub button_settings_open_cache_folder: gtk4::Button,
+    pub button_settings_open_settings_folder: gtk4::Button,
 }
 
 impl GuiSettings {
     pub fn create_from_builder(window_main: &Window) -> Self {
-        let glade_src = include_str!("../../ui/settings.ui").to_string();
+        let glade_src = include_str!("../../ui/settings.cmb.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let window_settings: gtk::Window = builder.object("window_settings").unwrap();
+        let window_settings: gtk4::Window = builder.object("window_settings").unwrap();
         window_settings.set_title(&flg!("window_settings_title"));
         window_settings.set_modal(true);
         window_settings.set_transient_for(Some(window_main));
 
-        let notebook_settings: gtk::Notebook = builder.object("notebook_settings").unwrap();
+        let notebook_settings: gtk4::Notebook = builder.object("notebook_settings").unwrap();
 
         // General
-        let check_button_settings_save_at_exit: gtk::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
-        let check_button_settings_load_at_start: gtk::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
-        let check_button_settings_confirm_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_deletion").unwrap();
-        let check_button_settings_confirm_link: gtk::CheckButton = builder.object("check_button_settings_confirm_link").unwrap();
-        let check_button_settings_confirm_group_deletion: gtk::CheckButton = builder.object("check_button_settings_confirm_group_deletion").unwrap();
-        let check_button_settings_show_text_view: gtk::CheckButton = builder.object("check_button_settings_show_text_view").unwrap();
-        let check_button_settings_use_cache: gtk::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
-        let check_button_settings_save_also_json: gtk::CheckButton = builder.object("check_button_settings_save_also_json").unwrap();
-        let check_button_settings_use_trash: gtk::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
-        let label_settings_general_language: gtk::Label = builder.object("label_settings_general_language").unwrap();
-        let combo_box_settings_language: gtk::ComboBoxText = builder.object("combo_box_settings_language").unwrap();
+        let check_button_settings_save_at_exit: gtk4::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
+        let check_button_settings_load_at_start: gtk4::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
+        let check_button_settings_confirm_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_deletion").unwrap();
+        let check_button_settings_confirm_link: gtk4::CheckButton = builder.object("check_button_settings_confirm_link").unwrap();
+        let check_button_settings_confirm_group_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_group_deletion").unwrap();
+        let check_button_settings_show_text_view: gtk4::CheckButton = builder.object("check_button_settings_show_text_view").unwrap();
+        let check_button_settings_use_cache: gtk4::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
+        let check_button_settings_save_also_json: gtk4::CheckButton = builder.object("check_button_settings_save_also_json").unwrap();
+        let check_button_settings_use_trash: gtk4::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
+        let label_settings_general_language: gtk4::Label = builder.object("label_settings_general_language").unwrap();
+        let combo_box_settings_language: gtk4::ComboBoxText = builder.object("combo_box_settings_language").unwrap();
 
         // Duplicates
-        let check_button_settings_hide_hard_links: gtk::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
-        let entry_settings_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
-        let check_button_settings_show_preview_duplicates: gtk::CheckButton = builder.object("check_button_settings_show_preview_duplicates").unwrap();
-        let check_button_settings_duplicates_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_duplicates_delete_outdated_cache").unwrap();
-        let button_settings_duplicates_clear_cache: gtk::Button = builder.object("button_settings_duplicates_clear_cache").unwrap();
-        let check_button_duplicates_use_prehash_cache: gtk::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").unwrap();
-        let entry_settings_prehash_cache_file_minimal_size: gtk::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").unwrap();
-        let label_settings_duplicate_minimal_size_cache: gtk::Label = builder.object("label_settings_duplicate_minimal_size_cache").unwrap();
-        let label_settings_duplicate_minimal_size_cache_prehash: gtk::Label = builder.object("label_settings_duplicate_minimal_size_cache_prehash").unwrap();
+        let check_button_settings_hide_hard_links: gtk4::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
+        let entry_settings_cache_file_minimal_size: gtk4::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
+        let check_button_settings_show_preview_duplicates: gtk4::CheckButton = builder.object("check_button_settings_show_preview_duplicates").unwrap();
+        let check_button_settings_duplicates_delete_outdated_cache: gtk4::CheckButton = builder.object("check_button_settings_duplicates_delete_outdated_cache").unwrap();
+        let button_settings_duplicates_clear_cache: gtk4::Button = builder.object("button_settings_duplicates_clear_cache").unwrap();
+        let check_button_duplicates_use_prehash_cache: gtk4::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").unwrap();
+        let entry_settings_prehash_cache_file_minimal_size: gtk4::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").unwrap();
+        let label_settings_duplicate_minimal_size_cache: gtk4::Label = builder.object("label_settings_duplicate_minimal_size_cache").unwrap();
+        let label_settings_duplicate_minimal_size_cache_prehash: gtk4::Label = builder.object("label_settings_duplicate_minimal_size_cache_prehash").unwrap();
 
         // Similar Images
-        let check_button_settings_show_preview_similar_images: gtk::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
-        let check_button_settings_similar_images_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_similar_images_delete_outdated_cache").unwrap();
-        let button_settings_similar_images_clear_cache: gtk::Button = builder.object("button_settings_similar_images_clear_cache").unwrap();
+        let check_button_settings_show_preview_similar_images: gtk4::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
+        let check_button_settings_similar_images_delete_outdated_cache: gtk4::CheckButton = builder.object("check_button_settings_similar_images_delete_outdated_cache").unwrap();
+        let button_settings_similar_images_clear_cache: gtk4::Button = builder.object("button_settings_similar_images_clear_cache").unwrap();
 
         // Similar Videos
-        let check_button_settings_similar_videos_delete_outdated_cache: gtk::CheckButton = builder.object("check_button_settings_similar_videos_delete_outdated_cache").unwrap();
-        let button_settings_similar_videos_clear_cache: gtk::Button = builder.object("button_settings_similar_videos_clear_cache").unwrap();
+        let check_button_settings_similar_videos_delete_outdated_cache: gtk4::CheckButton = builder.object("check_button_settings_similar_videos_delete_outdated_cache").unwrap();
+        let button_settings_similar_videos_clear_cache: gtk4::Button = builder.object("button_settings_similar_videos_clear_cache").unwrap();
 
         // Saving/Loading/Resetting configuration
-        let button_settings_save_configuration: gtk::Button = builder.object("button_settings_save_configuration").unwrap();
-        let button_settings_load_configuration: gtk::Button = builder.object("button_settings_load_configuration").unwrap();
-        let button_settings_reset_configuration: gtk::Button = builder.object("button_settings_reset_configuration").unwrap();
+        let button_settings_save_configuration: gtk4::Button = builder.object("button_settings_save_configuration").unwrap();
+        let button_settings_load_configuration: gtk4::Button = builder.object("button_settings_load_configuration").unwrap();
+        let button_settings_reset_configuration: gtk4::Button = builder.object("button_settings_reset_configuration").unwrap();
 
-        let button_settings_open_cache_folder: gtk::Button = builder.object("button_settings_open_cache_folder").unwrap();
-        let button_settings_open_settings_folder: gtk::Button = builder.object("button_settings_open_settings_folder").unwrap();
+        let button_settings_open_cache_folder: gtk4::Button = builder.object("button_settings_open_cache_folder").unwrap();
+        let button_settings_open_settings_folder: gtk4::Button = builder.object("button_settings_open_settings_folder").unwrap();
 
         Self {
             window_settings,
@@ -236,10 +236,10 @@ impl GuiSettings {
         self.button_settings_open_settings_folder
             .set_tooltip_text(Some(&flg!("settings_folder_settings_open_tooltip")));
 
-        let vec_children: Vec<gtk::Widget> = self.notebook_settings.children();
+        let vec_children: Vec<gtk4::Widget> = self.notebook_settings.children();
 
-        // let vec_children: Vec<gtk::Widget> = get_all_children(&self.notebook_settings);
-        // let vec_children: Vec<gtk::Widget> = get_all_children(&vec_children[1]);
+        // let vec_children: Vec<gtk4::Widget> = get_all_children(&self.notebook_settings);
+        // let vec_children: Vec<gtk4::Widget> = get_all_children(&vec_children[1]);
 
         // Change name of main notebook tabs
         let names: [String; 4] = [
@@ -252,7 +252,7 @@ impl GuiSettings {
             self.notebook_settings
                 .tab_label(&vec_children[index])
                 .unwrap()
-                .downcast::<gtk::Label>()
+                .downcast::<gtk4::Label>()
                 .unwrap()
                 .set_text(fl_thing);
         }

@@ -3,10 +3,10 @@ use std::ops::Deref;
 use std::path::Path;
 use std::rc::Rc;
 
-use gdk::gdk_pixbuf::Pixbuf;
-use gtk::gdk_pixbuf::InterpType;
-use gtk::prelude::*;
-use gtk::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use gdk4::gdk_pixbuf::Pixbuf;
+use gtk4::gdk_pixbuf::InterpType;
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
 use crate::flg;
 use czkawka_core::common::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
@@ -135,7 +135,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Color
                     glib::types::Type::STRING, // TextColor
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -144,8 +144,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_duplicates(&tree_view);
 
                 tree_view.set_widget_name("tree_view_duplicate_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Empty Folders
             {
@@ -159,7 +159,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -168,8 +168,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.set_widget_name("tree_view_empty_folder_finder");
 
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Empty Files
             {
@@ -182,7 +182,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -190,8 +190,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_empty_files(&tree_view);
 
                 tree_view.set_widget_name("tree_view_empty_files_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Temporary Files
             {
@@ -205,7 +205,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -213,8 +213,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_temporary_files(&tree_view);
 
                 tree_view.set_widget_name("tree_view_temporary_files_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Big Files
             {
@@ -230,7 +230,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::U64,    // SizeAsBytes
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -238,8 +238,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_big_files(&tree_view);
 
                 tree_view.set_widget_name("tree_view_big_files_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Similar Images
             {
@@ -263,7 +263,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Color
                     glib::types::Type::STRING, // TextColor
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -272,8 +272,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_similar_images(&tree_view);
 
                 tree_view.set_widget_name("tree_view_similar_images_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Similar Videos
             {
@@ -292,7 +292,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Color
                     glib::types::Type::STRING, // TextColor
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -301,8 +301,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_similar_videos(&tree_view);
 
                 tree_view.set_widget_name("tree_view_similar_videos_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Same Music
             {
@@ -328,7 +328,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Color
                     glib::types::Type::STRING, // TextColor
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -337,8 +337,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_same_music(&tree_view);
 
                 tree_view.set_widget_name("tree_view_same_music_finder");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Invalid Symlinks
             {
@@ -354,7 +354,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -362,8 +362,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_invalid_symlinks(&tree_view);
 
                 tree_view.set_widget_name("tree_view_invalid_symlinks");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Broken Files
             {
@@ -378,7 +378,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -386,8 +386,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_broken_files(&tree_view);
 
                 tree_view.set_widget_name("tree_view_broken_files");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
             // Bad Extensions
             {
@@ -403,7 +403,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                 ];
-                let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -411,8 +411,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 create_tree_view_broken_files(&tree_view);
 
                 tree_view.set_widget_name("tree_view_bad_extensions");
-                scrolled_window.add(&tree_view);
-                scrolled_window.show_all();
+                scrolled_window.set_child(Some(&tree_view));
+                scrolled_window.show();
             }
         }
     }
@@ -429,7 +429,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 glib::types::Type::STRING, // Path
                 glib::types::Type::BOOL,   // ReferenceButton
             ];
-            let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+            let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
             tree_view.set_model(Some(&list_store));
             tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -437,8 +437,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             create_tree_view_included_directories(&tree_view);
 
             tree_view.set_widget_name("tree_view_upper_included_directories");
-            scrolled_window.add(&tree_view);
-            scrolled_window.show_all();
+            scrolled_window.set_child(Some(&tree_view));
+            scrolled_window.show();
 
             tree_view.connect_button_press_event(opening_double_click_function_directories);
             evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
@@ -462,7 +462,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let evk = gui_data.upper_notebook.evk_tree_view_excluded_directories.clone();
 
             let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
-            let list_store: gtk::ListStore = gtk::ListStore::new(&col_types);
+            let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
             tree_view.set_model(Some(&list_store));
             tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -470,8 +470,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             create_tree_view_excluded_directories(&tree_view);
 
             tree_view.set_widget_name("tree_view_upper_excluded_directories");
-            scrolled_window.add(&tree_view);
-            scrolled_window.show_all();
+            scrolled_window.set_child(Some(&tree_view));
+            scrolled_window.show();
 
             tree_view.connect_button_press_event(opening_double_click_function_directories);
             evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
@@ -497,7 +497,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
         window_progress.connect_delete_event(move |_, _| {
             stop_sender.send(()).unwrap();
-            gtk::Inhibit(true)
+            gtk4::Inhibit(true)
         });
     }
 
@@ -533,7 +533,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
                 nb_object.column_name,
             );
 
-            gtk::Inhibit(false)
+            gtk4::Inhibit(false)
         });
     }
     // Similar Images
@@ -556,7 +556,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
                 nb_object.column_path,
                 nb_object.column_name,
             );
-            gtk::Inhibit(false)
+            gtk4::Inhibit(false)
         });
     }
 
@@ -652,7 +652,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
             show_preview(
-                &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
+                &event_controller_key.widget().unwrap().downcast::<gtk4::TreeView>().unwrap(),
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
@@ -680,7 +680,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             show_preview(
-                &event_controller_key.widget().unwrap().downcast::<gtk::TreeView>().unwrap(),
+                &event_controller_key.widget().unwrap().downcast::<gtk4::TreeView>().unwrap(),
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,
                 &image_preview,
@@ -711,8 +711,8 @@ fn show_preview(
         // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
         #[allow(clippy::never_loop)]
         'dir: loop {
-            let path = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
-            let name = tree_model.value(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
+            let path = tree_model.get(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
+            let name = tree_model.get(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
 
             let file_name = get_full_name_from_path_name(&path, &name);
             let file_name = file_name.as_str();

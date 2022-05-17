@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use gtk::prelude::*;
-use gtk::{ResponseType, TreePath};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{ResponseType, TreePath};
 
 use crate::flg;
 
@@ -64,20 +64,20 @@ pub fn connect_button_move(gui_data: &GuiData) {
 
 // TODO add progress bar
 fn move_things(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_color: Option<i32>,
     column_selection: i32,
-    entry_info: &gtk::Entry,
-    text_view_errors: &gtk::TextView,
-    window_main: &gtk::Window,
+    entry_info: &gtk4::Entry,
+    text_view_errors: &gtk4::TextView,
+    window_main: &gtk4::Window,
 ) {
     reset_text_view(text_view_errors);
 
-    let chooser = gtk::FileChooserDialog::builder()
+    let chooser = gtk4::FileChooserDialog::builder()
         .title(&flg!("move_files_title_dialog"))
-        .action(gtk::FileChooserAction::SelectFolder)
+        .action(gtk4::FileChooserAction::SelectFolder)
         .transient_for(window_main)
         .modal(true)
         .build();
@@ -91,7 +91,7 @@ fn move_things(
     let text_view_errors = text_view_errors.clone();
     let tree_view = tree_view.clone();
     chooser.connect_response(move |file_chooser, response_type| {
-        if response_type == gtk::ResponseType::Ok {
+        if response_type == gtk4::ResponseType::Ok {
             let folders: Vec<PathBuf> = file_chooser.filenames();
             // GTK 4
             // folders = Vec::new();
@@ -140,14 +140,14 @@ fn move_things(
 }
 
 fn move_with_tree(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_color: i32,
     column_selection: i32,
     destination_folder: PathBuf,
-    entry_info: &gtk::Entry,
-    text_view_errors: &gtk::TextView,
+    entry_info: &gtk4::Entry,
+    text_view_errors: &gtk4::TextView,
 ) {
     let model = get_list_store(tree_view);
 
@@ -155,9 +155,9 @@ fn move_with_tree(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    selected_rows.push(model.path(&iter).unwrap());
+            if model.get(&iter, column_selection).get::<bool>().unwrap() {
+                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                    selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
                 }
@@ -179,13 +179,13 @@ fn move_with_tree(
 }
 
 fn move_with_list(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_selection: i32,
     destination_folder: PathBuf,
-    entry_info: &gtk::Entry,
-    text_view_errors: &gtk::TextView,
+    entry_info: &gtk4::Entry,
+    text_view_errors: &gtk4::TextView,
 ) {
     let model = get_list_store(tree_view);
 
@@ -193,8 +193,8 @@ fn move_with_list(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                selected_rows.push(model.path(&iter).unwrap());
+            if model.get(&iter, column_selection).get::<bool>().unwrap() {
+                selected_rows.push(model.path(&iter));
             }
 
             if !model.iter_next(&iter) {
@@ -212,12 +212,12 @@ fn move_with_list(
 
 fn move_files_common(
     selected_rows: &[TreePath],
-    model: &gtk::ListStore,
+    model: &gtk4::ListStore,
     column_file_name: i32,
     column_path: i32,
     destination_folder: &Path,
-    entry_info: &gtk::Entry,
-    text_view_errors: &gtk::TextView,
+    entry_info: &gtk4::Entry,
+    text_view_errors: &gtk4::TextView,
 ) {
     let mut messages: String = "".to_string();
 
@@ -228,8 +228,8 @@ fn move_files_common(
         handle_gtk_pending_event_counter(counter);
         let iter = model.iter(tree_path).unwrap();
 
-        let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.value(&iter, column_path).get::<String>().unwrap();
+        let file_name = model.get(&iter, column_file_name).get::<String>().unwrap();
+        let path = model.get(&iter, column_path).get::<String>().unwrap();
 
         let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(file_name);
@@ -259,5 +259,5 @@ fn move_files_common(
         .as_str(),
     );
 
-    text_view_errors.buffer().unwrap().set_text(messages.as_str());
+    text_view_errors.buffer().set_text(messages.as_str());
 }

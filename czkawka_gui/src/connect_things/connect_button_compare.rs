@@ -1,7 +1,7 @@
 use crate::flg;
-use gdk::gdk_pixbuf::{InterpType, Pixbuf};
-use gtk::prelude::*;
-use gtk::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
+use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -93,7 +93,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         *shared_using_for_preview.borrow_mut() = (None, None);
         image_compare_left.set_from_pixbuf(None);
         image_compare_right.set_from_pixbuf(None);
-        gtk::Inhibit(true)
+        gtk4::Inhibit(true)
     });
 
     let button_go_previous_compare_group = gui_data.compare_images.button_go_previous_compare_group.clone();
@@ -251,18 +251,18 @@ fn populate_groups_at_start(
     model: &TreeModel,
     shared_current_path: Rc<RefCell<Option<TreePath>>>,
     tree_path: TreePath,
-    image_compare_left: &gtk::Image,
-    image_compare_right: &gtk::Image,
+    image_compare_left: &gtk4::Image,
+    image_compare_right: &gtk4::Image,
     current_group: u32,
     group_number: u32,
-    check_button_left_preview_text: &gtk::CheckButton,
-    check_button_right_preview_text: &gtk::CheckButton,
-    scrolled_window_compare_choose_images: &gtk::ScrolledWindow,
-    label_group_info: &gtk::Label,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
+    check_button_left_preview_text: &gtk4::CheckButton,
+    check_button_right_preview_text: &gtk4::CheckButton,
+    scrolled_window_compare_choose_images: &gtk4::ScrolledWindow,
+    label_group_info: &gtk4::Label,
+    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)>>>,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    button_go_previous_compare_group: &gtk::Button,
-    button_go_next_compare_group: &gtk::Button,
+    button_go_previous_compare_group: &gtk4::Button,
+    button_go_next_compare_group: &gtk4::Button,
 ) {
     if current_group == 1 {
         button_go_previous_compare_group.set_sensitive(false);
@@ -317,9 +317,9 @@ fn populate_groups_at_start(
     *shared_image_cache.borrow_mut() = cache_all_images.clone();
 
     let mut found = false;
-    for i in scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk::Viewport>().unwrap().children() {
+    for i in scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk4::Viewport>().unwrap().children() {
         if i.widget_name() == "all_box" {
-            let gtk_box = i.downcast::<gtk::Box>().unwrap();
+            let gtk_box = i.downcast::<gtk4::Box>().unwrap();
             update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
             found = true;
             break;
@@ -327,20 +327,20 @@ fn populate_groups_at_start(
     }
     assert!(found);
 
-    let is_active = model.value(&model.iter(&cache_all_images[0].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
+    let is_active = model.get(&model.iter(&cache_all_images[0].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
     check_button_left_preview_text.set_active(is_active);
-    let is_active = model.value(&model.iter(&cache_all_images[1].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
+    let is_active = model.get(&model.iter(&cache_all_images[1].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
     check_button_right_preview_text.set_active(is_active);
 }
 
 /// Generate images which will be used later as preview images without needing to open them again and again
-fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreePath)>) -> Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk4::TreePath)>) -> Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)> {
     // TODO use here threads,
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
     for (full_path, name, tree_path) in vector_with_path {
-        let small_img = gtk::Image::new();
-        let big_img = gtk::Image::new();
+        let small_img = gtk4::Image::new();
+        let big_img = gtk4::Image::new();
 
         match Pixbuf::from_file(&full_path) {
             Ok(pixbuf) =>
@@ -378,17 +378,17 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk::TreePa
 }
 
 /// Takes info about current items in groups like path
-fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk::TreePath)> {
+fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk4::TreePath)> {
     let used_iter = model.iter(current_path).unwrap();
 
-    assert_eq!(model.value(&used_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
-    let using_reference = !model.value(&used_iter, column_path).get::<String>().unwrap().is_empty();
+    assert_eq!(model.get(&used_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
+    let using_reference = !model.get(&used_iter, column_path).get::<String>().unwrap().is_empty();
 
     let mut returned_vector = Vec::new();
 
     if using_reference {
-        let name = model.value(&used_iter, column_name).get::<String>().unwrap();
-        let path = model.value(&used_iter, column_path).get::<String>().unwrap();
+        let name = model.get(&used_iter, column_name).get::<String>().unwrap();
+        let path = model.get(&used_iter, column_path).get::<String>().unwrap();
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
@@ -400,8 +400,8 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
     }
 
     loop {
-        let name = model.value(&used_iter, column_name).get::<String>().unwrap();
-        let path = model.value(&used_iter, column_path).get::<String>().unwrap();
+        let name = model.get(&used_iter, column_name).get::<String>().unwrap();
+        let path = model.get(&used_iter, column_path).get::<String>().unwrap();
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
@@ -411,7 +411,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
             break;
         }
 
-        let color = model.value(&used_iter, column_color).get::<String>().unwrap();
+        let color = model.get(&used_iter, column_color).get::<String>().unwrap();
 
         if color == HEADER_ROW_COLOR {
             break;
@@ -424,10 +424,10 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
 }
 
 /// Moves iterator to previous/next header
-fn move_iter(model: &gtk::TreeModel, tree_path: &TreePath, column_color: i32, go_next: bool) -> TreePath {
+fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_color: i32, go_next: bool) -> TreePath {
     let tree_iter = model.iter(tree_path).unwrap();
 
-    assert_eq!(model.value(&tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
+    assert_eq!(model.get(&tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
 
     if go_next {
         if !model.iter_next(&tree_iter) {
@@ -450,7 +450,7 @@ fn move_iter(model: &gtk::TreeModel, tree_path: &TreePath, column_color: i32, go
             }
         }
 
-        let color = model.value(&tree_iter, column_color).get::<String>().unwrap();
+        let color = model.get(&tree_iter, column_color).get::<String>().unwrap();
 
         if color == HEADER_ROW_COLOR {
             break;
@@ -466,7 +466,7 @@ fn populate_similar_scrolled_view(
     image_compare_left: &Image,
     image_compare_right: &Image,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk::Image, gtk::Image, gtk::TreePath)>>>,
+    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)>>>,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
     model: &TreeModel,
@@ -477,17 +477,17 @@ fn populate_similar_scrolled_view(
     };
     scrolled_window.set_propagate_natural_height(true);
 
-    let all_gtk_box = gtk::Box::new(Orientation::Horizontal, 5);
+    let all_gtk_box = gtk4::Box::new(Orientation::Horizontal, 5);
     all_gtk_box.set_widget_name("all_box");
 
     for (number, (path, _name, big_thumbnail, small_thumbnail, tree_path)) in image_cache.iter().enumerate() {
-        let small_box = gtk::Box::new(Orientation::Vertical, 3);
+        let small_box = gtk4::Box::new(Orientation::Vertical, 3);
 
-        let smaller_box = gtk::Box::new(Orientation::Horizontal, 2);
+        let smaller_box = gtk4::Box::new(Orientation::Horizontal, 2);
 
-        let button_left = gtk::Button::builder().label(&flg!("compare_move_left_button")).build();
-        let label = gtk::Label::builder().label(&(number + 1).to_string()).build();
-        let button_right = gtk::Button::builder().label(&flg!("compare_move_right_button")).build();
+        let button_left = gtk4::Button::builder().label(&flg!("compare_move_left_button")).build();
+        let label = gtk4::Label::builder().label(&(number + 1).to_string()).build();
+        let button_right = gtk4::Button::builder().label(&flg!("compare_move_right_button")).build();
 
         let image_compare_left = image_compare_left.clone();
         let image_compare_right = image_compare_right.clone();
@@ -506,7 +506,7 @@ fn populate_similar_scrolled_view(
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
             image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
 
-            let is_active = model_clone.value(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
+            let is_active = model_clone.get(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
             check_button_left_preview_text_clone.set_active(is_active);
             check_button_left_preview_text_clone.set_label(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70)));
         });
@@ -525,28 +525,28 @@ fn populate_similar_scrolled_view(
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
             image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
 
-            let is_active = model_clone.value(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
+            let is_active = model_clone.get(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
             check_button_right_preview_text_clone.set_active(is_active);
             check_button_right_preview_text_clone.set_label(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70)));
         });
 
-        smaller_box.add(&button_left);
-        smaller_box.add(&label);
-        smaller_box.add(&button_right);
+        smaller_box.append(&button_left);
+        smaller_box.append(&label);
+        smaller_box.append(&button_right);
 
-        small_box.add(&smaller_box);
-        small_box.add(small_thumbnail);
+        small_box.append(&smaller_box);
+        small_box.append(small_thumbnail);
 
-        all_gtk_box.add(&small_box);
+        all_gtk_box.append(&small_box);
     }
 
     all_gtk_box.show_all();
-    scrolled_window.add(&all_gtk_box);
+    scrolled_window.append(&all_gtk_box);
 }
 
 /// Disables/Enables L/R buttons at the bottom scrolled view
 fn update_bottom_buttons(
-    all_gtk_box: &gtk::Box,
+    all_gtk_box: &gtk4::Box,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
 ) {
@@ -557,10 +557,10 @@ fn update_bottom_buttons(
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 
-        let bx = i.downcast::<gtk::Box>().unwrap();
-        let smaller_bx = bx.children()[0].clone().downcast::<gtk::Box>().unwrap();
+        let bx = i.downcast::<gtk4::Box>().unwrap();
+        let smaller_bx = bx.children()[0].clone().downcast::<gtk4::Box>().unwrap();
         for items in smaller_bx.children() {
-            if let Ok(btn) = items.downcast::<gtk::Button>() {
+            if let Ok(btn) = items.downcast::<gtk4::Button>() {
                 btn.set_sensitive(is_chosen);
             }
         }
@@ -578,7 +578,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
     let iter = model.iter_first().unwrap(); // Checking that treeview is not empty should be done before
     header_clone = iter; // if nothing selected, use first group
     possible_header = iter; // if nothing selected, use first group
-    assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+    assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
 
     if !selected_records.is_empty() {
         let first_selected_record = selected_records[0].clone();
@@ -587,12 +587,12 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
                 break;
             }
 
-            if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
                 possible_group += 1;
                 possible_header = iter;
             }
 
-            if model.path(&iter).unwrap() == first_selected_record {
+            if model.path(&iter) == first_selected_record {
                 header_clone = possible_header;
                 current_group = possible_group;
             }

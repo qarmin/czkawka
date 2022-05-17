@@ -5,9 +5,9 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
-use gtk::gio::ApplicationFlags;
-use gtk::prelude::*;
-use gtk::Application;
+use gtk4::gio::ApplicationFlags;
+use gtk4::prelude::*;use gtk4::Inhibit;
+use gtk4::Application;
 use std::env;
 use std::ffi::OsString;
 
@@ -59,7 +59,7 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    let application = gtk::Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
+    let application = gtk4::Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
         build_ui(app, cmdline.arguments());
         0
