@@ -187,7 +187,7 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
     let window_main = gui_data.window_main.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let used_additional_arguments = arguments.len() > 1;
-    window_main.connect_delete_event(move |_, _| {
+    window_main.connect_close_request(move |_| {
         // Not save configuration when using non default arguments
         if !used_additional_arguments {
             save_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors);

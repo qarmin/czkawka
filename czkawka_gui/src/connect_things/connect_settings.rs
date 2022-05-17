@@ -27,7 +27,7 @@ pub fn connect_settings(gui_data: &GuiData) {
 
         let window_settings = gui_data.settings.window_settings.clone();
 
-        window_settings.connect_delete_event(move |window, _| {
+        window_settings.connect_close_request(move |window| {
             window.hide();
             gtk4::Inhibit(true)
         });

@@ -125,8 +125,8 @@ fn hardlink_symlink(
     let mut selected_rows = Vec::new();
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>().unwrap() {
-                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+            if model.get(&iter, column_selection).get::<bool>() {
+                if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -290,20 +290,20 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     let mut selected_values_in_group = 0;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get(&iter, column_color).get::<String>() == HEADER_ROW_COLOR {
                 if selected_values_in_group == 1 {
                     break;
                 }
                 selected_values_in_group = 0;
             } else {
-                if model.get(&iter, column_selection).get::<bool>().unwrap() {
+                if model.get(&iter, column_selection).get::<bool>() {
                     selected_values_in_group += 1;
                 }
             }
@@ -332,14 +332,14 @@ pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, col
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR && model.get(&iter, column_selection).get::<bool>().unwrap() {
+            if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR && model.get(&iter, column_selection).get::<bool>() {
                 return true;
             }
         }

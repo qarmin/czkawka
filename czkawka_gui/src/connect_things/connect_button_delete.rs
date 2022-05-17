@@ -211,7 +211,7 @@ pub async fn check_if_deleting_all_files_in_group(
     let mut selected_all_records: bool = true;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
 
         // It is safe to remove any number of files in reference mode
         if !model.get(&iter, column_path).get::<String>().unwrap().is_empty() {
@@ -393,7 +393,7 @@ pub fn basic_remove(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>().unwrap() {
+            if model.get(&iter, column_selection).get::<bool>() {
                 selected_rows.push(model.path(&iter));
             }
 
@@ -472,8 +472,8 @@ pub fn tree_remove(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>().unwrap() {
-                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+            if model.get(&iter, column_selection).get::<bool>() {
+                if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");

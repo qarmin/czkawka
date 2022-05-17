@@ -783,15 +783,6 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-pub fn get_custom_label_from_button_with_image(button: &gtk4::Button) -> gtk4::Label {
-    let internal_box = button.child().unwrap().downcast::<gtk4::Box>().unwrap();
-    for child in internal_box.children() {
-        if let Ok(t) = child.downcast::<gtk4::Label>() {
-            return t;
-        }
-    }
-    panic!("Button doesn't have proper custom label child");
-}
 pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::Image {
     let internal_box = match button.child().unwrap().downcast::<gtk4::Box>() {
         Ok(t) => t,
@@ -808,15 +799,15 @@ pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::I
 }
 
 // GTK 4
-// pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
-//     let internal_box = button.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
-//     for child in get_all_children(&internal_box) {
-//         if let Ok(t) = child.downcast::<gtk4::Label>() {
-//             return t;
-//         }
-//     }
-//     panic!("Button doesn't have proper custom label child");
-// }
+pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
+    let internal_box = button.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
+    for child in get_all_children(&internal_box) {
+        if let Ok(t) = child.downcast::<gtk4::Label>() {
+            return t;
+        }
+    }
+    panic!("Button doesn't have proper custom label child");
+}
 // TODO needs GTK 4.6 to be able to set as child of menu button a box
 // pub fn get_custom_label_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
 //     println!("{:?}", get_all_children(button));
@@ -833,21 +824,21 @@ pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::I
 // }
 
 // GTK 4
-// pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
-//     let mut vector = vec![];
-//     if let Some(mut child) = wid.first_child() {
-//         vector.push(child.clone());
-//         loop {
-//             child = match child.next_sibling() {
-//                 Some(t) => t,
-//                 None => break,
-//             };
-//             vector.push(child.clone());
-//         }
-//     }
-//
-//     return vector;
-// }
+pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
+    let mut vector = vec![];
+    if let Some(mut child) = wid.first_child() {
+        vector.push(child.clone());
+        loop {
+            child = match child.next_sibling() {
+                Some(t) => t,
+                None => break,
+            };
+            vector.push(child.clone());
+        }
+    }
+
+    return vector;
+}
 
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;

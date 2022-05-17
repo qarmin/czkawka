@@ -92,21 +92,19 @@ fn move_things(
     let tree_view = tree_view.clone();
     chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk4::ResponseType::Ok {
-            let folders: Vec<PathBuf> = file_chooser.filenames();
-            // GTK 4
-            // folders = Vec::new();
-            // if let Some(g_files) = file_chooser.files() {
-            //     for index in 0..g_files.n_items() {
-            //         let file = &g_files.item(index);
-            //         if let Some(file) = file {
-            //             println!("{:?}", file);
-            //             let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
-            //             if let Some(path_buf) = ss.path() {
-            //                 folders.push(path_buf);
-            //             }
-            //         }
-            //     }
-            // }
+            let mut folders: Vec<PathBuf> = Vec::new();
+            if let Some(g_files) = file_chooser.files() {
+                for index in 0..g_files.n_items() {
+                    let file = &g_files.item(index);
+                    if let Some(file) = file {
+                        println!("{:?}", file);
+                        let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
+                        if let Some(path_buf) = ss.path() {
+                            folders.push(path_buf);
+                        }
+                    }
+                }
+            }
 
             if folders.len() != 1 {
                 add_text_to_text_view(
@@ -155,8 +153,8 @@ fn move_with_tree(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>().unwrap() {
-                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+            if model.get(&iter, column_selection).get::<bool>() {
+                if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -193,7 +191,7 @@ fn move_with_list(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>().unwrap() {
+            if model.get(&iter, column_selection).get::<bool>() {
                 selected_rows.push(model.path(&iter));
             }
 
@@ -227,8 +225,8 @@ fn move_files_common(
     'next_result: for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
         let iter = model.iter(tree_path).unwrap();
 
-        let file_name = model.get(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.get(&iter, column_path).get::<String>().unwrap();
+        let file_name = model.get(&iter, column_file_name).get::<String>();
+        let path = model.get(&iter, column_path).get::<String>();
 
         let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(file_name);

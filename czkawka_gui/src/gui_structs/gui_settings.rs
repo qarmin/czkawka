@@ -141,17 +141,18 @@ impl GuiSettings {
     }
 
     pub fn update_language(&self) {
-        self.window_settings.set_title(&flg!("window_settings_title"));
+        self.window_settings.set_title(Some(&flg!("window_settings_title")));
 
-        self.check_button_settings_save_at_exit.set_label(&flg!("settings_save_at_exit_button"));
-        self.check_button_settings_load_at_start.set_label(&flg!("settings_load_at_start_button"));
-        self.check_button_settings_confirm_deletion.set_label(&flg!("settings_confirm_deletion_button"));
-        self.check_button_settings_confirm_link.set_label(&flg!("settings_confirm_link_button"));
-        self.check_button_settings_confirm_group_deletion.set_label(&flg!("settings_confirm_group_deletion_button"));
-        self.check_button_settings_show_text_view.set_label(&flg!("settings_show_text_view_button"));
-        self.check_button_settings_use_cache.set_label(&flg!("settings_use_cache_button"));
-        self.check_button_settings_save_also_json.set_label(&flg!("settings_save_also_as_json_button"));
-        self.check_button_settings_use_trash.set_label(&flg!("settings_use_trash_button"));
+        self.check_button_settings_save_at_exit.set_label(Some(&flg!("settings_save_at_exit_button")));
+        self.check_button_settings_load_at_start.set_label(Some(&flg!("settings_load_at_start_button")));
+        self.check_button_settings_confirm_deletion.set_label(Some(&flg!("settings_confirm_deletion_button")));
+        self.check_button_settings_confirm_link.set_label(Some(&flg!("settings_confirm_link_button")));
+        self.check_button_settings_confirm_group_deletion
+            .set_label(Some(&flg!("settings_confirm_group_deletion_button")));
+        self.check_button_settings_show_text_view.set_label(Some(&flg!("settings_show_text_view_button")));
+        self.check_button_settings_use_cache.set_label(Some(&flg!("settings_use_cache_button")));
+        self.check_button_settings_save_also_json.set_label(Some(&flg!("settings_save_also_as_json_button")));
+        self.check_button_settings_use_trash.set_label(Some(&flg!("settings_use_trash_button")));
         self.label_settings_general_language.set_label(&flg!("settings_language_label"));
 
         self.check_button_settings_save_at_exit
@@ -172,13 +173,15 @@ impl GuiSettings {
         self.check_button_settings_use_trash.set_tooltip_text(Some(&flg!("settings_use_trash_button_tooltip")));
         self.label_settings_general_language.set_tooltip_text(Some(&flg!("settings_language_label_tooltip")));
 
-        self.check_button_settings_hide_hard_links.set_label(&flg!("settings_duplicates_hide_hard_link_button"));
+        self.check_button_settings_hide_hard_links
+            .set_label(Some(&flg!("settings_duplicates_hide_hard_link_button")));
         self.check_button_settings_show_preview_duplicates
-            .set_label(&flg!("settings_multiple_image_preview_checkbutton"));
+            .set_label(Some(&flg!("settings_multiple_image_preview_checkbutton")));
         self.check_button_settings_duplicates_delete_outdated_cache
-            .set_label(&flg!("settings_multiple_delete_outdated_cache_checkbutton"));
+            .set_label(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton")));
         self.button_settings_duplicates_clear_cache.set_label(&flg!("settings_multiple_clear_cache_button"));
-        self.check_button_duplicates_use_prehash_cache.set_label(&flg!("settings_duplicates_prehash_checkbutton"));
+        self.check_button_duplicates_use_prehash_cache
+            .set_label(Some(&flg!("settings_duplicates_prehash_checkbutton")));
         self.label_settings_duplicate_minimal_size_cache
             .set_label(&flg!("settings_duplicates_minimal_size_cache_label"));
         self.label_settings_duplicate_minimal_size_cache_prehash
@@ -200,9 +203,9 @@ impl GuiSettings {
             .set_tooltip_text(Some(&flg!("settings_duplicates_prehash_minimal_entry_tooltip")));
 
         self.check_button_settings_show_preview_similar_images
-            .set_label(&flg!("settings_multiple_image_preview_checkbutton"));
+            .set_label(Some(&flg!("settings_multiple_image_preview_checkbutton")));
         self.check_button_settings_similar_images_delete_outdated_cache
-            .set_label(&flg!("settings_multiple_delete_outdated_cache_checkbutton"));
+            .set_label(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton")));
         self.button_settings_similar_images_clear_cache.set_label(&flg!("settings_multiple_clear_cache_button"));
 
         self.check_button_settings_show_preview_similar_images
@@ -213,7 +216,7 @@ impl GuiSettings {
             .set_tooltip_text(Some(&flg!("settings_multiple_clear_cache_button_tooltip")));
 
         self.check_button_settings_similar_videos_delete_outdated_cache
-            .set_label(&flg!("settings_multiple_delete_outdated_cache_checkbutton"));
+            .set_label(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton")));
         self.button_settings_similar_videos_clear_cache.set_label(&flg!("settings_multiple_clear_cache_button"));
 
         self.check_button_settings_similar_videos_delete_outdated_cache
