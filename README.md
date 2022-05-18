@@ -23,7 +23,7 @@
   - Same Music - Searches for music with the same artist, album etc.
   - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
   - Broken Files - Finds files that are invalid or corrupted
-  - Bad Extensions - List files whose content not match with they extension
+  - Bad Extensions - Lists files whose content not match with their extension
 
 <!-- The GIF thingy -->
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
@@ -37,7 +37,7 @@ Some helpful tricks you can find [**here**](instructions/Instruction.md#tips-tri
 Installation instructions with download links you can find [**here**](instructions/Installation.md).
 
 ## Compilation
-If you want to try and develop Czkawka or just use the latest available feature, you may want to look at the [**compilation instruction**](instructions/Compilation.md).
+If you want to try and develop Czkawka or just use the latest available feature, you may want to look at the [**compilation instructions**](instructions/Compilation.md).
 
 ## Benchmarks
 
