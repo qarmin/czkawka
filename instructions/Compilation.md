@@ -4,7 +4,7 @@
 
 If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
 
-FFmpeg is not included here, because is not needed to build because it is dynamically loaded.
+FFmpeg is not included here because it is not needed to build - it is dynamically loaded.
 
 
 | Program | Min  | What for                                                                      |
@@ -54,8 +54,8 @@ docker build ./misc/docker/ --tag cargo-gtk
 ## Compilation
 
 Czkawka can be installed with Debug or Release build.  
-With Debug build additional checks e.g. for variables overflow are available but depends of the usage it works very slow so should be using only to develop this app.    
-Compilation with `--release` flag will optimize binaries, so they can be used with good performance(official binaries are build with this flag)
+With Debug build additional checks, e.g., variables overflow, are available, but depending on the usage it works very slow, so it should be used only for development purposes.    
+Compilation with `--release` flag will optimize binaries, so they can be used with good performance (official binaries are built with this flag)
 
 
 - Download the source
@@ -86,7 +86,7 @@ target/release/czkawka_gui
 ```
 
 ## Additional features
-For now, finding broken audio files is temporary disabled by default, because app crashes when audio libraries are not found on the computer.  
+For now, finding broken audio files is temporarily disabled by default, because app crashes when audio libraries are not found on the computer.  
 I'm waiting for ability to disable audio playback feature, so after that I will be able to re-enable by default this feature (https://github.com/RustAudio/rodio/issues/349)
 
 To enable checking for broken audio files, just add ` --all-features`
