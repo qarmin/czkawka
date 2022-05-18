@@ -19,7 +19,7 @@ pub struct GuiProgressDialog {
 
     pub button_stop_in_dialog: gtk4::Button,
     pub evk_button_stop_in_dialog: gtk4::EventControllerKey,
-    // pub gc_button_stop_in_dialog: gtk4::GestureClick,
+    pub gc_button_stop_in_dialog: gtk4::GestureClick,
 }
 
 impl GuiProgressDialog {
@@ -28,7 +28,7 @@ impl GuiProgressDialog {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_progress: gtk4::Dialog = builder.object("window_progress").unwrap();
-        window_progress.set_title(&flg!("window_progress_title"));
+        window_progress.set_title(Some(&flg!("window_progress_title")));
         window_progress.set_transient_for(Some(window_main));
         window_progress.set_modal(true);
 
@@ -42,11 +42,10 @@ impl GuiProgressDialog {
         let grid_progress_stages: gtk4::Grid = builder.object("grid_progress_stages").unwrap();
 
         let button_stop_in_dialog: gtk4::Button = builder.object("button_stop_in_dialog").unwrap();
-        let evk_button_stop_in_dialog = EventControllerKey::new(&button_stop_in_dialog);
-        // let evk_button_stop_in_dialog = EventControllerKey::new();
-        // button_stop_in_dialog.add_controller(&evk_button_stop_in_dialog);
-        // let gc_button_stop_in_dialog = gtk4::GestureClick::new();
-        // button_stop_in_dialog.add_controller(&gc_button_stop_in_dialog);
+        let evk_button_stop_in_dialog = EventControllerKey::new();
+        button_stop_in_dialog.add_controller(&evk_button_stop_in_dialog);
+        let gc_button_stop_in_dialog = gtk4::GestureClick::new();
+        button_stop_in_dialog.add_controller(&gc_button_stop_in_dialog);
 
         set_icon_of_button(&button_stop_in_dialog, CZK_ICON_STOP);
 
@@ -60,10 +59,11 @@ impl GuiProgressDialog {
             grid_progress_stages,
             button_stop_in_dialog,
             evk_button_stop_in_dialog,
+            gc_button_stop_in_dialog,
         }
     }
     pub fn update_language(&self) {
-        self.window_progress.set_title(&flg!("window_progress_title"));
+        self.window_progress.set_title(Some(&flg!("window_progress_title")));
 
         get_custom_label_from_button_with_image(&self.button_stop_in_dialog.clone()).set_text(&flg!("progress_stop_button"));
 

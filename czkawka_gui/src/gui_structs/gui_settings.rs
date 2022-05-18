@@ -2,6 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Window};
 
 use crate::flg;
+use crate::help_functions::get_all_children;
 
 #[derive(Clone)]
 pub struct GuiSettings {
@@ -57,7 +58,7 @@ impl GuiSettings {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_settings: gtk4::Window = builder.object("window_settings").unwrap();
-        window_settings.set_title(&flg!("window_settings_title"));
+        window_settings.set_title(Some(&flg!("window_settings_title")));
         window_settings.set_modal(true);
         window_settings.set_transient_for(Some(window_main));
 
@@ -239,10 +240,8 @@ impl GuiSettings {
         self.button_settings_open_settings_folder
             .set_tooltip_text(Some(&flg!("settings_folder_settings_open_tooltip")));
 
-        let vec_children: Vec<gtk4::Widget> = self.notebook_settings.children();
-
-        // let vec_children: Vec<gtk4::Widget> = get_all_children(&self.notebook_settings);
-        // let vec_children: Vec<gtk4::Widget> = get_all_children(&vec_children[1]);
+        let vec_children: Vec<gtk4::Widget> = get_all_children(&self.notebook_settings);
+        let vec_children: Vec<gtk4::Widget> = get_all_children(&vec_children[1]);
 
         // Change name of main notebook tabs
         let names: [String; 4] = [

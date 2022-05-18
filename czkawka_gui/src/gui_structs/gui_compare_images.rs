@@ -35,7 +35,7 @@ impl GuiCompareImages {
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_compare: gtk4::Window = builder.object("window_compare").unwrap();
-        window_compare.set_title(&flg!("window_compare_images"));
+        window_compare.set_title(Some(&flg!("window_compare_images")));
         window_compare.set_modal(true);
         window_compare.set_transient_for(Some(window_main));
 
@@ -79,6 +79,6 @@ impl GuiCompareImages {
         }
     }
     pub fn update_language(&self) {
-        self.window_compare.set_title(&flg!("window_compare_images"));
+        self.window_compare.set_title(Some(&flg!("window_compare_images")));
     }
 }

@@ -362,8 +362,8 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk4::TreeP
                         Some(pixbuf) => pixbuf,
                     };
 
-                    big_img.set_pixbuf(Some(&pixbuf_big));
-                    small_img.set_pixbuf(Some(&pixbuf_small));
+                    big_img.set_from_pixbuf(Some(&pixbuf_big));
+                    small_img.set_from_pixbuf(Some(&pixbuf_small));
                     break;
                 }
             }

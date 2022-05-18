@@ -104,7 +104,7 @@ fn common_mark_function(tree_view: &gtk4::TreeView, column_selection: i32, colum
                 continue;
             }
         }
-        let value = !tree_model.get(&tree_model.iter(tree_path).unwrap(), column_selection).get::<bool>();
+        let value = !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), column_selection);
         model.set_value(&tree_model.iter(tree_path).unwrap(), column_selection as u32, &value.to_value());
     }
 }
@@ -114,8 +114,8 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let name = tree_model.get(&tree_model.iter(tree_path).unwrap(), column_name).get::<String>();
-        let path = tree_model.get(&tree_model.iter(tree_path).unwrap(), column_path).get::<String>();
+        let name = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_name);
+        let path = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_path);
 
         let end_path = match opening_mode {
             OpenMode::OnlyPath => path,

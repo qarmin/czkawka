@@ -199,7 +199,7 @@ impl LoadSaveStruct {
         if let Some(iter) = list_store.iter_first() {
             loop {
                 // TODO maybe save also here reference directories?
-                vec_string.push(list_store.get(&iter, column_path).get::<String>().unwrap());
+                vec_string.push(list_store.get::<String>(&iter, column_path));
                 if !list_store.iter_next(&iter) {
                     break;
                 }

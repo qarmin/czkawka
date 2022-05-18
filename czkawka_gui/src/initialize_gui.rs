@@ -652,7 +652,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
             show_preview(
-                &event_controller_key.widget().unwrap().downcast::<gtk4::TreeView>().unwrap(),
+                &event_controller_key.widget().downcast::<gtk4::TreeView>().unwrap(),
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
@@ -680,7 +680,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             show_preview(
-                &event_controller_key.widget().unwrap().downcast::<gtk4::TreeView>().unwrap(),
+                &event_controller_key.widget().downcast::<gtk4::TreeView>().unwrap(),
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,
                 &image_preview,
@@ -711,8 +711,8 @@ fn show_preview(
         // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
         #[allow(clippy::never_loop)]
         'dir: loop {
-            let path = tree_model.get(&tree_model.iter(&tree_path).unwrap(), column_path).get::<String>().unwrap();
-            let name = tree_model.get(&tree_model.iter(&tree_path).unwrap(), column_name).get::<String>().unwrap();
+            let path = tree_model.get::<String>(&tree_model.iter(&tree_path).unwrap(), column_path);
+            let name = tree_model.get::<String>(&tree_model.iter(&tree_path).unwrap(), column_name);
 
             let file_name = get_full_name_from_path_name(&path, &name);
             let file_name = file_name.as_str();
@@ -760,7 +760,7 @@ fn show_preview(
                 Some(pixbuf) => pixbuf,
             };
 
-            image_preview.set_pixbuf(Some(&pixbuf));
+            image_preview.set_from_pixbuf(Some(&pixbuf)); // TODO GTK 4
             {
                 let mut preview_path = preview_path.borrow_mut();
                 *preview_path = file_name.to_string();

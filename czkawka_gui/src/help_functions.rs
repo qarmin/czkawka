@@ -391,15 +391,15 @@ pub fn get_string_from_list_store(tree_view: &gtk4::TreeView, column_full_path: 
     };
     match column_selection {
         Some(column_selection) => loop {
-            if list_store.get(&tree_iter, column_selection).get::<bool>().unwrap() {
-                string_vector.push(list_store.get(&tree_iter, column_full_path).get::<String>().unwrap());
+            if list_store.get::<bool>(&tree_iter, column_selection) {
+                string_vector.push(list_store.get::<String>(&tree_iter, column_full_path));
             }
             if !list_store.iter_next(&tree_iter) {
                 return string_vector;
             }
         },
         None => loop {
-            string_vector.push(list_store.get(&tree_iter, column_full_path).get::<String>().unwrap());
+            string_vector.push(list_store.get::<String>(&tree_iter, column_full_path));
             if !list_store.iter_next(&tree_iter) {
                 return string_vector;
             }
@@ -461,10 +461,7 @@ pub fn reset_text_view(text_view: &TextView) {
 
 pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     let buffer = text_view.buffer();
-    let current_text = match buffer.text(&buffer.start_iter(), &buffer.end_iter(), true) {
-        Some(t) => t.to_string(),
-        None => "".to_string(),
-    };
+    let current_text = buffer.text(&buffer.start_iter(), &buffer.end_iter(), true).to_string();
     if current_text.is_empty() {
         buffer.set_text(string_to_append);
     } else {
@@ -560,7 +557,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if model.get(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+        if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
             panic!("First deleted element, should be a header"); // First element should be header
         };
 
@@ -570,7 +567,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
         // Empty means default check type
         if model.get(&current_iter, column_path).get::<String>().unwrap().is_empty() {
             'main: loop {
-                if model.get(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+                if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
                     panic!("First deleted element, should be a header"); // First element should be header
                 };
 
@@ -689,17 +686,17 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
     // First iter
     if let Some(iter) = model.iter_first() {
         if let Some(column_color) = column_color {
-            assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+            assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
 
             loop {
                 if !model.iter_next(&iter) {
                     break;
                 }
 
-                if model.get(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
                     is_item_currently_selected_in_group = false;
                 } else {
-                    if model.get(&iter, column_selection).get::<bool>().unwrap() {
+                    if model.get::<bool>(&iter, column_selection) {
                         number_of_selected_items += 1;
 
                         if !is_item_currently_selected_in_group {
@@ -715,7 +712,7 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
                     break;
                 }
 
-                if model.get(&iter, column_selection).get::<bool>().unwrap() {
+                if model.get::<bool>(&iter, column_selection) {
                     number_of_selected_items += 1;
                 }
             }
@@ -732,7 +729,7 @@ pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32) -> u32 {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
         number_of_selected_groups += 1;
 
         loop {
@@ -740,7 +737,7 @@ pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32) -> u32 {
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
                 number_of_selected_groups += 1;
             }
         }
@@ -783,20 +780,20 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::Image {
-    let internal_box = match button.child().unwrap().downcast::<gtk4::Box>() {
-        Ok(t) => t,
-        Err(wid) => {
-            return wid.downcast::<gtk4::Image>().unwrap();
-        }
-    };
-    for child in internal_box.children() {
-        if let Ok(t) = child.downcast::<gtk4::Image>() {
-            return t;
-        }
-    }
-    panic!("Button doesn't have proper custom label child");
-}
+// pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::Image {
+//     let internal_box = match button.child().unwrap().downcast::<gtk4::Box>() {
+//         Ok(t) => t,
+//         Err(wid) => {
+//             return wid.downcast::<gtk4::Image>().unwrap();
+//         }
+//     };
+//     for child in internal_box.children() {
+//         if let Ok(t) = child.downcast::<gtk4::Image>() {
+//             return t;
+//         }
+//     }
+//     panic!("Button doesn't have proper custom label child");
+// }
 
 // GTK 4
 pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
@@ -808,20 +805,42 @@ pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P)
     }
     panic!("Button doesn't have proper custom label child");
 }
-// TODO needs GTK 4.6 to be able to set as child of menu button a box
-// pub fn get_custom_label_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
-//     println!("{:?}", get_all_children(button));
-//     for c1 in get_all_children(button) {
-//         if let Ok(internal_box) = c1.downcast::<gtk4::Box>() {
-//             for child in get_all_children(&internal_box) {
-//                 if let Ok(t) = child.downcast::<gtk4::Label>() {
-//                     return t;
-//                 }
-//             }
-//         }
-//     }
-//     panic!("Menu Button doesn't have proper custom label child");
-// }
+pub fn get_custom_image_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Image {
+    let internal_box = button.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
+    for child in get_all_children(&internal_box) {
+        if let Ok(t) = child.downcast::<gtk4::Image>() {
+            return t;
+        }
+    }
+    panic!("Button doesn't have proper custom label child");
+}
+
+pub fn get_custom_label_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
+    println!("{:?}", get_all_children(button));
+    for c1 in get_all_children(button) {
+        if let Ok(internal_box) = c1.downcast::<gtk4::Box>() {
+            for child in get_all_children(&internal_box) {
+                if let Ok(t) = child.downcast::<gtk4::Label>() {
+                    return t;
+                }
+            }
+        }
+    }
+    panic!("Menu Button doesn't have proper custom label child");
+}
+pub fn get_custom_image_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Image {
+    println!("{:?}", get_all_children(button));
+    for c1 in get_all_children(button) {
+        if let Ok(internal_box) = c1.downcast::<gtk4::Box>() {
+            for child in get_all_children(&internal_box) {
+                if let Ok(t) = child.downcast::<gtk4::Image>() {
+                    return t;
+                }
+            }
+        }
+    }
+    panic!("Menu Button doesn't have proper custom label child");
+}
 
 // GTK 4
 pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
@@ -847,11 +866,11 @@ pub fn set_icon_of_button(button: &gtk4::Button, data: &'static [u8]) {
     let image = get_custom_image_from_button_with_image(&button.clone());
     let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
-    image.set_pixbuf(Some(&pixbuf));
+    image.set_from_pixbuf(Some(&pixbuf));
 }
 pub fn set_icon_of_menubutton(button: &gtk4::MenuButton, data: &'static [u8]) {
-    let image = get_custom_image_from_button_with_image(&button.clone());
+    let image = get_custom_image_from_menubutton_with_image(&button.clone());
     let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
-    image.set_pixbuf(Some(&pixbuf));
+    image.set_from_pixbuf(Some(&pixbuf));
 }
