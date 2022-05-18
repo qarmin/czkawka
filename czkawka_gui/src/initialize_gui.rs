@@ -139,7 +139,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(Some(Box::new(select_function_duplicates)));
+                tree_view.selection().set_select_function(select_function_duplicates);
 
                 create_tree_view_duplicates(&tree_view);
 
@@ -267,7 +267,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(Some(Box::new(select_function_similar_images)));
+                tree_view.selection().set_select_function(select_function_similar_images);
 
                 create_tree_view_similar_images(&tree_view);
 
@@ -296,7 +296,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(Some(Box::new(select_function_similar_videos)));
+                tree_view.selection().set_select_function(select_function_similar_videos);
 
                 create_tree_view_similar_videos(&tree_view);
 
@@ -332,7 +332,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(Some(Box::new(select_function_same_music)));
+                tree_view.selection().set_select_function(select_function_same_music);
 
                 create_tree_view_same_music(&tree_view);
 

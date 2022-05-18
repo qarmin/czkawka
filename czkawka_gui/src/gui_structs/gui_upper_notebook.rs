@@ -84,12 +84,13 @@ impl GuiUpperNotebook {
         let label_general_min_size: gtk4::Label = builder.object("label_general_min_size").unwrap();
         let label_general_max_size: gtk4::Label = builder.object("label_general_max_size").unwrap();
 
-        set_icon_of_button(&buttons_add_included_directory, CZK_ICON_ADD);
-        set_icon_of_button(&buttons_manual_add_included_directory, CZK_ICON_MANUAL_ADD);
-        set_icon_of_button(&buttons_remove_included_directory, CZK_ICON_DELETE);
-        set_icon_of_button(&buttons_add_excluded_directory, CZK_ICON_ADD);
-        set_icon_of_button(&buttons_manual_add_excluded_directory, CZK_ICON_MANUAL_ADD);
-        set_icon_of_button(&buttons_remove_excluded_directory, CZK_ICON_DELETE);
+        // TODO GTK 4
+        // set_icon_of_button(&buttons_add_included_directory, CZK_ICON_ADD);
+        // set_icon_of_button(&buttons_manual_add_included_directory, CZK_ICON_MANUAL_ADD);
+        // set_icon_of_button(&buttons_remove_included_directory, CZK_ICON_DELETE);
+        // set_icon_of_button(&buttons_add_excluded_directory, CZK_ICON_ADD);
+        // set_icon_of_button(&buttons_manual_add_excluded_directory, CZK_ICON_MANUAL_ADD);
+        // set_icon_of_button(&buttons_remove_excluded_directory, CZK_ICON_DELETE);
 
         Self {
             notebook_upper,

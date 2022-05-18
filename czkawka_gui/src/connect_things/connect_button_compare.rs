@@ -1,7 +1,7 @@
 use crate::flg;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
-use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection};
+use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -285,8 +285,8 @@ fn populate_groups_at_start(
     let cache_all_images = generate_cache_for_results(all_vec);
 
     // This is safe, because cache have at least 2 results
-    image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref());
-    image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref());
+    // image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref()); // TODO GTK 4
+    // image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref()); // TODO GTK 4
 
     *shared_using_for_preview.borrow_mut() = (Some(cache_all_images[0].4.clone()), Some(cache_all_images[1].4.clone()));
 
@@ -476,7 +476,7 @@ fn populate_similar_scrolled_view(
     model: &TreeModel,
     column_selection: i32,
 ) {
-    scrolled_window.set_child(None);
+    scrolled_window.set_child(None::<&Widget>);
     scrolled_window.set_propagate_natural_height(true);
 
     let all_gtk_box = gtk4::Box::new(Orientation::Horizontal, 5);
@@ -506,7 +506,7 @@ fn populate_similar_scrolled_view(
         button_left.connect_clicked(move |_button_left| {
             shared_using_for_preview_clone.borrow_mut().0 = Some(tree_path_clone.clone());
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
-            image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
+            // image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref()); // TODO GTK 4
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_left_preview_text_clone.set_active(is_active);
@@ -525,7 +525,7 @@ fn populate_similar_scrolled_view(
         button_right.connect_clicked(move |_button_right| {
             shared_using_for_preview_clone.borrow_mut().1 = Some(tree_path_clone.clone());
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
-            image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
+            // image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());  // TODO GTK 4
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_right_preview_text_clone.set_active(is_active);

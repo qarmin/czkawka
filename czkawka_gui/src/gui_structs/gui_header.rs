@@ -14,8 +14,9 @@ impl GuiHeader {
         let button_settings: gtk4::Button = builder.object("button_settings").unwrap();
         let button_app_info: gtk4::Button = builder.object("button_app_info").unwrap();
 
-        set_icon_of_button(&button_settings, CZK_ICON_SETTINGS);
-        set_icon_of_button(&button_app_info, CZK_ICON_INFO);
+        // TODO GTK 4
+        // set_icon_of_button(&button_settings, CZK_ICON_SETTINGS);
+        // set_icon_of_button(&button_app_info, CZK_ICON_INFO);
 
         Self { button_settings, button_app_info }
     }

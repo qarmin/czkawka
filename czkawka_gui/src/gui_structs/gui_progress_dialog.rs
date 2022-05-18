@@ -47,6 +47,7 @@ impl GuiProgressDialog {
         let gc_button_stop_in_dialog = gtk4::GestureClick::new();
         button_stop_in_dialog.add_controller(&gc_button_stop_in_dialog);
 
+        // TODO GTK 4
         set_icon_of_button(&button_stop_in_dialog, CZK_ICON_STOP);
 
         Self {

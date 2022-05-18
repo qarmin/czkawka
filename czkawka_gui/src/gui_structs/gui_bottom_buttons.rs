@@ -36,17 +36,17 @@ impl GuiBottomButtons {
 
         let buttons_show_errors: gtk4::Button = builder.object("buttons_show_errors").unwrap();
         let buttons_show_upper_notebook: gtk4::Button = builder.object("buttons_show_upper_notebook").unwrap();
-
-        set_icon_of_button(&buttons_search, CZK_ICON_SEARCH);
-        set_icon_of_menubutton(&buttons_select, CZK_ICON_SELECT);
-        set_icon_of_button(&buttons_delete, CZK_ICON_TRASH);
-        set_icon_of_button(&buttons_save, CZK_ICON_SAVE);
-        set_icon_of_button(&buttons_symlink, CZK_ICON_SYMLINK);
-        set_icon_of_button(&buttons_hardlink, CZK_ICON_HARDLINK);
-        set_icon_of_button(&buttons_move, CZK_ICON_MOVE);
-        set_icon_of_button(&buttons_compare, CZK_ICON_COMPARE);
-        set_icon_of_button(&buttons_show_errors, CZK_ICON_HIDE_DOWN);
-        set_icon_of_button(&buttons_show_upper_notebook, CZK_ICON_HIDE_UP);
+        // TODO GTK 4
+        // set_icon_of_button(&buttons_search, CZK_ICON_SEARCH);
+        // set_icon_of_menubutton(&buttons_select, CZK_ICON_SELECT);
+        // set_icon_of_button(&buttons_delete, CZK_ICON_TRASH);
+        // set_icon_of_button(&buttons_save, CZK_ICON_SAVE);
+        // set_icon_of_button(&buttons_symlink, CZK_ICON_SYMLINK);
+        // set_icon_of_button(&buttons_hardlink, CZK_ICON_HARDLINK);
+        // set_icon_of_button(&buttons_move, CZK_ICON_MOVE);
+        // set_icon_of_button(&buttons_compare, CZK_ICON_COMPARE);
+        // set_icon_of_button(&buttons_show_errors, CZK_ICON_HIDE_DOWN);
+        // set_icon_of_button(&buttons_show_upper_notebook, CZK_ICON_HIDE_UP);
 
         let buttons_names = [
             BottomButtonsEnum::Search,
@@ -87,13 +87,14 @@ impl GuiBottomButtons {
         }
     }
     pub fn update_language(&self) {
-        get_custom_label_from_button_with_image(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
-        get_custom_label_from_button_with_image(&self.buttons_select.clone()).set_text(&flg!("bottom_select_button"));
-        get_custom_label_from_button_with_image(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
-        get_custom_label_from_button_with_image(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
-        get_custom_label_from_button_with_image(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
-        get_custom_label_from_button_with_image(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
-        get_custom_label_from_button_with_image(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
+        // TODO GTK 4
+        // get_custom_label_from_button_with_image(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_select.clone()).set_text(&flg!("bottom_select_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
+        // get_custom_label_from_button_with_image(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));
         self.buttons_select.set_tooltip_text(Some(&flg!("bottom_select_button_tooltip")));
