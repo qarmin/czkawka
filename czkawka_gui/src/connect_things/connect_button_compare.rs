@@ -6,7 +6,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{count_number_of_groups, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, HEADER_ROW_COLOR, NOTEBOOKS_INFOS};
+use crate::help_functions::{
+    count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, HEADER_ROW_COLOR, NOTEBOOKS_INFOS,
+};
 use crate::localizer_core::generate_translation_hashmap;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
@@ -327,9 +329,9 @@ fn populate_groups_at_start(
     }
     assert!(found);
 
-    let is_active = model.get(&model.iter(&cache_all_images[0].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
+    let is_active = model.get::<bool>(&model.iter(&cache_all_images[0].4).unwrap(), nb_object.column_selection);
     check_button_left_preview_text.set_active(is_active);
-    let is_active = model.get(&model.iter(&cache_all_images[1].4).unwrap(), nb_object.column_selection).get::<bool>().unwrap();
+    let is_active = model.get::<bool>(&model.iter(&cache_all_images[1].4).unwrap(), nb_object.column_selection);
     check_button_right_preview_text.set_active(is_active);
 }
 
@@ -506,7 +508,7 @@ fn populate_similar_scrolled_view(
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
             image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
 
-            let is_active = model_clone.get(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
+            let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_left_preview_text_clone.set_active(is_active);
             check_button_left_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70))));
         });
@@ -525,7 +527,7 @@ fn populate_similar_scrolled_view(
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
             image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());
 
-            let is_active = model_clone.get(&model_clone.iter(&tree_path_clone).unwrap(), column_selection).get::<bool>().unwrap();
+            let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_right_preview_text_clone.set_active(is_active);
             check_button_right_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70))));
         });
@@ -553,7 +555,7 @@ fn update_bottom_buttons(
     let left_tree_view = (*shared_using_for_preview.borrow()).0.clone().unwrap();
     let right_tree_view = (*shared_using_for_preview.borrow()).1.clone().unwrap();
 
-    for (number, i) in all_gtk_box.children().into_iter().enumerate() {
+    for (number, i) in get_all_children(all_gtk_box).into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 

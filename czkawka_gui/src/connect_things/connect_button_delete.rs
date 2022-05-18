@@ -229,7 +229,7 @@ pub async fn check_if_deleting_all_files_in_group(
                 }
                 selected_all_records = true;
             } else {
-                if !model.get(&iter, column_selection).get::<bool>().unwrap() {
+                if !model.get::<bool>(&iter, column_selection) {
                     selected_all_records = false;
                 }
             }

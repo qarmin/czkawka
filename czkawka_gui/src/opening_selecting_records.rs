@@ -150,7 +150,7 @@ fn reverse_selection(tree_view: &gtk4::TreeView, column_color: i32, column_selec
     }
 
     // This will revert selection of current selected item, but I don't think that this is needed
-    // let current_value = model.get(&current_iter, column_selection).get::<bool>().unwrap();
+    // let current_value = model.get::<bool>(&current_iter, column_selection);
     // model.set_value(&current_iter, column_selection as u32, &(!current_value).to_value());
 
     let to_upper_iter = current_iter;
