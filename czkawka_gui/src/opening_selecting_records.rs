@@ -1,4 +1,4 @@
-use gdk4::ModifierType;
+use gdk4::{Key, ModifierType};
 use glib::signal::Inhibit;
 use gtk4::prelude::*;
 use gtk4::GestureClick;
@@ -8,7 +8,7 @@ use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
-pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
+pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::EventControllerKey, _key_value: Key, key_code: u32, _modifier_type: ModifierType) -> Inhibit {
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
@@ -31,34 +31,37 @@ pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::
             panic!()
         }
     }
-    false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
+    // false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
+    Inhibit(false)
 }
 
-pub fn opening_middle_mouse_function(tree_view: &gtk4::TreeView, event: &gdk4::EventButton) -> gtk4::Inhibit {
-    let nt_object = get_notebook_object_from_tree_view(tree_view);
+pub fn opening_middle_mouse_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
+    let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
+
+    let nt_object = get_notebook_object_from_tree_view(&tree_view);
     if let Some(column_color) = nt_object.column_color {
-        if event.button() == 2 {
-            reverse_selection(tree_view, column_color, nt_object.column_selection);
+        if gesture_click.current_button() == 2 {
+            reverse_selection(&tree_view, column_color, nt_object.column_selection);
         }
     }
-    gtk4::Inhibit(false)
 }
 
-pub fn opening_double_click_function_directories(tree_view: &gtk4::TreeView, event: &gdk4::EventButton) -> gtk4::Inhibit {
-    if event.event_type() == gdk4::EventType::DoubleButtonPress && (event.button() == 1 || event.button() == 3) {
-        match get_notebook_upper_enum_from_tree_view(tree_view) {
+pub fn opening_double_click_function_directories(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
+    let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
+
+    if number_of_clicks == 2 && (gesture_click.current_button() == 1 || gesture_click.current_button() == 3) {
+        match get_notebook_upper_enum_from_tree_view(&tree_view) {
             NotebookUpperEnum::IncludedDirectories => {
-                common_open_function_upper_directories(tree_view, ColumnsIncludedDirectory::Path as i32);
+                common_open_function_upper_directories(&tree_view, ColumnsIncludedDirectory::Path as i32);
             }
             NotebookUpperEnum::ExcludedDirectories => {
-                common_open_function_upper_directories(tree_view, ColumnsExcludedDirectory::Path as i32);
+                common_open_function_upper_directories(&tree_view, ColumnsExcludedDirectory::Path as i32);
             }
             _ => {
                 panic!()
             }
         }
     }
-    gtk4::Inhibit(false)
 }
 
 pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: gdk4::Key, key_code: u32, _modifier_type: ModifierType) -> gtk4::Inhibit {
