@@ -18,10 +18,7 @@ pub fn create_tree_view_included_directories(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsIncludedDirectory::ReferenceButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsIncludedDirectory::ReferenceButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsIncludedDirectory::ReferenceButton as u32, &fixed.to_value());
     });
@@ -49,10 +46,7 @@ pub fn create_tree_view_duplicates(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsDuplicates::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsDuplicates::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsDuplicates::SelectionButton as u32, &fixed.to_value());
     });
@@ -118,10 +112,7 @@ pub fn create_tree_view_empty_folders(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsEmptyFolders::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsEmptyFolders::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsEmptyFolders::SelectionButton as u32, &fixed.to_value());
     });
@@ -171,10 +162,7 @@ pub fn create_tree_view_big_files(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsBigFiles::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsBigFiles::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsBigFiles::SelectionButton as u32, &fixed.to_value());
     });
@@ -234,10 +222,7 @@ pub fn create_tree_view_temporary_files(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsTemporaryFiles::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsTemporaryFiles::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsTemporaryFiles::SelectionButton as u32, &fixed.to_value());
     });
@@ -287,10 +272,7 @@ pub fn create_tree_view_empty_files(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsEmptyFiles::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsEmptyFiles::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsEmptyFiles::SelectionButton as u32, &fixed.to_value());
     });
@@ -340,10 +322,7 @@ pub fn create_tree_view_similar_images(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsSimilarImages::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsSimilarImages::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsSimilarImages::SelectionButton as u32, &fixed.to_value());
     });
@@ -431,10 +410,7 @@ pub fn create_tree_view_similar_videos(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsSimilarVideos::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsSimilarVideos::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsSimilarVideos::SelectionButton as u32, &fixed.to_value());
     });
@@ -500,10 +476,7 @@ pub fn create_tree_view_same_music(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsSameMusic::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsSameMusic::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsSameMusic::SelectionButton as u32, &fixed.to_value());
     });
@@ -635,10 +608,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsInvalidSymlinks::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsInvalidSymlinks::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsInvalidSymlinks::SelectionButton as u32, &fixed.to_value());
     });
@@ -708,10 +678,7 @@ pub fn create_tree_view_broken_files(tree_view: &gtk4::TreeView) {
     let renderer = gtk4::CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
         let iter = model.iter(&path).unwrap();
-        let mut fixed = model
-            .get(&iter, ColumnsBrokenFiles::SelectionButton as i32)
-            .get::<bool>()
-            .unwrap_or_else(|err| panic!("ListStore value missing at path {:?}: {}", path, err));
+        let mut fixed = model.get::<bool>(&iter, ColumnsBrokenFiles::SelectionButton as i32);
         fixed = !fixed;
         model.set_value(&iter, ColumnsBrokenFiles::SelectionButton as u32, &fixed.to_value());
     });

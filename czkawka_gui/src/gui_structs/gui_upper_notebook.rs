@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{EventControllerKey, TreeView};
+use gtk4::{EventControllerKey, GestureClick, TreeView};
 
 use crate::help_functions::{get_all_children, get_custom_label_from_button_with_image, set_icon_of_button};
 use crate::notebook_enums::NotebookUpperEnum;
@@ -17,6 +17,9 @@ pub struct GuiUpperNotebook {
 
     pub evk_tree_view_included_directories: gtk4::EventControllerKey,
     pub evk_tree_view_excluded_directories: gtk4::EventControllerKey,
+
+    pub gc_tree_view_included_directories: gtk4::GestureClick,
+    pub gc_tree_view_excluded_directories: gtk4::GestureClick,
 
     pub entry_excluded_items: gtk4::Entry,
     pub entry_allowed_extensions: gtk4::Entry,
@@ -50,8 +53,15 @@ impl GuiUpperNotebook {
         let tree_view_included_directories: gtk4::TreeView = TreeView::new();
         let tree_view_excluded_directories: gtk4::TreeView = TreeView::new();
 
-        let evk_tree_view_included_directories: gtk4::EventControllerKey = EventControllerKey::new(&tree_view_included_directories);
-        let evk_tree_view_excluded_directories: gtk4::EventControllerKey = EventControllerKey::new(&tree_view_excluded_directories);
+        let evk_tree_view_included_directories: gtk4::EventControllerKey = EventControllerKey::new();
+        tree_view_included_directories.add_controller(&evk_tree_view_included_directories);
+        let evk_tree_view_excluded_directories: gtk4::EventControllerKey = EventControllerKey::new();
+        tree_view_excluded_directories.add_controller(&evk_tree_view_excluded_directories);
+
+        let gc_tree_view_included_directories: gtk4::GestureClick = GestureClick::new();
+        tree_view_included_directories.add_controller(&gc_tree_view_included_directories);
+        let gc_tree_view_excluded_directories: gtk4::GestureClick = GestureClick::new();
+        tree_view_excluded_directories.add_controller(&gc_tree_view_excluded_directories);
 
         let entry_allowed_extensions: gtk4::Entry = builder.object("entry_allowed_extensions").unwrap();
         let entry_excluded_items: gtk4::Entry = builder.object("entry_excluded_items").unwrap();
@@ -89,6 +99,8 @@ impl GuiUpperNotebook {
             tree_view_excluded_directories,
             evk_tree_view_included_directories,
             evk_tree_view_excluded_directories,
+            gc_tree_view_included_directories,
+            gc_tree_view_excluded_directories,
             entry_excluded_items,
             entry_allowed_extensions,
             check_button_recursive,
@@ -117,14 +129,6 @@ impl GuiUpperNotebook {
         get_custom_label_from_button_with_image(&self.buttons_manual_add_excluded_directory.clone()).set_text(&flg!("upper_manual_add_excluded_button"));
         get_custom_label_from_button_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&flg!("upper_add_excluded_button"));
         get_custom_label_from_button_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&flg!("upper_remove_excluded_button"));
-
-        // GTK 4
-        // get_custom_label_from_label_with_image(&self.buttons_manual_add_included_directory.clone()).set_text(&flg!("upper_manual_add_included_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_add_included_directory.clone()).set_text(&flg!("upper_add_included_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_remove_included_directory.clone()).set_text(&flg!("upper_remove_included_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_manual_add_excluded_directory.clone()).set_text(&flg!("upper_manual_add_excluded_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&flg!("upper_add_excluded_button"));
-        // get_custom_label_from_label_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&flg!("upper_remove_excluded_button"));
 
         self.buttons_manual_add_included_directory
             .set_tooltip_text(Some(&flg!("upper_manual_add_included_button_tooltip")));

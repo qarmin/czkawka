@@ -211,10 +211,10 @@ pub async fn check_if_deleting_all_files_in_group(
     let mut selected_all_records: bool = true;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
 
         // It is safe to remove any number of files in reference mode
-        if !model.get(&iter, column_path).get::<String>().unwrap().is_empty() {
+        if !model.get::<String>(&iter, column_path).is_empty() {
             return false;
         }
 
@@ -223,7 +223,7 @@ pub async fn check_if_deleting_all_files_in_group(
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
                 if selected_all_records {
                     break;
                 }
@@ -276,7 +276,7 @@ pub fn empty_folder_remover(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>() {
+            if model.get::<bool>(&iter, column_selection) {
                 selected_rows.push(model.path(&iter));
             }
             if !model.iter_next(&iter) {
@@ -295,8 +295,8 @@ pub fn empty_folder_remover(
     for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
         let iter = model.iter(tree_path).unwrap();
 
-        let name = model.get(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.get(&iter, column_path).get::<String>().unwrap();
+        let name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
@@ -393,7 +393,7 @@ pub fn basic_remove(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>() {
+            if model.get::<bool>(&iter, column_selection) {
                 selected_rows.push(model.path(&iter));
             }
 
@@ -411,8 +411,8 @@ pub fn basic_remove(
     for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
         let iter = model.iter(tree_path).unwrap();
 
-        let name = model.get(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.get(&iter, column_path).get::<String>().unwrap();
+        let name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         if !use_trash {
             match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
@@ -472,8 +472,8 @@ pub fn tree_remove(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>() {
-                if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR {
+            if model.get::<bool>(&iter, column_selection) {
+                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -494,8 +494,8 @@ pub fn tree_remove(
     for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
-        let file_name = model.get(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.get(&iter, column_path).get::<String>().unwrap();
+        let file_name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         model.remove(&iter);
 

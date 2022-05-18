@@ -125,8 +125,8 @@ fn hardlink_symlink(
     let mut selected_rows = Vec::new();
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>() {
-                if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR {
+            if model.get::<bool>(&iter, column_selection) {
+                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -145,7 +145,7 @@ fn hardlink_symlink(
     let mut current_symhardlink_data: Option<SymHardlinkData> = None;
     let mut current_selected_index = 0;
     loop {
-        if model.get(&current_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+        if model.get::<String>(&current_iter, column_color) == HEADER_ROW_COLOR {
             if let Some(current_symhardlink_data) = current_symhardlink_data {
                 if !current_symhardlink_data.files_to_symhardlink.is_empty() {
                     vec_symhardlink_data.push(current_symhardlink_data);
@@ -160,8 +160,8 @@ fn hardlink_symlink(
         }
 
         if model.path(&current_iter) == selected_rows[current_selected_index] {
-            let file_name = model.get(&current_iter, column_file_name).get::<String>().unwrap();
-            let path = model.get(&current_iter, column_path).get::<String>().unwrap();
+            let file_name = model.get::<String>(&current_iter, column_file_name);
+            let path = model.get::<String>(&current_iter, column_path);
             let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
             if current_symhardlink_data.is_some() {
@@ -290,20 +290,20 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     let mut selected_values_in_group = 0;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>() == HEADER_ROW_COLOR {
+            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
                 if selected_values_in_group == 1 {
                     break;
                 }
                 selected_values_in_group = 0;
             } else {
-                if model.get(&iter, column_selection).get::<bool>() {
+                if model.get::<bool>(&iter, column_selection) {
                     selected_values_in_group += 1;
                 }
             }
@@ -332,14 +332,14 @@ pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, col
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
+        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR && model.get(&iter, column_selection).get::<bool>() {
+            if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR && model.get::<bool>(&iter, column_selection) {
                 return true;
             }
         }

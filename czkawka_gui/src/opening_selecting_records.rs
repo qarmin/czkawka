@@ -9,7 +9,7 @@ use crate::notebook_enums::NotebookUpperEnum;
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
 pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::EventControllerKey, _key_value: u32, key_code: u32, _modifier_type: ModifierType) -> bool {
-    let tree_view = event_controller.widget().unwrap().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
         println!("key_code {}", key_code);
@@ -61,21 +61,27 @@ pub fn opening_double_click_function_directories(tree_view: &gtk4::TreeView, eve
     gtk4::Inhibit(false)
 }
 
-// // GTK 4
 pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: gdk4::Key, key_code: u32, _modifier_type: ModifierType) -> gtk4::Inhibit {
-    let tree_view = event_controller.widget().unwrap().downcast::<gtk4::TreeView>();
+    let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
         println!("key_code {}", key_code);
     }
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
-    handle_tree_keypress(&tree_view, key_code, nt_object.column_name, nt_object.column_path, nt_object.column_selection);
+    handle_tree_keypress(
+        &tree_view,
+        key_code,
+        nt_object.column_name,
+        nt_object.column_path,
+        nt_object.column_selection,
+        nt_object.column_color,
+    );
     Inhibit(false) // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
 }
 
 pub fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click.widget().unwrap().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
     if number_of_clicks == 2 {
@@ -139,7 +145,7 @@ fn reverse_selection(tree_view: &gtk4::TreeView, column_color: i32, column_selec
     let tree_path = selected_rows[0].clone();
     let current_iter = model.iter(&tree_path).unwrap();
 
-    if model.get(&current_iter, column_color).get::<String>() == HEADER_ROW_COLOR {
+    if model.get::<String>(&current_iter, column_color) == HEADER_ROW_COLOR {
         return; // Selecting header is not supported(this is available by using reference)
     }
 
@@ -152,11 +158,11 @@ fn reverse_selection(tree_view: &gtk4::TreeView, column_color: i32, column_selec
         if !model.iter_previous(&to_upper_iter) {
             break;
         }
-        if model.get(&to_upper_iter, column_color).get::<String>() == HEADER_ROW_COLOR {
+        if model.get::<String>(&to_upper_iter, column_color) == HEADER_ROW_COLOR {
             break;
         }
 
-        let current_value = model.get(&to_upper_iter, column_selection).get::<bool>().unwrap();
+        let current_value = model.get::<bool>(&to_upper_iter, column_selection);
         model.set_value(&to_upper_iter, column_selection as u32, &(!current_value).to_value());
     }
 
@@ -165,11 +171,11 @@ fn reverse_selection(tree_view: &gtk4::TreeView, column_color: i32, column_selec
         if !model.iter_next(&to_lower_iter) {
             break;
         }
-        if model.get(&to_lower_iter, column_color).get::<String>() == HEADER_ROW_COLOR {
+        if model.get::<String>(&to_lower_iter, column_color) == HEADER_ROW_COLOR {
             break;
         }
 
-        let current_value = model.get(&to_lower_iter, column_selection).get::<bool>().unwrap();
+        let current_value = model.get::<bool>(&to_lower_iter, column_selection);
         model.set_value(&to_lower_iter, column_selection as u32, &(!current_value).to_value());
     }
 }
@@ -179,7 +185,7 @@ fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_ful
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let full_path = tree_model.get(&tree_model.iter(tree_path).unwrap(), column_full_path).get::<String>();
+        let full_path = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_full_path);
 
         open::that_in_background(&full_path);
     }
@@ -212,10 +218,7 @@ fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: 
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model
-        .get(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32)
-        .get::<String>()
-        .unwrap();
+    let color = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::Color as i32);
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -225,7 +228,7 @@ pub fn select_function_duplicates(_tree_selection: &gtk4::TreeSelection, tree_mo
 }
 
 pub fn select_function_same_music(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.get(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32).get::<String>();
+    let color = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::Color as i32);
 
     if color == HEADER_ROW_COLOR {
         return false;
@@ -245,7 +248,7 @@ pub fn select_function_similar_images(_tree_selection: &gtk4::TreeSelection, tre
 }
 
 pub fn select_function_similar_videos(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    let color = tree_model.get(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32).get::<String>();
+    let color = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::Color as i32);
 
     if color == HEADER_ROW_COLOR {
         return false;

@@ -17,7 +17,7 @@ fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, colum
     if let Some(iter) = model.iter_first() {
         if let Some(column_color) = column_color {
             loop {
-                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
+                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
                     model.set_value(&iter, column_button_selection, &true.to_value());
                 }
                 if !model.iter_next(&iter) {
@@ -58,8 +58,8 @@ fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_b
     if let Some(iter) = model.iter_first() {
         if let Some(column_color) = column_color {
             loop {
-                if model.get(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    let current_value: bool = model.get(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
+                    let current_value: bool = model.get::<bool>(&iter, column_button_selection as i32);
                     model.set_value(&iter, column_button_selection, &(!current_value).to_value());
                 }
                 if !model.iter_next(&iter) {
@@ -68,7 +68,7 @@ fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_b
             }
         } else {
             loop {
-                let current_value: bool = model.get(&iter, column_button_selection as i32).get::<bool>().unwrap();
+                let current_value: bool = model.get::<bool>(&iter, column_button_selection as i32);
                 model.set_value(&iter, column_button_selection, &(!current_value).to_value());
 
                 if !model.iter_next(&iter) {
@@ -105,7 +105,7 @@ fn popover_all_except_oldest_newest(
             let mut file_length: usize = 0;
 
             loop {
-                let color = model.get(&iter, column_color).get::<String>().unwrap();
+                let color = model.get::<String>(&iter, column_color);
                 if color == HEADER_ROW_COLOR {
                     if !model.iter_next(&iter) {
                         end = true;
@@ -113,8 +113,8 @@ fn popover_all_except_oldest_newest(
                     break;
                 }
                 tree_iter_array.push(iter);
-                let modification = model.get(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.get(&iter, column_file_name).get::<String>().unwrap().len();
+                let modification = model.get::<u64>(&iter, column_modification_as_secs);
+                let current_file_length = model.get::<String>(&iter, column_file_name).len();
                 if except_oldest {
                     if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
                         file_length = current_file_length;
@@ -180,7 +180,7 @@ fn popover_one_oldest_newest(
             let mut file_length: usize = 0;
 
             loop {
-                let color = model.get(&iter, column_color).get::<String>().unwrap();
+                let color = model.get::<String>(&iter, column_color);
                 if color == HEADER_ROW_COLOR {
                     if !model.iter_next(&iter) {
                         end = true;
@@ -188,8 +188,8 @@ fn popover_one_oldest_newest(
                     break;
                 }
                 tree_iter_array.push(iter);
-                let modification = model.get(&iter, column_modification_as_secs).get::<u64>().unwrap();
-                let current_file_length = model.get(&iter, column_file_name).get::<String>().unwrap().len();
+                let modification = model.get::<u64>(&iter, column_modification_as_secs);
+                let current_file_length = model.get::<String>(&iter, column_file_name).len();
                 if check_oldest {
                     if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
                         file_length = current_file_length;
@@ -410,7 +410,7 @@ fn popover_custom_select_unselect(
                     let mut vec_of_iters: Vec<TreeIter> = Vec::new();
                     loop {
                         if let Some(column_color) = column_color {
-                            let color = model.get(&iter, column_color).get::<String>().unwrap();
+                            let color = model.get::<String>(&iter, column_color);
                             if color == HEADER_ROW_COLOR {
                                 if select_things {
                                     if check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
@@ -436,9 +436,9 @@ fn popover_custom_select_unselect(
                             }
                         }
 
-                        let is_selected = model.get(&iter, column_button_selection as i32).get::<bool>().unwrap();
-                        let path = model.get(&iter, column_path).get::<String>().unwrap();
-                        let name = model.get(&iter, column_file_name).get::<String>().unwrap();
+                        let is_selected = model.get::<bool>(&iter, column_button_selection as i32);
+                        let path = model.get::<String>(&iter, column_path);
+                        let name = model.get::<String>(&iter, column_file_name);
 
                         let path_and_name = get_full_name_from_path_name(&path, &name);
 
@@ -536,7 +536,7 @@ fn popover_all_except_biggest_smallest(
             };
 
             loop {
-                let color = model.get(&iter, column_color).get::<String>().unwrap();
+                let color = model.get::<String>(&iter, column_color);
                 if color == HEADER_ROW_COLOR {
                     if !model.iter_next(&iter) {
                         end = true;
@@ -544,11 +544,11 @@ fn popover_all_except_biggest_smallest(
                     break;
                 }
                 tree_iter_array.push(iter);
-                let size_as_bytes = model.get(&iter, column_size_as_bytes).get::<u64>().unwrap();
+                let size_as_bytes = model.get::<u64>(&iter, column_size_as_bytes);
 
                 // If dimension exists, then needs to be checked images
                 if let Some(column_dimensions) = column_dimensions {
-                    let dimensions_string = model.get(&iter, column_dimensions).get::<String>().unwrap();
+                    let dimensions_string = model.get::<String>(&iter, column_dimensions);
 
                     let dimensions = change_dimension_to_krotka(dimensions_string);
                     let number_of_pixels = dimensions.0 * dimensions.1;

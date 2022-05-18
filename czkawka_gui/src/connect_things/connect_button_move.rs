@@ -93,15 +93,14 @@ fn move_things(
     chooser.connect_response(move |file_chooser, response_type| {
         if response_type == gtk4::ResponseType::Ok {
             let mut folders: Vec<PathBuf> = Vec::new();
-            if let Some(g_files) = file_chooser.files() {
-                for index in 0..g_files.n_items() {
-                    let file = &g_files.item(index);
-                    if let Some(file) = file {
-                        println!("{:?}", file);
-                        let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
-                        if let Some(path_buf) = ss.path() {
-                            folders.push(path_buf);
-                        }
+            let g_files = file_chooser.files();
+            for index in 0..g_files.n_items() {
+                let file = &g_files.item(index);
+                if let Some(file) = file {
+                    println!("{:?}", file);
+                    let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
+                    if let Some(path_buf) = ss.path() {
+                        folders.push(path_buf);
                     }
                 }
             }
@@ -153,8 +152,8 @@ fn move_with_tree(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>() {
-                if model.get(&iter, column_color).get::<String>() == MAIN_ROW_COLOR {
+            if model.get::<bool>(&iter, column_selection) {
+                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -191,7 +190,7 @@ fn move_with_list(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get(&iter, column_selection).get::<bool>() {
+            if model.get::<bool>(&iter, column_selection) {
                 selected_rows.push(model.path(&iter));
             }
 
@@ -225,8 +224,8 @@ fn move_files_common(
     'next_result: for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
         let iter = model.iter(tree_path).unwrap();
 
-        let file_name = model.get(&iter, column_file_name).get::<String>();
-        let path = model.get(&iter, column_path).get::<String>();
+        let file_name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(file_name);

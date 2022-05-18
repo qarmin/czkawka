@@ -381,18 +381,18 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk4::TreeP
 fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk4::TreePath)> {
     let used_iter = model.iter(current_path).unwrap();
 
-    assert_eq!(model.get(&used_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
-    let using_reference = !model.get(&used_iter, column_path).get::<String>().unwrap().is_empty();
+    assert_eq!(model.get::<String>(&used_iter, column_color), HEADER_ROW_COLOR);
+    let using_reference = !model.get::<String>(&used_iter, column_path).is_empty();
 
     let mut returned_vector = Vec::new();
 
     if using_reference {
-        let name = model.get(&used_iter, column_name).get::<String>().unwrap();
-        let path = model.get(&used_iter, column_path).get::<String>().unwrap();
+        let name = model.get::<String>(&used_iter, column_name);
+        let path = model.get::<String>(&used_iter, column_path);
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
-        returned_vector.push((full_name, name, model.path(&used_iter).unwrap()));
+        returned_vector.push((full_name, name, model.path(&used_iter)));
     }
 
     if !model.iter_next(&used_iter) {
@@ -400,18 +400,18 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
     }
 
     loop {
-        let name = model.get(&used_iter, column_name).get::<String>().unwrap();
-        let path = model.get(&used_iter, column_path).get::<String>().unwrap();
+        let name = model.get::<String>(&used_iter, column_name);
+        let path = model.get::<String>(&used_iter, column_path);
 
         let full_name = get_full_name_from_path_name(&path, &name);
 
-        returned_vector.push((full_name, name, model.path(&used_iter).unwrap()));
+        returned_vector.push((full_name, name, model.path(&used_iter)));
 
         if !model.iter_next(&used_iter) {
             break;
         }
 
-        let color = model.get(&used_iter, column_color).get::<String>().unwrap();
+        let color = model.get::<String>(&used_iter, column_color);
 
         if color == HEADER_ROW_COLOR {
             break;
@@ -427,7 +427,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
 fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_color: i32, go_next: bool) -> TreePath {
     let tree_iter = model.iter(tree_path).unwrap();
 
-    assert_eq!(model.get(&tree_iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR);
+    assert_eq!(model.get::<String>(&tree_iter, column_color), HEADER_ROW_COLOR);
 
     if go_next {
         if !model.iter_next(&tree_iter) {
@@ -450,13 +450,13 @@ fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_color: i32, g
             }
         }
 
-        let color = model.get(&tree_iter, column_color).get::<String>().unwrap();
+        let color = model.get::<String>(&tree_iter, column_color);
 
         if color == HEADER_ROW_COLOR {
             break;
         }
     }
-    model.path(&tree_iter).unwrap()
+    model.path(&tree_iter)
 }
 
 /// Populate bottom Scrolled View with small thumbnails
@@ -578,7 +578,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
     let iter = model.iter_first().unwrap(); // Checking that treeview is not empty should be done before
     header_clone = iter; // if nothing selected, use first group
     possible_header = iter; // if nothing selected, use first group
-    assert_eq!(model.get(&iter, column_color).get::<String>(), HEADER_ROW_COLOR); // First element should be header
+    assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
 
     if !selected_records.is_empty() {
         let first_selected_record = selected_records[0].clone();
@@ -587,7 +587,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
                 break;
             }
 
-            if model.get(&iter, column_color).get::<String>() == HEADER_ROW_COLOR {
+            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
                 possible_group += 1;
                 possible_header = iter;
             }
@@ -599,5 +599,5 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
         }
     }
 
-    (current_group, model.path(&header_clone).unwrap())
+    (current_group, model.path(&header_clone))
 }

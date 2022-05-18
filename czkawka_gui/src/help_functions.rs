@@ -565,7 +565,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
         let mut next_next_iter;
 
         // Empty means default check type
-        if model.get(&current_iter, column_path).get::<String>().unwrap().is_empty() {
+        if model.get::<String>(&current_iter, column_path).is_empty() {
             'main: loop {
                 if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
                     panic!("First deleted element, should be a header"); // First element should be header
@@ -578,7 +578,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'main;
                 }
 
-                if model.get(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                if model.get::<String>(&next_iter, column_color) == HEADER_ROW_COLOR {
                     // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     current_iter = next_iter;
@@ -593,7 +593,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'main;
                 }
 
-                if model.get(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
                     // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     vec_tree_path_to_delete.push(model.path(&next_iter));
@@ -607,7 +607,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                         break 'main;
                     }
                     // Move to next header
-                    if model.get(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
                         current_iter = next_next_iter;
                         continue 'main;
                     }
@@ -620,7 +620,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
         // Non empty means that header points at reference folder
         else {
             'reference: loop {
-                if model.get(&current_iter, column_color).get::<String>().unwrap() != HEADER_ROW_COLOR {
+                if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
                     panic!("First deleted element, should be a header"); // First element should be header
                 };
 
@@ -631,7 +631,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'reference;
                 }
 
-                if model.get(&next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                if model.get::<String>(&next_iter, column_color) == HEADER_ROW_COLOR {
                     // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     current_iter = next_iter;
@@ -644,7 +644,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'reference;
                 }
 
-                if model.get(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
                     // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                     current_iter = next_next_iter;
                     continue 'reference;
@@ -656,7 +656,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                         break 'reference;
                     }
                     // Move to next header
-                    if model.get(&next_next_iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+                    if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
                         current_iter = next_next_iter;
                         continue 'reference;
                     }

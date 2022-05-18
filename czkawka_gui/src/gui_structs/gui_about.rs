@@ -23,7 +23,7 @@ impl GuiAbout {
         about_dialog.set_modal(true);
         about_dialog.set_transient_for(Some(window_main));
 
-        about_dialog.set_logo(Some(logo));
+        // about_dialog.set_logo(Some(logo)); // TODO GTK 4
 
         // Taken from command - "git shortlog -s -n -e" - remember to remove duplicates
         // This should be updated only before releasing new version
