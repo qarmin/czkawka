@@ -145,7 +145,6 @@ impl GuiMainNotebook {
         let tree_view_broken_files: gtk4::TreeView = TreeView::new();
         let tree_view_bad_extensions: gtk4::TreeView = TreeView::new();
 
-        // TODO GTK 4
         let evk_tree_view_duplicate_finder: gtk4::EventControllerKey = EventControllerKey::new();
         tree_view_duplicate_finder.add_controller(&evk_tree_view_duplicate_finder);
         let evk_tree_view_empty_folder_finder: gtk4::EventControllerKey = EventControllerKey::new();

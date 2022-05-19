@@ -797,49 +797,28 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
 
 // GTK 4
 pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
-    let internal_box = button.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
-    for child in get_all_children(&internal_box) {
-        if let Ok(t) = child.downcast::<gtk4::Label>() {
-            return t;
+    let mut widgets_to_check = vec![button.clone().upcast::<gtk4::Widget>()];
+
+    while let Some(widget) = widgets_to_check.pop() {
+        if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
+            return label;
+        } else {
+            widgets_to_check.extend(get_all_children(&widget));
         }
     }
     panic!("Button doesn't have proper custom label child");
 }
 pub fn get_custom_image_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Image {
-    let internal_box = button.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
-    for child in get_all_children(&internal_box) {
-        if let Ok(t) = child.downcast::<gtk4::Image>() {
-            return t;
+    let mut widgets_to_check = vec![button.clone().upcast::<gtk4::Widget>()];
+
+    while let Some(widget) = widgets_to_check.pop() {
+        if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
+            return image;
+        } else {
+            widgets_to_check.extend(get_all_children(&widget));
         }
     }
     panic!("Button doesn't have proper custom label child");
-}
-
-pub fn get_custom_label_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
-    println!("{:?}", get_all_children(button));
-    for c1 in get_all_children(button) {
-        if let Ok(internal_box) = c1.downcast::<gtk4::Box>() {
-            for child in get_all_children(&internal_box) {
-                if let Ok(t) = child.downcast::<gtk4::Label>() {
-                    return t;
-                }
-            }
-        }
-    }
-    panic!("Menu Button doesn't have proper custom label child");
-}
-pub fn get_custom_image_from_menubutton_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Image {
-    println!("{:?}", get_all_children(button));
-    for c1 in get_all_children(button) {
-        if let Ok(internal_box) = c1.downcast::<gtk4::Box>() {
-            for child in get_all_children(&internal_box) {
-                if let Ok(t) = child.downcast::<gtk4::Image>() {
-                    return t;
-                }
-            }
-        }
-    }
-    panic!("Menu Button doesn't have proper custom label child");
 }
 
 // GTK 4
@@ -862,14 +841,8 @@ pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
-pub fn set_icon_of_button(button: &gtk4::Button, data: &'static [u8]) {
+pub fn set_icon_of_button<P: IsA<gtk4::Widget>>(button: &P, data: &'static [u8]) {
     let image = get_custom_image_from_button_with_image(&button.clone());
-    let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
-    let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
-    image.set_from_pixbuf(Some(&pixbuf));
-}
-pub fn set_icon_of_menubutton(button: &gtk4::MenuButton, data: &'static [u8]) {
-    let image = get_custom_image_from_menubutton_with_image(&button.clone());
     let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
     image.set_from_pixbuf(Some(&pixbuf));

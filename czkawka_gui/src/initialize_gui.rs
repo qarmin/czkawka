@@ -728,7 +728,7 @@ fn show_preview(
                 Some(pixbuf) => pixbuf,
             };
 
-            image_preview.set_from_pixbuf(Some(&pixbuf)); // TODO GTK 4
+            image_preview.set_from_pixbuf(Some(&pixbuf));
             {
                 let mut preview_path = preview_path.borrow_mut();
                 *preview_path = file_name.to_string();

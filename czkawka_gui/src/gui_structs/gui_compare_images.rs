@@ -58,9 +58,8 @@ impl GuiCompareImages {
         let shared_image_cache = Rc::new(RefCell::new(Vec::new()));
         let shared_using_for_preview = Rc::new(RefCell::new((None, None)));
 
-        // TODO GTK 4
-        // set_icon_of_button(&button_go_previous_compare_group, CZK_ICON_LEFT);
-        // set_icon_of_button(&button_go_next_compare_group, CZK_ICON_RIGHT);
+        set_icon_of_button(&button_go_previous_compare_group, CZK_ICON_LEFT);
+        set_icon_of_button(&button_go_next_compare_group, CZK_ICON_RIGHT);
 
         Self {
             window_compare,
