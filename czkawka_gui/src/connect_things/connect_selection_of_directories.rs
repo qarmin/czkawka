@@ -1,14 +1,14 @@
 use std::path::PathBuf;
 
 use gtk4::prelude::*;
-use gtk4::{ResponseType, TreeView, Window};
+use gtk4::{Orientation, ResponseType, TreeView, Window};
 
 use crate::flg;
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{get_dialog_box_child, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
+use crate::help_functions::{debug_print_widget, get_all_boxes_from_widget, get_dialog_box_child, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
@@ -141,12 +141,15 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
         .transient_for(window_main)
         .modal(true)
         .build();
-    dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
-    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     let entry: gtk4::Entry = gtk4::Entry::new();
 
-    get_dialog_box_child(&dialog).append(&entry);
+    let added_button = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
+    dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
+
+    let parent = added_button.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    parent.set_orientation(Orientation::Vertical);
+    parent.insert_child_after(&entry, None::<&gtk4::Widget>);
 
     dialog.show();
 
