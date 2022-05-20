@@ -152,7 +152,7 @@ jobs:
       matrix:
         toolchain: [ stable ]
         type: [ release ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
 
@@ -176,8 +176,8 @@ jobs:
           GTK_APP="$(pwd)/gtk_app"
           GTK_THEME="$(pwd)/gtk_theme"
 
-          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
-          unzip mingw64.zip -d $GTK_LIBRARY
+          wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/gtk4_4_2_test.zip
+          unzip gtk4_4_2_test.zip -d $GTK_LIBRARY
           GTK_LIBRARY="$GTK_LIBRARY/mingw64"
 
           wget https://github.com/nrhodes91/AdMin/archive/master.zip
