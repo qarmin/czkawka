@@ -507,11 +507,6 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 }
 
 fn connect_event_mouse(gui_data: &GuiData) {
-    for tree_view in gui_data.main_notebook.get_main_tree_views() {
-        // tree_view.connect_button_press_event(opening_double_click_function);  // TODO GTK 4
-        // tree_view.connect_button_release_event(opening_middle_mouse_function);  // TODO GTK 4
-    }
-
     // GTK 4
     for gc in [
         gui_data.main_notebook.gc_tree_view_duplicate_finder.clone(),
@@ -528,6 +523,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
     ] {
         gc.set_button(0);
         gc.connect_pressed(opening_double_click_function);
+        // tree_view.connect_button_release_event(opening_middle_mouse_function);  // TODO GTK 4
     }
 
     // Duplicate

@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::Widget;
 
-use crate::help_functions::{get_custom_label_from_button_with_image, set_icon_of_button, BottomButtonsEnum};
+use crate::help_functions::{get_custom_label_from_widget, set_icon_of_button, BottomButtonsEnum};
 use crate::{
     flg, CZK_ICON_COMPARE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_MOVE, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SYMLINK,
     CZK_ICON_TRASH,
@@ -87,13 +87,13 @@ impl GuiBottomButtons {
         }
     }
     pub fn update_language(&self) {
-        get_custom_label_from_button_with_image(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
-        get_custom_label_from_button_with_image(&self.buttons_select.clone()).set_text(&flg!("bottom_select_button"));
-        get_custom_label_from_button_with_image(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
-        get_custom_label_from_button_with_image(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
-        get_custom_label_from_button_with_image(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
-        get_custom_label_from_button_with_image(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
-        get_custom_label_from_button_with_image(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
+        get_custom_label_from_widget(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
+        get_custom_label_from_widget(&self.buttons_select.clone()).set_text(&flg!("bottom_select_button"));
+        get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
+        get_custom_label_from_widget(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
+        get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
+        get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
+        get_custom_label_from_widget(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));
         self.buttons_select.set_tooltip_text(Some(&flg!("bottom_select_button_tooltip")));

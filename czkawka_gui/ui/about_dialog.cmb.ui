@@ -12,59 +12,5 @@ This program is free to use and will always be.
     <property name="logo-icon-name">help-about-symbolic</property>
     <property name="program-name">Czkawka</property>
     <property name="version">4.1.0</property>
-    <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <property name="visible">0</property>
-        <child>
-          <object class="GtkBox">
-            <property name="can-focus">False</property>
-            <property name="valign">center</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="margin-bottom">3</property>
-            <child>
-              <object class="GtkButton" id="button_repository">
-                <property name="focusable">1</property>
-                <property name="halign">center</property>
-                <property name="hexpand">1</property>
-                <property name="label" translatable="yes">Repository</property>
-                <property name="receives-default">1</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_instruction">
-                <property name="focusable">1</property>
-                <property name="halign">center</property>
-                <property name="hexpand">1</property>
-                <property name="label" translatable="yes">Instruction</property>
-                <property name="receives-default">1</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_donation">
-                <property name="focusable">1</property>
-                <property name="halign">center</property>
-                <property name="hexpand">1</property>
-                <property name="label" translatable="yes">Donation</property>
-                <property name="receives-default">1</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_translation">
-                <property name="focusable">1</property>
-                <property name="halign">center</property>
-                <property name="hexpand">1</property>
-                <property name="label" translatable="yes">Translation</property>
-                <property name="receives-default">1</property>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
   </object>
 </interface>

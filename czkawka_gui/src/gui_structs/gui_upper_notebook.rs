@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{EventControllerKey, GestureClick, TreeView};
 
-use crate::help_functions::{get_all_children, get_custom_label_from_button_with_image, set_icon_of_button};
+use crate::help_functions::{get_all_children, get_custom_label_from_widget, set_icon_of_button};
 use crate::notebook_enums::NotebookUpperEnum;
 use crate::{flg, CZK_ICON_ADD, CZK_ICON_DELETE, CZK_ICON_MANUAL_ADD};
 
@@ -123,12 +123,12 @@ impl GuiUpperNotebook {
         self.check_button_recursive.set_label(Some(&flg!("upper_recursive_button")));
         self.check_button_recursive.set_tooltip_text(Some(&flg!("upper_recursive_button_tooltip")));
 
-        get_custom_label_from_button_with_image(&self.buttons_manual_add_included_directory.clone()).set_text(&flg!("upper_manual_add_included_button"));
-        get_custom_label_from_button_with_image(&self.buttons_add_included_directory.clone()).set_text(&flg!("upper_add_included_button"));
-        get_custom_label_from_button_with_image(&self.buttons_remove_included_directory.clone()).set_text(&flg!("upper_remove_included_button"));
-        get_custom_label_from_button_with_image(&self.buttons_manual_add_excluded_directory.clone()).set_text(&flg!("upper_manual_add_excluded_button"));
-        get_custom_label_from_button_with_image(&self.buttons_add_excluded_directory.clone()).set_text(&flg!("upper_add_excluded_button"));
-        get_custom_label_from_button_with_image(&self.buttons_remove_excluded_directory.clone()).set_text(&flg!("upper_remove_excluded_button"));
+        get_custom_label_from_widget(&self.buttons_manual_add_included_directory.clone()).set_text(&flg!("upper_manual_add_included_button"));
+        get_custom_label_from_widget(&self.buttons_add_included_directory.clone()).set_text(&flg!("upper_add_included_button"));
+        get_custom_label_from_widget(&self.buttons_remove_included_directory.clone()).set_text(&flg!("upper_remove_included_button"));
+        get_custom_label_from_widget(&self.buttons_manual_add_excluded_directory.clone()).set_text(&flg!("upper_manual_add_excluded_button"));
+        get_custom_label_from_widget(&self.buttons_add_excluded_directory.clone()).set_text(&flg!("upper_add_excluded_button"));
+        get_custom_label_from_widget(&self.buttons_remove_excluded_directory.clone()).set_text(&flg!("upper_remove_excluded_button"));
 
         self.buttons_manual_add_included_directory
             .set_tooltip_text(Some(&flg!("upper_manual_add_included_button_tooltip")));

@@ -39,8 +39,6 @@ pub const KEY_SPACE: u32 = 65;
 // pub const KEY_HOME: u32 = 115;
 // pub const KEY_END: u32 = 110;
 
-pub const CHECK_GTK_EVENTS_INTERVAL: usize = 100;
-
 #[derive(Eq, PartialEq)]
 pub enum PopoverTypes {
     All,
@@ -780,24 +778,9 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-// pub fn get_custom_image_from_button_with_image(button: &gtk4::Button) -> gtk4::Image {
-//     let internal_box = match button.child().unwrap().downcast::<gtk4::Box>() {
-//         Ok(t) => t,
-//         Err(wid) => {
-//             return wid.downcast::<gtk4::Image>().unwrap();
-//         }
-//     };
-//     for child in internal_box.children() {
-//         if let Ok(t) = child.downcast::<gtk4::Image>() {
-//             return t;
-//         }
-//     }
-//     panic!("Button doesn't have proper custom label child");
-// }
-
 // GTK 4
-pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Label {
-    let mut widgets_to_check = vec![button.clone().upcast::<gtk4::Widget>()];
+pub fn get_custom_label_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Label {
+    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
@@ -808,8 +791,8 @@ pub fn get_custom_label_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P)
     }
     panic!("Button doesn't have proper custom label child");
 }
-pub fn get_custom_image_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P) -> gtk4::Image {
-    let mut widgets_to_check = vec![button.clone().upcast::<gtk4::Widget>()];
+pub fn get_custom_image_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Image {
+    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
@@ -819,6 +802,45 @@ pub fn get_custom_image_from_button_with_image<P: IsA<gtk4::Widget>>(button: &P)
         }
     }
     panic!("Button doesn't have proper custom label child");
+}
+pub fn get_custom_box_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Box {
+    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+
+    while let Some(widget) = widgets_to_check.pop() {
+        if let Ok(bbox) = widget.clone().downcast::<gtk4::Box>() {
+            return bbox;
+        } else {
+            widgets_to_check.extend(get_all_children(&widget));
+        }
+    }
+    panic!("Button doesn't have proper custom label child");
+}
+
+pub fn debug_print_widget<P: IsA<gtk4::Widget>>(item: &P) {
+    let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<gtk4::Widget>())];
+
+    let mut next_free_number = 1;
+    println!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
+
+    while let Some((current_number, parent_number, widget)) = widgets_to_check.pop() {
+        for widget in get_all_children(&widget) {
+            widgets_to_check.push((next_free_number, current_number, widget));
+            next_free_number += 1;
+        }
+        println!("{}, {}, {:?} ", current_number, parent_number, widget);
+    }
+}
+pub fn get_all_boxes_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> Vec<gtk4::Box> {
+    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+    let mut boxes = Vec::new();
+
+    while let Some(widget) = widgets_to_check.pop() {
+        widgets_to_check.extend(get_all_children(&widget));
+        if let Ok(bbox) = widget.clone().downcast::<gtk4::Box>() {
+            boxes.push(bbox);
+        }
+    }
+    boxes
 }
 
 // GTK 4
@@ -835,14 +857,14 @@ pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
         }
     }
 
-    return vector;
+    vector
 }
 
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
 pub fn set_icon_of_button<P: IsA<gtk4::Widget>>(button: &P, data: &'static [u8]) {
-    let image = get_custom_image_from_button_with_image(&button.clone());
+    let image = get_custom_image_from_widget(&button.clone());
     let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
     image.set_from_pixbuf(Some(&pixbuf));
