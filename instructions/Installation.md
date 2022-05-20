@@ -9,7 +9,7 @@ Broken files finder by default don't check for music files, but it is possible t
 
 #### Ubuntu/Debian/Linux Mint
 ```
-sudo apt install libgtk-3-dev ffmpeg
+sudo apt install libgtk-4-dev ffmpeg
 ```
 #### Fedora/Rocky Linux
 ```
@@ -24,7 +24,7 @@ sudo xbps-install gcc pkg-config ffmpeg
 ```
 
 ### macOS
-Currently, you need to manually install `GTK 3` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS.  
+Currently, you need to manually install `GTK 4` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS.  
 One very straight-forward way to do this is by using [Homebrew](https://brew.sh/).  
 Installation in the terminal:
 ```shell
@@ -47,7 +47,7 @@ arch -x86_64 /usr/local/bin/brew install gtk+3 adwaita-icon-theme ffmpeg librsvg
 ```
 
 ### Windows
-By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 3`
+By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 4`
 runtime from [**here**](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
 
 FFmpeg to be able to use Similar Videos, you can download and install from this [**link**](https://ffmpeg.org/).

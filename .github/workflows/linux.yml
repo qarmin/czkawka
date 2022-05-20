@@ -32,7 +32,7 @@ jobs:
             linux-cli-${{github.ref}}-${{github.sha}}
 
       - name: Install basic libraries
-        run: sudo apt-get update; sudo apt install libgtk-3-dev libasound2-dev -y
+        run: sudo apt-get update; sudo apt install libgtk-4-dev libasound2-dev -y
 
       - name: Build CLI Debug
         run: cargo build --bin czkawka_cli
@@ -150,7 +150,7 @@ jobs:
             linux-gui-${{github.ref}}-${{github.sha}}
 
       - name: Install Gtk, Mingw, unzip, zip and wget
-        run: sudo apt-get update; sudo apt install libgtk-3-dev libasound2-dev -y
+        run: sudo apt-get update; sudo apt install libgtk-4-dev libasound2-dev -y
 
       - name: Build GUI Debug
         run: cargo build --bin czkawka_gui
@@ -214,7 +214,7 @@ jobs:
             linux-appimage-gui-${{github.ref}}-${{github.sha}}
 
       - name: Install Gtk,
-        run: sudo apt-get update; sudo apt install libgtk-3-dev libasound2-dev librsvg2-dev wget -y
+        run: sudo apt-get update; sudo apt install libgtk-4-dev libasound2-dev librsvg2-dev wget -y
 
       - name: Build GUI Release
         run: cargo build --release --bin czkawka_gui

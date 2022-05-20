@@ -162,7 +162,7 @@ jobs:
           override: true
 
       - name: Install Gtk, Mingw, unzip, zip and wget
-        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-4-dev unzip wget zip -y
 
       - name: Build GUI Release Cross Compile
         run: |
@@ -252,7 +252,7 @@ jobs:
           override: true
 
       - name: Install Gtk, Mingw, unzip, zip and wget
-        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-4-dev unzip wget zip -y
 
       - name: Build GUI Release Cross Compile
         run: |
@@ -343,7 +343,7 @@ jobs:
 #          override: true
 #
 #      - name: Install Gtk, Mingw, unzip, zip and wget
-#        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+#        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-4-dev unzip wget zip -y
 #
 #      - name: Build GUI Debug Cross Compile
 #        run: |
@@ -434,7 +434,7 @@ jobs:
 #          override: true
 #
 #      - name: Install Gtk, Mingw, unzip, zip and wget
-#        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
+#        run: sudo apt-get update; sudo apt install mingw-w64 libgtk-4-dev unzip wget zip -y
 #
 #      - name: Build GUI Debug Cross Compile
 #        run: |
