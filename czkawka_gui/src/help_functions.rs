@@ -68,7 +68,7 @@ pub struct NotebookObject {
     pub column_path: i32,
     pub column_name: i32,
     pub column_selection: i32,
-    pub column_color: Option<i32>,
+    pub column_header: Option<i32>,
     pub column_dimensions: Option<i32>,
     pub column_size: Option<i32>,
     pub column_size_as_bytes: Option<i32>,
@@ -83,7 +83,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsDuplicates::Path as i32,
         column_name: ColumnsDuplicates::Name as i32,
         column_selection: ColumnsDuplicates::SelectionButton as i32,
-        column_color: Some(ColumnsDuplicates::Color as i32),
+        column_header: Some(ColumnsDuplicates::Color as i32),
         column_dimensions: None,
         column_size: None,          // Do not add, useless in hash and size mode
         column_size_as_bytes: None, // Do not add, useless in hash and size mode
@@ -96,7 +96,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsEmptyFolders::Path as i32,
         column_name: ColumnsEmptyFolders::Name as i32,
         column_selection: ColumnsEmptyFolders::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -109,7 +109,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsBigFiles::Path as i32,
         column_name: ColumnsBigFiles::Name as i32,
         column_selection: ColumnsBigFiles::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -122,7 +122,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsEmptyFiles::Path as i32,
         column_name: ColumnsEmptyFiles::Name as i32,
         column_selection: ColumnsEmptyFiles::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -135,7 +135,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsTemporaryFiles::Path as i32,
         column_name: ColumnsTemporaryFiles::Name as i32,
         column_selection: ColumnsTemporaryFiles::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -148,7 +148,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsSimilarImages::Path as i32,
         column_name: ColumnsSimilarImages::Name as i32,
         column_selection: ColumnsSimilarImages::SelectionButton as i32,
-        column_color: Some(ColumnsSimilarImages::Color as i32),
+        column_header: Some(ColumnsSimilarImages::Color as i32),
         column_dimensions: Some(ColumnsSimilarImages::Dimensions as i32),
         column_size: Some(ColumnsSimilarImages::Size as i32),
         column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
@@ -161,7 +161,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsSimilarVideos::Path as i32,
         column_name: ColumnsSimilarVideos::Name as i32,
         column_selection: ColumnsSimilarVideos::SelectionButton as i32,
-        column_color: Some(ColumnsSimilarVideos::Color as i32),
+        column_header: Some(ColumnsSimilarVideos::Color as i32),
         column_dimensions: None,
         column_size: Some(ColumnsSimilarVideos::Size as i32),
         column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
@@ -174,7 +174,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsSameMusic::Path as i32,
         column_name: ColumnsSameMusic::Name as i32,
         column_selection: ColumnsSameMusic::SelectionButton as i32,
-        column_color: Some(ColumnsSameMusic::Color as i32),
+        column_header: Some(ColumnsSameMusic::Color as i32),
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
@@ -187,7 +187,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsInvalidSymlinks::Path as i32,
         column_name: ColumnsInvalidSymlinks::Name as i32,
         column_selection: ColumnsInvalidSymlinks::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -200,7 +200,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsBrokenFiles::Path as i32,
         column_name: ColumnsBrokenFiles::Name as i32,
         column_selection: ColumnsBrokenFiles::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -213,7 +213,7 @@ pub static NOTEBOOKS_INFOS: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
         column_path: ColumnsBadExtensions::Path as i32,
         column_name: ColumnsBadExtensions::Name as i32,
         column_selection: ColumnsBadExtensions::SelectionButton as i32,
-        column_color: None,
+        column_header: None,
         column_dimensions: None,
         column_size: None,
         column_size_as_bytes: None,
@@ -245,6 +245,7 @@ pub enum ColumnsDuplicates {
     Modification,
     ModificationAsSecs,
     Color,
+    IsHeader,
     TextColor,
 }
 
@@ -305,6 +306,7 @@ pub enum ColumnsSimilarImages {
     Modification,
     ModificationAsSecs,
     Color,
+    IsHeader,
     TextColor,
 }
 
@@ -318,6 +320,7 @@ pub enum ColumnsSimilarVideos {
     Modification,
     ModificationAsSecs,
     Color,
+    IsHeader,
     TextColor,
 }
 
@@ -338,6 +341,7 @@ pub enum ColumnsSameMusic {
     Modification,
     ModificationAsSecs,
     Color,
+    IsHeader,
     TextColor,
 }
 
@@ -370,11 +374,9 @@ pub enum ColumnsBadExtensions {
     ModificationAsSecs,
 }
 
+pub const MAIN_ROW_COLOR: &str = "#222222";
+pub const HEADER_ROW_COLOR: &str = "#111111";
 pub const TEXT_COLOR: &str = "#ffffff";
-pub const MAIN_ROW_COLOR: &str = "#343434";
-pub const HEADER_ROW_COLOR: &str = "#272727";
-//pub const MAIN_ROW_COLOR: &str = "#f4f434"; // TEST
-//pub const HEADER_ROW_COLOR: &str = "#010101"; // TEST
 
 pub fn get_string_from_list_store(tree_view: &gtk4::TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
     let list_store: gtk4::ListStore = get_list_store(tree_view);
@@ -550,12 +552,12 @@ pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
-pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_path: i32) {
+pub fn clean_invalid_headers(model: &gtk4::ListStore, column_header: i32, column_path: i32) {
     // Remove only child from header
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
+        if !model.get::<bool>(&current_iter, column_header) {
             panic!("First deleted element, should be a header"); // First element should be header
         };
 
@@ -565,7 +567,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
         // Empty means default check type
         if model.get::<String>(&current_iter, column_path).is_empty() {
             'main: loop {
-                if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
+                if !model.get::<bool>(&current_iter, column_header) {
                     panic!("First deleted element, should be a header"); // First element should be header
                 };
 
@@ -576,7 +578,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'main;
                 }
 
-                if model.get::<String>(&next_iter, column_color) == HEADER_ROW_COLOR {
+                if model.get::<bool>(&next_iter, column_header) {
                     // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     current_iter = next_iter;
@@ -591,7 +593,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'main;
                 }
 
-                if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
+                if model.get::<bool>(&next_next_iter, column_header) {
                     // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     vec_tree_path_to_delete.push(model.path(&next_iter));
@@ -605,7 +607,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                         break 'main;
                     }
                     // Move to next header
-                    if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
+                    if model.get::<bool>(&next_next_iter, column_header) {
                         current_iter = next_next_iter;
                         continue 'main;
                     }
@@ -618,7 +620,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
         // Non empty means that header points at reference folder
         else {
             'reference: loop {
-                if model.get::<String>(&current_iter, column_color) != HEADER_ROW_COLOR {
+                if !model.get::<bool>(&current_iter, column_header) {
                     panic!("First deleted element, should be a header"); // First element should be header
                 };
 
@@ -629,7 +631,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'reference;
                 }
 
-                if model.get::<String>(&next_iter, column_color) == HEADER_ROW_COLOR {
+                if model.get::<bool>(&next_iter, column_header) {
                     // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     current_iter = next_iter;
@@ -642,7 +644,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                     break 'reference;
                 }
 
-                if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
+                if model.get::<bool>(&next_next_iter, column_header) {
                     // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
                     current_iter = next_next_iter;
                     continue 'reference;
@@ -654,7 +656,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
                         break 'reference;
                     }
                     // Move to next header
-                    if model.get::<String>(&next_next_iter, column_color) == HEADER_ROW_COLOR {
+                    if model.get::<bool>(&next_next_iter, column_header) {
                         current_iter = next_next_iter;
                         continue 'reference;
                     }
@@ -673,7 +675,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_color: i32, column_
         }
     }
 }
-pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: Option<i32>, column_selection: i32) -> (u64, u64) {
+pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
     let mut number_of_selected_items: u64 = 0;
     let mut number_of_selected_groups: u64 = 0;
 
@@ -683,15 +685,15 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
 
     // First iter
     if let Some(iter) = model.iter_first() {
-        if let Some(column_color) = column_color {
-            assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
+        if let Some(column_header) = column_header {
+            assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
             loop {
                 if !model.iter_next(&iter) {
                     break;
                 }
 
-                if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
+                if model.get::<bool>(&iter, column_header) {
                     is_item_currently_selected_in_group = false;
                 } else {
                     if model.get::<bool>(&iter, column_selection) {
@@ -721,13 +723,13 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_color: O
 }
 
 /// Counts how much headers/groups is in treeview
-pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32) -> u32 {
+pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
     let mut number_of_selected_groups = 0;
 
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
+        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
         number_of_selected_groups += 1;
 
         loop {
@@ -735,7 +737,7 @@ pub fn count_number_of_groups(tree_view: &TreeView, column_color: i32) -> u32 {
                 break;
             }
 
-            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
+            if model.get::<bool>(&iter, column_header) {
                 number_of_selected_groups += 1;
             }
         }

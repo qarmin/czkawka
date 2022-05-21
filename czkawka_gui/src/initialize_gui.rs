@@ -124,7 +124,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
                 image_preview.hide();
 
-                let col_types: [glib::types::Type; 9] = [
+                let col_types: [glib::types::Type; 10] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Size
@@ -133,6 +133,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                     glib::types::Type::STRING, // Color
+                    glib::types::Type::BOOL,   // IsHeader
                     glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
@@ -249,7 +250,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
                 image_preview.hide();
 
-                let col_types: [glib::types::Type; 12] = [
+                let col_types: [glib::types::Type; 13] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Similarity
@@ -261,6 +262,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                     glib::types::Type::STRING, // Color
+                    glib::types::Type::BOOL,   // IsHeader
                     glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
@@ -280,7 +282,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_similar_videos_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
 
-                let col_types: [glib::types::Type; 10] = [
+                let col_types: [glib::types::Type; 11] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Size
@@ -290,6 +292,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                     glib::types::Type::STRING, // Color
+                    glib::types::Type::BOOL,   // IsHeader
                     glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
@@ -309,7 +312,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_same_music_finder.clone();
 
-                let col_types: [glib::types::Type; 17] = [
+                let col_types: [glib::types::Type; 18] = [
                     glib::types::Type::BOOL,   // ActivatableSelectButton
                     glib::types::Type::BOOL,   // SelectionButton
                     glib::types::Type::STRING, // Size
@@ -326,6 +329,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                     glib::types::Type::STRING, // Modification
                     glib::types::Type::U64,    // ModificationAsSecs
                     glib::types::Type::STRING, // Color
+                    glib::types::Type::BOOL,   // IsHeader
                     glib::types::Type::STRING, // TextColor
                 ];
                 let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);

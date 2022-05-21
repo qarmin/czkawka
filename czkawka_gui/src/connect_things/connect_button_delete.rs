@@ -46,7 +46,7 @@ pub async fn delete_things(gui_data: GuiData) {
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_color, nb_object.column_selection);
+    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
 
     // Nothing is selected
     if number_of_selected_items == 0 {
@@ -57,11 +57,11 @@ pub async fn delete_things(gui_data: GuiData) {
         return;
     }
 
-    if let Some(column_color) = nb_object.column_color {
+    if let Some(column_header) = nb_object.column_header {
         if !check_button_settings_confirm_group_deletion.is_active()
             || !check_if_deleting_all_files_in_group(
                 tree_view,
-                column_color,
+                column_header,
                 nb_object.column_selection,
                 nb_object.column_path,
                 &window_main,
@@ -73,7 +73,7 @@ pub async fn delete_things(gui_data: GuiData) {
                 tree_view,
                 nb_object.column_name,
                 nb_object.column_path,
-                column_color,
+                column_header,
                 nb_object.column_selection,
                 &check_button_settings_use_trash,
                 &text_view_errors,
@@ -200,7 +200,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
 
 pub async fn check_if_deleting_all_files_in_group(
     tree_view: &gtk4::TreeView,
-    column_color: i32,
+    column_header: i32,
     column_selection: i32,
     column_path: i32,
     window_main: &gtk4::Window,
@@ -211,7 +211,7 @@ pub async fn check_if_deleting_all_files_in_group(
     let mut selected_all_records: bool = true;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
+        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         // It is safe to remove any number of files in reference mode
         if !model.get::<String>(&iter, column_path).is_empty() {
@@ -223,7 +223,7 @@ pub async fn check_if_deleting_all_files_in_group(
                 break;
             }
 
-            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
+            if model.get::<bool>(&iter, column_header) {
                 if selected_all_records {
                     break;
                 }
@@ -454,7 +454,7 @@ pub fn tree_remove(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
-    column_color: i32,
+    column_header: i32,
     column_selection: i32,
     check_button_settings_use_trash: &CheckButton,
     text_view_errors: &TextView,
@@ -473,7 +473,7 @@ pub fn tree_remove(
     if let Some(iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
-                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
+                if !model.get::<bool>(&iter, column_header) {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -530,7 +530,7 @@ pub fn tree_remove(
         }
     }
 
-    clean_invalid_headers(&model, column_color, column_path);
+    clean_invalid_headers(&model, column_header, column_path);
 
     text_view_errors.buffer().set_text(messages.as_str());
 }

@@ -57,11 +57,11 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-    let column_color = nb_object.column_color.expect("Linking can be only used for tree views with grouped results");
+    let column_header = nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
 
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
-    if !check_if_anything_is_selected_async(tree_view, column_color, nb_object.column_selection).await {
+    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection).await {
         return;
     }
 
@@ -69,7 +69,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         return;
     }
 
-    if !check_if_changing_one_item_in_group_and_continue(tree_view, column_color, nb_object.column_selection, &window_main).await {
+    if !check_if_changing_one_item_in_group_and_continue(tree_view, column_header, nb_object.column_selection, &window_main).await {
         return;
     }
 
@@ -77,7 +77,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         tree_view,
         nb_object.column_name,
         nb_object.column_path,
-        column_color,
+        column_header,
         nb_object.column_selection,
         hardlinking,
         &text_view_errors,
@@ -100,7 +100,7 @@ fn hardlink_symlink(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
-    column_color: i32,
+    column_header: i32,
     column_selection: i32,
     hardlinking: TypeOfTool,
     text_view_errors: &TextView,
@@ -126,7 +126,7 @@ fn hardlink_symlink(
     if let Some(iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
-                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
+                if !model.get::<bool>(&iter, column_header) {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -145,7 +145,7 @@ fn hardlink_symlink(
     let mut current_symhardlink_data: Option<SymHardlinkData> = None;
     let mut current_selected_index = 0;
     loop {
-        if model.get::<String>(&current_iter, column_color) == HEADER_ROW_COLOR {
+        if model.get::<bool>(&current_iter, column_header) {
             if let Some(current_symhardlink_data) = current_symhardlink_data {
                 if !current_symhardlink_data.files_to_symhardlink.is_empty() {
                     vec_symhardlink_data.push(current_symhardlink_data);
@@ -257,7 +257,7 @@ fn hardlink_symlink(
         model.remove(&model.iter(tree_path).unwrap());
     }
 
-    clean_invalid_headers(&model, column_color, column_path);
+    clean_invalid_headers(&model, column_header, column_path);
 }
 
 fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
@@ -284,20 +284,20 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     dialog
 }
 
-pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::TreeView, column_color: i32, column_selection: i32, window_main: &gtk4::Window) -> bool {
+pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32, window_main: &gtk4::Window) -> bool {
     let model = get_list_store(tree_view);
 
     let mut selected_values_in_group = 0;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
+        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
+            if model.get::<bool>(&iter, column_header) {
                 if selected_values_in_group == 1 {
                     break;
                 }
@@ -328,18 +328,18 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     true
 }
 
-pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_color: i32, column_selection: i32) -> bool {
+pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
+        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         loop {
             if !model.iter_next(&iter) {
                 break;
             }
 
-            if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR && model.get::<bool>(&iter, column_selection) {
+            if !model.get::<bool>(&iter, column_header) && model.get::<bool>(&iter, column_selection) {
                 return true;
             }
         }

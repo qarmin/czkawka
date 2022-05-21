@@ -31,7 +31,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_color, nb_object.column_selection);
+        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
 
         // Nothing is selected
         if number_of_selected_items == 0 {
@@ -41,7 +41,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
             tree_view,
             nb_object.column_name,
             nb_object.column_path,
-            nb_object.column_color,
+            nb_object.column_header,
             nb_object.column_selection,
             &entry_info,
             &text_view_errors,
@@ -67,7 +67,7 @@ fn move_things(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
-    column_color: Option<i32>,
+    column_header: Option<i32>,
     column_selection: i32,
     entry_info: &gtk4::Entry,
     text_view_errors: &gtk4::TextView,
@@ -97,7 +97,6 @@ fn move_things(
             for index in 0..g_files.n_items() {
                 let file = &g_files.item(index);
                 if let Some(file) = file {
-                    println!("{:?}", file);
                     let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
                     if let Some(path_buf) = ss.path() {
                         folders.push(path_buf);
@@ -116,12 +115,12 @@ fn move_things(
                 );
             } else {
                 let folder = folders[0].clone();
-                if let Some(column_color) = column_color {
+                if let Some(column_header) = column_header {
                     move_with_tree(
                         &tree_view,
                         column_file_name,
                         column_path,
-                        column_color,
+                        column_header,
                         column_selection,
                         folder,
                         &entry_info,
@@ -140,7 +139,7 @@ fn move_with_tree(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
-    column_color: i32,
+    column_header: i32,
     column_selection: i32,
     destination_folder: PathBuf,
     entry_info: &gtk4::Entry,
@@ -153,7 +152,7 @@ fn move_with_tree(
     if let Some(iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
-                if model.get::<String>(&iter, column_color) == MAIN_ROW_COLOR {
+                if !model.get::<bool>(&iter, column_header) {
                     selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
@@ -172,7 +171,7 @@ fn move_with_tree(
 
     move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors);
 
-    clean_invalid_headers(&model, column_color, column_path);
+    clean_invalid_headers(&model, column_header, column_path);
 }
 
 fn move_with_list(

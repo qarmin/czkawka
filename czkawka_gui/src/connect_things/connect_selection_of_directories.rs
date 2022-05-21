@@ -106,7 +106,6 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
             for index in 0..g_files.n_items() {
                 let file = &g_files.item(index);
                 if let Some(file) = file {
-                    println!("{:?}", file);
                     let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
                     if let Some(path_buf) = ss.path() {
                         folders.push(path_buf);

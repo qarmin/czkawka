@@ -44,14 +44,14 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
         let model = tree_view.model().unwrap();
 
-        let group_number = count_number_of_groups(tree_view, nb_object.column_color.unwrap());
+        let group_number = count_number_of_groups(tree_view, nb_object.column_header.unwrap());
 
         if group_number == 0 {
             return;
         }
 
         // Check selected items
-        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_color.unwrap());
+        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_header.unwrap());
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -128,7 +128,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), false);
+        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_header.unwrap(), false);
 
         populate_groups_at_start(
             nb_object,
@@ -180,7 +180,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_color.unwrap(), true);
+        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_header.unwrap(), true);
 
         populate_groups_at_start(
             nb_object,
@@ -279,7 +279,7 @@ fn populate_groups_at_start(
         button_go_next_compare_group.set_sensitive(true);
     }
 
-    let all_vec = get_all_path(model, &tree_path, nb_object.column_color.unwrap(), nb_object.column_path, nb_object.column_name);
+    let all_vec = get_all_path(model, &tree_path, nb_object.column_header.unwrap(), nb_object.column_path, nb_object.column_name);
     *shared_current_path.borrow_mut() = Some(tree_path);
 
     let cache_all_images = generate_cache_for_results(all_vec);
@@ -382,10 +382,10 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk4::TreeP
 }
 
 /// Takes info about current items in groups like path
-fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk4::TreePath)> {
+fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk4::TreePath)> {
     let used_iter = model.iter(current_path).unwrap();
 
-    assert_eq!(model.get::<String>(&used_iter, column_color), HEADER_ROW_COLOR);
+    assert!(model.get::<bool>(&used_iter, column_header));
     let using_reference = !model.get::<String>(&used_iter, column_path).is_empty();
 
     let mut returned_vector = Vec::new();
@@ -415,9 +415,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
             break;
         }
 
-        let color = model.get::<String>(&used_iter, column_color);
-
-        if color == HEADER_ROW_COLOR {
+        if model.get::<bool>(&used_iter, column_header) {
             break;
         }
     }
@@ -428,10 +426,10 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_color: i32, c
 }
 
 /// Moves iterator to previous/next header
-fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_color: i32, go_next: bool) -> TreePath {
+fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_header: i32, go_next: bool) -> TreePath {
     let tree_iter = model.iter(tree_path).unwrap();
 
-    assert_eq!(model.get::<String>(&tree_iter, column_color), HEADER_ROW_COLOR);
+    assert!(model.get::<bool>(&tree_iter, column_header));
 
     if go_next {
         if !model.iter_next(&tree_iter) {
@@ -454,9 +452,7 @@ fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_color: i32, g
             }
         }
 
-        let color = model.get::<String>(&tree_iter, column_color);
-
-        if color == HEADER_ROW_COLOR {
+        if model.get::<bool>(&tree_iter, column_header) {
             break;
         }
     }
@@ -569,7 +565,7 @@ fn update_bottom_buttons(
     }
 }
 
-fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeSelection, column_color: i32) -> (u32, TreePath) {
+fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeSelection, column_header: i32) -> (u32, TreePath) {
     let mut current_group = 1;
     let mut possible_group = 1;
     let mut header_clone: TreeIter;
@@ -580,7 +576,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
     let iter = model.iter_first().unwrap(); // Checking that treeview is not empty should be done before
     header_clone = iter; // if nothing selected, use first group
     possible_header = iter; // if nothing selected, use first group
-    assert_eq!(model.get::<String>(&iter, column_color), HEADER_ROW_COLOR); // First element should be header
+    assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
     if !selected_records.is_empty() {
         let first_selected_record = selected_records[0].clone();
@@ -589,7 +585,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeS
                 break;
             }
 
-            if model.get::<String>(&iter, column_color) == HEADER_ROW_COLOR {
+            if model.get::<bool>(&iter, column_header) {
                 possible_group += 1;
                 possible_header = iter;
             }
