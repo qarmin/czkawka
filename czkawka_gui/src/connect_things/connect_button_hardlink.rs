@@ -209,7 +209,7 @@ fn hardlink_symlink(
         }
     } else {
         for symhardlink_data in vec_symhardlink_data {
-            for (counter, file_to_symlink) in symhardlink_data.files_to_symhardlink.into_iter().enumerate() {
+            for file_to_symlink in symhardlink_data.files_to_symhardlink.into_iter() {
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,

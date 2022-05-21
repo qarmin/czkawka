@@ -22,8 +22,8 @@ pub fn connect_button_stop(gui_data: &GuiData) {
 
     let gc_button_stop_in_dialog = gui_data.progress_window.gc_button_stop_in_dialog.clone();
     let stop_sender = gui_data.stop_sender.clone();
-    // TODO change this to connect released, not sure why not works here
-    gc_button_stop_in_dialog.connect_pressed(move |a, b, c, d| {
+    // TODO GTK 4 change this to connect released, not sure why not works here
+    gc_button_stop_in_dialog.connect_pressed(move |a, _b, _c, _d| {
         send_stop_message(&stop_sender);
     });
 }

@@ -35,7 +35,8 @@ pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::
     Inhibit(false)
 }
 
-pub fn opening_middle_mouse_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
+pub fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_clicks: i32, _b: f64, _c: f64) {
+    println!("MIDDLE MOUSE BUTTON CLICKED");
     let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);

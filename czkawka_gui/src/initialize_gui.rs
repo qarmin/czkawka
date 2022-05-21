@@ -513,21 +513,21 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 fn connect_event_mouse(gui_data: &GuiData) {
     // GTK 4
     for gc in [
-        gui_data.main_notebook.gc_tree_view_duplicate_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_empty_folder_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_empty_files_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_temporary_files_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_big_files_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_similar_images_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_similar_videos_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_same_music_finder.clone(),
-        gui_data.main_notebook.gc_tree_view_invalid_symlinks.clone(),
-        gui_data.main_notebook.gc_tree_view_broken_files.clone(),
-        gui_data.main_notebook.gc_tree_view_bad_extensions.clone(),
+        &gui_data.main_notebook.gc_tree_view_duplicate_finder,
+        &gui_data.main_notebook.gc_tree_view_empty_folder_finder,
+        &gui_data.main_notebook.gc_tree_view_empty_files_finder,
+        &gui_data.main_notebook.gc_tree_view_temporary_files_finder,
+        &gui_data.main_notebook.gc_tree_view_big_files_finder,
+        &gui_data.main_notebook.gc_tree_view_similar_images_finder,
+        &gui_data.main_notebook.gc_tree_view_similar_videos_finder,
+        &gui_data.main_notebook.gc_tree_view_same_music_finder,
+        &gui_data.main_notebook.gc_tree_view_invalid_symlinks,
+        &gui_data.main_notebook.gc_tree_view_broken_files,
+        &gui_data.main_notebook.gc_tree_view_bad_extensions,
     ] {
         gc.set_button(0);
         gc.connect_pressed(opening_double_click_function);
-        // tree_view.connect_button_release_event(opening_middle_mouse_function);  // TODO GTK 4
+        gc.connect_released(opening_middle_mouse_function); // TODO GTK 4 - https://github.com/gtk-rs/gtk4-rs/issues/1043
     }
 
     // Duplicate
