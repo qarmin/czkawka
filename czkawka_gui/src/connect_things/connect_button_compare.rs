@@ -6,9 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{
-    count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, HEADER_ROW_COLOR, NOTEBOOKS_INFOS,
-};
+use crate::help_functions::{count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, NOTEBOOKS_INFOS};
 use crate::localizer_core::generate_translation_hashmap;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
@@ -205,51 +203,50 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         );
     });
 
-    // // TODO GTK 4
-    // let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
-    // let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
-    // let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    // let shared_current_path = gui_data.compare_images.shared_current_path.clone();
-    // let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    // check_button_left_preview_text.connect_(move |check_button_left_preview_text| {
-    //     let nb_number = notebook_main.current_page().unwrap();
-    //     let tree_view = &main_tree_views[nb_number as usize];
-    //     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
-    //     let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
-    //
-    //     let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
-    //     let this_tree_path = shared_using_for_preview.borrow().0.clone().unwrap();
-    //     if main_tree_path == this_tree_path {
-    //         return; // Selected header, so we don't need to select result in treeview
-    //                 // TODO this should be handled by disabling entirely check box
-    //     }
-    //
-    //     let is_active = check_button_left_preview_text.is_active();
-    //     model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
-    // });
-    //
-    // let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
-    // let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
-    // let shared_current_path = gui_data.compare_images.shared_current_path.clone();
-    // let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    // let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    //
-    // check_button_right_preview_text.connect_clicked(move |check_button_right_preview_text| {
-    //     let nb_number = notebook_main.current_page().unwrap();
-    //     let tree_view = &main_tree_views[nb_number as usize];
-    //     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
-    //     let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
-    //
-    //     let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
-    //     let this_tree_path = shared_using_for_preview.borrow().1.clone().unwrap();
-    //     if main_tree_path == this_tree_path {
-    //         return; // Selected header, so we don't need to select result in treeview
-    //                 // TODO this should be handled by disabling entirely check box
-    //     }
-    //
-    //     let is_active = check_button_right_preview_text.is_active();
-    //     model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
-    // });
+    let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    check_button_left_preview_text.connect_toggled(move |check_button_left_preview_text| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
+
+        let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
+        let this_tree_path = shared_using_for_preview.borrow().0.clone().unwrap();
+        if main_tree_path == this_tree_path {
+            return; // Selected header, so we don't need to select result in treeview
+                    // TODO this should be handled by disabling entirely check box
+        }
+
+        let is_active = check_button_left_preview_text.is_active();
+        model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
+    });
+
+    let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
+    let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
+    let shared_current_path = gui_data.compare_images.shared_current_path.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    check_button_right_preview_text.connect_toggled(move |check_button_right_preview_text| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
+
+        let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
+        let this_tree_path = shared_using_for_preview.borrow().1.clone().unwrap();
+        if main_tree_path == this_tree_path {
+            return; // Selected header, so we don't need to select result in treeview
+                    // TODO this should be handled by disabling entirely check box
+        }
+
+        let is_active = check_button_right_preview_text.is_active();
+        model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
+    });
 }
 
 /// Populate all parameters for current group, it is used at start and when changing groups
@@ -288,8 +285,8 @@ fn populate_groups_at_start(
     let cache_all_images = generate_cache_for_results(all_vec);
 
     // This is safe, because cache have at least 2 results
-    image_compare_left.set_paintable(cache_all_images[0].2.paintable().as_ref()); // TODO GTK 4
-    image_compare_right.set_paintable(cache_all_images[1].2.paintable().as_ref()); // TODO GTK 4
+    image_compare_left.set_paintable(cache_all_images[0].2.paintable().as_ref());
+    image_compare_right.set_paintable(cache_all_images[1].2.paintable().as_ref());
 
     *shared_using_for_preview.borrow_mut() = (Some(cache_all_images[0].4.clone()), Some(cache_all_images[1].4.clone()));
 
@@ -505,7 +502,7 @@ fn populate_similar_scrolled_view(
         button_left.connect_clicked(move |_button_left| {
             shared_using_for_preview_clone.borrow_mut().0 = Some(tree_path_clone.clone());
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
-            image_compare_left.set_paintable(big_thumbnail_clone.paintable().as_ref()); // TODO GTK 4
+            image_compare_left.set_paintable(big_thumbnail_clone.paintable().as_ref());
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_left_preview_text_clone.set_active(is_active);
@@ -524,7 +521,7 @@ fn populate_similar_scrolled_view(
         button_right.connect_clicked(move |_button_right| {
             shared_using_for_preview_clone.borrow_mut().1 = Some(tree_path_clone.clone());
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
-            image_compare_right.set_paintable(big_thumbnail_clone.paintable().as_ref()); // TODO GTK 4
+            image_compare_right.set_paintable(big_thumbnail_clone.paintable().as_ref());
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_right_preview_text_clone.set_active(is_active);

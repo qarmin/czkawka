@@ -1,10 +1,9 @@
 use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::prelude::*;
-use gtk4::ImageType::Paintable;
 use gtk4::{Builder, Button, Orientation, Picture, Window};
 
 use crate::flg;
-use crate::help_functions::{debug_print_widget, get_all_boxes_from_widget, get_custom_box_from_widget};
+use crate::help_functions::get_all_boxes_from_widget;
 
 #[derive(Clone)]
 pub struct GuiAbout {
@@ -18,7 +17,7 @@ pub struct GuiAbout {
 
 impl GuiAbout {
     pub fn create_from_builder(window_main: &Window, logo: &Pixbuf) -> Self {
-        let glade_src = include_str!("../../ui/about_dialog.cmb.ui").to_string();
+        let glade_src = include_str!("../../ui/about_dialog.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let about_dialog: gtk4::AboutDialog = builder.object("about_dialog").unwrap();

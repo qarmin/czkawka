@@ -54,7 +54,7 @@ pub struct GuiSettings {
 
 impl GuiSettings {
     pub fn create_from_builder(window_main: &Window) -> Self {
-        let glade_src = include_str!("../../ui/settings.cmb.ui").to_string();
+        let glade_src = include_str!("../../ui/settings.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
         let window_settings: gtk4::Window = builder.object("window_settings").unwrap();

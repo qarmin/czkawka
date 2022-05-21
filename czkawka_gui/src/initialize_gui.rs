@@ -721,7 +721,7 @@ fn show_preview(
                 }
             };
 
-            pixbuf = match resize_pixbuf_dimension(pixbuf, (400, 400), InterpType::Nearest) {
+            pixbuf = match resize_pixbuf_dimension(pixbuf, (800, 800), InterpType::Nearest) {
                 None => {
                     add_text_to_text_view(
                         text_view_errors,

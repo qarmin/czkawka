@@ -8,7 +8,7 @@ use crate::flg;
 use czkawka_core::common::Common;
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{debug_print_widget, get_all_boxes_from_widget, get_dialog_box_child, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
+use crate::help_functions::{get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory

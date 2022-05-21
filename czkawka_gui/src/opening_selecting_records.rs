@@ -222,19 +222,19 @@ fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: 
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    return !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::IsHeader as i32);
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::IsHeader as i32)
 }
 
 pub fn select_function_same_music(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    return !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::IsHeader as i32);
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::IsHeader as i32)
 }
 
 pub fn select_function_similar_images(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    return !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::IsHeader as i32);
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::IsHeader as i32)
 }
 
 pub fn select_function_similar_videos(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    return !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::IsHeader as i32);
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::IsHeader as i32)
 }
 pub fn select_function_always_true(_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     true

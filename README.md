@@ -2,6 +2,11 @@
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ʈ͡ʂkafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary files from your computer.
 
+## UNSTABLE WARNING
+**Currently this repository contains unstable GTK 4 port, so multiple regression, broken features etc. are expected.**
+
+**You can use old stable version built with GTK 3 - [4.1.0](https://github.com/qarmin/czkawka/releases/tag/4.1.0) or compile app from git before GTK 4 PR merge.**
+
 ## Features
 - Written in memory-safe Rust
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
