@@ -29,6 +29,7 @@
               <object class="GtkNotebookPage">
                 <property name="child">
                   <object class="GtkBox">
+                    <property name="margin-bottom">5</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">

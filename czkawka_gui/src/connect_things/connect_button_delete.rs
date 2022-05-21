@@ -292,7 +292,7 @@ pub fn empty_folder_remover(
     let mut messages: String = "".to_string();
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
+    for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.get::<String>(&iter, column_file_name);
@@ -408,7 +408,7 @@ pub fn basic_remove(
     }
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
+    for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
         let name = model.get::<String>(&iter, column_file_name);

@@ -38,6 +38,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
 
+    window_compare.set_default_size(700, 700);
+
     button_compare.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
@@ -86,17 +88,18 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let window_compare = gui_data.compare_images.window_compare.clone();
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
-    // window_compare.connect_delete_event(move |window_compare, _| { // TODO GTK4
-    //     window_compare.hide();
-    //     *shared_image_cache.borrow_mut() = Vec::new();
-    //     *shared_current_path.borrow_mut() = None;
-    //     *shared_current_of_groups.borrow_mut() = 0;
-    //     *shared_numbers_of_groups.borrow_mut() = 0;
-    //     *shared_using_for_preview.borrow_mut() = (None, None);
-    //     image_compare_left.set_from_pixbuf(None);
-    //     image_compare_right.set_from_pixbuf(None);
-    //     gtk4::Inhibit(true)
-    // });
+    window_compare.connect_close_request(move |window_compare| {
+        // TODO GTK4
+        window_compare.hide();
+        *shared_image_cache.borrow_mut() = Vec::new();
+        *shared_current_path.borrow_mut() = None;
+        *shared_current_of_groups.borrow_mut() = 0;
+        *shared_numbers_of_groups.borrow_mut() = 0;
+        *shared_using_for_preview.borrow_mut() = (None, None);
+        image_compare_left.set_from_pixbuf(None);
+        image_compare_right.set_from_pixbuf(None);
+        gtk4::Inhibit(true)
+    });
 
     let button_go_previous_compare_group = gui_data.compare_images.button_go_previous_compare_group.clone();
     let button_go_next_compare_group = gui_data.compare_images.button_go_next_compare_group.clone();
@@ -202,13 +205,13 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         );
     });
 
-    // TODO GTK 4
+    // // TODO GTK 4
     // let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
     // let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
     // let notebook_main = gui_data.main_notebook.notebook_main.clone();
     // let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     // let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    // check_button_left_preview_text.connect_clicked(move |check_button_left_preview_text| {
+    // check_button_left_preview_text.connect_(move |check_button_left_preview_text| {
     //     let nb_number = notebook_main.current_page().unwrap();
     //     let tree_view = &main_tree_views[nb_number as usize];
     //     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
@@ -285,13 +288,13 @@ fn populate_groups_at_start(
     let cache_all_images = generate_cache_for_results(all_vec);
 
     // This is safe, because cache have at least 2 results
-    // image_compare_left.set_from_pixbuf(cache_all_images[0].2.pixbuf().as_ref()); // TODO GTK 4
-    // image_compare_right.set_from_pixbuf(cache_all_images[1].2.pixbuf().as_ref()); // TODO GTK 4
+    image_compare_left.set_paintable(cache_all_images[0].2.paintable().as_ref()); // TODO GTK 4
+    image_compare_right.set_paintable(cache_all_images[1].2.paintable().as_ref()); // TODO GTK 4
 
     *shared_using_for_preview.borrow_mut() = (Some(cache_all_images[0].4.clone()), Some(cache_all_images[1].4.clone()));
 
-    check_button_left_preview_text.set_label(Some(&format!("1. {}", get_max_file_name(&cache_all_images[0].0, 70))));
-    check_button_right_preview_text.set_label(Some(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 70))));
+    check_button_left_preview_text.set_label(Some(&format!("1. {}", get_max_file_name(&cache_all_images[0].0, 60))));
+    check_button_right_preview_text.set_label(Some(&format!("2. {}", get_max_file_name(&cache_all_images[1].0, 60))));
 
     label_group_info.set_text(
         flg!(
@@ -502,11 +505,11 @@ fn populate_similar_scrolled_view(
         button_left.connect_clicked(move |_button_left| {
             shared_using_for_preview_clone.borrow_mut().0 = Some(tree_path_clone.clone());
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
-            // image_compare_left.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref()); // TODO GTK 4
+            image_compare_left.set_paintable(big_thumbnail_clone.paintable().as_ref()); // TODO GTK 4
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_left_preview_text_clone.set_active(is_active);
-            check_button_left_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70))));
+            check_button_left_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 60))));
         });
 
         let big_thumbnail_clone = big_thumbnail.clone();
@@ -521,11 +524,11 @@ fn populate_similar_scrolled_view(
         button_right.connect_clicked(move |_button_right| {
             shared_using_for_preview_clone.borrow_mut().1 = Some(tree_path_clone.clone());
             update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
-            // image_compare_right.set_from_pixbuf(big_thumbnail_clone.pixbuf().as_ref());  // TODO GTK 4
+            image_compare_right.set_paintable(big_thumbnail_clone.paintable().as_ref()); // TODO GTK 4
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
             check_button_right_preview_text_clone.set_active(is_active);
-            check_button_right_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 70))));
+            check_button_right_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 60))));
         });
 
         smaller_box.append(&button_left);
