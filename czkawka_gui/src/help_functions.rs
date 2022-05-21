@@ -818,6 +818,7 @@ pub fn get_custom_box_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Box {
     panic!("Button doesn't have proper custom label child");
 }
 
+#[allow(dead_code)]
 pub fn debug_print_widget<P: IsA<gtk4::Widget>>(item: &P) {
     let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<gtk4::Widget>())];
 

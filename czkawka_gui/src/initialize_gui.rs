@@ -428,6 +428,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let scrolled_window = gui_data.upper_notebook.scrolled_window_included_directories.clone();
             let tree_view = gui_data.upper_notebook.tree_view_included_directories.clone();
             let evk = gui_data.upper_notebook.evk_tree_view_included_directories.clone();
+            let gc = gui_data.upper_notebook.gc_tree_view_included_directories.clone();
 
             let col_types: [glib::types::Type; 2] = [
                 glib::types::Type::STRING, // Path
@@ -444,7 +445,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             scrolled_window.set_child(Some(&tree_view));
             scrolled_window.show();
 
-            // tree_view.connect_button_press_event(opening_double_click_function_directories);  // TODO GTK 4
+            gc.connect_pressed(opening_double_click_function_directories);
             evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
             evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
                 if key_code == KEY_DELETE {
@@ -464,6 +465,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let scrolled_window = gui_data.upper_notebook.scrolled_window_excluded_directories.clone();
             let tree_view = gui_data.upper_notebook.tree_view_excluded_directories.clone();
             let evk = gui_data.upper_notebook.evk_tree_view_excluded_directories.clone();
+            let gc = gui_data.upper_notebook.gc_tree_view_excluded_directories.clone();
 
             let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
             let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
@@ -477,7 +479,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             scrolled_window.set_child(Some(&tree_view));
             scrolled_window.show();
 
-            // tree_view.connect_button_press_event(opening_double_click_function_directories); // TODO GTK 4
+            gc.connect_pressed(opening_double_click_function_directories);
             evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
             evk.connect_key_released(move |_event_controller_key, _key_value, key_code, _modifier_type| {
                 if key_code == KEY_DELETE {
@@ -539,6 +541,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
 
         let gc = gui_data.main_notebook.gc_tree_view_duplicate_finder.clone();
 
+        // TODO GTK 4, currently not works, connect_pressed shows previous thing
         gc.connect_released(move |gc, _event, _, _| {
             let tree_view = gc.widget().downcast::<gtk4::TreeView>().unwrap();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
@@ -563,6 +566,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
 
         let gc = gui_data.main_notebook.gc_tree_view_similar_images_finder.clone();
 
+        // TODO GTK 4, currently not works, connect_pressed shows previous thing
         gc.connect_released(move |gc, _event, _, _| {
             let tree_view = gc.widget().downcast::<gtk4::TreeView>().unwrap();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
