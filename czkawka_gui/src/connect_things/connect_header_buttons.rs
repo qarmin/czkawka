@@ -1,4 +1,5 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;
+use gtk4::Inhibit;
 
 use crate::gui_structs::gui_data::GuiData;
 
@@ -9,7 +10,7 @@ pub fn connect_button_about(gui_data: &GuiData) {
         about_dialog.show();
 
         // Prevent from deleting dialog after close
-        about_dialog.connect_delete_event(|dialog, _| {
+        about_dialog.connect_close_request(|dialog| {
             dialog.hide();
             Inhibit(true)
         });

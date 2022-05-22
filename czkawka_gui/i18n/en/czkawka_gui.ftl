@@ -247,6 +247,7 @@ bottom_show_upper_notebook_tooltip = Show/Hide upper notebook panel.
 
 # Progress Window
 progress_stop_button = Stop
+progress_stop_additional_message = Stop requested
 
 # About Window
 about_repository_button_tooltip = Link to repository page with source code.

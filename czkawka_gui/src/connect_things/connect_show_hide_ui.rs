@@ -1,4 +1,4 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
 

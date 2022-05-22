@@ -5,9 +5,10 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
-use gtk::gio::ApplicationFlags;
-use gtk::prelude::*;
-use gtk::Application;
+use gtk4::gio::ApplicationFlags;
+use gtk4::prelude::*;
+use gtk4::Application;
+use gtk4::Inhibit;
 use std::env;
 use std::ffi::OsString;
 
@@ -59,7 +60,7 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    let application = gtk::Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
+    let application = gtk4::Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
         build_ui(app, cmdline.arguments());
         0
@@ -186,7 +187,7 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
     let window_main = gui_data.window_main.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let used_additional_arguments = arguments.len() > 1;
-    window_main.connect_delete_event(move |_, _| {
+    window_main.connect_close_request(move |_| {
         // Not save configuration when using non default arguments
         if !used_additional_arguments {
             save_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors);

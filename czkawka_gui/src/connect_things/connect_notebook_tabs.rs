@@ -1,5 +1,3 @@
-use gtk::prelude::*;
-
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;

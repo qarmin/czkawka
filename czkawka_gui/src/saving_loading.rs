@@ -7,8 +7,8 @@ use std::{env, fs};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use directories_next::ProjectDirs;
-use gtk::prelude::*;
-use gtk::{ComboBoxText, ScrolledWindow, TextView};
+use gtk4::prelude::*;
+use gtk4::{ComboBoxText, ScrolledWindow, TextView};
 
 use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
@@ -64,11 +64,11 @@ const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
 struct LoadSaveStruct {
     loaded_items: HashMap<String, Vec<String>>,
-    text_view: gtk::TextView,
+    text_view: gtk4::TextView,
 }
 
 impl LoadSaveStruct {
-    pub fn with_text_view(text_view: gtk::TextView) -> Self {
+    pub fn with_text_view(text_view: gtk4::TextView) -> Self {
         Self {
             loaded_items: Default::default(),
             text_view,
@@ -193,13 +193,13 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec![value.to_string()]);
     }
 
-    pub fn save_list_store(&mut self, key: String, tree_view: &gtk::TreeView, column_path: i32) {
+    pub fn save_list_store(&mut self, key: String, tree_view: &gtk4::TreeView, column_path: i32) {
         let mut vec_string = vec![];
         let list_store = get_list_store(tree_view);
         if let Some(iter) = list_store.iter_first() {
             loop {
                 // TODO maybe save also here reference directories?
-                vec_string.push(list_store.value(&iter, column_path).get::<String>().unwrap());
+                vec_string.push(list_store.get::<String>(&iter, column_path));
                 if !list_store.iter_next(&iter) {
                     break;
                 }

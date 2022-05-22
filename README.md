@@ -2,6 +2,13 @@
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ʈ͡ʂkafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary files from your computer.
 
+## UNSTABLE WARNING
+**Currently master branch of this repository contains unstable GTK 4 port, so multiple regression, broken features etc. are expected.**
+
+**You can use old stable version built with GTK 3 - [4.1.0](https://github.com/qarmin/czkawka/releases/tag/4.1.0) or compile app from git before GTK 4 PR merge.**
+
+**Due build problems Windows binaries are not available yet, you can help by creating/modifying CI to produce valid windows binaries**
+
 ## Features
 - Written in memory-safe Rust
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
@@ -9,7 +16,7 @@
 - Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
 - Cache support - second and further scans should be much faster than the first one
 - CLI frontend - for easy automation
-- GUI frontend - uses modern GTK 3 and looks similar to FSlint
+- GUI frontend - uses GTK 4 framework and looks similar to FSlint
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multilingual - support multiple languages like Polish, English or Italian
 - Multiple tools to use:
@@ -96,7 +103,7 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 |:------------------------:|:-----------:|:----------:|:-----------------:|:-----------:|
 |         Language         |    Rust     |   Python   |   Python/Obj-C    |   Python    |
 |            OS            | Lin,Mac,Win |    Lin     |    Lin,Mac,Win    | Lin,Mac,Win |
-|        Framework         |    GTK 3    |   PyGTK2   | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
+|        Framework         |    GTK 4    |   PyGTK2   | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
 |     Duplicate finder     |      •      |     •      |         •         |             |
 |       Empty files        |      •      |     •      |                   |             |
 |      Empty folders       |      •      |     •      |                   |             |

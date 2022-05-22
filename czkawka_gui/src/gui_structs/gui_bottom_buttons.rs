@@ -1,7 +1,7 @@
-use gtk::prelude::*;
-use gtk::{Bin, Widget};
+use gtk4::prelude::*;
+use gtk4::{GestureClick, Widget};
 
-use crate::help_functions::{get_custom_label_from_button_with_image, set_icon_of_button, set_icon_of_menubutton, BottomButtonsEnum};
+use crate::help_functions::{get_custom_label_from_widget, set_icon_of_button, BottomButtonsEnum};
 use crate::{
     flg, CZK_ICON_COMPARE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_MOVE, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SYMLINK,
     CZK_ICON_TRASH,
@@ -9,36 +9,43 @@ use crate::{
 
 #[derive(Clone)]
 pub struct GuiBottomButtons {
-    pub buttons_search: gtk::Button,
-    pub buttons_select: gtk::MenuButton,
-    pub buttons_delete: gtk::Button,
-    pub buttons_save: gtk::Button,
-    pub buttons_symlink: gtk::Button,
-    pub buttons_hardlink: gtk::Button,
-    pub buttons_move: gtk::Button,
-    pub buttons_compare: gtk::Button,
-    pub buttons_show_errors: gtk::Button,
-    pub buttons_show_upper_notebook: gtk::Button,
+    pub buttons_search: gtk4::Button,
+    pub buttons_select: gtk4::MenuButton,
+    pub buttons_delete: gtk4::Button,
+    pub buttons_save: gtk4::Button,
+    pub buttons_symlink: gtk4::Button,
+    pub buttons_hardlink: gtk4::Button,
+    pub buttons_move: gtk4::Button,
+    pub buttons_compare: gtk4::Button,
+    pub buttons_show_errors: gtk4::Button,
+    pub buttons_show_upper_notebook: gtk4::Button,
+
     pub buttons_names: [BottomButtonsEnum; 8],
     pub buttons_array: [Widget; 8],
+
+    pub gc_buttons_select: gtk4::GestureClick,
 }
 
 impl GuiBottomButtons {
-    pub fn create_from_builder(builder: &gtk::Builder, popover_select: &gtk::Popover) -> Self {
-        let buttons_search: gtk::Button = builder.object("buttons_search").unwrap();
-        let buttons_select: gtk::MenuButton = builder.object("buttons_select").unwrap();
-        let buttons_delete: gtk::Button = builder.object("buttons_delete").unwrap();
-        let buttons_save: gtk::Button = builder.object("buttons_save").unwrap();
-        let buttons_symlink: gtk::Button = builder.object("buttons_symlink").unwrap();
-        let buttons_hardlink: gtk::Button = builder.object("buttons_hardlink").unwrap();
-        let buttons_move: gtk::Button = builder.object("buttons_move").unwrap();
-        let buttons_compare: gtk::Button = builder.object("buttons_compare").unwrap();
+    pub fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover) -> Self {
+        let buttons_search: gtk4::Button = builder.object("buttons_search").unwrap();
+        let buttons_select: gtk4::MenuButton = builder.object("buttons_select").unwrap();
+        let buttons_delete: gtk4::Button = builder.object("buttons_delete").unwrap();
+        let buttons_save: gtk4::Button = builder.object("buttons_save").unwrap();
+        let buttons_symlink: gtk4::Button = builder.object("buttons_symlink").unwrap();
+        let buttons_hardlink: gtk4::Button = builder.object("buttons_hardlink").unwrap();
+        let buttons_move: gtk4::Button = builder.object("buttons_move").unwrap();
+        let buttons_compare: gtk4::Button = builder.object("buttons_compare").unwrap();
 
-        let buttons_show_errors: gtk::Button = builder.object("buttons_show_errors").unwrap();
-        let buttons_show_upper_notebook: gtk::Button = builder.object("buttons_show_upper_notebook").unwrap();
+        let buttons_show_errors: gtk4::Button = builder.object("buttons_show_errors").unwrap();
+        let buttons_show_upper_notebook: gtk4::Button = builder.object("buttons_show_upper_notebook").unwrap();
+
+        let gc_buttons_select: GestureClick = GestureClick::new();
+
+        buttons_select.add_controller(&gc_buttons_select);
 
         set_icon_of_button(&buttons_search, CZK_ICON_SEARCH);
-        set_icon_of_menubutton(&buttons_select, CZK_ICON_SELECT);
+        set_icon_of_button(&buttons_select, CZK_ICON_SELECT);
         set_icon_of_button(&buttons_delete, CZK_ICON_TRASH);
         set_icon_of_button(&buttons_save, CZK_ICON_SAVE);
         set_icon_of_button(&buttons_symlink, CZK_ICON_SYMLINK);
@@ -84,24 +91,17 @@ impl GuiBottomButtons {
             buttons_show_upper_notebook,
             buttons_names,
             buttons_array,
+            gc_buttons_select,
         }
     }
     pub fn update_language(&self) {
-        get_custom_label_from_button_with_image(&self.buttons_search.clone().upcast::<Bin>()).set_text(&flg!("bottom_search_button"));
-        get_custom_label_from_button_with_image(&self.buttons_select.clone().upcast::<Bin>()).set_text(&flg!("bottom_select_button"));
-        get_custom_label_from_button_with_image(&self.buttons_delete.clone().upcast::<Bin>()).set_text(&flg!("bottom_delete_button"));
-        get_custom_label_from_button_with_image(&self.buttons_save.clone().upcast::<Bin>()).set_text(&flg!("bottom_save_button"));
-        get_custom_label_from_button_with_image(&self.buttons_symlink.clone().upcast::<Bin>()).set_text(&flg!("bottom_symlink_button"));
-        get_custom_label_from_button_with_image(&self.buttons_hardlink.clone().upcast::<Bin>()).set_text(&flg!("bottom_hardlink_button"));
-        get_custom_label_from_button_with_image(&self.buttons_move.clone().upcast::<Bin>()).set_text(&flg!("bottom_move_button"));
-
-        // get_custom_label_from_button_with_image(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
-        // get_custom_label_from_button_with_image(&self.buttons_select.clone()).set_text(&flg!("bottom_select_button"));
-        // get_custom_label_from_button_with_image(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
-        // get_custom_label_from_button_with_image(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
-        // get_custom_label_from_button_with_image(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
-        // get_custom_label_from_button_with_image(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
-        // get_custom_label_from_button_with_image(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
+        get_custom_label_from_widget(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
+        get_custom_label_from_widget(&self.buttons_select.clone()).set_text(&flg!("bottom_select_button"));
+        get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
+        get_custom_label_from_widget(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
+        get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
+        get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
+        get_custom_label_from_widget(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));
         self.buttons_select.set_tooltip_text(Some(&flg!("bottom_select_button_tooltip")));

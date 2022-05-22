@@ -10,7 +10,7 @@ repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
 czkawka_core = { path = "../czkawka_core", version = "4.1.0"}
-gdk = "0.15.4"
+gdk4 = "0.4.7"
 glib = "0.15.11"
 
 humansize = "1.1.1"
@@ -52,8 +52,8 @@ once_cell = "1.10.0"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_core", "windef", "winerror", "wtypesbase", "winuser"] }
 
-[dependencies.gtk]
-version = "0.15.5"
+[dependencies.gtk4]
+version = "0.4.7"
 default-features = false # just in case
-features = ["v3_24_9"]
+features = ["v4_6"]
 

@@ -1,4 +1,4 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
 

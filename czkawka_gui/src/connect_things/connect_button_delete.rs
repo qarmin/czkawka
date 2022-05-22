@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::Metadata;
 
-use gtk::prelude::*;
-use gtk::{Align, CheckButton, Dialog, ResponseType, TextView};
+use gtk4::prelude::*;
+use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 
 use crate::flg;
 
@@ -46,7 +46,7 @@ pub async fn delete_things(gui_data: GuiData) {
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
 
-    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_color, nb_object.column_selection);
+    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
 
     // Nothing is selected
     if number_of_selected_items == 0 {
@@ -57,11 +57,11 @@ pub async fn delete_things(gui_data: GuiData) {
         return;
     }
 
-    if let Some(column_color) = nb_object.column_color {
+    if let Some(column_header) = nb_object.column_header {
         if !check_button_settings_confirm_group_deletion.is_active()
             || !check_if_deleting_all_files_in_group(
                 tree_view,
-                column_color,
+                column_header,
                 nb_object.column_selection,
                 nb_object.column_path,
                 &window_main,
@@ -73,7 +73,7 @@ pub async fn delete_things(gui_data: GuiData) {
                 tree_view,
                 nb_object.column_name,
                 nb_object.column_path,
-                column_color,
+                column_header,
                 nb_object.column_selection,
                 &check_button_settings_use_trash,
                 &text_view_errors,
@@ -115,8 +115,8 @@ pub async fn delete_things(gui_data: GuiData) {
 }
 
 pub async fn check_if_can_delete_files(
-    check_button_settings_confirm_deletion: &gtk::CheckButton,
-    window_main: &gtk::Window,
+    check_button_settings_confirm_deletion: &gtk4::CheckButton,
+    window_main: &gtk4::Window,
     number_of_selected_items: u64,
     number_of_selected_groups: u64,
 ) -> bool {
@@ -124,7 +124,7 @@ pub async fn check_if_can_delete_files(
         let (confirmation_dialog_delete, check_button) = create_dialog_ask_for_deletion(window_main, number_of_selected_items, number_of_selected_groups);
 
         let response_type = confirmation_dialog_delete.run_future().await;
-        if response_type == gtk::ResponseType::Ok {
+        if response_type == gtk4::ResponseType::Ok {
             if !check_button.is_active() {
                 check_button_settings_confirm_deletion.set_active(false);
             }
@@ -139,41 +139,45 @@ pub async fn check_if_can_delete_files(
     true
 }
 
-fn create_dialog_ask_for_deletion(window_main: &gtk::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder().title(&flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
+fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> (Dialog, CheckButton) {
+    let dialog = gtk4::Dialog::builder().title(&flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&flg!("delete_question_label")));
-    let label2: gtk::Label = match number_of_selected_groups {
-        0 => gtk::Label::new(Some(&flg!(
+    dialog.set_default_size(300, 0);
+
+    let label: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_question_label")));
+    let label2: gtk4::Label = match number_of_selected_groups {
+        0 => gtk4::Label::new(Some(&flg!(
             "delete_items_label",
             generate_translation_hashmap(vec![("items", number_of_selected_items.to_string())])
         ))),
-        _ => gtk::Label::new(Some(&flg!(
+        _ => gtk4::Label::new(Some(&flg!(
             "delete_items_groups_label",
             generate_translation_hashmap(vec![("items", number_of_selected_items.to_string()), ("groups", number_of_selected_groups.to_string())])
         ))),
     };
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
+    let check_button: gtk4::CheckButton = gtk4::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
     button_ok.grab_focus();
 
-    let internal_box = get_dialog_box_child(&dialog);
-    internal_box.add(&label);
-    internal_box.add(&label2);
-    internal_box.add(&check_button);
-    internal_box.set_margin(5);
+    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    parent.set_orientation(Orientation::Vertical);
+    parent.insert_child_after(&label, None::<&gtk4::Widget>);
+    parent.insert_child_after(&label2, Some(&label));
+    parent.insert_child_after(&check_button, Some(&label2));
+
+    // parent.set_margin(5); // TODO
     check_button.set_margin_top(5);
 
-    dialog.show_all();
+    dialog.show();
     (dialog, check_button)
 }
 
-fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk::Dialog::builder()
+fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
+    let dialog = gtk4::Dialog::builder()
         .title(&flg!("delete_all_files_in_group_title"))
         .transient_for(window_main)
         .modal(true)
@@ -181,40 +185,40 @@ fn create_dialog_group_deletion(window_main: &gtk::Window) -> (Dialog, CheckButt
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label: gtk::Label = gtk::Label::new(Some(&flg!("delete_all_files_in_group_label1")));
-    let label2: gtk::Label = gtk::Label::new(Some(&flg!("delete_all_files_in_group_label2")));
-    let check_button: gtk::CheckButton = gtk::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
+    let label: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_all_files_in_group_label1")));
+    let label2: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_all_files_in_group_label2")));
+    let check_button: gtk4::CheckButton = gtk4::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
     button_ok.grab_focus();
 
     let internal_box = get_dialog_box_child(&dialog);
-    internal_box.add(&label);
-    internal_box.add(&label2);
-    internal_box.add(&check_button);
+    internal_box.append(&label);
+    internal_box.append(&label2);
+    internal_box.append(&check_button);
 
-    dialog.show_all();
+    dialog.show();
     (dialog, check_button)
 }
 
 pub async fn check_if_deleting_all_files_in_group(
-    tree_view: &gtk::TreeView,
-    column_color: i32,
+    tree_view: &gtk4::TreeView,
+    column_header: i32,
     column_selection: i32,
     column_path: i32,
-    window_main: &gtk::Window,
-    check_button_settings_confirm_group_deletion: &gtk::CheckButton,
+    window_main: &gtk4::Window,
+    check_button_settings_confirm_group_deletion: &gtk4::CheckButton,
 ) -> bool {
     let model = get_list_store(tree_view);
 
     let mut selected_all_records: bool = true;
 
     if let Some(iter) = model.iter_first() {
-        assert_eq!(model.value(&iter, column_color).get::<String>().unwrap(), HEADER_ROW_COLOR); // First element should be header
+        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         // It is safe to remove any number of files in reference mode
-        if !model.value(&iter, column_path).get::<String>().unwrap().is_empty() {
+        if !model.get::<String>(&iter, column_path).is_empty() {
             return false;
         }
 
@@ -223,13 +227,13 @@ pub async fn check_if_deleting_all_files_in_group(
                 break;
             }
 
-            if model.value(&iter, column_color).get::<String>().unwrap() == HEADER_ROW_COLOR {
+            if model.get::<bool>(&iter, column_header) {
                 if selected_all_records {
                     break;
                 }
                 selected_all_records = true;
             } else {
-                if !model.value(&iter, column_selection).get::<bool>().unwrap() {
+                if !model.get::<bool>(&iter, column_selection) {
                     selected_all_records = false;
                 }
             }
@@ -244,7 +248,7 @@ pub async fn check_if_deleting_all_files_in_group(
         let (confirmation_dialog_group_delete, check_button) = create_dialog_group_deletion(window_main);
 
         let response_type = confirmation_dialog_group_delete.run_future().await;
-        if response_type == gtk::ResponseType::Ok {
+        if response_type == gtk4::ResponseType::Ok {
             if !check_button.is_active() {
                 check_button_settings_confirm_group_deletion.set_active(false);
             }
@@ -261,7 +265,7 @@ pub async fn check_if_deleting_all_files_in_group(
 }
 
 pub fn empty_folder_remover(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_selection: i32,
@@ -276,8 +280,8 @@ pub fn empty_folder_remover(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                selected_rows.push(model.path(&iter).unwrap());
+            if model.get::<bool>(&iter, column_selection) {
+                selected_rows.push(model.path(&iter));
             }
             if !model.iter_next(&iter) {
                 break;
@@ -292,12 +296,11 @@ pub fn empty_folder_remover(
     let mut messages: String = "".to_string();
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
-        handle_gtk_pending_event_counter(counter);
+    for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
-        let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.value(&iter, column_path).get::<String>().unwrap();
+        let name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
@@ -373,11 +376,11 @@ pub fn empty_folder_remover(
         }
     }
 
-    text_view_errors.buffer().unwrap().set_text(messages.as_str());
+    text_view_errors.buffer().set_text(messages.as_str());
 }
 
 pub fn basic_remove(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
     column_selection: i32,
@@ -394,8 +397,8 @@ pub fn basic_remove(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                selected_rows.push(model.path(&iter).unwrap());
+            if model.get::<bool>(&iter, column_selection) {
+                selected_rows.push(model.path(&iter));
             }
 
             if !model.iter_next(&iter) {
@@ -409,12 +412,11 @@ pub fn basic_remove(
     }
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for (counter, tree_path) in selected_rows.iter().rev().enumerate() {
-        handle_gtk_pending_event_counter(counter);
+    for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
-        let name = model.value(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.value(&iter, column_path).get::<String>().unwrap();
+        let name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         if !use_trash {
             match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
@@ -448,15 +450,15 @@ pub fn basic_remove(
         }
     }
 
-    text_view_errors.buffer().unwrap().set_text(messages.as_str());
+    text_view_errors.buffer().set_text(messages.as_str());
 }
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
 pub fn tree_remove(
-    tree_view: &gtk::TreeView,
+    tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
-    column_color: i32,
+    column_header: i32,
     column_selection: i32,
     check_button_settings_use_trash: &CheckButton,
     text_view_errors: &TextView,
@@ -474,9 +476,9 @@ pub fn tree_remove(
 
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.value(&iter, column_selection).get::<bool>().unwrap() {
-                if model.value(&iter, column_color).get::<String>().unwrap() == MAIN_ROW_COLOR {
-                    selected_rows.push(model.path(&iter).unwrap());
+            if model.get::<bool>(&iter, column_selection) {
+                if !model.get::<bool>(&iter, column_header) {
+                    selected_rows.push(model.path(&iter));
                 } else {
                     panic!("Header row shouldn't be selected, please report bug.");
                 }
@@ -496,8 +498,8 @@ pub fn tree_remove(
     for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).unwrap();
 
-        let file_name = model.value(&iter, column_file_name).get::<String>().unwrap();
-        let path = model.value(&iter, column_path).get::<String>().unwrap();
+        let file_name = model.get::<String>(&iter, column_file_name);
+        let path = model.get::<String>(&iter, column_path);
 
         model.remove(&iter);
 
@@ -506,13 +508,10 @@ pub fn tree_remove(
     }
 
     // Delete duplicated entries, and remove real files
-    let mut counter = 0_usize;
     for (path, mut vec_file_name) in map_with_path_to_delete {
         vec_file_name.sort();
         vec_file_name.dedup();
         for file_name in vec_file_name {
-            handle_gtk_pending_event_counter(counter);
-            counter += 1;
             if !use_trash {
                 if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
                     messages += flg!(
@@ -535,7 +534,7 @@ pub fn tree_remove(
         }
     }
 
-    clean_invalid_headers(&model, column_color, column_path);
+    clean_invalid_headers(&model, column_header, column_path);
 
-    text_view_errors.buffer().unwrap().set_text(messages.as_str());
+    text_view_errors.buffer().set_text(messages.as_str());
 }

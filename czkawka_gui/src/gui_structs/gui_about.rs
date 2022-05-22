@@ -1,17 +1,18 @@
-use gdk::gdk_pixbuf::Pixbuf;
-use gtk::prelude::*;
-use gtk::{Builder, Window};
+use gdk4::gdk_pixbuf::Pixbuf;
+use gtk4::prelude::*;
+use gtk4::{Builder, Button, Orientation, Picture, Window};
 
 use crate::flg;
+use crate::help_functions::get_all_boxes_from_widget;
 
 #[derive(Clone)]
 pub struct GuiAbout {
-    pub about_dialog: gtk::AboutDialog,
+    pub about_dialog: gtk4::AboutDialog,
 
-    pub button_repository: gtk::Button,
-    pub button_donation: gtk::Button,
-    pub button_instruction: gtk::Button,
-    pub button_translation: gtk::Button,
+    pub button_repository: gtk4::Button,
+    pub button_donation: gtk4::Button,
+    pub button_instruction: gtk4::Button,
+    pub button_translation: gtk4::Button,
 }
 
 impl GuiAbout {
@@ -19,15 +20,15 @@ impl GuiAbout {
         let glade_src = include_str!("../../ui/about_dialog.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let about_dialog: gtk::AboutDialog = builder.object("about_dialog").unwrap();
+        let about_dialog: gtk4::AboutDialog = builder.object("about_dialog").unwrap();
         about_dialog.set_modal(true);
         about_dialog.set_transient_for(Some(window_main));
 
-        about_dialog.set_logo(Some(logo));
+        about_dialog.set_logo(Picture::for_pixbuf(logo).paintable().as_ref());
 
         // Taken from command - "git shortlog -s -n -e" - remember to remove duplicates
         // This should be updated only before releasing new version
-        about_dialog.set_authors(&vec![
+        about_dialog.set_authors(&[
             "Rafał Mikrut",
             "Alexis Lefebvre",
             "Thomas Andreas Jung",
@@ -73,10 +74,20 @@ impl GuiAbout {
             "tenninjas",
         ]);
 
-        let button_repository: gtk::Button = builder.object("button_repository").unwrap();
-        let button_donation: gtk::Button = builder.object("button_donation").unwrap();
-        let button_instruction: gtk::Button = builder.object("button_instruction").unwrap();
-        let button_translation: gtk::Button = builder.object("button_translation").unwrap();
+        let custom_box = get_all_boxes_from_widget(&about_dialog)[2].clone(); // TODO may not be stable enough between GTK versions
+        let new_box = gtk4::Box::new(Orientation::Horizontal, 5);
+
+        let button_repository = Button::builder().label("Repository").build();
+        let button_donation = Button::builder().label("Donation").build();
+        let button_instruction = Button::builder().label("Instruction").build();
+        let button_translation = Button::builder().label("Translation").build();
+
+        new_box.append(&button_repository);
+        new_box.append(&button_donation);
+        new_box.append(&button_instruction);
+        new_box.append(&button_translation);
+
+        custom_box.append(&new_box);
 
         Self {
             about_dialog,
@@ -86,6 +97,7 @@ impl GuiAbout {
             button_translation,
         }
     }
+
     pub fn update_language(&self) {
         let mut comment_text: String = "2020 - 2022  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &flg!("about_window_motto");

@@ -1,4 +1,4 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 

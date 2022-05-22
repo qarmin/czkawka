@@ -1,4 +1,4 @@
-use gtk::prelude::*;
+use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_popovers::GuiPopovers;
@@ -8,12 +8,10 @@ use crate::notebook_enums::*;
 pub fn connect_button_select(gui_data: &GuiData) {
     let popovers = gui_data.popovers.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_select = gui_data.bottom_buttons.buttons_select.clone();
+    let gc_buttons_select = gui_data.bottom_buttons.gc_buttons_select.clone();
 
-    buttons_select.connect_clicked(move |_| {
+    gc_buttons_select.connect_pressed(move |_, _, _, _| {
         show_required_popovers(&popovers, &to_notebook_main_enum(notebook_main.current_page().unwrap()));
-        popover_select.popup();
     });
 }
 

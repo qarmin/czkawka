@@ -16,7 +16,7 @@ FFmpeg is not included here because it is not needed to build - it is dynamicall
 ```shell
 sudo apt install -y curl git build-essential # Needed by Rust update tool
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo apt install -y libgtk-3-dev
+sudo apt install -y libgtk-4-dev
 ```
 
 #### Fedora / CentOS / Rocky Linux
@@ -42,7 +42,7 @@ For Linux-to-Windows cross-building instruction look at the CI.
 
 <!-- First you need to install Visual C++ components from Visual Studio installer - https://visualstudio.microsoft.com/downloads/
 Next install Rust from site https://rustup.rs/
-After that the latest GTK 3 runtime must be installed from https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
+After that the latest GTK 4 runtime must be installed from(not available yet for GTK 4) https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
 -->
 
 ### Docker
