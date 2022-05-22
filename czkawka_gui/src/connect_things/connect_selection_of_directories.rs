@@ -141,6 +141,8 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
         .modal(true)
         .build();
 
+    dialog.set_default_size(300, 0);
+
     let entry: gtk4::Entry = gtk4::Entry::new();
 
     let added_button = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);

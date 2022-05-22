@@ -23,16 +23,7 @@ pub struct GuiBottomButtons {
     pub buttons_names: [BottomButtonsEnum; 8],
     pub buttons_array: [Widget; 8],
 
-    pub gc_buttons_search: gtk4::GestureClick,
     pub gc_buttons_select: gtk4::GestureClick,
-    pub gc_buttons_delete: gtk4::GestureClick,
-    pub gc_buttons_save: gtk4::GestureClick,
-    pub gc_buttons_symlink: gtk4::GestureClick,
-    pub gc_buttons_hardlink: gtk4::GestureClick,
-    pub gc_buttons_move: gtk4::GestureClick,
-    pub gc_buttons_compare: gtk4::GestureClick,
-    pub gc_buttons_show_errors: gtk4::GestureClick,
-    pub gc_buttons_show_upper_notebook: gtk4::GestureClick,
 }
 
 impl GuiBottomButtons {
@@ -49,16 +40,7 @@ impl GuiBottomButtons {
         let buttons_show_errors: gtk4::Button = builder.object("buttons_show_errors").unwrap();
         let buttons_show_upper_notebook: gtk4::Button = builder.object("buttons_show_upper_notebook").unwrap();
 
-        let gc_buttons_search: GestureClick = GestureClick::new();
         let gc_buttons_select: GestureClick = GestureClick::new();
-        let gc_buttons_delete: GestureClick = GestureClick::new();
-        let gc_buttons_save: GestureClick = GestureClick::new();
-        let gc_buttons_symlink: GestureClick = GestureClick::new();
-        let gc_buttons_hardlink: GestureClick = GestureClick::new();
-        let gc_buttons_move: GestureClick = GestureClick::new();
-        let gc_buttons_compare: GestureClick = GestureClick::new();
-        let gc_buttons_show_errors: GestureClick = GestureClick::new();
-        let gc_buttons_show_upper_notebook: GestureClick = GestureClick::new();
 
         buttons_select.add_controller(&gc_buttons_select);
 
@@ -109,16 +91,7 @@ impl GuiBottomButtons {
             buttons_show_upper_notebook,
             buttons_names,
             buttons_array,
-            gc_buttons_search,
             gc_buttons_select,
-            gc_buttons_delete,
-            gc_buttons_save,
-            gc_buttons_symlink,
-            gc_buttons_hardlink,
-            gc_buttons_move,
-            gc_buttons_compare,
-            gc_buttons_show_errors,
-            gc_buttons_show_upper_notebook,
         }
     }
     pub fn update_language(&self) {

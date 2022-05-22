@@ -143,6 +143,8 @@ pub fn connect_button_search(
 
         let show_dialog = Arc::new(AtomicBool::new(true));
 
+        window_progress.set_title(Some(&flg!("window_progress_title")));
+
         hide_all_buttons(&buttons_array);
 
         notebook_main.set_sensitive(false);
@@ -169,6 +171,7 @@ pub fn connect_button_search(
 
                 label_stage.show();
                 grid_progress_stages.show();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_duplicate_finder).clear();
 
@@ -213,6 +216,7 @@ pub fn connect_button_search(
             NotebookMainEnum::EmptyFiles => {
                 label_stage.show();
                 grid_progress_stages.hide();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_empty_files_finder).clear();
 
@@ -233,6 +237,7 @@ pub fn connect_button_search(
             NotebookMainEnum::EmptyDirectories => {
                 label_stage.show();
                 grid_progress_stages.hide();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_empty_folder_finder).clear();
 
@@ -250,6 +255,7 @@ pub fn connect_button_search(
             NotebookMainEnum::BigFiles => {
                 label_stage.show();
                 grid_progress_stages.hide();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_big_files_finder).clear();
 
@@ -273,6 +279,7 @@ pub fn connect_button_search(
             NotebookMainEnum::Temporary => {
                 label_stage.show();
                 grid_progress_stages.hide();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_temporary_files_finder).clear();
 
@@ -294,6 +301,7 @@ pub fn connect_button_search(
 
                 label_stage.show();
                 grid_progress_stages.show();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_similar_images_finder).clear();
 
@@ -343,6 +351,7 @@ pub fn connect_button_search(
             NotebookMainEnum::SimilarVideos => {
                 label_stage.show();
                 grid_progress_stages.show();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_similar_videos_finder).clear();
 
@@ -377,6 +386,7 @@ pub fn connect_button_search(
             NotebookMainEnum::SameMusic => {
                 label_stage.show();
                 grid_progress_stages.show();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_same_music_finder).clear();
 
@@ -436,6 +446,7 @@ pub fn connect_button_search(
             NotebookMainEnum::Symlinks => {
                 label_stage.show();
                 grid_progress_stages.hide();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_invalid_symlinks).clear();
 
@@ -456,6 +467,7 @@ pub fn connect_button_search(
             NotebookMainEnum::BrokenFiles => {
                 label_stage.show();
                 grid_progress_stages.show();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_broken_files).clear();
 
@@ -478,6 +490,7 @@ pub fn connect_button_search(
             NotebookMainEnum::BadExtensions => {
                 label_stage.show();
                 grid_progress_stages.show();
+                window_progress.set_default_size(1, 1);
 
                 get_list_store(&tree_view_bad_extensions).clear();
 

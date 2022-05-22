@@ -1,7 +1,9 @@
 use crossbeam_channel::{Sender, TrySendError};
 
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::KEY_ENTER;
+use gtk4::prelude::*;
 
 fn send_stop_message(stop_sender: &Sender<()>) {
     stop_sender
@@ -12,18 +14,22 @@ fn send_stop_message(stop_sender: &Sender<()>) {
 
 pub fn connect_button_stop(gui_data: &GuiData) {
     let evk_button_stop_in_dialog = gui_data.progress_window.evk_button_stop_in_dialog.clone();
+    let stop_dialog = gui_data.progress_window.window_progress.clone();
     let stop_sender = gui_data.stop_sender.clone();
     evk_button_stop_in_dialog.connect_key_released(move |_, _, key_code, _| {
         if key_code == KEY_ENTER {
-            // Only accept enter key to stop search
+            stop_dialog.set_title(Some(&format!("{} ({})", flg!("window_progress_title"), flg!("progress_stop_additional_message"))));
             send_stop_message(&stop_sender);
         }
     });
 
-    let gc_button_stop_in_dialog = gui_data.progress_window.gc_button_stop_in_dialog.clone();
+    let button_stop_in_dialog = gui_data.progress_window.button_stop_in_dialog.clone();
+    let stop_dialog = gui_data.progress_window.window_progress.clone();
     let stop_sender = gui_data.stop_sender.clone();
     // TODO GTK 4 change this to connect released, not sure why not works here
-    gc_button_stop_in_dialog.connect_pressed(move |_a, _b, _c, _d| {
+
+    button_stop_in_dialog.connect_clicked(move |_a| {
+        stop_dialog.set_title(Some(&format!("{} ({})", flg!("window_progress_title"), flg!("progress_stop_additional_message"))));
         send_stop_message(&stop_sender);
     });
 }

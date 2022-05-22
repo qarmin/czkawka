@@ -19,7 +19,6 @@ pub struct GuiProgressDialog {
 
     pub button_stop_in_dialog: gtk4::Button,
     pub evk_button_stop_in_dialog: gtk4::EventControllerKey,
-    pub gc_button_stop_in_dialog: gtk4::GestureClick,
 }
 
 impl GuiProgressDialog {
@@ -44,8 +43,6 @@ impl GuiProgressDialog {
         let button_stop_in_dialog: gtk4::Button = builder.object("button_stop_in_dialog").unwrap();
         let evk_button_stop_in_dialog = EventControllerKey::new();
         button_stop_in_dialog.add_controller(&evk_button_stop_in_dialog);
-        let gc_button_stop_in_dialog = gtk4::GestureClick::new();
-        button_stop_in_dialog.add_controller(&gc_button_stop_in_dialog);
 
         set_icon_of_button(&button_stop_in_dialog, CZK_ICON_STOP);
 
@@ -59,7 +56,6 @@ impl GuiProgressDialog {
             grid_progress_stages,
             button_stop_in_dialog,
             evk_button_stop_in_dialog,
-            gc_button_stop_in_dialog,
         }
     }
     pub fn update_language(&self) {

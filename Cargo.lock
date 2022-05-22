@@ -304,9 +304,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-expr"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e068cb2806bbc15b439846dc16c5f89f8599f2c3e4d73d4449d38f9b2f0b6c5"
+checksum = "0aacacf4d96c24b2ad6eb8ee6df040e4f27b0d0b39a5710c30091baa830485db"
 dependencies = [
  "smallvec",
 ]
@@ -1493,9 +1493,9 @@ checksum = "7efd1d698db0759e6ef11a7cd44407407399a910c774dd804c64c032da7826ff"
 
 [[package]]
 name = "libc"
-version = "0.2.125"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5916d2ae698f6de9bfb891ad7a8d65c09d232dc58cc4ac433c7da3b2fd84bc2b"
+checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 
 [[package]]
 name = "linked-hash-map"
@@ -1528,9 +1528,9 @@ dependencies = [
 
 [[package]]
 name = "lofty"
-version = "0.6.2"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9b0ac50022c34427688f83800b865c8a324ba2fe9f41f232b899b7517b3786c"
+checksum = "9e09702a8eff21fa1cf105d189d8eea3609d7074ab1503d7c49d5b37b7403a65"
 dependencies = [
  "base64 0.13.0",
  "byteorder",
@@ -1762,9 +1762,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f3e037eac156d1775da914196f0f37741a274155e34a0b7e427c35d2a2ecb9"
+checksum = "7b10983b38c53aebdf33f542c6275b0f58a238129d00c4ae0e6fb59738d783ca"
 
 [[package]]
 name = "opaque-debug"
@@ -2032,11 +2032,11 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.38"
+version = "1.0.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9027b48e9d4c9175fa2218adf3557f91c1137021739951d4932f5f8268ac48aa"
+checksum = "c54b25569025b7fc9651de43004ae593a75ad88543b17178aa5e1b9c4f15f56f"
 dependencies = [
- "unicode-xid",
+ "unicode-ident",
 ]
 
 [[package]]
@@ -2148,9 +2148,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.5"
+version = "1.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a11647b6b25ff05a515cb92c365cec08801e83423a235b51e231e1808747286"
+checksum = "d83f127d94bdbcda4c8cc2e50f6f84f4b611f69c902699ca385a39c3a75f9ff1"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2159,9 +2159,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.25"
+version = "0.6.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
+checksum = "49b3de9ec5dc0a3417da371aab17d729997c15010e7fd24ff707773a33bddb64"
 
 [[package]]
 name = "remove_dir_all"
@@ -2684,13 +2684,13 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.94"
+version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a07e33e919ebcd69113d5be0e4d70c5707004ff45188910106854f38b960df4a"
+checksum = "fbaf6116ab8924f39d52792136fb74fd60a80194cf1b1c6ffa6453eef1c3f942"
 dependencies = [
  "proc-macro2",
  "quote",
- "unicode-xid",
+ "unicode-ident",
 ]
 
 [[package]]
@@ -2920,6 +2920,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
 
 [[package]]
+name = "unicode-ident"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d22af068fba1eb5edcb4aea19d382b2a3deb4c8f9d475c589b6ada9e0fd493ee"
+
+[[package]]
 name = "unicode-normalization"
 version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2939,12 +2945,6 @@ name = "unicode-width"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
-
-[[package]]
-name = "unicode-xid"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "957e51f3646910546462e67d5f7599b9e4fb8acdd304b087a6494730f9eebf04"
 
 [[package]]
 name = "uuid"
