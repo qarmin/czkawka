@@ -482,7 +482,7 @@ impl BrokenFiles {
                                     Some(Some(file_entry_clone))
                                 }
                             },
-                        Err(_inspected) => Some(None), // TODO maybe throw error or something
+                        Err(_inspected) => Some(None),
                     },
 
                     TypeOfFile::PDF => {

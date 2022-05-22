@@ -707,6 +707,9 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: 
                 }
             }
         } else {
+            if model.get::<bool>(&iter, column_selection) {
+                number_of_selected_items += 1;
+            }
             loop {
                 if !model.iter_next(&iter) {
                     break;
@@ -780,7 +783,6 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-// GTK 4
 pub fn get_custom_label_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Label {
     let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
 
@@ -834,7 +836,6 @@ pub fn get_all_boxes_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> Vec<gtk4::Bo
     boxes
 }
 
-// GTK 4
 pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
     let mut vector = vec![];
     if let Some(mut child) = wid.first_child() {

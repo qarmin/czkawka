@@ -3,7 +3,7 @@ use std::fs;
 use std::fs::Metadata;
 
 use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Dialog, ResponseType, TextView};
+use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 
 use crate::flg;
 
@@ -144,6 +144,8 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
+    dialog.set_default_size(300, 0);
+
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_question_label")));
     let label2: gtk4::Label = match number_of_selected_groups {
         0 => gtk4::Label::new(Some(&flg!(
@@ -161,11 +163,13 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
 
     button_ok.grab_focus();
 
-    let internal_box = get_dialog_box_child(&dialog);
-    internal_box.append(&label);
-    internal_box.append(&label2);
-    internal_box.append(&check_button);
-    // internal_box.set_margin(5); // TODO
+    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    parent.set_orientation(Orientation::Vertical);
+    parent.insert_child_after(&label, None::<&gtk4::Widget>);
+    parent.insert_child_after(&label2, Some(&label));
+    parent.insert_child_after(&check_button, Some(&label2));
+
+    // parent.set_margin(5); // TODO
     check_button.set_margin_top(5);
 
     dialog.show();
