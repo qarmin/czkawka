@@ -279,6 +279,12 @@ impl SimilarImages {
         if !self.allowed_extensions.using_custom_extensions() {
             self.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
             self.allowed_extensions.extend_allowed_extensions(RAW_IMAGE_EXTENSIONS);
+        } else {
+            self.allowed_extensions
+                .validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat());
+            if !self.allowed_extensions.using_custom_extensions() {
+                return true;
+            }
         }
 
         // Add root folders for finding

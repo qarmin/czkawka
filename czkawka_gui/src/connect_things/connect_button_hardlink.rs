@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Dialog, ResponseType, TextView, TreeIter, TreePath};
+use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
 use crate::flg;
 use czkawka_core::duplicate::make_hard_link;
@@ -275,10 +275,11 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
 
     button_ok.grab_focus();
 
-    let internal_box = get_dialog_box_child(&dialog);
-    internal_box.append(&label);
-    internal_box.append(&label2);
-    internal_box.append(&label3);
+    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    parent.set_orientation(Orientation::Vertical);
+    parent.insert_child_after(&label, None::<&gtk4::Widget>);
+    parent.insert_child_after(&label2, Some(&label));
+    parent.insert_child_after(&label3, Some(&label2));
 
     dialog.show();
     dialog
@@ -384,9 +385,10 @@ fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckBu
 
     button_ok.grab_focus();
 
-    let internal_box = get_dialog_box_child(&dialog);
-    internal_box.append(&label);
-    internal_box.append(&check_button);
+    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    parent.set_orientation(Orientation::Vertical);
+    parent.insert_child_after(&label, None::<&gtk4::Widget>);
+    parent.insert_child_after(&check_button, Some(&label));
 
     dialog.show();
     (dialog, check_button)

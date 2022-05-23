@@ -237,6 +237,11 @@ impl SimilarVideos {
 
         if !self.allowed_extensions.using_custom_extensions() {
             self.allowed_extensions.extend_allowed_extensions(VIDEO_FILES_EXTENSIONS);
+        } else {
+            self.allowed_extensions.validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
+            if !self.allowed_extensions.using_custom_extensions() {
+                return true;
+            }
         }
 
         // Add root folders for finding

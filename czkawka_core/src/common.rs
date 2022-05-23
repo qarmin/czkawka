@@ -14,15 +14,13 @@ pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     ".cr2", ".ari",
 ];
 pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
-    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr", ".hdr", ".dds",
+    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr", ".hdr",
 ];
 
-pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[
-    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr", ".hdr", ".dds",
-];
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr", ".hdr"];
 
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
-    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr", ".hdr", ".dds",
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr", ".hdr",
 ];
 
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
