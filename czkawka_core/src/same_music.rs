@@ -10,7 +10,7 @@ use std::time::{Duration, SystemTime};
 use std::{mem, panic, thread};
 
 use crossbeam_channel::Receiver;
-use lofty::{read_from_path, AudioFile, ItemKey};
+use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -251,7 +251,13 @@ impl SameMusic {
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         if !self.allowed_extensions.using_custom_extensions() {
             self.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
+        } else {
+            self.allowed_extensions.validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
+            if !self.allowed_extensions.using_custom_extensions() {
+                return true;
+            }
         }
+
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -362,8 +368,13 @@ impl SameMusic {
                     return None;
                 }
 
-                let result = panic::catch_unwind(|| {
-                    match read_from_path(&path, true) {
+                let mut file = match File::open(&path) {
+                    Ok(t) => t,
+                    Err(_) => return Some(None),
+                };
+
+                let result = panic::catch_unwind(move || {
+                    match read_from(&mut file, true) {
                         Ok(t) => Some(t),
                         Err(_inspected) => {
                             // println!("Failed to open {}", path);

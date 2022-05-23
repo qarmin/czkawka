@@ -77,4 +77,16 @@ impl Extensions {
             self.file_extensions.push(extension.to_string());
         }
     }
+
+    pub fn validate_allowed_extensions(&mut self, file_extensions: &[&str]) {
+        let mut current_file_extensions = Vec::new();
+
+        for extension in file_extensions {
+            assert!(extension.starts_with('.'));
+            if self.file_extensions.contains(&extension.to_string()) {
+                current_file_extensions.push(extension.to_string());
+            }
+        }
+        self.file_extensions = current_file_extensions;
+    }
 }
