@@ -26,7 +26,6 @@ pub fn connect_button_stop(gui_data: &GuiData) {
     let button_stop_in_dialog = gui_data.progress_window.button_stop_in_dialog.clone();
     let stop_dialog = gui_data.progress_window.window_progress.clone();
     let stop_sender = gui_data.stop_sender.clone();
-    // TODO GTK 4 change this to connect released, not sure why not works here
 
     button_stop_in_dialog.connect_clicked(move |_a| {
         stop_dialog.set_title(Some(&format!("{} ({})", flg!("window_progress_title"), flg!("progress_stop_additional_message"))));

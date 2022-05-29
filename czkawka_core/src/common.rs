@@ -28,10 +28,7 @@ pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
 pub const PDF_FILES_EXTENSIONS: &[&str] = &[".pdf"];
 
 pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
-    ".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".aiff", ".pcm", ".aif", ".aiff", ".aifc", ".m3a", ".mp2", ".mp4a", ".mp2a", ".mpga", ".wave", ".weba",
-    ".wma",
-    /*".ac3",*/
-    /*".oga", https://github.com/Serial-ATA/lofty-rs/issues/47#issuecomment-1120414259*/
+    ".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".aiff", ".pcm", ".aif", ".aiff", ".aifc", ".m3a", ".mp2", ".mp4a", ".mp2a", ".mpga", ".wave", ".weba", ".wma", ".oga",
 ];
 
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[

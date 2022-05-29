@@ -8,3 +8,4 @@ TestSuite*
 *.snap
 flatpak/
 *.zip
+*.zst

@@ -5,8 +5,10 @@ members = [
     "czkawka_gui",
 ]
 [profile.release]
-# Panic = "abort" will crash entire app when processing invalid image file.
-# Since crash happens in external library, this is only way to handle this(I think).
+# panic = "unwind" in opposite to "abort", allows to catch panic!()
+# Since Czkawka parse different types of files with few libraries, it is possible
+# that some files will cause crash, so at this moment I don't recommend to use "abort"
+# until you are ready to occasional crashes
 panic = "unwind"
 
 # LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
