@@ -8,6 +8,8 @@
 - Improve checking for invalid extensions - [#705](https://github.com/qarmin/czkawka/pull/705)
 - Support for finding invalid PDF files - [#705](https://github.com/qarmin/czkawka/pull/705)
 - Re-enable checking for broken music files(`libasound.so.2` no longer needed) - [#705](https://github.com/qarmin/czkawka/pull/705)
+- Fix disabled ui when using invalid settings in similar music - [#740](https://github.com/qarmin/czkawka/pull/740)
+- Speedup searching for invalid extensions - [#740](https://github.com/qarmin/czkawka/pull/740)
 
 ## Version 4.1.0 - 24.04.2022r
 - New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)
