@@ -20,6 +20,7 @@
             <property name="shrink-end-child">0</property>
             <property name="shrink-start-child">0</property>
             <property name="vexpand">1</property>
+            <property name="wide-handle">True</property>
             <child>
               <object class="GtkNotebook" id="notebook_upper">
                 <property name="focusable">1</property>
@@ -857,7 +858,7 @@
                             </child>
                             <child>
                               <object class="GtkLabel">
-                                <property name="label" translatable="yes">Select</property>
+                                <property name="label">SelectMenu</property>
                               </object>
                             </child>
                           </object>

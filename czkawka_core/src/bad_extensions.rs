@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
@@ -27,6 +27,7 @@ static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak"]; // Such files c
 // ("real_content_extension", "current_file_extension")
 static WORKAROUNDS: &[(&str, &str)] = &[
     // Wine/Windows
+    ("der", "cat"),
     ("exe", "acm"),
     ("exe", "ax"),
     ("exe", "bck"),
@@ -38,78 +39,86 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "drv"),
     ("exe", "drv16"),
     ("exe", "ds"),
+    ("exe", "efi"),
     ("exe", "exe16"),
     ("exe", "fon"), // Type of font or something else
+    ("exe", "mod16"),
     ("exe", "msstyles"),
+    ("exe", "mui"),
     ("exe", "orig"),
+    ("exe", "signed"),
+    ("exe", "sys"),
     ("exe", "sys"),
     ("exe", "tlb"),
     ("exe", "vxd"),
-    ("exe", "sys"),
-    ("exe", "mod16"),
-    // Other
-    ("zip", "odg"), // Libreoffice
-    ("ods", "ots"), // Libreoffice
-    ("exe", "efi"),
-    ("sh", "sample"), // Git
-    ("exe", "signed"),
-    ("gz", "blend"),
-    ("gz", "crate"),
-    ("gz", "svgz"),
-    ("gz", "tgz"),
-    ("html", "md"),
-    ("html", "svg"), // Quite strange, but yes it works
-    ("jpg", "jfif"),
-    ("mobi", "azw3"),
-    ("obj", "o"),
-    ("obj", "bin"),
-    ("odp", "otp"),
-    ("odt", "ott"),
-    ("ogg", "ogv"),
-    ("pptx", "ppsx"),
-    ("sh", "bash"),
-    ("sh", "py"),
-    ("sh", "pyx"),
-    ("xml", "sopcinfo"), // Quartus
-    ("xml", "bsp"),      // Quartus
-    ("xml", "fb2"),
-    ("xml", "user"), // Qtcreator
-    ("sh", "rs"),
-    ("sh", "pl"),   // Gnome/Linux
-    ("sh", "pm"),   // Gnome/Linux
-    ("xml", "cbp"), // CodeBlocks config
-    ("xml", "cmb"),
-    ("xml", "cfg"),
-    ("xml", "conf"),
-    ("xml", "config"),
-    ("xml", "dae"),
-    ("xml", "docbook"),
-    ("xml", "gir"),
-    ("xml", "glade"),
-    ("xml", "html"),
-    ("xml", "kdenlive"),
-    ("xml", "lang"),
-    ("xml", "svg"),
-    ("xml", "ui"),     // Cambalache, Glade
-    ("xml", "vcproj"), // VisualStudio
-    ("xml", "iml"),    // Intelij Idea
+    ("exe", "winmd"),
+    ("xml", "adml"),
     ("xml", "manifest"),
-    ("xml", "xcd"), // Libreoffice files
-    ("xml", "policy"),
-    ("xml", "qsys"), // Quartus
-    ("xml", "xba"),  // Libreoffice
-    ("zip", "apk"),
-    ("zip", "doc"),
-    ("zip", "docx"),
-    ("zip", "dat"),
-    ("zip", "jar"), // Java
-    ("zip", "kra"), // Krita
-    ("zip", "nupkg"),
-    ("zip", "pptx"),
-    ("zip", "whl"),
-    ("zip", "xpi"),
-    ("zip", "zcos"),
-    ("zip", "cbr"), // Komiksy
+    ("xml", "mum"),
+    // Other
+    ("gz", "blend"),      // Blender
+    ("gz", "crate"),      // Cargo
+    ("gz", "svgz"),       // Archive svg
+    ("gz", "tgz"),        // Archive
+    ("html", "md"),       // Markdown
+    ("jpg", "jfif"),      // Photo format
+    ("mobi", "azw3"),     // Ebook format
+    ("mpg", "vob"),       // Weddings in parts have usually vob extension
+    ("obj", "bin"),       // Multiple apps, Czkawka, Nvidia, Windows
+    ("obj", "o"),         // Compilators
+    ("odp", "otp"),       // LibreOffice
+    ("ods", "ots"),       // Libreoffice
+    ("odt", "ott"),       // Libreoffice
+    ("ogg", "ogv"),       // Audio format
+    ("pptx", "ppsx"),     // Powerpoint
+    ("sh", "bash"),       // Linux
+    ("sh", "pl"),         // Gnome/Linux
+    ("sh", "pm"),         // Gnome/Linux
+    ("sh", "py"),         // Python
+    ("sh", "pyx"),        // Python
+    ("sh", "rs"),         // Rust
+    ("sh", "sample"),     // Git
+    ("xml", "bsp"),       // Quartus
+    ("xml", "cbp"),       // CodeBlocks config
+    ("xml", "cfg"),       // Multiple apps - Godot
+    ("xml", "cmb"),       // Cambalache
+    ("xml", "conf"),      // Multiple apps - Python
+    ("xml", "config"),    // Multiple apps - QT Creator
+    ("xml", "dae"),       // 3D models
+    ("xml", "docbook"),   //
+    ("xml", "fb2"),       //
+    ("xml", "gir"),       // GTK
+    ("xml", "glade"),     // Glade
+    ("xml", "iml"),       // Intelij Idea
+    ("xml", "kdenlive"),  // KDenLive
+    ("xml", "lang"),      // ?
+    ("xml", "policy"),    // SystemD
+    ("xml", "qsys"),      // Quartus
+    ("xml", "sopcinfo"),  // Quartus
+    ("xml", "svg"),       // SVG
+    ("xml", "ui"),        // Cambalache, Glade
+    ("xml", "user"),      // Qtcreator
+    ("xml", "vbox"),      // VirtualBox
+    ("xml", "vbox-prev"), // VirtualBox
+    ("xml", "vcproj"),    // VisualStudio
+    ("xml", "xba"),       // Libreoffice
+    ("xml", "xcd"),       // Libreoffice files
+    ("zip", "apk"),       // Android apk
+    ("zip", "cbr"),       // Komiksy
+    ("zip", "dat"),       // Multiple - python, brave
+    ("zip", "doc"),       // Word
+    ("zip", "docx"),      // Word
+    ("zip", "jar"),       // Java
+    ("zip", "kra"),       // Krita
+    ("zip", "nupkg"),     // Nuget packages
+    ("zip", "odg"),       // Libreoffice
+    ("zip", "pptx"),      // Powerpoint
+    ("zip", "whl"),       // Python packages
+    ("zip", "xpi"),       // Firefox extensions
+    ("zip", "zcos"),      // Scilab
+    // Probably invalid
+    ("html", "svg"),
+    ("xml", "html"),
     // Probably bug in external library
     ("exe", "doc"), // Not sure whe doc is not recognized
     ("exe", "xls"), // Not sure whe xls is not recognized
@@ -306,10 +315,15 @@ impl BadExtensions {
 
         let mut files_to_check = Default::default();
         mem::swap(&mut files_to_check, &mut self.files_to_check);
-
         //// PROGRESS THREAD END
+
+        let mut hashmap_workarounds: HashMap<&str, &str> = Default::default();
+        for (proper, found) in WORKAROUNDS {
+            hashmap_workarounds.insert(found, proper);
+        }
+
         self.bad_extensions_files = files_to_check
-            .into_par_iter() // TODO into par iter after
+            .into_par_iter()
             .map(|file_entry| {
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -350,7 +364,7 @@ impl BadExtensions {
                 }
 
                 // Check for all extensions that file can use(not sure if it is worth to do it)
-                let mut all_available_extensions: BTreeSet<_> = Default::default();
+                let mut all_available_extensions: BTreeSet<&str> = Default::default();
                 let think_extension = match current_extension.is_empty() {
                     true => "".to_string(),
                     false => {
@@ -363,9 +377,9 @@ impl BadExtensions {
                         }
 
                         // Workarounds
-                        for (pre, post) in WORKAROUNDS {
-                            if post == &current_extension.as_str() && all_available_extensions.contains(&pre) {
-                                all_available_extensions.insert(post);
+                        if let Some(pre) = hashmap_workarounds.get(current_extension.as_str()) {
+                            if all_available_extensions.contains(pre) {
+                                all_available_extensions.insert(current_extension.as_str());
                             }
                         }
 

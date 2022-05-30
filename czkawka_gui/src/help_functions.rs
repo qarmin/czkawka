@@ -795,6 +795,20 @@ pub fn get_custom_label_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Lab
     }
     panic!("Button doesn't have proper custom label child");
 }
+pub fn get_custom_label_with_name_from_widget<P: IsA<gtk4::Widget>>(item: &P, name: &str) -> gtk4::Label {
+    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+
+    while let Some(widget) = widgets_to_check.pop() {
+        if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
+            if name == label.text().as_str() {
+                return label;
+            }
+        } else {
+            widgets_to_check.extend(get_all_children(&widget));
+        }
+    }
+    panic!("Button doesn't have proper custom label child");
+}
 pub fn get_custom_image_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Image {
     let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
 
