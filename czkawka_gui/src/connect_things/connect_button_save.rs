@@ -5,9 +5,9 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry};
 
-use crate::flg;
 use czkawka_core::common_traits::SaveResults;
 
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
 use crate::localizer_core::generate_translation_hashmap;

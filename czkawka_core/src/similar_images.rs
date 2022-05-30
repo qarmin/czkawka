@@ -562,16 +562,13 @@ impl SimilarImages {
 
                 let image;
 
-                if !IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)){
-
-                    image = match get_dynamic_image_from_raw_image(&file_entry.path){
+                if !IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                    image = match get_dynamic_image_from_raw_image(&file_entry.path) {
                         Some(t) => t,
                         None =>
-                        return Some(Some((file_entry, Vec::new())))
+                            return Some(Some((file_entry, Vec::new())))
                     };
-                }
-                else {
-
+                } else {
                     let result = panic::catch_unwind(|| {
                         match image::open(file_entry.path.clone()) {
                             Ok(t) => Ok(t),
@@ -596,24 +593,22 @@ impl SimilarImages {
                 }
 
 
-                    let dimensions = image.dimensions();
+                let dimensions = image.dimensions();
 
-                    file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
+                file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
 
-                    let hasher_config = HasherConfig::new()
-                        .hash_size(self.hash_size as u32, self.hash_size as u32)
-                        .hash_alg(self.hash_alg)
-                        .resize_filter(self.image_filter);
-                    let hasher = hasher_config.to_hasher();
+                let hasher_config = HasherConfig::new()
+                    .hash_size(self.hash_size as u32, self.hash_size as u32)
+                    .hash_alg(self.hash_alg)
+                    .resize_filter(self.image_filter);
+                let hasher = hasher_config.to_hasher();
 
-                    let hash = hasher.hash_image(&image);
-                    let buf: Vec<u8> = hash.as_bytes().to_vec();
+                let hash = hasher.hash_image(&image);
+                let buf: Vec<u8> = hash.as_bytes().to_vec();
 
-                    file_entry.hash = buf.clone();
+                file_entry.hash = buf.clone();
 
-                    Some(Some((file_entry, buf)))
-
-
+                Some(Some((file_entry, buf)))
             })
             .while_some()
             .filter(|file_entry| file_entry.is_some())
@@ -887,10 +882,10 @@ impl SimilarImages {
         }
 
         if self.use_reference_folders {
-            let mut similars_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut similars_vector);
+            let mut similar_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similar_vector);
             let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = similars_vector
+            self.similar_referenced_vectors = similar_vector
                 .into_iter()
                 .filter_map(|vec_file_entry| {
                     let mut files_from_referenced_folders = Vec::new();

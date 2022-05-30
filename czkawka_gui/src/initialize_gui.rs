@@ -8,13 +8,13 @@ use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
-use crate::flg;
 use czkawka_core::common::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
 use crate::delete_things;
+use crate::flg;
 use crate::gui_structs::gui_data::*;
 use crate::help_combo_box::{
     DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
@@ -584,6 +584,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
         });
     }
 }
+
 fn connect_event_buttons(gui_data: &GuiData) {
     for evk in [
         //gui_data.main_notebook.evk_tree_view_duplicate_finder.clone(), // Manual - needs to show/hide preview
@@ -625,7 +626,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
             show_preview(
-                &event_controller_key.widget().downcast::<gtk4::TreeView>().unwrap(),
+                &event_controller_key.widget().downcast::<TreeView>().unwrap(),
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
@@ -653,7 +654,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             show_preview(
-                &event_controller_key.widget().downcast::<gtk4::TreeView>().unwrap(),
+                &event_controller_key.widget().downcast::<TreeView>().unwrap(),
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,
                 &image_preview,

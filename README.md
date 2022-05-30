@@ -3,7 +3,7 @@
 **Czkawka** (_tch•kav•ka_ (IPA: [ʈ͡ʂkafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary files from your computer.
 
 ## UNSTABLE WARNING
-**Currently master branch of this repository contains unstable GTK 4 port, so multiple regression, broken features etc. are expected.**
+**Currently, master branch of this repository contains unstable GTK 4 port, so multiple regression, broken features etc. are expected.**
 
 **You can use old stable version built with GTK 3 - [4.1.0](https://github.com/qarmin/czkawka/releases/tag/4.1.0) or compile app from git before GTK 4 PR merge.**
 
@@ -50,7 +50,7 @@ If you want to try and develop Czkawka or just use the latest available feature,
 
 Since Czkawka is written in Rust and it aims to be a faster alternative to FSlint or DupeGuru which are written in Python, we need to compare the speed of these tools.
 
-I tested it on a 256 GB SSD and a i7-4770 CPU.
+I tested it on a 256 GB SSD and an i7-4770 CPU.
 
 I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links. The disk contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which occupied 4,1 GB.
 
@@ -135,7 +135,7 @@ There are many similar applications to Czkawka on the Internet, which do some th
 ### CLI
 Due to limited time, the biggest emphasis is on the GUI version so if you are looking for really good and feature-packed console apps, then take a look at these:
 - [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is written also in Rust
-- [Rmlint](https://github.com/sahib/rmlint) - Really good console interface and also is feature packed
+- [Rmlint](https://github.com/sahib/rmlint) - Nice console interface and also is feature packed
 - [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
 
 ## Contributions
@@ -185,7 +185,7 @@ Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his w
 
 Thanks also to all the people who create patches for this program, make it available on other systems, create videos, articles about it etc.
 
-Also I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs to make it even better.
+Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs to make it even better.
 
 ## Donations
 If you are using the app, I would appreciate a donation for its further development, which can be done [here](https://github.com/sponsors/qarmin).

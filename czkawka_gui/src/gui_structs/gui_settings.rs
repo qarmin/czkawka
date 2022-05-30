@@ -6,7 +6,7 @@ use crate::help_functions::get_all_children;
 
 #[derive(Clone)]
 pub struct GuiSettings {
-    pub window_settings: gtk4::Window,
+    pub window_settings: Window,
 
     pub notebook_settings: gtk4::Notebook,
 
@@ -57,7 +57,7 @@ impl GuiSettings {
         let glade_src = include_str!("../../ui/settings.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let window_settings: gtk4::Window = builder.object("window_settings").unwrap();
+        let window_settings: Window = builder.object("window_settings").unwrap();
         window_settings.set_title(Some(&flg!("window_settings_title")));
         window_settings.set_modal(true);
         window_settings.set_transient_for(Some(window_main));

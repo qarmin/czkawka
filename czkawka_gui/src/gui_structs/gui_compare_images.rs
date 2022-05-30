@@ -1,9 +1,11 @@
-use crate::help_functions::set_icon_of_button;
-use crate::{flg, CZK_ICON_LEFT, CZK_ICON_RIGHT};
-use gtk4::prelude::*;
-use gtk4::{Builder, TreePath};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+use gtk4::prelude::*;
+use gtk4::{Builder, TreePath};
+
+use crate::help_functions::set_icon_of_button;
+use crate::{flg, CZK_ICON_LEFT, CZK_ICON_RIGHT};
 
 #[derive(Clone)]
 pub struct GuiCompareImages {
@@ -25,8 +27,8 @@ pub struct GuiCompareImages {
     pub shared_numbers_of_groups: Rc<RefCell<u32>>,
     pub shared_current_of_groups: Rc<RefCell<u32>>,
     pub shared_current_path: Rc<RefCell<Option<TreePath>>>,
-    pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)>>>,
-    pub shared_using_for_preview: Rc<RefCell<(Option<gtk4::TreePath>, Option<gtk4::TreePath>)>>,
+    pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, TreePath)>>>,
+    pub shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
 }
 
 impl GuiCompareImages {

@@ -5,15 +5,15 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use czkawka_core::common_dir_traversal::CheckingMethod;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView};
 
-use crate::flg;
-use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 
+use crate::flg;
+use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
@@ -64,11 +64,11 @@ const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
 struct LoadSaveStruct {
     loaded_items: HashMap<String, Vec<String>>,
-    text_view: gtk4::TextView,
+    text_view: TextView,
 }
 
 impl LoadSaveStruct {
-    pub fn with_text_view(text_view: gtk4::TextView) -> Self {
+    pub fn with_text_view(text_view: TextView) -> Self {
         Self {
             loaded_items: Default::default(),
             text_view,

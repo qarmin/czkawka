@@ -18,7 +18,7 @@ The GUI is built from different pieces:
 - 3 - Main results window - allows to choose, delete, configure results.
 - 4 - Bottom image panels - contains buttons which do specific actions on data(like selecting them) or e.g. hide/show parts of GUI
 - 5 - Text panel - prints messages/warnings/errors about executed actions. User can hide it.
-- 6 - Panel with selecting specific directories to use or exclude. Also here are specified allowed extensions and file sizes.
+- 6 - Panel with selecting specific directories to use or exclude. Also, here are specified allowed extensions and file sizes.
 - 7 - Buttons which opens About Window(shows info about app) and Settings in which scan can be customized
 
 <img src="https://user-images.githubusercontent.com/41945903/148279809-54ea8684-8bff-436b-af67-ff9859f468f2.png" width="800" />
@@ -28,17 +28,17 @@ GUI is fully translatable.
 For now at least 10 languages are supported(some was translated by computers) 
 
 ### Opening/Manipulating files
-It is possible to open selected files by double clicking on them.
+It is possible to open selected files by double-clicking on them.
 
-To open multiple file just select desired files with CTRL key pressed and still when clicking this key, double click at selected items with left mouse button.
+To open multiple file just select desired files with CTRL key pressed and still when clicking this key, double-click at selected items with left mouse button.
 
 To open folder containing selected file, just click twice on it with right mouse button.
 
-To invert a selection of files, click on a file with the middle mouse button and it will invert the selection of the other files in the same group.
+To invert a selection of files, click on a file with the middle mouse button, and it will invert the selection of the other files in the same group.
 
 ### Adding directories 
 
-By default current path is loaded to included directory and excluded directories are filled with default paths.
+By default, current path is loaded to included directory and excluded directories are filled with default paths.
 
 It is possible to override this, by adding arguments when opening app e.g. `czkawka_gui /home /usr --/home/rafal --/home/zaba` which means that `/home` and `/usr` directories will be checked and `/home/rafal` and `/home/zaba` will be excluded.
 
@@ -64,13 +64,13 @@ By default, all tools only write about results to console, but it is possible wi
 ## Config/Cache files
 Currently, Czkawka stores few config and cache files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image_SIZE_HASH_FILTER.bin/json` - stores cache data and hashes which may be used later without needing to compute image hash again.. Each algorithms uses its own file, because hashes are completely different in each.
+- `cache_similar_image_SIZE_HASH_FILTER.bin/json` - stores cache data and hashes which may be used later without needing to compute image hash again. Each algorithms use its own file, because hashes are completely different in each.
 - `cache_broken_files.txt` - stores cache data of broken files
 - `cache_duplicates_HASH.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
 - `cache_similar_videos.bin/json` - stores cache data of video files.
 
 Editing `bin` files may cause showing strange crashes, so in case of having any, removing these files should help.  
-It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
+It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default, cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
 
 Config files are located in this path:
 
@@ -99,7 +99,7 @@ Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
     - It is possible to open parent folder of selected items with double click with right mouse button(RMB)
   it is also possible to open such item with double click with left mouse button(LMB).
 - **Faster scanning for big number of duplicates**  
-  By default for all files grouped by same size are computed partial hash(hash from only of 2KB each file). Such hash is computed usually very fast, especially on SSD and fast multicore processors. But when scanning a hundred of thousands or millions of files with HDD or slow processor, usually this step can take much time. In settings exists option `Use prehash cache` which enables caching such things. It is disabled by default because can increase time of loading/saving cache, with big number of entries.
+  By default for all files grouped by same size are computed partial hash(hash from only of 2KB each file). Such hash is computed usually very fast, especially on SSD and fast multicore processors. But when scanning a hundred of thousands or millions of files with HDD or slow processor, typically this step can take much time. In settings exists option `Use prehash cache` which enables caching such things. It is disabled by default because can increase time of loading/saving cache, with big number of entries.
 - **Permanent store of cache entries**  
   After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed. This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again. In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled. Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
 - **Partial scanning**
@@ -176,9 +176,9 @@ This only removes the most basic temporary files, for more I suggest to use Blea
 ### Invalid Symlinks
 To find invalid symlinks we must first find symlinks.
 
-After searching for them you should check at which element it points to and if it does not exist, add this symlinks into the list of invalid symlinks, pointing to a non-existent path.
+After searching for them, you should check at which element it points to and if it does not exist, add this symlinks into the list of invalid symlinks, pointing to a non-existent path.
 
-The second mode is to detect recursive symlink. Unfortunately, this mode does not work and it displays when using it an error of a non-existent target element, but it is implemented by counting the jumps of the symlink and after exceeding a certain number (e.g. 20) it is considered that the given symlink is recursive.
+The second mode is to detect recursive symlink. Unfortunately, this mode does not work, and it displays when using it an error of a non-existent target element, but it is implemented by counting the jumps of the symlink and after exceeding a certain number (e.g. 20) it is considered that the given symlink is recursive.
 
 ### Same Music
 This is a mode to find identical music files through tags.
@@ -202,7 +202,7 @@ It is a tool for finding similar images that differ e.g. in watermark, size etc.
 The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp", ".avif"]`.
 
 Next cached data is loaded from file to prevent hashing twice the same file.  
-The cache which points to non existing data, by default is deleted automatically.
+The cache which points to non-existing data, by default is deleted automatically.
 
 Then a perceptual hash is created for each image which isn't available in cache.
 
@@ -232,7 +232,7 @@ Some images broke hash functions and create hashes full of `0` or `255`, so thes
 
 You can test each algorithm with provided CLI tool, just put to folder `test.jpg` file and run inside this command `czkawka_cli tester -i`
 
-Faster compare option allows to only once compare results, so checking should works a lot of faster when using higher number of similarity.
+Faster compare option allows to only once compare results, so checking should work a lot of faster when using higher number of similarity.
 
 Some tidbits:
 - Smaller hash size not always means that calculating it will take more time

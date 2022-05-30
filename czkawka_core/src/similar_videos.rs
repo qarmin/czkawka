@@ -513,7 +513,7 @@ impl SimilarVideos {
                         return {
                             file_entry.error = format!("Failed to hash file, reason {}", e);
                             Some(file_entry)
-                        }
+                        };
                     }
                 };
 
@@ -590,10 +590,10 @@ impl SimilarVideos {
         self.similar_vectors = collected_similar_videos;
 
         if self.use_reference_folders {
-            let mut similars_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut similars_vector);
+            let mut similar_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similar_vector);
             let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = similars_vector
+            self.similar_referenced_vectors = similar_vector
                 .into_iter()
                 .filter_map(|vec_file_entry| {
                     let mut files_from_referenced_folders = Vec::new();

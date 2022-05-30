@@ -302,7 +302,7 @@ pub struct NotRecursive {
 #[cfg(target_family = "unix")]
 #[derive(Debug, StructOpt)]
 pub struct ExcludeOtherFilesystems {
-    #[structopt(short = "X", long, help = "Exclude files on other filesystmes")]
+    #[structopt(short = "X", long, help = "Exclude files on other filesystems")]
     pub exclude_other_filesystems: bool,
 }
 

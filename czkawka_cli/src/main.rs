@@ -24,6 +24,7 @@ use czkawka_core::{
 
 mod commands;
 
+//noinspection ALL
 fn main() {
     let command = Commands::from_args();
 

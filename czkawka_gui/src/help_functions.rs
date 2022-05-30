@@ -1,13 +1,12 @@
-use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use czkawka_core::bad_extensions::BadExtensions;
+use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{ListStore, TextView, TreeView, Widget};
 
-use crate::flg;
+use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_dir_traversal;
@@ -21,6 +20,7 @@ use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 
+use crate::flg;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[cfg(not(target_family = "windows"))]
@@ -263,6 +263,7 @@ pub enum ColumnsIncludedDirectory {
     Path = 0,
     ReferenceButton,
 }
+
 pub enum ColumnsExcludedDirectory {
     // Columns for Excluded Directories in upper Notebook
     Path = 0,
@@ -378,8 +379,8 @@ pub const MAIN_ROW_COLOR: &str = "#222222";
 pub const HEADER_ROW_COLOR: &str = "#111111";
 pub const TEXT_COLOR: &str = "#ffffff";
 
-pub fn get_string_from_list_store(tree_view: &gtk4::TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
-    let list_store: gtk4::ListStore = get_list_store(tree_view);
+pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
+    let list_store: ListStore = get_list_store(tree_view);
 
     let mut string_vector: Vec<String> = Vec::new();
 
@@ -419,7 +420,7 @@ pub fn split_path(path: &Path) -> (String, String) {
     }
 }
 
-pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &gtk4::TextView) {
+pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
     let mut messages: String = String::from("");
     if !text_messages.messages.is_empty() {
         messages += format!("############### {}({}) ###############\n", flg!("text_view_messages"), text_messages.messages.len()).as_str();
@@ -469,7 +470,7 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     }
 }
 
-pub fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[gtk4::Widget], button_names: &[BottomButtonsEnum]) {
+pub fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(&button_names[index]).unwrap() {
             button.show();
@@ -492,8 +493,8 @@ pub fn get_text_from_invalid_symlink_cause(error: &common_dir_traversal::ErrorTy
     }
 }
 
-pub fn get_list_store(tree_view: &gtk4::TreeView) -> ListStore {
-    tree_view.model().unwrap().downcast::<gtk4::ListStore>().unwrap()
+pub fn get_list_store(tree_view: &TreeView) -> ListStore {
+    tree_view.model().unwrap().downcast::<ListStore>().unwrap()
 }
 
 pub fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
@@ -509,7 +510,7 @@ pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
     (number1, number2)
 }
 
-pub fn get_notebook_enum_from_tree_view(tree_view: &gtk4::TreeView) -> NotebookMainEnum {
+pub fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
         "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
@@ -528,7 +529,7 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &gtk4::TreeView) -> NotebookM
     }
 }
 
-pub fn get_notebook_upper_enum_from_tree_view(tree_view: &gtk4::TreeView) -> NotebookUpperEnum {
+pub fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookUpperEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_upper_included_directories" => NotebookUpperEnum::IncludedDirectories,
         "tree_view_upper_excluded_directories" => NotebookUpperEnum::ExcludedDirectories,
@@ -538,7 +539,7 @@ pub fn get_notebook_upper_enum_from_tree_view(tree_view: &gtk4::TreeView) -> Not
     }
 }
 
-pub fn get_notebook_object_from_tree_view(tree_view: &gtk4::TreeView) -> &NotebookObject {
+pub fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObject {
     let nb_enum = get_notebook_enum_from_tree_view(tree_view);
     &NOTEBOOKS_INFOS[nb_enum as usize]
 }
@@ -552,7 +553,7 @@ pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
-pub fn clean_invalid_headers(model: &gtk4::ListStore, column_header: i32, column_path: i32) {
+pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
     // Remove only child from header
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
@@ -675,6 +676,7 @@ pub fn clean_invalid_headers(model: &gtk4::ListStore, column_header: i32, column
         }
     }
 }
+
 pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
     let mut number_of_selected_items: u64 = 0;
     let mut number_of_selected_groups: u64 = 0;
@@ -783,8 +785,8 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-pub fn get_custom_label_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Label {
-    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
@@ -795,8 +797,9 @@ pub fn get_custom_label_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Lab
     }
     panic!("Button doesn't have proper custom label child");
 }
-pub fn get_custom_label_with_name_from_widget<P: IsA<gtk4::Widget>>(item: &P, name: &str) -> gtk4::Label {
-    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+
+pub fn get_custom_label_with_name_from_widget<P: IsA<Widget>>(item: &P, name: &str) -> gtk4::Label {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
@@ -809,8 +812,9 @@ pub fn get_custom_label_with_name_from_widget<P: IsA<gtk4::Widget>>(item: &P, na
     }
     panic!("Button doesn't have proper custom label child");
 }
-pub fn get_custom_image_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Image {
-    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+
+pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
@@ -823,8 +827,8 @@ pub fn get_custom_image_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> gtk4::Ima
 }
 
 #[allow(dead_code)]
-pub fn debug_print_widget<P: IsA<gtk4::Widget>>(item: &P) {
-    let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<gtk4::Widget>())];
+pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
+    let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<Widget>())];
 
     let mut next_free_number = 1;
     println!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
@@ -837,8 +841,9 @@ pub fn debug_print_widget<P: IsA<gtk4::Widget>>(item: &P) {
         println!("{}, {}, {:?} ", current_number, parent_number, widget);
     }
 }
-pub fn get_all_boxes_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> Vec<gtk4::Box> {
-    let mut widgets_to_check = vec![item.clone().upcast::<gtk4::Widget>()];
+
+pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
     let mut boxes = Vec::new();
 
     while let Some(widget) = widgets_to_check.pop() {
@@ -850,7 +855,7 @@ pub fn get_all_boxes_from_widget<P: IsA<gtk4::Widget>>(item: &P) -> Vec<gtk4::Bo
     boxes
 }
 
-pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
+pub fn get_all_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
     let mut vector = vec![];
     if let Some(mut child) = wid.first_child() {
         vector.push(child.clone());
@@ -869,7 +874,7 @@ pub fn get_all_children<P: IsA<gtk4::Widget>>(wid: &P) -> Vec<gtk4::Widget> {
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
-pub fn set_icon_of_button<P: IsA<gtk4::Widget>>(button: &P, data: &'static [u8]) {
+pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
     let image = get_custom_image_from_widget(&button.clone());
     let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();

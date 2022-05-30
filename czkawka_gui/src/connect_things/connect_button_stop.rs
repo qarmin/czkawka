@@ -1,9 +1,9 @@
 use crossbeam_channel::{Sender, TrySendError};
+use gtk4::prelude::*;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::KEY_ENTER;
-use gtk4::prelude::*;
 
 fn send_stop_message(stop_sender: &Sender<()>) {
     stop_sender

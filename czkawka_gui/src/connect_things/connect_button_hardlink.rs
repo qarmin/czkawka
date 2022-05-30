@@ -4,9 +4,9 @@ use std::path::PathBuf;
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
-use crate::flg;
 use czkawka_core::duplicate::make_hard_link;
 
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;
@@ -261,7 +261,7 @@ fn hardlink_symlink(
 }
 
 fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
-    let dialog = gtk4::Dialog::builder()
+    let dialog = Dialog::builder()
         .title(&flg!("hard_sym_invalid_selection_title_dialog"))
         .transient_for(window_main)
         .modal(true)
@@ -349,7 +349,7 @@ pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, col
     false
 }
 
-pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk4::CheckButton, window_main: &gtk4::Window) -> bool {
+pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckButton, window_main: &gtk4::Window) -> bool {
     if check_button_settings_confirm_link.is_active() {
         let (confirmation_dialog_link, check_button) = create_dialog_ask_for_linking(window_main);
 
@@ -370,16 +370,12 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &gtk4::
 }
 
 fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk4::Dialog::builder()
-        .title(&flg!("hard_sym_link_title_dialog"))
-        .transient_for(window_main)
-        .modal(true)
-        .build();
+    let dialog = Dialog::builder().title(&flg!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_link_label")));
-    let check_button: gtk4::CheckButton = gtk4::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
+    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 

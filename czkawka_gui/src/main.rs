@@ -5,20 +5,14 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
+use std::env;
+use std::ffi::OsString;
+
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
 use gtk4::Application;
 use gtk4::Inhibit;
-use std::env;
-use std::ffi::OsString;
 
-use czkawka_core::*;
-
-use crate::compute_results::*;
-use crate::initialize_gui::*;
-use crate::language_functions::LANGUAGES_ALL;
-use crate::saving_loading::*;
-use crate::tests::validate_notebook_data;
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;
 use connect_things::connect_button_delete::*;
@@ -38,7 +32,14 @@ use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
+use czkawka_core::*;
 use gui_structs::gui_data::*;
+
+use crate::compute_results::*;
+use crate::initialize_gui::*;
+use crate::language_functions::LANGUAGES_ALL;
+use crate::saving_loading::*;
+use crate::tests::validate_notebook_data;
 
 mod compute_results;
 mod connect_things;
@@ -60,13 +61,14 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    let application = gtk4::Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
+    let application = Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
         build_ui(app, cmdline.arguments());
         0
     });
     application.run_with_args(&env::args().collect::<Vec<_>>());
 }
+
 fn build_ui(application: &Application, arguments: Vec<OsString>) {
     let mut gui_data: GuiData = GuiData::new_with_application(application);
 

@@ -403,7 +403,7 @@ impl DebugPrint for BigFile {
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
         println!("Number of files to check - {:?}", self.number_of_files_to_check);
         println!("-----------------------------------------");
     }

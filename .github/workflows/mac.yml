@@ -69,7 +69,7 @@ jobs:
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-      - name: Override link[WORKAROUND] # Looks that this is a bug with current homebrew or Github CI
+      - name: Override link[WORKAROUND] # Looks that this is a bug with current homebrew or GitHub CI
         run: rm '/usr/local/bin/2to3'
 
       - name: Install GTK4

@@ -9,6 +9,7 @@ use gtk4::prelude::*;
 use humansize::{file_size_opts as options, FileSize};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images;
 
@@ -18,7 +19,6 @@ use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::opening_selecting_records::*;
-use czkawka_core::localizer_core::generate_translation_hashmap;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -1595,7 +1595,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
         }
         // Returning false here would close the receiver and have senders fail
-        glib::Continue(true)
+        Continue(true)
     });
 }
 

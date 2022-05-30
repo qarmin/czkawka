@@ -3,12 +3,11 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crossbeam_channel::bounded;
-use czkawka_core::bad_extensions::BadExtensions;
 use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::prelude::*;
 use gtk4::Builder;
 
-use crate::flg;
+use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -20,6 +19,7 @@ use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 
+use crate::flg;
 use crate::gui_structs::gui_about::GuiAbout;
 use crate::gui_structs::gui_bottom_buttons::GuiBottomButtons;
 use crate::gui_structs::gui_compare_images::GuiCompareImages;

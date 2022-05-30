@@ -7,6 +7,7 @@ pub struct HashTypeStruct {
     pub eng_name: &'static str,
     pub hash_type: HashType,
 }
+
 pub const DUPLICATES_HASH_TYPE_COMBO_BOX: [HashTypeStruct; 3] = [
     HashTypeStruct {
         eng_name: "Blake3",
@@ -21,6 +22,7 @@ pub const DUPLICATES_HASH_TYPE_COMBO_BOX: [HashTypeStruct; 3] = [
         hash_type: HashType::Xxh3,
     },
 ];
+
 pub struct CheckMethodStruct {
     pub eng_name: &'static str,
     pub check_method: CheckingMethod,
