@@ -538,16 +538,17 @@ fn connect_event_mouse(gui_data: &GuiData) {
         let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_duplicates.clone();
         let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
         let preview_path = gui_data.preview_path.clone();
+        let tree_view = gui_data.main_notebook.tree_view_duplicate_finder.clone();
 
-        let gc = gui_data.main_notebook.gc_tree_view_duplicate_finder.clone();
+        tree_view.set_property("activate-on-single-click", true);
 
-        // TODO GTK 4, currently not works, connect_pressed shows previous thing
-        gc.connect_released(move |gc, _event, _, _| {
-            let tree_view = gc.widget().downcast::<gtk4::TreeView>().unwrap();
+        // TODO GTK 4, currently not works, connect_pressed shows previous thing - https://gitlab.gnome.org/GNOME/gtk/-/issues/4939
+        // Use connect_released when it will be fixed, currently using connect_row_activated workaround
+        tree_view.connect_row_activated(move |tree_view, _b, _c| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
             let preview_path = preview_path.clone();
             show_preview(
-                &tree_view,
+                tree_view,
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
@@ -563,16 +564,16 @@ fn connect_event_mouse(gui_data: &GuiData) {
         let check_button_settings_show_preview = gui_data.settings.check_button_settings_show_preview_similar_images.clone();
         let preview_path = gui_data.preview_path.clone();
         let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
+        let tree_view = gui_data.main_notebook.tree_view_similar_images_finder.clone();
 
-        let gc = gui_data.main_notebook.gc_tree_view_similar_images_finder.clone();
+        tree_view.set_property("activate-on-single-click", true);
 
         // TODO GTK 4, currently not works, connect_pressed shows previous thing
-        gc.connect_released(move |gc, _event, _, _| {
-            let tree_view = gc.widget().downcast::<gtk4::TreeView>().unwrap();
+        tree_view.connect_row_activated(move |tree_view, _b, _c| {
             let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
             let preview_path = preview_path.clone();
             show_preview(
-                &tree_view,
+                tree_view,
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,

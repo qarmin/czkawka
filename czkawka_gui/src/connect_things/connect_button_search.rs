@@ -441,6 +441,11 @@ pub fn connect_button_search(
                     );
                     entry_info.set_text(&flg!("search_not_choosing_any_music"));
                     show_dialog.store(false, Ordering::Relaxed);
+
+                    notebook_main.set_sensitive(true);
+                    notebook_upper.set_sensitive(true);
+                    button_settings.set_sensitive(true);
+                    button_app_info.set_sensitive(true);
                 }
             }
             NotebookMainEnum::Symlinks => {

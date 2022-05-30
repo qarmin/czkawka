@@ -1,3 +1,14 @@
+## Version 5.0.0 - ?.?.2022r
+- GTK 4 port - [#466](https://github.com/qarmin/czkawka/pull/466)
+- Resize preview with window - [#466](https://github.com/qarmin/czkawka/pull/466)
+- Fix removing only one item from list view - [#466](https://github.com/qarmin/czkawka/pull/466)
+- Fix showing help command in duplicate CLI mode - [#720](https://github.com/qarmin/czkawka/pull/720)
+- Fix freeze when not choosing any tag in similiar music mode - [TODO]()
+- Read more tags from music files - [#705](https://github.com/qarmin/czkawka/pull/705)
+- Improve checking for invalid extensions - [#705](https://github.com/qarmin/czkawka/pull/705)
+- Support for finding invalid PDF files - [#705](https://github.com/qarmin/czkawka/pull/705)
+- Re-enable checking for broken music files(`libasound.so.2` no longer needed) - [#705](https://github.com/qarmin/czkawka/pull/705)
+
 ## Version 4.1.0 - 24.04.2022r
 - New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)
 - Builtin icons - no more invalid, theme/OS dependant icons - [#659](https://github.com/qarmin/czkawka/pull/659)
