@@ -46,6 +46,7 @@ pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap
 pub fn fnc_get_similarity_very_high() -> String {
     flc!("core_similarity_very_high")
 }
+
 pub fn fnc_get_similarity_minimal() -> String {
     flc!("core_similarity_minimal")
 }

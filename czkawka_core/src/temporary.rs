@@ -377,7 +377,7 @@ impl DebugPrint for Temporary {
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }

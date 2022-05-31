@@ -4,7 +4,6 @@ use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
 
 use crate::flg;
-
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;

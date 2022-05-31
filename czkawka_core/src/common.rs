@@ -1,12 +1,13 @@
-use directories_next::ProjectDirs;
-use image::{DynamicImage, ImageBuffer, Rgb};
-use imagepipe::{ImageSource, Pipeline};
 use std::ffi::OsString;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+
+use directories_next::ProjectDirs;
+use image::{DynamicImage, ImageBuffer, Rgb};
+use imagepipe::{ImageSource, Pipeline};
 
 /// Class for common functions used across other class/functions
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
@@ -136,7 +137,7 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     };
 
     // println!("Properly hashed {:?}", path);
-    Some(image::DynamicImage::ImageRgb8(image))
+    Some(DynamicImage::ImageRgb8(image))
 }
 
 impl Common {

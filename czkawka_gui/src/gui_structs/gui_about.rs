@@ -9,10 +9,10 @@ use crate::help_functions::get_all_boxes_from_widget;
 pub struct GuiAbout {
     pub about_dialog: gtk4::AboutDialog,
 
-    pub button_repository: gtk4::Button,
-    pub button_donation: gtk4::Button,
-    pub button_instruction: gtk4::Button,
-    pub button_translation: gtk4::Button,
+    pub button_repository: Button,
+    pub button_donation: Button,
+    pub button_instruction: Button,
+    pub button_translation: Button,
 }
 
 impl GuiAbout {

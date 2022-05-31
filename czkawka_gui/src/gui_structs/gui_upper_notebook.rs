@@ -12,14 +12,14 @@ pub struct GuiUpperNotebook {
     pub scrolled_window_included_directories: gtk4::ScrolledWindow,
     pub scrolled_window_excluded_directories: gtk4::ScrolledWindow,
 
-    pub tree_view_included_directories: gtk4::TreeView,
-    pub tree_view_excluded_directories: gtk4::TreeView,
+    pub tree_view_included_directories: TreeView,
+    pub tree_view_excluded_directories: TreeView,
 
-    pub evk_tree_view_included_directories: gtk4::EventControllerKey,
-    pub evk_tree_view_excluded_directories: gtk4::EventControllerKey,
+    pub evk_tree_view_included_directories: EventControllerKey,
+    pub evk_tree_view_excluded_directories: EventControllerKey,
 
-    pub gc_tree_view_included_directories: gtk4::GestureClick,
-    pub gc_tree_view_excluded_directories: gtk4::GestureClick,
+    pub gc_tree_view_included_directories: GestureClick,
+    pub gc_tree_view_excluded_directories: GestureClick,
 
     pub entry_excluded_items: gtk4::Entry,
     pub entry_allowed_extensions: gtk4::Entry,
@@ -50,17 +50,17 @@ impl GuiUpperNotebook {
         let scrolled_window_included_directories: gtk4::ScrolledWindow = builder.object("scrolled_window_included_directories").unwrap();
         let scrolled_window_excluded_directories: gtk4::ScrolledWindow = builder.object("scrolled_window_excluded_directories").unwrap();
 
-        let tree_view_included_directories: gtk4::TreeView = TreeView::new();
-        let tree_view_excluded_directories: gtk4::TreeView = TreeView::new();
+        let tree_view_included_directories: TreeView = TreeView::new();
+        let tree_view_excluded_directories: TreeView = TreeView::new();
 
-        let evk_tree_view_included_directories: gtk4::EventControllerKey = EventControllerKey::new();
+        let evk_tree_view_included_directories: EventControllerKey = EventControllerKey::new();
         tree_view_included_directories.add_controller(&evk_tree_view_included_directories);
-        let evk_tree_view_excluded_directories: gtk4::EventControllerKey = EventControllerKey::new();
+        let evk_tree_view_excluded_directories: EventControllerKey = EventControllerKey::new();
         tree_view_excluded_directories.add_controller(&evk_tree_view_excluded_directories);
 
-        let gc_tree_view_included_directories: gtk4::GestureClick = GestureClick::new();
+        let gc_tree_view_included_directories: GestureClick = GestureClick::new();
         tree_view_included_directories.add_controller(&gc_tree_view_included_directories);
-        let gc_tree_view_excluded_directories: gtk4::GestureClick = GestureClick::new();
+        let gc_tree_view_excluded_directories: GestureClick = GestureClick::new();
         tree_view_excluded_directories.add_controller(&gc_tree_view_excluded_directories);
 
         let entry_allowed_extensions: gtk4::Entry = builder.object("entry_allowed_extensions").unwrap();

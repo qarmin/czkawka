@@ -7,10 +7,10 @@ use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
-use crate::common::LOOP_DURATION;
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
+use crate::common::LOOP_DURATION;
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -72,7 +72,8 @@ pub(crate) enum FolderEmptiness {
 /// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
 #[derive(Clone)]
 pub struct FolderEntry {
-    pub(crate) parent_path: Option<PathBuf>, // Usable only when finding
+    pub(crate) parent_path: Option<PathBuf>,
+    // Usable only when finding
     pub(crate) is_empty: FolderEmptiness,
     pub modified_date: u64,
 }

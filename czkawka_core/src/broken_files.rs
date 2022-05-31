@@ -453,16 +453,16 @@ impl BrokenFiles {
                             Some(Some(file_entry_clone))
                         }
                     }
-                    TypeOfFile::ArchiveZip => match fs::File::open(&file_entry.path) {
+                    TypeOfFile::ArchiveZip => match File::open(&file_entry.path) {
                         Ok(file) => {
                             if let Err(e) = zip::ZipArchive::new(file) {
                                 file_entry.error_string = e.to_string();
                             }
                             Some(Some(file_entry))
-                        },
+                        }
                         Err(_inspected) => Some(None)
                     },
-                    TypeOfFile::Audio => match fs::File::open(&file_entry.path) {
+                    TypeOfFile::Audio => match File::open(&file_entry.path) {
                         Ok(file) =>
                             {
                                 let mut file_entry_clone = file_entry.clone();
@@ -481,7 +481,7 @@ impl BrokenFiles {
                                     file_entry_clone.error_string = "Audio crashes due parsing, please report bug here - https://github.com/qarmin/audio_checker/issues".to_string();
                                     Some(Some(file_entry_clone))
                                 }
-                            },
+                            }
                         Err(_inspected) => Some(None),
                     },
 
@@ -502,7 +502,7 @@ impl BrokenFiles {
                                     if let Err(e) = pdf::file::File::from_data(content) {
                                         file_entry.error_string = e.to_string();
                                         let error = unpack_pdf_error(e);
-                                        if let pdf::PdfError::InvalidPassword = error {
+                                        if let PdfError::InvalidPassword = error {
                                             return Some(None);
                                         }
                                     }
@@ -515,7 +515,7 @@ impl BrokenFiles {
                                     file_entry_clone.error_string = "PDF-rs library crashed when opening pdf, and if it is not reported, please report bug here - https://github.com/pdf-rs/pdf".to_string();
                                     Some(Some(file_entry_clone))
                                 }
-                            },
+                            }
                             Err(_inspected) => Some(None)
                         }
                     }
@@ -615,7 +615,7 @@ impl DebugPrint for BrokenFiles {
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }

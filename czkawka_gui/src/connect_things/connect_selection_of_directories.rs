@@ -3,10 +3,10 @@ use std::path::PathBuf;
 use gtk4::prelude::*;
 use gtk4::{Orientation, ResponseType, TreeView, Window};
 
-use crate::flg;
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
 
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 

@@ -992,7 +992,7 @@ impl DebugPrint for DuplicateFinder {
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
         println!("Minimum file size - {:?}", self.minimal_file_size);
         println!("Checking Method - {:?}", self.check_method);
         println!("Delete Method - {:?}", self.delete_method);
@@ -1306,6 +1306,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             .push(flc!("core_saving_to_cache", generate_translation_hashmap(vec![("number", how_much.to_string())])));
     }
 }
+
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
     if let Some(((file_handler, cache_file), (_json_file, _json_name))) =
         open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, false, &mut text_messages.warnings)

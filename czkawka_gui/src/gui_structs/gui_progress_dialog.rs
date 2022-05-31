@@ -18,7 +18,7 @@ pub struct GuiProgressDialog {
     pub grid_progress_stages: gtk4::Grid,
 
     pub button_stop_in_dialog: gtk4::Button,
-    pub evk_button_stop_in_dialog: gtk4::EventControllerKey,
+    pub evk_button_stop_in_dialog: EventControllerKey,
 }
 
 impl GuiProgressDialog {

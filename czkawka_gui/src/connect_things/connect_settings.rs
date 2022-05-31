@@ -8,10 +8,10 @@ use gtk4::{ResponseType, Window};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 
-use crate::flg;
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::HashType;
 
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_dialog_box_child;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};

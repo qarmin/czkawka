@@ -65,7 +65,7 @@ pub fn opening_double_click_function_directories(gesture_click: &GestureClick, n
     }
 }
 
-pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: gdk4::Key, key_code: u32, _modifier_type: ModifierType) -> gtk4::Inhibit {
+pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> Inhibit {
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
@@ -139,6 +139,7 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
         // }
     }
 }
+
 fn reverse_selection(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) {
     let (selected_rows, model) = tree_view.selection().selected_rows();
     let model = model.downcast::<gtk4::ListStore>().unwrap();
@@ -236,6 +237,7 @@ pub fn select_function_similar_images(_tree_selection: &gtk4::TreeSelection, tre
 pub fn select_function_similar_videos(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::IsHeader as i32)
 }
+
 pub fn select_function_always_true(_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
     true
 }

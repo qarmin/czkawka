@@ -1,10 +1,11 @@
-use crate::flg;
-use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use gtk4::prelude::*;
-use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
+use gtk4::prelude::*;
+use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
+
+use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, NOTEBOOKS_INFOS};
 use crate::localizer_core::generate_translation_hashmap;
@@ -255,15 +256,15 @@ fn populate_groups_at_start(
     model: &TreeModel,
     shared_current_path: Rc<RefCell<Option<TreePath>>>,
     tree_path: TreePath,
-    image_compare_left: &gtk4::Image,
-    image_compare_right: &gtk4::Image,
+    image_compare_left: &Image,
+    image_compare_right: &Image,
     current_group: u32,
     group_number: u32,
-    check_button_left_preview_text: &gtk4::CheckButton,
-    check_button_right_preview_text: &gtk4::CheckButton,
-    scrolled_window_compare_choose_images: &gtk4::ScrolledWindow,
+    check_button_left_preview_text: &CheckButton,
+    check_button_right_preview_text: &CheckButton,
+    scrolled_window_compare_choose_images: &ScrolledWindow,
     label_group_info: &gtk4::Label,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)>>>,
+    shared_image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     button_go_previous_compare_group: &gtk4::Button,
     button_go_next_compare_group: &gtk4::Button,
@@ -338,13 +339,13 @@ fn populate_groups_at_start(
 }
 
 /// Generate images which will be used later as preview images without needing to open them again and again
-fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk4::TreePath)>) -> Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>) -> Vec<(String, String, Image, Image, TreePath)> {
     // TODO use here threads,
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
     for (full_path, name, tree_path) in vector_with_path {
-        let small_img = gtk4::Image::new();
-        let big_img = gtk4::Image::new();
+        let small_img = Image::new();
+        let big_img = Image::new();
 
         match Pixbuf::from_file(&full_path) {
             Ok(pixbuf) =>
@@ -382,7 +383,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, gtk4::TreeP
 }
 
 /// Takes info about current items in groups like path
-fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, column_path: i32, column_name: i32) -> Vec<(String, String, gtk4::TreePath)> {
+fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, column_path: i32, column_name: i32) -> Vec<(String, String, TreePath)> {
     let used_iter = model.iter(current_path).unwrap();
 
     assert!(model.get::<bool>(&used_iter, column_header));
@@ -426,7 +427,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
 }
 
 /// Moves iterator to previous/next header
-fn move_iter(model: &gtk4::TreeModel, tree_path: &TreePath, column_header: i32, go_next: bool) -> TreePath {
+fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_next: bool) -> TreePath {
     let tree_iter = model.iter(tree_path).unwrap();
 
     assert!(model.get::<bool>(&tree_iter, column_header));
@@ -466,7 +467,7 @@ fn populate_similar_scrolled_view(
     image_compare_left: &Image,
     image_compare_right: &Image,
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, gtk4::TreePath)>>>,
+    shared_image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
     model: &TreeModel,

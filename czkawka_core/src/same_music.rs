@@ -708,10 +708,10 @@ impl SameMusic {
         self.duplicated_music_entries = old_duplicates;
 
         if self.use_reference_folders {
-            let mut similars_vector = Default::default();
-            mem::swap(&mut self.duplicated_music_entries, &mut similars_vector);
+            let mut similar_vector = Default::default();
+            mem::swap(&mut self.duplicated_music_entries, &mut similar_vector);
             let reference_directories = self.directories.reference_directories.clone();
-            self.duplicated_music_entries_referenced = similars_vector
+            self.duplicated_music_entries_referenced = similar_vector
                 .into_iter()
                 .filter_map(|vec_file_entry| {
                     let mut files_from_referenced_folders = Vec::new();
@@ -883,7 +883,7 @@ impl DebugPrint for SameMusic {
         println!("Excluded directories - {:?}", self.directories.excluded_directories);
         println!("Recursive search - {}", self.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystmes - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }

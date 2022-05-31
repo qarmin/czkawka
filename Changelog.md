@@ -3,7 +3,7 @@
 - Resize preview with window - [#466](https://github.com/qarmin/czkawka/pull/466)
 - Fix removing only one item from list view - [#466](https://github.com/qarmin/czkawka/pull/466)
 - Fix showing help command in duplicate CLI mode - [#720](https://github.com/qarmin/czkawka/pull/720)
-- Fix freeze when not choosing any tag in similiar music mode - [TODO]()
+- Fix freeze when not choosing any tag in similar music mode - [TODO]()
 - Read more tags from music files - [#705](https://github.com/qarmin/czkawka/pull/705)
 - Improve checking for invalid extensions - [#705](https://github.com/qarmin/czkawka/pull/705)
 - Support for finding invalid PDF files - [#705](https://github.com/qarmin/czkawka/pull/705)
@@ -38,7 +38,7 @@
 - Change minimal supported OS to Ubuntu 20.04(needed by GTK) - [#468](https://github.com/qarmin/czkawka/pull/468)
 - Increased performance by avoiding creating unnecessary image previews - [#468](https://github.com/qarmin/czkawka/pull/468)
 - Improved performance due caching hash of broken/not supported images/videos = [#471](https://github.com/qarmin/czkawka/pull/471)
-- Option to not remove cache from non existent files(e.g. from unplugged pendrive) - [#472](https://github.com/qarmin/czkawka/pull/472)
+- Option to not remove cache from non-existent files(e.g. from unplugged pendrive) - [#472](https://github.com/qarmin/czkawka/pull/472)
 - Add multiple tooltips with helpful messages - [#472](https://github.com/qarmin/czkawka/pull/472)
 - Allow caching prehash - [#477](https://github.com/qarmin/czkawka/pull/477)
 - Improve custom selecting of records(allows to use Rust regex) - [#489](https://github.com/qarmin/czkawka/pull/478)
@@ -63,7 +63,7 @@
 - Add additional info to printed errors [#446](https://github.com/qarmin/czkawka/pull/446) 
 - Add support for multiple image filters, hashes and sizes in similar images tool [#447](https://github.com/qarmin/czkawka/pull/447), [#448](https://github.com/qarmin/czkawka/pull/448)
 - Button to move files/folders to provided location [#449](https://github.com/qarmin/czkawka/pull/449)
-- Add non clickable button to fix white theme [#450](https://github.com/qarmin/czkawka/pull/450)
+- Add non-clickable button to fix white theme [#450](https://github.com/qarmin/czkawka/pull/450)
 - Fixed freeze when opening in same thread file/folder [#448](https://github.com/qarmin/czkawka/pull/448)
 - Tool to check performance of different image filters and hash types and sizes [#447](https://github.com/qarmin/czkawka/pull/447) 
 - Add scheduled CI and pin it to support Rust 1.53.0 [7bb](https://github.com/qarmin/czkawka/commit/7bbdf742739a513b80d0cc06ba61dfafec976b23), [#431](https://github.com/qarmin/czkawka/pull/431)
@@ -123,7 +123,7 @@
 - Add support for CRC32 and XXH3 hash - [#243](https://github.com/qarmin/czkawka/pull/243)
 - Add delete method to replace duplicate files with hard links - [#236](https://github.com/qarmin/czkawka/pull/236)
 - Add checking for broken music opt-in - [#249](https://github.com/qarmin/czkawka/pull/249)
-- Allow to save to files similar images results - [10156ccfd3](https://github.com/qarmin/czkawka/commit/10156ccfd3ba880d26d4bbad1e025b0050d7753b)
+- Allow to save to file similar images results - [10156ccfd3](https://github.com/qarmin/czkawka/commit/10156ccfd3ba880d26d4bbad1e025b0050d7753b)
 - Keep original file if replacing duplicate with hardlink fails - [#256](https://github.com/qarmin/czkawka/pull/256)
 - Fix Windows theme - [#265](https://github.com/qarmin/czkawka/pull/265)
 - Windows taskbar progress support - [#264](https://github.com/qarmin/czkawka/pull/264)
@@ -169,7 +169,7 @@ This version is only needed to test flatpak build
 - Add support for delete button - [#159](https://github.com/qarmin/czkawka/pull/159)
 - Allow to select multiple entries in File Chooser - [#154](https://github.com/qarmin/czkawka/pull/154)
 - Add cache support for similar images - [#139](https://github.com/qarmin/czkawka/pull/139)
-- Add selecting images with it's size - [#138](https://github.com/qarmin/czkawka/pull/138)
+- Add selecting images with its size - [#138](https://github.com/qarmin/czkawka/pull/138)
 - Modernize popovers code and simplify later changes - [#137](https://github.com/qarmin/czkawka/pull/137)
 
 ## Version 2.0.0 - 23.12.2020r
@@ -213,7 +213,7 @@ This version is only needed to test flatpak build
 
 ## Version 1.3.0 - 02.11.2020r
 - Appimage support - [#77](https://github.com/qarmin/czkawka/pull/77)
-- Removed warnings about non existend excluded directories - [#79](https://github.com/qarmin/czkawka/pull/79)
+- Removed warnings about non-existed excluded directories - [#79](https://github.com/qarmin/czkawka/pull/79)
 - Updated README - [8ec](https://github.com/qarmin/czkawka/commit/8ecde0fc9adb3e6cedf432c4ba749e698b645a7a)
 - Added pre hash support(speedup for searching big duplicates) - [#83](https://github.com/qarmin/czkawka/pull/83)
 - Support for searching duplicates by file name - [#84](https://github.com/qarmin/czkawka/pull/84)
@@ -247,7 +247,7 @@ This version is only needed to test flatpak build
 
 ## Version 1.0.1 - 06.10.2020r
 - Replaced default argument parser with StructOpt [#37](https://github.com/qarmin/czkawka/pull/37)
-- Added all(except MacOS GTK build) builds to CI where can be freely downloaded [#41](https://github.com/qarmin/czkawka/pull/41) [#39](https://github.com/qarmin/czkawka/pull/39)
+- Added all(except macOS GTK build) builds to CI where can be freely downloaded [#41](https://github.com/qarmin/czkawka/pull/41) [#39](https://github.com/qarmin/czkawka/pull/39)
 - App can be downloaded also from Arch AUR and Cargo [#36](https://github.com/qarmin/czkawka/pull/36)
 - Fixed crash with invalid file modification date [#33](https://github.com/qarmin/czkawka/issues/33)
 - Upper tabs can hide and show when this is necessary [#38](https://github.com/qarmin/czkawka/pull/38)
@@ -298,11 +298,11 @@ This version is only needed to test flatpak build
 - Basic search in GTK
 - Cleaned core from println
 - Core functions doesn't use now process::exit(everything is done with help of messages/errors/warnings)
-- Added support for non recursive search
+- Added support for non-recursive search
 - Improved finding number and size of duplicated files
 - Saving results to file
 - Print how much data was read by duplicate finder(debug only)
-- Added Github CI
+- Added GitHub CI
 - Only debug build prints debug information's
 - Clean code
 - Add basic idea config to misc folder

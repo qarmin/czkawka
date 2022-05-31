@@ -13,15 +13,15 @@ use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(
     gui_data: &GuiData,
-    mut futures_receiver_duplicate_files: UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_empty_files: UnboundedReceiver<common_dir_traversal::ProgressData>,
-    mut futures_receiver_empty_folder: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_duplicate_files: UnboundedReceiver<ProgressData>,
+    mut futures_receiver_empty_files: UnboundedReceiver<ProgressData>,
+    mut futures_receiver_empty_folder: UnboundedReceiver<ProgressData>,
     mut futures_receiver_big_files: UnboundedReceiver<big_file::ProgressData>,
-    mut futures_receiver_same_music: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_same_music: UnboundedReceiver<ProgressData>,
     mut futures_receiver_similar_images: UnboundedReceiver<similar_images::ProgressData>,
     mut futures_receiver_similar_videos: UnboundedReceiver<similar_videos::ProgressData>,
     mut futures_receiver_temporary: UnboundedReceiver<temporary::ProgressData>,
-    mut futures_receiver_invalid_symlinks: UnboundedReceiver<common_dir_traversal::ProgressData>,
+    mut futures_receiver_invalid_symlinks: UnboundedReceiver<ProgressData>,
     mut futures_receiver_broken_files: UnboundedReceiver<broken_files::ProgressData>,
     mut futures_receiver_bad_extensions: UnboundedReceiver<ProgressData>,
 ) {

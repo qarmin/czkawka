@@ -6,7 +6,6 @@ use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 
 use crate::flg;
-
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;
@@ -115,7 +114,7 @@ pub async fn delete_things(gui_data: GuiData) {
 }
 
 pub async fn check_if_can_delete_files(
-    check_button_settings_confirm_deletion: &gtk4::CheckButton,
+    check_button_settings_confirm_deletion: &CheckButton,
     window_main: &gtk4::Window,
     number_of_selected_items: u64,
     number_of_selected_groups: u64,
@@ -140,7 +139,7 @@ pub async fn check_if_can_delete_files(
 }
 
 fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> (Dialog, CheckButton) {
-    let dialog = gtk4::Dialog::builder().title(&flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
+    let dialog = Dialog::builder().title(&flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
@@ -157,7 +156,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
             generate_translation_hashmap(vec![("items", number_of_selected_items.to_string()), ("groups", number_of_selected_groups.to_string())])
         ))),
     };
-    let check_button: gtk4::CheckButton = gtk4::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
+    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
@@ -177,7 +176,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
 }
 
 fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
-    let dialog = gtk4::Dialog::builder()
+    let dialog = Dialog::builder()
         .title(&flg!("delete_all_files_in_group_title"))
         .transient_for(window_main)
         .modal(true)
@@ -187,7 +186,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
 
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_all_files_in_group_label1")));
     let label2: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_all_files_in_group_label2")));
-    let check_button: gtk4::CheckButton = gtk4::CheckButton::with_label(&flg!("dialogs_ask_next_time"));
+    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
     check_button.set_active(true);
     check_button.set_halign(Align::Center);
 
@@ -209,7 +208,7 @@ pub async fn check_if_deleting_all_files_in_group(
     column_selection: i32,
     column_path: i32,
     window_main: &gtk4::Window,
-    check_button_settings_confirm_group_deletion: &gtk4::CheckButton,
+    check_button_settings_confirm_group_deletion: &CheckButton,
 ) -> bool {
     let model = get_list_store(tree_view);
 

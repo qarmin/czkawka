@@ -104,7 +104,7 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "xba"),       // Libreoffice
     ("xml", "xcd"),       // Libreoffice files
     ("zip", "apk"),       // Android apk
-    ("zip", "cbr"),       // Komiksy
+    ("zip", "cbr"),       // Comics
     ("zip", "dat"),       // Multiple - python, brave
     ("zip", "doc"),       // Word
     ("zip", "docx"),      // Word
@@ -132,6 +132,7 @@ pub struct BadFileEntry {
     pub current_extension: String,
     pub proper_extensions: String,
 }
+
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {

@@ -23,7 +23,7 @@ pub struct GuiBottomButtons {
     pub buttons_names: [BottomButtonsEnum; 8],
     pub buttons_array: [Widget; 8],
 
-    pub gc_buttons_select: gtk4::GestureClick,
+    pub gc_buttons_select: GestureClick,
 }
 
 impl GuiBottomButtons {
