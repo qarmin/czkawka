@@ -503,8 +503,7 @@ pub fn tree_remove(
 
         model.remove(&iter);
 
-        map_with_path_to_delete.entry(path.clone()).or_insert_with(Vec::new);
-        map_with_path_to_delete.get_mut(path.as_str()).unwrap().push(file_name);
+        map_with_path_to_delete.entry(path.clone()).or_insert_with(Vec::new).push(file_name);
     }
 
     // Delete duplicated entries, and remove real files
