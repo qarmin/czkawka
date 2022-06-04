@@ -1,3 +1,4 @@
+use czkawka_core::big_file::SearchMode;
 use image_hasher::{FilterType, HashAlg};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
@@ -40,6 +41,23 @@ pub const DUPLICATES_CHECK_METHOD_COMBO_BOX: [CheckMethodStruct; 3] = [
     CheckMethodStruct {
         eng_name: "Name",
         check_method: CheckingMethod::Name,
+    },
+];
+
+#[derive(Copy, Clone)]
+pub struct SearchModeStruct {
+    pub eng_name: &'static str,
+    pub check_method: SearchMode,
+}
+
+pub const BIG_FILES_CHECK_METHOD_COMBO_BOX: [SearchModeStruct; 2] = [
+    SearchModeStruct {
+        eng_name: "Biggest",
+        check_method: SearchMode::BiggestFiles,
+    },
+    SearchModeStruct {
+        eng_name: "Smallest",
+        check_method: SearchMode::SmallestFiles,
     },
 ];
 

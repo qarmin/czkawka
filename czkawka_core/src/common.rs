@@ -140,6 +140,14 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     Some(DynamicImage::ImageRgb8(image))
 }
 
+pub fn split_path(path: &Path) -> (String, String) {
+    match (path.parent(), path.file_name()) {
+        (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
+        (Some(dir), None) => (dir.display().to_string(), String::new()),
+        (None, _) => (String::new(), String::new()),
+    }
+}
+
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
     #[allow(unused_variables)]

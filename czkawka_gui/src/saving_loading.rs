@@ -419,6 +419,7 @@ enum LoadText {
     ComboBoxImageResizeAlgorithm,
     ComboBoxImageHashType,
     ComboBoxImageHashSize,
+    ComboBoxBigFiles,
     NumberOfBiggestFiles,
     SimilarImagesSimilarity,
     SimilarImagesIgnoreSameSize,
@@ -468,6 +469,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::SimilarVideosIgnoreSameSize, "similar_videos_ignore_same_size"),
         (LoadText::MusicApproximateComparison, "music_approximate_comparison"),
         (LoadText::DuplicateNameCaseSensitive, "duplicate_name_case_sensitive"),
+        (LoadText::ComboBoxBigFiles, "combo_box_big_files_mode"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -617,6 +619,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().to_string(),
         main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
     );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().to_string(),
+        main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
+    );
 
     // Other2
     saving_struct.save_var(
@@ -729,6 +735,7 @@ pub fn load_configuration(
     let combo_box_image_hash_size = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 0);
     let combo_box_image_hash_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
     let combo_box_image_resize_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
+    let combo_box_big_files_mode = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().clone(), 0);
 
     let number_of_biggest_files = loaded_entries.get_integer_string(
         hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().clone(),
@@ -865,6 +872,7 @@ pub fn load_configuration(
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_algorithm, combo_box_image_hash_algorithm);
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_size, combo_box_image_hash_size);
         save_proper_value_to_combo_box(&main_notebook.combo_box_image_resize_algorithm, combo_box_image_resize_algorithm);
+        save_proper_value_to_combo_box(&main_notebook.combo_box_big_files_mode, combo_box_big_files_mode);
 
         main_notebook.check_button_duplicate_case_sensitive_name.set_active(check_button_case_sensitive_name);
         main_notebook.entry_big_files_number.set_text(&number_of_biggest_files);
@@ -995,6 +1003,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_image_hash_algorithm.set_active(Some(0));
         main_notebook.combo_box_image_resize_algorithm.set_active(Some(0));
         main_notebook.combo_box_image_hash_size.set_active(Some(0));
+        main_notebook.combo_box_big_files_mode.set_active(Some(0));
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);

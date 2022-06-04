@@ -48,6 +48,10 @@ image_hash_size_tooltip =
     散列的默认值为8字节，这样可以找到非常相似和不同的图像。 16 字节和32 字节哈希值只能用于几乎完全相同的图像。 64 字节散列不应使用，除非您需要找到真正小的差异。
 image_resize_filter_tooltip = 要计算图像散列，库必须首先调整大小。在选定的算法上停用，结果图像看起来没有什么不同。 使用最快的算法，但结果最差的算法是Nearest。
 image_hash_alg_tooltip = 用户可以从计算哈希的许多算法中选择一个。 每一个国家都有强大和弱点，有时会给不同的形象带来更好、有时甚至更糟的结果。 因此，为了确定您最好的测试，需要手动测试。
+big_files_mode_combobox_tooltip = 允许搜索最小/最大的文件
+big_files_mode_label = 已检查的文件
+big_files_mode_smallest_combo_box = 最小的
+big_files_mode_biggest_combo_box = 最大的
 main_notebook_image_fast_compare = 快速比较
 main_notebook_image_fast_compare_tooltip =
     加快搜索和比较哈希。
@@ -206,6 +210,7 @@ bottom_show_errors_tooltip = 显示/隐藏底部文本面板。
 bottom_show_upper_notebook_tooltip = 显示/隐藏主笔记本面板。
 # Progress Window
 progress_stop_button = 停止
+progress_stop_additional_message = 停止请求
 # About Window
 about_repository_button_tooltip = 链接到源代码的仓库页面。
 about_donation_button_tooltip = 链接到捐赠页面。

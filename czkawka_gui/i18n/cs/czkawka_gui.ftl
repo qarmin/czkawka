@@ -48,6 +48,10 @@ image_hash_size_tooltip =
     Výchozí hodnota pro hash je 8 bajtů, což umožňuje najít velmi podobné i různé obrázky. 16 bajtů a 32 bajtových hashů by mělo být používáno pouze pro téměř totožné obrázky. 64 byte hash by neměl být použit, kromě situací, kdy je třeba najít opravdu malé rozdíly.
 image_resize_filter_tooltip = Pro výpočet hash obrázku musí knihovna nejprve změnit velikost. V závislosti na zvoleném algoritmu bude výsledný obrázek vypadat málo jinak. Nejrychlejší algoritmus k používání, ale také ten, který dává nejhorší výsledky, je blízko.
 image_hash_alg_tooltip = Uživatelé si mohou vybrat z jednoho z mnoha algoritmů pro výpočet hashu. Každý z nich má silné i slabší body a někdy přinese lepší a někdy horší výsledky pro různé obrázky. Takže pro určení nejlepšího pro vás je vyžadováno ruční testování.
+big_files_mode_combobox_tooltip = Umožňuje vyhledávat malé / největší soubory
+big_files_mode_label = Zaškrtnuté soubory
+big_files_mode_smallest_combo_box = Nejmenší
+big_files_mode_biggest_combo_box = Největší
 main_notebook_image_fast_compare = Rychlé porovnání
 main_notebook_image_fast_compare_tooltip =
     Urychlit hledání a porovnávání hasičů.
@@ -206,6 +210,7 @@ bottom_show_errors_tooltip = Zobrazit/skrýt spodní textový panel.
 bottom_show_upper_notebook_tooltip = Zobrazit/skrýt horní panel sešitu.
 # Progress Window
 progress_stop_button = Zastavit
+progress_stop_additional_message = Zastavit požadavek
 # About Window
 about_repository_button_tooltip = Odkaz na stránku repositáře se zdrojovým kódem.
 about_donation_button_tooltip = Odkaz na stránku s darováním.

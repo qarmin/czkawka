@@ -1,3 +1,4 @@
+use czkawka_core::big_file::SearchMode;
 use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
 
@@ -6,7 +7,7 @@ use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarit
 use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
 
 use crate::flg;
-use crate::help_combo_box::{DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
+use crate::help_combo_box::{BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
 use crate::help_functions::get_all_children;
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
@@ -76,6 +77,8 @@ pub struct GuiMainNotebook {
     // Big file
     pub label_big_shown_files: Label,
     pub entry_big_files_number: Entry,
+    pub label_big_files_mode: Label,
+    pub combo_box_big_files_mode: ComboBoxText,
 
     // Similar Images
     pub scale_similarity_similar_images: Scale,
@@ -206,8 +209,6 @@ impl GuiMainNotebook {
         let check_button_music_length: CheckButton = builder.object("check_button_music_length").unwrap();
         let check_button_music_approximate_comparison: CheckButton = builder.object("check_button_music_approximate_comparison").unwrap();
 
-        //// Radio Buttons
-
         let scale_similarity_similar_images: Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
@@ -216,6 +217,7 @@ impl GuiMainNotebook {
         let combo_box_image_resize_algorithm: ComboBoxText = builder.object("combo_box_image_resize_algorithm").unwrap();
         let combo_box_image_hash_algorithm: ComboBoxText = builder.object("combo_box_image_hash_algorithm").unwrap();
         let combo_box_image_hash_size: ComboBoxText = builder.object("combo_box_image_hash_size").unwrap();
+        let combo_box_big_files_mode: ComboBoxText = builder.object("combo_box_big_files_mode").unwrap();
 
         let check_button_image_ignore_same_size: CheckButton = builder.object("check_button_image_ignore_same_size").unwrap();
         let check_button_video_ignore_same_size: CheckButton = builder.object("check_button_video_ignore_same_size").unwrap();
@@ -233,6 +235,7 @@ impl GuiMainNotebook {
         let label_video_similarity: Label = builder.object("label_video_similarity").unwrap();
         let label_video_similarity_min: Label = builder.object("label_video_similarity_min").unwrap();
         let label_video_similarity_max: Label = builder.object("label_video_similarity_max").unwrap();
+        let label_big_files_mode: Label = builder.object("label_big_files_mode").unwrap();
 
         let image_preview_similar_images: Image = builder.object("image_preview_similar_images").unwrap();
         let image_preview_duplicates: Image = builder.object("image_preview_duplicates").unwrap();
@@ -316,6 +319,8 @@ impl GuiMainNotebook {
             gc_tree_view_invalid_symlinks,
             gc_tree_view_broken_files,
             gc_tree_view_bad_extensions,
+            combo_box_big_files_mode,
+            label_big_files_mode,
         }
     }
 
@@ -375,6 +380,10 @@ impl GuiMainNotebook {
 
         self.combo_box_image_hash_algorithm.set_tooltip_text(Some(&flg!("image_hash_alg_tooltip")));
         self.label_image_hash_type.set_tooltip_text(Some(&flg!("image_hash_alg_tooltip")));
+
+        self.combo_box_big_files_mode.set_tooltip_text(Some(&flg!("big_files_mode_combobox_tooltip")));
+        self.label_big_files_mode.set_tooltip_text(Some(&flg!("big_files_mode_combobox_tooltip")));
+        self.label_big_files_mode.set_label(&flg!("big_files_mode_label"));
 
         self.check_button_image_ignore_same_size
             .set_tooltip_text(Some(&flg!("check_button_general_same_size_tooltip")));
@@ -537,6 +546,18 @@ impl GuiMainNotebook {
                 self.combo_box_duplicate_check_method.append_text(&text);
             }
             self.combo_box_duplicate_check_method.set_active(Some(active));
+        }
+        {
+            let active = self.combo_box_big_files_mode.active().unwrap_or(0);
+            self.combo_box_big_files_mode.remove_all();
+            for i in &BIG_FILES_CHECK_METHOD_COMBO_BOX {
+                let text = match i.check_method {
+                    SearchMode::SmallestFiles => flg!("big_files_mode_smallest_combo_box"),
+                    SearchMode::BiggestFiles => flg!("big_files_mode_biggest_combo_box"),
+                };
+                self.combo_box_big_files_mode.append_text(&text);
+            }
+            self.combo_box_big_files_mode.set_active(Some(active));
         }
     }
 }

@@ -11,7 +11,7 @@ music_title_checkbox = タイトル
 music_artist_checkbox = アーティスト
 music_year_checkbox = 年
 music_bitrate_checkbox = ビットレート
-music_genre_checkbox = Genre
+music_genre_checkbox = ジャンル
 music_length_checkbox = 長さ
 music_comparison_checkbox = おおよその比較
 music_comparison_checkbox_tooltip =
@@ -48,6 +48,10 @@ image_hash_size_tooltip =
     ハッシュ値のデフォルトの大きさは8バイトで、非常に類似した異なる画像を見つけることができます。 16バイトと32バイトのハッシュは、ほぼ同じ画像にのみ使用する必要があります。 本当に小さな違いを見つける必要がある状況を除いて、64 バイトのハッシュは使用するべきではありません。
 image_resize_filter_tooltip = 画像のハッシュを計算するには、ライブラリはまず画像のサイズを変更する必要があります。選択されたアルゴリズムによって、結果の画像はほとんど異なります。 最速のアルゴリズムであり、かつ最も悪い結果をもたらすアルゴリズムはNearestです。
 image_hash_alg_tooltip = ユーザーは多くのハッシュ方式から1つを選択することができます。 それぞれが長所と短所の両方を持っており、時には異なる画像に対してより良い結果や悪い結果を与えます。 あなたにとって最良のものを選ぶには、それらを自分自身で試す必要があります。
+big_files_mode_combobox_tooltip = 最小/最大のファイルを検索できます
+big_files_mode_label = チェックされたファイル
+big_files_mode_smallest_combo_box = 最も小さい
+big_files_mode_biggest_combo_box = 最大のもの
 main_notebook_image_fast_compare = 高速な比較
 main_notebook_image_fast_compare_tooltip =
     ハッシュの検索・比較を高速化します。
@@ -206,6 +210,7 @@ bottom_show_errors_tooltip = 下部のエラーパネルを表示/非表示に�
 bottom_show_upper_notebook_tooltip = 上部のノートブックパネルを表示/非表示にします。
 # Progress Window
 progress_stop_button = 停止
+progress_stop_additional_message = リクエストを停止する
 # About Window
 about_repository_button_tooltip = ソースコードのあるリポジトリページへのリンク
 about_donation_button_tooltip = 寄付ページへのリンク

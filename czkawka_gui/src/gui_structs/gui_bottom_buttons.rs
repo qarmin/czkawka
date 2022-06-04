@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{GestureClick, Widget};
 
-use crate::help_functions::{get_custom_label_from_widget, get_custom_label_with_name_from_widget, set_icon_of_button, BottomButtonsEnum};
+use crate::help_functions::{get_custom_label_from_widget, set_icon_of_button, BottomButtonsEnum};
 use crate::{
     flg, CZK_ICON_COMPARE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_MOVE, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SYMLINK,
     CZK_ICON_TRASH,
@@ -19,6 +19,8 @@ pub struct GuiBottomButtons {
     pub buttons_compare: gtk4::Button,
     pub buttons_show_errors: gtk4::Button,
     pub buttons_show_upper_notebook: gtk4::Button,
+
+    pub label_buttons_select: gtk4::Label,
 
     pub buttons_names: [BottomButtonsEnum; 8],
     pub buttons_array: [Widget; 8],
@@ -39,6 +41,8 @@ impl GuiBottomButtons {
 
         let buttons_show_errors: gtk4::Button = builder.object("buttons_show_errors").unwrap();
         let buttons_show_upper_notebook: gtk4::Button = builder.object("buttons_show_upper_notebook").unwrap();
+
+        let label_buttons_select: gtk4::Label = builder.object("label_buttons_select").unwrap();
 
         let gc_buttons_select: GestureClick = GestureClick::new();
 
@@ -89,6 +93,7 @@ impl GuiBottomButtons {
             buttons_compare,
             buttons_show_errors,
             buttons_show_upper_notebook,
+            label_buttons_select,
             buttons_names,
             buttons_array,
             gc_buttons_select,
@@ -96,7 +101,7 @@ impl GuiBottomButtons {
     }
     pub fn update_language(&self) {
         get_custom_label_from_widget(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
-        get_custom_label_with_name_from_widget(&self.buttons_select.clone(), "SelectMenu").set_text(&flg!("bottom_select_button"));
+        self.label_buttons_select.set_text(&flg!("bottom_select_button"));
         get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
         get_custom_label_from_widget(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
         get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
