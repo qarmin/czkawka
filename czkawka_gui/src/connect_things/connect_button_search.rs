@@ -21,7 +21,8 @@ use czkawka_core::*;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
-    DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
+    BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX,
+    IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
 use crate::help_functions::*;
 use crate::notebook_enums::*;
@@ -49,6 +50,7 @@ pub fn connect_button_search(
     let combo_box_image_resize_algorithm = gui_data.main_notebook.combo_box_image_resize_algorithm.clone();
     let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
     let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
+    let combo_box_big_files_mode = gui_data.main_notebook.combo_box_big_files_mode.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let check_button_image_ignore_same_size = gui_data.main_notebook.check_button_image_ignore_same_size.clone();
     let check_button_video_ignore_same_size = gui_data.main_notebook.check_button_video_ignore_same_size.clone();
@@ -259,6 +261,9 @@ pub fn connect_button_search(
 
                 get_list_store(&tree_view_big_files_finder).clear();
 
+                let big_files_mode_index = combo_box_big_files_mode.active().unwrap() as usize;
+                let big_files_mode = BIG_FILES_CHECK_METHOD_COMBO_BOX[big_files_mode_index].check_method;
+
                 let numbers_of_files_to_check = entry_big_files_number.text().as_str().parse::<usize>().unwrap_or(50);
 
                 let futures_sender_big_file = futures_sender_big_file.clone();
@@ -272,6 +277,7 @@ pub fn connect_button_search(
                     bf.set_excluded_items(excluded_items);
                     bf.set_allowed_extensions(allowed_extensions);
                     bf.set_number_of_files_to_check(numbers_of_files_to_check);
+                    bf.set_search_mode(big_files_mode);
                     bf.find_big_files(Some(&stop_receiver), Some(&futures_sender_big_file));
                     let _ = glib_stop_sender.send(Message::BigFiles(bf));
                 });

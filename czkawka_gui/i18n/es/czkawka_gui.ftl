@@ -48,6 +48,10 @@ image_hash_size_tooltip =
     El valor predeterminado para el hash es de 8 bytes, lo que permite encontrar imágenes muy similares y diferentes. El hash de 16 bytes y 32 bytes debe utilizarse sólo para imágenes casi idénticas. El hash de 64 bytes no debería ser usado, excepto en situaciones en las que necesita encontrar diferencias realmente pequeñas.
 image_resize_filter_tooltip = Para calcular el hash de la imagen, la librería primero debe redimensionarla. Depende del algoritmo elegido, la imagen resultante se verá poco diferente. El algoritmo más rápido de usar, pero también uno que da los peores resultados es el más cercano.
 image_hash_alg_tooltip = Los usuarios pueden elegir uno de los muchos algoritmos de cálculo del hash. Cada uno tiene puntos fuertes y débiles y a veces dará mejores y a veces peores resultados para diferentes imágenes. Por lo tanto, para determinar cuál es la mejor para usted, se requiere la prueba manual.
+big_files_mode_combobox_tooltip = Permite buscar archivos más pequeños/mayores
+big_files_mode_label = Archivos marcados
+big_files_mode_smallest_combo_box = El más pequeño
+big_files_mode_biggest_combo_box = El Bigote
 main_notebook_image_fast_compare = Comparación rápida
 main_notebook_image_fast_compare_tooltip =
     Acelera la búsqueda y la comparación de hashes.
@@ -206,6 +210,7 @@ bottom_show_errors_tooltip = Mostrar/Ocultar panel de texto inferior.
 bottom_show_upper_notebook_tooltip = Mostrar / Ocultar panel de cuaderno superior.
 # Progress Window
 progress_stop_button = Parar
+progress_stop_additional_message = Parar solicitado
 # About Window
 about_repository_button_tooltip = Enlace a la página del repositorio con código fuente.
 about_donation_button_tooltip = Enlace a la página de donación.

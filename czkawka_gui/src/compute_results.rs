@@ -8,6 +8,7 @@ use glib::Receiver;
 use gtk4::prelude::*;
 use humansize::{file_size_opts as options, FileSize};
 
+use czkawka_core::common::split_path;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::same_music::MusicSimilarity;
@@ -677,30 +678,23 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     {
                         let list_store = get_list_store(&tree_view_big_files_finder);
 
-                        let btreemap = bf.get_big_files();
+                        let vector = bf.get_big_files();
 
-                        for (size, vector) in btreemap.iter().rev() {
-                            let mut vector = vector.clone();
-                            vector.sort_by_key(|e| {
-                                let t = split_path(e.path.as_path());
-                                (t.0, t.1)
-                            });
-                            for file_entry in vector {
-                                let (directory, file) = split_path(&file_entry.path);
-                                let values: [(u32, &dyn ToValue); 7] = [
-                                    (ColumnsBigFiles::SelectionButton as u32, &false),
-                                    (ColumnsBigFiles::Size as u32, &(size.file_size(options::BINARY).unwrap())),
-                                    (ColumnsBigFiles::Name as u32, &file),
-                                    (ColumnsBigFiles::Path as u32, &directory),
-                                    (
-                                        ColumnsBigFiles::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
-                                    ),
-                                    (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                                    (ColumnsBigFiles::SizeAsBytes as u32, &(size)),
-                                ];
-                                list_store.set(&list_store.append(), &values);
-                            }
+                        for (size, file_entry) in vector.iter() {
+                            let (directory, file) = split_path(&file_entry.path);
+                            let values: [(u32, &dyn ToValue); 7] = [
+                                (ColumnsBigFiles::SelectionButton as u32, &false),
+                                (ColumnsBigFiles::Size as u32, &(size.file_size(options::BINARY).unwrap())),
+                                (ColumnsBigFiles::Name as u32, &file),
+                                (ColumnsBigFiles::Path as u32, &directory),
+                                (
+                                    ColumnsBigFiles::Modification as u32,
+                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                ),
+                                (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+                                (ColumnsBigFiles::SizeAsBytes as u32, &(size)),
+                            ];
+                            list_store.set(&list_store.append(), &values);
                         }
                         print_text_messages_to_text_view(text_messages, &text_view_errors);
                     }

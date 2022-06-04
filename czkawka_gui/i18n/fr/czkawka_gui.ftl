@@ -48,6 +48,10 @@ image_hash_size_tooltip =
     La valeur par défaut pour le hachage est de 8 octets, ce qui permet de trouver des images très similaires et différentes. Les hashs 16 octets et 32 octets ne doivent être utilisés que pour des images presque identiques. Le hash de 64 octets ne devrait pas être utilisé, sauf situation où de petites différences sont nécessaires pour trouver.
 image_resize_filter_tooltip = Pour calculer le hachage de l'image, la bibliothèque doit d'abord la redimensionner. En fonction de l'algorithme choisi, l'image résultée sera peu différente. L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest.
 image_hash_alg_tooltip = Les utilisateurs peuvent choisir un des nombreux algorithmes de calcul du hachage. Chacun a des points forts et des points faibles et donnera parfois de meilleurs résultats pour des images différentes, parfois pires, afin de choisir le meilleur, des tests manuels sont nécessaires.
+big_files_mode_combobox_tooltip = Permet de rechercher les fichiers les plus petits ou les plus grands
+big_files_mode_label = Fichiers cochés
+big_files_mode_smallest_combo_box = Le plus petit
+big_files_mode_biggest_combo_box = Le plus grand
 main_notebook_image_fast_compare = Comparaison rapide
 main_notebook_image_fast_compare_tooltip =
     Accélère la recherche et la comparaison des haches.
@@ -206,6 +210,7 @@ bottom_show_errors_tooltip = Afficher/Masquer le panneau de texte du bas.
 bottom_show_upper_notebook_tooltip = Afficher/Masquer le panneau supérieur du bloc-notes.
 # Progress Window
 progress_stop_button = Arrêter
+progress_stop_additional_message = Arrêt demandé
 # About Window
 about_repository_button_tooltip = Lien vers la page du dépôt avec le code source.
 about_donation_button_tooltip = Lien vers la page des dons.

@@ -424,6 +424,14 @@
                             <property name="margin-top">2</property>
                             <property name="spacing">8</property>
                             <child>
+                              <object class="GtkLabel" id="label_big_files_mode">
+                                <property name="label">VVV</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="combo_box_big_files_mode"/>
+                            </child>
+                            <child>
                               <object class="GtkLabel" id="label_big_shown_files">
                                 <property name="label" translatable="yes">Number of shown files</property>
                               </object>
@@ -857,7 +865,7 @@
                               </object>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="label_buttons_select">
                                 <property name="label">SelectMenu</property>
                               </object>
                             </child>

@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
@@ -412,14 +412,6 @@ pub fn get_path_buf_from_vector_of_strings(vec_string: Vec<String>) -> Vec<PathB
     vec_string.iter().map(PathBuf::from).collect()
 }
 
-pub fn split_path(path: &Path) -> (String, String) {
-    match (path.parent(), path.file_name()) {
-        (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
-        (Some(dir), None) => (dir.display().to_string(), String::new()),
-        (None, _) => (String::new(), String::new()),
-    }
-}
-
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
     let mut messages: String = String::from("");
     if !text_messages.messages.is_empty() {
@@ -791,21 +783,6 @@ pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
             return label;
-        } else {
-            widgets_to_check.extend(get_all_children(&widget));
-        }
-    }
-    panic!("Button doesn't have proper custom label child");
-}
-
-pub fn get_custom_label_with_name_from_widget<P: IsA<Widget>>(item: &P, name: &str) -> gtk4::Label {
-    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
-
-    while let Some(widget) = widgets_to_check.pop() {
-        if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
-            if name == label.text().as_str() {
-                return label;
-            }
         } else {
             widgets_to_check.extend(get_all_children(&widget));
         }

@@ -61,6 +61,11 @@ image_resize_filter_tooltip =
 image_hash_alg_tooltip = 
         Users can choose from one of many algorithms of calculating the hash. Each has both strong and weaker points and will sometimes give better and sometimes worse results for different images. So, to determine the best one for you, manual testing is required.
 
+big_files_mode_combobox_tooltip = Allows to search for smallest/biggest files
+big_files_mode_label = Checked files
+big_files_mode_smallest_combo_box = The Smallest
+big_files_mode_biggest_combo_box = The Biggest
+
 main_notebook_image_fast_compare = Fast compare
 main_notebook_image_fast_compare_tooltip =
         Speedup searching and comparing hashes.

@@ -48,6 +48,10 @@ image_hash_size_tooltip =
     Standardverdi for hash er 8 byte, noe som tillater å finne både svært like og forskjellige bilder. 16 byte og 32 byte hashes skal bare brukes ved nesten identiske bilder. 64 byte hash skal ikke brukes, unntatt i situasjoner hvor du må finne veldig små forskjeller.
 image_resize_filter_tooltip = For å beregne hash med bilde må biblioteket først endre størrelsen på det. Avhengig av valgt algoritme, resulterte i et bilde vil se lite annet ut. Den raskeste algoritmen å bruke, men også den som gir de verste resultatene, er Nearest.
 image_hash_alg_tooltip = Brukere kan velge mellom en av mange algoritmer i beregningen av hashen. Hver har både sterke og svakere poeng, og vil i noen tilfeller gi bedre og noen ganger verre resultater for ulike bilder. Derfor er det nødvendig med manuell testing for å bestemme det beste for deg.
+big_files_mode_combobox_tooltip = Lar deg søke etter minste/største filer
+big_files_mode_label = Avmerkede filer
+big_files_mode_smallest_combo_box = Den minste
+big_files_mode_biggest_combo_box = Den største
 main_notebook_image_fast_compare = Rask sammenligning
 main_notebook_image_fast_compare_tooltip =
     Speedup søk og sammenligner hashes.
@@ -206,6 +210,7 @@ bottom_show_errors_tooltip = Vis/Skjul bunntekstpanelet.
 bottom_show_upper_notebook_tooltip = Vis/Skjul øvre notebook panel.
 # Progress Window
 progress_stop_button = Stopp
+progress_stop_additional_message = Stopp forespurt
 # About Window
 about_repository_button_tooltip = Link til pakkesiden med kildekoden.
 about_donation_button_tooltip = Lenke til donasjonssiden.
