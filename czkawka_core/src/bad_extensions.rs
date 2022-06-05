@@ -33,7 +33,6 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "bck"),
     ("exe", "com"),
     ("exe", "cpl"),
-    ("exe", "cpl"),
     ("exe", "dll"),
     ("exe", "dll16"),
     ("exe", "drv"),
@@ -47,7 +46,6 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "mui"),
     ("exe", "orig"),
     ("exe", "signed"),
-    ("exe", "sys"),
     ("exe", "sys"),
     ("exe", "tlb"),
     ("exe", "vxd"),
@@ -120,7 +118,7 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("html", "svg"),
     ("xml", "html"),
     // Probably bug in external library
-    ("exe", "doc"), // Not sure whe doc is not recognized
+    ("msi", "doc"), // Not sure whe doc is not recognized
     ("exe", "xls"), // Not sure whe xls is not recognized
 ];
 
@@ -318,9 +316,13 @@ impl BadExtensions {
         mem::swap(&mut files_to_check, &mut self.files_to_check);
         //// PROGRESS THREAD END
 
-        let mut hashmap_workarounds: HashMap<&str, &str> = Default::default();
+        let mut hashmap_workarounds: HashMap<&str, Vec<&str>> = Default::default();
         for (proper, found) in WORKAROUNDS {
-            hashmap_workarounds.insert(found, proper);
+            // This should be enabled when items will have only 1 possible workaround items
+            // if hashmap_workarounds.contains_key(found) {
+            //     panic!("Already have {} key", found);
+            // }
+            hashmap_workarounds.entry(found).or_insert_with(Vec::new).push(proper);
         }
 
         self.bad_extensions_files = files_to_check
@@ -378,9 +380,12 @@ impl BadExtensions {
                         }
 
                         // Workarounds
-                        if let Some(pre) = hashmap_workarounds.get(current_extension.as_str()) {
-                            if all_available_extensions.contains(pre) {
-                                all_available_extensions.insert(current_extension.as_str());
+                        if let Some(vec_pre) = hashmap_workarounds.get(current_extension.as_str()) {
+                            for pre in vec_pre {
+                                if all_available_extensions.contains(pre) {
+                                    all_available_extensions.insert(current_extension.as_str());
+                                    break;
+                                }
                             }
                         }
 
@@ -400,7 +405,6 @@ impl BadExtensions {
                     return Some(None);
                 } else if current_extension.is_empty() {
                     if !include_files_without_extension {
-                        println!("Empty extension which is disabled by settings");
                         return Some(None);
                     }
                 } else if all_available_extensions.take(&current_extension.as_str()).is_some() {

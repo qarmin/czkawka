@@ -311,8 +311,7 @@ impl LoadSaveStruct {
                 if line.starts_with("--") {
                     header = line.to_string();
                 } else if !header.is_empty() {
-                    self.loaded_items.entry(header.clone()).or_insert_with(Vec::new);
-                    self.loaded_items.get_mut(&header).unwrap().push(line.to_string());
+                    self.loaded_items.entry(header.clone()).or_insert_with(Vec::new).push(line.to_string());
                 } else {
                     add_text_to_text_view(
                         text_view_errors,

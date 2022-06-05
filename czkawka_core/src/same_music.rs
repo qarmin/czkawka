@@ -552,8 +552,7 @@ impl SameMusic {
                         get_approximate_conversion(&mut thing);
                     }
                     if !thing.is_empty() {
-                        hash_map.entry(thing.clone()).or_insert_with(Vec::new);
-                        hash_map.get_mut(thing.as_str()).unwrap().push(file_entry);
+                        hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {
@@ -581,8 +580,7 @@ impl SameMusic {
                         get_approximate_conversion(&mut thing);
                     }
                     if !thing.is_empty() {
-                        hash_map.entry(thing.clone()).or_insert_with(Vec::new);
-                        hash_map.get_mut(thing.as_str()).unwrap().push(file_entry);
+                        hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {
@@ -607,8 +605,7 @@ impl SameMusic {
                 for file_entry in vec_file_entry {
                     let thing = file_entry.year.to_lowercase().trim().to_string();
                     if !thing.is_empty() {
-                        hash_map.entry(thing.clone()).or_insert_with(Vec::new);
-                        hash_map.get_mut(thing.as_str()).unwrap().push(file_entry);
+                        hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {
@@ -633,8 +630,7 @@ impl SameMusic {
                 for file_entry in vec_file_entry {
                     let thing = file_entry.length.to_lowercase().trim().to_string();
                     if !thing.is_empty() {
-                        hash_map.entry(thing.clone()).or_insert_with(Vec::new);
-                        hash_map.get_mut(thing.as_str()).unwrap().push(file_entry);
+                        hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {
@@ -659,8 +655,7 @@ impl SameMusic {
                 for file_entry in vec_file_entry {
                     let thing = file_entry.genre.to_lowercase().trim().to_string();
                     if !thing.is_empty() {
-                        hash_map.entry(thing.clone()).or_insert_with(Vec::new);
-                        hash_map.get_mut(thing.as_str()).unwrap().push(file_entry);
+                        hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {
@@ -686,8 +681,7 @@ impl SameMusic {
                     if file_entry.bitrate != 0 {
                         let thing = file_entry.bitrate.to_string();
                         if !thing.is_empty() {
-                            hash_map.entry(thing.clone()).or_insert_with(Vec::new);
-                            hash_map.get_mut(thing.as_str()).unwrap().push(file_entry);
+                            hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                         }
                     }
                 }

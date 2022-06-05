@@ -631,8 +631,7 @@ impl SimilarImages {
         for (file_entry, buf) in &vec_file_entry {
             // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
             if !(buf.is_empty() || buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
-                self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new);
-                self.image_hashes.get_mut(buf).unwrap().push(file_entry.clone());
+                self.image_hashes.entry(buf.clone()).or_insert_with(Vec::<FileEntry>::new).push(file_entry.clone());
             }
         }
 
