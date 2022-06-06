@@ -1,0 +1,27 @@
+name: 🏁 Windows
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 2'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  windows-gui-release-normal-app:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo This job does not specify a container.
+          echo It runs directly on the virtual machine.
+        name: Run on VM
+  container:
+    runs-on: ubuntu-latest
+    container: mglolenstine/gtk4-cross:rust-gtk-4.6
+    steps:
+      - run: |
+          echo This job does specify a container.
+          echo It runs in the container instead of the VM.
+          git status
+        name: Run in container
