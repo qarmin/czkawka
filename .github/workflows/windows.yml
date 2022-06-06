@@ -23,5 +23,13 @@ jobs:
       - run: |
           echo This job does specify a container.
           echo It runs in the container instead of the VM.
-          git status
+          git clone https://github.com/qarmin/czkawka.git
+          build
+          zip -r gtk_app.zip target/x86_64-pc-windows-gnu/release/czkawka_gui.exe
         name: Run in container
+
+      - name: Store Windows GUI CrossComplile
+        uses: actions/upload-artifact@v2
+        with:
+          name: czkawka_gui-release-console-${{ matrix.toolchain }}
+          path: gtk_app.zip
