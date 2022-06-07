@@ -18,7 +18,10 @@ use image_hasher::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS};
+#[cfg(feature = "heif")]
+use crate::common::get_dynamic_image_from_heic;
+use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS};
+
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -279,9 +282,11 @@ impl SimilarImages {
         if !self.allowed_extensions.using_custom_extensions() {
             self.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
             self.allowed_extensions.extend_allowed_extensions(RAW_IMAGE_EXTENSIONS);
+            #[cfg(feature = "heif")]
+            self.allowed_extensions.extend_allowed_extensions(HEIC_EXTENSIONS);
         } else {
             self.allowed_extensions
-                .validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat());
+                .validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
             if !self.allowed_extensions.using_custom_extensions() {
                 return true;
             }
@@ -562,13 +567,29 @@ impl SimilarImages {
 
                 let image;
 
-                if !IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                    image = match get_dynamic_image_from_raw_image(&file_entry.path) {
-                        Some(t) => t,
-                        None =>
-                            return Some(Some((file_entry, Vec::new())))
-                    };
-                } else {
+                #[allow(clippy::never_loop)] // Required to implement nice if/else
+                'krztyna: loop {
+                    if RAW_IMAGE_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                        image = match get_dynamic_image_from_raw_image(&file_entry.path) {
+                            Some(t) => t,
+                            None =>
+                                return Some(Some((file_entry, Vec::new())))
+                        };
+                        break 'krztyna;
+                    }
+
+                    # [cfg(feature = "heif")]
+                    if HEIC_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                        image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy().to_string()) {
+                            Ok(t) => t,
+                            Err(_) => {
+                                return Some(Some((file_entry, Vec::new())));
+                            }
+                        };
+                        break 'krztyna;
+                    }
+
+                    // Normal image extension, when any other fail, not using if/else
                     let result = panic::catch_unwind(|| {
                         match image::open(file_entry.path.clone()) {
                             Ok(t) => Ok(t),
@@ -590,6 +611,8 @@ impl SimilarImages {
                         println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
                         return Some(Some((file_entry, Vec::new())));
                     }
+
+                    break 'krztyna;
                 }
 
 

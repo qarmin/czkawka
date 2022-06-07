@@ -64,3 +64,10 @@ imagepipe = "0.5.0"
 # Checking for invalid extensions
 mime_guess = "2.0.4"
 infer = "0.8.0"
+
+libheif-rs = { version = "0.15.0", optional = true }
+anyhow = { version = "1.0.57", optional = true }
+
+[features]
+default = ["heif"]
+heif = ["dep:libheif-rs", "dep:anyhow"]
