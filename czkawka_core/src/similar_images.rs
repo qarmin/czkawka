@@ -615,7 +615,6 @@ impl SimilarImages {
                     break 'krztyna;
                 }
 
-
                 let dimensions = image.dimensions();
 
                 file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);

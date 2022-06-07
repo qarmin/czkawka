@@ -7,8 +7,11 @@ use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use image::codecs::jpeg::JpegEncoder;
+use image::EncodableLayout;
+use once_cell::sync::OnceCell;
 
-use czkawka_core::common::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use czkawka_core::common::{get_dynamic_image_from_heic, HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
@@ -24,6 +27,8 @@ use crate::language_functions::LANGUAGES_ALL;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
+
+static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
 
 pub fn initialize_gui(gui_data: &mut GuiData) {
     //// Initialize button
@@ -698,28 +703,90 @@ fn show_preview(
                     return; // Preview is already created, no need to recreate it
                 }
             }
-
+            println!("Trying to {}", name);
+            let is_heic;
+            let is_webp;
             if let Some(extension) = Path::new(&name).extension() {
                 let extension = format!(".{}", extension.to_string_lossy().to_lowercase());
-                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) {
+                is_heic = HEIC_EXTENSIONS.contains(&extension.as_str());
+                is_webp = ".webp" == extension;
+                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) && !is_heic {
                     break 'dir;
                 }
             } else {
                 break 'dir;
             }
+            let mut pixbuf = if is_heic || is_webp {
+                let image = if is_heic {
+                    match get_dynamic_image_from_heic(file_name) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            add_text_to_text_view(
+                                text_view_errors,
+                                flg!(
+                                    "preview_image_opening_failure",
+                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                )
+                                .as_str(),
+                            );
+                            break 'dir;
+                        }
+                    }
+                } else if is_webp {
+                    match image::open(file_name) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            add_text_to_text_view(
+                                text_view_errors,
+                                flg!(
+                                    "preview_image_opening_failure",
+                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                )
+                                .as_str(),
+                            );
+                            break 'dir;
+                        }
+                    }
+                } else {
+                    panic!("");
+                };
 
-            let mut pixbuf = match Pixbuf::from_file(file_name) {
-                Ok(pixbuf) => pixbuf,
-                Err(e) => {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        flg!(
-                            "preview_image_opening_failure",
-                            generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
-                        )
-                        .as_str(),
-                    );
-                    break 'dir;
+                let mut output = Vec::new();
+                JpegEncoder::new(&mut output).encode_image(&image).unwrap();
+                let arra;
+                unsafe {
+                    IMAGE_PREVIEW_ARRAY.take();
+                    IMAGE_PREVIEW_ARRAY.set(output).unwrap();
+                    arra = IMAGE_PREVIEW_ARRAY.get().unwrap().as_bytes();
+                }
+                match Pixbuf::from_read(arra) {
+                    Ok(t) => t,
+                    Err(e) => {
+                        add_text_to_text_view(
+                            text_view_errors,
+                            flg!(
+                                "preview_image_opening_failure",
+                                generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
+                        );
+                        break 'dir;
+                    }
+                }
+            } else {
+                match Pixbuf::from_file(file_name) {
+                    Ok(pixbuf) => pixbuf,
+                    Err(e) => {
+                        add_text_to_text_view(
+                            text_view_errors,
+                            flg!(
+                                "preview_image_opening_failure",
+                                generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
+                        );
+                        break 'dir;
+                    }
                 }
             };
 
