@@ -3,8 +3,12 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
+use glib::Error;
 use gtk4::prelude::*;
 use gtk4::{ListStore, TextView, TreeView, Widget};
+use image::codecs::jpeg::JpegEncoder;
+use image::{DynamicImage, EncodableLayout};
+use once_cell::sync::OnceCell;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
@@ -856,4 +860,17 @@ pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
     let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
     image.set_from_pixbuf(Some(&pixbuf));
+}
+
+static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
+pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, Error> {
+    let mut output = Vec::new();
+    JpegEncoder::new(&mut output).encode_image(dynamic_image).unwrap();
+    let arra;
+    unsafe {
+        IMAGE_PREVIEW_ARRAY.take();
+        IMAGE_PREVIEW_ARRAY.set(output).unwrap();
+        arra = IMAGE_PREVIEW_ARRAY.get().unwrap().as_bytes();
+    }
+    Pixbuf::from_read(arra)
 }

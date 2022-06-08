@@ -11,14 +11,7 @@
         <child>
           <object class="GtkBox">
             <child>
-              <object class="GtkLabel" id="label_group_info">
-                <property name="halign">center</property>
-                <property name="hexpand">1</property>
-                <property name="label" translatable="yes">Group XD/PER XD (99 images in current group)</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_go_next_compare_group">
+              <object class="GtkButton" id="button_go_previous_compare_group">
                 <property name="focusable">1</property>
                 <property name="receives-default">1</property>
                 <child>
@@ -29,7 +22,14 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="button_go_previous_compare_group">
+              <object class="GtkLabel" id="label_group_info">
+                <property name="halign">center</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">Group XD/PER XD (99 images in current group)</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_go_next_compare_group">
                 <property name="focusable">1</property>
                 <property name="receives-default">1</property>
                 <child>
@@ -63,16 +63,22 @@
             <property name="homogeneous">1</property>
             <property name="vexpand">1</property>
             <child>
-              <object class="GtkImage" id="image_compare_left"/>
+              <object class="GtkImage" id="image_compare_left">
+                <property name="height-request">100</property>
+              </object>
             </child>
             <child>
-              <object class="GtkImage" id="image_compare_right"/>
+              <object class="GtkImage" id="image_compare_right">
+                <property name="height-request">100</property>
+              </object>
             </child>
           </object>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window_compare_choose_images">
             <property name="focusable">1</property>
+            <property name="max-content-height">150</property>
+            <property name="min-content-height">150</property>
           </object>
         </child>
       </object>

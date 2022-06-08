@@ -8,7 +8,9 @@ use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
-use czkawka_core::common::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+#[cfg(feature = "heif")]
+use czkawka_core::common::get_dynamic_image_from_heic;
+use czkawka_core::common::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
@@ -699,27 +701,85 @@ fn show_preview(
                 }
             }
 
+            let is_heic;
+            let is_webp;
             if let Some(extension) = Path::new(&name).extension() {
                 let extension = format!(".{}", extension.to_string_lossy().to_lowercase());
-                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) {
+                is_heic = HEIC_EXTENSIONS.contains(&extension.as_str());
+                is_webp = ".webp" == extension;
+                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) && !is_heic {
                     break 'dir;
                 }
             } else {
                 break 'dir;
             }
+            let mut pixbuf = if is_heic || is_webp {
+                let image = if is_heic {
+                    #[cfg(feature = "heif")]
+                    match get_dynamic_image_from_heic(file_name) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            add_text_to_text_view(
+                                text_view_errors,
+                                flg!(
+                                    "preview_image_opening_failure",
+                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                )
+                                .as_str(),
+                            );
+                            break 'dir;
+                        }
+                    }
 
-            let mut pixbuf = match Pixbuf::from_file(file_name) {
-                Ok(pixbuf) => pixbuf,
-                Err(e) => {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        flg!(
-                            "preview_image_opening_failure",
-                            generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
-                        )
-                        .as_str(),
-                    );
-                    break 'dir;
+                    #[cfg(not(feature = "heif"))]
+                    panic!("")
+                } else if is_webp {
+                    match image::open(file_name) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            add_text_to_text_view(
+                                text_view_errors,
+                                flg!(
+                                    "preview_image_opening_failure",
+                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                )
+                                .as_str(),
+                            );
+                            break 'dir;
+                        }
+                    }
+                } else {
+                    panic!("");
+                };
+
+                match get_pixbuf_from_dynamic_image(&image) {
+                    Ok(t) => t,
+                    Err(e) => {
+                        add_text_to_text_view(
+                            text_view_errors,
+                            flg!(
+                                "preview_image_opening_failure",
+                                generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
+                        );
+                        break 'dir;
+                    }
+                }
+            } else {
+                match Pixbuf::from_file(file_name) {
+                    Ok(pixbuf) => pixbuf,
+                    Err(e) => {
+                        add_text_to_text_view(
+                            text_view_errors,
+                            flg!(
+                                "preview_image_opening_failure",
+                                generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
+                        );
+                        break 'dir;
+                    }
                 }
             };
 
