@@ -155,14 +155,14 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ matrix.type == 'release'}} and ${{ matrix.toolchain == '1.60.0' }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.60.0') }}
 
       - name: Build GUI Release
         run: cargo build --release --bin czkawka_gui --features heif
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ matrix.type == 'release'}} and ${{ matrix.toolchain == 'stable' }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
       - name: Store Linux GUI
         uses: actions/upload-artifact@v2
