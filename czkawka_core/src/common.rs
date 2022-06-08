@@ -20,15 +20,15 @@ pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     ".cr2", ".ari",
 ];
 pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
-    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr", ".hdr",
+    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr",
 ];
 
-pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr", ".hdr"];
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr"];
 
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
-    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr", ".hdr",
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr",
 ];
-pub const HEIC_EXTENSIONS: &[&str] = &[".heic"];
+pub const HEIC_EXTENSIONS: &[&str] = &[".heif", ".heifs", ".heic", ".heics", ".avci", ".avcs", ".avif", ".avifs"];
 
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
 

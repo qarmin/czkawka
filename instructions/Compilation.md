@@ -6,6 +6,8 @@ If you only want the terminal version without a GUI, just skip all the packages 
 
 FFmpeg is not included here because it is not needed to build - it is dynamically loaded.
 
+Support for heif images is optional and require to install libheif library.
+
 
 | Program | Min  | What for                                                                      |
 |---------|------|-------------------------------------------------------------------------------|
@@ -26,12 +28,12 @@ sudo yum install gtk3-devel glib2-devel
 ```
 
 #### macOS
-You need to install Rust via Homebrew and GTK Libraries
+You need to install Rust via Homebrew, GTK Libraries and optionally heif library(to have support for heic files, which are quite popular on mac)
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install gtk+3 adwaita-icon-theme librsvg
+brew install gtk+3 adwaita-icon-theme librsvg libheif
 ```
 
 ### Windows

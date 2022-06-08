@@ -1,10 +1,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[cfg(feature = "heif")]
 use czkawka_core::common::get_dynamic_image_from_heic;
+use czkawka_core::common::HEIC_EXTENSIONS;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
-use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
+use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
 
 use crate::flg;
@@ -16,7 +18,7 @@ use crate::help_functions::{
 use crate::localizer_core::generate_translation_hashmap;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
-const SMALL_PREVIEW_SIZE: i32 = 100;
+const SMALL_PREVIEW_SIZE: i32 = 130;
 
 pub fn connect_button_compare(gui_data: &GuiData) {
     let button_compare = gui_data.bottom_buttons.buttons_compare.clone();
@@ -352,10 +354,15 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         let big_img = Image::new();
 
         let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).unwrap();
-        if name.to_lowercase().ends_with(".heic") || name.to_lowercase().ends_with(".webp") {
+        let name_lowercase = name.to_lowercase();
+        let is_heic = HEIC_EXTENSIONS.iter().any(|extension| name_lowercase.ends_with(extension));
+        let is_webp = name.to_lowercase().ends_with(".webp");
+
+        if is_heic || is_webp {
             #[allow(clippy::never_loop)]
             'czystka: loop {
-                if name.ends_with(".heic") {
+                #[cfg(feature = "heif")]
+                if is_heic {
                     match get_dynamic_image_from_heic(&full_path) {
                         Ok(t) => {
                             match get_pixbuf_from_dynamic_image(&t) {
@@ -373,7 +380,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
                     };
                     break 'czystka;
                 }
-                if name.ends_with(".webp") {
+                if is_webp {
                     match image::open(&full_path) {
                         Ok(t) => {
                             match get_pixbuf_from_dynamic_image(&t) {
@@ -523,10 +530,11 @@ fn populate_similar_scrolled_view(
     column_selection: i32,
 ) {
     scrolled_window.set_child(None::<&Widget>);
-    scrolled_window.set_propagate_natural_height(true);
 
     let all_gtk_box = gtk4::Box::new(Orientation::Horizontal, 5);
     all_gtk_box.set_widget_name("all_box");
+    all_gtk_box.set_halign(Align::Fill);
+    all_gtk_box.set_valign(Align::Fill);
 
     for (number, (path, _name, big_thumbnail, small_thumbnail, tree_path)) in image_cache.iter().enumerate() {
         let small_box = gtk4::Box::new(Orientation::Vertical, 3);
@@ -583,6 +591,17 @@ fn populate_similar_scrolled_view(
         smaller_box.append(&button_right);
 
         small_box.append(&smaller_box);
+        small_box.set_halign(Align::Fill);
+        small_box.set_valign(Align::Fill);
+        small_box.set_hexpand_set(true);
+        small_box.set_vexpand_set(true);
+        small_thumbnail.set_halign(Align::Fill);
+        small_thumbnail.set_valign(Align::Fill);
+        small_thumbnail.set_hexpand(true);
+        small_thumbnail.set_hexpand_set(true);
+        small_thumbnail.set_vexpand(true);
+        small_thumbnail.set_vexpand_set(true);
+
         small_box.append(small_thumbnail);
 
         all_gtk_box.append(&small_box);

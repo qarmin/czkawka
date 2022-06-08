@@ -29,7 +29,7 @@ One very straight-forward way to do this is by using [Homebrew](https://brew.sh/
 Installation in the terminal:
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk+3 adwaita-icon-theme ffmpeg librsvg
+brew install gtk+3 adwaita-icon-theme ffmpeg librsvg libheif
 ```
 After that, go to the location where you downloaded Czkawka and add the `executable` permission to this file.
 ```shell
@@ -43,7 +43,7 @@ At the end execute it:
 **Warning**  
 Prebuilt binaries are available only for x86_64, so if you use ARM machine like e.g. Mac M1, you need to compile manually app or install special version of required libraries which can be done via this:
 ```shell
-arch -x86_64 /usr/local/bin/brew install gtk+3 adwaita-icon-theme ffmpeg librsvg
+arch -x86_64 /usr/local/bin/brew install gtk+3 adwaita-icon-theme ffmpeg librsvg libheif
 ```
 
 ### Windows

@@ -28,8 +28,8 @@ jobs:
           components: rustfmt, clippy
           override: true
 
-      - name: Install Gtk
-        run: sudo apt-get update; sudo apt install -y libgtk-4-dev libasound2-dev
+      - name: Install Gtk 4
+        run: sudo apt-get update; sudo apt install -y libgtk-4-dev libheif-dev -y
 
       - name: Check the format
         run: cargo fmt --all -- --check

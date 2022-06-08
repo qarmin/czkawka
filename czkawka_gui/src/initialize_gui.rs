@@ -8,7 +8,9 @@ use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
 
-use czkawka_core::common::{get_dynamic_image_from_heic, HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+#[cfg(feature = "heif")]
+use czkawka_core::common::get_dynamic_image_from_heic;
+use czkawka_core::common::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 
@@ -698,7 +700,7 @@ fn show_preview(
                     return; // Preview is already created, no need to recreate it
                 }
             }
-            println!("Trying to {}", name);
+
             let is_heic;
             let is_webp;
             if let Some(extension) = Path::new(&name).extension() {
@@ -713,6 +715,7 @@ fn show_preview(
             }
             let mut pixbuf = if is_heic || is_webp {
                 let image = if is_heic {
+                    #[cfg(feature = "heif")]
                     match get_dynamic_image_from_heic(file_name) {
                         Ok(t) => t,
                         Err(e) => {
@@ -727,6 +730,9 @@ fn show_preview(
                             break 'dir;
                         }
                     }
+
+                    #[cfg(not(feature = "heif"))]
+                    panic!("")
                 } else if is_webp {
                     match image::open(file_name) {
                         Ok(t) => t,

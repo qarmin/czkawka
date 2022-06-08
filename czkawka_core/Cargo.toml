@@ -69,5 +69,5 @@ libheif-rs = { version = "0.15.0", optional = true }
 anyhow = { version = "1.0.57", optional = true }
 
 [features]
-default = ["heif"]
+default = []
 heif = ["dep:libheif-rs", "dep:anyhow"]

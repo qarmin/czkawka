@@ -11,16 +11,6 @@
         <property name="orientation">vertical</property>
         <property name="vexpand">1</property>
         <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkComboBoxText">
-                <property name="valign">center</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
           <object class="GtkNotebook" id="notebook_settings">
             <property name="focusable">1</property>
             <property name="tab-pos">left</property>
