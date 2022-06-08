@@ -7,9 +7,6 @@ use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
-use image::codecs::jpeg::JpegEncoder;
-use image::EncodableLayout;
-use once_cell::sync::OnceCell;
 
 use czkawka_core::common::{get_dynamic_image_from_heic, HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use czkawka_core::similar_images::SIMILAR_VALUES;
@@ -27,8 +24,6 @@ use crate::language_functions::LANGUAGES_ALL;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::opening_selecting_records::*;
-
-static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
 
 pub fn initialize_gui(gui_data: &mut GuiData) {
     //// Initialize button
@@ -751,15 +746,7 @@ fn show_preview(
                     panic!("");
                 };
 
-                let mut output = Vec::new();
-                JpegEncoder::new(&mut output).encode_image(&image).unwrap();
-                let arra;
-                unsafe {
-                    IMAGE_PREVIEW_ARRAY.take();
-                    IMAGE_PREVIEW_ARRAY.set(output).unwrap();
-                    arra = IMAGE_PREVIEW_ARRAY.get().unwrap().as_bytes();
-                }
-                match Pixbuf::from_read(arra) {
+                match get_pixbuf_from_dynamic_image(&image) {
                     Ok(t) => t,
                     Err(e) => {
                         add_text_to_text_view(

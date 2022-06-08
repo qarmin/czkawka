@@ -1,13 +1,18 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use czkawka_core::common::get_dynamic_image_from_heic;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
+use image::DynamicImage;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, resize_pixbuf_dimension, NotebookObject, NOTEBOOKS_INFOS};
+use crate::help_functions::{
+    count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension, NotebookObject,
+    NOTEBOOKS_INFOS,
+};
 use crate::localizer_core::generate_translation_hashmap;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
@@ -88,7 +93,6 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
     window_compare.connect_close_request(move |window_compare| {
-        // TODO GTK4
         window_compare.hide();
         *shared_image_cache.borrow_mut() = Vec::new();
         *shared_current_path.borrow_mut() = None;
@@ -347,35 +351,80 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         let small_img = Image::new();
         let big_img = Image::new();
 
-        match Pixbuf::from_file(&full_path) {
-            Ok(pixbuf) =>
-            {
-                #[allow(clippy::never_loop)]
-                loop {
-                    let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Nearest) {
-                        None => {
-                            println!("Failed to resize image {}.", full_path);
-                            break;
+        let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).unwrap();
+        if name.to_lowercase().ends_with(".heic") || name.to_lowercase().ends_with(".webp") {
+            #[allow(clippy::never_loop)]
+            'czystka: loop {
+                if name.ends_with(".heic") {
+                    match get_dynamic_image_from_heic(&full_path) {
+                        Ok(t) => {
+                            match get_pixbuf_from_dynamic_image(&t) {
+                                Ok(t) => {
+                                    pixbuf = t;
+                                }
+                                Err(e) => {
+                                    println!("Failed to open image {}, reason {}", full_path, e);
+                                }
+                            };
                         }
-                        Some(pixbuf) => pixbuf,
-                    };
-                    let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Nearest) {
-                        None => {
-                            println!("Failed to resize image {}.", full_path);
-                            break;
+                        Err(e) => {
+                            println!("Failed to open image {}, reason {}", full_path, e);
                         }
-                        Some(pixbuf) => pixbuf,
                     };
+                    break 'czystka;
+                }
+                if name.ends_with(".webp") {
+                    match image::open(&full_path) {
+                        Ok(t) => {
+                            match get_pixbuf_from_dynamic_image(&t) {
+                                Ok(t) => {
+                                    pixbuf = t;
+                                }
+                                Err(e) => {
+                                    println!("Failed to open image {}, reason {}", full_path, e);
+                                }
+                            };
+                        }
+                        Err(e) => {
+                            println!("Failed to open image {}, reason {}", full_path, e);
+                        }
+                    };
+                    break 'czystka;
+                }
+                break 'czystka;
+            }
+        } else {
+            match Pixbuf::from_file(&full_path) {
+                Ok(t) => {
+                    pixbuf = t;
+                }
+                Err(e) => {
+                    println!("Failed to open image {}, reason {}", full_path, e);
+                }
+            };
+        }
 
-                    big_img.set_from_pixbuf(Some(&pixbuf_big));
-                    small_img.set_from_pixbuf(Some(&pixbuf_small));
+        #[allow(clippy::never_loop)]
+        loop {
+            let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Nearest) {
+                None => {
+                    println!("Failed to resize image {}.", full_path);
                     break;
                 }
-            }
-            Err(e) => {
-                println!("Failed to open image {}, reason {}", full_path, e);
-            }
-        };
+                Some(pixbuf) => pixbuf,
+            };
+            let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Nearest) {
+                None => {
+                    println!("Failed to resize image {}.", full_path);
+                    break;
+                }
+                Some(pixbuf) => pixbuf,
+            };
+
+            big_img.set_from_pixbuf(Some(&pixbuf_big));
+            small_img.set_from_pixbuf(Some(&pixbuf_small));
+            break;
+        }
 
         cache_all_images.push((full_path, name, big_img, small_img, tree_path));
     }
