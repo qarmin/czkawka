@@ -116,6 +116,11 @@ main_label_shown_files = Number of shown files
 main_label_resize_algorithm = Resize algorithm
 main_label_similarity = Similarity{"   "}
 
+main_check_box_broken_files_audio = Audio
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Archive
+main_check_box_broken_files_image = Image
+
 check_button_general_same_size = Ignore same size
 check_button_general_same_size_tooltip = Ignore from results, files which have identical size - usually this are 1:1 duplicates
 
@@ -474,6 +479,7 @@ move_stats = Properly moved {$num_files}/{$all_files} items
 save_results_to_file = Saved results to file {$name}
 
 search_not_choosing_any_music = ERROR: You must select at least one checkbox with music searching types.
+search_not_choosing_any_broken_files = ERROR: You must select at least one checkbox with type of checked broken files.
 
 include_folders_dialog_title = Folders to include
 exclude_folders_dialog_title = Folders to exclude

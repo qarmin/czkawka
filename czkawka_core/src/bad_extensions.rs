@@ -21,7 +21,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 
-static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak"]; // Such files can have any type inside
+static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak", "data"]; // Such files can have any type inside
 
 // This adds several workarounds for bugs/invalid recognizing types by external libraries
 // ("real_content_extension", "current_file_extension")
@@ -33,10 +33,10 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "bck"),
     ("exe", "com"),
     ("exe", "cpl"),
-    ("exe", "dll"),
     ("exe", "dll16"),
-    ("exe", "drv"),
+    ("exe", "dll"),
     ("exe", "drv16"),
+    ("exe", "drv"),
     ("exe", "ds"),
     ("exe", "efi"),
     ("exe", "exe16"),
@@ -44,20 +44,43 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "mod16"),
     ("exe", "msstyles"),
     ("exe", "mui"),
+    ("exe", "mun"),
     ("exe", "orig"),
+    ("exe", "ps1xml"),
+    ("exe", "rll"),
+    ("exe", "rs"),
+    ("exe", "scr"),
     ("exe", "signed"),
     ("exe", "sys"),
     ("exe", "tlb"),
+    ("exe", "tsp"),
+    ("exe", "vdm"),
     ("exe", "vxd"),
     ("exe", "winmd"),
+    ("gz", "loggz"),
     ("xml", "adml"),
+    ("xml", "admx"),
+    ("xml", "camp"),
+    ("xml", "cdmp"),
+    ("xml", "cdxml"),
+    ("xml", "dgml"),
+    ("xml", "diagpkg"),
+    ("xml", "gmmp"),
+    ("xml", "library-ms"),
+    ("xml", "man"),
     ("xml", "manifest"),
+    ("xml", "msc"),
     ("xml", "mum"),
+    ("xml", "resx"),
+    ("zip", "wmz"),
     // Other
+    ("exe", "pyd"),       // Python/Mingw
     ("gz", "blend"),      // Blender
     ("gz", "crate"),      // Cargo
     ("gz", "svgz"),       // Archive svg
     ("gz", "tgz"),        // Archive
+    ("html", "dtd"),      // Mingw
+    ("html", "ent"),      // Mingw
     ("html", "md"),       // Markdown
     ("jpg", "jfif"),      // Photo format
     ("mobi", "azw3"),     // Ebook format
@@ -70,6 +93,7 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("ogg", "ogv"),       // Audio format
     ("pptx", "ppsx"),     // Powerpoint
     ("sh", "bash"),       // Linux
+    ("sh", "guess"),      // GNU
     ("sh", "pl"),         // Gnome/Linux
     ("sh", "pm"),         // Gnome/Linux
     ("sh", "py"),         // Python
@@ -90,6 +114,7 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "iml"),       // Intelij Idea
     ("xml", "kdenlive"),  // KDenLive
     ("xml", "lang"),      // ?
+    ("xml", "nuspec"),    // Nuget
     ("xml", "policy"),    // SystemD
     ("xml", "qsys"),      // Quartus
     ("xml", "sopcinfo"),  // Quartus
@@ -112,12 +137,14 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("zip", "odg"),       // Libreoffice
     ("zip", "pptx"),      // Powerpoint
     ("zip", "whl"),       // Python packages
+    ("zip", "xlsx"),      // Excel
     ("zip", "xpi"),       // Firefox extensions
     ("zip", "zcos"),      // Scilab
     // Probably invalid
     ("html", "svg"),
     ("xml", "html"),
     // Probably bug in external library
+    ("msi", "ppt"), // Not sure whe ppt is not recognized
     ("msi", "doc"), // Not sure whe doc is not recognized
     ("exe", "xls"), // Not sure whe xls is not recognized
 ];
