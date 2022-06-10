@@ -157,13 +157,6 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="check_button_settings_duplicates_delete_outdated_cache">
-                        <property name="active">1</property>
-                        <property name="focusable">1</property>
-                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkBox">
                         <property name="margin-end">4</property>
                         <property name="margin-start">4</property>
@@ -191,14 +184,6 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button_settings_duplicates_clear_cache">
-                        <property name="focusable">1</property>
-                        <property name="label" translatable="yes">Remove outdated results from duplicates cache</property>
-                        <property name="receives-default">1</property>
-                        <property name="valign">center</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkBox">
                         <property name="margin-end">4</property>
                         <property name="margin-start">4</property>
@@ -217,6 +202,21 @@
                             <property name="text" translatable="yes">1</property>
                           </object>
                         </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="check_button_settings_duplicates_delete_outdated_cache">
+                        <property name="active">1</property>
+                        <property name="focusable">1</property>
+                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_settings_duplicates_clear_cache">
+                        <property name="focusable">1</property>
+                        <property name="label" translatable="yes">Remove outdated results from duplicates cache</property>
+                        <property name="receives-default">1</property>
+                        <property name="valign">center</property>
                       </object>
                     </child>
                   </object>
@@ -272,17 +272,17 @@
                   <object class="GtkBox">
                     <property name="orientation">vertical</property>
                     <child>
+                      <object class="GtkCheckButton" id="check_button_settings_similar_videos_delete_outdated_cache">
+                        <property name="focusable">1</property>
+                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="button_settings_similar_videos_clear_cache">
                         <property name="focusable">1</property>
                         <property name="label" translatable="yes">Remove outdated results from videos cache</property>
                         <property name="receives-default">1</property>
                         <property name="valign">center</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="check_button_settings_similar_videos_delete_outdated_cache">
-                        <property name="focusable">1</property>
-                        <property name="label" translatable="yes">Delete outdated cache entries automatically</property>
                       </object>
                     </child>
                   </object>

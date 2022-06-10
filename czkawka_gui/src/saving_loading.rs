@@ -42,6 +42,11 @@ const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
 
+const DEFAULT_BROKEN_FILES_PDF: bool = true;
+const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
+const DEFAULT_BROKEN_FILES_ARCHIVE: bool = true;
+const DEFAULT_BROKEN_FILES_IMAGE: bool = true;
+
 const DEFAULT_NUMBER_OF_BIGGEST_FILES: &str = "50";
 const DEFAULT_SIMILAR_IMAGES_SIMILARITY: i32 = 0;
 const DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE: bool = false;
@@ -427,6 +432,10 @@ enum LoadText {
     SimilarVideosIgnoreSameSize,
     MusicApproximateComparison,
     DuplicateNameCaseSensitive,
+    BrokenFilesPdf,
+    BrokenFilesAudio,
+    BrokenFilesImage,
+    BrokenFilesArchive,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -469,6 +478,10 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::MusicApproximateComparison, "music_approximate_comparison"),
         (LoadText::DuplicateNameCaseSensitive, "duplicate_name_case_sensitive"),
         (LoadText::ComboBoxBigFiles, "combo_box_big_files_mode"),
+        (LoadText::BrokenFilesPdf, "broken_files_pdf"),
+        (LoadText::BrokenFilesAudio, "broken_files_audio"),
+        (LoadText::BrokenFilesImage, "broken_files_image"),
+        (LoadText::BrokenFilesArchive, "broken_files_archive"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -581,6 +594,23 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ShowBottomTextPanel).unwrap().to_string(),
         settings.check_button_settings_show_text_view.is_active(),
+    );
+
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().to_string(),
+        main_notebook.check_button_broken_files_archive.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().to_string(),
+        main_notebook.check_button_broken_files_image.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().to_string(),
+        main_notebook.check_button_broken_files_audio.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().to_string(),
+        main_notebook.check_button_broken_files_pdf.is_active(),
     );
 
     // Others
@@ -756,6 +786,11 @@ pub fn load_configuration(
         DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING,
     );
 
+    let check_button_broken_files_archive = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_pdf = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_image = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_audio = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+
     // Setting data
     if manual_execution || loading_at_start {
         {
@@ -880,6 +915,11 @@ pub fn load_configuration(
         main_notebook.check_button_video_ignore_same_size.set_active(similar_videos_ignore_same_size);
         main_notebook.scale_similarity_similar_videos.set_value(similar_videos_similarity as f64);
 
+        main_notebook.check_button_broken_files_audio.set_active(check_button_broken_files_audio);
+        main_notebook.check_button_broken_files_pdf.set_active(check_button_broken_files_pdf);
+        main_notebook.check_button_broken_files_image.set_active(check_button_broken_files_image);
+        main_notebook.check_button_broken_files_archive.set_active(check_button_broken_files_archive);
+
         {
             let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().unwrap();
 
@@ -1003,6 +1043,11 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_image_resize_algorithm.set_active(Some(0));
         main_notebook.combo_box_image_hash_size.set_active(Some(0));
         main_notebook.combo_box_big_files_mode.set_active(Some(0));
+
+        main_notebook.check_button_broken_files_audio.set_active(DEFAULT_BROKEN_FILES_AUDIO);
+        main_notebook.check_button_broken_files_pdf.set_active(DEFAULT_BROKEN_FILES_PDF);
+        main_notebook.check_button_broken_files_archive.set_active(DEFAULT_BROKEN_FILES_ARCHIVE);
+        main_notebook.check_button_broken_files_image.set_active(DEFAULT_BROKEN_FILES_IMAGE);
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);

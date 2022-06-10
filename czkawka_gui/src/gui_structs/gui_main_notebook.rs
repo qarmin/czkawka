@@ -109,6 +109,12 @@ pub struct GuiMainNotebook {
 
     pub scale_similarity_similar_videos: Scale,
 
+    // Broken Files
+    pub check_button_broken_files_audio: CheckButton,
+    pub check_button_broken_files_pdf: CheckButton,
+    pub check_button_broken_files_archive: CheckButton,
+    pub check_button_broken_files_image: CheckButton,
+
     // Music
     pub check_button_music_title: CheckButton,
     pub check_button_music_artist: CheckButton,
@@ -209,6 +215,11 @@ impl GuiMainNotebook {
         let check_button_music_length: CheckButton = builder.object("check_button_music_length").unwrap();
         let check_button_music_approximate_comparison: CheckButton = builder.object("check_button_music_approximate_comparison").unwrap();
 
+        let check_button_broken_files_audio: CheckButton = builder.object("check_button_broken_files_audio").unwrap();
+        let check_button_broken_files_pdf: CheckButton = builder.object("check_button_broken_files_pdf").unwrap();
+        let check_button_broken_files_archive: CheckButton = builder.object("check_button_broken_files_archive").unwrap();
+        let check_button_broken_files_image: CheckButton = builder.object("check_button_broken_files_image").unwrap();
+
         let scale_similarity_similar_images: Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
@@ -284,6 +295,9 @@ impl GuiMainNotebook {
             check_button_music_approximate_comparison,
             scale_similarity_similar_images,
             scale_similarity_similar_videos,
+            check_button_broken_files_audio,
+            check_button_broken_files_pdf,
+            check_button_broken_files_archive,
             check_button_image_ignore_same_size,
             label_similar_images_minimal_similarity,
             label_duplicate_check_method,
@@ -321,6 +335,7 @@ impl GuiMainNotebook {
             gc_tree_view_bad_extensions,
             combo_box_big_files_mode,
             label_big_files_mode,
+            check_button_broken_files_image,
         }
     }
 
@@ -395,6 +410,11 @@ impl GuiMainNotebook {
         self.check_button_image_fast_compare.set_label(Some(&flg!("main_notebook_image_fast_compare")));
         self.check_button_image_fast_compare
             .set_tooltip_text(Some(&flg!("main_notebook_image_fast_compare_tooltip")));
+
+        self.check_button_broken_files_audio.set_label(Some(&flg!("main_check_box_broken_files_audio")));
+        self.check_button_broken_files_archive.set_label(Some(&flg!("main_check_box_broken_files_archive")));
+        self.check_button_broken_files_image.set_label(Some(&flg!("main_check_box_broken_files_image")));
+        self.check_button_broken_files_pdf.set_label(Some(&flg!("main_check_box_broken_files_pdf")));
 
         {
             let hash_size_index = self.combo_box_image_hash_size.active().unwrap() as usize;

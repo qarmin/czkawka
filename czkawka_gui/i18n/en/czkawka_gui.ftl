@@ -116,6 +116,11 @@ main_label_shown_files = Number of shown files
 main_label_resize_algorithm = Resize algorithm
 main_label_similarity = Similarity{"   "}
 
+main_check_box_broken_files_audio = Audio
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Archive
+main_check_box_broken_files_image = Image
+
 check_button_general_same_size = Ignore same size
 check_button_general_same_size_tooltip = Ignore from results, files which have identical size - usually this are 1:1 duplicates
 

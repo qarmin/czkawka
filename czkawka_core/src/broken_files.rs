@@ -57,6 +57,19 @@ pub enum TypeOfFile {
     PDF,
 }
 
+bitflags! {
+    pub struct CheckedFiles : u32 {
+        const NONE = 0;
+
+        const TRACK_TITLE = 0b1;
+        const TRACK_ARTIST = 0b10;
+        const YEAR = 0b100;
+        const LENGTH = 0b1000;
+        const GENRE = 0b10000;
+        const BITRATE = 0b100000;
+    }
+}
+
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
