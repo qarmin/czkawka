@@ -479,6 +479,7 @@ move_stats = Properly moved {$num_files}/{$all_files} items
 save_results_to_file = Saved results to file {$name}
 
 search_not_choosing_any_music = ERROR: You must select at least one checkbox with music searching types.
+search_not_choosing_any_broken_files = ERROR: You must select at least one checkbox with type of checked broken files.
 
 include_folders_dialog_title = Folders to include
 exclude_folders_dialog_title = Folders to exclude

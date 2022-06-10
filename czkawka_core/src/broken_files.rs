@@ -48,7 +48,7 @@ pub struct FileEntry {
     pub error_string: String,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum TypeOfFile {
     Unknown = -1,
     Image = 0,
@@ -58,15 +58,13 @@ pub enum TypeOfFile {
 }
 
 bitflags! {
-    pub struct CheckedFiles : u32 {
+    pub struct CheckedTypes : u32 {
         const NONE = 0;
 
-        const TRACK_TITLE = 0b1;
-        const TRACK_ARTIST = 0b10;
-        const YEAR = 0b100;
-        const LENGTH = 0b1000;
-        const GENRE = 0b10000;
-        const BITRATE = 0b100000;
+        const PDF = 0b1;
+        const AUDIO = 0b10;
+        const IMAGE = 0b100;
+        const ARCHIVE = 0b1000;
     }
 }
 
@@ -93,6 +91,7 @@ pub struct BrokenFiles {
     recursive_search: bool,
     delete_method: DeleteMethod,
     stopped_search: bool,
+    checked_types: CheckedTypes,
     use_cache: bool,
     delete_outdated_cache: bool, // TODO add this to GUI
     save_also_as_json: bool,
@@ -114,6 +113,7 @@ impl BrokenFiles {
             use_cache: true,
             delete_outdated_cache: true,
             save_also_as_json: false,
+            checked_types: CheckedTypes::PDF | CheckedTypes::AUDIO | CheckedTypes::IMAGE | CheckedTypes::ARCHIVE,
         }
     }
 
@@ -137,6 +137,10 @@ impl BrokenFiles {
 
     pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
         &self.broken_files
+    }
+
+    pub fn set_checked_types(&mut self, checked_types: CheckedTypes) {
+        self.checked_types = checked_types;
     }
 
     pub const fn get_text_messages(&self) -> &Messages {
@@ -316,6 +320,10 @@ impl BrokenFiles {
                                 continue 'dir;
                             }
 
+                            if !check_extension_allowed(&type_of_file, &self.checked_types) {
+                                continue 'dir;
+                            }
+
                             let current_file_name = current_folder.join(entry_data.file_name());
                             if self.excluded_items.is_excluded(&current_file_name) {
                                 continue 'dir;
@@ -381,6 +389,8 @@ impl BrokenFiles {
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
+        let mut files_to_check = Default::default();
+        mem::swap(&mut self.files_to_check, &mut files_to_check);
 
         if self.use_cache {
             loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache) {
@@ -388,22 +398,26 @@ impl BrokenFiles {
                 None => Default::default(),
             };
 
-            for (name, file_entry) in &self.files_to_check {
+            for (name, file_entry) in files_to_check {
+                let checked_extension = check_extension_allowed(&file_entry.type_of_file, &self.checked_types); // Only broken
+
                 #[allow(clippy::if_same_then_else)]
-                if !loaded_hash_map.contains_key(name) {
-                    // If loaded data doesn't contains current image info
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                } else if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                if checked_extension && !loaded_hash_map.contains_key(&name) {
+                    // If loaded data doesn't contains current info
+                    non_cached_files_to_check.insert(name, file_entry.clone());
+                } else if checked_extension && file_entry.size != loaded_hash_map.get(&name).unwrap().size
+                    || file_entry.modified_date != loaded_hash_map.get(&name).unwrap().modified_date
+                {
                     // When size or modification date of image changed, then it is clear that is different image
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                    non_cached_files_to_check.insert(name, file_entry);
                 } else {
                     // Checking may be omitted when already there is entry with same size and modification date
-                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                    records_already_cached.insert(name.clone(), loaded_hash_map.get(&name).unwrap().clone());
                 }
             }
         } else {
             loaded_hash_map = Default::default();
-            mem::swap(&mut self.files_to_check, &mut non_cached_files_to_check);
+            non_cached_files_to_check = files_to_check;
         }
 
         //// PROGRESS THREAD START
@@ -777,6 +791,12 @@ fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
     } else {
         TypeOfFile::Unknown
     }
+}
+fn check_extension_allowed(type_of_file: &TypeOfFile, checked_types: &CheckedTypes) -> bool {
+    ((*type_of_file == TypeOfFile::Image) && ((*checked_types & CheckedTypes::IMAGE) == CheckedTypes::IMAGE))
+        || ((*type_of_file == TypeOfFile::PDF) && ((*checked_types & CheckedTypes::PDF) == CheckedTypes::PDF))
+        || ((*type_of_file == TypeOfFile::ArchiveZip) && ((*checked_types & CheckedTypes::ARCHIVE) == CheckedTypes::ARCHIVE))
+        || ((*type_of_file == TypeOfFile::Audio) && ((*checked_types & CheckedTypes::AUDIO) == CheckedTypes::AUDIO))
 }
 
 fn unpack_pdf_error(e: PdfError) -> PdfError {

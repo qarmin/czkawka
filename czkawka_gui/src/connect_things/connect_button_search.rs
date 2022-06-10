@@ -7,7 +7,7 @@ use gtk4::prelude::*;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
-use czkawka_core::broken_files::BrokenFiles;
+use czkawka_core::broken_files::{BrokenFiles, CheckedTypes};
 use czkawka_core::common_dir_traversal;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
@@ -64,6 +64,10 @@ pub fn connect_button_search(
     let check_button_music_genre: gtk4::CheckButton = gui_data.main_notebook.check_button_music_genre.clone();
     let check_button_music_length: gtk4::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
     let check_button_music_bitrate: gtk4::CheckButton = gui_data.main_notebook.check_button_music_bitrate.clone();
+    let check_button_broken_files_archive: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_archive.clone();
+    let check_button_broken_files_pdf: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_pdf.clone();
+    let check_button_broken_files_audio: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_audio.clone();
+    let check_button_broken_files_image: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_image.clone();
     let check_button_recursive = gui_data.upper_notebook.check_button_recursive.clone();
     let check_button_settings_duplicates_delete_outdated_cache = gui_data.settings.check_button_settings_duplicates_delete_outdated_cache.clone();
     let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
@@ -484,19 +488,50 @@ pub fn connect_button_search(
 
                 let futures_sender_broken_files = futures_sender_broken_files.clone();
 
-                thread::spawn(move || {
-                    let mut br = BrokenFiles::new();
+                let mut checked_types: CheckedTypes = CheckedTypes::NONE;
 
-                    br.set_included_directory(included_directories);
-                    br.set_excluded_directory(excluded_directories);
-                    br.set_recursive_search(recursive_search);
-                    br.set_excluded_items(excluded_items);
-                    br.set_use_cache(use_cache);
-                    br.set_allowed_extensions(allowed_extensions);
-                    br.set_save_also_as_json(save_also_as_json);
-                    br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
-                    let _ = glib_stop_sender.send(Message::BrokenFiles(br));
-                });
+                if check_button_broken_files_audio.is_active() {
+                    checked_types |= CheckedTypes::AUDIO;
+                }
+                if check_button_broken_files_pdf.is_active() {
+                    checked_types |= CheckedTypes::PDF;
+                }
+                if check_button_broken_files_image.is_active() {
+                    checked_types |= CheckedTypes::IMAGE;
+                }
+                if check_button_broken_files_archive.is_active() {
+                    checked_types |= CheckedTypes::ARCHIVE;
+                }
+
+                if checked_types != CheckedTypes::NONE {
+                    thread::spawn(move || {
+                        let mut br = BrokenFiles::new();
+
+                        br.set_included_directory(included_directories);
+                        br.set_excluded_directory(excluded_directories);
+                        br.set_recursive_search(recursive_search);
+                        br.set_excluded_items(excluded_items);
+                        br.set_use_cache(use_cache);
+                        br.set_allowed_extensions(allowed_extensions);
+                        br.set_save_also_as_json(save_also_as_json);
+                        br.set_checked_types(checked_types);
+                        br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
+                        let _ = glib_stop_sender.send(Message::BrokenFiles(br));
+                    });
+                } else {
+                    set_buttons(
+                        &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(),
+                        &buttons_array,
+                        &buttons_names,
+                    );
+                    entry_info.set_text(&flg!("search_not_choosing_any_broken_files"));
+                    show_dialog.store(false, Ordering::Relaxed);
+
+                    notebook_main.set_sensitive(true);
+                    notebook_upper.set_sensitive(true);
+                    button_settings.set_sensitive(true);
+                    button_app_info.set_sensitive(true);
+                }
             }
             NotebookMainEnum::BadExtensions => {
                 label_stage.show();
