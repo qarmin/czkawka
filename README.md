@@ -2,13 +2,6 @@
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ʈ͡ʂkafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary files from your computer.
 
-## UNSTABLE WARNING
-**Currently, master branch of this repository contains unstable GTK 4 port, so multiple regression, broken features etc. are expected.**
-
-**You can use old stable version built with GTK 3 - [4.1.0](https://github.com/qarmin/czkawka/releases/tag/4.1.0) or compile app from git before GTK 4 PR merge.**
-
-**Due build problems Windows binaries are not available yet, you can help by creating/modifying CI to produce valid windows binaries**
-
 ## Features
 - Written in memory-safe Rust
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
@@ -32,7 +25,6 @@
   - Broken Files - Finds files that are invalid or corrupted
   - Bad Extensions - Lists files whose content not match with their extension
 
-<!-- The GIF thingy -->
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
 ## How do I use it?
@@ -56,8 +48,8 @@ I prepared a disk and performed a test without any folder exceptions and with di
 
 I set the minimal file size to check to 1KB on all programs.
 
-|             App             | Executing Time |
-|:---------------------------:|:--------------:|
+| App                         | Executing Time |
+|:----------------------------|:--------------:|
 | FSlint 2.4.7 (First Run)    |      86s       |
 | FSlint 2.4.7 (Second Run)   |      43s       |
 | Czkawka 3.0.0 (First Run)   |       8s       |
@@ -67,11 +59,11 @@ I set the minimal file size to check to 1KB on all programs.
 
 I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for Czkawka.
 
-|      App       | Idle Ram | Max Operational Ram Usage | Stabilized after search |
-|:--------------:|:--------:|:-------------------------:|:-----------------------:|
-|  FSlint 2.4.7  |  62 MB   |          164 MB           |         158 MB          |
-| Dupeguru 4.1.1 |  90 MB   |          170 MB           |         166 MB          |
-| Czkawka 3.0.0  |  12 MB   |          122 MB           |          60 MB          |
+| App             | Idle Ram | Max Operational Ram Usage | Stabilized after search |
+|:----------------|:--------:|:-------------------------:|:-----------------------:|
+| FSlint 2.4.7    |  62 MB   |          164 MB           |         158 MB          |
+| Dupeguru 4.1.1  |  90 MB   |          170 MB           |         166 MB          |
+| Czkawka 3.0.0   |  12 MB   |          122 MB           |          60 MB          |
 
 
 In Dupeguru, I enabled checking images with different dimensions to match Czkawka behavior.
@@ -79,8 +71,8 @@ Both apps use a caching mechanism, so the second scan is really fast.
 
 Similar images which check 10949 files that occupied 6.6 GB
 
-|             App             | Scan time |
-|:---------------------------:|:---------:|
+| App                         | Scan time |
+|:----------------------------|:---------:|
 | Czkawka 3.0.0 (First Run)   |   276s    |
 | Czkawka 3.0.0 (Second Run)  |    1s     |
 | DupeGuru 4.1.1 (First Run)  |   539s    |
@@ -88,12 +80,12 @@ Similar images which check 10949 files that occupied 6.6 GB
 
 Similar images which check 349 image files that occupied 1.7 GB
 
-|             App             | Scan time |
-|:---------------------------:|:----------|
-| Czkawka 3.0.0 (First Run)   | 54s       |
-| Czkawka 3.0.0 (Second Run)  | 1s        |
-| DupeGuru 4.1.1 (First Run)  | 55s       |
-| DupeGuru 4.1.1 (Second Run) | 1s        |
+| App                         | Scan time  |
+|:----------------------------|:----------:|
+| Czkawka 3.0.0 (First Run)   |    54s     |
+| Czkawka 3.0.0 (Second Run)  |     1s     |
+| DupeGuru 4.1.1 (First Run)  |    55s     |
+| DupeGuru 4.1.1 (Second Run) |     1s     |
 
 ## Comparison to other tools
 
@@ -171,9 +163,9 @@ Code is distributed under MIT license.
 
 Icon was created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
 
-Windows dark theme is used from [AdMin repo](https://github.com/nrhodes91/AdMin) with MIT license.
+Windows dark theme is used from project [WhiteSur](https://github.com/slypy/whitesur-gtk4-theme) with MIT license.
 
-Some icons were taken from [ReShot](https://www.reshot.com) site and are licensed under Reshot Free License
+Some icons were taken from [ReShot](https://www.reshot.com) site and are licensed under Reshot Free License.
 
 The program is completely free to use.
 

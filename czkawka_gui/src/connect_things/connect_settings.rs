@@ -73,7 +73,10 @@ pub fn connect_settings(gui_data: &GuiData) {
         button_settings_open_cache_folder.connect_clicked(move |_| {
             if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
                 let cache_dir = proj_dirs.cache_dir();
-                open::that_in_background(cache_dir);
+
+                if let Err(e) = open::that(&cache_dir) {
+                    println!("Failed to open config folder {:?}, reason {}", cache_dir, e);
+                };
             }
         });
     }
@@ -83,7 +86,10 @@ pub fn connect_settings(gui_data: &GuiData) {
         button_settings_open_settings_folder.connect_clicked(move |_| {
             if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
                 let config_dir = proj_dirs.config_dir();
-                open::that_in_background(config_dir);
+
+                if let Err(e) = open::that(&config_dir) {
+                    println!("Failed to open config folder {:?}, reason {}", config_dir, e);
+                };
             }
         });
     }

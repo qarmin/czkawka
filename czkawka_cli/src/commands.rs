@@ -1,254 +1,253 @@
 use std::path::PathBuf;
 
 use image_hasher::{FilterType, HashAlg};
-use structopt::StructOpt;
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::duplicate::{DeleteMethod, HashType};
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
 
-#[derive(Debug, StructOpt)]
-#[structopt(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
+#[derive(Debug, clap::StructOpt)]
+#[clap(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
 pub enum Commands {
-    #[structopt(name = "dup", about = "Finds duplicate files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo")]
+    #[clap(name = "dup", about = "Finds duplicate files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo")]
     Duplicates {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        #[clap(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
-        #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
+        #[clap(short = 'i', long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
-        #[structopt(short = "c", long, parse(try_from_str = parse_minimal_file_size), default_value = "257144", help = "Minimum cached file size in bytes", long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up will cause that lower amount of files will be cached, but loading of cache will be faster")]
+        #[clap(short = 'c', long, parse(try_from_str = parse_minimal_file_size), default_value = "257144", help = "Minimum cached file size in bytes", long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up will cause that lower amount of files will be cached, but loading of cache will be faster")]
         minimal_cached_file_size: u64,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (NAME, SIZE, HASH)", long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file")]
+        #[clap(short, long, default_value = "HASH", parse(try_from_str = parse_checking_method), help = "Search method (NAME, SIZE, HASH)", long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file")]
         search_method: CheckingMethod,
-        #[structopt(short = "D", long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
+        #[clap(short = 'D', long, default_value = "NONE", parse(try_from_str = parse_delete_method), help = "Delete method (AEN, AEO, ON, OO, HARD)", long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files")]
         delete_method: DeleteMethod,
-        #[structopt(short = "t", long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help = "Hash type (BLAKE3, CRC32, XXH3)")]
+        #[clap(short = 't', long, default_value = "BLAKE3", parse(try_from_str = parse_hash_type), help = "Hash type (BLAKE3, CRC32, XXH3)")]
         hash_type: HashType,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allow_hard_links: AllowHardLinks,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         dryrun: DryRun,
     },
-    #[structopt(name = "empty-folders", about = "Finds empty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
+    #[clap(name = "empty-folders", about = "Finds empty folders", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt")]
     EmptyFolders {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(short = "D", long, help = "Delete found folders")]
+        #[clap(short = 'D', long, help = "Delete found folders")]
         delete_folders: bool,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[structopt(name = "big", about = "Finds big files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt")]
+    #[clap(name = "big", about = "Finds big files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt")]
     BiggestFiles {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short, long, default_value = "50", help = "Number of files to be shown")]
+        #[clap(short, long, default_value = "50", help = "Number of files to be shown")]
         number_of_files: usize,
-        #[structopt(short = "D", long, help = "Delete found files")]
+        #[clap(short = 'D', long, help = "Delete found files")]
         delete_files: bool,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[structopt(name = "empty-files", about = "Finds empty files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt")]
+    #[clap(name = "empty-files", about = "Finds empty files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt")]
     EmptyFiles {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short = "D", long, help = "Delete found files")]
+        #[clap(short = 'D', long, help = "Delete found files")]
         delete_files: bool,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[structopt(name = "temp", about = "Finds temporary files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D")]
+    #[clap(name = "temp", about = "Finds temporary files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D")]
     Temporary {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(short = "D", long, help = "Delete found files")]
+        #[clap(short = 'D', long, help = "Delete found files")]
         delete_files: bool,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[structopt(name = "image", about = "Finds similar images", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka image -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt")]
+    #[clap(name = "image", about = "Finds similar images", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka image -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt")]
     SimilarImages {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "16384", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        #[clap(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "16384", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
-        #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
+        #[clap(short = 'i', long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
-        #[structopt(short, long, default_value = "High", parse(try_from_str = parse_similar_images_similarity), help = "Similairty level (Minimal, VerySmall, Small, Medium, High, VeryHigh)", long_help = "Methods to choose similarity level of images which will be considered as duplicated.")]
+        #[clap(short, long, default_value = "High", parse(try_from_str = parse_similar_images_similarity), help = "Similairty level (Minimal, VerySmall, Small, Medium, High, VeryHigh)", long_help = "Methods to choose similarity level of images which will be considered as duplicated.")]
         similarity_preset: SimilarityPreset,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
-        #[structopt(short = "g", long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
+        #[clap(short = 'g', long, default_value = "Gradient", parse(try_from_str = parse_similar_hash_algorithm), help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)")]
         hash_alg: HashAlg,
-        #[structopt(short = "z", long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
+        #[clap(short = 'z', long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
         image_filter: FilterType,
-        #[structopt(short = "c", long, default_value = "8", parse(try_from_str = parse_image_hash_size), help = "Hash size (allowed: 4, 8, 16)")]
+        #[clap(short = 'c', long, default_value = "8", parse(try_from_str = parse_image_hash_size), help = "Hash size (allowed: 4, 8, 16)")]
         hash_size: u8,
     },
-    #[structopt(name = "music", about = "Finds same music by tags", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka music -d /home/rafal -f results.txt")]
+    #[clap(name = "music", about = "Finds same music by tags", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka music -d /home/rafal -f results.txt")]
     SameMusic {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        // #[structopt(short = "D", long, help = "Delete found files")]
+        // #[clap(short = 'D', long, help = "Delete found files")]
         // delete_files: bool, TODO
-        #[structopt(short = "z", long, default_value = "track_title,track_artist", parse(try_from_str = parse_music_duplicate_type), help = "Search method (track_title,track_artist,year,bitrate,genre,length))", long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas).")]
+        #[clap(short = 'z', long, default_value = "track_title,track_artist", parse(try_from_str = parse_music_duplicate_type), help = "Search method (track_title,track_artist,year,bitrate,genre,length))", long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas).")]
         music_similarity: MusicSimilarity,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
-        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        #[clap(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
-        #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
+        #[clap(short = 'i', long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
     },
-    #[structopt(name = "symlinks", about = "Finds invalid symlinks", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt")]
+    #[clap(name = "symlinks", about = "Finds invalid symlinks", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt")]
     InvalidSymlinks {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short = "D", long, help = "Delete found files")]
+        #[clap(short = 'D', long, help = "Delete found files")]
         delete_files: bool,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[structopt(name = "broken", about = "Finds broken files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt")]
+    #[clap(name = "broken", about = "Finds broken files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt")]
     BrokenFiles {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(short = "D", long, help = "Delete found files")]
+        #[clap(short = 'D', long, help = "Delete found files")]
         delete_files: bool,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[structopt(name = "video", about = "Finds similar video files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka videos -d /home/rafal -f results.txt")]
+    #[clap(name = "video", about = "Finds similar video files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka videos -d /home/rafal -f results.txt")]
     SimilarVideos {
-        #[structopt(flatten)]
+        #[clap(flatten)]
         directories: Directories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_directories: ExcludedDirectories,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         excluded_items: ExcludedItems,
-        // #[structopt(short = "D", long, help = "Delete found files")]
+        // #[clap(short = 'D', long, help = "Delete found files")]
         // delete_files: bool, TODO
-        #[structopt(flatten)]
+        #[clap(flatten)]
         file_to_save: FileToSave,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
-        #[structopt(flatten)]
+        #[clap(flatten)]
         not_recursive: NotRecursive,
         #[cfg(target_family = "unix")]
-        #[structopt(flatten)]
+        #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
-        #[structopt(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
+        #[clap(short, long, parse(try_from_str = parse_minimal_file_size), default_value = "8192", help = "Minimum size in bytes", long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching")]
         minimal_file_size: u64,
-        #[structopt(short = "i", long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
+        #[clap(short = 'i', long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
-        #[structopt(short = "t", long, parse(try_from_str = parse_tolerance), default_value = "10", help = "Video maximium difference (allowed values <0,20>)", long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)")]
+        #[clap(short = 't', long, parse(try_from_str = parse_tolerance), default_value = "10", help = "Video maximium difference (allowed values <0,20>)", long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)")]
         tolerance: i32,
     },
-    #[structopt(name = "tester", about = "Contains various test", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka tests -i")]
+    #[clap(name = "tester", about = "Contains various test", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka tests -i")]
     Tester {
-        #[structopt(short = "i", long = "test_image", help = "Test speed of hashing provided test.jpg image with different filters and methods.")]
+        #[clap(short = 'i', long = "test_image", help = "Test speed of hashing provided test.jpg image with different filters and methods.")]
         test_image: bool,
     },
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct Directories {
-    #[structopt(
+    #[clap(
         short,
         long,
         parse(from_os_str),
@@ -259,9 +258,9 @@ pub struct Directories {
     pub directories: Vec<PathBuf>,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct ExcludedDirectories {
-    #[structopt(
+    #[clap(
         short,
         long,
         parse(from_os_str),
@@ -271,10 +270,10 @@ pub struct ExcludedDirectories {
     pub excluded_directories: Vec<PathBuf>,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct ExcludedItems {
-    #[structopt(
-        short = "E",
+    #[clap(
+        short = 'E',
         long,
         help = "Excluded item(s)",
         long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
@@ -282,10 +281,10 @@ pub struct ExcludedItems {
     pub excluded_items: Vec<String>,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct AllowedExtensions {
-    #[structopt(
-        short = "x",
+    #[clap(
+        short = 'x',
         long,
         help = "Allowed file extension(s)",
         long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
@@ -293,34 +292,34 @@ pub struct AllowedExtensions {
     pub allowed_extensions: Vec<String>,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct NotRecursive {
-    #[structopt(short = "R", long, help = "Prevents from recursive check of folders")]
+    #[clap(short = 'R', long, help = "Prevents from recursive check of folders")]
     pub not_recursive: bool,
 }
 
 #[cfg(target_family = "unix")]
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct ExcludeOtherFilesystems {
-    #[structopt(short = "X", long, help = "Exclude files on other filesystems")]
+    #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
     pub exclude_other_filesystems: bool,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct FileToSave {
-    #[structopt(short, long, value_name = "file-name", help = "Saves the results into the file")]
+    #[clap(short, long, value_name = "file-name", help = "Saves the results into the file")]
     pub file_to_save: Option<PathBuf>,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct AllowHardLinks {
-    #[structopt(short = "L", long, help = "Do not ignore hard links")]
+    #[clap(short = 'L', long, help = "Do not ignore hard links")]
     pub allow_hard_links: bool,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, clap::StructOpt)]
 pub struct DryRun {
-    #[structopt(long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(long, help = "Do nothing and print the operation that would happen.")]
     pub dryrun: bool,
 }
 
@@ -487,8 +486,8 @@ const HELP_TEMPLATE: &str = r#"
 USAGE:
     {usage} [SCFLAGS] [SCOPTIONS]
 
-FLAGS:
-{flags}
+OPTIONS:
+{options}
 
 SUBCOMMANDS:
 {subcommands}

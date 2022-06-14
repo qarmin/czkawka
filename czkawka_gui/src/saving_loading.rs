@@ -213,6 +213,7 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec_string);
     }
 
+    //noinspection RsLift
     pub fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
             // Lin: /home/username/.config/czkawka
