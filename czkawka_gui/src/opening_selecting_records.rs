@@ -132,11 +132,9 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
             OpenMode::PathAndName => get_full_name_from_path_name(&path, &name),
         };
 
-        open::that_in_background(&end_path);
-
-        // if let Err(e) = open::that(&end_path) {
-        //     println!("Failed to open {} - Error {}", end_path, e);
-        // }
+        if let Err(e) = open::that(&end_path) {
+            println!("Failed to open file {}, reason {}", end_path, e);
+        };
     }
 }
 
@@ -192,7 +190,9 @@ fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_ful
     for tree_path in selected_rows.iter().rev() {
         let full_path = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_full_path);
 
-        open::that_in_background(&full_path);
+        if let Err(e) = open::that(&full_path) {
+            println!("Failed to open file {}, reason {}", full_path, e);
+        };
     }
 }
 

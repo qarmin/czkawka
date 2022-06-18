@@ -1,0 +1,25 @@
+[advisories]
+vulnerability = "deny"
+unmaintained = "warn"
+yanked = "deny"
+ignore = [
+    "RUSTSEC-2020-0071", # https://rustsec.org/advisories/RUSTSEC-2020-0071 - Potential segfault in the time crate.
+]
+
+
+[bans]
+multiple-versions = "deny"
+wildcards = "allow"
+deny = []
+skip = []
+skip-tree = []
+
+
+[licenses]
+unlicensed = "allow"
+allow-osi-fsf-free = "either"
+copyleft = "allow"
+allow = [
+    "MIT",
+    "Apache-2.0 WITH LLVM-exception",
+]

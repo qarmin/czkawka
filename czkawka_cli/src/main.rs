@@ -1,9 +1,6 @@
 #![allow(clippy::needless_late_init)]
 
-use std::process;
-
-use structopt::StructOpt;
-
+use clap::Parser;
 use commands::Commands;
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
@@ -21,6 +18,7 @@ use czkawka_core::{
     similar_videos::SimilarVideos,
     temporary::{self, Temporary},
 };
+use std::process;
 
 mod commands;
 

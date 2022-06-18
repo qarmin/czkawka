@@ -9,3 +9,4 @@ TestSuite*
 flatpak/
 *.zip
 *.zst
+*.profraw
