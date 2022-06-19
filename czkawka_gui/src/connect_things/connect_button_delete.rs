@@ -10,6 +10,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
+use crate::notebook_info::NOTEBOOKS_INFO;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
@@ -43,7 +44,7 @@ pub async fn delete_things(gui_data: GuiData) {
 
     let nb_number = notebook_main.current_page().unwrap();
     let tree_view = &main_tree_views[nb_number as usize];
-    let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+    let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
     let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
 

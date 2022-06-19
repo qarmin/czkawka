@@ -7,6 +7,7 @@ use czkawka_core::common::Common;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
+use crate::notebook_info::NOTEBOOKS_INFO;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
@@ -612,7 +613,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_all.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
     });
@@ -624,7 +625,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_unselect_all.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_unselect_all(&popover_select, tree_view, nb_object.column_selection as u32);
     });
@@ -636,7 +637,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_reverse.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
     });
@@ -648,7 +649,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_all_except_oldest_newest(
             &popover_select,
@@ -668,7 +669,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_all_except_oldest_newest(
             &popover_select,
@@ -688,7 +689,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_one_oldest_newest(
             &popover_select,
@@ -708,7 +709,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_one_newest.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_one_oldest_newest(
             &popover_select,
@@ -729,7 +730,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_custom.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_custom_select_unselect(
             &popover_select,
@@ -751,7 +752,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_unselect_custom.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_custom_select_unselect(
             &popover_select,
@@ -772,7 +773,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_all_except_biggest_smallest(
             &popover_select,
@@ -792,7 +793,7 @@ pub fn connect_popovers(gui_data: &GuiData) {
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         popover_all_except_biggest_smallest(
             &popover_select,

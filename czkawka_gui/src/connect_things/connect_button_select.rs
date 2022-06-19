@@ -2,8 +2,9 @@ use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_popovers::GuiPopovers;
-use crate::help_functions::{PopoverTypes, NOTEBOOKS_INFOS};
+use crate::help_functions::PopoverTypes;
 use crate::notebook_enums::*;
+use crate::notebook_info::NOTEBOOKS_INFO;
 
 pub fn connect_button_select(gui_data: &GuiData) {
     let popovers = gui_data.popovers.clone();
@@ -33,7 +34,7 @@ fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnu
     let separator_select_image_size = popovers.separator_select_image_size.clone();
     let separator_select_reverse = popovers.separator_select_reverse.clone();
 
-    let arr = &NOTEBOOKS_INFOS[current_mode.clone() as usize].available_modes;
+    let arr = &NOTEBOOKS_INFO[current_mode.clone() as usize].available_modes;
 
     if arr.contains(&PopoverTypes::All) {
         buttons_popover_select_all.show();
