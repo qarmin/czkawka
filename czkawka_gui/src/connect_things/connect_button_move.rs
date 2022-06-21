@@ -8,6 +8,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
+use crate::notebook_info::NOTEBOOKS_INFO;
 
 pub fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
@@ -28,7 +29,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
     buttons_move.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
         let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
 

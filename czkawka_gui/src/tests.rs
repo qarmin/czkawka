@@ -1,5 +1,6 @@
-use crate::help_functions::{get_notebook_enum_from_tree_view, NOTEBOOKS_INFOS};
+use crate::help_functions::get_notebook_enum_from_tree_view;
 use crate::notebook_enums::to_notebook_main_enum;
+use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::GuiData;
 
 pub fn validate_notebook_data(gui_data: &GuiData) {
@@ -13,7 +14,7 @@ pub fn validate_notebook_data(gui_data: &GuiData) {
 
     // This test main info about notebooks
     // Should have same order as notebook enum types
-    for (i, item) in NOTEBOOKS_INFOS.iter().enumerate() {
+    for (i, item) in NOTEBOOKS_INFO.iter().enumerate() {
         let en = to_notebook_main_enum(i as u32);
         assert_eq!(item.notebook_type, en);
     }

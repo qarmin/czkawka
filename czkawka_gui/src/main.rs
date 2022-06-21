@@ -51,6 +51,7 @@ mod initialize_gui;
 mod language_functions;
 mod localizer_gui;
 mod notebook_enums;
+mod notebook_info;
 mod opening_selecting_records;
 mod saving_loading;
 mod taskbar_progress;

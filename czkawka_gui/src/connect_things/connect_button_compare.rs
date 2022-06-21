@@ -11,11 +11,9 @@ use image::DynamicImage;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{
-    count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension, NotebookObject,
-    NOTEBOOKS_INFOS,
-};
+use crate::help_functions::{count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
 use crate::localizer_core::generate_translation_hashmap;
+use crate::notebook_info::{NotebookObject, NOTEBOOKS_INFO};
 
 const BIG_PREVIEW_SIZE: i32 = 600;
 const SMALL_PREVIEW_SIZE: i32 = 130;
@@ -49,7 +47,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     button_compare.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
         let model = tree_view.model().unwrap();
 
         let group_number = count_number_of_groups(tree_view, nb_object.column_header.unwrap());
@@ -128,7 +126,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     button_go_previous_compare_group.connect_clicked(move |button_go_previous_compare_group| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
         let model = tree_view.model().unwrap();
 
         *shared_current_of_groups.borrow_mut() -= 1;
@@ -180,7 +178,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     button_go_next_compare_group.connect_clicked(move |button_go_next_compare_group| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
         let model = tree_view.model().unwrap();
 
         *shared_current_of_groups.borrow_mut() += 1;
@@ -218,7 +216,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     check_button_left_preview_text.connect_toggled(move |check_button_left_preview_text| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
         let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
 
         let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
@@ -241,7 +239,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     check_button_right_preview_text.connect_toggled(move |check_button_right_preview_text| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
         let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
 
         let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();

@@ -11,6 +11,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
+use crate::notebook_info::NOTEBOOKS_INFO;
 
 #[derive(PartialEq, Eq)]
 enum TypeOfTool {
@@ -55,7 +56,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
 
     let nb_number = notebook_main.current_page().unwrap();
     let tree_view = &main_tree_views[nb_number as usize];
-    let nb_object = &NOTEBOOKS_INFOS[nb_number as usize];
+    let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
     let column_header = nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
 

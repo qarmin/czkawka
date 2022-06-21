@@ -25,6 +25,7 @@ use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::NotebookMainEnum;
+use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
 
 pub fn initialize_gui(gui_data: &mut GuiData) {
@@ -126,19 +127,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
                 image_preview.hide();
 
-                let col_types: [glib::types::Type; 10] = [
-                    glib::types::Type::BOOL,   // ActivatableSelectButton
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Size
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                    glib::types::Type::STRING, // Color
-                    glib::types::Type::BOOL,   // IsHeader
-                    glib::types::Type::STRING, // TextColor
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -155,14 +144,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_empty_folder_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
 
-                let col_types: [glib::types::Type; 5] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::EmptyDirectories as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -178,14 +160,8 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_empty_files_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-                let col_types: [glib::types::Type; 5] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::EmptyFiles as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -201,14 +177,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_temporary_files_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
 
-                let col_types: [glib::types::Type; 5] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::Temporary as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -224,16 +193,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_big_files_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_big_files_finder.clone();
 
-                let col_types: [glib::types::Type; 7] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Size
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // SizeAsBytes
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::BigFiles as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -252,22 +212,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
                 image_preview.hide();
 
-                let col_types: [glib::types::Type; 13] = [
-                    glib::types::Type::BOOL,   // ActivatableSelectButton
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Similarity
-                    glib::types::Type::STRING, // Size
-                    glib::types::Type::U64,    // SizeAsBytes
-                    glib::types::Type::STRING, // Dimensions
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                    glib::types::Type::STRING, // Color
-                    glib::types::Type::BOOL,   // IsHeader
-                    glib::types::Type::STRING, // TextColor
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::SimilarImages as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -284,20 +229,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_similar_videos_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
 
-                let col_types: [glib::types::Type; 11] = [
-                    glib::types::Type::BOOL,   // ActivatableSelectButton
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Size
-                    glib::types::Type::U64,    // SizeAsBytes
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                    glib::types::Type::STRING, // Color
-                    glib::types::Type::BOOL,   // IsHeader
-                    glib::types::Type::STRING, // TextColor
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::SimilarVideos as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -314,27 +246,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
                 let tree_view = gui_data.main_notebook.tree_view_same_music_finder.clone();
 
-                let col_types: [glib::types::Type; 18] = [
-                    glib::types::Type::BOOL,   // ActivatableSelectButton
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Size
-                    glib::types::Type::U64,    // SizeAsBytes
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // Title
-                    glib::types::Type::STRING, // Artist
-                    glib::types::Type::STRING, // Year
-                    glib::types::Type::STRING, // Bitrate
-                    glib::types::Type::U64,    // BitrateAsNumber
-                    glib::types::Type::STRING, // Length
-                    glib::types::Type::STRING, // Genre
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                    glib::types::Type::STRING, // Color
-                    glib::types::Type::BOOL,   // IsHeader
-                    glib::types::Type::STRING, // TextColor
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::SameMusic as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -351,16 +263,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_invalid_symlinks.clone();
                 let tree_view = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
 
-                let col_types: [glib::types::Type; 7] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // DestinationPath
-                    glib::types::Type::STRING, // TypeOfError
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::Symlinks as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -376,15 +279,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_broken_files.clone();
                 let tree_view = gui_data.main_notebook.tree_view_broken_files.clone();
 
-                let col_types: [glib::types::Type; 6] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // ErrorType
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::BrokenFiles as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -400,16 +295,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 let scrolled_window = gui_data.main_notebook.scrolled_window_bad_extensions.clone();
                 let tree_view = gui_data.main_notebook.tree_view_bad_extensions.clone();
 
-                let col_types: [glib::types::Type; 7] = [
-                    glib::types::Type::BOOL,   // SelectionButton
-                    glib::types::Type::STRING, // Name
-                    glib::types::Type::STRING, // Path
-                    glib::types::Type::STRING, // CurrentExtension
-                    glib::types::Type::STRING, // ProperExtensions
-                    glib::types::Type::STRING, // Modification
-                    glib::types::Type::U64,    // ModificationAsSecs
-                ];
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
+                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::BadExtensions as usize].columns_types);
 
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
@@ -547,7 +433,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
         // TODO GTK 4, currently not works, connect_pressed shows previous thing - https://gitlab.gnome.org/GNOME/gtk/-/issues/4939
         // Use connect_released when it will be fixed, currently using connect_row_activated workaround
         tree_view.connect_row_activated(move |tree_view, _b, _c| {
-            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
+            let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize];
             let preview_path = preview_path.clone();
             show_preview(
                 tree_view,
@@ -572,7 +458,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
 
         // TODO GTK 4, currently not works, connect_pressed shows previous thing
         tree_view.connect_row_activated(move |tree_view, _b, _c| {
-            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
+            let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::SimilarImages as usize];
             let preview_path = preview_path.clone();
             show_preview(
                 tree_view,
@@ -626,7 +512,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
             }
             let preview_path = preview_path.clone();
-            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::Duplicate as usize];
+            let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize];
             show_preview(
                 &event_controller_key.widget().downcast::<TreeView>().unwrap(),
                 &text_view_errors,
@@ -654,7 +540,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 glib::MainContext::default().spawn_local(delete_things(gui_data_clone.clone()));
             }
             let preview_path = preview_path.clone();
-            let nb_object = &NOTEBOOKS_INFOS[NotebookMainEnum::SimilarImages as usize];
+            let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::SimilarImages as usize];
             show_preview(
                 &event_controller_key.widget().downcast::<TreeView>().unwrap(),
                 &text_view_errors,
