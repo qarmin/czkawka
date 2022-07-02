@@ -692,81 +692,133 @@ impl SimilarImages {
                 }
             }
         } else {
+            //// PROGRESS THREAD START
+            let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+            let progress_thread_run = Arc::new(AtomicBool::new(true));
+            let atomic_mode_counter = Arc::new(AtomicUsize::new(0));
+
+            let progress_thread_handle = if let Some(progress_sender) = progress_sender {
+                let progress_send = progress_sender.clone();
+                let progress_thread_run = progress_thread_run.clone();
+                let atomic_mode_counter = atomic_mode_counter.clone();
+                let all_combinations_to_check = all_hashes.len();
+                thread::spawn(move || loop {
+                    progress_send
+                        .unbounded_send(ProgressData {
+                            current_stage: 2,
+                            max_stage: 2,
+                            images_checked: atomic_mode_counter.load(Ordering::Relaxed) as usize,
+                            images_to_check: all_combinations_to_check,
+                        })
+                        .unwrap();
+                    if !progress_thread_run.load(Ordering::Relaxed) {
+                        break;
+                    }
+                    sleep(Duration::from_millis(LOOP_DURATION as u64));
+                })
+            } else {
+                thread::spawn(|| {})
+            };
+            //// PROGRESS THREAD END
+
             for hash in &all_hashes {
                 self.bktree.add(hash.to_vec());
             }
 
             let number_of_processors = num_cpus::get();
-            let chunks = all_hashes.chunks(all_hashes.len() / number_of_processors);
+            let chunks: Vec<_> = all_hashes.chunks(all_hashes.len() / number_of_processors).collect();
 
-            let parts = chunks.into_iter().map(|hashes_to_check| {
-                let mut hashes_parents: HashMap<&Vec<u8>, u32> = Default::default(); // Hash used as parent, childrens
-                let mut hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default(); // Hash used as child, (parent_hash,similarity)
+            let parts: Vec<_> = chunks
+                .into_par_iter()
+                .map(|hashes_to_check| {
+                    let mut hashes_parents: HashMap<&Vec<u8>, u32> = Default::default(); // Hash used as parent, childrens
+                    let mut hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default(); // Hash used as child, (parent_hash,similarity)
 
-                // Sprawdź czy hash nie jest użyty jako master gdzie indziej
-                // Jeśli tak to przejdź do sprawdzania kolejnego elementu
-                // Zweryfikuj czy sprawdzany element ma rodzica
-                // Jeśli ma to sprawdź czy similarity nowego rodzica jest mniejsze niż starego
-                // // Jeśli tak to zmniejsz ilość dzieci starego rodzica, dodaj ilość dzieci w nowym rodzicu i podmień rekord hashes_similarity
-                // // Jeśli nie to dodaj nowy rekord w hashes_similarity jak i hashes_parents z liczbą dzieci równą 1
+                    // Sprawdź czy hash nie jest użyty jako master gdzie indziej
+                    // Jeśli tak to przejdź do sprawdzania kolejnego elementu
+                    // Zweryfikuj czy sprawdzany element ma rodzica
+                    // Jeśli ma to sprawdź czy similarity nowego rodzica jest mniejsze niż starego
+                    // // Jeśli tak to zmniejsz ilość dzieci starego rodzica, dodaj ilość dzieci w nowym rodzicu i podmień rekord hashes_similarity
+                    // // Jeśli nie to dodaj nowy rekord w hashes_similarity jak i hashes_parents z liczbą dzieci równą 1
 
-                for hash_to_check in hashes_to_check {
-                    // Hash is already used as child
-                    if hashes_similarity.contains_key(hash_to_check) {
-                        continue;
+                    for (index, hash_to_check) in hashes_to_check.into_iter().enumerate() {
+                        // Don't check for user stop too often
+                        // Also don't add too ofter data to variables
+                        const CYCLES_COUNTER: usize = 100;
+                        if index % CYCLES_COUNTER == 0 && index != 0 {
+                            atomic_mode_counter.fetch_add(CYCLES_COUNTER, Ordering::Relaxed);
+                            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                                check_was_stopped.store(true, Ordering::Relaxed);
+                                return None;
+                            }
+                        }
+
+                        // Hash is already used as child
+                        if hashes_similarity.contains_key(hash_to_check) {
+                            continue;
+                        }
+
+                        let mut found_items = self
+                            .bktree
+                            .find(hash_to_check, tolerance)
+                            .filter(|(similarity, _hash)| *similarity != 0)
+                            .collect::<Vec<_>>();
+
+                        found_items.sort_unstable_by_key(|f| f.0);
+
+                        for (similarity, other_hash) in found_items {
+                            // Cannot use hash if already is used as master record(have more than 0 children)
+                            if let Some(children_number) = hashes_parents.get(other_hash) {
+                                if *children_number > 0 {
+                                    continue;
+                                }
+                            }
+
+                            // If there is already record, with smaller sensitivity, then replace it
+                            let mut need_to_add = false;
+                            if let Some((parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
+                                if similarity < *other_similarity {
+                                    need_to_add = true;
+                                    *hashes_parents.get_mut(parent_hash).unwrap() -= 1;
+                                }
+                            }
+                            // But when there is no record, just add it
+                            else {
+                                need_to_add = true
+                            }
+
+                            if need_to_add {
+                                hashes_similarity.insert(other_hash, (hash_to_check, similarity));
+
+                                if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
+                                    *number_of_children += 1;
+                                } else {
+                                    hashes_parents.insert(hash_to_check, 1);
+                                }
+                            }
+                        }
                     }
 
-                    let mut found_items = self
-                        .bktree
-                        .find(hash_to_check, tolerance)
-                        .filter(|(similarity, _hash)| *similarity != 0)
-                        .collect::<Vec<_>>();
+                    #[cfg(debug_assertions)]
+                    debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "BEFORE");
 
-                    found_items.sort_unstable_by_key(|f| f.0);
+                    Some((hashes_parents, hashes_similarity))
+                })
+                .while_some()
+                .collect();
 
-                    for (similarity, other_hash) in found_items {
-                        // Cannot use hash if already is used as master record(have more than 0 children)
-                        if let Some(children_number) = hashes_parents.get(other_hash) {
-                            if *children_number > 0 {
-                                continue;
-                            }
-                        }
+            // End thread which send info to gui
+            progress_thread_run.store(false, Ordering::Relaxed);
+            progress_thread_handle.join().unwrap();
 
-                        // If there is already record, with smaller sensitivity, then replace it
-                        let mut need_to_add = false;
-                        if let Some((parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
-                            if similarity < *other_similarity {
-                                need_to_add = true;
-                                *hashes_parents.get_mut(parent_hash).unwrap() -= 1;
-                            }
-                        }
-                        // But when there is no record, just add it
-                        else {
-                            need_to_add = true
-                        }
-
-                        if need_to_add {
-                            hashes_similarity.insert(other_hash, (hash_to_check, similarity));
-
-                            if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
-                                *number_of_children += 1;
-                            } else {
-                                hashes_parents.insert(hash_to_check, 1);
-                            }
-                        }
-                    }
-                }
-
-                #[cfg(debug_assertions)]
-                debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "BEFORE");
-
-                (hashes_parents, hashes_similarity)
-            });
+            if check_was_stopped.load(Ordering::Relaxed) {
+                return false;
+            }
 
             {
                 let mut new_hashes_parents: HashMap<&Vec<u8>, u32> = Default::default();
                 let mut new_hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default();
-                let mut iter = parts;
+                let mut iter = parts.into_iter();
                 // At start fill arrays with first item
                 // Normal algorithm would do exactly same thing, but slower, one record after one
                 if let Some((hashes_parents, hashes_similarity)) = iter.next() {
