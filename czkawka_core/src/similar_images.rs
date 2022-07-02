@@ -741,21 +741,16 @@ impl SimilarImages {
                     // // Jeśli tak to zmniejsz ilość dzieci starego rodzica, dodaj ilość dzieci w nowym rodzicu i podmień rekord hashes_similarity
                     // // Jeśli nie to dodaj nowy rekord w hashes_similarity jak i hashes_parents z liczbą dzieci równą 1
 
-                    for (index, hash_to_check) in hashes_to_check.into_iter().enumerate() {
+                    for (index, hash_to_check) in hashes_to_check.iter().enumerate() {
                         // Don't check for user stop too often
                         // Also don't add too ofter data to variables
-                        const CYCLES_COUNTER: usize = 100;
+                        const CYCLES_COUNTER: usize = 50;
                         if index % CYCLES_COUNTER == 0 && index != 0 {
                             atomic_mode_counter.fetch_add(CYCLES_COUNTER, Ordering::Relaxed);
                             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                                 check_was_stopped.store(true, Ordering::Relaxed);
                                 return None;
                             }
-                        }
-
-                        // Hash is already used as child
-                        if hashes_similarity.contains_key(hash_to_check) {
-                            continue;
                         }
 
                         let mut found_items = self
@@ -767,6 +762,7 @@ impl SimilarImages {
                         found_items.sort_unstable_by_key(|f| f.0);
 
                         for (similarity, other_hash) in found_items {
+                            // SSSTART
                             // Cannot use hash if already is used as master record(have more than 0 children)
                             if let Some(children_number) = hashes_parents.get(other_hash) {
                                 if *children_number > 0 {
@@ -776,15 +772,32 @@ impl SimilarImages {
 
                             // If there is already record, with smaller sensitivity, then replace it
                             let mut need_to_add = false;
-                            if let Some((parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
-                                if similarity < *other_similarity {
-                                    need_to_add = true;
-                                    *hashes_parents.get_mut(parent_hash).unwrap() -= 1;
+                            let mut need_to_check = false;
+
+                            // TODO replace variables from above with closures
+                            // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
+                            if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(hash_to_check) {
+                                if *current_similarity_with_parent > similarity {
+                                    need_to_check = true;
+
+                                    *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
+                                    hashes_similarity.remove(hash_to_check).unwrap();
                                 }
+                            } else {
+                                need_to_check = true;
                             }
-                            // But when there is no record, just add it
-                            else {
-                                need_to_add = true
+
+                            if need_to_check {
+                                if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
+                                    if *other_similarity > similarity {
+                                        need_to_add = true;
+                                        *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
+                                    }
+                                }
+                                // But when there is no record, just add it
+                                else {
+                                    need_to_add = true
+                                }
                             }
 
                             if need_to_add {
@@ -796,6 +809,7 @@ impl SimilarImages {
                                     hashes_parents.insert(hash_to_check, 1);
                                 }
                             }
+                            // ENND
                         }
                     }
 
@@ -816,25 +830,21 @@ impl SimilarImages {
             }
 
             {
-                let mut new_hashes_parents: HashMap<&Vec<u8>, u32> = Default::default();
-                let mut new_hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default();
+                let mut hashes_parents: HashMap<&Vec<u8>, u32> = Default::default();
+                let mut hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default();
                 let mut iter = parts.into_iter();
                 // At start fill arrays with first item
                 // Normal algorithm would do exactly same thing, but slower, one record after one
-                if let Some((hashes_parents, hashes_similarity)) = iter.next() {
-                    new_hashes_parents = hashes_parents;
-                    new_hashes_similarity = hashes_similarity;
+                if let Some((first_hashes_parents, first_hashes_similarity)) = iter.next() {
+                    hashes_parents = first_hashes_parents;
+                    hashes_similarity = first_hashes_similarity;
                 }
 
-                for (_hashes_with_parents, hashes_with_similarity) in iter {
-                    for (hash_to_check, (other_hash, similarity)) in hashes_with_similarity {
-                        // Hash is already used as child
-                        if new_hashes_similarity.contains_key(hash_to_check) {
-                            continue;
-                        }
-
+                for (_partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
+                    for (hash_to_check, (other_hash, similarity)) in partial_hashes_with_similarity {
+                        // SSSTART
                         // Cannot use hash if already is used as master record(have more than 0 children)
-                        if let Some(children_number) = new_hashes_parents.get(other_hash) {
+                        if let Some(children_number) = hashes_parents.get(other_hash) {
                             if *children_number > 0 {
                                 continue;
                             }
@@ -842,42 +852,60 @@ impl SimilarImages {
 
                         // If there is already record, with smaller sensitivity, then replace it
                         let mut need_to_add = false;
-                        if let Some((parent_hash, other_similarity)) = new_hashes_similarity.get(other_hash) {
-                            if similarity < *other_similarity {
-                                need_to_add = true;
-                                *new_hashes_parents.get_mut(parent_hash).unwrap() -= 1;
+                        let mut need_to_check = false;
+
+                        // TODO replace variables from above with closures
+                        // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
+                        if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(hash_to_check) {
+                            if *current_similarity_with_parent > similarity {
+                                need_to_check = true;
+
+                                *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
+                                hashes_similarity.remove(hash_to_check).unwrap();
                             }
+                        } else {
+                            need_to_check = true;
                         }
-                        // But when there is no record, just add it
-                        else {
-                            need_to_add = true
+
+                        if need_to_check {
+                            if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
+                                if *other_similarity > similarity {
+                                    need_to_add = true;
+                                    *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
+                                }
+                            }
+                            // But when there is no record, just add it
+                            else {
+                                need_to_add = true
+                            }
                         }
 
                         if need_to_add {
-                            new_hashes_similarity.insert(other_hash, (hash_to_check, similarity));
+                            hashes_similarity.insert(other_hash, (hash_to_check, similarity));
 
-                            if let Some(number_of_children) = new_hashes_parents.get_mut(hash_to_check) {
+                            if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
                                 *number_of_children += 1;
                             } else {
-                                new_hashes_parents.insert(hash_to_check, 1);
+                                hashes_parents.insert(hash_to_check, 1);
                             }
                         }
+                        // ENND
                     }
                 }
 
                 #[cfg(debug_assertions)]
-                debug_check_for_duplicated_things(new_hashes_parents.clone(), new_hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
+                debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
 
                 // Collecting results
 
-                for (parent_hash, child_number) in new_hashes_parents {
+                for (parent_hash, child_number) in hashes_parents {
                     if child_number > 0 {
                         let vec_fe = all_hashed_images.get(parent_hash).unwrap().clone();
                         collected_similar_images.insert(parent_hash.clone(), vec_fe);
                     }
                 }
 
-                for (child_hash, (parent_hash, similarity)) in new_hashes_similarity {
+                for (child_hash, (parent_hash, similarity)) in hashes_similarity {
                     let mut vec_fe = all_hashed_images.get(child_hash).unwrap().clone();
                     for mut fe in &mut vec_fe {
                         fe.similarity = similarity;
@@ -1318,6 +1346,7 @@ pub fn test_image_conversion_speed() {
     }
 }
 
+#[allow(dead_code)]
 fn debug_check_for_duplicated_things(
     hashes_parents: HashMap<&Vec<u8>, u32>,
     hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)>,
