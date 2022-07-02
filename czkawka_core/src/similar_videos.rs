@@ -803,7 +803,7 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 }
 
 fn get_cache_file() -> String {
-    "cache_similar_videos.bin".to_string()
+    "cache_similar_videos_50.bin".to_string()
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {

@@ -66,14 +66,6 @@ big_files_mode_label = Checked files
 big_files_mode_smallest_combo_box = The Smallest
 big_files_mode_biggest_combo_box = The Biggest
 
-main_notebook_image_fast_compare = Fast compare
-main_notebook_image_fast_compare_tooltip =
-        Speedup searching and comparing hashes.
-
-        As opposed to normal mode - where each hash is compared to each other x times (where x is the similarity the user chose) - in this mode, exactly one comparison will be used.
-
-        This option is recommended when comparing >10000 images with non 0 (Very High) similarity.
-
 main_notebook_duplicates = Duplicate Files
 main_notebook_empty_directories = Empty Directories
 main_notebook_big_files = Big Files

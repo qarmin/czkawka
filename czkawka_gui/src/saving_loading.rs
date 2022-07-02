@@ -48,10 +48,9 @@ const DEFAULT_BROKEN_FILES_ARCHIVE: bool = true;
 const DEFAULT_BROKEN_FILES_IMAGE: bool = true;
 
 const DEFAULT_NUMBER_OF_BIGGEST_FILES: &str = "50";
-const DEFAULT_SIMILAR_IMAGES_SIMILARITY: i32 = 0;
+const DEFAULT_SIMILAR_IMAGES_SIMILARITY: f32 = 0.0;
 const DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE: bool = false;
-const DEFAULT_SIMILAR_IMAGES_FAST_COMPARE: bool = false;
-const DEFAULT_SIMILAR_VIDEOS_SIMILARITY: i32 = 15;
+const DEFAULT_SIMILAR_VIDEOS_SIMILARITY: f32 = 15.0;
 const DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE: bool = false;
 
 pub const DEFAULT_MINIMAL_FILE_SIZE: &str = "16384";
@@ -126,7 +125,7 @@ impl LoadSaveStruct {
 
         default_value
     }
-    pub fn get_integer<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
+    pub fn get_object<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
         if self.loaded_items.contains_key(&key) {
             let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
 
@@ -428,7 +427,6 @@ enum LoadText {
     NumberOfBiggestFiles,
     SimilarImagesSimilarity,
     SimilarImagesIgnoreSameSize,
-    SimilarImagesFastCompare,
     SimilarVideosSimilarity,
     SimilarVideosIgnoreSameSize,
     MusicApproximateComparison,
@@ -473,7 +471,6 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::NumberOfBiggestFiles, "number_of_biggest_files"),
         (LoadText::SimilarImagesSimilarity, "similar_images_similarity"),
         (LoadText::SimilarImagesIgnoreSameSize, "similar_images_ignore_same_size"),
-        (LoadText::SimilarImagesFastCompare, "similar_images_fast_compare"),
         (LoadText::SimilarVideosSimilarity, "similar_videos_similarity"),
         (LoadText::SimilarVideosIgnoreSameSize, "similar_videos_ignore_same_size"),
         (LoadText::MusicApproximateComparison, "music_approximate_comparison"),
@@ -672,10 +669,6 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.check_button_image_ignore_same_size.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::SimilarImagesFastCompare).unwrap().to_string(),
-        main_notebook.check_button_image_fast_compare.is_active(),
-    );
-    saving_struct.save_var(
         hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().to_string(),
         main_notebook.scale_similarity_similar_videos.value(),
     );
@@ -760,37 +753,36 @@ pub fn load_configuration(
     let cache_minimal_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
     let short_language = loaded_entries.get_string(hashmap_ls.get(&LoadText::Language).unwrap().clone(), short_language);
 
-    let combo_box_duplicate_hash_type = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().clone(), 0);
-    let combo_box_duplicate_checking_method = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().clone(), 0);
-    let combo_box_image_hash_size = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 0);
-    let combo_box_image_hash_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
-    let combo_box_image_resize_algorithm = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
-    let combo_box_big_files_mode = loaded_entries.get_integer(hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().clone(), 0);
+    let combo_box_duplicate_hash_type = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().clone(), 0);
+    let combo_box_duplicate_checking_method = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().clone(), 0);
+    let combo_box_image_hash_size = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 0);
+    let combo_box_image_hash_algorithm = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
+    let combo_box_image_resize_algorithm = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
+    let combo_box_big_files_mode = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().clone(), 0);
 
     let number_of_biggest_files = loaded_entries.get_integer_string(
         hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().clone(),
         DEFAULT_NUMBER_OF_BIGGEST_FILES.to_string(),
     );
-    let similar_images_similarity = loaded_entries.get_integer(hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().clone(), DEFAULT_SIMILAR_IMAGES_SIMILARITY);
+    let similar_images_similarity = loaded_entries.get_object(hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().clone(), DEFAULT_SIMILAR_IMAGES_SIMILARITY);
     let similar_images_ignore_same_size = loaded_entries.get_bool(
         hashmap_ls.get(&LoadText::SimilarImagesIgnoreSameSize).unwrap().clone(),
         DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE,
     );
-    let similar_images_fast_compare = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SimilarImagesFastCompare).unwrap().clone(), DEFAULT_SIMILAR_IMAGES_FAST_COMPARE);
-    let similar_videos_similarity = loaded_entries.get_integer(hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
+    let similar_videos_similarity = loaded_entries.get_object(hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
     let similar_videos_ignore_same_size = loaded_entries.get_bool(
         hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().clone(),
         DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE,
     );
-    let check_button_case_sensitive_name = loaded_entries.get_integer(
+    let check_button_case_sensitive_name = loaded_entries.get_object(
         hashmap_ls.get(&LoadText::DuplicateNameCaseSensitive).unwrap().clone(),
         DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING,
     );
 
-    let check_button_broken_files_archive = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_pdf = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_image = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_audio = loaded_entries.get_integer(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_image = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
 
     // Setting data
     if manual_execution || loading_at_start {
@@ -912,7 +904,6 @@ pub fn load_configuration(
         main_notebook.check_button_duplicate_case_sensitive_name.set_active(check_button_case_sensitive_name);
         main_notebook.entry_big_files_number.set_text(&number_of_biggest_files);
         main_notebook.check_button_image_ignore_same_size.set_active(similar_images_ignore_same_size);
-        main_notebook.check_button_image_fast_compare.set_active(similar_images_fast_compare);
         main_notebook.check_button_video_ignore_same_size.set_active(similar_videos_ignore_same_size);
         main_notebook.scale_similarity_similar_videos.set_value(similar_videos_similarity as f64);
 
@@ -1056,7 +1047,6 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.entry_big_files_number.set_text(DEFAULT_NUMBER_OF_BIGGEST_FILES);
         main_notebook.scale_similarity_similar_images.set_value(DEFAULT_SIMILAR_IMAGES_SIMILARITY as f64);
         main_notebook.check_button_image_ignore_same_size.set_active(DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE);
-        main_notebook.check_button_image_fast_compare.set_active(DEFAULT_SIMILAR_IMAGES_FAST_COMPARE);
         main_notebook.check_button_video_ignore_same_size.set_active(DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
         main_notebook.scale_similarity_similar_videos.set_value(DEFAULT_SIMILAR_VIDEOS_SIMILARITY as f64);
     }
