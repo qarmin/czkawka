@@ -818,10 +818,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    vec_file_entry.sort_by_key(|e| {
-                                        let t = split_path(e.path.as_path());
-                                        (t.0, t.1)
-                                    });
+                                    // Use comparison by similarity, because it is more important that path here
+                                    vec_file_entry.sort_unstable_by_key(|e| e.similarity);
                                     vec_file_entry
                                 } else {
                                     vec_file_entry.clone()
@@ -882,10 +880,8 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    vec_file_entry.sort_by_key(|e| {
-                                        let t = split_path(e.path.as_path());
-                                        (t.0, t.1)
-                                    });
+                                    // Use comparsion by similarity, because it is more important that path here
+                                    vec_file_entry.sort_unstable_by_key(|e| e.similarity);
                                     vec_file_entry
                                 } else {
                                     vec_file_entry.clone()

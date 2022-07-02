@@ -113,7 +113,6 @@ pub fn connect_button_search(
     let button_settings = gui_data.header.button_settings.clone();
     let button_app_info = gui_data.header.button_app_info.clone();
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
-    let check_button_image_fast_compare = gui_data.main_notebook.check_button_image_fast_compare.clone();
     let check_button_settings_save_also_json = gui_data.settings.check_button_settings_save_also_json.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
@@ -326,11 +325,9 @@ pub fn connect_button_search(
 
                 let ignore_same_size = check_button_image_ignore_same_size.is_active();
 
-                let similarity = similar_images::Similarity::Similar(scale_similarity_similar_images.value() as u32);
+                let similarity = scale_similarity_similar_images.value() as u32;
 
                 let delete_outdated_cache = check_button_settings_similar_images_delete_outdated_cache.is_active();
-
-                let fast_compare = check_button_image_fast_compare.is_active();
 
                 let futures_sender_similar_images = futures_sender_similar_images.clone();
                 // Find similar images
@@ -352,7 +349,6 @@ pub fn connect_button_search(
                     sf.set_allowed_extensions(allowed_extensions);
                     sf.set_delete_outdated_cache(delete_outdated_cache);
                     sf.set_exclude_images_with_same_size(ignore_same_size);
-                    sf.set_fast_comparing(fast_compare);
                     sf.set_save_also_as_json(save_also_as_json);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
                     let _ = glib_stop_sender.send(Message::SimilarImages(sf));

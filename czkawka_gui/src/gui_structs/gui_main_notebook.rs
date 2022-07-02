@@ -4,7 +4,7 @@ use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, Gestur
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
-use czkawka_core::similar_images::{get_string_from_similarity, Similarity, SIMILAR_VALUES};
+use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
 
 use crate::flg;
 use crate::help_combo_box::{BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
@@ -93,8 +93,6 @@ pub struct GuiMainNotebook {
 
     pub check_button_image_ignore_same_size: CheckButton,
     pub check_button_video_ignore_same_size: CheckButton,
-
-    pub check_button_image_fast_compare: CheckButton,
 
     pub label_image_similarity: Label,
     pub label_image_similarity_max: Label,
@@ -223,8 +221,6 @@ impl GuiMainNotebook {
         let scale_similarity_similar_images: Scale = builder.object("scale_similarity_similar_images").unwrap();
         let scale_similarity_similar_videos: Scale = builder.object("scale_similarity_similar_videos").unwrap();
 
-        let check_button_image_fast_compare: CheckButton = builder.object("check_button_image_fast_compare").unwrap();
-
         let combo_box_image_resize_algorithm: ComboBoxText = builder.object("combo_box_image_resize_algorithm").unwrap();
         let combo_box_image_hash_algorithm: ComboBoxText = builder.object("combo_box_image_hash_algorithm").unwrap();
         let combo_box_image_hash_size: ComboBoxText = builder.object("combo_box_image_hash_size").unwrap();
@@ -319,7 +315,6 @@ impl GuiMainNotebook {
             combo_box_duplicate_hash_type,
             combo_box_image_hash_size,
             check_button_video_ignore_same_size,
-            check_button_image_fast_compare,
             check_button_duplicate_case_sensitive_name,
             evk_tree_view_bad_extensions,
             gc_tree_view_duplicate_finder,
@@ -407,10 +402,6 @@ impl GuiMainNotebook {
         self.check_button_image_ignore_same_size.set_label(Some(&flg!("check_button_general_same_size")));
         self.check_button_video_ignore_same_size.set_label(Some(&flg!("check_button_general_same_size")));
 
-        self.check_button_image_fast_compare.set_label(Some(&flg!("main_notebook_image_fast_compare")));
-        self.check_button_image_fast_compare
-            .set_tooltip_text(Some(&flg!("main_notebook_image_fast_compare_tooltip")));
-
         self.check_button_broken_files_audio.set_label(Some(&flg!("main_check_box_broken_files_audio")));
         self.check_button_broken_files_archive.set_label(Some(&flg!("main_check_box_broken_files_archive")));
         self.check_button_broken_files_image.set_label(Some(&flg!("main_check_box_broken_files_image")));
@@ -421,20 +412,19 @@ impl GuiMainNotebook {
             let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
             match hash_size {
                 8 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[0][5]), 8));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&SIMILAR_VALUES[0][5], 8));
                 }
                 16 => {
                     self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[1][5]), 16));
+                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[1][5], 16));
                 }
                 32 => {
                     self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[2][5]), 32));
+                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[2][5], 32));
                 }
                 64 => {
                     self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&Similarity::Similar(SIMILAR_VALUES[3][5]), 64));
+                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[3][5], 64));
                 }
                 _ => panic!(),
             }

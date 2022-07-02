@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
-<cambalache-project version="0.9.1" target_tk="gtk-4.0">
+<cambalache-project version="0.10.2" target_tk="gtk-4.0">
   <ui>
 	(3,None,"about_dialog.ui","about_dialog.ui",None,None,None,None,None,None),
 	(4,None,"compare_images.ui","compare_images.ui",None,None,None,None,None,None),
@@ -136,7 +136,6 @@
 	(5,98,"GtkScale","scale_similarity_similar_images",95,None,None,None,2),
 	(5,99,"GtkLabel","label_similar_images_minimal_similarity",95,None,None,None,3),
 	(5,100,"GtkCheckButton","check_button_image_ignore_same_size",95,None,None,None,4),
-	(5,101,"GtkCheckButton","check_button_image_fast_compare",95,None,None,None,5),
 	(5,102,"GtkScrolledWindow","scrolled_window_similar_images_finder",87,None,None,None,2),
 	(5,103,"GtkImage","image_preview_similar_images",86,None,None,None,1),
 	(5,104,"GtkLabel",None,85,None,None,None,None),
@@ -558,9 +557,6 @@
 	(5,100,"GtkCheckButton","label","Ignore same size",1,None,None,None,None),
 	(5,100,"GtkWidget","focusable","1",None,None,None,None,None),
 	(5,100,"GtkWidget","margin-start","7",None,None,None,None,None),
-	(5,101,"GtkCheckButton","label","Fast compare",1,None,None,None,None),
-	(5,101,"GtkWidget","focusable","1",None,None,None,None,None),
-	(5,101,"GtkWidget","margin-start","7",None,None,None,None,None),
 	(5,102,"GtkWidget","focusable","1",None,None,None,None,None),
 	(5,102,"GtkWidget","margin-end","5",None,None,None,None,None),
 	(5,102,"GtkWidget","vexpand","1",None,None,None,None,None),
