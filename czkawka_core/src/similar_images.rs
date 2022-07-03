@@ -1247,7 +1247,9 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     // }
     // #[cfg(not(debug_assertions))]
 
-    if *similarity <= SIMILAR_VALUES[index_preset][0] {
+    if *similarity == 0 {
+        flc!("core_similarity_original")
+    } else if *similarity <= SIMILAR_VALUES[index_preset][0] {
         flc!("core_similarity_very_high")
     } else if *similarity <= SIMILAR_VALUES[index_preset][1] {
         flc!("core_similarity_high")
@@ -1347,6 +1349,9 @@ pub fn test_image_conversion_speed() {
 }
 
 #[allow(dead_code)]
+// Function to validate if after first check there are any duplicated entries
+// E.g. /a.jpg is used also as master and similar image which is forbidden, because may
+// cause accidentally delete more pictures that user wanted
 fn debug_check_for_duplicated_things(
     hashes_parents: HashMap<&Vec<u8>, u32>,
     hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)>,

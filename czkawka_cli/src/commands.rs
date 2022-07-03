@@ -145,7 +145,7 @@ pub enum Commands {
         hash_alg: HashAlg,
         #[clap(short = 'z', long, default_value = "Lanczos3", parse(try_from_str = parse_similar_image_filter), help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)")]
         image_filter: FilterType,
-        #[clap(short = 'c', long, default_value = "8", parse(try_from_str = parse_image_hash_size), help = "Hash size (allowed: 4, 8, 16)")]
+        #[clap(short = 'c', long, default_value = "16", parse(try_from_str = parse_image_hash_size), help = "Hash size (allowed: 8, 16, 32, 64)")]
         hash_size: u8,
     },
     #[clap(name = "music", about = "Finds same music by tags", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka music -d /home/rafal -f results.txt")]

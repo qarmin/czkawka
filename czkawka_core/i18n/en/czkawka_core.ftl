@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = Original
 core_similarity_very_high = Very High
 core_similarity_high = High
 core_similarity_medium = Medium
@@ -26,7 +27,7 @@ core_directory_overlap = Directories: All directories to search overlaps with ex
 core_directory_unable_to_get_device_id = Directories: Unable to get device id from folder { $path }
 
 core_ffmpeg_not_found = Cannot find proper installation of FFmpeg
-core_ffmpeg_not_found_windows = When using Windows be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are put directly to same folder where is app executable
+core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are put directly to same folder where is app executable
 core_ffmpeg_missing_in_snap = Similar Videos don't work currently with snap, if you want help look at - { $url }
 
 core_saving_to_cache = Saved to file { $number } cache entries
