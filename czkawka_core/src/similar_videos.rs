@@ -203,7 +203,9 @@ impl SimilarVideos {
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
             self.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
+            #[cfg(target_os = "windows")]
             self.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+            #[cfg(target_os = "linux")]
             self.text_messages.errors.push(flc!(
                 "core_ffmpeg_missing_in_snap",
                 generate_translation_hashmap(vec![("url", "https://github.com/snapcrafters/ffmpeg/issues/73".to_string())])
@@ -803,7 +805,7 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 }
 
 fn get_cache_file() -> String {
-    "cache_similar_videos_50.bin".to_string()
+    "cache_similar_videos.bin".to_string()
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {

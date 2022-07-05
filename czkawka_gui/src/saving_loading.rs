@@ -755,7 +755,7 @@ pub fn load_configuration(
 
     let combo_box_duplicate_hash_type = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().clone(), 0);
     let combo_box_duplicate_checking_method = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().clone(), 0);
-    let combo_box_image_hash_size = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 0);
+    let combo_box_image_hash_size = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 1); // 16 instead default 8
     let combo_box_image_hash_algorithm = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
     let combo_box_image_resize_algorithm = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
     let combo_box_big_files_mode = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().clone(), 0);
@@ -1033,7 +1033,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));
         main_notebook.combo_box_image_hash_algorithm.set_active(Some(0));
         main_notebook.combo_box_image_resize_algorithm.set_active(Some(0));
-        main_notebook.combo_box_image_hash_size.set_active(Some(0));
+        main_notebook.combo_box_image_hash_size.set_active(Some(1)); // Set as 16 instead 8
         main_notebook.combo_box_big_files_mode.set_active(Some(0));
 
         main_notebook.check_button_broken_files_audio.set_active(DEFAULT_BROKEN_FILES_AUDIO);
