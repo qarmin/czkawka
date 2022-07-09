@@ -673,6 +673,10 @@ impl SimilarImages {
     }
 
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        if self.image_hashes.is_empty() {
+            return true;
+        }
+
         let hash_map_modification = SystemTime::now();
         let tolerance = self.similarity;
 

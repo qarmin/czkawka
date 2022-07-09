@@ -277,3 +277,19 @@ It works in this way:
 In `Proper Extension` column, inside parentheses is visible extension guessed by Infer library, and outside there are extensions which have same mime type as guessed one. 
 ![ABC](https://user-images.githubusercontent.com/41945903/167214811-7d811829-6dba-4da0-9788-9e2f780e7279.png)
 
+## Code coverage
+If you want to check code coverage of Czkawka(both in tests or in normal usage) you can execute this simple commands(supports Ubuntu 22.04, but for other OS only installation instruction of packages should be different).
+```commandline
+sudo apt install llvm
+cargo install rustfilt
+
+RUSTFLAGS="-C instrument-coverage" cargo run --bin czkawka_gui
+llvm-profdata merge -sparse default.profraw -o default.profdata
+
+
+llvm-cov show   -Xdemangler=rustfilt target/debug/czkawka_gui -format=html -output-dir=report -instr-profile=default.profdata  -ignore-filename-regex="cargo/registry|rustc"
+llvm-cov report -Xdemangler=rustfilt target/debug/czkawka_gui              --instr-profile=default.profdata -ignore-filename-regex="cargo/registry" > lcov_report.txt
+
+xdg-open report/index.html
+xdg-open lcov_report.txt
+```

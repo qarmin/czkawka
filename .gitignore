@@ -10,3 +10,6 @@ flatpak/
 *.zip
 *.zst
 *.profraw
+*.profdata
+/lcov_report*
+/report
