@@ -1,9 +1,10 @@
 ## Version 5.0.0 - ?.?.2022r
-- GTK 4 port - [#466](https://github.com/qarmin/czkawka/pull/466)
+- GUI ported to use GTK 4 - [#466](https://github.com/qarmin/czkawka/pull/466)
+- Use multithreading and improved algorithm to compare image hashes - [#762](https://github.com/qarmin/czkawka/pull/762)
 - Resize preview with window - [#466](https://github.com/qarmin/czkawka/pull/466)
 - Fix removing only one item from list view - [#466](https://github.com/qarmin/czkawka/pull/466)
 - Fix showing help command in duplicate CLI mode - [#720](https://github.com/qarmin/czkawka/pull/720)
-- Fix freeze when not choosing any tag in similar music mode - [TODO]()
+- Fix freeze when not choosing any tag in similar music mode - [#732](https://github.com/qarmin/czkawka/pull/732)
 - Fix preview of files with non-lowercase extensions - [#694](https://github.com/qarmin/czkawka/pull/694) 
 - Read more tags from music files - [#705](https://github.com/qarmin/czkawka/pull/705)
 - Improve checking for invalid extensions - [#705](https://github.com/qarmin/czkawka/pull/705), [#747](https://github.com/qarmin/czkawka/pull/747), [#749](https://github.com/qarmin/czkawka/pull/749)
@@ -15,6 +16,7 @@
 - Improve Windows CI - [#749](https://github.com/qarmin/czkawka/pull/749)
 - Ability to check for broken files by types - [#749](https://github.com/qarmin/czkawka/pull/749)
 - Add heif and Webp files support - [#750](https://github.com/qarmin/czkawka/pull/750)
+- Use in CLI Clap library instead StructOpt - [#759](https://github.com/qarmin/czkawka/pull/759)
 
 ## Version 4.1.0 - 24.04.2022r
 - New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)
