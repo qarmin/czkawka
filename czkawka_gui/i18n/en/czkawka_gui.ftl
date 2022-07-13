@@ -268,6 +268,12 @@ header_about_button_tooltip = Opens dialog with info about app.
 
 # Settings
 ## General
+settings_ignore_other_filesystems = Ignore other filesystems(only Linux)
+settings_ignore_other_filesystems_tooltip =
+        ignores files that are not in the same file system as searched directories.
+
+        Works same like -xdev option in find command on Linux
+
 settings_save_at_exit_button_tooltip = Save configuration to file when closing app.
 settings_load_at_start_button_tooltip = 
         Load configuration from file when opening app.

@@ -13,7 +13,6 @@ pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,
     pub reference_directories: Vec<PathBuf>,
-    #[cfg(target_family = "unix")]
     exclude_other_filesystems: Option<bool>,
     #[cfg(target_family = "unix")]
     included_dev_ids: Vec<u64>,
@@ -181,7 +180,8 @@ impl Directories {
         self.reference_directories.dedup();
 
         // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
-        if recursive_search {
+        // Do not use when not using recursive search or using
+        if recursive_search && !self.exclude_other_filesystems.unwrap_or(false) {
             // This is only point which can't be done when recursive search is disabled.
             let mut is_inside: bool;
             for ed_checked in &self.excluded_directories {
