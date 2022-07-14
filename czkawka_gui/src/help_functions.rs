@@ -608,14 +608,23 @@ pub fn resize_pixbuf_dimension(pixbuf: Pixbuf, requested_size: (i32, i32), inter
 
 pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     assert!(max_length > 10); // Maybe in future will be supported lower values
-    if file_name.len() > max_length {
-        let difference = file_name.len() - max_length;
+    let characters_in_filename = file_name.chars().count();
+    if characters_in_filename > max_length {
+        let start_characters = 10;
+        let difference = characters_in_filename - max_length;
+        let second_part_start = start_characters + difference;
+        let mut string_pre = "".to_string();
+        let mut string_after = "".to_string();
 
-        let mut string = "".to_string();
-        string += &file_name[0..10];
-        string += " ... ";
-        string += &file_name[10 + difference..];
-        string
+        for (index, character) in file_name.chars().enumerate() {
+            if index < start_characters {
+                string_pre.push(character);
+            } else if index >= second_part_start {
+                string_after.push(character);
+            }
+        }
+
+        format!("{string_pre} ... {string_after}")
     } else {
         file_name.to_string()
     }
@@ -713,4 +722,14 @@ pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pix
         arra = IMAGE_PREVIEW_ARRAY.get().unwrap().as_bytes();
     }
     Pixbuf::from_read(arra)
+}
+
+#[test]
+fn test_file_name_shortener() {
+    let name_to_check = "/home/rafal/czkawek/romek/atomek.txt";
+    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... atomek.txt".to_string());
+    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt".to_string());
+    let name_to_check = "/home/rafal/czkawek/romek/czekistan/atomek.txt";
+    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt".to_string());
+    assert_eq!(get_max_file_name(name_to_check, 80), name_to_check.to_string());
 }
