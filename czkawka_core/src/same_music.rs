@@ -199,6 +199,8 @@ impl SameMusic {
     pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
     }
+    #[cfg(not(target_family = "unix"))]
+    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
 
     /// Set included dir which needs to be relative, exists etc.
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {

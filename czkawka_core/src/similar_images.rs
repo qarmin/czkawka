@@ -216,6 +216,8 @@ impl SimilarImages {
     pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
     }
+    #[cfg(not(target_family = "unix"))]
+    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
 
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
@@ -730,7 +732,8 @@ impl SimilarImages {
             }
 
             let number_of_processors = num_cpus::get();
-            let chunks: Vec<_> = all_hashes.chunks(all_hashes.len() / number_of_processors).collect();
+            let chunk_size = all_hashes.len() / number_of_processors;
+            let chunks: Vec<_> = if chunk_size > 0 { all_hashes.chunks(chunk_size).collect() } else { vec![&all_hashes] };
 
             let parts: Vec<_> = chunks
                 .into_par_iter()

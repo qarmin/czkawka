@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
-<cambalache-project version="0.10.2" target_tk="gtk-4.0">
+<cambalache-project version="0.11.0" target_tk="gtk-4.0">
   <ui>
 	(3,None,"about_dialog.ui","about_dialog.ui",None,None,None,None,None,None),
 	(4,None,"compare_images.ui","compare_images.ui",None,None,None,None,None,None),
@@ -313,7 +313,8 @@
 	(9,51,"GtkBox",None,3,None,None,None,2),
 	(9,52,"GtkButton","button_settings_load_configuration",51,None,None,None,None),
 	(9,53,"GtkButton","button_settings_reset_configuration",51,None,None,None,1),
-	(9,54,"GtkButton","button_settings_save_configuration",51,None,None,None,2)
+	(9,54,"GtkButton","button_settings_save_configuration",51,None,None,None,2),
+	(9,55,"GtkCheckButton","check_button_settings_one_filesystem",9,None,None,None,10)
   </object>
   <object_property>
 	(3,1,"GtkAboutDialog","comments","2020 - 2022  Rafał Mikrut(qarmin)\n\nThis program is free to use and will always be.\n",1,None,None,None,None),
@@ -947,7 +948,10 @@
 	(9,54,"GtkButton","label","Save configuration",1,None,None,None,None),
 	(9,54,"GtkWidget","focusable","1",None,None,None,None,None),
 	(9,54,"GtkWidget","halign","center",None,None,None,None,None),
-	(9,54,"GtkWidget","receives-default","1",None,None,None,None,None)
+	(9,54,"GtkWidget","receives-default","1",None,None,None,None,None),
+	(9,55,"GtkCheckButton","active","1",None,None,None,None,None),
+	(9,55,"GtkCheckButton","label","Exclude other filesystems(Linux)",None,None,None,None,None),
+	(9,55,"GtkWidget","focusable","1",None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(8,17,18,"GtkGridLayoutChild","column","0",None,None,None,None),

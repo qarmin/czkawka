@@ -41,6 +41,7 @@ const DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE: bool = false;
 const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
+const DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS: bool = false;
 
 const DEFAULT_BROKEN_FILES_PDF: bool = true;
 const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
@@ -417,6 +418,7 @@ enum LoadText {
     VideoDeleteOutdatedCacheEntries,
     UsePrehashCache,
     MinimalPrehashCacheSize,
+    GeneralIgnoreOtherFilesystems,
     Language,
     ComboBoxDuplicateHashType,
     ComboBoxDuplicateCheckMethod,
@@ -480,6 +482,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::BrokenFilesAudio, "broken_files_audio"),
         (LoadText::BrokenFilesImage, "broken_files_image"),
         (LoadText::BrokenFilesArchive, "broken_files_archive"),
+        (LoadText::GeneralIgnoreOtherFilesystems, "ignore_other_filesystems"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -592,6 +595,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ShowBottomTextPanel).unwrap().to_string(),
         settings.check_button_settings_show_text_view.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::GeneralIgnoreOtherFilesystems).unwrap().to_string(),
+        settings.check_button_settings_one_filesystem.is_active(),
     );
 
     saving_struct.save_var(
@@ -732,6 +739,10 @@ pub fn load_configuration(
     let use_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UseCache).unwrap().clone(), DEFAULT_USE_CACHE);
     let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UseJsonCacheFile).unwrap().clone(), DEFAULT_SAVE_ALSO_AS_JSON);
     let use_trash: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::DeleteToTrash).unwrap().clone(), DEFAULT_USE_TRASH);
+    let ignore_other_fs: bool = loaded_entries.get_bool(
+        hashmap_ls.get(&LoadText::GeneralIgnoreOtherFilesystems).unwrap().clone(),
+        DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS,
+    );
     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
         hashmap_ls.get(&LoadText::DuplicateDeleteOutdatedCacheEntries).unwrap().clone(),
         DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE,
@@ -893,6 +904,7 @@ pub fn load_configuration(
         settings.check_button_settings_use_trash.set_active(use_trash);
         settings.entry_settings_cache_file_minimal_size.set_text(&cache_minimal_size);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&cache_prehash_minimal_size);
+        settings.check_button_settings_one_filesystem.set_active(ignore_other_fs);
 
         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_hash_type, combo_box_duplicate_hash_type);
         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_check_method, combo_box_duplicate_checking_method);
@@ -1028,6 +1040,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.check_button_duplicates_use_prehash_cache.set_active(DEFAULT_USE_PRECACHE);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(DEFAULT_PREHASH_MINIMAL_CACHE_SIZE);
         settings.combo_box_settings_language.set_active(Some(0));
+        settings.check_button_settings_one_filesystem.set_active(DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
 
         main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));

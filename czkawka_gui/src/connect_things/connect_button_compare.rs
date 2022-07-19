@@ -11,7 +11,9 @@ use image::DynamicImage;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{count_number_of_groups, get_all_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
+use crate::help_functions::{
+    count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
+};
 use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_info::{NotebookObject, NOTEBOOKS_INFO};
 
@@ -326,7 +328,7 @@ fn populate_groups_at_start(
     *shared_image_cache.borrow_mut() = cache_all_images.clone();
 
     let mut found = false;
-    for i in get_all_children(&scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk4::Viewport>().unwrap()) {
+    for i in get_all_direct_children(&scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk4::Viewport>().unwrap()) {
         if i.widget_name() == "all_box" {
             let gtk_box = i.downcast::<gtk4::Box>().unwrap();
             update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
@@ -618,13 +620,13 @@ fn update_bottom_buttons(
     let left_tree_view = (*shared_using_for_preview.borrow()).0.clone().unwrap();
     let right_tree_view = (*shared_using_for_preview.borrow()).1.clone().unwrap();
 
-    for (number, i) in get_all_children(all_gtk_box).into_iter().enumerate() {
+    for (number, i) in get_all_direct_children(all_gtk_box).into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 
         let bx = i.downcast::<gtk4::Box>().unwrap();
-        let smaller_bx = get_all_children(&bx)[0].clone().downcast::<gtk4::Box>().unwrap();
-        for items in get_all_children(&smaller_bx) {
+        let smaller_bx = get_all_direct_children(&bx)[0].clone().downcast::<gtk4::Box>().unwrap();
+        for items in get_all_direct_children(&smaller_bx) {
             if let Ok(btn) = items.downcast::<gtk4::Button>() {
                 btn.set_sensitive(is_chosen);
             }

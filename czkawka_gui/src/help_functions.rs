@@ -608,14 +608,23 @@ pub fn resize_pixbuf_dimension(pixbuf: Pixbuf, requested_size: (i32, i32), inter
 
 pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     assert!(max_length > 10); // Maybe in future will be supported lower values
-    if file_name.len() > max_length {
-        let difference = file_name.len() - max_length;
+    let characters_in_filename = file_name.chars().count();
+    if characters_in_filename > max_length {
+        let start_characters = 10;
+        let difference = characters_in_filename - max_length;
+        let second_part_start = start_characters + difference;
+        let mut string_pre = "".to_string();
+        let mut string_after = "".to_string();
 
-        let mut string = "".to_string();
-        string += &file_name[0..10];
-        string += " ... ";
-        string += &file_name[10 + difference..];
-        string
+        for (index, character) in file_name.chars().enumerate() {
+            if index < start_characters {
+                string_pre.push(character);
+            } else if index >= second_part_start {
+                string_after.push(character);
+            }
+        }
+
+        format!("{string_pre} ... {string_after}")
     } else {
         file_name.to_string()
     }
@@ -628,7 +637,7 @@ pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
             return label;
         } else {
-            widgets_to_check.extend(get_all_children(&widget));
+            widgets_to_check.extend(get_all_direct_children(&widget));
         }
     }
     panic!("Button doesn't have proper custom label child");
@@ -641,7 +650,7 @@ pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
         if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
             return image;
         } else {
-            widgets_to_check.extend(get_all_children(&widget));
+            widgets_to_check.extend(get_all_direct_children(&widget));
         }
     }
     panic!("Button doesn't have proper custom label child");
@@ -655,7 +664,7 @@ pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
     println!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
 
     while let Some((current_number, parent_number, widget)) = widgets_to_check.pop() {
-        for widget in get_all_children(&widget) {
+        for widget in get_all_direct_children(&widget) {
             widgets_to_check.push((next_free_number, current_number, widget));
             next_free_number += 1;
         }
@@ -668,7 +677,7 @@ pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
     let mut boxes = Vec::new();
 
     while let Some(widget) = widgets_to_check.pop() {
-        widgets_to_check.extend(get_all_children(&widget));
+        widgets_to_check.extend(get_all_direct_children(&widget));
         if let Ok(bbox) = widget.clone().downcast::<gtk4::Box>() {
             boxes.push(bbox);
         }
@@ -676,7 +685,7 @@ pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
     boxes
 }
 
-pub fn get_all_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
+pub fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
     let mut vector = vec![];
     if let Some(mut child) = wid.first_child() {
         vector.push(child.clone());
@@ -713,4 +722,67 @@ pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pix
         arra = IMAGE_PREVIEW_ARRAY.get().unwrap().as_bytes();
     }
     Pixbuf::from_read(arra)
+}
+
+#[test]
+fn test_file_name_shortener() {
+    let name_to_check = "/home/rafal/czkawek/romek/atomek.txt";
+    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... atomek.txt");
+    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
+    let name_to_check = "/home/rafal/czkawek/romek/czekistan/atomek.txt";
+    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
+    assert_eq!(get_max_file_name(name_to_check, 80), name_to_check);
+    let name_to_check = "/home/rafal/‍🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈.txt";
+    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈🌈🌈🌈🌈🌈🌈.txt");
+    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... 🌈🌈🌈🌈🌈🌈.txt");
+    assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🌈🌈🌈🌈🌈.txt");
+    let name_to_check = "/home/rafal/‍🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️.txt";
+    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈\u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... \u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+    assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+}
+
+#[cfg(test)]
+mod test {
+    use crate::help_functions::{get_all_boxes_from_widget, get_all_direct_children, get_pixbuf_from_dynamic_image};
+    use gtk4::prelude::*;
+    use gtk4::Orientation;
+    use image::DynamicImage;
+
+    #[test]
+    fn test_pixbuf_from_dynamic_image() {
+        let dynamic_image = DynamicImage::new_rgb8(1, 1);
+        get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
+        get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
+        get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
+        get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
+    }
+
+    #[gtk4::test]
+    fn test_get_all_direct_children() {
+        let obj = gtk4::Box::new(Orientation::Horizontal, 0);
+        let obj2 = gtk4::Box::new(Orientation::Horizontal, 0);
+        let obj3 = gtk4::Image::new();
+        let obj4 = gtk4::Image::new();
+        let obj5 = gtk4::Image::new();
+        obj.append(&obj2);
+        obj.append(&obj3);
+        obj2.append(&obj4);
+        obj2.append(&obj5);
+        assert_eq!(get_all_direct_children(&obj).len(), 2);
+    }
+
+    #[gtk4::test]
+    fn test_get_all_boxes_from_widget() {
+        let obj = gtk4::Box::new(Orientation::Horizontal, 0);
+        let obj2 = gtk4::Box::new(Orientation::Horizontal, 0);
+        let obj3 = gtk4::Image::new();
+        let obj4 = gtk4::Image::new();
+        let obj5 = gtk4::Image::new();
+        obj.append(&obj2);
+        obj.append(&obj3);
+        obj2.append(&obj4);
+        obj2.append(&obj5);
+        assert_eq!(get_all_boxes_from_widget(&obj).len(), 2);
+    }
 }

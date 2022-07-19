@@ -113,6 +113,8 @@ impl Temporary {
     pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
     }
+    #[cfg(not(target_family = "unix"))]
+    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
 
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
         self.directories.set_included_directory(included_directory, &mut self.text_messages)

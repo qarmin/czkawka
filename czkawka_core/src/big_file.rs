@@ -133,6 +133,8 @@ impl BigFile {
     pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
     }
+    #[cfg(not(target_family = "unix"))]
+    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
 
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {

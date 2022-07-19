@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Window};
 
 use crate::flg;
-use crate::help_functions::get_all_children;
+use crate::help_functions::get_all_direct_children;
 
 #[derive(Clone)]
 pub struct GuiSettings {
@@ -22,6 +22,7 @@ pub struct GuiSettings {
     pub check_button_settings_use_trash: gtk4::CheckButton,
     pub label_settings_general_language: gtk4::Label,
     pub combo_box_settings_language: gtk4::ComboBoxText,
+    pub check_button_settings_one_filesystem: gtk4::CheckButton,
 
     // Duplicates
     pub check_button_settings_hide_hard_links: gtk4::CheckButton,
@@ -65,6 +66,7 @@ impl GuiSettings {
         let notebook_settings: gtk4::Notebook = builder.object("notebook_settings").unwrap();
 
         // General
+        let check_button_settings_one_filesystem: gtk4::CheckButton = builder.object("check_button_settings_one_filesystem").unwrap();
         let check_button_settings_save_at_exit: gtk4::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
         let check_button_settings_load_at_start: gtk4::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
         let check_button_settings_confirm_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_deletion").unwrap();
@@ -119,6 +121,7 @@ impl GuiSettings {
             check_button_settings_use_trash,
             label_settings_general_language,
             combo_box_settings_language,
+            check_button_settings_one_filesystem,
             check_button_settings_hide_hard_links,
             entry_settings_cache_file_minimal_size,
             entry_settings_prehash_cache_file_minimal_size,
@@ -155,6 +158,7 @@ impl GuiSettings {
         self.check_button_settings_save_also_json.set_label(Some(&flg!("settings_save_also_as_json_button")));
         self.check_button_settings_use_trash.set_label(Some(&flg!("settings_use_trash_button")));
         self.label_settings_general_language.set_label(&flg!("settings_language_label"));
+        self.check_button_settings_one_filesystem.set_label(Some(&flg!("settings_ignore_other_filesystems")));
 
         self.check_button_settings_save_at_exit
             .set_tooltip_text(Some(&flg!("settings_save_at_exit_button_tooltip")));
@@ -173,6 +177,8 @@ impl GuiSettings {
         self.check_button_settings_use_cache.set_tooltip_text(Some(&flg!("settings_use_cache_button_tooltip")));
         self.check_button_settings_use_trash.set_tooltip_text(Some(&flg!("settings_use_trash_button_tooltip")));
         self.label_settings_general_language.set_tooltip_text(Some(&flg!("settings_language_label_tooltip")));
+        self.check_button_settings_one_filesystem
+            .set_tooltip_text(Some(&flg!("settings_ignore_other_filesystems_tooltip")));
 
         self.check_button_settings_hide_hard_links
             .set_label(Some(&flg!("settings_duplicates_hide_hard_link_button")));
@@ -240,8 +246,8 @@ impl GuiSettings {
         self.button_settings_open_settings_folder
             .set_tooltip_text(Some(&flg!("settings_folder_settings_open_tooltip")));
 
-        let vec_children: Vec<gtk4::Widget> = get_all_children(&self.notebook_settings);
-        let vec_children: Vec<gtk4::Widget> = get_all_children(&vec_children[1]);
+        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&self.notebook_settings);
+        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&vec_children[1]);
 
         // Change name of main notebook tabs
         let names: [String; 4] = [
