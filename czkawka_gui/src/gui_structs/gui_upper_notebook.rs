@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{EventControllerKey, GestureClick, TreeView};
 
-use crate::help_functions::{get_all_children, get_custom_label_from_widget, set_icon_of_button};
+use crate::help_functions::{get_all_direct_children, get_custom_label_from_widget, set_icon_of_button};
 use crate::notebook_enums::NotebookUpperEnum;
 use crate::{flg, CZK_ICON_ADD, CZK_ICON_DELETE, CZK_ICON_MANUAL_ADD};
 
@@ -157,8 +157,8 @@ impl GuiUpperNotebook {
         self.entry_general_minimal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
         self.entry_general_maximal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
 
-        let vec_children: Vec<gtk4::Widget> = get_all_children(&self.notebook_upper);
-        let vec_children: Vec<gtk4::Widget> = get_all_children(&vec_children[1]);
+        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&self.notebook_upper);
+        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&vec_children[1]);
 
         // Change name of upper notebook tabs
         for (upper_enum, fl_thing) in [

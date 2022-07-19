@@ -8,7 +8,7 @@ use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
 
 use crate::flg;
 use crate::help_combo_box::{BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::get_all_children;
+use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
 #[derive(Clone)]
@@ -430,8 +430,8 @@ impl GuiMainNotebook {
             }
         }
 
-        let vec_children: Vec<Widget> = get_all_children(&self.notebook_main);
-        let vec_children: Vec<Widget> = get_all_children(&vec_children[1]);
+        let vec_children: Vec<Widget> = get_all_direct_children(&self.notebook_main);
+        let vec_children: Vec<Widget> = get_all_direct_children(&vec_children[1]);
 
         // Change name of main notebook tabs
         for (main_enum, fl_thing) in [

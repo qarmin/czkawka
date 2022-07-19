@@ -26,10 +26,10 @@ futures = "0.3.21"
 directories-next = "2.0.0"
 
 # For opening files
-open = "3.0.1"
+open = "3.0.2"
 
 # To get image preview
-image = "0.24.2"
+image = "0.24.3"
 
 # To be able to use custom select
 regex = "1.6.0"
