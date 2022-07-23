@@ -21,7 +21,6 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS};
-
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -570,7 +569,7 @@ impl SimilarImages {
                         break 'krztyna;
                     }
 
-                    # [cfg(feature = "heif")]
+                    #[cfg(feature = "heif")]
                     if HEIC_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
                         image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy().to_string()) {
                             Ok(t) => t,

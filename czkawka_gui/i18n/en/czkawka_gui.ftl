@@ -132,7 +132,12 @@ upper_manual_add_excluded_button = Manual Add
 upper_add_excluded_button = Add
 upper_remove_excluded_button =  Remove
 
-upper_manual_add_included_button_tooltip = Add directory name to search by hand.
+upper_manual_add_included_button_tooltip =
+        Add directory name to search by hand.
+
+        To add multiple paths at once, separate them by ;
+
+        /home/roman;/home/rozkaz will add two directories /home/roman and /home/rozkaz
 upper_add_included_button_tooltip = Add new directory to search.
 upper_remove_included_button_tooltip =  Delete directory from search.
 upper_manual_add_excluded_button_tooltip = Add excluded directory name by hand.

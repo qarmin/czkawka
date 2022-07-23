@@ -157,20 +157,21 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
     let tree_view = tree_view.clone();
     dialog.connect_response(move |dialog, response_type| {
         if response_type == gtk4::ResponseType::Ok {
-            let text = entry.text().to_string().trim().to_string();
+            for text in entry.text().split(';') {
+                let text = text.trim().to_string();
+                #[cfg(target_family = "windows")]
+                let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
-            #[cfg(target_family = "windows")]
-            let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
+                if !text.is_empty() {
+                    let list_store = get_list_store(&tree_view);
 
-            if !text.is_empty() {
-                let list_store = get_list_store(&tree_view);
-
-                if excluded_items {
-                    let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
-                    list_store.set(&list_store.append(), &values);
-                } else {
-                    let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
-                    list_store.set(&list_store.append(), &values);
+                    if excluded_items {
+                        let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
+                        list_store.set(&list_store.append(), &values);
+                    } else {
+                        let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
+                        list_store.set(&list_store.append(), &values);
+                    }
                 }
             }
         }

@@ -712,6 +712,7 @@ pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
 }
 
 static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
+
 pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, Error> {
     let mut output = Vec::new();
     JpegEncoder::new(&mut output).encode_image(dynamic_image).unwrap();
@@ -740,14 +741,18 @@ fn test_file_name_shortener() {
     assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈\u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
     assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... \u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
     assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+    assert_eq!(get_max_file_name(name_to_check, 18), "/home/rafa ... \u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+    assert_eq!(get_max_file_name(name_to_check, 17), "/home/rafa ... \u{200d}🌈\u{fe0f}.txt");
+    assert_eq!(get_max_file_name(name_to_check, 16), "/home/rafa ... 🌈\u{fe0f}.txt");
 }
 
 #[cfg(test)]
 mod test {
-    use crate::help_functions::{get_all_boxes_from_widget, get_all_direct_children, get_pixbuf_from_dynamic_image};
     use gtk4::prelude::*;
     use gtk4::Orientation;
     use image::DynamicImage;
+
+    use crate::help_functions::{change_dimension_to_krotka, get_all_boxes_from_widget, get_all_direct_children, get_pixbuf_from_dynamic_image};
 
     #[test]
     fn test_pixbuf_from_dynamic_image() {
@@ -756,6 +761,11 @@ mod test {
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
+    }
+    #[test]
+    fn test_change_dimension_to_krotka() {
+        assert_eq!(change_dimension_to_krotka("50x50".to_string()), (50, 50));
+        assert_eq!(change_dimension_to_krotka("6000x6000".to_string()), (6000, 6000));
     }
 
     #[gtk4::test]

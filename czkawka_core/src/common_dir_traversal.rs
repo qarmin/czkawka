@@ -34,7 +34,7 @@ pub enum CheckingMethod {
     Hash,
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -47,13 +47,13 @@ pub struct FileEntry {
 
 const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SymlinkInfo {
     pub destination_path: PathBuf,
     pub type_of_error: ErrorType,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorType {
     InfiniteRecursion,
     NonExistentFile,

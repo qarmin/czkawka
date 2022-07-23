@@ -5,12 +5,11 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
+#[cfg(feature = "heif")]
+use anyhow::Result;
 use directories_next::ProjectDirs;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
-
-#[cfg(feature = "heif")]
-use anyhow::Result;
 #[cfg(feature = "heif")]
 use libheif_rs::{Channel, ColorSpace, HeifContext, RgbChroma};
 
