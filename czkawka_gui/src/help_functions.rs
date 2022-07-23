@@ -761,9 +761,9 @@ mod test {
         for i in values_to_add {
             list_store.set(&list_store.append(), &[*i]);
         }
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"), true);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"), true);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"), false);
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
 
         let columns_types: &[glib::types::Type] = &[glib::types::Type::STRING, glib::types::Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
@@ -771,12 +771,12 @@ mod test {
         for i in values_to_add {
             list_store.set(&list_store.append(), i);
         }
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"), true);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"), true);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"), true);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"), true);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 0, "Krakus"), false);
-        assert_eq!(check_if_value_is_in_list_store(&list_store, 1, "Kachir"), false);
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Krakus"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 1, "Kachir"));
     }
 
     #[test]
