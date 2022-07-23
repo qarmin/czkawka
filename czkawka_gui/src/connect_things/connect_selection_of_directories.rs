@@ -8,7 +8,7 @@ use czkawka_core::common::Common;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
+use crate::help_functions::{check_if_value_is_in_list_store, get_list_store, ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 
 pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
@@ -158,19 +158,27 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
     dialog.connect_response(move |dialog, response_type| {
         if response_type == gtk4::ResponseType::Ok {
             for text in entry.text().split(';') {
-                let text = text.trim().to_string();
+                let mut text = text.trim().to_string();
                 #[cfg(target_family = "windows")]
-                let text = Common::normalize_windows_path(text).to_string_lossy().to_string();
+                let mut text = Common::normalize_windows_path(text).to_string_lossy().to_string();
+
+                while text != "/" && (text.ends_with('/') || text.ends_with('\\')) {
+                    text.pop();
+                }
 
                 if !text.is_empty() {
                     let list_store = get_list_store(&tree_view);
 
                     if excluded_items {
-                        let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
-                        list_store.set(&list_store.append(), &values);
+                        if !(check_if_value_is_in_list_store(&list_store, ColumnsExcludedDirectory::Path as i32, &text)) {
+                            let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
+                            list_store.set(&list_store.append(), &values);
+                        }
                     } else {
-                        let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
-                        list_store.set(&list_store.append(), &values);
+                        if !check_if_value_is_in_list_store(&list_store, ColumnsIncludedDirectory::Path as i32, &text) {
+                            let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
+                            list_store.set(&list_store.append(), &values);
+                        }
                     }
                 }
             }

@@ -549,7 +549,7 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let mut thing = file_entry.track_title.to_lowercase().trim().to_string();
+                    let mut thing = file_entry.track_title.trim().to_lowercase();
                     if self.approximate_comparison {
                         get_approximate_conversion(&mut thing);
                     }
@@ -577,7 +577,7 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let mut thing = file_entry.track_artist.to_lowercase().trim().to_string();
+                    let mut thing = file_entry.track_artist.trim().to_lowercase();
                     if self.approximate_comparison {
                         get_approximate_conversion(&mut thing);
                     }
@@ -605,7 +605,7 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let thing = file_entry.year.to_lowercase().trim().to_string();
+                    let thing = file_entry.year.trim().to_lowercase();
                     if !thing.is_empty() {
                         hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
@@ -630,7 +630,7 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let thing = file_entry.length.to_lowercase().trim().to_string();
+                    let thing = file_entry.length.trim().to_lowercase();
                     if !thing.is_empty() {
                         hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
@@ -655,7 +655,7 @@ impl SameMusic {
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
-                    let thing = file_entry.genre.to_lowercase().trim().to_string();
+                    let thing = file_entry.genre.trim().to_lowercase();
                     if !thing.is_empty() {
                         hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
                     }
