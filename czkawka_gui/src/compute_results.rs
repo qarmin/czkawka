@@ -157,7 +157,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         // Sort
                                         let vector = if vector.len() >= 2 {
                                             let mut vector = vector.clone();
-                                            vector.sort_by_key(|e| {
+                                            vector.sort_unstable_by_key(|e| {
                                                 let t = split_path(e.path.as_path());
                                                 (t.0, t.1)
                                             });
@@ -216,7 +216,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             // Sort
                                             let vector = if vector.len() >= 2 {
                                                 let mut vector = vector.clone();
-                                                vector.sort_by_key(|e| {
+                                                vector.sort_unstable_by_key(|e| {
                                                     let t = split_path(e.path.as_path());
                                                     (t.0, t.1)
                                                 });
@@ -276,7 +276,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         // Sort
                                         let vector = if vector.len() >= 2 {
                                             let mut vector = vector.clone();
-                                            vector.sort_by_key(|e| {
+                                            vector.sort_unstable_by_key(|e| {
                                                 let t = split_path(e.path.as_path());
                                                 (t.0, t.1)
                                             });
@@ -339,7 +339,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         // Sort
                                         let vector = if vector.len() >= 2 {
                                             let mut vector = vector.clone();
-                                            vector.sort_by_key(|e| {
+                                            vector.sort_unstable_by_key(|e| {
                                                 let t = split_path(e.path.as_path());
                                                 (t.0, t.1)
                                             });
@@ -395,7 +395,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             // Sort
                                             let vector = if vector.len() >= 2 {
                                                 let mut vector = vector.clone();
-                                                vector.sort_by_key(|e| {
+                                                vector.sort_unstable_by_key(|e| {
                                                     let t = split_path(e.path.as_path());
                                                     (t.0, t.1)
                                                 });
@@ -449,7 +449,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         // Sort
                                         let vector = if vector.len() >= 2 {
                                             let mut vector = vector.clone();
-                                            vector.sort_by_key(|e| {
+                                            vector.sort_unstable_by_key(|e| {
                                                 let t = split_path(e.path.as_path());
                                                 (t.0, t.1)
                                             });
@@ -550,7 +550,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         let hashmap = ef.get_empty_folder_list();
                         let mut vector = hashmap.keys().cloned().collect::<Vec<PathBuf>>();
 
-                        vector.sort_by_key(|e| {
+                        vector.sort_unstable_by_key(|e| {
                             let t = split_path(e.as_path());
                             (t.0, t.1)
                         });
@@ -616,7 +616,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         // Sort
                         let mut vector = vector.clone();
-                        vector.sort_by_key(|e| {
+                        vector.sort_unstable_by_key(|e| {
                             let t = split_path(e.path.as_path());
                             (t.0, t.1)
                         });
@@ -742,7 +742,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         // Sort
                         let mut vector = vector.clone();
-                        vector.sort_by_key(|e| {
+                        vector.sort_unstable_by_key(|e| {
                             let t = split_path(e.path.as_path());
                             (t.0, t.1)
                         });
@@ -999,7 +999,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    vec_file_entry.sort_by_key(|e| {
+                                    vec_file_entry.sort_unstable_by_key(|e| {
                                         let t = split_path(e.path.as_path());
                                         (t.0, t.1)
                                     });
@@ -1057,7 +1057,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    vec_file_entry.sort_by_key(|e| {
+                                    vec_file_entry.sort_unstable_by_key(|e| {
                                         let t = split_path(e.path.as_path());
                                         (t.0, t.1)
                                     });
@@ -1181,7 +1181,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    vec_file_entry.sort_by_key(|e| {
+                                    vec_file_entry.sort_unstable_by_key(|e| {
                                         let t = split_path(e.path.as_path());
                                         (t.0, t.1)
                                     });
@@ -1252,7 +1252,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    vec_file_entry.sort_by_key(|e| {
+                                    vec_file_entry.sort_unstable_by_key(|e| {
                                         let t = split_path(e.path.as_path());
                                         (t.0, t.1)
                                     });
@@ -1402,7 +1402,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                         // Sort
                         let mut vector = vector.clone();
 
-                        vector.sort_by_key(|e| {
+                        vector.sort_unstable_by_key(|e| {
                             let t = split_path(e.path.as_path());
                             (t.0, t.1)
                         });
@@ -1474,7 +1474,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         // Sort
                         let mut vector = vector.clone();
-                        vector.sort_by_key(|e| {
+                        vector.sort_unstable_by_key(|e| {
                             let t = split_path(e.path.as_path());
                             (t.0, t.1)
                         });
@@ -1540,7 +1540,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
 
                         // Sort
                         let mut vector = vector.clone();
-                        vector.sort_by_key(|e| {
+                        vector.sort_unstable_by_key(|e| {
                             let t = split_path(e.path.as_path());
                             (t.0, t.1)
                         });

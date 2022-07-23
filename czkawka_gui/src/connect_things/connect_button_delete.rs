@@ -509,7 +509,7 @@ pub fn tree_remove(
 
     // Delete duplicated entries, and remove real files
     for (path, mut vec_file_name) in map_with_path_to_delete {
-        vec_file_name.sort();
+        vec_file_name.sort_unstable();
         vec_file_name.dedup();
         for file_name in vec_file_name {
             if !use_trash {

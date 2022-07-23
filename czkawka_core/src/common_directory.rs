@@ -171,9 +171,9 @@ impl Directories {
 
         // Remove duplicated entries like: "/", "/"
 
-        self.excluded_directories.sort();
-        self.included_directories.sort();
-        self.reference_directories.sort();
+        self.excluded_directories.sort_unstable();
+        self.included_directories.sort_unstable();
+        self.reference_directories.sort_unstable();
 
         self.excluded_directories.dedup();
         self.included_directories.dedup();
@@ -292,8 +292,8 @@ impl Directories {
         }
 
         // Not needed, but better is to have sorted everything
-        self.excluded_directories.sort();
-        self.included_directories.sort();
+        self.excluded_directories.sort_unstable();
+        self.included_directories.sort_unstable();
         Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
 
         // Get device IDs for included directories

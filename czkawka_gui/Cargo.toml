@@ -17,7 +17,7 @@ humansize = "1.1.1"
 chrono = "0.4.19"
 
 # Used for sending stop signal across threads
-crossbeam-channel = "0.5.5"
+crossbeam-channel = "0.5.6"
 
 # To get informations about progress
 futures = "0.3.21"

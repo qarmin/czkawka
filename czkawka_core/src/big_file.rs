@@ -336,7 +336,7 @@ impl BigFile {
         for (size, mut vector) in iter {
             if self.information.number_of_real_files < self.number_of_files_to_check {
                 if vector.len() > 1 {
-                    vector.sort_by_key(|e| {
+                    vector.sort_unstable_by_key(|e| {
                         let t = split_path(e.path.as_path());
                         (t.0, t.1)
                     });

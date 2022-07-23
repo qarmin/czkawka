@@ -148,7 +148,6 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("msi", "doc"), // Not sure whe doc is not recognized
     ("exe", "xls"), // Not sure whe xls is not recognized
 ];
-
 #[derive(Clone)]
 pub struct BadFileEntry {
     pub path: PathBuf,
