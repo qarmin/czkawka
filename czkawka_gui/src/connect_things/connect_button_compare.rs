@@ -1,13 +1,14 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[cfg(feature = "heif")]
-use czkawka_core::common::get_dynamic_image_from_heic;
-use czkawka_core::common::HEIC_EXTENSIONS;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
+
+#[cfg(feature = "heif")]
+use czkawka_core::common::get_dynamic_image_from_heic;
+use czkawka_core::common::HEIC_EXTENSIONS;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -617,8 +618,8 @@ fn update_bottom_buttons(
     shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
 ) {
-    let left_tree_view = (*shared_using_for_preview.borrow()).0.clone().unwrap();
-    let right_tree_view = (*shared_using_for_preview.borrow()).1.clone().unwrap();
+    let left_tree_view = (shared_using_for_preview.borrow()).0.clone().unwrap();
+    let right_tree_view = (shared_using_for_preview.borrow()).1.clone().unwrap();
 
     for (number, i) in get_all_direct_children(all_gtk_box).into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();

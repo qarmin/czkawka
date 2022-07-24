@@ -1476,7 +1476,7 @@ mod tests {
         assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
 
         let mut actual = read_dir(&dir)?.map(|e| e.unwrap().path()).collect::<Vec<PathBuf>>();
-        actual.sort();
+        actual.sort_unstable();
         assert_eq!(vec![src, dst], actual);
         Ok(())
     }

@@ -794,6 +794,7 @@ fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
         TypeOfFile::Unknown
     }
 }
+
 fn check_extension_allowed(type_of_file: &TypeOfFile, checked_types: &CheckedTypes) -> bool {
     ((*type_of_file == TypeOfFile::Image) && ((*checked_types & CheckedTypes::IMAGE) == CheckedTypes::IMAGE))
         || ((*type_of_file == TypeOfFile::PDF) && ((*checked_types & CheckedTypes::PDF) == CheckedTypes::PDF))

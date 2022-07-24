@@ -712,6 +712,7 @@ pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
 }
 
 static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
+
 pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, Error> {
     let mut output = Vec::new();
     JpegEncoder::new(&mut output).encode_image(dynamic_image).unwrap();
@@ -724,30 +725,80 @@ pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pix
     Pixbuf::from_read(arra)
 }
 
-#[test]
-fn test_file_name_shortener() {
-    let name_to_check = "/home/rafal/czkawek/romek/atomek.txt";
-    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... atomek.txt");
-    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
-    let name_to_check = "/home/rafal/czkawek/romek/czekistan/atomek.txt";
-    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
-    assert_eq!(get_max_file_name(name_to_check, 80), name_to_check);
-    let name_to_check = "/home/rafal/‍🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈.txt";
-    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈🌈🌈🌈🌈🌈🌈.txt");
-    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... 🌈🌈🌈🌈🌈🌈.txt");
-    assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🌈🌈🌈🌈🌈.txt");
-    let name_to_check = "/home/rafal/‍🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️.txt";
-    assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈\u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
-    assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... \u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
-    assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
+    if let Some(iter) = list_store.iter_first() {
+        loop {
+            let list_store_value: String = list_store.get::<String>(&iter, column as i32);
+
+            if value == list_store_value {
+                return true;
+            }
+
+            if !list_store.iter_next(&iter) {
+                break;
+            }
+        }
+    }
+
+    false
 }
 
 #[cfg(test)]
 mod test {
-    use crate::help_functions::{get_all_boxes_from_widget, get_all_direct_children, get_pixbuf_from_dynamic_image};
     use gtk4::prelude::*;
     use gtk4::Orientation;
     use image::DynamicImage;
+
+    use crate::help_functions::{
+        change_dimension_to_krotka, check_if_value_is_in_list_store, get_all_boxes_from_widget, get_all_direct_children, get_max_file_name, get_pixbuf_from_dynamic_image,
+    };
+
+    #[gtk4::test]
+    fn test_check_if_value_is_in_list_store() {
+        let columns_types: &[glib::types::Type] = &[glib::types::Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"Koczkodan"), (0, &"Kachir")];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
+
+        let columns_types: &[glib::types::Type] = &[glib::types::Type::STRING, glib::types::Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), i);
+        }
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Krakus"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 1, "Kachir"));
+    }
+
+    #[test]
+    fn test_file_name_shortener() {
+        let name_to_check = "/home/rafal/czkawek/romek/atomek.txt";
+        assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... atomek.txt");
+        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
+        let name_to_check = "/home/rafal/czkawek/romek/czekistan/atomek.txt";
+        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
+        assert_eq!(get_max_file_name(name_to_check, 80), name_to_check);
+        let name_to_check = "/home/rafal/‍🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈.txt";
+        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈🌈🌈🌈🌈🌈🌈.txt");
+        assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... 🌈🌈🌈🌈🌈🌈.txt");
+        assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🌈🌈🌈🌈🌈.txt");
+        let name_to_check = "/home/rafal/‍🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️.txt";
+        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈\u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+        assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... \u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+        assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+        assert_eq!(get_max_file_name(name_to_check, 18), "/home/rafa ... \u{fe0f}\u{200d}🌈\u{fe0f}.txt");
+        assert_eq!(get_max_file_name(name_to_check, 17), "/home/rafa ... \u{200d}🌈\u{fe0f}.txt");
+        assert_eq!(get_max_file_name(name_to_check, 16), "/home/rafa ... 🌈\u{fe0f}.txt");
+    }
 
     #[test]
     fn test_pixbuf_from_dynamic_image() {
@@ -756,6 +807,11 @@ mod test {
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
+    }
+    #[test]
+    fn test_change_dimension_to_krotka() {
+        assert_eq!(change_dimension_to_krotka("50x50".to_string()), (50, 50));
+        assert_eq!(change_dimension_to_krotka("6000x6000".to_string()), (6000, 6000));
     }
 
     #[gtk4::test]
