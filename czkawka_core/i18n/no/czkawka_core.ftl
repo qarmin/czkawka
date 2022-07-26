@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = Opprinnelig
 core_similarity_very_high = Veldig høy
 core_similarity_high = Høy
 core_similarity_medium = Middels
@@ -21,7 +22,9 @@ core_directory_must_be_directory = Kataloger: Angitt sti må peke på mappen. Ig
 core_included_directory_zero_valid_directories = Feil med inkludert katalog: Fant ikke én eneste sti til den inkluderte mappen, noe som er påkrevd
 core_excluded_directory_pointless_slash = Kataloger: Ekskludere / er poengløst, fordi det betyr at ingen filer vil bli skannet
 core_directory_overlap = Kataloger: Alle kataloger å søke overlapper med ekskluderte mapper
+core_directory_unable_to_get_device_id = Mapper: Kan ikke hente enhets id fra mappen { $path }
 core_ffmpeg_not_found = Klarte ikke å finne riktig installasjon av FFmpeg
+core_ffmpeg_not_found_windows = Pass på at ffmpeg.exe og ffprobe.exe er tilgjengelig i PATH eller plasseres direkte i samme mappe som appen kan kjøres
 core_ffmpeg_missing_in_snap = Lignende videoer fungerer ikke for øyeblikket med snap. Hvis du vil ha hjelp kan du se her - { $url }
 core_saving_to_cache = Lagret i filen { $number } cache-oppføringer
 core_loading_from_cache = Lastet fra hurtigbuffer { $number } oppføringer

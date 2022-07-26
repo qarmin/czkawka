@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = Ursprünglich
 core_similarity_very_high = Sehr Hoch
 core_similarity_high = Hoch
 core_similarity_medium = Mittel
@@ -21,7 +22,9 @@ core_directory_must_be_directory = Verzeichnisse: Der angegebene Pfad muss auf d
 core_included_directory_zero_valid_directories = Inklusive Verzeichnis-FEHLER: Nicht einmal einen korrekten Pfad zu inkludiert, der erforderlich ist
 core_excluded_directory_pointless_slash = Verzeichnisse: / auszuschließen ist sinnlos, weil somit keine Dateien gescannt werden
 core_directory_overlap = Verzeichnisse: Alle zu durchsuchende Verzeichnisse überlappen mit den ausgeschlossenen Verzeichnissen
+core_directory_unable_to_get_device_id = Verzeichnisse: Geräte-Id kann nicht aus dem Ordner { $path } geholt werden
 core_ffmpeg_not_found = Keine richtige Installation von FFmpeg gefunden
+core_ffmpeg_not_found_windows = Stellen Sie sicher, dass ffmpeg.exe und ffprobe.exe in PATH verfügbar sind oder direkt in den gleichen Ordner gelegt werden, in dem die App ausführbar ist
 core_ffmpeg_missing_in_snap = Ähnliche Videos funktionieren derzeit nicht mit Snap, wenn du Hilfe möchtest, besuche - { $url }
 core_saving_to_cache = { $number } Cache-Einträge in der Datei gespeichert
 core_loading_from_cache = { $number } Einträge aus dem Cache geladen

@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = 原版
 core_similarity_very_high = 非常高
 core_similarity_high = 高
 core_similarity_medium = 中
@@ -21,7 +22,9 @@ core_directory_must_be_directory = 目录：提供的路径必须指向目录，
 core_included_directory_zero_valid_directories = 包括目录错误：即使找不到一个需要包含的正确路径
 core_excluded_directory_pointless_slash = 目录：不包括 / 无意义，因为它意味着没有文件将被扫描
 core_directory_overlap = 目录：所有要搜索与排除目录重叠的目录
+core_directory_unable_to_get_device_id = 目录：无法从文件夹 { $path } 获取设备 id
 core_ffmpeg_not_found = 找不到正确安装FFmpeg
+core_ffmpeg_not_found_windows = 请确保ffmpeg.exe 和 ffprobe.exe 在 PATH 中可用或直接放到同一个可以执行应用程序的文件夹中
 core_ffmpeg_missing_in_snap = 类似的视频目前不适用于快照，如果您想要帮助查看- { $url }
 core_saving_to_cache = 保存到文件 { $number } 缓存条目
 core_loading_from_cache = 从缓存 { $number } 项加载

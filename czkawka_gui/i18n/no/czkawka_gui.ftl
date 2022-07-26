@@ -43,22 +43,31 @@ duplicate_check_method_tooltip =
     
     Hash - Finner filer med samme innhold. Denne modusen ligner filen og senere sammenligner dette hashen for å finne duplikater. Denne modusen er den sikreste måten å finne duplikater. Appen bruker stort, så sekund og ytterligere skanninger av de samme dataene bør være mye raskere enn det første.
 image_hash_size_tooltip =
-    Tsjekkia tilbyr å endre størrelsen på den genererte hashen for hvert bilde. En større hashstørrelse gjør det mulig å finne bilder med lavere forskjeller mellom bilder, men den er også litt langsommere å bruke.
+    Hvert avmerket bilde produserer spesielle hash som kan sammenlignes med hverandre, og en liten forskjell mellom dem betyr at dette bildet er likt.
     
-    Standardverdi for hash er 8 byte, noe som tillater å finne både svært like og forskjellige bilder. 16 byte og 32 byte hashes skal bare brukes ved nesten identiske bilder. 64 byte hash skal ikke brukes, unntatt i situasjoner hvor du må finne veldig små forskjeller.
-image_resize_filter_tooltip = For å beregne hash med bilde må biblioteket først endre størrelsen på det. Avhengig av valgt algoritme, resulterte i et bilde vil se lite annet ut. Den raskeste algoritmen å bruke, men også den som gir de verste resultatene, er Nearest.
-image_hash_alg_tooltip = Brukere kan velge mellom en av mange algoritmer i beregningen av hashen. Hver har både sterke og svakere poeng, og vil i noen tilfeller gi bedre og noen ganger verre resultater for ulike bilder. Derfor er det nødvendig med manuell testing for å bestemme det beste for deg.
+    8 hash-størrelse er ganske bra for å finne bilder som er lite likt original. Med et større sett med bilder(>1000) vil jeg gi store mengder falske positive, så jeg anbefaler å bruke for så mye større hash-størrelse.
+    
+    16 er standard hash-størrelse som er ganske godt kompromiss mellom å finne enda litt lignende bilder og å ha en liten mengde hash-kollisjoner.
+    
+    32 og 64 hashes finner bare lignende bilder, men nesten bør ikke ha falske positive positive (kanskje unntatt bilder med alfa-kanal).
+image_resize_filter_tooltip =
+    For å beregne hash av bildet må biblioteket først endre størrelsen på det.
+    
+    Avhengig av valgt algoritme, resulterte et bilde som brukes til å beregne hash, kan det være lite annerledes.
+    
+    Den raskeste algoritmen som skal brukes, men også som gir de verste resultatene, er Nearest, den er aktivert som standard fordi den ikke er synlig med 16x16 hash-størrelse, lavere kvalitet.
+    
+    Med 8x8 hash størrelse anbefales det å bruke annen algoritme enn Nearest, for å ha bedre grupper av bilder.
+image_hash_alg_tooltip =
+    Brukere kan velge mellom en av mange algoritmer i beregningen av hashen.
+    
+    Hver har både sterke og svakere poeng, og vil noen ganger gi bedre og noen ganger verre resultater for ulike bilder.
+    
+    Så for å bestemme det beste for deg, kreves manuell testing.
 big_files_mode_combobox_tooltip = Lar deg søke etter minste/største filer
 big_files_mode_label = Avmerkede filer
 big_files_mode_smallest_combo_box = Den minste
 big_files_mode_biggest_combo_box = Den største
-main_notebook_image_fast_compare = Rask sammenligning
-main_notebook_image_fast_compare_tooltip =
-    Speedup søk og sammenligner hashes.
-    
-    I motsetning til normal modus - der hver hash sammenlignes med hverandre x ganger (der x er brukerens chose) - i denne modusen, nøyaktig en sammenligning vil bli brukt.
-    
-    Dette alternativet anbefales ved sammenligning av >10000 bilder med ikke-0 (Svært høy) likhet.
 main_notebook_duplicates = Dupliser filer
 main_notebook_empty_directories = Tomme mapper
 main_notebook_big_files = Store filer
@@ -98,6 +107,10 @@ main_label_max_size = Maks
 main_label_shown_files = Antall filer som vises
 main_label_resize_algorithm = Endre algoritmen
 main_label_similarity = Similarity{ " " }
+main_check_box_broken_files_audio = Lyd
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Arkiv
+main_check_box_broken_files_image = Bilde
 check_button_general_same_size = Ignorer samme størrelse
 check_button_general_same_size_tooltip = Ignorer fra resultatene, filer som har identisk størrelse - vanligvis dette er 1:1 duplikater
 main_label_size_bytes_tooltip = Størrelse på filer som vil bli brukt i skanning
@@ -112,10 +125,20 @@ upper_remove_included_button = Fjern
 upper_manual_add_excluded_button = Manuelt legg til
 upper_add_excluded_button = Legg til
 upper_remove_excluded_button = Fjern
-upper_manual_add_included_button_tooltip = Legg til mappenavn for å søke etter hånd.
+upper_manual_add_included_button_tooltip =
+    Add directory name to search by hand.
+    
+    To add multiple paths at once, separate them by ;
+    
+    /home/roman;/home/rozkaz will add two directories /home/roman and /home/rozkaz
 upper_add_included_button_tooltip = Legg til ny mappe i søk.
 upper_remove_included_button_tooltip = Slett mappen fra søk.
-upper_manual_add_excluded_button_tooltip = Legg til ekskludert mappenavn for hånd.
+upper_manual_add_excluded_button_tooltip =
+    Legg til ekskludert mappenavn for hånd.
+    
+    For å legge til flere baner på en gang, separer dem med ;
+    
+    /home/roman;/home/krokiet vil legge til to kataloger /home/roman and /home/keokiet
 upper_add_excluded_button_tooltip = Legg til mappe som skal utelukkes i søk.
 upper_remove_excluded_button_tooltip = Slett mappen fra ekskludert.
 upper_notebook_items_configuration = Konfigurasjon av elementer
@@ -229,6 +252,11 @@ header_about_button_tooltip = Åpner dialog med info om app.
 
 ## General
 
+settings_ignore_other_filesystems = Ignore other filesystems(only Linux)
+settings_ignore_other_filesystems_tooltip =
+    ignores files that are not in the same file system as searched directories.
+    
+    Works same like -xdev option in find command on Linux
 settings_save_at_exit_button_tooltip = Lagre konfigurasjon som fil når appen lukkes.
 settings_load_at_start_button_tooltip =
     Last inn konfigurasjon fra filen når du åpner appen.
@@ -404,6 +432,7 @@ move_files_choose_more_than_1_path = Bare én sti kan velges for å kunne kopier
 move_stats = Flott flyttet { $num_files }/{ $all_files } elementer
 save_results_to_file = Lagrede resultater i filen { $name }
 search_not_choosing_any_music = FEIL: Du må velge minst en avkrysningsboks med musikk som søker.
+search_not_choosing_any_broken_files = FEIL: Du må velge minst en avkrysningsboks med sjekket ødelagte filer.
 include_folders_dialog_title = Mapper å inkludere
 exclude_folders_dialog_title = Mapper som skal ekskluderes
 include_manually_directories_dialog_title = Legg til mappe manuelt

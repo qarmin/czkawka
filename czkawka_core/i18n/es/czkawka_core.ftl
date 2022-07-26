@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = Original
 core_similarity_very_high = Muy alta
 core_similarity_high = Alta
 core_similarity_medium = Medio
@@ -21,7 +22,9 @@ core_directory_must_be_directory = Directorios: La ruta proporcionada debe apunt
 core_included_directory_zero_valid_directories = ERROR del directorio incluido: No se ha encontrado ni una ruta correcta a incluida que es necesaria
 core_excluded_directory_pointless_slash = Directorios: Excluyendo / es inútil, ya que no se analizarán archivos
 core_directory_overlap = Directorios: Todos los directorios para buscar superposiciones con directorios excluidos
+core_directory_unable_to_get_device_id = Directorios: No se puede obtener el id del dispositivo de la carpeta { $path }
 core_ffmpeg_not_found = No se puede encontrar la instalación correcta de FFmpeg
+core_ffmpeg_not_found_windows = Asegúrese de que ffmpeg.exe y ffprobe.exe están disponibles en PATH o se colocan directamente en la misma carpeta donde es ejecutable la aplicación
 core_ffmpeg_missing_in_snap = Los Videos Similares no funcionan actualmente con el snap, si quieres ayuda mira - { $url }
 core_saving_to_cache = Guardado en el archivo { $number } entradas de caché
 core_loading_from_cache = Cargado desde { $number } entradas de caché

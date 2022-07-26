@@ -43,22 +43,31 @@ duplicate_check_method_tooltip =
     
     哈希-查找内容相同的文件。 此模式将文件哈希，然后比较此哈希以找到重复。此模式是找到重复的最安全方法。 应用大量使用缓存，所以第二和进一步扫描同一数据应该比第一个更快一些。
 image_hash_size_tooltip =
-    Czkawka提供改变每个图像生成的散列大小的功能。 散列尺寸较大，可以找到图像之间差异较小的图像，但使用速度也稍慢一些。
+    每张选中的图像都会产生可相互比较的特殊哈希值，而它们之间的小差意味着这张图像是相似的。
     
-    散列的默认值为8字节，这样可以找到非常相似和不同的图像。 16 字节和32 字节哈希值只能用于几乎完全相同的图像。 64 字节散列不应使用，除非您需要找到真正小的差异。
-image_resize_filter_tooltip = 要计算图像散列，库必须首先调整大小。在选定的算法上停用，结果图像看起来没有什么不同。 使用最快的算法，但结果最差的算法是Nearest。
-image_hash_alg_tooltip = 用户可以从计算哈希的许多算法中选择一个。 每一个国家都有强大和弱点，有时会给不同的形象带来更好、有时甚至更糟的结果。 因此，为了确定您最好的测试，需要手动测试。
+    8 个散列尺寸非常适合于找到与原始相似的图像。 随着更大的图像集(>1000) 将产生大量的虚假正数，因此我建议使用这种更大的散列大小。
+    
+    16 是默认的散列大小，它很好地影响了找到哪怕是略类似的图像和少量散列碰撞。
+    
+    32和64 哈希只找到非常相似的图像，但几乎不应该有任何假正数(可能只有一些透明通道的图像)。
+image_resize_filter_tooltip =
+    要计算图像散列，库必须首先调整大小。
+    
+    在选定的算法上花费钱，用来计算散列的结果图像可能看起来没有什么不同。
+    
+    最快使用的算法，但结果最差的算法是Nearest。 默认启用它，因为16x16散列尺寸较低的质量并不真正可见。
+    
+    建议使用 8x8 散列大小，使用不同于Nearest的算法来拥有更好的图像组。
+image_hash_alg_tooltip =
+    Users can choose from one of many algorithms of calculating the hash.
+    
+    Each has both strong and weaker points and will sometimes give better and sometimes worse results for different images.
+    
+    So, to determine the best one for you, manual testing is required.
 big_files_mode_combobox_tooltip = 允许搜索最小/最大的文件
 big_files_mode_label = 已检查的文件
 big_files_mode_smallest_combo_box = 最小的
 big_files_mode_biggest_combo_box = 最大的
-main_notebook_image_fast_compare = 快速比较
-main_notebook_image_fast_compare_tooltip =
-    加快搜索和比较哈希。
-    
-    与正常模式相反，在这种模式下，每次散列被比较为彼此x次(x是用户选择的相似性) 只会使用一个比较。
-    
-    在比较非0(Very High)相似性时，建议使用此选项。
 main_notebook_duplicates = 重复文件
 main_notebook_empty_directories = 空目录
 main_notebook_big_files = 大文件
@@ -98,6 +107,10 @@ main_label_max_size = 最大值
 main_label_shown_files = 显示的文件数
 main_label_resize_algorithm = 调整算法
 main_label_similarity = 相似性:{" "}
+main_check_box_broken_files_audio = 音频
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = 归档
+main_check_box_broken_files_image = 图像
 check_button_general_same_size = 忽略相同的大小
 check_button_general_same_size_tooltip = 从结果忽略相同大小的文件 - 通常是 1:1 重复
 main_label_size_bytes_tooltip = 将用于扫描的文件大小
@@ -112,10 +125,20 @@ upper_remove_included_button = 删除
 upper_manual_add_excluded_button = 手动添加
 upper_add_excluded_button = 添加
 upper_remove_excluded_button = 删除
-upper_manual_add_included_button_tooltip = 手动添加目录名。
+upper_manual_add_included_button_tooltip =
+    手动添加目录名。
+    
+    一次性添加多个路径，用……分隔它们；
+    
+    /home/roman；/home/rozkaz 将添加两个目录/home/roman和/home/rozkaz
 upper_add_included_button_tooltip = 添加新目录进行搜索。
 upper_remove_included_button_tooltip = 从搜索中删除目录。
-upper_manual_add_excluded_button_tooltip = 手动添加排除的目录名称。
+upper_manual_add_excluded_button_tooltip =
+    手动添加排除的目录名称。
+    
+    一次要添加多个路径，请将它们分开。
+    
+    /home/roman;/home/krokiet 将添加两个目录/home/roman 和 /home/kookiet
 upper_add_excluded_button_tooltip = 添加要排除在搜索中的目录。
 upper_remove_excluded_button_tooltip = 从排除中删除目录。
 upper_notebook_items_configuration = 项目配置
@@ -229,6 +252,11 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。
 
 ## General
 
+settings_ignore_other_filesystems = 忽略其它文件系统 (仅限Linux)
+settings_ignore_other_filesystems_tooltip =
+    忽略与搜索的目录不在同一个文件系统中的文件。
+    
+    在 Linux 上查找命令时类似-xdev选项
 settings_save_at_exit_button_tooltip = 关闭应用时将配置保存到文件。
 settings_load_at_start_button_tooltip =
     打开应用程序时从文件加载配置。
@@ -404,6 +432,7 @@ move_files_choose_more_than_1_path = 只能选择一个路径来复制重复的�
 move_stats = 正确移动 { $num_files }/{ $all_files } 项目
 save_results_to_file = 结果保存到文件 { $name }
 search_not_choosing_any_music = 错误：您必须选择至少一个带有音乐搜索类型的复选框。
+search_not_choosing_any_broken_files = 错误：您必须选择至少一个带有选中文件类型的复选框。
 include_folders_dialog_title = 要包含的文件夹
 exclude_folders_dialog_title = 要排除的文件夹
 include_manually_directories_dialog_title = 手动添加目录

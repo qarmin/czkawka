@@ -43,22 +43,31 @@ duplicate_check_method_tooltip =
     
     Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót(hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
 image_hash_size_tooltip =
-    Czkawka oferuje zmianę rozmiaru wygenerowanego hashu dla każdego obrazu. Większy rozmiar umożliwia wyszukiwanie plików z mniejszą ilością różnic między innymi obrazami, ale jest również nieco wolniejszy w użyciu.
+    Każdy sprawdzony obraz generuje hash, który można porównać z innymi a niewielka różnica między nimi oznacza, że te obrazy są podobne.
     
-    Domyślna wartość 8 bajtów jest dla znacznej większości przypadków wystarczająca, dlatego jest opcją domyslną, jednak w razie konieczności znalezienia identycznych obrazów z jeszcze większą dokładnością, należy użyć większego haszu.
-image_resize_filter_tooltip = By obliczyć hash obrazu, biblioteka musi najpierw go zmniejszyć. W zależności od wybranego algorytmu, obraz będzie wyglądał nieco inaczej. Najszybszym, lecz za razem dającym najgorsze efekty jest algorytm Nearest.
-image_hash_alg_tooltip = Użytkownicy mogą wybrać jeden z wielu algorytmów obliczania haszu. Każda z nich ma zarówno silne jak i słabsze punkty i czasami przyniesie lepsze i czasami gorsze wyniki w odniesieniu do różnych obrazów. W związku z tym, aby określić najlepszy dla siebie, wymagane jest ręczne testowanie każdego z nich.
+    Hash wielkości 8 jest dość dobry do wyszukiwania obrazów, które są tylko niewiele podobne do oryginału. Z większą ilością obrazów(>1000) będzie generować dużą ilość niepoprawnych wyników, więc w takim przypadku zalecam użycie większego hashu.
+    
+    16 to domyślny rozmiar hashu, który jest całkiem dobrym kompromisem między znalezieniem nawet nieco podobnych obrazów a niewielkim poziomem kolizji pomiędzy nimi.
+    
+    32 i 64 znajdują tylko bardzo podobne zdjęcia, ale prawie nie powinny mieć kolizji (może z wyjątkiem niektórych obrazów z kanałem alfa(przezroczystością)).
+image_resize_filter_tooltip =
+    Aby obliczyć hash obrazu, biblioteka musi najpierw zmienić(zwykle zmniejszyć) jego rozmiar.
+    
+    W zależności od wybranego algorytmu, zmiejszony obraz użyty do obliczenia skrótu może wyglądać nieco inaczej.
+    
+    Najszybszy algorytm do użycia, ale również taki, który daje najgorsze wyniki, to Nearest i domyślnie jest włączony, ponieważ przy rozmiarze skrótu 16x16 jego niższa jakość, nie jest zbytnio widoczna.
+    
+    Przy rozmiarze hashu 8 zaleca się użycie innego algorytmu niż Nearest, aby mieć obraz mógł zostać lepiej zakwalifikowany do danej grupy.
+image_hash_alg_tooltip =
+    Użytkownicy mogą wybrać jeden z wielu algorytmów obliczania hashu.
+    
+    Każdy ma zarówno mocniejsze jak i słabsze punkty i czasami daje lepsze a czasami gorsze wyniki dla różnych obrazów.
+    
+    Najlepiej jest samemu potestować jaki algorytm ma najlepsze wyniki(może to nie być zawsze dobrze widoczne).
 big_files_mode_combobox_tooltip = Pozwala na wyszukiwanie najmniejszych lub największych plików
 big_files_mode_label = Sprawdzane pliki
 big_files_mode_smallest_combo_box = Najmniejsze
 big_files_mode_biggest_combo_box = Największe
-main_notebook_image_fast_compare = Szybkie porównywanie
-main_notebook_image_fast_compare_tooltip =
-    Przyśpieszenie wyszukiwania i porównywania hashów.
-    
-    W przeciwieństwie do normalnego trybu - w którym każdy skrót jest porównywany ze sobą x razy (gdzie x jest podobieństwem wybranym przez użytkownika) - w tym trybie, dokładnie jedno porównanie zostanie wykonane.
-    
-    Ta opcja jest zalecana podczas porównywania >10000 obrazów z podobieństwem innym niż 0 (Bardzo wysokie).
 main_notebook_duplicates = Duplikaty
 main_notebook_empty_directories = Puste Katalogi
 main_notebook_big_files = Duże Pliki
@@ -98,6 +107,10 @@ main_label_max_size = Max
 main_label_shown_files = Liczba wyświetlanych plików
 main_label_resize_algorithm = Algorytm zmiany rozmiaru
 main_label_similarity = Podobieństwo{ "   " }
+main_check_box_broken_files_audio = Audio
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Archiwa
+main_check_box_broken_files_image = Obraz
 check_button_general_same_size = Ignoruj identyczny rozmiar
 check_button_general_same_size_tooltip = Wyrzuca z wyników skanowania pliki, które posiadają identyczny rozmiar, po to by w wynikach zostały tylko niemal identyczne rekordy.
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
@@ -112,10 +125,20 @@ upper_remove_included_button = Usuń
 upper_manual_add_excluded_button = Ręcznie Dodaj
 upper_add_excluded_button = Dodaj
 upper_remove_excluded_button = Usuń
-upper_manual_add_included_button_tooltip = Dodaj nazwę katalogu do ręcznego wyszukiwania.
+upper_manual_add_included_button_tooltip =
+    Dodaj nazwę katalogu do ręcznego wyszukiwania.
+    
+    Aby dodać wiele ścieżek na raz, należy je oddzielić za pomocą średnika ;
+    
+    /home/roman;/home/rozkaz doda dwa katalogi /home/roman i /home/rozkaz
 upper_add_included_button_tooltip = Dodaje wybrany folder do przeskanowania.
 upper_remove_included_button_tooltip = Usuwa zaznaczony folder z listy do skanowania.
-upper_manual_add_excluded_button_tooltip = Dodaj ręcznie wyodrębnioną nazwę katalogu.
+upper_manual_add_excluded_button_tooltip =
+    Dodaj ręcznie katalog do listy wykluczonych.
+    
+    Aby dodać wiele ścieżek na raz, oddziel je średnikiem ;
+    
+    /home/roman;/home/krokiet doda dwa katalogi /home/roman i /home/keokiet
 upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych.
 upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych.
 upper_notebook_items_configuration = Konfiguracja Skanowania
@@ -229,6 +252,11 @@ header_about_button_tooltip = Otwórz okno z informacjami o programie.
 
 ## General
 
+settings_ignore_other_filesystems = Ignoruj inne systemy plików (tylko Linux)
+settings_ignore_other_filesystems_tooltip =
+    ignoruje pliki, które nie są w tym samym systemie plików co przeszukiwane katalogi.
+    
+    Działa tak samo jak opcja -xdev w komendzie find na Linux
 settings_save_at_exit_button_tooltip = Zapisz konfigurację do pliku podczas zamykania aplikacji.
 settings_load_at_start_button_tooltip =
     Wczytaj konfigurację z pliku podczas otwierania aplikacji.
@@ -408,6 +436,7 @@ move_files_choose_more_than_1_path = Tylko jedna ścieżka może być wybrana, a
 move_stats = Poprawnie przeniesiono { $num_files }/{ $all_files } elementów
 save_results_to_file = Zapisano wyniki do pliku { $name }
 search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
+search_not_choosing_any_broken_files = BŁĄD: Musisz wybrać co najmniej jedno pole wyboru z rodzajem uszkodzonych plików.
 include_folders_dialog_title = Foldery do przeszukiwania
 exclude_folders_dialog_title = Foldery do ignorowania
 include_manually_directories_dialog_title = Dodaj katalogi ręcznie

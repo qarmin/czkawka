@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = Originale
 core_similarity_very_high = Très haute
 core_similarity_high = Haute
 core_similarity_medium = Moyenne
@@ -21,7 +22,9 @@ core_directory_must_be_directory = Répertoires : Le chemin fourni doit pointer 
 core_included_directory_zero_valid_directories = ERREUR de répertoire inclus : Aucun chemin n'a été trouvé, même un chemin correct à inclure qui est requis
 core_excluded_directory_pointless_slash = Répertoires: Exclure / est inutile, car cela signifie qu'aucun fichier ne sera scanné
 core_directory_overlap = Répertoires : Tous les répertoires pour rechercher des chevauchements avec des répertoires exclus
+core_directory_unable_to_get_device_id = Répertoires : Impossible d'obtenir l'id de l'appareil depuis le dossier { $path }
 core_ffmpeg_not_found = Impossible de trouver une installation correcte de FFmpeg
+core_ffmpeg_not_found_windows = Assurez-vous que ffmpeg.exe et ffprobe.exe sont disponibles en PATH ou sont mis directement dans le même dossier où est exécutable l'application
 core_ffmpeg_missing_in_snap = Les vidéos similaires ne fonctionnent pas actuellement avec un instantané, si vous voulez de l'aide - { $url }
 core_saving_to_cache = Enregistré dans le fichier { $number } entrées du cache
 core_loading_from_cache = Chargé depuis l'entrées { $number } du cache

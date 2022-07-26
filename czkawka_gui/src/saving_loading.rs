@@ -1045,7 +1045,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));
         main_notebook.combo_box_image_hash_algorithm.set_active(Some(0));
-        main_notebook.combo_box_image_resize_algorithm.set_active(Some(0));
+        main_notebook.combo_box_image_resize_algorithm.set_active(Some(1)); // Nearest by default
         main_notebook.combo_box_image_hash_size.set_active(Some(1)); // Set as 16 instead 8
         main_notebook.combo_box_big_files_mode.set_active(Some(0));
 

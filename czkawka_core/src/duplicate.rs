@@ -39,6 +39,7 @@ pub enum HashType {
 }
 
 impl HashType {
+    #[inline(always)]
     fn hasher(self: &HashType) -> Box<dyn MyHasher> {
         match self {
             HashType::Blake3 => Box::new(blake3::Hasher::new()),

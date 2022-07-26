@@ -43,22 +43,31 @@ duplicate_check_method_tooltip =
     
     Hash - Najde soubory, které mají stejný obsah. Tento režim hashuje soubor a později porovnává tento hash s nalezením duplikátů. Tento režim je nejbezpečnějším způsobem, jak nalézt duplikáty. Aplikace používá mezipaměť, takže druhé a další skenování stejných dat by mělo být mnohem rychlejší než první.
 image_hash_size_tooltip =
-    Czkawka nabízí změnu velikosti generovaného hash pro každý obrázek. Větší velikost hash umožňuje najít obrázky s nižším množstvím rozdílů mezi obrázky, ale je také poněkud pomalejší.
+    Každý zkontrolovaný obrázek vytváří speciální hash, který lze vzájemně porovnávat, a malý rozdíl mezi nimi znamená, že tyto obrázky jsou podobné.
     
-    Výchozí hodnota pro hash je 8 bajtů, což umožňuje najít velmi podobné i různé obrázky. 16 bajtů a 32 bajtových hashů by mělo být používáno pouze pro téměř totožné obrázky. 64 byte hash by neměl být použit, kromě situací, kdy je třeba najít opravdu malé rozdíly.
-image_resize_filter_tooltip = Pro výpočet hash obrázku musí knihovna nejprve změnit velikost. V závislosti na zvoleném algoritmu bude výsledný obrázek vypadat málo jinak. Nejrychlejší algoritmus k používání, ale také ten, který dává nejhorší výsledky, je blízko.
-image_hash_alg_tooltip = Uživatelé si mohou vybrat z jednoho z mnoha algoritmů pro výpočet hashu. Každý z nich má silné i slabší body a někdy přinese lepší a někdy horší výsledky pro různé obrázky. Takže pro určení nejlepšího pro vás je vyžadováno ruční testování.
+    8 hash velikost je docela dobrá k nalezení obrázků, které jsou jen málo podobné originálům. S větší sadou obrázků(>1000) bude produkovat velké množství falešných pozitivních výsledků, takže doporučuji použít pro takovou částku větší hash velikosti.
+    
+    16 je výchozí velikost hash, což je docela dobrý kompromis mezi nalezením i trochu podobných obrázků a malým množstvím srážek hash.
+    
+    32 a 64 hashy najde jen velmi podobné obrázky, ale téměř by neměly mít žádné falešné pozitivní (možná kromě některých obrázků s alfa kanálem).
+image_resize_filter_tooltip =
+    Pro výpočet hash obrázku musí knihovna nejprve změnit velikost.
+    
+    V závislosti na zvoleném algoritmu může výsledný obrázek použitý k výpočtu hash vypadat málo jinak.
+    
+    Nejrychlejší algoritmus k používání, ale také ten, který dává nejhorší výsledky, je nejblíže, je ve výchozím nastavení povoleno, protože s 16x16 hash velikostí, nižší kvalitou, není opravdu viditelná.
+    
+    S velikostí 8x8 hash je doporučeno použít jiný algoritmus než nejbližší pro lepší skupiny obrázků.
+image_hash_alg_tooltip =
+    Uživatelé si mohou vybrat z jednoho z mnoha algoritmů pro výpočet hashu.
+    
+    Každý má silné a slabší body a někdy přinese lepší a někdy horší výsledky pro různé obrázky.
+    
+    Takže k určení nejlepšího pro vás je vyžadováno ruční testování.
 big_files_mode_combobox_tooltip = Umožňuje vyhledávat malé / největší soubory
 big_files_mode_label = Zaškrtnuté soubory
 big_files_mode_smallest_combo_box = Nejmenší
 big_files_mode_biggest_combo_box = Největší
-main_notebook_image_fast_compare = Rychlé porovnání
-main_notebook_image_fast_compare_tooltip =
-    Urychlit hledání a porovnávání hasičů.
-    
-    Na rozdíl od normálního režimu - kde je každý hash porovnáván s x krát (kde x je podobnost zvolená uživatelem) - v tomto režimu, přesně bude použito jedno srovnání.
-    
-    Tato možnost je doporučena při porovnávání >10000 obrázků s jinou než 0 (Very High) podobností.
 main_notebook_duplicates = Duplicitní soubory
 main_notebook_empty_directories = Prázdné adresáře
 main_notebook_big_files = Velké soubory
@@ -98,6 +107,10 @@ main_label_max_size = Max
 main_label_shown_files = Počet zobrazených souborů
 main_label_resize_algorithm = Změna velikosti algoritmu
 main_label_similarity = Podobnost { " " }
+main_check_box_broken_files_audio = Zvuk
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Archivovat
+main_check_box_broken_files_image = Obrázek
 check_button_general_same_size = Ignorovat stejnou velikost
 check_button_general_same_size_tooltip = Ignorovat výsledky souborů, které mají stejnou velikost - obvykle jde o 1:1 duplicitní
 main_label_size_bytes_tooltip = Velikost souborů, které budou použity při skenování
@@ -112,10 +125,20 @@ upper_remove_included_button = Odebrat
 upper_manual_add_excluded_button = Ruční přidání
 upper_add_excluded_button = Přidat
 upper_remove_excluded_button = Odebrat
-upper_manual_add_included_button_tooltip = Přidat název adresáře k hledání ručně.
+upper_manual_add_included_button_tooltip =
+    Přidat název adresáře k hledání ručně.
+    
+    Chcete-li přidat více cest najednou, oddělte je od ;
+    
+    /home/roman;/home/rozkaz přidá dva adresáře /home/roman a /home/rozkaz
 upper_add_included_button_tooltip = Přidat nový adresář k vyhledávání.
 upper_remove_included_button_tooltip = Odstranit adresář z hledání.
-upper_manual_add_excluded_button_tooltip = Přidejte ručně název vyloučené adresáře.
+upper_manual_add_excluded_button_tooltip =
+    Přidejte ručně název vyloučené adresáře.
+    
+    Chcete-li přidat více cest najednou, oddělte je od ;
+    
+    /home/roman;/home/krokiet přidá dva adresáře /home/roman a /home/keokiet
 upper_add_excluded_button_tooltip = Přidat adresář, který bude při hledání vyloučen.
 upper_remove_excluded_button_tooltip = Odstranit adresář z vyloučení.
 upper_notebook_items_configuration = Konfigurace položek
@@ -229,6 +252,11 @@ header_about_button_tooltip = Otevře dialog s informacemi o aplikaci.
 
 ## General
 
+settings_ignore_other_filesystems = Ignorovat další souborové systémy (pouze Linux)
+settings_ignore_other_filesystems_tooltip =
+    ignoruje soubory, které nejsou ve stejném souborovém systému jako prohledávané adresáře.
+    
+    Funguje stejně jako -xdev možnost najít příkaz na Linuxu
 settings_save_at_exit_button_tooltip = Uložit konfiguraci do souboru při zavření aplikace.
 settings_load_at_start_button_tooltip =
     Načíst konfiguraci ze souboru při otevírání aplikace.
@@ -404,6 +432,7 @@ move_files_choose_more_than_1_path = Lze vybrat pouze jednu cestu, aby bylo mož
 move_stats = Správně přesunuto { $num_files }/{ $all_files } položek
 save_results_to_file = Uložené výsledky do souboru { $name }
 search_not_choosing_any_music = CHYBA: Musíte vybrat alespoň jedno zaškrtávací políčko s prohledáváním hudby.
+search_not_choosing_any_broken_files = CHYBA: Musíte vybrat alespoň jedno zaškrtávací políčko s typem zkontrolovaných poškozených souborů.
 include_folders_dialog_title = Složky, které chcete zahrnout
 exclude_folders_dialog_title = Složky k vyloučení
 include_manually_directories_dialog_title = Přidat adresář ručně

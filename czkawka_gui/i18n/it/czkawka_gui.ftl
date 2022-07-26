@@ -42,22 +42,31 @@ duplicate_check_method_tooltip =
     
     Hash - Trova i file che hanno lo stesso contenuto. Questa modalità fa hash sul file e in seguito confronta questo hash per trovare i duplicati. Questa modalità è il modo più sicuro per trovare i duplicati. App usa pesantemente la cache, quindi la seconda e ulteriori scansioni degli stessi dati dovrebbero essere molto più veloce del primo.
 image_hash_size_tooltip =
-    Czkawka offre di cambiare la dimensione dell'hash generato per ogni immagine. Una dimensione di hash più grande consente di trovare immagini con una minore quantità di differenze tra le immagini, ma è anche leggermente più lenta da usare.
+    Ogni immagine selezionata produce hash speciale che può essere confrontato con l'altro, e piccola differenza tra di loro significa che queste immagini sono simili.
     
-    Il valore predefinito per l'hash è di 8 byte, che permette di trovare immagini molto simili e diverse. Gli hash di 16 byte e 32 byte dovrebbero essere usati solo per immagini quasi identiche. L'hash da 64 byte non dovrebbe essere utilizzato, tranne nelle situazioni in cui è necessario trovare davvero piccole differenze.
-image_resize_filter_tooltip = Per processare l'hash di un'immagine, la libreria deve prima ridimensionarla. In funzione del metodo scelto, l'immagine risultante apparirà leggermente diversa. Il metodo più veloce, ma anche quello che dà i peggiori risultati, è Nearest.
-image_hash_alg_tooltip = Gli utenti possono scegliere tra uno dei molti algoritmi di calcolo dell'hash. Ognuno ha punti forti e più deboli e a volte darà risultati migliori e a volte peggiori per immagini diverse. Quindi, per determinare quello migliore per voi, test manuali è richiesto.
+    8 dimensioni di hash sono abbastanza buone per trovare immagini che sono solo poco simili all'originale. Con serie più grande di immagini (>1000) produrrà la grande quantità di falsi positivi, quindi consiglio di usare per una tale quantità più grande dimensioni di hash.
+    
+    16 è la dimensione predefinita dell'hash che è abbastanza buon compromesso tra trovare anche un po 'di immagini simili e avere una piccola quantità di collisioni di hash.
+    
+    32 e 64 hash trovano solo immagini molto simili, ma quasi non dovrebbero avere falsi positivi (forse tranne alcune immagini con canale alfa).
+image_resize_filter_tooltip =
+    Per calcolare l'hash dell'immagine, la libreria deve prima ridimensionarla.
+    
+    Dipende dall'algoritmo scelto, l'immagine risultante utilizzata per calcolare l'hash potrebbe sembrare poco diversa.
+    
+    L'algoritmo più veloce da usare, ma anche uno che dà i peggiori risultati è il più vicino, è abilitato per impostazione predefinita, perché con dimensioni di hash 16x16, qualità inferiore non è realmente visibile.
+    
+    Con 8x8 hash dimensione si consiglia di utilizzare un algoritmo diverso rispetto al più vicino, per avere migliori gruppi di immagini.
+image_hash_alg_tooltip =
+    Gli utenti possono scegliere tra uno dei molti algoritmi di calcolo dell'hash.
+    
+    Ognuno ha punti forti e più deboli e a volte darà risultati migliori e a volte peggiori per immagini diverse.
+    
+    Quindi, per determinare quello migliore per te, è necessario un test manuale.
 big_files_mode_combobox_tooltip = Consente di cercare file più piccoli/più grandi
 big_files_mode_label = File controllati
 big_files_mode_smallest_combo_box = Il Più Piccolo
 big_files_mode_biggest_combo_box = Il Più Grande
-main_notebook_image_fast_compare = Confronto veloce
-main_notebook_image_fast_compare_tooltip =
-    Accelerare la ricerca e confrontare hash.
-    
-    Al contrario della modalità normale - dove ogni hash viene confrontato tra loro x volte (dove x è la somiglianza scelta dall'utente) - in questa modalità, verrà utilizzato esattamente un confronto.
-    
-    Questa opzione è consigliata quando si confrontano >10000 immagini con la similitudine non 0 (Molto Alta).
 main_notebook_duplicates = File duplicati
 main_notebook_empty_directories = Cartelle vuote
 main_notebook_big_files = Grandi file
@@ -97,6 +106,10 @@ main_label_max_size = Max
 main_label_shown_files = Numero di file visualizzati
 main_label_resize_algorithm = Metodo di ridimensionamento
 main_label_similarity = Similitudine{ "   " }
+main_check_box_broken_files_audio = Audio
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Compresso
+main_check_box_broken_files_image = Immagine
 check_button_general_same_size = Ignora stesse dimensioni
 check_button_general_same_size_tooltip = Nei risultati, ignora i file con le stesse dimensioni - solitamente questi sono duplicati 1:1
 main_label_size_bytes_tooltip = Dimensione dei file utilizzati nella ricerca
@@ -111,10 +124,20 @@ upper_remove_included_button = Rimuovi
 upper_manual_add_excluded_button = Aggiungi manualmente
 upper_add_excluded_button = Aggiungi
 upper_remove_excluded_button = Rimuovi
-upper_manual_add_included_button_tooltip = Aggiungi nome directory da cercare a mano.
+upper_manual_add_included_button_tooltip =
+    Aggiungi nome directory da cercare a mano.
+    
+    Per aggiungere più percorsi contemporaneamente, separarli da ;
+    
+    /home/roman;/home/rozkaz aggiungerà due directory /home/roman e /home/rozkaz
 upper_add_included_button_tooltip = Aggiungi nuova cartella per la ricerca
 upper_remove_included_button_tooltip = Cancella cartella dalla ricerca
-upper_manual_add_excluded_button_tooltip = Aggiungi nome directory escluso a mano.
+upper_manual_add_excluded_button_tooltip =
+    Aggiungi nome directory escluso a mano.
+    
+    Per aggiungere più percorsi contemporaneamente, separarli da ;
+    
+    /home/roman;/home/krokiet aggiungerà due directory /home/roman e /home/keokiet
 upper_add_excluded_button_tooltip = Aggiunge una cartella da escludere dalla ricerca
 upper_remove_excluded_button_tooltip = Rimuove una cartella da quelle escluse
 upper_notebook_items_configuration = Configurazione degli oggetti
@@ -228,6 +251,11 @@ header_about_button_tooltip = Apre la finestra delle informazioni sul programma.
 
 ## General
 
+settings_ignore_other_filesystems = Ignora altri filesystem (solo Linux)
+settings_ignore_other_filesystems_tooltip =
+    ignora i file che non sono nello stesso file system delle directory cercate.
+    
+    Funziona come l'opzione -xdev nel comando find su Linux
 settings_save_at_exit_button_tooltip = Salva la configurazione su file quando chiudi l'app.
 settings_load_at_start_button_tooltip =
     Carica la configurazione dal file all'apertura dell'applicazione.
@@ -403,6 +431,7 @@ move_files_choose_more_than_1_path = Solo un percorso può essere selezionato pe
 move_stats = { $num_files }/{ $all_files } elementi spostati con successo
 save_results_to_file = Risultati salvati su file
 search_not_choosing_any_music = ERRORE: Devi selezionare almeno una casella dei metodi di ricerca musicali.
+search_not_choosing_any_broken_files = ERRORE: è necessario selezionare almeno una casella di controllo selezionando il tipo di file danneggiati.
 include_folders_dialog_title = Cartelle incluse
 exclude_folders_dialog_title = Cartelle escluse
 include_manually_directories_dialog_title = Aggiungi cartella manualmente

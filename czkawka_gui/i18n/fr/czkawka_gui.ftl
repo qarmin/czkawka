@@ -43,22 +43,31 @@ duplicate_check_method_tooltip =
     
     Hachage - Trouve des fichiers qui ont le même contenu. Ce mode permet de hacher le fichier et de le comparer ensuite pour trouver les doublons. Ce mode est le moyen le plus sûr de trouver les doublons. L'application utilise lourdement le cache, donc les analyses secondaires et ultérieures des mêmes données devraient être beaucoup plus rapides que la première.
 image_hash_size_tooltip =
-    Czkawka offre une taille variable de hachage généré pour chaque image. Une taille de hachage plus importante permet de trouver des images avec moins de différences entre les images, mais un peu plus lent à utiliser.
+    Chaque image vérifiée produit un hachage spécial qui peut être comparé entre les autres, et une petite différence entre elles signifie que ces images sont similaires.
     
-    La valeur par défaut pour le hachage est de 8 octets, ce qui permet de trouver des images très similaires et différentes. Les hashs 16 octets et 32 octets ne doivent être utilisés que pour des images presque identiques. Le hash de 64 octets ne devrait pas être utilisé, sauf situation où de petites différences sont nécessaires pour trouver.
-image_resize_filter_tooltip = Pour calculer le hachage de l'image, la bibliothèque doit d'abord la redimensionner. En fonction de l'algorithme choisi, l'image résultée sera peu différente. L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest.
-image_hash_alg_tooltip = Les utilisateurs peuvent choisir un des nombreux algorithmes de calcul du hachage. Chacun a des points forts et des points faibles et donnera parfois de meilleurs résultats pour des images différentes, parfois pires, afin de choisir le meilleur, des tests manuels sont nécessaires.
+    La taille de 8 hachages est assez bonne pour trouver des images qui ne sont que peu similaires à l'original. Avec un plus grand ensemble d'images(>1000) produira une grande quantité de faux positifs, je recommande donc d'utiliser pour une telle quantité plus grande taille de hachage.
+    
+    16 est la taille de hachage par défaut, ce qui est assez bon compromis entre trouver même un peu d'images similaires et avoir peu de collisions de hachage.
+    
+    32 et 64 hachages ne trouvent que des images très similaires, mais presque ne devraient pas avoir de faux positifs (peut-être sauf certaines images avec canal alpha).
+image_resize_filter_tooltip =
+    Pour calculer le hachage de l'image, la bibliothèque doit d'abord le redimensionner.
+    
+    Dépend de l'algorithme choisi, image résultée utilisée pour calculer le hachage peut sembler peu différente.
+    
+    L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats est Nearest, elle est activée par défaut, car avec une taille de hachage 16x16, une qualité inférieure n'est pas vraiment visible.
+    
+    Avec une taille de hachage de 8x8 il est recommandé d'utiliser un algorithme différent de Nearest, pour avoir de meilleurs groupes d'images.
+image_hash_alg_tooltip =
+    Les utilisateurs peuvent choisir parmi un des nombreux algorithmes de calcul du hachage.
+    
+    Chacune a des points forts et des points faibles et donnera parfois des résultats meilleurs et parfois pires pour des images différentes.
+    
+    Donc, pour déterminer le meilleur pour vous, des tests manuels sont requis.
 big_files_mode_combobox_tooltip = Permet de rechercher les fichiers les plus petits ou les plus grands
 big_files_mode_label = Fichiers cochés
 big_files_mode_smallest_combo_box = Le plus petit
 big_files_mode_biggest_combo_box = Le plus grand
-main_notebook_image_fast_compare = Comparaison rapide
-main_notebook_image_fast_compare_tooltip =
-    Accélère la recherche et la comparaison des haches.
-    
-    Par opposition au mode normal - où chaque hachage est comparé à chaque fois x (où x est la similitude de l'utilisateur choisis) - dans ce mode, une comparaison sera utilisée.
-    
-    Cette option est recommandée lors de la comparaison de >10000 images avec la similitude non 0 (Very High) .
 main_notebook_duplicates = Fichiers en double
 main_notebook_empty_directories = Dossiers vides
 main_notebook_big_files = Gros fichiers
@@ -98,6 +107,10 @@ main_label_max_size = Max
 main_label_shown_files = Nombre de fichiers affichés
 main_label_resize_algorithm = Algorithme de redimensionnement
 main_label_similarity = Similarité{ " " }
+main_check_box_broken_files_audio = L'audio
+main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_archive = Archiver
+main_check_box_broken_files_image = Image
 check_button_general_same_size = Ignorer la même taille
 check_button_general_same_size_tooltip = Ignorer les résultats, les fichiers dont la taille est identique - généralement ce sont des doublons 1:1
 main_label_size_bytes_tooltip = Taille des fichiers qui seront utilisés lors de l'analyse
@@ -112,10 +125,20 @@ upper_remove_included_button = Retirer
 upper_manual_add_excluded_button = Ajout manuel
 upper_add_excluded_button = Ajouter
 upper_remove_excluded_button = Retirer
-upper_manual_add_included_button_tooltip = Ajouter un nom de répertoire à la recherche manuelle.
+upper_manual_add_included_button_tooltip =
+    Ajouter le nom du répertoire à rechercher à la main.
+    
+    Pour ajouter plusieurs chemins à la fois, séparez-les par ;
+    
+    /home/roman;/home/rozkaz ajoutera deux répertoires /home/roman et /home/rozkaz
 upper_add_included_button_tooltip = Ajouter un nouveau répertoire à la recherche.
 upper_remove_included_button_tooltip = Supprimer le répertoire de la recherche.
-upper_manual_add_excluded_button_tooltip = Exclure un nom de répertoire à la recherche manuelle.
+upper_manual_add_excluded_button_tooltip =
+    Ajouter un nom de répertoire exclu à la main.
+    
+    Pour ajouter plusieurs chemins à la fois, séparez-les par ;
+    
+    /home/roman;/home/krokiet ajoutera deux répertoires /home/roman et /home/keokiet
 upper_add_excluded_button_tooltip = Ajouter un répertoire à exclure dans la recherche.
 upper_remove_excluded_button_tooltip = Supprimer le répertoire de l’exclusion.
 upper_notebook_items_configuration = Configuration des éléments
@@ -229,6 +252,11 @@ header_about_button_tooltip = Ouvre la boîte de dialogue avec les informations 
 
 ## General
 
+settings_ignore_other_filesystems = Ignorer les autres systèmes de fichiers (uniquement Linux)
+settings_ignore_other_filesystems_tooltip =
+    ignore les fichiers qui ne sont pas dans le même système de fichiers que les répertoires recherchés.
+    
+    Fonctionne de la même manière que l'option -xdev dans la commande find sur Linux
 settings_save_at_exit_button_tooltip = Enregistrer la configuration dans un fichier lors de la fermeture de l'application.
 settings_load_at_start_button_tooltip =
     Charger la configuration à partir du fichier lors de l'ouverture de l'application.
@@ -404,6 +432,7 @@ move_files_choose_more_than_1_path = Un seul chemin peut être sélectionné pou
 move_stats = Éléments { $num_files }/{ $all_files } correctement déplacés
 save_results_to_file = Résultats enregistrés dans le fichier { $name }
 search_not_choosing_any_music = ERREUR : Vous devez sélectionner au moins une case à cocher avec les types de recherche de musique.
+search_not_choosing_any_broken_files = ERREUR : Vous devez sélectionner au moins une case à cocher avec le type de fichiers cassés cochés.
 include_folders_dialog_title = Dossiers à inclure
 exclude_folders_dialog_title = Dossiers à exclure
 include_manually_directories_dialog_title = Ajouter un répertoire manuellement

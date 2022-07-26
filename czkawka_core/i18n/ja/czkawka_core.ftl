@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = 新規に作成
 core_similarity_very_high = 非常に高い
 core_similarity_high = 高い
 core_similarity_medium = ミディアム
@@ -21,7 +22,9 @@ core_directory_must_be_directory = ディレクトリ: 指定されたパスは�
 core_included_directory_zero_valid_directories = 含まれるディレクトリエラー: 必須の正しいパスが1つも見つかりません
 core_excluded_directory_pointless_slash = ディレクトリ: ファイルがスキャンされないことを意味するため、除外/無意味です
 core_directory_overlap = ディレクトリ: 除外されたディレクトリとオーバーラップを検索するすべてのディレクトリ
+core_directory_unable_to_get_device_id = ディレクトリ: フォルダ { $path } からデバイス ID を取得できません
 core_ffmpeg_not_found = 適切なFFmpegのインストールが見つかりません
+core_ffmpeg_not_found_windows = ffmpeg.exeとffprobe.exeがPATHで使用できることを確認するか、アプリ実行ファイルのある同じフォルダに直接配置してください。
 core_ffmpeg_missing_in_snap = ヘルプを見たい場合は、現在同様のビデオはスナップでは動作しません - { $url }
 core_saving_to_cache = { $number } 個のキャッシュエントリをファイルに保存しました
 core_loading_from_cache = キャッシュから { $number } 個のエントリが読み込まれました

@@ -1,4 +1,5 @@
 # Core
+core_similarity_original = Originál
 core_similarity_very_high = Velmi vysoká
 core_similarity_high = Vysoká
 core_similarity_medium = Střední
@@ -21,7 +22,9 @@ core_directory_must_be_directory = Adresáře: Poskytnutá cesta musí směřova
 core_included_directory_zero_valid_directories = CHYBA zahrnutí adresáře: Nenalezena ani jedna správná cesta k zahrnutí, která je vyžadována
 core_excluded_directory_pointless_slash = Adresáře: Vyloučení / je bezúčelné, protože to znamená, že žádné soubory nebudou naskenovány
 core_directory_overlap = Adresáře: Všechny adresáře pro vyhledávání se překrývají s vyloučením adresářů
+core_directory_unable_to_get_device_id = Adresáře: Nelze získat ID zařízení ze složky { $path }
 core_ffmpeg_not_found = Nelze najít správnou instalaci FFmpeg
+core_ffmpeg_not_found_windows = Ujistěte se, že ffmpeg.exe a ffprobe.exe jsou k dispozici v PATH nebo jsou umístěny přímo do stejné složky, kde lze spustit aplikaci
 core_ffmpeg_missing_in_snap = Podobná videa v současné době nefungují se snapem, pokud chcete nápovědu sledovat - { $url }
 core_saving_to_cache = Uloženo do souboru { $number } položek mezipaměti
 core_loading_from_cache = Načteno z { $number } položek keše
