@@ -167,6 +167,10 @@ pub fn split_path(path: &Path) -> (String, String) {
     }
 }
 
+pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
+    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
+}
+
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
     #[allow(unused_variables)]

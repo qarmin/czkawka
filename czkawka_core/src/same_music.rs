@@ -14,7 +14,7 @@ use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::AUDIO_FILES_EXTENSIONS;
+use crate::common::{create_crash_message, AUDIO_FILES_EXTENSIONS};
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
@@ -393,7 +393,8 @@ impl SameMusic {
                         }
                     },
                     Err(_) => {
-                        println!("File {} crashed during reading tags, please report bug", path);
+                        let message = create_crash_message("Lofty", &path, "https://github.com/image-rs/image/issues");
+                        println!("{message}");
                         return Some(None);
                     }
                 };

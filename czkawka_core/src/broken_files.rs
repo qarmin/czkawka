@@ -15,7 +15,7 @@ use pdf::PdfError::Try;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{open_cache_folder, Common, LOOP_DURATION, PDF_FILES_EXTENSIONS};
+use crate::common::{create_crash_message, open_cache_folder, Common, LOOP_DURATION, PDF_FILES_EXTENSIONS};
 use crate::common::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -477,8 +477,9 @@ impl BrokenFiles {
                         if let Ok(image_result) = result {
                             image_result
                         } else {
-                            println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry_clone.path);
-                            file_entry_clone.error_string = "Image crashes due parsing, please check if problem happens with updated https://github.com/qarmin/ImageOpening and later report here https://github.com/image-rs/image/issues".to_string();
+                            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy().to_string(), "https://github.com/Serial-ATA/lofty-rs");
+                            println!("{message}");
+                            file_entry_clone.error_string = message;
                             Some(Some(file_entry_clone))
                         }
                     }
@@ -489,28 +490,28 @@ impl BrokenFiles {
                             }
                             Some(Some(file_entry))
                         }
-                        Err(_inspected) => Some(None)
+                        Err(_inspected) => Some(None),
                     },
                     TypeOfFile::Audio => match File::open(&file_entry.path) {
-                        Ok(file) =>
-                            {
-                                let mut file_entry_clone = file_entry.clone();
+                        Ok(file) => {
+                            let mut file_entry_clone = file_entry.clone();
 
-                                let result = panic::catch_unwind(|| {
-                                    if let Err(e) = audio_checker::parse_audio_file(file) {
-                                        file_entry.error_string = e.to_string();
-                                    }
-                                    Some(Some(file_entry))
-                                });
-
-                                if let Ok(audio_result) = result {
-                                    audio_result
-                                } else {
-                                    println!("External parsing audio library crashed when opening \"{:?}\" audio file, please report bug here - https://github.com/qarmin/audio_checker/issues", file_entry_clone.path);
-                                    file_entry_clone.error_string = "Audio crashes due parsing, please report bug here - https://github.com/qarmin/audio_checker/issues".to_string();
-                                    Some(Some(file_entry_clone))
+                            let result = panic::catch_unwind(|| {
+                                if let Err(e) = audio_checker::parse_audio_file(file) {
+                                    file_entry.error_string = e.to_string();
                                 }
+                                Some(Some(file_entry))
+                            });
+
+                            if let Ok(audio_result) = result {
+                                audio_result
+                            } else {
+                                let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy().to_string(), "https://github.com/pdeljanov/Symphonia");
+                                println!("{message}");
+                                file_entry_clone.error_string = message;
+                                Some(Some(file_entry_clone))
                             }
+                        }
                         Err(_inspected) => Some(None),
                     },
 
@@ -540,12 +541,13 @@ impl BrokenFiles {
                                 if let Ok(pdf_result) = result {
                                     pdf_result
                                 } else {
-                                    println!("PDF-rs library crashed when opening \"{:?}\" pdf, and if it is not reported, please report bug here - https://github.com/pdf-rs/pdf", file_entry_clone.path);
-                                    file_entry_clone.error_string = "PDF-rs library crashed when opening pdf, and if it is not reported, please report bug here - https://github.com/pdf-rs/pdf".to_string();
+                                    let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy().to_string(), "https://github.com/pdf-rs/pdf");
+                                    println!("{message}");
+                                    file_entry_clone.error_string = message;
                                     Some(Some(file_entry_clone))
                                 }
                             }
-                            Err(_inspected) => Some(None)
+                            Err(_inspected) => Some(None),
                         }
                     }
 
