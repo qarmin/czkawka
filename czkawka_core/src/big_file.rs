@@ -88,7 +88,7 @@ impl BigFile {
             number_of_files_to_check: 50,
             delete_method: DeleteMethod::None,
             stopped_search: false,
-            search_mode: SearchMode::SmallestFiles,
+            search_mode: SearchMode::BiggestFiles,
         }
     }
 
