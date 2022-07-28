@@ -1,4 +1,4 @@
-## Version 5.0.0 - ?.?.2022r
+## Version 5.0.0 - 28.07.2022r
 - GUI ported to use GTK 4 - [#466](https://github.com/qarmin/czkawka/pull/466)
 - Use multithreading and improved algorithm to compare image hashes - [#762](https://github.com/qarmin/czkawka/pull/762)
 - Resize preview with window - [#466](https://github.com/qarmin/czkawka/pull/466)
