@@ -162,9 +162,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
                 #[cfg(target_family = "windows")]
                 let mut text = Common::normalize_windows_path(text).to_string_lossy().to_string();
 
-                while text != "/" && (text.ends_with('/') || text.ends_with('\\')) {
-                    text.pop();
-                }
+                remove_ending_slashes(&mut text);
 
                 if !text.is_empty() {
                     let list_store = get_list_store(&tree_view);
@@ -185,4 +183,72 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
         }
         dialog.close();
     });
+}
+fn remove_ending_slashes(original_string: &mut String) {
+    let mut windows_disk_path: bool = false;
+    let mut chars = original_string.chars();
+    if let Some(first_character) = chars.next() {
+        if first_character.is_alphabetic() {
+            if let Some(second_character) = chars.next() {
+                if second_character == ':' {
+                    windows_disk_path = true;
+                    original_string.push('/'); // In case of adding window path without ending slash e.g. C: instead C:/ or C:\
+                }
+            }
+        }
+    }
+
+    while (original_string != "/" && (original_string.ends_with('/') || original_string.ends_with('\\'))) && (!windows_disk_path || original_string.len() > 3) {
+        original_string.pop();
+    }
+}
+#[test]
+pub fn test_remove_ending_slashes() {
+    let mut original = "/home/rafal".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/home/rafal");
+
+    let mut original = "/home/rafal/".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/home/rafal");
+
+    let mut original = "/home/rafal\\".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/home/rafal");
+
+    let mut original = "/home/rafal/////////".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/home/rafal");
+
+    let mut original = "/home/rafal/\\//////\\\\".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/home/rafal");
+
+    let mut original = "/home/rafal\\\\\\\\\\\\\\\\".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/home/rafal");
+
+    let mut original = "\\\\\\\\\\\\\\\\\\\\\\\\".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "");
+
+    let mut original = "//////////".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "/");
+
+    let mut original = "C:/".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "C:/");
+
+    let mut original = "C:\\".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "C:\\");
+
+    let mut original = "C://////////".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "C:/");
+
+    let mut original = "C:\\\\\\\\\\".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "C:\\");
 }
