@@ -13,10 +13,12 @@
 - Fix disabled ui when using invalid settings in similar music - [#740](https://github.com/qarmin/czkawka/pull/740)
 - Speedup searching for invalid extensions - [#740](https://github.com/qarmin/czkawka/pull/740)
 - Support for finding the smallest files - [#741](https://github.com/qarmin/czkawka/pull/741)
-- Improve Windows CI - [#749](https://github.com/qarmin/czkawka/pull/749)
+- Improved Windows CI - [#749](https://github.com/qarmin/czkawka/pull/749)
 - Ability to check for broken files by types - [#749](https://github.com/qarmin/czkawka/pull/749)
 - Add heif and Webp files support - [#750](https://github.com/qarmin/czkawka/pull/750)
 - Use in CLI Clap library instead StructOpt - [#759](https://github.com/qarmin/czkawka/pull/759)
+- Multiple directories can be added via Manual Add button - [#782](https://github.com/qarmin/czkawka/pull/782)
+- Option to exclude files from other filesystems in GUI(Linux) - [#776](https://github.com/qarmin/czkawka/pull/776)
 
 ## Version 4.1.0 - 24.04.2022r
 - New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)

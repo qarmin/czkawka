@@ -20,7 +20,9 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
-use crate::common::{get_dynamic_image_from_raw_image, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS};
+use crate::common::{
+    create_crash_message, get_dynamic_image_from_raw_image, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
+};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -563,8 +565,7 @@ impl SimilarImages {
                     if RAW_IMAGE_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
                         image = match get_dynamic_image_from_raw_image(&file_entry.path) {
                             Some(t) => t,
-                            None =>
-                                return Some(Some((file_entry, Vec::new())))
+                            None => return Some(Some((file_entry, Vec::new()))),
                         };
                         break 'krztyna;
                     }
@@ -599,7 +600,8 @@ impl SimilarImages {
                             return Some(Some((file_entry, Vec::new())));
                         }
                     } else {
-                        println!("Image-rs library crashed when opening \"{:?}\" image, please check if problem happens with latest image-rs version(this can be checked via https://github.com/qarmin/ImageOpening tool) and if it is not reported, please report bug here - https://github.com/image-rs/image/issues", file_entry.path);
+                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy().to_string(), "https://github.com/image-rs/image/issues");
+                        println!("{message}");
                         return Some(Some((file_entry, Vec::new())));
                     }
 

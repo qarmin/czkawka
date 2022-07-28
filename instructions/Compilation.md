@@ -33,7 +33,7 @@ You need to install Rust via Homebrew, GTK Libraries and optionally heif library
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install gtk+3 adwaita-icon-theme librsvg libheif
+brew install gtk4 adwaita-icon-theme librsvg libheif
 ```
 
 ### Windows
