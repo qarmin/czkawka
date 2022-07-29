@@ -251,10 +251,10 @@ jobs:
           override: true
 
       - name: Install Dependencies
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
+        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Test
-        run: cargo test
+        run: xvfb-run cargo test
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
