@@ -142,7 +142,7 @@ jobs:
           restore-keys: |
             linux-gui-${{github.ref}}-${{github.sha}}
 
-      - name: Install Gtk, Mingw, unzip, zip and wget
+      - name: Install Dependencies
         run: sudo apt-get update; sudo apt install libgtk-4-dev fuse libfuse2
         if: ${{ matrix.toolchain == '1.60.0' }}
 
@@ -211,7 +211,7 @@ jobs:
           restore-keys: |
             linux-appimage-gui-${{github.ref}}-${{github.sha}}
 
-      - name: Install Gtk,
+      - name: Install Dependencies
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
 
       - name: Build GUI Release
@@ -235,3 +235,26 @@ jobs:
         with:
           name: czkawka_gui-appimage-${{ runner.os }}-${{ matrix.toolchain }}
           path: Czkawka*.AppImage
+
+  linux-tests:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ debug ]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Install Dependencies
+        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
+
+      - name: Test
+        run: cargo test
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0"
