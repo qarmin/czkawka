@@ -35,14 +35,14 @@ jobs:
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
 
       - name: Build Release
-        run: cargo build --release --bin czkawka_gui
+        run: cargo build --release
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.60.0') }}
 
       - name: Build Release Heif
-        run: cargo build --release --bin czkawka_cli --features heif
+        run: cargo build --release --features heif
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
@@ -58,7 +58,7 @@ jobs:
       - name: Store Linux GUI
         uses: actions/upload-artifact@v2
         with:
-          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_gui
         if: ${{ matrix.type == 'release' }}
 
@@ -159,18 +159,20 @@ jobs:
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
 
       - name: Build Release
-        run: cargo build
+        run: cargo build --release
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
 
       - name: Download appimage dependiences
         run: |
+          pwd
           wget -c "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
           wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           chmod +x linuxdeploy-plugin-gtk.sh
           chmod +x linuxdeploy-x86_64.AppImage
           mkdir -p AppDir/usr/bin
+          pwd
           cp target/release/czkawka_gui AppDir/usr/bin
           ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage --icon-file data/icons/com.github.qarmin.czkawka.svg --desktop-file data/com.github.qarmin.czkawka.desktop
 

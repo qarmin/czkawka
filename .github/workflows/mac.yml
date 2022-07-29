@@ -27,9 +27,9 @@ jobs:
         with:
           path: |
             target
-          key: mac-cli-${{github.ref}}-${{github.sha}}
+          key: mac-${{github.ref}}-${{github.sha}}
           restore-keys: |
-            mac-cli-${{github.ref}}-${{github.sha}}
+            mac-${{github.ref}}-${{github.sha}}
 
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
