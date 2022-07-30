@@ -1,3 +1,10 @@
+## Version 5.0.1 - .08.2022r
+- Fixed problem with removing ending slash with empty disk window path
+- Added to CLI bad extensions mode
+- Fixed default sorting method in CLI where finding biggest files 
+- Added tests to CI
+- Show error message when all directories are set as reference folders
+
 ## Version 5.0.0 - 28.07.2022r
 - GUI ported to use GTK 4 - [#466](https://github.com/qarmin/czkawka/pull/466)
 - Use multithreading and improved algorithm to compare image hashes - [#762](https://github.com/qarmin/czkawka/pull/762)
