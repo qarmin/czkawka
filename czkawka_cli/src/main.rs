@@ -5,20 +5,21 @@ use std::process;
 use clap::Parser;
 
 use commands::Commands;
+use czkawka_core::big_file::SearchMode;
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 use czkawka_core::similar_images::test_image_conversion_speed;
 use czkawka_core::{
-    bad_extensions::{self, BadExtensions},
+    bad_extensions::BadExtensions,
     big_file::{self, BigFile},
     broken_files::{self, BrokenFiles},
-    duplicate::{self, DuplicateFinder},
+    duplicate::DuplicateFinder,
     empty_files::{self, EmptyFiles},
-    empty_folder::{self, EmptyFolder},
+    empty_folder::EmptyFolder,
     invalid_symlinks::{self, InvalidSymlinks},
-    same_music::{self, SameMusic},
-    similar_images::{self, return_similarity_from_similarity_preset, SimilarImages},
-    similar_videos::{self, SimilarVideos},
+    same_music::SameMusic,
+    similar_images::{return_similarity_from_similarity_preset, SimilarImages},
+    similar_videos::SimilarVideos,
     temporary::{self, Temporary},
 };
 
@@ -125,6 +126,7 @@ fn main() {
             #[cfg(target_family = "unix")]
             exclude_other_filesystems,
             delete_files,
+            smallest_mode,
         } => {
             let mut bf = BigFile::new();
 
@@ -138,6 +140,9 @@ fn main() {
             bf.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
             if delete_files {
                 bf.set_delete_method(big_file::DeleteMethod::Delete);
+            }
+            if smallest_mode {
+                bf.set_search_mode(SearchMode::SmallestFiles);
             }
 
             bf.find_big_files(None, None);
@@ -453,6 +458,8 @@ fn main() {
                     process::exit(1);
                 }
             }
+
+            be.find_bad_extensions_files(None, None);
 
             #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
             be.print_results();

@@ -464,9 +464,12 @@ impl SaveResults for BigFile {
         }
 
         if self.information.number_of_real_files != 0 {
-            write!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
-
-            for (size, file_entry) in self.big_files.iter().rev() {
+            if self.search_mode == SearchMode::BiggestFiles {
+                write!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
+            } else {
+                write!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files).unwrap();
+            }
+            for (size, file_entry) in self.big_files.iter() {
                 writeln!(writer, "{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
             }
         } else {
@@ -480,9 +483,13 @@ impl SaveResults for BigFile {
 impl PrintResults for BigFile {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
-        for (size, file_entry) in self.big_files.iter().rev() {
-            // TODO Align all to same width
-            println!("{} ({} bytes) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display());
+        if self.search_mode == SearchMode::BiggestFiles {
+            println!("{} the biggest files.\n\n", self.information.number_of_real_files);
+        } else {
+            println!("{} the smallest files.\n\n", self.information.number_of_real_files);
+        }
+        for (size, file_entry) in self.big_files.iter() {
+            println!("{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display());
         }
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
     }

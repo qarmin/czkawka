@@ -62,7 +62,7 @@ pub enum Commands {
         #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
     },
-    #[clap(name = "big", about = "Finds big files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt")]
+    #[clap(name = "big", about = "Finds big files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -J -x VIDEO -f results.txt")]
     BiggestFiles {
         #[clap(flatten)]
         directories: Directories,
@@ -80,6 +80,8 @@ pub enum Commands {
         file_to_save: FileToSave,
         #[clap(flatten)]
         not_recursive: NotRecursive,
+        #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest")]
+        smallest_mode: bool,
         #[cfg(target_family = "unix")]
         #[clap(flatten)]
         exclude_other_filesystems: ExcludeOtherFilesystems,
