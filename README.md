@@ -27,6 +27,13 @@
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
+## Supported OS
+Linux - Ubuntu 22.04+, Fedora 36+, Alpine Linux 3.16+, Debian 12+ and a lot of more   
+Windows - 7, 8.1, 10, 11  
+MacOS - 10.15+
+
+If you are looking for older version that use GTK 3 and have support for more OS(like e.g. Ubuntu 20.04), look at [4.1.0](https://github.com/qarmin/czkawka/releases/tag/4.1.0) or older versions.
+
 ## How do I use it?
 You can find the instructions on how to use Czkawka [**here**](instructions/Instruction.md).
 
@@ -140,6 +147,7 @@ You can help by creating:
   If the change is bigger, then it's a good idea to open a new issue to discuss changes, but issues with label `PR welcome` are already checked and accepted.
 - Documentation - There is an [instruction](instructions/Instruction.md) which you can improve.
 - Translations - Instruction how to translate files is available [here](instructions/Translations.md)
+- External contributions - App use big number of external libraries like [lofty](https://github.com/Serial-ATA/lofty-rs), [image-rs](https://github.com/image-rs/image) or [symphonia](https://github.com/pdeljanov/Symphonia) so improving this libraries will automatically improve Czkawka
 
 You can also help by doing other things:
 - Creating text articles - [LinuxUprising](https://www.linuxuprising.com/2021/03/find-and-remove-duplicate-files-similar.html) or [Ubunlog](https://ubunlog.com/en/czkawka-finds-and-removes-empty-and-broken-duplicate-files/)

@@ -9,16 +9,16 @@ use commands::Commands;
 use czkawka_core::common_traits::*;
 use czkawka_core::similar_images::test_image_conversion_speed;
 use czkawka_core::{
+    bad_extensions::{self, BadExtensions},
     big_file::{self, BigFile},
     broken_files::{self, BrokenFiles},
-    duplicate::DuplicateFinder,
+    duplicate::{self, DuplicateFinder},
     empty_files::{self, EmptyFiles},
-    empty_folder::EmptyFolder,
-    invalid_symlinks,
-    invalid_symlinks::InvalidSymlinks,
-    same_music::SameMusic,
-    similar_images::{return_similarity_from_similarity_preset, SimilarImages},
-    similar_videos::SimilarVideos,
+    empty_folder::{self, EmptyFolder},
+    invalid_symlinks::{self, InvalidSymlinks},
+    same_music::{self, SameMusic},
+    similar_images::{self, return_similarity_from_similarity_preset, SimilarImages},
+    similar_videos::{self, SimilarVideos},
     temporary::{self, Temporary},
 };
 
@@ -49,6 +49,7 @@ fn main() {
             exclude_other_filesystems,
             allow_hard_links,
             dryrun,
+            case_sensitive_name_comparison,
         } => {
             let mut df = DuplicateFinder::new();
 
@@ -67,6 +68,7 @@ fn main() {
             df.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
             df.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
             df.set_dryrun(dryrun.dryrun);
+            df.set_case_sensitive_name_comparison(case_sensitive_name_comparison.case_sensitive_name_comparison);
 
             df.find_duplicates(None, None);
 
@@ -425,12 +427,39 @@ fn main() {
             vr.print_results();
             vr.get_text_messages().print_messages();
         }
-        Commands::Tester { test_image } => {
-            if test_image {
-                test_image_conversion_speed();
-            } else {
-                println!("At least one test should be choosen!");
+        Commands::BadExtensions {
+            directories,
+            excluded_directories,
+            excluded_items,
+            file_to_save,
+            not_recursive,
+            #[cfg(target_family = "unix")]
+            exclude_other_filesystems,
+            allowed_extensions,
+        } => {
+            let mut be = BadExtensions::new();
+
+            be.set_included_directory(directories.directories);
+            be.set_excluded_directory(excluded_directories.excluded_directories);
+            be.set_excluded_items(excluded_items.excluded_items);
+            be.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
+            be.set_recursive_search(!not_recursive.not_recursive);
+            #[cfg(target_family = "unix")]
+            be.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+
+            if let Some(file_name) = file_to_save.file_name() {
+                if !be.save_results_to_file(file_name) {
+                    be.get_text_messages().print_messages();
+                    process::exit(1);
+                }
             }
+
+            #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+            be.print_results();
+            be.get_text_messages().print_messages();
+        }
+        Commands::Tester {} => {
+            test_image_conversion_speed();
         }
     }
 }

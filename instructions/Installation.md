@@ -7,13 +7,16 @@ For Czkawka GUI the lowest supported version of GTK is `3.24` which is the only 
 In app exists Similar Video tool which require `FFmpeg` to work, but is completelly optional and without it, only warning would be printed when trying to use this tool without installed ffmpeg.  
 Broken files finder by default don't check for music files, but it is possible to enable this feature and that require to have alsa lib installed(on Ubuntu this is `libasound2-dev` package)
 
+**Warning**
+Main Czkawka GUI dependency - GTK 4 is only available on newer systems like e.g. Ubuntu 22.04, so if you have problems with running app on older systems, you may like to use older Czkawka versions, upgrade OS or install flatpak package which use its own set of dependencies.
+
 #### Ubuntu/Debian/Linux Mint
 ```
 sudo apt install libgtk-4-dev ffmpeg
 ```
 #### Fedora/Rocky Linux
 ```
-sudo yum install gtk3-devel glib2-devel
+sudo yum install gtk4-devel glib2-devel
 sudo dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 sudo dnf -y install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 sudo dnf -y install ffmpeg
@@ -43,7 +46,7 @@ At the end execute it:
 **Warning**  
 Prebuilt binaries are available only for x86_64, so if you use ARM machine like e.g. Mac M1, you need to compile manually app.  
 
-There is also a way to use x86_64 binaries on ARM, but this require to install special version of required libraries probably via:
+There is also a way to use x86_64 binaries on ARM, but this requires to install special version of required libraries probably via:
 ```shell
 arch -x86_64 /usr/local/bin/brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif
 ```
