@@ -44,7 +44,6 @@ jobs:
         run: cargo build --release --features heif
         env:
           CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0 -D warnings"
         if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS CLI

@@ -184,6 +184,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
         dialog.close();
     });
 }
+
 fn remove_ending_slashes(original_string: &mut String) {
     let mut windows_disk_path: bool = false;
     let mut chars = original_string.chars();
@@ -202,6 +203,7 @@ fn remove_ending_slashes(original_string: &mut String) {
         original_string.pop();
     }
 }
+
 #[test]
 pub fn test_remove_ending_slashes() {
     let mut original = "/home/rafal".to_string();
@@ -247,6 +249,14 @@ pub fn test_remove_ending_slashes() {
     let mut original = "C://////////".to_string();
     remove_ending_slashes(&mut original);
     assert_eq!(&original, "C:/");
+
+    let mut original = "C:/roman/function/".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "C:/roman/function");
+
+    let mut original = "C:/staszek/without".to_string();
+    remove_ending_slashes(&mut original);
+    assert_eq!(&original, "C:/staszek/without");
 
     let mut original = "C:\\\\\\\\\\".to_string();
     remove_ending_slashes(&mut original);

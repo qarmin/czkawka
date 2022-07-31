@@ -861,6 +861,7 @@ mod test {
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
     }
+
     #[test]
     fn test_change_dimension_to_krotka() {
         assert_eq!(change_dimension_to_krotka("50x50".to_string()), (50, 50));
