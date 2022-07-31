@@ -743,6 +743,24 @@ pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, valu
     false
 }
 
+pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
+    if let Some(iter) = list_store.iter_first() {
+        loop {
+            let list_store_value: bool = list_store.get::<bool>(&iter, column as i32);
+
+            if value != list_store_value {
+                return false;
+            }
+
+            if !list_store.iter_next(&iter) {
+                break;
+            }
+        }
+        return true;
+    }
+    false
+}
+
 #[cfg(test)]
 mod test {
     use gtk4::prelude::*;
@@ -750,8 +768,43 @@ mod test {
     use image::DynamicImage;
 
     use crate::help_functions::{
-        change_dimension_to_krotka, check_if_value_is_in_list_store, get_all_boxes_from_widget, get_all_direct_children, get_max_file_name, get_pixbuf_from_dynamic_image,
+        change_dimension_to_krotka, check_if_list_store_column_have_all_same_values, check_if_value_is_in_list_store, get_all_boxes_from_widget, get_all_direct_children,
+        get_max_file_name, get_pixbuf_from_dynamic_image,
     };
+
+    #[gtk4::test]
+    fn test_check_if_list_store_column_have_all_same_values() {
+        let columns_types: &[glib::types::Type] = &[glib::types::Type::BOOL];
+        let list_store = gtk4::ListStore::new(columns_types);
+
+        list_store.clear();
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &false)];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+
+        list_store.clear();
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &true)];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+
+        list_store.clear();
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &false)];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+
+        list_store.clear();
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+    }
 
     #[gtk4::test]
     fn test_check_if_value_is_in_list_store() {
@@ -808,6 +861,7 @@ mod test {
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
         get_pixbuf_from_dynamic_image(&dynamic_image).unwrap();
     }
+
     #[test]
     fn test_change_dimension_to_krotka() {
         assert_eq!(change_dimension_to_krotka("50x50".to_string()), (50, 50));

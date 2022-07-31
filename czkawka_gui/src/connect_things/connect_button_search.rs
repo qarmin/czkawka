@@ -117,6 +117,13 @@ pub fn connect_button_search(
     let check_button_settings_save_also_json = gui_data.settings.check_button_settings_save_also_json.clone();
 
     buttons_search_clone.connect_clicked(move |_| {
+        // Check if user selected all referenced folders
+        let list_store_included_directories = get_list_store(&tree_view_included_directories);
+        if check_if_list_store_column_have_all_same_values(&list_store_included_directories, ColumnsIncludedDirectory::ReferenceButton as i32, true) {
+            entry_info.set_text(&flg!("selected_all_reference_folders"));
+            return;
+        }
+
         let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
         let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None));
         let reference_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(

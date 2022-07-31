@@ -11,8 +11,8 @@ Support for heif images is optional and require to install libheif library.
 
 | Program | Min  | What for                                                                      |
 |---------|------|-------------------------------------------------------------------------------|
-| Rust    | 1.60 | Czkawka, aims to support the latest available version of Rust on Ubuntu 20.04 |
-| GTK     | 3.24 | Only for the `GTK` backend                                                    |
+| Rust    | 1.60 | Czkawka, aims to support the latest available version of Rust on Ubuntu 22.04 |
+| GTK     | 4.6  | Only for the `GTK` backend                                                    |
 
 #### Debian / Ubuntu
 ```shell
@@ -24,11 +24,11 @@ sudo apt install -y libgtk-4-dev
 #### Fedora / CentOS / Rocky Linux
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo yum install gtk3-devel glib2-devel
+sudo yum install gtk4-devel glib2-devel
 ```
 
 #### macOS
-You need to install Rust via Homebrew, GTK Libraries and optionally heif library(to have support for heic files, which are quite popular on mac)
+You need to install Rust via Homebrew, GTK Libraries and optionally heif library(to have support for heic files, which are quite popular on Mac)
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
@@ -88,10 +88,9 @@ target/release/czkawka_gui
 ```
 
 ## Additional features
-For now, finding broken audio files is temporarily disabled by default, because app crashes when audio libraries are not found on the computer.  
-I'm waiting for ability to disable audio playback feature, so after that I will be able to re-enable by default this feature (https://github.com/RustAudio/rodio/issues/349)
+Currently, the only additional dependence is heif image support.
 
-To enable checking for broken audio files, just add ` --all-features`
+To enable checking for heif images, just add ` --all-features` or `--features heif`
 ```
-cargo run --all-features --bin czkawka_cli -- broken  -d /home/rafal/ -f "results.txt"
+cargo run --features heif --bin czkawka_cli -- image  -d /home/rafal/ -f "results.txt"
 ```

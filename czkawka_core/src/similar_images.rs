@@ -32,7 +32,7 @@ use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
-    [0, 2, 5, 7, 14, 20],    // 8
+    [1, 2, 5, 7, 14, 20],    // 8
     [2, 5, 15, 30, 40, 40],  // 16
     [4, 10, 20, 40, 40, 40], // 32
     [6, 20, 40, 40, 40, 40], // 64
@@ -59,6 +59,7 @@ pub struct FileEntry {
 /// Used by CLI tool when we cannot use directly values
 #[derive(Clone, Debug)]
 pub enum SimilarityPreset {
+    Original,
     VeryHigh,
     High,
     Medium,
@@ -1283,6 +1284,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPr
         _ => panic!(),
     };
     match similarity_preset {
+        SimilarityPreset::Original => 0,
         SimilarityPreset::VeryHigh => SIMILAR_VALUES[index_preset][0],
         SimilarityPreset::High => SIMILAR_VALUES[index_preset][1],
         SimilarityPreset::Medium => SIMILAR_VALUES[index_preset][2],
