@@ -402,6 +402,7 @@ saving_loading_not_valid = La configuración "{ $data }" no existe en la versió
 invalid_symlink_infinite_recursion = Recursión infinita
 invalid_symlink_non_existent_destination = Archivo de destino inexistente
 # Other
+selected_all_reference_folders = No se puede iniciar la búsqueda, cuando todos los directorios están establecidos como carpetas de referencia
 searching_for_data = Buscando datos, puede tardar un tiempo, por favor espere...
 text_view_messages = MENSAJES
 text_view_warnings = ADVERTENCIA

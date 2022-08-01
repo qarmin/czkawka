@@ -402,6 +402,7 @@ saving_loading_not_valid = Inställningen "{ $data }" finns inte i nuvarande app
 invalid_symlink_infinite_recursion = Oändlig recursion
 invalid_symlink_non_existent_destination = Icke-existerande målfil
 # Other
+selected_all_reference_folders = Kan inte börja söka, när alla kataloger är inställda som referensmappar
 searching_for_data = Söker data, det kan ta en stund, vänta...
 text_view_messages = MEDDELANDEN
 text_view_warnings = VARNINGAR

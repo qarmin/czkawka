@@ -402,6 +402,7 @@ saving_loading_not_valid = Setting "{ $data }" does not exist in current app ver
 invalid_symlink_infinite_recursion = Infinite recursion
 invalid_symlink_non_existent_destination = Non-existent destination file
 # Other
+selected_all_reference_folders = Cannot start search, when all directories are set as reference folders
 searching_for_data = Searching data, it may take a while, please wait...
 text_view_messages = MESAJLAR
 text_view_warnings = WARNINGS

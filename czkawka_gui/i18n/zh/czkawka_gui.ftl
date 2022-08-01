@@ -59,11 +59,11 @@ image_resize_filter_tooltip =
     
     建议使用 8x8 散列大小，使用不同于Nearest的算法来拥有更好的图像组。
 image_hash_alg_tooltip =
-    Users can choose from one of many algorithms of calculating the hash.
+    用户可以从许多计算哈希值的算法中选择一种。
     
-    Each has both strong and weaker points and will sometimes give better and sometimes worse results for different images.
+    每种算法都有强项和弱项，对于不同的图像，有时会有更好的结果，有时会有更差的结果。
     
-    So, to determine the best one for you, manual testing is required.
+    因此，为了确定最适合你的算法，需要进行人工测试。
 big_files_mode_combobox_tooltip = 允许搜索最小/最大的文件
 big_files_mode_label = 已检查的文件
 big_files_mode_smallest_combo_box = 最小的
@@ -402,6 +402,7 @@ saving_loading_not_valid = 设置“{ $data }”在当前应用版本中不存�
 invalid_symlink_infinite_recursion = 无限递归性
 invalid_symlink_non_existent_destination = 目标文件不存在
 # Other
+selected_all_reference_folders = 当所有目录被设置为参考文件夹时，无法开始搜索
 searching_for_data = 正在搜索数据，可能需要一段时间，请稍候...
 text_view_messages = 消息
 text_view_warnings = 警告

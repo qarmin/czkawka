@@ -402,6 +402,7 @@ saving_loading_not_valid = Nastavení "{ $data }" v aktuální verzi aplikace ne
 invalid_symlink_infinite_recursion = Nekonečná rekurze
 invalid_symlink_non_existent_destination = Neexistující cílový soubor
 # Other
+selected_all_reference_folders = Hledání nelze spustit, pokud jsou všechny adresáře nastaveny jako referenční složky
 searching_for_data = Vyhledávání dat může chvíli trvat, prosím čekejte...
 text_view_messages = ZPRÁVY
 text_view_warnings = VAROVÁNÍ
