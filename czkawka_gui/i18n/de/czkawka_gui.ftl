@@ -401,6 +401,7 @@ saving_loading_not_valid = Einstellung "{ $data }" existiert nicht in der aktuel
 invalid_symlink_infinite_recursion = Endlose Rekursion
 invalid_symlink_non_existent_destination = Nicht existierende Zieldatei
 # Other
+selected_all_reference_folders = Suche kann nicht gestartet werden, wenn alle Verzeichnisse als Referenzordner gesetzt sind
 searching_for_data = Suche nach Daten, es kann eine Weile dauern, bitte warten...
 text_view_messages = NACHRICHT
 text_view_warnings = WARNUNGEN

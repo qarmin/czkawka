@@ -43,27 +43,27 @@ duplicate_check_method_tooltip =
     
     ハッシュ - 同じ内容のファイルを探します。ファイルをハッシュ化して比較することにより重複を見つけます。このモードは、重複を見つけるための最も安全な方法です。このツールはキャッシュを多用するので、同じデータの2回目以降のスキャンは最初の時よりずっと速くなるはずです。
 image_hash_size_tooltip =
-    Each checked image produce special hash which can be compared with every other, and small difference between them means that this images are similar.
+    チェックした画像はそれぞれ特別なハッシュを生成し、そのハッシュを比較することで、両者の差が小さいほど、この画像は類似していることを意味します。
     
-    8 hash size is quite good to find images that are only little similar to original. With bigger set of images(>1000) will produce big amount of false positives, so I recommend to use for such amount bigger hash size.
+    8のハッシュサイズは、オリジナルに少ししか似ていない画像を見つけるのにかなり適しています。しかし、1000枚を超えるような大きな画像では、誤検出が多くなるため、より大きなハッシュサイズを使用することをお勧めします。
     
-    16 is default hash size which is quite good compromise between finding even a little similar images and having small amount of hash collisions.
+    16はデフォルトのハッシュサイズであり、少しでも類似した画像を見つけることとハッシュの衝突を少なくすることの間でかなり良い妥協点です。
     
-    32 and 64 hashes finds only very similar images, but almost should not have any false positives(maybe except some images with alpha channel).
+    32と64のハッシュは非常に類似した画像しか見つけられませんが、誤検出はほとんどありません（アルファチャンネルのある一部の画像を除いて）。
 image_resize_filter_tooltip =
-    To compute hash of image, library must first resize it.
+    画像のハッシュを計算するために、ライブラリはまず画像のサイズを変更する必要があります。
     
-    Depend on chosen algorithm, resulted image used to calculate hash will may looks little different.
+    選択されたアルゴリズムによって、ハッシュを計算するために使用される画像は少し違って見えるかもしれません。
     
-    The fastest algorithm to use, but also one which gives the worst results is Nearest, it is enabled by default, because with 16x16 hash size, lower quality it is not really visible.
+    最も高速なアルゴリズムは Nearest ですが、最も悪い結果を出すのも Nearest です。
     
-    With 8x8 hash size is recommended to use different algorithm than Nearest, to have better groups of images.
+    8x8のハッシュサイズでは、より良い画像群を得るために、Nearestとは異なるアルゴリズムを使用することが推奨されます。
 image_hash_alg_tooltip =
-    Users can choose from one of many algorithms of calculating the hash.
+    ハッシュの計算方法は、多くのアルゴリズムの中からユーザーが選択することができます。
     
-    Each has both strong and weaker points and will sometimes give better and sometimes worse results for different images.
+    それぞれ長所と短所があり、画像によって良い結果が出る場合もあれば、悪い結果が出る場合もあります。
     
-    So, to determine the best one for you, manual testing is required.
+    そのため、最適なものを見極めるには、手動でのテストが必要です。
 big_files_mode_combobox_tooltip = 最小/最大のファイルを検索できます
 big_files_mode_label = チェックされたファイル
 big_files_mode_smallest_combo_box = 最も小さい
@@ -402,6 +402,7 @@ saving_loading_not_valid = 設定 "{ $data }" は現在のバージョンのア�
 invalid_symlink_infinite_recursion = 無限再帰性
 invalid_symlink_non_existent_destination = 保存先ファイルが存在しません
 # Other
+selected_all_reference_folders = すべてのディレクトリが参照フォルダとして設定されている場合、検索を開始できません
 searching_for_data = データを検索中、しばらくお待ちください...
 text_view_messages = メッセージ
 text_view_warnings = 警告

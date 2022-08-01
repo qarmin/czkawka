@@ -126,11 +126,11 @@ upper_manual_add_excluded_button = Manuelt legg til
 upper_add_excluded_button = Legg til
 upper_remove_excluded_button = Fjern
 upper_manual_add_included_button_tooltip =
-    Add directory name to search by hand.
+    Legg til mappenavn for å søke etter hånd.
     
-    To add multiple paths at once, separate them by ;
+    For å legge til flere baner samtidig, separer dem med ;
     
-    /home/roman;/home/rozkaz will add two directories /home/roman and /home/rozkaz
+    /home/roman;/home/rozkaz vil legge til to kataloger /home/roman og /home/rozkaz
 upper_add_included_button_tooltip = Legg til ny mappe i søk.
 upper_remove_included_button_tooltip = Slett mappen fra søk.
 upper_manual_add_excluded_button_tooltip =
@@ -252,11 +252,11 @@ header_about_button_tooltip = Åpner dialog med info om app.
 
 ## General
 
-settings_ignore_other_filesystems = Ignore other filesystems(only Linux)
+settings_ignore_other_filesystems = Ignorer andre filsystemer (bare Linux)
 settings_ignore_other_filesystems_tooltip =
-    ignores files that are not in the same file system as searched directories.
+    ignorerer filer som ikke er i samme filsystem som søk-kataloger.
     
-    Works same like -xdev option in find command on Linux
+    Fungerer samme som -xdev alternativet i å finne kommandoen på Linux
 settings_save_at_exit_button_tooltip = Lagre konfigurasjon som fil når appen lukkes.
 settings_load_at_start_button_tooltip =
     Last inn konfigurasjon fra filen når du åpner appen.
@@ -402,6 +402,7 @@ saving_loading_not_valid = Setter "{ $data }" finnes ikke i gjeldende appversjon
 invalid_symlink_infinite_recursion = Uendelig rekursjon
 invalid_symlink_non_existent_destination = Ikke-eksisterende målfil
 # Other
+selected_all_reference_folders = Kan ikke starte søk, når alle kataloger er angitt som referanselapper
 searching_for_data = Søker data, det kan ta en stund, vennligst vent...
 text_view_messages = MELDINGER
 text_view_warnings = ADVARSELSER
