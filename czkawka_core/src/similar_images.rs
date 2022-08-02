@@ -729,19 +729,28 @@ impl SimilarImages {
             };
             //// PROGRESS THREAD END
 
-            for hash in &all_hashes {
-                self.bktree.add(hash.to_vec());
+            // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
+            let mut additional_chunk_to_check: Vec<_> = Default::default();
+            let mut hashes_with_multiple_images: HashSet<_> = Default::default(); // Fast way to check if hash have multiple imaages
+            for (hash, vec_files) in &all_hashed_images {
+                if vec_files.len() >= 2 {
+                    additional_chunk_to_check.push(hash);
+                    hashes_with_multiple_images.insert(hash);
+                } else {
+                    self.bktree.add(hash.to_vec());
+                }
             }
 
             let number_of_processors = num_cpus::get();
             let chunk_size = all_hashes.len() / number_of_processors;
-            let chunks: Vec<_> = if chunk_size > 0 { all_hashes.chunks(chunk_size).collect() } else { vec![&all_hashes] };
+            let mut chunks: Vec<_> = if chunk_size > 0 { all_hashes.chunks(chunk_size).collect() } else { vec![&all_hashes] };
+            chunks.push(&additional_chunk_to_check);
 
             let parts: Vec<_> = chunks
                 .into_par_iter()
                 .map(|hashes_to_check| {
-                    let mut hashes_parents: HashMap<&Vec<u8>, u32> = Default::default(); // Hash used as parent, childrens
-                    let mut hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default(); // Hash used as child, (parent_hash,similarity)
+                    let mut hashes_parents: HashMap<&Vec<u8>, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
+                    let mut hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
 
                     // Sprawdź czy hash nie jest użyty jako master gdzie indziej
                     // Jeśli tak to przejdź do sprawdzania kolejnego elementu
@@ -752,15 +761,16 @@ impl SimilarImages {
 
                     for (index, hash_to_check) in hashes_to_check.iter().enumerate() {
                         // Don't check for user stop too often
-                        // Also don't add too ofter data to variables
-                        const CYCLES_COUNTER: usize = 50;
-                        if index % CYCLES_COUNTER == 0 && index != 0 {
+                        // Also don't add too often data to atomic variable
+                        const CYCLES_COUNTER: usize = 0b111111;
+                        if ((index & CYCLES_COUNTER) == CYCLES_COUNTER) && index != 0 {
                             atomic_mode_counter.fetch_add(CYCLES_COUNTER, Ordering::Relaxed);
                             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                                 check_was_stopped.store(true, Ordering::Relaxed);
                                 return None;
                             }
                         }
+                        hashes_parents.insert(hash_to_check, 0);
 
                         let mut found_items = self
                             .bktree
@@ -772,9 +782,9 @@ impl SimilarImages {
 
                         for (similarity, other_hash) in found_items {
                             // SSSTART
-                            // Cannot use hash if already is used as master record(have more than 0 children)
+                            // Cannot use hash if already is used as master record(have more than 0 children) or hash have more than one images
                             if let Some(children_number) = hashes_parents.get(other_hash) {
-                                if *children_number > 0 {
+                                if *children_number > 0 || hashes_with_multiple_images.contains(other_hash) {
                                     continue;
                                 }
                             }
@@ -815,7 +825,7 @@ impl SimilarImages {
                                 if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
                                     *number_of_children += 1;
                                 } else {
-                                    hashes_parents.insert(hash_to_check, 1);
+                                    panic!("This should never happen(At start item should be initialized with 0)");
                                 }
                             }
                             // ENND
@@ -854,7 +864,7 @@ impl SimilarImages {
                         // SSSTART
                         // Cannot use hash if already is used as master record(have more than 0 children)
                         if let Some(children_number) = hashes_parents.get(other_hash) {
-                            if *children_number > 0 {
+                            if *children_number > 0 || hashes_with_multiple_images.contains(other_hash) {
                                 continue;
                             }
                         }
@@ -895,7 +905,7 @@ impl SimilarImages {
                             if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
                                 *number_of_children += 1;
                             } else {
-                                hashes_parents.insert(hash_to_check, 1);
+                                hashes_parents.insert(hash_to_check, 1); // This line is different than in first algorithm because at start hashes without children are not zeroed as before
                             }
                         }
                         // ENND
@@ -906,9 +916,9 @@ impl SimilarImages {
                 debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
 
                 // Collecting results
-
                 for (parent_hash, child_number) in hashes_parents {
-                    if child_number > 0 {
+                    // If hash contains other hasher OR multiple images are available for checked hash
+                    if child_number > 0 || hashes_with_multiple_images.contains(parent_hash) {
                         let vec_fe = all_hashed_images.get(parent_hash).unwrap().clone();
                         collected_similar_images.insert(parent_hash.clone(), vec_fe);
                     }
@@ -1368,12 +1378,14 @@ fn debug_check_for_duplicated_things(
     all_hashed_images: HashMap<Vec<u8>, Vec<FileEntry>>,
     numm: &str,
 ) {
+    let mut found_broken_thing = false;
     let mut hashmap_hashes: HashSet<_> = Default::default();
     let mut hashmap_names: HashSet<_> = Default::default();
     for (hash, number_of_children) in &hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(*hash) {
                 println!("------1--HASH--{}  {:?}", numm, all_hashed_images.get(*hash).unwrap());
+                found_broken_thing = true;
             }
             hashmap_hashes.insert(hash.to_vec());
 
@@ -1381,6 +1393,7 @@ fn debug_check_for_duplicated_things(
                 let name = i.path.to_string_lossy().to_string();
                 if hashmap_names.contains(&name) {
                     println!("------1--NAME--{}  {:?}", numm, name);
+                    found_broken_thing = true;
                 }
                 hashmap_names.insert(name);
             }
@@ -1389,6 +1402,7 @@ fn debug_check_for_duplicated_things(
     for hash in hashes_similarity.keys() {
         if hashmap_hashes.contains(*hash) {
             println!("------2--HASH--{}  {:?}", numm, all_hashed_images.get(*hash).unwrap());
+            found_broken_thing = true;
         }
         hashmap_hashes.insert(hash.to_vec());
 
@@ -1396,8 +1410,13 @@ fn debug_check_for_duplicated_things(
             let name = i.path.to_string_lossy().to_string();
             if hashmap_names.contains(&name) {
                 println!("------2--NAME--{}  {:?}", numm, name);
+                found_broken_thing = true;
             }
             hashmap_names.insert(name);
         }
+    }
+
+    if found_broken_thing {
+        panic!();
     }
 }
