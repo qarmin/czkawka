@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "5.0.0"
+version = "5.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
 rust-version = "1.60"
@@ -59,7 +59,7 @@ features = ["v4_6"]
 
 [dependencies.czkawka_core]
 path = "../czkawka_core"
-version = "5.0.0"
+version = "5.0.1"
 features = []
 
 [features]

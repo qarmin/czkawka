@@ -1,9 +1,10 @@
-## Version 5.0.1 - .08.2022r
-- Fixed problem with removing ending slash with empty disk window path
-- Added to CLI bad extensions mode
-- Fixed default sorting method in CLI where finding biggest files 
-- Added tests to CI
-- Show error message when all directories are set as reference folders
+## Version 5.0.1 - 03.08.2022r
+- Fixed problem with removing ending slash with empty disk window path - [975](https://github.com/qarmin/czkawka/commit/97563a7b2a70fb5fcf6463f28069e6ea3b0ff5c2)
+- Added to CLI bad extensions mode - [#795](https://github.com/qarmin/czkawka/pull/795)
+- Restore default sorting method in CLI where finding biggest files - [5d7](https://github.com/qarmin/czkawka/commit/5d79dc7ccfee6d5426e37c4e6a860fa555c5927a)
+- Added tests to CI - [#791](https://github.com/qarmin/czkawka/pull/791)
+- Show error message when all directories are set as reference folders - [#795](https://github.com/qarmin/czkawka/pull/795)
+- Added more info about new requirements on Linux - [#795](https://github.com/qarmin/czkawka/pull/795)
 
 ## Version 5.0.0 - 28.07.2022r
 - GUI ported to use GTK 4 - [#466](https://github.com/qarmin/czkawka/pull/466)

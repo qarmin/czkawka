@@ -360,7 +360,7 @@ compute_found_images = 총 { $number_groups }개의 그룹, { $number_files }개
 compute_found_videos = 총 { $number_groups }개의 그룹, { $number_files }개의 유사한 영상을 찾음.
 compute_found_music = 총 { $number_groups }개의 그룹, { $number_files }개의 유사한 음악 파일을 찾음.
 compute_found_invalid_symlinks = 총 { $number_files } 개의 유효하지 않은 심볼릭 링크를 찾음.
-compute_found_broken_files = Found { $number_files } broken files
+compute_found_broken_files = { $number_files }개의 손상된 파일을 찾음.
 compute_found_bad_extensions = 총 { $number_files }개의 잘못된 확장자를 가진 파일을 찾음.
 # Progress window
 progress_scanning_general_file = { $file_number }개의 파일 스캔 중
@@ -389,23 +389,23 @@ saving_loading_invalid_bool = 키 "{ $key }"의 값이 올바르지 않습니다
 saving_loading_decode_problem_bool = 키 "{ $key }"의 값을 bool로 해석할 수 없습니다. 허용된 값은 0, 1, true, false 중 하나이지만 실제 값이 "{ $result }"입니다.
 saving_loading_saving_same_keys = 키 "{ $key }"가 중복되어 있습니다.
 saving_loading_failed_to_get_home_directory = 설정 파일을 저장 또는 불러오기 위한 홈 디렉터리를 찾을 수 없습니다.saving_loading_folder_config_instead_file = "{ $path }"에 있는 설정 파일을 열거나 설정 파일을 생성할 수 없습니다. 파일과 같은 이름의 폴더가 존재합니다.
-saving_loading_folder_config_instead_file = Cannot create or open save configuration file in path "{ $path }" because already there is a folder.
+saving_loading_folder_config_instead_file = "{ $path }"에 설정 파일을 만들거나 열 수 없습니다. 이미 같은 이름의 폴더가 존재합니다.
 saving_loading_failed_to_create_configuration_folder = 설정 폴더를 "{ $path }"에 생성할 수 없습니다. 이유: "{ $reason }".
 saving_loading_failed_to_create_config_file = "{ $path }" 파일에 설정을 저장할 수 없습니다. 이유: "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" 파일에서 설정을 불러올 수 없습니다. 파일이 없거나, 파일이 아닙니다.
 saving_loading_failed_to_read_data_from_file = "{ $path }" 파일을 읽을 수 없습니다. 이유: "{ $reason }".
-saving_loading_orphan_data = Found orphan data "{ $data }" in line "{ $line }".
+saving_loading_orphan_data = { $line }번 행에 고아 데이터 "{ $data }"가 있습니다.
 saving_loading_not_valid = 설정 "{ $data }"은 현재 프로그램 버전에 존재하지 않습니다.
 # Invalid symlinks
 invalid_symlink_infinite_recursion = 무한 재귀
 invalid_symlink_non_existent_destination = 목표 파일이 없음
 # Other
-selected_all_reference_folders = Cannot start search, when all directories are set as reference folders
+selected_all_reference_folders = 모든 디렉터리가 기준 폴더이므로, 검색을 시작할 수 없습니다.
 searching_for_data = 검색 중. 잠시만 기다려주세요...
-text_view_messages = 메시지
-text_view_warnings = 경보
-text_view_errors = ERRORS
-about_window_motto = 이 프로그램은 무료이며, 항상 그럴 것이다.
+text_view_messages = 알림
+text_view_warnings = 경고
+text_view_errors = 오류
+about_window_motto = 이 프로그램은 무료이며, 앞으로도 항상 그럴 것이다.
 # Various dialog
 dialogs_ask_next_time = 다음에도 묻기
 delete_file_failed = { $name } 파일 삭제 실패. 이유: { $reason }
