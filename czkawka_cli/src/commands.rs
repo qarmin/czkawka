@@ -6,9 +6,10 @@ use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::duplicate::{DeleteMethod, HashType};
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
+use czkawka_core::CZKAWKA_VERSION;
 
 #[derive(Debug, clap::StructOpt)]
-#[clap(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE)]
+#[clap(name = "czkawka", help_message = HELP_MESSAGE, template = HELP_TEMPLATE, version = CZKAWKA_VERSION)]
 pub enum Commands {
     #[clap(name = "dup", about = "Finds duplicate files", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo")]
     Duplicates {
