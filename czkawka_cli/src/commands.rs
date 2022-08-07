@@ -22,7 +22,7 @@ pub enum Commands {
         minimal_file_size: u64,
         #[clap(short = 'i', long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
-        #[clap(short = 'c', long, parse(try_from_str = parse_minimal_file_size), default_value = "257144", help = "Minimum cached file size in bytes", long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up will cause that lower amount of files will be cached, but loading of cache will be faster")]
+        #[clap(short = 'c', long, parse(try_from_str = parse_minimal_file_size), default_value = "257144", help = "Minimum cached file size in bytes", long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up the scan but loading the cache will be slower, assigning smaller value may slow down the scan and some files may need to be hashed again but loading the cache will be faster")]
         minimal_cached_file_size: u64,
         #[clap(flatten)]
         allowed_extensions: AllowedExtensions,
