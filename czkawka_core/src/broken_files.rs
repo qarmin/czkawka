@@ -477,7 +477,7 @@ impl BrokenFiles {
                         if let Ok(image_result) = result {
                             image_result
                         } else {
-                            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy().to_string(), "https://github.com/Serial-ATA/lofty-rs");
+                            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
                             println!("{message}");
                             file_entry_clone.error_string = message;
                             Some(Some(file_entry_clone))
@@ -506,7 +506,7 @@ impl BrokenFiles {
                             if let Ok(audio_result) = result {
                                 audio_result
                             } else {
-                                let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy().to_string(), "https://github.com/pdeljanov/Symphonia");
+                                let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
                                 println!("{message}");
                                 file_entry_clone.error_string = message;
                                 Some(Some(file_entry_clone))
@@ -541,7 +541,7 @@ impl BrokenFiles {
                                 if let Ok(pdf_result) = result {
                                     pdf_result
                                 } else {
-                                    let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy().to_string(), "https://github.com/pdf-rs/pdf");
+                                    let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
                                     println!("{message}");
                                     file_entry_clone.error_string = message;
                                     Some(Some(file_entry_clone))
