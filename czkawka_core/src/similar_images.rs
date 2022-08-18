@@ -573,7 +573,7 @@ impl SimilarImages {
 
                     #[cfg(feature = "heif")]
                     if HEIC_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                        image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy().to_string()) {
+                        image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
                             Ok(t) => t,
                             Err(_) => {
                                 return Some(Some((file_entry, Vec::new())));
@@ -601,7 +601,7 @@ impl SimilarImages {
                             return Some(Some((file_entry, Vec::new())));
                         }
                     } else {
-                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy().to_string(), "https://github.com/image-rs/image/issues");
+                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
                         println!("{message}");
                         return Some(Some((file_entry, Vec::new())));
                     }
