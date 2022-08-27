@@ -34,15 +34,15 @@ jobs:
       - name: Install basic libraries
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
 
-      - name: Build Release
-        run: cargo build --release
+      - name: Build Release Heif
+        run: cargo build --release --features heif
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.60.0') }}
 
-      - name: Build Release Heif
-        run: cargo build --release --features heif
+      - name: Build Release
+        run: cargo build --release
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
