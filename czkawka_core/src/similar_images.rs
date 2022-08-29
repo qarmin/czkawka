@@ -912,10 +912,24 @@ impl SimilarImages {
                     }
                 }
 
-                #[cfg(debug_assertions)]
+                // #[cfg(debug_assertions)]
                 debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
 
-                // Collecting results
+                // Just simple check if all original hashes with multiple entries are available in end results
+                let original_hashes_at_start = hashes_with_multiple_images.len();
+                let original_hashes_in_end_results = hashes_parents
+                    .iter()
+                    .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
+                    .count();
+                assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
+                dbg!(hashes_with_multiple_images.len());
+                dbg!(hashes_parents.len());
+                dbg!(hashes_parents.iter().filter(|(parent_hash, child_number)| **child_number > 0).count());
+                dbg!(hashes_parents
+                    .iter()
+                    .filter(|(parent_hash, child_number)| hashes_with_multiple_images.contains(*parent_hash))
+                    .count());
+                // Collecting results to vector
                 for (parent_hash, child_number) in hashes_parents {
                     // If hash contains other hasher OR multiple images are available for checked hash
                     if child_number > 0 || hashes_with_multiple_images.contains(parent_hash) {
@@ -923,6 +937,7 @@ impl SimilarImages {
                         collected_similar_images.insert(parent_hash.clone(), vec_fe);
                     }
                 }
+                dbg!(collected_similar_images.len());
 
                 for (child_hash, (parent_hash, similarity)) in hashes_similarity {
                     let mut vec_fe = all_hashed_images.get(child_hash).unwrap().clone();
