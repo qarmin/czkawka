@@ -838,7 +838,7 @@ impl SimilarImages {
                     }
                 }
 
-                // #[cfg(debug_assertions)]
+                #[cfg(debug_assertions)]
                 debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
 
                 // Just simple check if all original hashes with multiple entries are available in end results
