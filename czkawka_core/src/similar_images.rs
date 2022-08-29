@@ -780,55 +780,15 @@ impl SimilarImages {
 
                         found_items.sort_unstable_by_key(|f| f.0);
 
-                        for (similarity, other_hash) in found_items {
-                            // SSSTART
-                            // Cannot use hash if already is used as master record(have more than 0 children) or hash have more than one images
-                            if let Some(children_number) = hashes_parents.get(other_hash) {
-                                if *children_number > 0 || hashes_with_multiple_images.contains(other_hash) {
-                                    continue;
-                                }
-                            }
-
-                            // If there is already record, with smaller sensitivity, then replace it
-                            let mut need_to_add = false;
-                            let mut need_to_check = false;
-
-                            // TODO replace variables from above with closures
-                            // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
-                            if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(hash_to_check) {
-                                if *current_similarity_with_parent > similarity {
-                                    need_to_check = true;
-
-                                    *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
-                                    hashes_similarity.remove(hash_to_check).unwrap();
-                                }
-                            } else {
-                                need_to_check = true;
-                            }
-
-                            if need_to_check {
-                                if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
-                                    if *other_similarity > similarity {
-                                        need_to_add = true;
-                                        *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
-                                    }
-                                }
-                                // But when there is no record, just add it
-                                else {
-                                    need_to_add = true
-                                }
-                            }
-
-                            if need_to_add {
-                                hashes_similarity.insert(other_hash, (hash_to_check, similarity));
-
-                                if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
-                                    *number_of_children += 1;
-                                } else {
-                                    panic!("This should never happen(At start item should be initialized with 0)");
-                                }
-                            }
-                            // ENND
+                        for (similarity, compared_hash) in found_items {
+                            image_to_check(
+                                &mut hashes_parents,
+                                &mut hashes_similarity,
+                                &hashes_with_multiple_images,
+                                hash_to_check,
+                                compared_hash,
+                                similarity,
+                            );
                         }
                     }
 
@@ -860,55 +820,15 @@ impl SimilarImages {
                 }
 
                 for (_partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
-                    for (hash_to_check, (other_hash, similarity)) in partial_hashes_with_similarity {
-                        // SSSTART
-                        // Cannot use hash if already is used as master record(have more than 0 children)
-                        if let Some(children_number) = hashes_parents.get(other_hash) {
-                            if *children_number > 0 || hashes_with_multiple_images.contains(other_hash) {
-                                continue;
-                            }
-                        }
-
-                        // If there is already record, with smaller sensitivity, then replace it
-                        let mut need_to_add = false;
-                        let mut need_to_check = false;
-
-                        // TODO replace variables from above with closures
-                        // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
-                        if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(hash_to_check) {
-                            if *current_similarity_with_parent > similarity {
-                                need_to_check = true;
-
-                                *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
-                                hashes_similarity.remove(hash_to_check).unwrap();
-                            }
-                        } else {
-                            need_to_check = true;
-                        }
-
-                        if need_to_check {
-                            if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(other_hash) {
-                                if *other_similarity > similarity {
-                                    need_to_add = true;
-                                    *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
-                                }
-                            }
-                            // But when there is no record, just add it
-                            else {
-                                need_to_add = true
-                            }
-                        }
-
-                        if need_to_add {
-                            hashes_similarity.insert(other_hash, (hash_to_check, similarity));
-
-                            if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
-                                *number_of_children += 1;
-                            } else {
-                                hashes_parents.insert(hash_to_check, 1); // This line is different than in first algorithm because at start hashes without children are not zeroed as before
-                            }
-                        }
-                        // ENND
+                    for (hash_to_check, (compared_hash, similarity)) in partial_hashes_with_similarity {
+                        image_to_check(
+                            &mut hashes_parents,
+                            &mut hashes_similarity,
+                            &hashes_with_multiple_images,
+                            hash_to_check,
+                            compared_hash,
+                            similarity,
+                        );
                     }
                 }
 
@@ -924,10 +844,10 @@ impl SimilarImages {
                 assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
                 dbg!(hashes_with_multiple_images.len());
                 dbg!(hashes_parents.len());
-                dbg!(hashes_parents.iter().filter(|(parent_hash, child_number)| **child_number > 0).count());
+                dbg!(hashes_parents.iter().filter(|(_parent_hash, child_number)| **child_number > 0).count());
                 dbg!(hashes_parents
                     .iter()
-                    .filter(|(parent_hash, child_number)| hashes_with_multiple_images.contains(*parent_hash))
+                    .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
                     .count());
                 // Collecting results to vector
                 for (parent_hash, child_number) in hashes_parents {
@@ -1062,6 +982,61 @@ impl SimilarImages {
 
     pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
+    }
+}
+
+fn image_to_check<'a>(
+    hashes_parents: &mut HashMap<&'a Vec<u8>, u32>,
+    hashes_similarity: &mut HashMap<&'a Vec<u8>, (&'a Vec<u8>, u32)>,
+    hashes_with_multiple_images: &HashSet<&'a Vec<u8>>,
+    hash_to_check: &'a Vec<u8>,
+    compared_hash: &'a Vec<u8>,
+    similarity: u32,
+) {
+    if let Some(children_number) = hashes_parents.get(compared_hash) {
+        if *children_number > 0 || hashes_with_multiple_images.contains(compared_hash) {
+            return;
+        }
+    }
+
+    // If there is already record, with smaller sensitivity, then replace it
+    let mut need_to_add = false;
+    let mut need_to_check = false;
+
+    // TODO consider to replace variables from above with closures
+    // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
+    if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(hash_to_check) {
+        if *current_similarity_with_parent > similarity {
+            need_to_check = true;
+
+            *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
+            hashes_similarity.remove(hash_to_check).unwrap();
+        }
+    } else {
+        need_to_check = true;
+    }
+
+    if need_to_check {
+        if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
+            if *other_similarity > similarity {
+                need_to_add = true;
+                *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
+            }
+        }
+        // But when there is no record, just add it
+        else {
+            need_to_add = true
+        }
+    }
+
+    if need_to_add {
+        hashes_similarity.insert(compared_hash, (hash_to_check, similarity));
+
+        if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
+            *number_of_children += 1;
+        } else {
+            hashes_parents.insert(hash_to_check, 1); // This line is different than in first algorithm because at start hashes without children are not zeroed as before
+        }
     }
 }
 
