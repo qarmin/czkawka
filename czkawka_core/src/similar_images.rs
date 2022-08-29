@@ -1033,7 +1033,7 @@ fn image_to_check<'a>(
         if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
             *number_of_children += 1;
         } else {
-            hashes_parents.insert(hash_to_check, 1); // This line is different than in first algorithm because at start hashes without children are not zeroed as before
+            hashes_parents.insert(hash_to_check, 1);
         }
     }
 }
