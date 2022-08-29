@@ -819,7 +819,13 @@ impl SimilarImages {
                     hashes_similarity = first_hashes_similarity;
                 }
 
-                for (_partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
+                for (partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
+                    for (parent_hash, _child_number) in partial_hashes_with_parents {
+                        if !hashes_parents.contains_key(parent_hash) && !hashes_similarity.contains_key(parent_hash) {
+                            hashes_parents.insert(parent_hash, 0);
+                        }
+                    }
+
                     for (hash_to_check, (compared_hash, similarity)) in partial_hashes_with_similarity {
                         image_to_check(
                             &mut hashes_parents,
@@ -842,13 +848,6 @@ impl SimilarImages {
                     .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
                     .count();
                 assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
-                dbg!(hashes_with_multiple_images.len());
-                dbg!(hashes_parents.len());
-                dbg!(hashes_parents.iter().filter(|(_parent_hash, child_number)| **child_number > 0).count());
-                dbg!(hashes_parents
-                    .iter()
-                    .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
-                    .count());
                 // Collecting results to vector
                 for (parent_hash, child_number) in hashes_parents {
                     // If hash contains other hasher OR multiple images are available for checked hash
@@ -857,7 +856,6 @@ impl SimilarImages {
                         collected_similar_images.insert(parent_hash.clone(), vec_fe);
                     }
                 }
-                dbg!(collected_similar_images.len());
 
                 for (child_hash, (parent_hash, similarity)) in hashes_similarity {
                     let mut vec_fe = all_hashed_images.get(child_hash).unwrap().clone();
