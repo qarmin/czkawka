@@ -1,3 +1,10 @@
+## Version 5.0.2 - 30.08.2022r
+- Fixed problem with missing some similar images when using similarity > 0  - [#799](https://github.com/qarmin/czkawka/pull/799)
+- Prebuilt Linux binaries are compiled without heif support - [24b](https://github.com/qarmin/czkawka/commit/24b64a32c65904c506b54270f0977ccbe5098cc8)
+- Similar videos stops to proceed video after certain amount of time(fixes freezes)  - [#815](https://github.com/qarmin/czkawka/pull/815)
+- Add --version argument for czkawka_cli - [#806](https://github.com/qarmin/czkawka/pull/806)
+- Rewrite a little nonsense message about minimal file size - [#807](https://github.com/qarmin/czkawka/pull/807)
+
 ## Version 5.0.1 - 03.08.2022r
 - Fixed problem with removing ending slash with empty disk window path - [975](https://github.com/qarmin/czkawka/commit/97563a7b2a70fb5fcf6463f28069e6ea3b0ff5c2)
 - Added to CLI bad extensions mode - [#795](https://github.com/qarmin/czkawka/pull/795)

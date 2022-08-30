@@ -11,6 +11,6 @@ This program is free to use and will always be.
     <property name="license-type">mit-x11</property>
     <property name="logo-icon-name">help-about-symbolic</property>
     <property name="program-name">Czkawka</property>
-    <property name="version">5.0.1</property>
+    <property name="version">5.0.2</property>
   </object>
 </interface>
