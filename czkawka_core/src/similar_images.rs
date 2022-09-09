@@ -731,13 +731,44 @@ impl SimilarImages {
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
             let mut additional_chunk_to_check: Vec<_> = Default::default();
-            let mut hashes_with_multiple_images: HashSet<_> = Default::default(); // Fast way to check if hash have multiple imaages
-            for (hash, vec_files) in &all_hashed_images {
-                if vec_files.len() >= 2 {
-                    additional_chunk_to_check.push(hash);
-                    hashes_with_multiple_images.insert(hash);
-                } else {
-                    self.bktree.add(hash.to_vec());
+            let mut hashes_with_multiple_images: HashSet<_> = Default::default(); // Fast way to check if hash have multiple images
+
+            let mut files_from_referenced_folders = HashMap::new();
+            let mut normal_files = HashMap::new();
+
+            if self.use_reference_folders {
+                let reference_directories = self.directories.reference_directories.clone();
+                all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            files_from_referenced_folders.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
+                        } else {
+                            normal_files.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
+                        }
+                    }
+                });
+                for (hash, vec_files) in &normal_files {
+                    if vec_files.len() >= 2 {
+                        additional_chunk_to_check.push(hash);
+                        hashes_with_multiple_images.insert(hash);
+                    } else {
+                        self.bktree.add(hash.to_vec());
+                    }
+                }
+                for (hash, vec_files) in &files_from_referenced_folders {
+                    if vec_files.len() >= 2 {
+                        additional_chunk_to_check.push(hash);
+                        hashes_with_multiple_images.insert(hash);
+                    }
+                }
+            } else {
+                for (hash, vec_files) in &all_hashed_images {
+                    if vec_files.len() >= 2 {
+                        additional_chunk_to_check.push(hash);
+                        hashes_with_multiple_images.insert(hash);
+                    } else {
+                        self.bktree.add(hash.to_vec());
+                    }
                 }
             }
 
