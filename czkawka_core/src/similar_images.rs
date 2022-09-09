@@ -730,11 +730,17 @@ impl SimilarImages {
             //// PROGRESS THREAD END
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
-            let mut additional_chunk_to_check: Vec<_> = Default::default();
             let mut hashes_with_multiple_images: HashSet<_> = Default::default(); // Fast way to check if hash have multiple images
 
             let mut files_from_referenced_folders = HashMap::new();
             let mut normal_files = HashMap::new();
+
+            let number_of_processors = num_cpus::get();
+            let chunk_size;
+            let mut chunks: Vec<&[&Vec<u8>]>;
+
+            let mut initial_hashes: Vec<&Vec<u8>> = Vec::new();
+            let mut additional_chunk_to_check: Vec<&Vec<u8>> = Default::default();
 
             if self.use_reference_folders {
                 let reference_directories = self.directories.reference_directories.clone();
@@ -749,18 +755,23 @@ impl SimilarImages {
                 });
                 for (hash, vec_files) in &normal_files {
                     if vec_files.len() >= 2 {
-                        additional_chunk_to_check.push(hash);
                         hashes_with_multiple_images.insert(hash);
-                    } else {
-                        self.bktree.add(hash.to_vec());
                     }
+                    self.bktree.add(hash.to_vec());
                 }
                 for (hash, vec_files) in &files_from_referenced_folders {
                     if vec_files.len() >= 2 {
-                        additional_chunk_to_check.push(hash);
                         hashes_with_multiple_images.insert(hash);
                     }
+                    initial_hashes.push(hash);
                 }
+                chunk_size = initial_hashes.len() / number_of_processors;
+
+                chunks = if chunk_size > 0 {
+                    initial_hashes.chunks(chunk_size).collect::<Vec<_>>()
+                } else {
+                    vec![&initial_hashes]
+                };
             } else {
                 for (hash, vec_files) in &all_hashed_images {
                     if vec_files.len() >= 2 {
@@ -770,12 +781,14 @@ impl SimilarImages {
                         self.bktree.add(hash.to_vec());
                     }
                 }
+                chunk_size = all_hashes.len() / number_of_processors;
+                chunks = if chunk_size > 0 {
+                    all_hashes.chunks(chunk_size).collect::<Vec<_>>()
+                } else {
+                    vec![&all_hashes]
+                };
+                chunks.push(&additional_chunk_to_check);
             }
-
-            let number_of_processors = num_cpus::get();
-            let chunk_size = all_hashes.len() / number_of_processors;
-            let mut chunks: Vec<_> = if chunk_size > 0 { all_hashes.chunks(chunk_size).collect() } else { vec![&all_hashes] };
-            chunks.push(&additional_chunk_to_check);
 
             let parts: Vec<_> = chunks
                 .into_par_iter()
