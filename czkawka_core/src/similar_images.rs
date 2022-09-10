@@ -896,7 +896,9 @@ impl SimilarImages {
                     .iter()
                     .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
                     .count();
-                assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
+                if !self.use_reference_folders {
+                    assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
+                }
 
                 if self.use_reference_folders {
                     // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
