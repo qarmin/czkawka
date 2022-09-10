@@ -753,6 +753,7 @@ impl SimilarImages {
                         }
                     }
                 });
+
                 for (hash, vec_files) in &normal_files {
                     if vec_files.len() >= 2 {
                         hashes_with_multiple_images.insert(hash);
@@ -819,7 +820,7 @@ impl SimilarImages {
                         let mut found_items = self
                             .bktree
                             .find(hash_to_check, tolerance)
-                            .filter(|(similarity, _hash)| *similarity != 0)
+                            .filter(|(similarity, _hash)| if self.use_reference_folders { true } else { *similarity != 0 })
                             .collect::<Vec<_>>();
 
                         found_items.sort_unstable_by_key(|f| f.0);
@@ -837,7 +838,9 @@ impl SimilarImages {
                     }
 
                     #[cfg(debug_assertions)]
-                    debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "BEFORE");
+                    if !self.use_reference_folders {
+                        debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "BEFORE");
+                    }
 
                     Some((hashes_parents, hashes_similarity))
                 })
@@ -883,7 +886,9 @@ impl SimilarImages {
                 }
 
                 #[cfg(debug_assertions)]
-                debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
+                if !self.use_reference_folders {
+                    debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
+                }
 
                 // Just simple check if all original hashes with multiple entries are available in end results
                 let original_hashes_at_start = hashes_with_multiple_images.len();
@@ -892,21 +897,55 @@ impl SimilarImages {
                     .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
                     .count();
                 assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
-                // Collecting results to vector
-                for (parent_hash, child_number) in hashes_parents {
-                    // If hash contains other hasher OR multiple images are available for checked hash
-                    if child_number > 0 || hashes_with_multiple_images.contains(parent_hash) {
-                        let vec_fe = all_hashed_images.get(parent_hash).unwrap().clone();
-                        collected_similar_images.insert(parent_hash.clone(), vec_fe);
-                    }
-                }
 
-                for (child_hash, (parent_hash, similarity)) in hashes_similarity {
-                    let mut vec_fe = all_hashed_images.get(child_hash).unwrap().clone();
-                    for mut fe in &mut vec_fe {
-                        fe.similarity = similarity;
+                if self.use_reference_folders {
+                    // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
+
+                    // Collecting results to vector
+                    for (parent_hash, child_number) in hashes_parents {
+                        // If hash contains other hasher OR multiple images are available for checked hash
+                        if child_number > 0 || hashes_with_multiple_images.contains(parent_hash) {
+                            let vec_fe = all_hashed_images
+                                .get(parent_hash)
+                                .unwrap()
+                                .iter()
+                                .filter(|e| is_in_reference_folder(&self.directories.reference_directories, &e.path))
+                                .cloned()
+                                .collect();
+                            collected_similar_images.insert(parent_hash.clone(), vec_fe);
+                        }
                     }
-                    collected_similar_images.get_mut(parent_hash).unwrap().append(&mut vec_fe);
+
+                    for (child_hash, (parent_hash, similarity)) in hashes_similarity {
+                        let mut vec_fe: Vec<_> = all_hashed_images
+                            .get(child_hash)
+                            .unwrap()
+                            .iter()
+                            .filter(|e| !is_in_reference_folder(&self.directories.reference_directories, &e.path))
+                            .cloned()
+                            .collect();
+                        for mut fe in &mut vec_fe {
+                            fe.similarity = similarity;
+                        }
+                        collected_similar_images.get_mut(parent_hash).unwrap().append(&mut vec_fe);
+                    }
+                } else {
+                    // Collecting results to vector
+                    for (parent_hash, child_number) in hashes_parents {
+                        // If hash contains other hasher OR multiple images are available for checked hash
+                        if child_number > 0 || hashes_with_multiple_images.contains(parent_hash) {
+                            let vec_fe = all_hashed_images.get(parent_hash).unwrap().clone();
+                            collected_similar_images.insert(parent_hash.clone(), vec_fe);
+                        }
+                    }
+
+                    for (child_hash, (parent_hash, similarity)) in hashes_similarity {
+                        let mut vec_fe = all_hashed_images.get(child_hash).unwrap().clone();
+                        for mut fe in &mut vec_fe {
+                            fe.similarity = similarity;
+                        }
+                        collected_similar_images.get_mut(parent_hash).unwrap().append(&mut vec_fe);
+                    }
                 }
             }
         }
@@ -1080,6 +1119,10 @@ fn image_to_check<'a>(
             hashes_parents.insert(hash_to_check, 1);
         }
     }
+}
+
+fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> bool {
+    reference_directories.iter().any(|e| path.starts_with(&e))
 }
 
 impl Default for SimilarImages {
