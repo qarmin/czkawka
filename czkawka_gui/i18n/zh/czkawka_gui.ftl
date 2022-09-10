@@ -45,11 +45,11 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     每张选中的图像都会产生可相互比较的特殊哈希值，而它们之间的小差意味着这张图像是相似的。
     
-    8 个散列尺寸非常适合于找到与原始相似的图像。 随着更大的图像集(>1000) 将产生大量的虚假正数，因此我建议使用这种更大的散列大小。
+    8 个散列尺寸非常适合于找到与原始相似的图像。 随着更大的图像集 (>1000) 将产生大量的虚假正数，因此我建议使用这种更大的散列大小。
     
     16 是默认的散列大小，它很好地影响了找到哪怕是略类似的图像和少量散列碰撞。
     
-    32和64 哈希只找到非常相似的图像，但几乎不应该有任何假正数(可能只有一些透明通道的图像)。
+    32和64 哈希只找到非常相似的图像，但几乎不应该有任何假正数 (可能只有一些透明通道的图像)。
 image_resize_filter_tooltip =
     要计算图像散列，库必须首先调整大小。
     
@@ -145,11 +145,11 @@ upper_notebook_items_configuration = 项目配置
 upper_notebook_excluded_directories = 排除的目录
 upper_notebook_included_directories = 包含的目录
 upper_allowed_extensions_tooltip =
-    允许的扩展必须用逗号分隔(默认所有可用)。
+    允许的扩展必须用逗号分隔 (默认所有可用)。
     
     同时添加多个扩展的下列宏也可用: IMAGE, VIDEO, MUSIC, TEXT
     
-    使用示例".exe, IMAGE, VIDEO, .rar, 7z" - 这意味着图像(e). . jpg、png、视频(例如avi、mp4)、ex、rar和7z 文件将被扫描。
+    使用示例".exe, IMAGE, VIDEO, .rar, 7z" - 这意味着图像 (e). . jpg、png、视频 (例如avi、mp4)、ex、rar和7z 文件将被扫描。
 upper_excluded_items_tooltip =
     排除的项目必须包含 * 通配符，并且应该用逗号分隔。
     这比排除的目录慢，所以请仔细使用。
@@ -267,7 +267,7 @@ settings_confirm_link_button_tooltip = 点击硬链接/符号链接按钮时显�
 settings_confirm_group_deletion_button_tooltip = 尝试从群组中删除所有记录时显示警告对话框。
 settings_show_text_view_button_tooltip = 在用户界面底部显示文本面板。
 settings_use_cache_button_tooltip = 使用文件缓存。
-settings_save_also_as_json_button_tooltip = 保存缓存为 (人类可读) JSON 格式。可以修改其内容。 如果缺少二进制格式缓存(带bin extensional)，此文件的缓存将被应用自动读取。
+settings_save_also_as_json_button_tooltip = 保存缓存为 (人类可读) JSON 格式。可以修改其内容。 如果缺少二进制格式缓存 (带bin extensional)，此文件的缓存将被应用自动读取。
 settings_use_trash_button_tooltip = 将文件移至回收站，而将其永久删除。
 settings_language_label_tooltip = 用户界面的语言。
 settings_save_at_exit_button = 关闭应用时保存配置
@@ -284,7 +284,7 @@ settings_multiple_delete_outdated_cache_checkbutton = 自动删除过时的缓�
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     删除指向不存在文件的过时缓存结果。
     
-    如果启用，应用会确保当加载记录时，所有记录都指向有效的文件(被忽略的文件)。
+    如果启用，应用会确保当加载记录时，所有记录都指向有效的文件 (被忽略的文件)。
     
     禁用这将有助于扫描外部驱动器上的文件，所以在下次扫描中不会清除有关它们的缓存条目。
     
@@ -306,15 +306,15 @@ settings_multiple_clear_cache_button = 从图像缓存中删除过时的结果
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =
-    隐藏除一个之外的所有文件，如果所有文件都指向相同的数据(是硬链接)。
+    隐藏除一个之外的所有文件，如果所有文件都指向相同的数据 (是硬链接)。
     
-    示例：在存在(磁盘) 的情况下，七个文件与特定数据有硬链接，一个不同的文件具有相同的数据但不同的内涵， 然后在重复的查找器中，将只显示一个唯一的文件和一个来自硬链接的文件。
+    示例：在存在 (磁盘) 的情况下，七个文件与特定数据有硬链接，一个不同的文件具有相同的数据但不同的内涵， 然后在重复的查找器中，将只显示一个唯一的文件和一个来自硬链接的文件。
 settings_duplicates_minimal_size_entry_tooltip =
     设置将缓存的最小文件大小。
     
     选择一个较小的值将生成更多的记录。 这将加速搜索，但减缓缓缓存加载/保存。
 settings_duplicates_prehash_checkbutton_tooltip =
-    启用封存(从文件的一小部分计算的散列) 的缓存，允许提早撤销不重复的结果。
+    启用封存 (从文件的一小部分计算的散列) 的缓存，允许提早撤销不重复的结果。
     
     默认情况下禁用它，因为它会导致某些情况下的减速。
     
@@ -323,7 +323,7 @@ settings_duplicates_prehash_minimal_entry_tooltip = 缓存条目的最小尺寸�
 settings_duplicates_hide_hard_link_button = 隐藏硬链接 (仅限Linux 和 macOS)
 settings_duplicates_prehash_checkbutton = 使用捕捉缓存
 settings_duplicates_minimal_size_cache_label = 保存到缓存的文件最小大小 (字节)
-settings_duplicates_minimal_size_cache_prehash_label = 文件最小尺寸(字节) 保存到逮捕缓存
+settings_duplicates_minimal_size_cache_prehash_label = 文件最小尺寸 (字节) 保存到逮捕缓存
 
 ## Saving/Loading settings
 
@@ -341,7 +341,7 @@ settings_folder_cache_open_tooltip =
     
     修改缓存文件可能会导致显示无效结果。 然而，当将大量文件移动到另一个位置时，修改路径可能会节省时间。
     
-    您可以在计算机之间复制这些文件以便在扫描文件时节省时间(当然，如果它们具有类似的目录结构)。
+    您可以在计算机之间复制这些文件以便在扫描文件时节省时间 (当然，如果它们具有类似的目录结构)。
     
     如果缓存出现问题，这些文件可以被删除。应用程序将自动重新生成它们。
 settings_folder_settings_open_tooltip =

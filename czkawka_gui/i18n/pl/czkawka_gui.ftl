@@ -41,17 +41,17 @@ duplicate_check_method_tooltip =
     
     Rozmiar - Znajduje pliki o tym samym rozmiarze.
     
-    Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót(hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
+    Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót (hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
 image_hash_size_tooltip =
     Każdy sprawdzony obraz generuje hash, który można porównać z innymi a niewielka różnica między nimi oznacza, że te obrazy są podobne.
     
-    Hash wielkości 8 jest dość dobry do wyszukiwania obrazów, które są tylko niewiele podobne do oryginału. Z większą ilością obrazów(>1000) będzie generować dużą ilość niepoprawnych wyników, więc w takim przypadku zalecam użycie większego hashu.
+    Hash wielkości 8 jest dość dobry do wyszukiwania obrazów, które są tylko niewiele podobne do oryginału. Z większą ilością obrazów (>1000) będzie generować dużą ilość niepoprawnych wyników, więc w takim przypadku zalecam użycie większego hashu.
     
     16 to domyślny rozmiar hashu, który jest całkiem dobrym kompromisem między znalezieniem nawet nieco podobnych obrazów a niewielkim poziomem kolizji pomiędzy nimi.
     
-    32 i 64 znajdują tylko bardzo podobne zdjęcia, ale prawie nie powinny mieć kolizji (może z wyjątkiem niektórych obrazów z kanałem alfa(przezroczystością)).
+    32 i 64 znajdują tylko bardzo podobne zdjęcia, ale prawie nie powinny mieć kolizji (może z wyjątkiem niektórych obrazów z kanałem alfa (przezroczystością)).
 image_resize_filter_tooltip =
-    Aby obliczyć hash obrazu, biblioteka musi najpierw zmienić(zwykle zmniejszyć) jego rozmiar.
+    Aby obliczyć hash obrazu, biblioteka musi najpierw zmienić (zwykle zmniejszyć) jego rozmiar.
     
     W zależności od wybranego algorytmu, zmiejszony obraz użyty do obliczenia skrótu może wyglądać nieco inaczej.
     
@@ -63,7 +63,7 @@ image_hash_alg_tooltip =
     
     Każdy ma zarówno mocniejsze jak i słabsze punkty i czasami daje lepsze a czasami gorsze wyniki dla różnych obrazów.
     
-    Najlepiej jest samemu potestować jaki algorytm ma najlepsze wyniki(może to nie być zawsze dobrze widoczne).
+    Najlepiej jest samemu potestować jaki algorytm ma najlepsze wyniki (może to nie być zawsze dobrze widoczne).
 big_files_mode_combobox_tooltip = Pozwala na wyszukiwanie najmniejszych lub największych plików
 big_files_mode_label = Sprawdzane pliki
 big_files_mode_smallest_combo_box = Najmniejsze
@@ -180,7 +180,7 @@ popover_custom_name_check_button_entry_tooltip =
 popover_custom_regex_check_button_entry_tooltip =
     Wybierz rekordy według określonego Regexa.
     
-    W tym trybie wyszukiwanym tekstem jest pełna ścieżka(wraz z nazwą).
+    W tym trybie wyszukiwanym tekstem jest pełna ścieżka (wraz z nazwą).
     
     Przykładowe użycie:
     /usr/bin/ziemniak. xt można znaleźć za pomocą /ziem[a-z]+
@@ -241,7 +241,7 @@ about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.
 about_repository_button = Repozytorium
 about_donation_button = Dotacje
-about_instruction_button = Instrukcja(ENG)
+about_instruction_button = Instrukcja (ENG)
 about_translation_button = Tłumaczenie
 # Header
 header_setting_button_tooltip = Otwórz okno z ustawieniami programu.

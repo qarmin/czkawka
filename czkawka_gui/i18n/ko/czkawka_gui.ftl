@@ -47,7 +47,7 @@ image_hash_size_tooltip =
     
     해시 크기 8은 원본과 유사도가 낮은 이미지까지 찾는 데 좋습니다. 하지만 1,000개를 넘어가는 이미지들을 서로 비교할 경우, 거짓 양성 반응이 나타날 가능성이 큽니다. 따라서 그런 경우에는 적당히 큰 값을 사용하는 것이 좋습니다.
     
-    해시 크기 32와 64는 오로지 매우 비슷한 이미지만 찾아내며, 거짓 양성 반응이 거의 나타나지 않습니다(다만 알파 채널을 가진 이미지의 경우 나타날 수 있습니다).
+    해시 크기 32와 64는 오로지 매우 비슷한 이미지만 찾아내며, 거짓 양성 반응이 거의 나타나지 않습니다 (다만 알파 채널을 가진 이미지의 경우 나타날 수 있습니다).
 image_resize_filter_tooltip =
     이미지의 해시를 계산하기 위해서, 먼저 이미지의 크기를 조절해야 합니다.
     
@@ -143,13 +143,13 @@ upper_notebook_items_configuration = 항목 설정
 upper_notebook_excluded_directories = 제외할 디렉터리
 upper_notebook_included_directories = 검색할 디렉터리
 upper_allowed_extensions_tooltip =
-    허용할 확장자는 콤마(',')를 통해 구분해야 합니다. (기본값인 경우 모든 확장자를 허용합니다.)
+    허용할 확장자는 콤마 (',') 를 통해 구분해야 합니다. (기본값인 경우 모든 확장자를 허용합니다.)
     
     IMAGE, VIDEO, MUSIC, TEXT를 입력할 경우 해당하는 파일을 모두 지칭할 수 있습니다.
     
-    예시: ".exe, IMAGE, VIDEO, .rar, 7z" - 이와 같이 입력하면, 이미지 파일(예. jpg, png), 영상 파일(예. avi, mp4), exe, rar, 그리고 7z 파일을 검색합니다.
+    예시: ".exe, IMAGE, VIDEO, .rar, 7z" - 이와 같이 입력하면, 이미지 파일 (예. jpg, png), 영상 파일 (예. avi, mp4), exe, rar, 그리고 7z 파일을 검색합니다.
 upper_excluded_items_tooltip =
-    제외할 항목은 반드시 '*' 와일드카드 문자를 사용해서 추가해야 하며, 콤마(',')로 구분되어야 합니다.
+    제외할 항목은 반드시 '*' 와일드카드 문자를 사용해서 추가해야 하며, 콤마 (',') 로 구분되어야 합니다.
     디렉터리를 직접 제외하는 것보다 느립니다. 주의해서 사용하세요.
 upper_excluded_items = 제외할 항목:
 upper_allowed_extensions = 허용할 확장자:
@@ -250,7 +250,7 @@ header_about_button_tooltip = 이 앱에 대한 정보창을 엽니다.
 
 ## General
 
-settings_ignore_other_filesystems = 다른 파일시스템 무시(Linux에서만)
+settings_ignore_other_filesystems = 다른 파일시스템 무시 (Linux에서만)
 settings_ignore_other_filesystems_tooltip =
     검색할 디렉터리와 파일시스템이 다른 디렉터리를 무시합니다.
     
@@ -282,7 +282,7 @@ settings_multiple_delete_outdated_cache_checkbutton = 만료된 파일을 캐시
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     더 이상 존재하지 않는 파일에 대한 정보를 캐시에서 삭제합니다.
     
-    이 옵션이 켜져 있으면, 프로그램은 존재하는 파일만이 캐시에 남도록 할 것입니다(망가진 파일은 무시됩니다).
+    이 옵션이 켜져 있으면, 프로그램은 존재하는 파일만이 캐시에 남도록 할 것입니다 (망가진 파일은 무시됩니다).
     
     이 옵션을 끄는 것은 외장 저장장치에 존재하는 파일을 스캔했을 때, 외장 저장장치에 있는 파일에 대한 캐시를 보존하는 데 도움이 됩니다.
     
@@ -312,7 +312,7 @@ settings_duplicates_minimal_size_entry_tooltip =
     
     이 값이 작을 수록 더 많은 파일이 캐시에 저장됩니다. 이 경우 검색은 더 빨라지지만, 캐시 저장 및 불러오기는 느려집니다.
 settings_duplicates_prehash_checkbutton_tooltip =
-    사전 해시(파일 일부만으로 계산되는 해시)에 대한 캐싱을 허용하여, 중복이 아닌 파일을 더 빠르게 결과에서 제거합니다.
+    사전 해시 (파일 일부만으로 계산되는 해시) 에 대한 캐싱을 허용하여, 중복이 아닌 파일을 더 빠르게 결과에서 제거합니다.
     
     이 옵션은 일부 상황에서 검색을 느리게 하기 때문에, 기본적으로 꺼져 있습니다.
     
