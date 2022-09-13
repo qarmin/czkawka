@@ -6,7 +6,8 @@ use std::rc::Rc;
 use chrono::NaiveDateTime;
 use glib::Receiver;
 use gtk4::prelude::*;
-use humansize::{file_size_opts as options, FileSize};
+use humansize::format_size;
+use humansize::BINARY;
 
 use czkawka_core::common::split_path;
 use czkawka_core::common_dir_traversal::CheckingMethod;
@@ -117,7 +118,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     generate_translation_hashmap(vec![
                                         ("number_files", duplicates_number.to_string()),
                                         ("number_groups", duplicates_group.to_string()),
-                                        ("size", duplicates_size.file_size(options::BINARY).unwrap())
+                                        ("size", format_size(duplicates_size, BINARY))
                                     ])
                                 )
                                 .as_str(),
@@ -133,7 +134,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     generate_translation_hashmap(vec![
                                         ("number_files", duplicates_number.to_string()),
                                         ("number_groups", duplicates_group.to_string()),
-                                        ("size", duplicates_size.file_size(options::BINARY).unwrap())
+                                        ("size", format_size(duplicates_size, BINARY))
                                     ])
                                 )
                                 .as_str(),
@@ -171,7 +172,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         let values: [(u32, &dyn ToValue); 10] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                            (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
                                             (ColumnsDuplicates::Name as u32, &file),
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
@@ -192,7 +193,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             let values: [(u32, &dyn ToValue); 10] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
@@ -230,7 +231,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             let values: [(u32, &dyn ToValue); 10] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
@@ -251,7 +252,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 let values: [(u32, &dyn ToValue); 10] = [
                                                     (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                     (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                    (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
                                                     (ColumnsDuplicates::Name as u32, &file),
                                                     (ColumnsDuplicates::Path as u32, &directory),
                                                     (
@@ -290,7 +291,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         let values: [(u32, &dyn ToValue); 10] = [
                                             (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
                                             (ColumnsDuplicates::SelectionButton as u32, &false),
-                                            (ColumnsDuplicates::Size as u32, (&base_file_entry.size.file_size(options::BINARY).unwrap())),
+                                            (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
                                             (ColumnsDuplicates::Name as u32, &file),
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
@@ -310,7 +311,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             let values: [(u32, &dyn ToValue); 10] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
@@ -367,16 +368,12 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             let values: [(u32, &dyn ToValue); 10] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(format!(
-                                                        "{} - ({})",
-                                                        NaiveDateTime::from_timestamp(entry.modified_date as i64, 0),
-                                                        entry.size.file_size(options::BINARY).unwrap()
-                                                    )),
+                                                    &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0), format_size(entry.size, BINARY))),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -424,7 +421,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 let values: [(u32, &dyn ToValue); 10] = [
                                                     (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                     (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                    (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
                                                     (ColumnsDuplicates::Name as u32, &file),
                                                     (ColumnsDuplicates::Path as u32, &directory),
                                                     (
@@ -476,7 +473,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             let values: [(u32, &dyn ToValue); 10] = [
                                                 (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                                 (ColumnsDuplicates::SelectionButton as u32, &false),
-                                                (ColumnsDuplicates::Size as u32, (&entry.size.file_size(options::BINARY).unwrap())),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
                                                 (ColumnsDuplicates::Name as u32, &file),
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
@@ -684,7 +681,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                             let (directory, file) = split_path(&file_entry.path);
                             let values: [(u32, &dyn ToValue); 7] = [
                                 (ColumnsBigFiles::SelectionButton as u32, &false),
-                                (ColumnsBigFiles::Size as u32, &(size.file_size(options::BINARY).unwrap())),
+                                (ColumnsBigFiles::Size as u32, &(format_size(*size, BINARY))),
                                 (ColumnsBigFiles::Name as u32, &file),
                                 (ColumnsBigFiles::Path as u32, &directory),
                                 (
@@ -831,7 +828,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
                                     (ColumnsSimilarImages::SelectionButton as u32, &false),
                                     (ColumnsSimilarImages::Similarity as u32, &"".to_string()),
-                                    (ColumnsSimilarImages::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarImages::Size as u32, &format_size(base_file_entry.size, BINARY)),
                                     (ColumnsSimilarImages::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSimilarImages::Dimensions as u32, &base_file_entry.dimensions),
                                     (ColumnsSimilarImages::Name as u32, &file),
@@ -857,7 +854,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             ColumnsSimilarImages::Similarity as u32,
                                             &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
                                         ),
-                                        (ColumnsSimilarImages::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarImages::Size as u32, &format_size(file_entry.size, BINARY)),
                                         (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
                                         (ColumnsSimilarImages::Name as u32, &file),
@@ -915,7 +912,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             ColumnsSimilarImages::Similarity as u32,
                                             &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
                                         ),
-                                        (ColumnsSimilarImages::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarImages::Size as u32, &format_size(file_entry.size, BINARY)),
                                         (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
                                         (ColumnsSimilarImages::Name as u32, &file),
@@ -1013,7 +1010,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let values: [(u32, &dyn ToValue); 11] = [
                                     (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
                                     (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                    (ColumnsSimilarVideos::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSimilarVideos::Size as u32, &format_size(base_file_entry.size, BINARY)),
                                     (ColumnsSimilarVideos::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSimilarVideos::Name as u32, &file),
                                     (ColumnsSimilarVideos::Path as u32, &directory),
@@ -1034,7 +1031,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     let values: [(u32, &dyn ToValue); 11] = [
                                         (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
                                         (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                        (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarVideos::Size as u32, &format_size(file_entry.size, BINARY)),
                                         (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSimilarVideos::Name as u32, &file),
                                         (ColumnsSimilarVideos::Path as u32, &directory),
@@ -1088,7 +1085,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     let values: [(u32, &dyn ToValue); 11] = [
                                         (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
                                         (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                                        (ColumnsSimilarVideos::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSimilarVideos::Size as u32, &format_size(file_entry.size, BINARY)),
                                         (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSimilarVideos::Name as u32, &file),
                                         (ColumnsSimilarVideos::Path as u32, &directory),
@@ -1194,7 +1191,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 let values: [(u32, &dyn ToValue); 18] = [
                                     (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
                                     (ColumnsSameMusic::SelectionButton as u32, &false),
-                                    (ColumnsSameMusic::Size as u32, &base_file_entry.size.file_size(options::BINARY).unwrap()),
+                                    (ColumnsSameMusic::Size as u32, &format_size(base_file_entry.size, BINARY)),
                                     (ColumnsSameMusic::SizeAsBytes as u32, &base_file_entry.size),
                                     (ColumnsSameMusic::Name as u32, &file),
                                     (ColumnsSameMusic::Path as u32, &directory),
@@ -1220,7 +1217,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     let values: [(u32, &dyn ToValue); 18] = [
                                         (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
                                         (ColumnsSameMusic::SelectionButton as u32, &false),
-                                        (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSameMusic::Size as u32, &format_size(file_entry.size, BINARY)),
                                         (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSameMusic::Name as u32, &file),
                                         (ColumnsSameMusic::Path as u32, &directory),
@@ -1323,7 +1320,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     let values: [(u32, &dyn ToValue); 18] = [
                                         (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
                                         (ColumnsSameMusic::SelectionButton as u32, &false),
-                                        (ColumnsSameMusic::Size as u32, &file_entry.size.file_size(options::BINARY).unwrap()),
+                                        (ColumnsSameMusic::Size as u32, &format_size(file_entry.size, BINARY)),
                                         (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
                                         (ColumnsSameMusic::Name as u32, &file),
                                         (ColumnsSameMusic::Path as u32, &directory),

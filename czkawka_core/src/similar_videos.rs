@@ -11,7 +11,8 @@ use std::{fs, mem, thread};
 
 use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
-use humansize::{file_size_opts as options, FileSize};
+use humansize::format_size;
+use humansize::BINARY;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
@@ -714,7 +715,7 @@ impl SaveResults for SimilarVideos {
             for struct_similar in self.similar_vectors.iter() {
                 writeln!(writer, "Found {} videos which have similar friends", self.similar_vectors.len()).unwrap();
                 for file_entry in struct_similar {
-                    writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.size.file_size(options::BINARY).unwrap(),).unwrap();
+                    writeln!(writer, "{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY)).unwrap();
                 }
                 writeln!(writer).unwrap();
             }
@@ -734,7 +735,7 @@ impl PrintResults for SimilarVideos {
 
             for vec_file_entry in &self.similar_vectors {
                 for file_entry in vec_file_entry {
-                    println!("{} - {}", file_entry.path.display(), file_entry.size.file_size(options::BINARY).unwrap());
+                    println!("{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY));
                 }
                 println!();
             }

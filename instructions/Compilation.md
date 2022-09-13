@@ -11,7 +11,7 @@ Support for heif images is optional and require to install libheif library.
 
 | Program | Min  | What for                                                                      |
 |---------|------|-------------------------------------------------------------------------------|
-| Rust    | 1.60 | Czkawka, aims to support the latest available version of Rust on Ubuntu 22.04 |
+| Rust    | 1.62 | Czkawka, aims to support the latest available version of Rust on Ubuntu 22.04 |
 | GTK     | 4.6  | Only for the `GTK` backend                                                    |
 
 #### Debian / Ubuntu
