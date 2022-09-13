@@ -16,7 +16,8 @@ use std::time::{Duration, SystemTime};
 use std::{fs, mem, thread};
 
 use crossbeam_channel::Receiver;
-use humansize::{file_size_opts as options, FileSize};
+use humansize::format_size;
+use humansize::BINARY;
 use rayon::prelude::*;
 
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
@@ -965,12 +966,12 @@ impl DebugPrint for DuplicateFinder {
         );
         println!(
             "Lost space by size - {} ({} bytes)",
-            self.information.lost_space_by_size.file_size(options::BINARY).unwrap(),
+            format_size(self.information.lost_space_by_size, BINARY),
             self.information.lost_space_by_size
         );
         println!(
             "Lost space by hash - {} ({} bytes)",
-            self.information.lost_space_by_hash.file_size(options::BINARY).unwrap(),
+            format_size(self.information.lost_space_by_hash, BINARY),
             self.information.lost_space_by_hash
         );
 
@@ -1053,11 +1054,11 @@ impl SaveResults for DuplicateFinder {
                         "Found {} duplicated files which in {} groups which takes {}.",
                         self.information.number_of_duplicated_files_by_size,
                         self.information.number_of_groups_by_size,
-                        self.information.lost_space_by_size.file_size(options::BINARY).unwrap()
+                        format_size(self.information.lost_space_by_size, BINARY)
                     )
                     .unwrap();
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
-                        write!(writer, "\n---- Size {} ({}) - {} files \n", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
+                        write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len()).unwrap();
                         for file_entry in vector {
                             writeln!(writer, "{}", file_entry.path.display()).unwrap();
                         }
@@ -1078,12 +1079,12 @@ impl SaveResults for DuplicateFinder {
                         "Found {} duplicated files which in {} groups which takes {}.",
                         self.information.number_of_duplicated_files_by_hash,
                         self.information.number_of_groups_by_hash,
-                        self.information.lost_space_by_hash.file_size(options::BINARY).unwrap()
+                        format_size(self.information.lost_space_by_hash, BINARY)
                     )
                     .unwrap();
                     for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
                         for vector in vectors_vector {
-                            writeln!(writer, "\n---- Size {} ({}) - {} files", size.file_size(options::BINARY).unwrap(), size, vector.len()).unwrap();
+                            writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len()).unwrap();
                             for file_entry in vector {
                                 writeln!(writer, "{}", file_entry.path.display()).unwrap();
                             }
@@ -1136,11 +1137,11 @@ impl PrintResults for DuplicateFinder {
                     "Found {} duplicated files in {} groups with same content which took {}:",
                     number_of_files,
                     number_of_groups,
-                    self.information.lost_space_by_size.file_size(options::BINARY).unwrap()
+                    format_size(self.information.lost_space_by_size, BINARY)
                 );
                 for (size, vector) in self.files_with_identical_hashes.iter().rev() {
                     for j in vector {
-                        println!("Size - {} ({}) - {} files ", size.file_size(options::BINARY).unwrap(), size, j.len());
+                        println!("Size - {} ({}) - {} files ", format_size(*size, BINARY), size, j.len());
                         for k in j {
                             println!("{}", k.path.display());
                         }
@@ -1158,10 +1159,10 @@ impl PrintResults for DuplicateFinder {
                     "Found {} files in {} groups with same size(may have different content) which took {}:",
                     number_of_files,
                     number_of_groups,
-                    self.information.lost_space_by_size.file_size(options::BINARY).unwrap()
+                    format_size(self.information.lost_space_by_size, BINARY)
                 );
                 for (size, vector) in &self.files_with_identical_size {
-                    println!("Size - {} ({}) - {} files ", size.file_size(options::BINARY).unwrap(), size, vector.len());
+                    println!("Size - {} ({}) - {} files ", format_size(*size, BINARY), size, vector.len());
                     for j in vector {
                         println!("{}", j.path.display());
                     }

@@ -12,7 +12,8 @@ use std::{fs, mem, thread};
 
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
-use humansize::{file_size_opts as options, FileSize};
+use humansize::format_size;
+use humansize::BINARY;
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
@@ -1185,7 +1186,7 @@ impl SaveResults for SimilarImages {
                         "{} - {} - {} - {}",
                         file_entry.path.display(),
                         file_entry.dimensions,
-                        file_entry.size.file_size(options::BINARY).unwrap(),
+                        format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
                     )
                     .unwrap();
@@ -1212,7 +1213,7 @@ impl PrintResults for SimilarImages {
                         "{} - {} - {} - {}",
                         file_entry.path.display(),
                         file_entry.dimensions,
-                        file_entry.size.file_size(options::BINARY).unwrap(),
+                        format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
                     );
                 }

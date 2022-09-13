@@ -11,7 +11,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
 use crossbeam_channel::Receiver;
-use humansize::{file_size_opts as options, FileSize};
+use humansize::format_size;
+use humansize::BINARY;
 use rayon::prelude::*;
 
 use crate::common::split_path;
@@ -470,7 +471,7 @@ impl SaveResults for BigFile {
                 write!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files).unwrap();
             }
             for (size, file_entry) in self.big_files.iter() {
-                writeln!(writer, "{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display()).unwrap();
+                writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display()).unwrap();
             }
         } else {
             write!(writer, "Not found any files.").unwrap();
@@ -489,7 +490,7 @@ impl PrintResults for BigFile {
             println!("{} the smallest files.\n\n", self.information.number_of_real_files);
         }
         for (size, file_entry) in self.big_files.iter() {
-            println!("{} ({}) - {}", size.file_size(options::BINARY).unwrap(), size, file_entry.path.display());
+            println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
         }
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
     }
