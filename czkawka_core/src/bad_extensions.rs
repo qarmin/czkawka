@@ -83,7 +83,7 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("html", "ent"),      // Mingw
     ("html", "md"),       // Markdown
     ("jpg", "jfif"),      // Photo format
-    ("mp4", "m4v"),       // mp4 and m4v are interchangable
+    ("m4v", "mp4"),       // m4v and mp4 are interchangable
     ("mobi", "azw3"),     // Ebook format
     ("mpg", "vob"),       // Weddings in parts have usually vob extension
     ("obj", "bin"),       // Multiple apps, Czkawka, Nvidia, Windows
