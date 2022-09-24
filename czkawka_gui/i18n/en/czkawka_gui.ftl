@@ -53,11 +53,11 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
         Each checked image produce special hash which can be compared with every other, and small difference between them means that this images are similar.
 
-        8 hash size is quite good to find images that are only little similar to original. With bigger set of images(>1000) will produce big amount of false positives, so I recommend to use for such amount bigger hash size.
+        8 hash size is quite good to find images that are only little similar to original. With bigger set of images (>1000) will produce big amount of false positives, so I recommend to use for such amount bigger hash size.
 
         16 is default hash size which is quite good compromise between finding even a little similar images and having small amount of hash collisions.
 
-        32 and 64 hashes finds only very similar images, but almost should not have any false positives(maybe except some images with alpha channel).
+        32 and 64 hashes finds only very similar images, but almost should not have any false positives (maybe except some images with alpha channel).
 
 image_resize_filter_tooltip = 
         To compute hash of image, library must first resize it.
@@ -292,7 +292,7 @@ header_about_button_tooltip = Opens dialog with info about app.
 
 # Settings
 ## General
-settings_ignore_other_filesystems = Ignore other filesystems(only Linux)
+settings_ignore_other_filesystems = Ignore other filesystems (only Linux)
 settings_ignore_other_filesystems_tooltip =
         ignores files that are not in the same file system as searched directories.
 

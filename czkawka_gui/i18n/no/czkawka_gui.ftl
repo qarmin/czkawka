@@ -45,7 +45,7 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Hvert avmerket bilde produserer spesielle hash som kan sammenlignes med hverandre, og en liten forskjell mellom dem betyr at dette bildet er likt.
     
-    8 hash-størrelse er ganske bra for å finne bilder som er lite likt original. Med et større sett med bilder(>1000) vil jeg gi store mengder falske positive, så jeg anbefaler å bruke for så mye større hash-størrelse.
+    8 hash-størrelse er ganske bra for å finne bilder som er lite likt original. Med et større sett med bilder (>1000) vil jeg gi store mengder falske positive, så jeg anbefaler å bruke for så mye større hash-størrelse.
     
     16 er standard hash-størrelse som er ganske godt kompromiss mellom å finne enda litt lignende bilder og å ha en liten mengde hash-kollisjoner.
     

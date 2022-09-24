@@ -45,7 +45,7 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Chaque image vérifiée produit un hachage spécial qui peut être comparé entre les autres, et une petite différence entre elles signifie que ces images sont similaires.
     
-    La taille de 8 hachages est assez bonne pour trouver des images qui ne sont que peu similaires à l'original. Avec un plus grand ensemble d'images(>1000) produira une grande quantité de faux positifs, je recommande donc d'utiliser pour une telle quantité plus grande taille de hachage.
+    La taille de 8 hachages est assez bonne pour trouver des images qui ne sont que peu similaires à l'original. Avec un plus grand ensemble d'images (>1000) produira une grande quantité de faux positifs, je recommande donc d'utiliser pour une telle quantité plus grande taille de hachage.
     
     16 est la taille de hachage par défaut, ce qui est assez bon compromis entre trouver même un peu d'images similaires et avoir peu de collisions de hachage.
     

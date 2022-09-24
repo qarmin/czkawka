@@ -353,7 +353,7 @@ settings_folder_settings_open = Открыть папку настроек
 # Compute results
 compute_stopped_by_user = Поиск был остановлен пользователем
 compute_found_duplicates_hash_size = Найдено дубликатов: { $number_files } (групп: { $number_groups }), размер: { $size }
-compute_found_duplicates_name = Найдено: { $number_files } дубликат(а/ов) (групп: { $number_groups })
+compute_found_duplicates_name = Найдено: { $number_files } дубликат (а/ов) (групп: { $number_groups })
 compute_found_empty_folders = Найдено пустых папок: { $number_files }
 compute_found_empty_files = Найдено пустых файлов: { $number_files }
 compute_found_big_files = Найдено больших файлов: { $number_files }

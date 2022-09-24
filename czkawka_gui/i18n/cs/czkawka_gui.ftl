@@ -45,7 +45,7 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Každý zkontrolovaný obrázek vytváří speciální hash, který lze vzájemně porovnávat, a malý rozdíl mezi nimi znamená, že tyto obrázky jsou podobné.
     
-    8 hash velikost je docela dobrá k nalezení obrázků, které jsou jen málo podobné originálům. S větší sadou obrázků(>1000) bude produkovat velké množství falešných pozitivních výsledků, takže doporučuji použít pro takovou částku větší hash velikosti.
+    8 hash velikost je docela dobrá k nalezení obrázků, které jsou jen málo podobné originálům. S větší sadou obrázků (>1000) bude produkovat velké množství falešných pozitivních výsledků, takže doporučuji použít pro takovou částku větší hash velikosti.
     
     16 je výchozí velikost hash, což je docela dobrý kompromis mezi nalezením i trochu podobných obrázků a malým množstvím srážek hash.
     

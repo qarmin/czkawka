@@ -101,7 +101,7 @@ main_tree_view_column_proper_extensions = 適切な拡張
 main_label_check_method = メソッドのチェック
 main_label_hash_type = ハッシュ方式
 main_label_hash_size = ハッシュサイズ
-main_label_size_bytes = サイズ(バイト)
+main_label_size_bytes = サイズ (バイト)
 main_label_min_size = 最小値
 main_label_max_size = 最大値
 main_label_shown_files = 表示するファイルの数
@@ -252,7 +252,7 @@ header_about_button_tooltip = アプリに関する情報を含むダイアロ�
 
 ## General
 
-settings_ignore_other_filesystems = 他のファイルシステムを無視(Linuxのみ)
+settings_ignore_other_filesystems = 他のファイルシステムを無視 (Linuxのみ)
 settings_ignore_other_filesystems_tooltip =
     検索されたディレクトリと同じファイルシステムにないファイルを無視します。
     
@@ -314,7 +314,7 @@ settings_duplicates_minimal_size_entry_tooltip =
     
     値を小さくするとキャッシュが生成されるレコードが増え検索が高速化しますが、キャッシュの読み込みと保存が遅くなります。
 settings_duplicates_prehash_checkbutton_tooltip =
-    プレハッシュ(ファイルの一部から計算したハッシュ) のキャッシュを有効にし、重複していない検索結果をより早く捨てられるようにします。
+    プレハッシュ (ファイルの一部から計算したハッシュ) のキャッシュを有効にし、重複していない検索結果をより早く捨てられるようにします。
     
     いくつかの場面では低速化の要因になりうるので、この機能はデフォルトでは無効になっています。
     
