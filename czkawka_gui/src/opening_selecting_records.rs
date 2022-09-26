@@ -31,7 +31,7 @@ pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::
             panic!()
         }
     }
-    // false // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
+    // false // True catches signal, and don't send it to function, e.g. up button is caught and don't move selection
     Inhibit(false)
 }
 
@@ -81,7 +81,7 @@ pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey
         nt_object.column_selection,
         nt_object.column_header,
     );
-    Inhibit(false) // True catches signal, and don't send it to function, e.g. up button is catched and don't move selection
+    Inhibit(false) // True catches signal, and don't send it to function, e.g. up button is caught and don't move selection
 }
 
 pub fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {

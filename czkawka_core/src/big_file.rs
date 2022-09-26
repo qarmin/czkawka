@@ -191,7 +191,7 @@ impl BigFile {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
-                    // Read current dir childrens
+                    // Read current dir children
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {

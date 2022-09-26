@@ -877,7 +877,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 // Sort
                                 let vec_file_entry = if vec_file_entry.len() >= 2 {
                                     let mut vec_file_entry = vec_file_entry.clone();
-                                    // Use comparsion by similarity, because it is more important that path here
+                                    // Use comparison by similarity, because it is more important that path here
                                     vec_file_entry.sort_unstable_by_key(|e| e.similarity);
                                     vec_file_entry
                                 } else {
