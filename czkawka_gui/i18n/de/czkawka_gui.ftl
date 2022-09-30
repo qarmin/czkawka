@@ -375,10 +375,10 @@ progress_scanning_music_tags = Lese Tags von { $file_checked }/{ $all_files } Mu
 progress_scanning_empty_folders = Scanne { $folder_number } Ordner
 progress_scanning_size = Scanne Größe der { $file_number } Datei
 progress_scanning_name = Scanne Name der { $file_number } Datei
-progress_analyzed_partial_hash = Analysierter Teilhash von { $file_checked }/{ $all_files } Dateien
-progress_analyzed_full_hash = Analysiert voller Hash von { $file_checked }/{ $all_files } Dateien
-progress_current_stage = Aktuelle Stufe:{ " " }
-progress_all_stages = Alle Stufen:{ " " }
+progress_analyzed_partial_hash = Analysierter Teilhash { $file_checked } von { $all_files } Dateien
+progress_analyzed_full_hash = Analysiert voller Hash { $file_checked } von { $all_files } Dateien
+progress_current_stage = Aktuelle Stufe: { " " }
+progress_all_stages = Alle Stufen: { " " }
 # Saving loading 
 saving_loading_saving_success = Konfiguration in Datei { $name } gespeichert.
 saving_loading_saving_failure = Konfigurationsdaten konnten nicht in Datei { $name } gespeichert werden.
