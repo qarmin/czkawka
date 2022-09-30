@@ -376,7 +376,7 @@ progress_scanning_empty_folders = Scanne { $folder_number } Ordner
 progress_scanning_size = Scanne Größe der { $file_number } Datei
 progress_scanning_name = Scanne Name der { $file_number } Datei
 progress_analyzed_partial_hash = Analysierter Teilhash { $file_checked } von { $all_files } Dateien
-progress_analyzed_full_hash = Analysiert voller Hash { $file_checked } von { $all_files } Dateien
+progress_analyzed_full_hash = Analysiert vollen Hash { $file_checked } von { $all_files } Dateien
 progress_current_stage = Aktuelle Stufe: { " " }
 progress_all_stages = Alle Stufen: { " " }
 # Saving loading 
