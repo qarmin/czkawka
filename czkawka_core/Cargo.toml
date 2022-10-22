@@ -43,7 +43,7 @@ xxhash-rust = { version = "0.8.6", features = ["xxh3"] }
 
 tempfile = "3.3.0"
 
-# Video Duplactes
+# Video Duplicates
 vid_dup_finder_lib = "0.1.1"
 ffmpeg_cmdline_utils = "0.1.2"
 

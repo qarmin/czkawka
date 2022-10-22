@@ -240,7 +240,7 @@ pub enum Commands {
         minimal_file_size: u64,
         #[clap(short = 'i', long, parse(try_from_str = parse_maximal_file_size), default_value = "18446744073709551615", help = "Maximum size in bytes", long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching")]
         maximal_file_size: u64,
-        #[clap(short = 't', long, parse(try_from_str = parse_tolerance), default_value = "10", help = "Video maximium difference (allowed values <0,20>)", long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)")]
+        #[clap(short = 't', long, parse(try_from_str = parse_tolerance), default_value = "10", help = "Video maximum difference (allowed values <0,20>)", long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)")]
         tolerance: i32,
     },
     #[clap(name = "ext", about = "Finds files with invalid extensions", help_message = HELP_MESSAGE, after_help = "EXAMPLE:\n    czkawka broken -d /home/czokolada/ -f results.txt")]

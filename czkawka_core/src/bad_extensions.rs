@@ -83,7 +83,7 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("html", "ent"),      // Mingw
     ("html", "md"),       // Markdown
     ("jpg", "jfif"),      // Photo format
-    ("m4v", "mp4"),       // m4v and mp4 are interchangable
+    ("m4v", "mp4"),       // m4v and mp4 are interchangeable
     ("mobi", "azw3"),     // Ebook format
     ("mpg", "vob"),       // Weddings in parts have usually vob extension
     ("obj", "bin"),       // Multiple apps, Czkawka, Nvidia, Windows
@@ -145,9 +145,9 @@ static WORKAROUNDS: &[(&str, &str)] = &[
     ("html", "svg"),
     ("xml", "html"),
     // Probably bug in external library
-    ("msi", "ppt"), // Not sure whe ppt is not recognized
-    ("msi", "doc"), // Not sure whe doc is not recognized
-    ("exe", "xls"), // Not sure whe xls is not recognized
+    ("msi", "ppt"), // Not sure why ppt is not recognized
+    ("msi", "doc"), // Not sure why doc is not recognized
+    ("exe", "xls"), // Not sure why xls is not recognized
 ];
 
 #[derive(Clone)]

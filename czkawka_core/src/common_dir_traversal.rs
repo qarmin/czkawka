@@ -378,7 +378,7 @@ where
                     let mut fe_result = vec![];
                     let mut set_as_not_empty_folder_list = vec![];
                     let mut folder_entries_list = vec![];
-                    // Read current dir childrens
+                    // Read current dir children
                     let read_dir = match fs::read_dir(&current_folder) {
                         Ok(t) => t,
                         Err(e) => {
