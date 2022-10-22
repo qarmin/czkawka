@@ -37,7 +37,7 @@
 
 ## Version 4.1.0 - 24.04.2022r
 - New mode - finding files whose content not match with their extension - [#678](https://github.com/qarmin/czkawka/pull/678)
-- Builtin icons - no more invalid, theme/OS dependant icons - [#659](https://github.com/qarmin/czkawka/pull/659)
+- Builtin icons - no more invalid, theme/OS dependent icons - [#659](https://github.com/qarmin/czkawka/pull/659)
 - Big(usually 2x) speedup of showing previews of images(both previews in scan and compare window) - [#660](https://github.com/qarmin/czkawka/pull/660)
 - Fix selecting records by custom selection popup - [#632](https://github.com/qarmin/czkawka/pull/632)
 - Support more tags when comparing music files - [#590](https://github.com/qarmin/czkawka/pull/590)

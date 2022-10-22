@@ -4,7 +4,7 @@
 If you use Snap, Flatpak or Appimage, you need to only install ffmpeg if you want to use Similar Videos tool.
 
 For Czkawka GUI the lowest supported version of GTK is `3.24` which is the only required dependency(of course on Ubuntu, different distributions will probably require a little different set of dependences).  
-In app exists Similar Video tool which require `FFmpeg` to work, but is completelly optional and without it, only warning would be printed when trying to use this tool without installed ffmpeg.  
+In app exists Similar Video tool which require `FFmpeg` to work, but is completely optional and without it, only warning would be printed when trying to use this tool without installed ffmpeg.  
 Broken files finder by default don't check for music files, but it is possible to enable this feature and that require to have alsa lib installed(on Ubuntu this is `libasound2-dev` package)
 
 **Warning**
