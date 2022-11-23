@@ -376,7 +376,7 @@ impl SameMusic {
                 };
 
                 let result = panic::catch_unwind(move || {
-                    match read_from(&mut file, true) {
+                    match read_from(&mut file) {
                         Ok(t) => Some(t),
                         Err(_inspected) => {
                             // println!("Failed to open {}", path);
@@ -714,7 +714,7 @@ impl SameMusic {
                     let mut files_from_referenced_folders = Vec::new();
                     let mut normal_files = Vec::new();
                     for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                             files_from_referenced_folders.push(file_entry);
                         } else {
                             normal_files.push(file_entry);

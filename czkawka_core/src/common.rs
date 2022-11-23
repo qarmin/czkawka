@@ -189,10 +189,10 @@ impl Common {
         for entry in entries {
             path = Path::new(entry);
             if path.is_dir() {
-                if let Err(e) = fs::remove_dir_all(&entry) {
+                if let Err(e) = fs::remove_dir_all(entry) {
                     warnings.push(format!("Failed to remove folder {}, reason {}", entry, e));
                 }
-            } else if let Err(e) = fs::remove_file(&entry) {
+            } else if let Err(e) = fs::remove_file(entry) {
                 warnings.push(format!("Failed to remove file {}, reason {}", entry, e));
             }
         }
@@ -202,10 +202,10 @@ impl Common {
         let path: &Path = Path::new(entry);
         let mut warning: String = String::from("");
         if path.is_dir() {
-            if let Err(e) = fs::remove_dir_all(&entry) {
+            if let Err(e) = fs::remove_dir_all(entry) {
                 warning = format!("Failed to remove folder {}, reason {}", entry, e)
             }
-        } else if let Err(e) = fs::remove_file(&entry) {
+        } else if let Err(e) = fs::remove_file(entry) {
             warning = format!("Failed to remove file {}, reason {}", entry, e)
         }
         warning
@@ -241,7 +241,7 @@ impl Common {
         let mut position_of_splits: Vec<usize> = Vec::new();
 
         // `git*` shouldn't be true for `/gitsfafasfs`
-        if !expression.starts_with('*') && directory.find(&splits[0]).unwrap() > 0 {
+        if !expression.starts_with('*') && directory.find(splits[0]).unwrap() > 0 {
             return false;
         }
         // `*home` shouldn't be true for `/homeowner`
@@ -250,7 +250,7 @@ impl Common {
         }
 
         // At the end we check if parts between * are correctly positioned
-        position_of_splits.push(directory.find(&splits[0]).unwrap());
+        position_of_splits.push(directory.find(splits[0]).unwrap());
         let mut current_index: usize;
         let mut found_index: usize;
         for i in splits[1..].iter().enumerate() {

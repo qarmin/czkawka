@@ -300,7 +300,7 @@ impl SimilarVideos {
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
                     // Read current dir children
-                    let read_dir = match fs::read_dir(&current_folder) {
+                    let read_dir = match fs::read_dir(current_folder) {
                         Ok(t) => t,
                         Err(e) => {
                             warnings.push(flc!(
@@ -607,7 +607,7 @@ impl SimilarVideos {
                     let mut files_from_referenced_folders = Vec::new();
                     let mut normal_files = Vec::new();
                     for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                             files_from_referenced_folders.push(file_entry);
                         } else {
                             normal_files.push(file_entry);
@@ -818,7 +818,7 @@ pub fn check_if_ffmpeg_is_installed() -> bool {
     if let Err(DetermineVideo {
         src_path: _a,
         error: FfmpegNotFound,
-    }) = VideoHash::from_path(&vid)
+    }) = VideoHash::from_path(vid)
     {
         return false;
     }

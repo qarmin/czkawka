@@ -241,7 +241,7 @@ impl BrokenFiles {
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
                     // Read current dir children
-                    let read_dir = match fs::read_dir(&current_folder) {
+                    let read_dir = match fs::read_dir(current_folder) {
                         Ok(t) => t,
                         Err(e) => {
                             warnings.push(flc!(

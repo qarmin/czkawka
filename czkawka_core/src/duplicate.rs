@@ -358,7 +358,7 @@ impl DuplicateFinder {
                             let mut files_from_referenced_folders = Vec::new();
                             let mut normal_files = Vec::new();
                             for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                                     files_from_referenced_folders.push(file_entry);
                                 } else {
                                     normal_files.push(file_entry);
@@ -458,7 +458,7 @@ impl DuplicateFinder {
                             let mut files_from_referenced_folders = Vec::new();
                             let mut normal_files = Vec::new();
                             for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                                     files_from_referenced_folders.push(file_entry);
                                 } else {
                                     normal_files.push(file_entry);
@@ -844,7 +844,7 @@ impl DuplicateFinder {
                         let mut files_from_referenced_folders = Vec::new();
                         let mut normal_files = Vec::new();
                         for file_entry in vec_file_entry {
-                            if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                                 files_from_referenced_folders.push(file_entry);
                             } else {
                                 normal_files.push(file_entry);

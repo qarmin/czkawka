@@ -135,7 +135,7 @@ fn popover_all_except_oldest_newest(
                     break;
                 }
             }
-            if used_index == None {
+            if used_index.is_none() {
                 continue;
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
@@ -210,7 +210,7 @@ fn popover_one_oldest_newest(
                     break;
                 }
             }
-            if used_index == None {
+            if used_index.is_none() {
                 continue;
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
@@ -584,7 +584,7 @@ fn popover_all_except_biggest_smallest(
                     break;
                 }
             }
-            if used_index == None {
+            if used_index.is_none() {
                 continue;
             }
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
