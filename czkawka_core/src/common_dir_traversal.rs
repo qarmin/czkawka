@@ -335,7 +335,7 @@ where
                         checking_method,
                         current_stage: 0,
                         max_stage,
-                        entries_checked: atomic_entry_counter.load(Ordering::Relaxed) as usize,
+                        entries_checked: atomic_entry_counter.load(Ordering::Relaxed),
                         entries_to_check: 0,
                     })
                     .unwrap();
@@ -379,7 +379,7 @@ where
                     let mut set_as_not_empty_folder_list = vec![];
                     let mut folder_entries_list = vec![];
                     // Read current dir children
-                    let read_dir = match fs::read_dir(&current_folder) {
+                    let read_dir = match fs::read_dir(current_folder) {
                         Ok(t) => t,
                         Err(e) => {
                             warnings.push(flc!(
@@ -550,7 +550,7 @@ where
                             (EntryType::File, Collect::EmptyFolders) | (EntryType::Symlink, Collect::EmptyFolders) => {
                                 #[cfg(target_family = "unix")]
                                 if directories.exclude_other_filesystems() {
-                                    match directories.is_on_other_filesystems(&current_folder) {
+                                    match directories.is_on_other_filesystems(current_folder) {
                                         Ok(true) => continue 'dir,
                                         Err(e) => warnings.push(e.to_string()),
                                         _ => (),
@@ -588,7 +588,7 @@ where
 
                                 #[cfg(target_family = "unix")]
                                 if directories.exclude_other_filesystems() {
-                                    match directories.is_on_other_filesystems(&current_folder) {
+                                    match directories.is_on_other_filesystems(current_folder) {
                                         Ok(true) => continue 'dir,
                                         Err(e) => warnings.push(e.to_string()),
                                         _ => (),
@@ -715,7 +715,7 @@ fn set_as_not_empty_folder(folder_entries: &mut BTreeMap<PathBuf, FolderEntry>, 
     // Loop to recursively set as non empty this and all his parent folders
     loop {
         d.is_empty = FolderEmptiness::No;
-        if d.parent_path != None {
+        if d.parent_path.is_some() {
             let cf = d.parent_path.clone().unwrap();
             d = folder_entries.get_mut(&cf).unwrap();
         } else {

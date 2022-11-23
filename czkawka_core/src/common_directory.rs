@@ -279,7 +279,7 @@ impl Directories {
         {
             let mut ref_folders = Vec::new();
             for folder in &self.reference_directories {
-                if self.included_directories.iter().any(|e| folder.starts_with(&e)) {
+                if self.included_directories.iter().any(|e| folder.starts_with(e)) {
                     ref_folders.push(folder.clone());
                 }
             }

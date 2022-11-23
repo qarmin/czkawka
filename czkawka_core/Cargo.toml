@@ -11,22 +11,22 @@ repository = "https://github.com/qarmin/czkawka"
 
 
 [dependencies]
-humansize = "2.1.0"
-rayon = "1.5.3"
+humansize = "2.1.2"
+rayon = "1.6.0"
 crossbeam-channel = "0.5.6"
 
 # For saving/loading config files to specific directories
 directories-next = "2.0.0"
 
 # Needed by similar images
-image_hasher = "1.1.0"
+image_hasher = "1.1.1"
 bk-tree = "0.4.0"
-image = "0.24.4"
+image = "0.24.5"
 hamming = "0.1.3"
 
 # Needed by same music
 bitflags = "1.3.2"
-lofty = "0.8.1"
+lofty = "0.9.0"
 
 # Futures - needed by async progress sender
 futures = "0.3.25"
@@ -37,7 +37,7 @@ audio_checker = "0.1.0"
 pdf = "0.7.2"
 
 # Hashes for duplicate files
-blake3 = "1.3.1"
+blake3 = "1.3.2"
 crc32fast = "1.3.2"
 xxhash-rust = { version = "0.8.6", features = ["xxh3"] }
 
@@ -50,13 +50,13 @@ ffmpeg_cmdline_utils = "0.1.2"
 # Saving/Loading Cache
 serde = "1.0.147"
 bincode = "1.3.3"
-serde_json = "1.0.87"
+serde_json = "1.0.89"
 
 # Language
 i18n-embed = { version = "0.13.4", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.6.4"
 rust-embed = "6.4.2"
-once_cell = "1.15.0"
+once_cell = "1.16.0"
 
 # Raw image files
 rawloader = "0.37.1"
@@ -64,9 +64,9 @@ imagepipe = "0.5.0"
 
 # Checking for invalid extensions
 mime_guess = "2.0.4"
-infer = "0.9.0"
+infer = "0.11.0"
 
-num_cpus = "1.13.1"
+num_cpus = "1.14.0"
 
 # Heif/Heic
 libheif-rs = { version = "0.15.1", optional = true }

@@ -358,7 +358,7 @@ impl DuplicateFinder {
                             let mut files_from_referenced_folders = Vec::new();
                             let mut normal_files = Vec::new();
                             for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                                     files_from_referenced_folders.push(file_entry);
                                 } else {
                                     normal_files.push(file_entry);
@@ -458,7 +458,7 @@ impl DuplicateFinder {
                             let mut files_from_referenced_folders = Vec::new();
                             let mut normal_files = Vec::new();
                             for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                                     files_from_referenced_folders.push(file_entry);
                                 } else {
                                     normal_files.push(file_entry);
@@ -528,7 +528,7 @@ impl DuplicateFinder {
                         checking_method,
                         current_stage: 1,
                         max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
                         entries_to_check: files_to_check,
                     })
                     .unwrap();
@@ -679,7 +679,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = pre_checked_map.iter().map(|(_size, vec_file_entry)| vec_file_entry.len()).sum();
+            let files_to_check = pre_checked_map.values().map(|vec_file_entry| vec_file_entry.len()).sum();
             let checking_method = self.check_method;
             thread::spawn(move || loop {
                 progress_send
@@ -687,7 +687,7 @@ impl DuplicateFinder {
                         checking_method,
                         current_stage: 2,
                         max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
                         entries_to_check: files_to_check,
                     })
                     .unwrap();
@@ -844,7 +844,7 @@ impl DuplicateFinder {
                         let mut files_from_referenced_folders = Vec::new();
                         let mut normal_files = Vec::new();
                         for file_entry in vec_file_entry {
-                            if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                            if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                                 files_from_referenced_folders.push(file_entry);
                             } else {
                                 normal_files.push(file_entry);

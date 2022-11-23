@@ -306,7 +306,7 @@ impl SimilarImages {
                     .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 3,
-                        images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        images_checked: atomic_file_counter.load(Ordering::Relaxed),
                         images_to_check: 0,
                     })
                     .unwrap();
@@ -335,7 +335,7 @@ impl SimilarImages {
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
                     // Read current dir children
-                    let read_dir = match fs::read_dir(&current_folder) {
+                    let read_dir = match fs::read_dir(current_folder) {
                         Ok(t) => t,
                         Err(e) => {
                             warnings.push(flc!(
@@ -536,7 +536,7 @@ impl SimilarImages {
                     .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 3,
-                        images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        images_checked: atomic_file_counter.load(Ordering::Relaxed),
                         images_to_check,
                     })
                     .unwrap();
@@ -716,7 +716,7 @@ impl SimilarImages {
                         .unbounded_send(ProgressData {
                             current_stage: 2,
                             max_stage: 2,
-                            images_checked: atomic_mode_counter.load(Ordering::Relaxed) as usize,
+                            images_checked: atomic_mode_counter.load(Ordering::Relaxed),
                             images_to_check: all_combinations_to_check,
                         })
                         .unwrap();
@@ -747,7 +747,7 @@ impl SimilarImages {
                 let reference_directories = self.directories.reference_directories.clone();
                 all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
                     for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                             files_from_referenced_folders.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
                         } else {
                             normal_files.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
@@ -1013,7 +1013,7 @@ impl SimilarImages {
                     let mut files_from_referenced_folders = Vec::new();
                     let mut normal_files = Vec::new();
                     for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(&e)) {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
                             files_from_referenced_folders.push(file_entry);
                         } else {
                             normal_files.push(file_entry);
@@ -1125,7 +1125,7 @@ fn image_to_check<'a>(
 }
 
 fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> bool {
-    reference_directories.iter().any(|e| path.starts_with(&e))
+    reference_directories.iter().any(|e| path.starts_with(e))
 }
 
 impl Default for SimilarImages {

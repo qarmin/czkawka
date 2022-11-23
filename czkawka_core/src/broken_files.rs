@@ -212,7 +212,7 @@ impl BrokenFiles {
                     .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 1,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
                         files_to_check: 0,
                     })
                     .unwrap();
@@ -241,7 +241,7 @@ impl BrokenFiles {
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
                     // Read current dir children
-                    let read_dir = match fs::read_dir(&current_folder) {
+                    let read_dir = match fs::read_dir(current_folder) {
                         Ok(t) => t,
                         Err(e) => {
                             warnings.push(flc!(
@@ -436,7 +436,7 @@ impl BrokenFiles {
                     .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 1,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
                         files_to_check,
                     })
                     .unwrap();
