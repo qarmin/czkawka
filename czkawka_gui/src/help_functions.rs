@@ -728,7 +728,7 @@ pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pix
 pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
     if let Some(iter) = list_store.iter_first() {
         loop {
-            let list_store_value: String = list_store.get::<String>(&iter, column as i32);
+            let list_store_value: String = list_store.get::<String>(&iter, column);
 
             if value == list_store_value {
                 return true;
@@ -746,7 +746,7 @@ pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, valu
 pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
     if let Some(iter) = list_store.iter_first() {
         loop {
-            let list_store_value: bool = list_store.get::<bool>(&iter, column as i32);
+            let list_store_value: bool = list_store.get::<bool>(&iter, column);
 
             if value != list_store_value {
                 return false;

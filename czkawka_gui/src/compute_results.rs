@@ -566,7 +566,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     ColumnsEmptyFolders::Modification as u32,
                                     &(NaiveDateTime::from_timestamp_opt(hashmap.get(&path).unwrap().modified_date as i64, 0).unwrap().to_string()),
                                 ),
-                                (ColumnsEmptyFolders::ModificationAsSecs as u32, &(hashmap.get(&path).unwrap().modified_date as u64)),
+                                (ColumnsEmptyFolders::ModificationAsSecs as u32, &(hashmap.get(&path).unwrap().modified_date)),
                             ];
                             list_store.set(&list_store.append(), &values);
                         }

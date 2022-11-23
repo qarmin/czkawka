@@ -335,7 +335,7 @@ where
                         checking_method,
                         current_stage: 0,
                         max_stage,
-                        entries_checked: atomic_entry_counter.load(Ordering::Relaxed) as usize,
+                        entries_checked: atomic_entry_counter.load(Ordering::Relaxed),
                         entries_to_check: 0,
                     })
                     .unwrap();

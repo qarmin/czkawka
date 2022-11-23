@@ -346,7 +346,7 @@ impl SameMusic {
                         checking_method: CheckingMethod::None,
                         current_stage: 1,
                         max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
                         entries_to_check: music_to_check,
                     })
                     .unwrap();
@@ -522,7 +522,7 @@ impl SameMusic {
                         checking_method: CheckingMethod::None,
                         current_stage: 2,
                         max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
                         entries_to_check: music_to_check,
                     })
                     .unwrap();

@@ -306,7 +306,7 @@ impl SimilarImages {
                     .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 3,
-                        images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        images_checked: atomic_file_counter.load(Ordering::Relaxed),
                         images_to_check: 0,
                     })
                     .unwrap();
@@ -536,7 +536,7 @@ impl SimilarImages {
                     .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 3,
-                        images_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        images_checked: atomic_file_counter.load(Ordering::Relaxed),
                         images_to_check,
                     })
                     .unwrap();
@@ -716,7 +716,7 @@ impl SimilarImages {
                         .unbounded_send(ProgressData {
                             current_stage: 2,
                             max_stage: 2,
-                            images_checked: atomic_mode_counter.load(Ordering::Relaxed) as usize,
+                            images_checked: atomic_mode_counter.load(Ordering::Relaxed),
                             images_to_check: all_combinations_to_check,
                         })
                         .unwrap();

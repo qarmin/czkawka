@@ -271,7 +271,7 @@ impl SimilarVideos {
                     .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 1,
-                        videos_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        videos_checked: atomic_file_counter.load(Ordering::Relaxed),
                         videos_to_check: 0,
                     })
                     .unwrap();
@@ -492,7 +492,7 @@ impl SimilarVideos {
                     .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 1,
-                        videos_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        videos_checked: atomic_file_counter.load(Ordering::Relaxed),
                         videos_to_check,
                     })
                     .unwrap();

@@ -212,7 +212,7 @@ impl BrokenFiles {
                     .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 1,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
                         files_to_check: 0,
                     })
                     .unwrap();
@@ -436,7 +436,7 @@ impl BrokenFiles {
                     .unbounded_send(ProgressData {
                         current_stage: 1,
                         max_stage: 1,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
                         files_to_check,
                     })
                     .unwrap();
