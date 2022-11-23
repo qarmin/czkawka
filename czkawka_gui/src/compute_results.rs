@@ -177,7 +177,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
                                                 ColumnsDuplicates::Modification as u32,
-                                                &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                                &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
                                             ),
                                             (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                             (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -198,7 +198,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -236,7 +236,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                                    &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -257,7 +257,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                     (ColumnsDuplicates::Path as u32, &directory),
                                                     (
                                                         ColumnsDuplicates::Modification as u32,
-                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
                                                     ),
                                                     (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                     (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -296,7 +296,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                             (ColumnsDuplicates::Path as u32, &directory),
                                             (
                                                 ColumnsDuplicates::Modification as u32,
-                                                &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                                &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
                                             ),
                                             (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                             (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -316,7 +316,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -373,7 +373,11 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(format!("{} - ({})", NaiveDateTime::from_timestamp(entry.modified_date as i64, 0), format_size(entry.size, BINARY))),
+                                                    &(format!(
+                                                        "{} - ({})",
+                                                        NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap(),
+                                                        format_size(entry.size, BINARY)
+                                                    )),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -426,7 +430,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                     (ColumnsDuplicates::Path as u32, &directory),
                                                     (
                                                         ColumnsDuplicates::Modification as u32,
-                                                        &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
                                                     ),
                                                     (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                     (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -478,7 +482,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                                 (ColumnsDuplicates::Path as u32, &directory),
                                                 (
                                                     ColumnsDuplicates::Modification as u32,
-                                                    &(NaiveDateTime::from_timestamp(entry.modified_date as i64, 0).to_string()),
+                                                    &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
                                                 ),
                                                 (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
                                                 (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -560,7 +564,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsEmptyFolders::Path as u32, &directory),
                                 (
                                     ColumnsEmptyFolders::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(hashmap.get(&path).unwrap().modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(hashmap.get(&path).unwrap().modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsEmptyFolders::ModificationAsSecs as u32, &(hashmap.get(&path).unwrap().modified_date as u64)),
                             ];
@@ -626,7 +630,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsEmptyFiles::Path as u32, &directory),
                                 (
                                     ColumnsEmptyFiles::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
@@ -686,7 +690,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsBigFiles::Path as u32, &directory),
                                 (
                                     ColumnsBigFiles::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                                 (ColumnsBigFiles::SizeAsBytes as u32, &(size)),
@@ -752,7 +756,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsTemporaryFiles::Path as u32, &directory),
                                 (
                                     ColumnsTemporaryFiles::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
@@ -835,7 +839,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (ColumnsSimilarImages::Path as u32, &directory),
                                     (
                                         ColumnsSimilarImages::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
                                     ),
                                     (ColumnsSimilarImages::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                     (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -861,7 +865,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         (ColumnsSimilarImages::Path as u32, &directory),
                                         (
                                             ColumnsSimilarImages::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                            &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                         ),
                                         (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
                                         (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -919,7 +923,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         (ColumnsSimilarImages::Path as u32, &directory),
                                         (
                                             ColumnsSimilarImages::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                            &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                         ),
                                         (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
                                         (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -1016,7 +1020,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (ColumnsSimilarVideos::Path as u32, &directory),
                                     (
                                         ColumnsSimilarVideos::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
                                     ),
                                     (ColumnsSimilarVideos::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                     (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -1037,7 +1041,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         (ColumnsSimilarVideos::Path as u32, &directory),
                                         (
                                             ColumnsSimilarVideos::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                            &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                         ),
                                         (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
                                         (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -1091,7 +1095,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         (ColumnsSimilarVideos::Path as u32, &directory),
                                         (
                                             ColumnsSimilarVideos::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                            &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                         ),
                                         (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
                                         (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -1204,7 +1208,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (ColumnsSameMusic::Length as u32, &base_file_entry.length),
                                     (
                                         ColumnsSameMusic::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp(base_file_entry.modified_date as i64, 0).to_string()),
+                                        &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
                                     ),
                                     (ColumnsSameMusic::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
                                     (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
@@ -1230,7 +1234,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         (ColumnsSameMusic::Length as u32, &base_file_entry.length),
                                         (
                                             ColumnsSameMusic::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                            &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                         ),
                                         (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
                                         (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -1333,7 +1337,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         (ColumnsSameMusic::Length as u32, &file_entry.length),
                                         (
                                             ColumnsSameMusic::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                            &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                         ),
                                         (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
                                         (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
@@ -1418,7 +1422,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 ),
                                 (
                                     ColumnsInvalidSymlinks::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
@@ -1485,7 +1489,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
                                 (
                                     ColumnsBrokenFiles::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
@@ -1552,7 +1556,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions),
                                 (
                                     ColumnsBadExtensions::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp(file_entry.modified_date as i64, 0).to_string()),
+                                    &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                                 ),
                                 (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                             ];
