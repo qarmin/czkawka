@@ -13,6 +13,28 @@ use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{Channel, ColorSpace, HeifContext, RgbChroma};
 
+static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
+
+pub fn get_number_of_threads() -> usize {
+    let data = NUMBER_OF_THREADS.get();
+    if *data >= 1 {
+        *data
+    } else {
+        num_cpus::get()
+    }
+}
+pub fn set_default_number_of_threads() {
+    set_number_of_threads(num_cpus::get());
+}
+pub fn get_default_number_of_threads() -> usize {
+    num_cpus::get()
+}
+pub fn set_number_of_threads(thread_number: usize) {
+    NUMBER_OF_THREADS.set(thread_number);
+
+    rayon::ThreadPoolBuilder::new().num_threads(get_number_of_threads()).build_global().unwrap();
+}
+
 /// Class for common functions used across other class/functions
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",

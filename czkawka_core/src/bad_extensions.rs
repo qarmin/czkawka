@@ -362,6 +362,7 @@ impl BadExtensions {
         self.bad_extensions_files = files_to_check
             .into_par_iter()
             .map(|file_entry| {
+                println!("{:?}", file_entry.path);
                 atomic_file_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);

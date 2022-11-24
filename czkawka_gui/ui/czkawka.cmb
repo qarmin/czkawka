@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
-<cambalache-project version="0.11.0" target_tk="gtk-4.0">
+<cambalache-project version="0.10.3" target_tk="gtk-4.0">
   <ui>
 	(3,None,"about_dialog.ui","about_dialog.ui",None,None,None,None,None,None),
 	(4,None,"compare_images.ui","compare_images.ui",None,None,None,None,None,None),
@@ -314,7 +314,10 @@
 	(9,52,"GtkButton","button_settings_load_configuration",51,None,None,None,None),
 	(9,53,"GtkButton","button_settings_reset_configuration",51,None,None,None,1),
 	(9,54,"GtkButton","button_settings_save_configuration",51,None,None,None,2),
-	(9,55,"GtkCheckButton","check_button_settings_one_filesystem",9,None,None,None,10)
+	(9,55,"GtkCheckButton","check_button_settings_one_filesystem",9,None,None,None,10),
+	(9,56,"GtkBox",None,9,None,None,None,11),
+	(9,57,"GtkLabel","label_settings_number_of_threads",56,None,None,None,None),
+	(9,58,"GtkScale","scale_settings_number_of_threads",56,None,None,None,1)
   </object>
   <object_property>
 	(3,1,"GtkAboutDialog","comments","2020 - 2022  Rafał Mikrut(qarmin)\n\nThis program is free to use and will always be.\n",1,None,None,None,None),
@@ -951,7 +954,15 @@
 	(9,54,"GtkWidget","receives-default","1",None,None,None,None,None),
 	(9,55,"GtkCheckButton","active","1",None,None,None,None,None),
 	(9,55,"GtkCheckButton","label","Exclude other filesystems(Linux)",None,None,None,None,None),
-	(9,55,"GtkWidget","focusable","1",None,None,None,None,None)
+	(9,55,"GtkWidget","focusable","1",None,None,None,None,None),
+	(9,57,"GtkLabel","label","Number of used threads",None,None,None,None,None),
+	(9,58,"GtkRange","fill-level","100",None,None,None,None,None),
+	(9,58,"GtkRange","round-digits","1",None,None,None,None,None),
+	(9,58,"GtkScale","digits","0",None,None,None,None,None),
+	(9,58,"GtkScale","draw-value","1",None,None,None,None,None),
+	(9,58,"GtkScale","value-pos","right",None,None,None,None,None),
+	(9,58,"GtkWidget","focusable","1",None,None,None,None,None),
+	(9,58,"GtkWidget","hexpand","1",None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(8,17,18,"GtkGridLayoutChild","column","0",None,None,None,None),

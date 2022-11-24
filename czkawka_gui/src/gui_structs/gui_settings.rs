@@ -23,6 +23,8 @@ pub struct GuiSettings {
     pub label_settings_general_language: gtk4::Label,
     pub combo_box_settings_language: gtk4::ComboBoxText,
     pub check_button_settings_one_filesystem: gtk4::CheckButton,
+    pub label_settings_number_of_threads: gtk4::Label,
+    pub scale_settings_number_of_threads: gtk4::Scale,
 
     // Duplicates
     pub check_button_settings_hide_hard_links: gtk4::CheckButton,
@@ -78,6 +80,8 @@ impl GuiSettings {
         let check_button_settings_use_trash: gtk4::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
         let label_settings_general_language: gtk4::Label = builder.object("label_settings_general_language").unwrap();
         let combo_box_settings_language: gtk4::ComboBoxText = builder.object("combo_box_settings_language").unwrap();
+        let label_settings_number_of_threads: gtk4::Label = builder.object("label_settings_number_of_threads").unwrap();
+        let scale_settings_number_of_threads: gtk4::Scale = builder.object("scale_settings_number_of_threads").unwrap();
 
         // Duplicates
         let check_button_settings_hide_hard_links: gtk4::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
@@ -122,6 +126,8 @@ impl GuiSettings {
             label_settings_general_language,
             combo_box_settings_language,
             check_button_settings_one_filesystem,
+            label_settings_number_of_threads,
+            scale_settings_number_of_threads,
             check_button_settings_hide_hard_links,
             entry_settings_cache_file_minimal_size,
             entry_settings_prehash_cache_file_minimal_size,
