@@ -1,4 +1,4 @@
-name: 🐧 Linux
+name: 🐧 Linux GUI
 on:
   push:
   pull_request:
@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  linux-default:
+  linux-gui:
     strategy:
       matrix:
         toolchain: [ stable, 1.63.0 ]

@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  macos-cli:
+  macos:
     strategy:
       matrix:
         toolchain: [ stable ]
