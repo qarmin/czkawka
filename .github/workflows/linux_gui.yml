@@ -35,14 +35,14 @@ jobs:
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
 
       - name: Build Release Heif
-        run: cargo build --release --features heif --bin czkawka_gui
+        run: cargo build --release --features heif
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.63.0') }}
 
       - name: Build Release
-        run: cargo build --release --bin czkawka_gui
+        run: cargo build --release
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
@@ -81,7 +81,7 @@ jobs:
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
 
       - name: Build Release
-        run: cargo build --release --bin czkawka_gui
+        run: cargo build --release
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"

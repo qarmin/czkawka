@@ -34,19 +34,12 @@ jobs:
       - name: Install basic libraries
         run: sudo apt-get update; sudo apt install libheif-dev -y
 
-      - name: Build Release Heif
-        run: cargo build --release --features heif --bin czkawka_cli
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.63.0') }}
-
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux CLI
         uses: actions/upload-artifact@v3
