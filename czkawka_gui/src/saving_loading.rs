@@ -625,7 +625,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     // Others
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ThreadNumber).unwrap().to_string(),
-        settings.scale_settings_number_of_threads.value(),
+        settings.scale_settings_number_of_threads.value().round(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().to_string(),
@@ -960,8 +960,9 @@ pub fn load_configuration(
         main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
 
         settings.scale_settings_number_of_threads.set_range(0_f64, get_default_number_of_threads() as f64);
-        settings.scale_settings_number_of_threads.set_fill_level(thread_number as f64);
+        settings.scale_settings_number_of_threads.set_fill_level(get_default_number_of_threads() as f64);
         settings.scale_settings_number_of_threads.connect_change_value(scale_step_function);
+        settings.scale_settings_number_of_threads.set_value(thread_number as f64);
     } else {
         settings.check_button_settings_load_at_start.set_active(false);
     }

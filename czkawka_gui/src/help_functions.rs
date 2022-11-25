@@ -763,8 +763,8 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
 }
 
 pub fn scale_step_function(scale: &gtk4::Scale, _scroll_type: ScrollType, value: f64) -> Inhibit {
-    scale.set_round_digits(0);
     scale.set_increments(1_f64, 1_f64);
+    scale.set_round_digits(0);
     scale.set_fill_level(value.round());
     Inhibit(false)
 }

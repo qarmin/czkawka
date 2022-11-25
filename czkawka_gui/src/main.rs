@@ -32,7 +32,7 @@ use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
-use czkawka_core::common::set_number_of_threads;
+use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
 use czkawka_core::*;
 use gui_structs::gui_data::*;
 
@@ -136,7 +136,8 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
         &gui_data.scrolled_window_errors,
         arguments.clone(),
     );
-    set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value() as usize);
+    set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value().round() as usize);
+    println!("Set thread number to {}", get_number_of_threads());
 
     // Needs to run when entire GUI is initialized
     connect_change_language(&gui_data);

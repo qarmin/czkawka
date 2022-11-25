@@ -6,7 +6,7 @@ use clap::Parser;
 
 use commands::Commands;
 use czkawka_core::big_file::SearchMode;
-use czkawka_core::common::set_default_number_of_threads;
+use czkawka_core::common::{get_number_of_threads, set_default_number_of_threads};
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 use czkawka_core::similar_images::test_image_conversion_speed;
@@ -30,6 +30,7 @@ fn main() {
     let command = Commands::from_args();
 
     set_default_number_of_threads();
+    println!("Set thread number to {}", get_number_of_threads());
     #[cfg(debug_assertions)]
     println!("{:?}", command);
 

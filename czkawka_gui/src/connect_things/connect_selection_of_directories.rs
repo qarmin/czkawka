@@ -100,7 +100,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 
     let tree_view = tree_view.clone();
     file_chooser.connect_response(move |file_chooser, response_type| {
-        if response_type == gtk4::ResponseType::Ok {
+        if response_type == ResponseType::Ok {
             let mut folders: Vec<PathBuf> = Vec::new();
             let g_files = file_chooser.files();
             for index in 0..g_files.n_items() {
@@ -156,7 +156,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
 
     let tree_view = tree_view.clone();
     dialog.connect_response(move |dialog, response_type| {
-        if response_type == gtk4::ResponseType::Ok {
+        if response_type == ResponseType::Ok {
             for text in entry.text().split(';') {
                 let mut text = text.trim().to_string();
                 #[cfg(target_family = "windows")]

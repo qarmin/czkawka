@@ -156,7 +156,6 @@ impl GuiSettings {
     pub fn update_language(&self) {
         self.window_settings.set_title(Some(&flg!("window_settings_title")));
 
-        self.label_restart_needed.set_label(&flg!("settings_label_restart"));
         self.check_button_settings_save_at_exit.set_label(Some(&flg!("settings_save_at_exit_button")));
         self.check_button_settings_load_at_start.set_label(Some(&flg!("settings_load_at_start_button")));
         self.check_button_settings_confirm_deletion.set_label(Some(&flg!("settings_confirm_deletion_button")));

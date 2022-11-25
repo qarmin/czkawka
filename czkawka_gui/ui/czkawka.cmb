@@ -968,7 +968,6 @@
 	(9,58,"GtkWidget","focusable","1",None,None,None,None,None),
 	(9,58,"GtkWidget","hexpand","1",None,None,None,None,None),
 	(9,59,"GtkAccessible","accessible-role","menu-item-checkbox",None,None,None,None,None),
-	(9,59,"GtkLabel","label","You need to restart app to apply settings!",None,None,None,None,None),
 	(9,59,"GtkWidget","margin-bottom","4",None,None,None,None,None),
 	(9,59,"GtkWidget","margin-top","5",None,None,None,None,None)
   </object_property>

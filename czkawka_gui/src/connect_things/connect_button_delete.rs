@@ -124,7 +124,7 @@ pub async fn check_if_can_delete_files(
         let (confirmation_dialog_delete, check_button) = create_dialog_ask_for_deletion(window_main, number_of_selected_items, number_of_selected_groups);
 
         let response_type = confirmation_dialog_delete.run_future().await;
-        if response_type == gtk4::ResponseType::Ok {
+        if response_type == ResponseType::Ok {
             if !check_button.is_active() {
                 check_button_settings_confirm_deletion.set_active(false);
             }
@@ -249,7 +249,7 @@ pub async fn check_if_deleting_all_files_in_group(
         let (confirmation_dialog_group_delete, check_button) = create_dialog_group_deletion(window_main);
 
         let response_type = confirmation_dialog_group_delete.run_future().await;
-        if response_type == gtk4::ResponseType::Ok {
+        if response_type == ResponseType::Ok {
             if !check_button.is_active() {
                 check_button_settings_confirm_group_deletion.set_active(false);
             }

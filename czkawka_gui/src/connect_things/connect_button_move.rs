@@ -91,7 +91,7 @@ fn move_things(
     let text_view_errors = text_view_errors.clone();
     let tree_view = tree_view.clone();
     chooser.connect_response(move |file_chooser, response_type| {
-        if response_type == gtk4::ResponseType::Ok {
+        if response_type == ResponseType::Ok {
             let mut folders: Vec<PathBuf> = Vec::new();
             let g_files = file_chooser.files();
             for index in 0..g_files.n_items() {

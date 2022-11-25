@@ -373,7 +373,7 @@ fn popover_custom_select_unselect(
             #[cfg(target_family = "windows")]
             let path_wildcard = path_wildcard.replace("/", "\\");
 
-            if response_type == gtk4::ResponseType::Ok {
+            if response_type == ResponseType::Ok {
                 let check_path = check_button_path.is_active();
                 let check_name = check_button_name.is_active();
                 let check_regex = check_button_rust_regex.is_active();
