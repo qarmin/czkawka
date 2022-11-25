@@ -281,7 +281,7 @@
 	(9,19,"GtkCheckButton","check_button_settings_use_cache",9,None,None,None,7),
 	(9,20,"GtkCheckButton","check_button_settings_save_also_json",9,None,None,None,8),
 	(9,21,"GtkCheckButton","check_button_settings_use_trash",9,None,None,None,9),
-	(9,22,"GtkBox",None,8,None,None,None,1),
+	(9,22,"GtkBox",None,8,None,None,None,2),
 	(9,23,"GtkButton","button_settings_open_cache_folder",22,None,None,None,None),
 	(9,24,"GtkButton","button_settings_open_settings_folder",22,None,None,None,1),
 	(9,25,"GtkLabel",None,7,None,None,None,None),
@@ -317,7 +317,8 @@
 	(9,55,"GtkCheckButton","check_button_settings_one_filesystem",9,None,None,None,10),
 	(9,56,"GtkBox",None,9,None,None,None,11),
 	(9,57,"GtkLabel","label_settings_number_of_threads",56,None,None,None,None),
-	(9,58,"GtkScale","scale_settings_number_of_threads",56,None,None,None,1)
+	(9,58,"GtkScale","scale_settings_number_of_threads",56,None,None,None,1),
+	(9,59,"GtkLabel","label_restart_needed",8,None,None,None,1)
   </object>
   <object_property>
 	(3,1,"GtkAboutDialog","comments","2020 - 2022  Rafał Mikrut(qarmin)\n\nThis program is free to use and will always be.\n",1,None,None,None,None),
@@ -955,14 +956,21 @@
 	(9,55,"GtkCheckButton","active","1",None,None,None,None,None),
 	(9,55,"GtkCheckButton","label","Exclude other filesystems(Linux)",None,None,None,None,None),
 	(9,55,"GtkWidget","focusable","1",None,None,None,None,None),
+	(9,57,"GtkAccessible","accessible-role","presentation",None,None,None,None,None),
 	(9,57,"GtkLabel","label","Number of used threads",None,None,None,None,None),
+	(9,57,"GtkLabel","wrap-mode","word-char",None,None,None,None,None),
+	(9,57,"GtkWidget","margin-start","5",None,None,None,None,None),
 	(9,58,"GtkRange","fill-level","100",None,None,None,None,None),
 	(9,58,"GtkRange","round-digits","1",None,None,None,None,None),
 	(9,58,"GtkScale","digits","0",None,None,None,None,None),
 	(9,58,"GtkScale","draw-value","True",None,None,None,None,None),
 	(9,58,"GtkScale","value-pos","right",None,None,None,None,None),
 	(9,58,"GtkWidget","focusable","1",None,None,None,None,None),
-	(9,58,"GtkWidget","hexpand","1",None,None,None,None,None)
+	(9,58,"GtkWidget","hexpand","1",None,None,None,None,None),
+	(9,59,"GtkAccessible","accessible-role","menu-item-checkbox",None,None,None,None,None),
+	(9,59,"GtkLabel","label","You need to restart app to apply settings!",None,None,None,None,None),
+	(9,59,"GtkWidget","margin-bottom","4",None,None,None,None,None),
+	(9,59,"GtkWidget","margin-top","5",None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(8,17,18,"GtkGridLayoutChild","column","0",None,None,None,None),

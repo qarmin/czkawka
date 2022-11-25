@@ -118,7 +118,10 @@
                           <object class="GtkBox">
                             <child>
                               <object class="GtkLabel" id="label_settings_number_of_threads">
+                                <property name="accessible-role">presentation</property>
                                 <property name="label">Number of used threads</property>
+                                <property name="margin-start">5</property>
+                                <property name="wrap-mode">word-char</property>
                               </object>
                             </child>
                             <child>
@@ -134,6 +137,14 @@
                             </child>
                           </object>
                         </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_restart_needed">
+                        <property name="accessible-role">menu-item-checkbox</property>
+                        <property name="label">You need to restart app to apply settings!</property>
+                        <property name="margin-bottom">4</property>
+                        <property name="margin-top">5</property>
                       </object>
                     </child>
                     <child>

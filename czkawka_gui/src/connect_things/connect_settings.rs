@@ -17,6 +17,16 @@ use crate::help_functions::get_dialog_box_child;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 
 pub fn connect_settings(gui_data: &GuiData) {
+    // Connect scale
+    {
+        gui_data.settings.label_restart_needed.hide();
+        let label_restart_needed = gui_data.settings.label_restart_needed.clone();
+        gui_data.settings.scale_settings_number_of_threads.connect_value_changed(move |_| {
+            if !label_restart_needed.is_visible() {
+                label_restart_needed.show();
+            }
+        });
+    }
     // Connect button settings
     {
         let button_settings = gui_data.header.button_settings.clone();

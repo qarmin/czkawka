@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use czkawka_core::common::{get_default_number_of_threads, get_number_of_threads};
+use czkawka_core::common::get_default_number_of_threads;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView};
@@ -101,7 +101,6 @@ impl LoadSaveStruct {
             println!("Default value {} can't be convert to integer value", default_value);
             panic!();
         }
-        assert!(default_value.parse::<i64>().is_ok());
         let mut returned_value = self.get_string(key, default_value.clone());
         if returned_value.parse::<i64>().is_err() {
             returned_value = default_value;

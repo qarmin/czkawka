@@ -22,7 +22,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    create_crash_message, get_dynamic_image_from_raw_image, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
+    create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION,
+    RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -736,7 +737,7 @@ impl SimilarImages {
             let mut files_from_referenced_folders = HashMap::new();
             let mut normal_files = HashMap::new();
 
-            let number_of_processors = num_cpus::get();
+            let number_of_processors = get_number_of_threads();
             let chunk_size;
             let mut chunks: Vec<&[&Vec<u8>]>;
 

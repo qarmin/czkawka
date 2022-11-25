@@ -136,7 +136,7 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
         &gui_data.scrolled_window_errors,
         arguments.clone(),
     );
-    // set_number_of_threads(gui_data.settings.sc);
+    set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value() as usize);
 
     // Needs to run when entire GUI is initialized
     connect_change_language(&gui_data);
