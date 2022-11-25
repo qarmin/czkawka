@@ -123,8 +123,13 @@
                             </child>
                             <child>
                               <object class="GtkScale" id="scale_settings_number_of_threads">
-                                <property name="hexpand">True</property>
-                                <property name="vexpand">True</property>
+                                <property name="digits">0</property>
+                                <property name="draw-value">True</property>
+                                <property name="fill-level">100</property>
+                                <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="round-digits">1</property>
+                                <property name="value-pos">right</property>
                               </object>
                             </child>
                           </object>

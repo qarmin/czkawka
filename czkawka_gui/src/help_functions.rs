@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
+use glib::signal::Inhibit;
 use glib::Error;
 use gtk4::prelude::*;
-use gtk4::{ListStore, TextView, TreeView, Widget};
+use gtk4::{ListStore, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, EncodableLayout};
 use once_cell::sync::OnceCell;
@@ -759,6 +760,13 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
         return true;
     }
     false
+}
+
+pub fn scale_step_function(scale: &gtk4::Scale, _scroll_type: ScrollType, value: f64) -> Inhibit {
+    scale.set_round_digits(0);
+    scale.set_increments(1_f64, 1_f64);
+    scale.set_fill_level(value.round());
+    Inhibit(false)
 }
 
 #[cfg(test)]

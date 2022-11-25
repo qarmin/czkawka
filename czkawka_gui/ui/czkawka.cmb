@@ -959,7 +959,7 @@
 	(9,58,"GtkRange","fill-level","100",None,None,None,None,None),
 	(9,58,"GtkRange","round-digits","1",None,None,None,None,None),
 	(9,58,"GtkScale","digits","0",None,None,None,None,None),
-	(9,58,"GtkScale","draw-value","1",None,None,None,None,None),
+	(9,58,"GtkScale","draw-value","True",None,None,None,None,None),
 	(9,58,"GtkScale","value-pos","right",None,None,None,None,None),
 	(9,58,"GtkWidget","focusable","1",None,None,None,None,None),
 	(9,58,"GtkWidget","hexpand","1",None,None,None,None,None)

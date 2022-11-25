@@ -1,8 +1,9 @@
+use glib::signal::Inhibit;
 use gtk4::prelude::*;
 use gtk4::{Builder, Window};
 
 use crate::flg;
-use crate::help_functions::get_all_direct_children;
+use crate::help_functions::{get_all_direct_children, scale_step_function};
 
 #[derive(Clone)]
 pub struct GuiSettings {
