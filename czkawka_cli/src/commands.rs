@@ -529,4 +529,5 @@ EXAMPLES:
     {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
     {bin} music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
-    {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;
+    {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
+    {bin} extnp -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;

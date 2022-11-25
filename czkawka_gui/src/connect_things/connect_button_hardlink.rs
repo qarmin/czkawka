@@ -318,7 +318,7 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
         let confirmation_dialog = create_dialog_non_group(window_main);
 
         let response_type = confirmation_dialog.run_future().await;
-        if response_type != gtk4::ResponseType::Ok {
+        if response_type != ResponseType::Ok {
             confirmation_dialog.hide();
             confirmation_dialog.close();
             return false;
@@ -355,7 +355,7 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
         let (confirmation_dialog_link, check_button) = create_dialog_ask_for_linking(window_main);
 
         let response_type = confirmation_dialog_link.run_future().await;
-        if response_type == gtk4::ResponseType::Ok {
+        if response_type == ResponseType::Ok {
             if !check_button.is_active() {
                 check_button_settings_confirm_link.set_active(false);
             }

@@ -5,6 +5,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
+use czkawka_core::common::get_default_number_of_threads;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView};
@@ -47,6 +48,8 @@ const DEFAULT_BROKEN_FILES_PDF: bool = true;
 const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
 const DEFAULT_BROKEN_FILES_ARCHIVE: bool = true;
 const DEFAULT_BROKEN_FILES_IMAGE: bool = true;
+
+const DEFAULT_THREAD_NUMBER: u32 = 0;
 
 const DEFAULT_NUMBER_OF_BIGGEST_FILES: &str = "50";
 const DEFAULT_SIMILAR_IMAGES_SIMILARITY: f32 = 0.0;
@@ -98,7 +101,6 @@ impl LoadSaveStruct {
             println!("Default value {} can't be convert to integer value", default_value);
             panic!();
         }
-        assert!(default_value.parse::<i64>().is_ok());
         let mut returned_value = self.get_string(key, default_value.clone());
         if returned_value.parse::<i64>().is_err() {
             returned_value = default_value;
@@ -437,6 +439,7 @@ enum LoadText {
     BrokenFilesAudio,
     BrokenFilesImage,
     BrokenFilesArchive,
+    ThreadNumber,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -483,6 +486,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::BrokenFilesImage, "broken_files_image"),
         (LoadText::BrokenFilesArchive, "broken_files_archive"),
         (LoadText::GeneralIgnoreOtherFilesystems, "ignore_other_filesystems"),
+        (LoadText::ThreadNumber, "thread_number"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -619,6 +623,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     );
 
     // Others
+    saving_struct.save_var(
+        hashmap_ls.get(&LoadText::ThreadNumber).unwrap().to_string(),
+        settings.scale_settings_number_of_threads.value().round(),
+    );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().to_string(),
         settings.entry_settings_cache_file_minimal_size.text(),
@@ -791,9 +799,10 @@ pub fn load_configuration(
     );
 
     let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_image = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().clone(), DEFAULT_BROKEN_FILES_PDF);
+    let check_button_broken_files_image = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().clone(), DEFAULT_BROKEN_FILES_IMAGE);
+    let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_AUDIO);
+    let thread_number = loaded_entries.get_object(hashmap_ls.get(&LoadText::ThreadNumber).unwrap().clone(), DEFAULT_THREAD_NUMBER);
 
     // Setting data
     if manual_execution || loading_at_start {
@@ -947,8 +956,13 @@ pub fn load_configuration(
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[index][5] as f64);
         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[index][5] as f64);
-
+        main_notebook.scale_similarity_similar_images.connect_change_value(scale_step_function);
         main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
+
+        settings.scale_settings_number_of_threads.set_range(0_f64, get_default_number_of_threads() as f64);
+        settings.scale_settings_number_of_threads.set_fill_level(get_default_number_of_threads() as f64);
+        settings.scale_settings_number_of_threads.connect_change_value(scale_step_function);
+        settings.scale_settings_number_of_threads.set_value(thread_number as f64);
     } else {
         settings.check_button_settings_load_at_start.set_active(false);
     }

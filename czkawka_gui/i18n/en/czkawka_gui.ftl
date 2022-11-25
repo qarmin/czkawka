@@ -292,6 +292,11 @@ header_about_button_tooltip = Opens dialog with info about app.
 
 # Settings
 ## General
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+
+settings_label_restart = You need to restart app to apply settings!
+
 settings_ignore_other_filesystems = Ignore other filesystems (only Linux)
 settings_ignore_other_filesystems_tooltip =
         ignores files that are not in the same file system as searched directories.

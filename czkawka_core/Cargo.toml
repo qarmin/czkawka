@@ -72,6 +72,8 @@ num_cpus = "1.14.0"
 libheif-rs = { version = "0.15.1", optional = true }
 anyhow = { version = "1.0.66", optional = true }
 
+state="0.5.3"
+
 [features]
 default = []
 heif = ["dep:libheif-rs", "dep:anyhow"]

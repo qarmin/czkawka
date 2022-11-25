@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.11.2 -->
+<!-- Created with Cambalache 0.10.3 -->
 <interface>
   <!-- interface-name settings.ui -->
   <requires lib="gtk" version="4.0"/>
@@ -114,6 +114,36 @@
                             <property name="label">Exclude other filesystems(Linux)</property>
                           </object>
                         </child>
+                        <child>
+                          <object class="GtkBox">
+                            <child>
+                              <object class="GtkLabel" id="label_settings_number_of_threads">
+                                <property name="accessible-role">presentation</property>
+                                <property name="label">Number of used threads</property>
+                                <property name="margin-start">5</property>
+                                <property name="wrap-mode">word-char</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="scale_settings_number_of_threads">
+                                <property name="digits">0</property>
+                                <property name="draw-value">True</property>
+                                <property name="fill-level">100</property>
+                                <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="round-digits">1</property>
+                                <property name="value-pos">right</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_restart_needed">
+                        <property name="accessible-role">menu-item-checkbox</property>
+                        <property name="margin-bottom">4</property>
+                        <property name="margin-top">5</property>
                       </object>
                     </child>
                     <child>
@@ -153,7 +183,7 @@
                       <object class="GtkCheckButton" id="check_button_settings_hide_hard_links">
                         <property name="active">1</property>
                         <property name="focusable">1</property>
-                        <property name="label" translatable="yes">Hide hard links(only Linux and macOS)</property>
+                        <property name="label" translatable="yes">Hide hard links(only Linux and MacOS)</property>
                       </object>
                     </child>
                     <child>

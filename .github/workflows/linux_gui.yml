@@ -1,4 +1,4 @@
-name: 🐧 Linux
+name: 🐧 Linux GUI
 on:
   push:
   pull_request:
@@ -9,21 +9,21 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  linux-default:
+  linux-gui:
     strategy:
       matrix:
         toolchain: [ stable, 1.63.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
           override: true
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             target
@@ -48,90 +48,12 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
-      - name: Store Linux CLI
-        uses: actions/upload-artifact@v2
-        with:
-          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
-          path: target/release/czkawka_cli
-        if: ${{ matrix.type == 'release' }}
-
       - name: Store Linux GUI
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_gui
         if: ${{ matrix.type == 'release' }}
-
-      # Duplicate finder checks included and excluded directories
-      # Others are just check delete files number
-      - name: Linux Regression Test
-        run: |
-          wget https://github.com/qarmin/czkawka/releases/download/1.1.0/TestSuite.zip
-          unzip TestSuite.zip -d TestSuite
-          python3 misc/check_results.py TestSuite 15 8
-
-
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen -m 1024
-          python3 misc/check_results.py TestSuite 7 8
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -D aen -m 1024
-          python3 misc/check_results.py TestSuite 7 8
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -x TEXT -D aeo -m 1024
-          python3 misc/check_results.py TestSuite 14 8
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -e "$(pwd)/TestSuite/SubFolder" -D aeo -m 1024
-          python3 misc/check_results.py TestSuite 13 8
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -m 1500 -D aeo
-          python3 misc/check_results.py TestSuite 8 8
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -m 1024
-          python3 misc/check_results.py TestSuite 15 8
-          target/release/czkawka_cli dup -d "$(pwd)/TestSuite" -R -D aeo -m 1024
-          python3 misc/check_results.py TestSuite 13 8
-
-
-          target/release/czkawka_cli big -d "$(pwd)/TestSuite"
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli empty-files -d "$(pwd)/TestSuite"
-          python3 misc/check_results.py TestSuite 15 8
-          target/release/czkawka_cli empty-files -d "$(pwd)/TestSuite" -D
-          python3 misc/check_results.py TestSuite 13 8
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli empty-folders -d "$(pwd)/TestSuite"
-          python3 misc/check_results.py TestSuite 15 8
-          target/release/czkawka_cli empty-folders -d "$(pwd)/TestSuite" -D
-          python3 misc/check_results.py TestSuite 15 2
-
-          rm -rf TestSuite
-          unzip TestSuite.zip -d TestSuite
-
-          target/release/czkawka_cli temp -d "$(pwd)/TestSuite"
-          python3 misc/check_results.py TestSuite 15 8
-          target/release/czkawka_cli temp -d "$(pwd)/TestSuite" -D
-          python3 misc/check_results.py TestSuite 14 8
 
   linux-appimage-gui:
     strategy:
@@ -140,14 +62,14 @@ jobs:
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
           override: true
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             target
@@ -177,7 +99,7 @@ jobs:
           ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage --icon-file data/icons/com.github.qarmin.czkawka.svg --desktop-file data/com.github.qarmin.czkawka.desktop
 
       - name: Store Linux Appimage GUI
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-appimage-${{ runner.os }}-${{ matrix.toolchain }}
           path: Czkawka*.AppImage
@@ -194,7 +116,7 @@ jobs:
           mv out/Czkawka*.AppImage out/czkawka_gui-minimal.AppImage
 
       - name: Minimal Appimage Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-${{ matrix.toolchain }}_minimal_AppImage
           path: out/*.AppImage
@@ -206,7 +128,7 @@ jobs:
         type: [ debug ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions-rs/toolchain@v1
         with:
