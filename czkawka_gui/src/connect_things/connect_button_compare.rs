@@ -626,7 +626,7 @@ fn update_bottom_buttons(
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 
         let bx = i.downcast::<gtk4::Box>().unwrap();
-        let smaller_bx = get_all_direct_children(&bx)[0].clone().downcast::<gtk4::Box>().unwrap();
+        let smaller_bx = bx.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
         for items in get_all_direct_children(&smaller_bx) {
             if let Ok(btn) = items.downcast::<gtk4::Button>() {
                 btn.set_sensitive(is_chosen);

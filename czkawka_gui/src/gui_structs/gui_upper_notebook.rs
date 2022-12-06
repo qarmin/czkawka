@@ -158,7 +158,7 @@ impl GuiUpperNotebook {
         self.entry_general_maximal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
 
         let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&self.notebook_upper);
-        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&vec_children[1]);
+        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&vec_children[1]); // This is quite safe in GTK 4, because tab label is always second child
 
         // Change name of upper notebook tabs
         for (upper_enum, fl_thing) in [

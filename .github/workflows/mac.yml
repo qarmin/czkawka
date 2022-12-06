@@ -41,7 +41,7 @@ jobs:
         run: brew install rust gtk4 libheif
 
       - name: Build Release
-        run: cargo build --release --features heif
+        run: cargo build --release
         env:
           CARGO_INCREMENTAL: 0
         if: ${{ matrix.type == 'release'}}
@@ -57,5 +57,25 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_gui
+        if: ${{ matrix.type == 'release' }}
+
+      - name: Build Release Heif
+        run: cargo build --release --features heif
+        env:
+          CARGO_INCREMENTAL: 0
+        if: ${{ matrix.type == 'release'}}
+
+      - name: Store MacOS CLI Heif
+        uses: actions/upload-artifact@v3
+        with:
+          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}-heif
+          path: target/release/czkawka_cli
+        if: ${{ matrix.type == 'release' }}
+
+      - name: Store MacOS GUI Heif
+        uses: actions/upload-artifact@v3
+        with:
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
           path: target/release/czkawka_gui
         if: ${{ matrix.type == 'release' }}
