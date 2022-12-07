@@ -117,7 +117,6 @@ impl GuiData {
         window_main.show();
 
         let pixbuf = Pixbuf::from_read(std::io::BufReader::new(&ICON_ABOUT[..])).unwrap();
-        // window_main.set_icon(Some(&pixbuf)); // TODO
 
         window_main.set_application(Some(application));
 
