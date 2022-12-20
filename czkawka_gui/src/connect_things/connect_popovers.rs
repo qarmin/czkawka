@@ -452,7 +452,7 @@ fn popover_custom_select_unselect(
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if Common::regex_check(&name_wildcard.to_lowercase(), &name.to_lowercase()) {
+                                    if Common::regex_check(&name_wildcard.to_lowercase(), name.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }
@@ -463,7 +463,7 @@ fn popover_custom_select_unselect(
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if Common::regex_check(&path_wildcard.to_lowercase(), &path.to_lowercase()) {
+                                    if Common::regex_check(&path_wildcard.to_lowercase(), path.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }
