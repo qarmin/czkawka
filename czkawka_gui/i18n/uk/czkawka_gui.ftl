@@ -225,6 +225,11 @@ bottom_hardlink_button_tooltip =
     Створити жорсткі посилання.
     Працює лише тоді, коли вибрано не менше двох результатів у групі.
     Перший результат залишається, а другий та наступні робляться жорсткими посиланнями на перший.
+bottom_hardlink_button_not_available_tooltip =
+    Create hardlinks.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
     Переміщення файлів до вибраного каталогу.
     Копіює всі файли в теку без збереження структури дерева каталогів.
@@ -252,6 +257,9 @@ header_about_button_tooltip = Відкриває діалогове вікно �
 
 ## General
 
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
 settings_ignore_other_filesystems = Ігнорувати інші файлові системи (лише Linux)
 settings_ignore_other_filesystems_tooltip =
     ігнорує файли, які не знаходяться в одній файловій системі, як пошукові каталоги.
@@ -353,7 +361,7 @@ settings_folder_settings_open = Відкрити папку налаштуван
 # Compute results
 compute_stopped_by_user = Пошук був зупинений користувачем
 compute_found_duplicates_hash_size = Знайдено дублікатів: { $number_files } (груп: { $number_groups }), розмір: { $size }
-compute_found_duplicates_name = Знайдено: { $number_files } дубликат (и/ів) (груп: { $number_groups })
+compute_found_duplicates_name = Знайдено: { $number_files } дубликат(и/ів) (груп: { $number_groups })
 compute_found_empty_folders = Знайдено порожніх папок: { $number_files }
 compute_found_empty_files = Знайдено порожніх файлів: { $number_files }
 compute_found_big_files = Знайдено великих файлів: { $number_files }

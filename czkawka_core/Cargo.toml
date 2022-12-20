@@ -66,7 +66,7 @@ imagepipe = "0.5.0"
 mime_guess = "2.0.4"
 infer = "0.11.0"
 
-num_cpus = "1.14.0"
+num_cpus = "1.15.0"
 
 # Heif/Heic
 libheif-rs = { version = "0.15.1", optional = true }

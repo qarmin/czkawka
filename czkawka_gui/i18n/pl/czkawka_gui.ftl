@@ -27,13 +27,13 @@ duplicate_mode_name_combo_box = Nazwa
 duplicate_mode_size_combo_box = Rozmiar
 duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
-    Czkawka oferuje 3 typy hashów:
+    Czkawka oferuje 3 rodzaje hashów:
     
-    Blake3 - kryptograficzna funkcja skrótu. Domyślnie używane, ponieważ jest bardzo szybkie.
+    Blake3 - kryptograficzna funkcja skrótu. Jest to wartość domyślna, ponieważ jest bardzo szybka.
     
-    CRC32 - prosta funkcja haszująca. Powinna być szybsza niż Blake3, lecz bardzo rzadko może prowadzić do kolizji haszów.
+    CRC32 - prosta funkcja haszująca. Powinno to być szybsze od Blake3, ale bardzo rzadko może to prowadzić do kolizji.
     
-    XXH3 - bardzo podobna pod względem wydajności i jakości do Blake3 (lecz nie jest kryptograficzna).
+    XXH3 - bardzo podobna pod względem wydajności i jakości hashu do Blake3 (ale niekryptograficzna). Tak więc takie tryby mogą być łatwo wymienione.
 duplicate_check_method_tooltip =
     Na razie Czkawka oferuje trzy typy metod do znalezienia duplikatów przez:
     
@@ -41,17 +41,17 @@ duplicate_check_method_tooltip =
     
     Rozmiar - Znajduje pliki o tym samym rozmiarze.
     
-    Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót (hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
+    Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót(hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
 image_hash_size_tooltip =
     Każdy sprawdzony obraz generuje hash, który można porównać z innymi a niewielka różnica między nimi oznacza, że te obrazy są podobne.
     
-    Hash wielkości 8 jest dość dobry do wyszukiwania obrazów, które są tylko niewiele podobne do oryginału. Z większą ilością obrazów (>1000) będzie generować dużą ilość niepoprawnych wyników, więc w takim przypadku zalecam użycie większego hashu.
+    Hash wielkości 8 jest dość dobry do wyszukiwania obrazów, które są tylko niewiele podobne do oryginału. Z większą ilością obrazów(>1000) będzie generować dużą ilość niepoprawnych wyników, więc w takim przypadku zalecam użycie większego hashu.
     
     16 to domyślny rozmiar hashu, który jest całkiem dobrym kompromisem między znalezieniem nawet nieco podobnych obrazów a niewielkim poziomem kolizji pomiędzy nimi.
     
-    32 i 64 znajdują tylko bardzo podobne zdjęcia, ale prawie nie powinny mieć kolizji (może z wyjątkiem niektórych obrazów z kanałem alfa (przezroczystością)).
+    32 i 64 znajdują tylko bardzo podobne zdjęcia, ale prawie nie powinny mieć kolizji (może z wyjątkiem niektórych obrazów z kanałem alfa(przezroczystością)).
 image_resize_filter_tooltip =
-    Aby obliczyć hash obrazu, biblioteka musi najpierw zmienić (zwykle zmniejszyć) jego rozmiar.
+    Aby obliczyć hash obrazu, biblioteka musi najpierw zmienić(zwykle zmniejszyć) jego rozmiar.
     
     W zależności od wybranego algorytmu, zmiejszony obraz użyty do obliczenia skrótu może wyglądać nieco inaczej.
     
@@ -63,7 +63,7 @@ image_hash_alg_tooltip =
     
     Każdy ma zarówno mocniejsze jak i słabsze punkty i czasami daje lepsze a czasami gorsze wyniki dla różnych obrazów.
     
-    Najlepiej jest samemu potestować jaki algorytm ma najlepsze wyniki (może to nie być zawsze dobrze widoczne).
+    Najlepiej jest samemu potestować jaki algorytm ma najlepsze wyniki(może to nie być zawsze dobrze widoczne).
 big_files_mode_combobox_tooltip = Pozwala na wyszukiwanie najmniejszych lub największych plików
 big_files_mode_label = Sprawdzane pliki
 big_files_mode_smallest_combo_box = Najmniejsze
@@ -180,7 +180,7 @@ popover_custom_name_check_button_entry_tooltip =
 popover_custom_regex_check_button_entry_tooltip =
     Wybierz rekordy według określonego Regexa.
     
-    W tym trybie wyszukiwanym tekstem jest pełna ścieżka (wraz z nazwą).
+    W tym trybie wyszukiwanym tekstem jest pełna ścieżka(wraz z nazwą).
     
     Przykładowe użycie:
     /usr/bin/ziemniak. xt można znaleźć za pomocą /ziem[a-z]+
@@ -225,6 +225,11 @@ bottom_hardlink_button_tooltip =
     Tworzenie twardych linków.
     Działa tylko wtedy, gdy wybrano co najmniej dwa rekordy w grupie.
     Pierwszy jest niezmieniony, drugi i następny jest dowiązywany z pierwszym.
+bottom_hardlink_button_not_available_tooltip =
+    Tworzenie twardych dowiązań.
+    Przycisk jest zablokowany, gdyż stworzenie twardego dowiązania nie jest możliwe.
+    Dowiązanie tego rodzaju może tworzyć administrator w systemie Windows, więc należy upewnić się że aplikacja jest uruchomiona przez z tymi uprawnieniami.
+    Jeśli aplikacja działa z nimi, należy przeszukać issues w Githubie celem znalezienia możliwych rozwiązań danego problemu.
 bottom_move_button_tooltip =
     Przenosi pliki do wybranego katalogu.
     Kopiuje wszystkie pliki do katalogu bez zachowania struktury plików.
@@ -241,7 +246,7 @@ about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.
 about_repository_button = Repozytorium
 about_donation_button = Dotacje
-about_instruction_button = Instrukcja (ENG)
+about_instruction_button = Instrukcja(ENG)
 about_translation_button = Tłumaczenie
 # Header
 header_setting_button_tooltip = Otwórz okno z ustawieniami programu.
@@ -252,6 +257,9 @@ header_about_button_tooltip = Otwórz okno z informacjami o programie.
 
 ## General
 
+settings_number_of_threads = Liczba używanych wątków
+settings_number_of_threads_tooltip = Liczba używanych wątków, 0 oznacza, że zostaną użyte wszystkie dostępne wątki.
+settings_label_restart = Musisz ponownie uruchomić aplikację, aby aplikacja zaciągnęła nowe ustawienia!
 settings_ignore_other_filesystems = Ignoruj inne systemy plików (tylko Linux)
 settings_ignore_other_filesystems_tooltip =
     ignoruje pliki, które nie są w tym samym systemie plików co przeszukiwane katalogi.

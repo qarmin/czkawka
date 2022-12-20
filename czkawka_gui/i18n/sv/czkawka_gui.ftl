@@ -225,6 +225,11 @@ bottom_hardlink_button_tooltip =
     Skapa hardlinks.
     Fungerar endast när minst två resultat i en grupp är valda.
     Först är oförändrad och andra och senare är hårt länkade till först.
+bottom_hardlink_button_not_available_tooltip =
+    Create hardlinks.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
     Flyttar filer till vald katalog.
     Det kopierar alla filer till katalogen utan att bevara katalogträdet.
@@ -252,6 +257,9 @@ header_about_button_tooltip = Öppnar dialog med info om app.
 
 ## General
 
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
 settings_ignore_other_filesystems = Ignorera andra filsystem (endast Linux)
 settings_ignore_other_filesystems_tooltip =
     ignorerar filer som inte finns i samma filsystem som sökta kataloger.

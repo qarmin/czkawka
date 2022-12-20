@@ -45,7 +45,7 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Chaque image vérifiée produit un hachage spécial qui peut être comparé entre les autres, et une petite différence entre elles signifie que ces images sont similaires.
     
-    La taille de 8 hachages est assez bonne pour trouver des images qui ne sont que peu similaires à l'original. Avec un plus grand ensemble d'images (>1000) produira une grande quantité de faux positifs, je recommande donc d'utiliser pour une telle quantité plus grande taille de hachage.
+    La taille de 8 hachages est assez bonne pour trouver des images qui ne sont que peu similaires à l'original. Avec un plus grand ensemble d'images(>1000) produira une grande quantité de faux positifs, je recommande donc d'utiliser pour une telle quantité plus grande taille de hachage.
     
     16 est la taille de hachage par défaut, ce qui est assez bon compromis entre trouver même un peu d'images similaires et avoir peu de collisions de hachage.
     
@@ -225,6 +225,11 @@ bottom_hardlink_button_tooltip =
     Créer des liens durs.
     Ne fonctionne que si au moins deux résultats dans un groupe sont sélectionnés.
     Le premier est inchangé et le second et plus tard sont hardliés au premier.
+bottom_hardlink_button_not_available_tooltip =
+    Create hardlinks.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
     Déplace les fichiers vers le répertoire choisi.
     Il copie tous les fichiers dans le répertoire sans préserver l'arborescence des répertoires.
@@ -252,6 +257,9 @@ header_about_button_tooltip = Ouvre la boîte de dialogue avec les informations 
 
 ## General
 
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
 settings_ignore_other_filesystems = Ignorer les autres systèmes de fichiers (uniquement Linux)
 settings_ignore_other_filesystems_tooltip =
     ignore les fichiers qui ne sont pas dans le même système de fichiers que les répertoires recherchés.

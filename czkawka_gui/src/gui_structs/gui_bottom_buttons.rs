@@ -82,6 +82,9 @@ impl GuiBottomButtons {
 
         buttons_select.set_popover(Some(popover_select));
 
+        #[cfg(target_family = "windows")]
+        buttons_hardlink.set_sensitive(test_hardlinks());
+
         Self {
             buttons_search,
             buttons_select,
@@ -105,18 +108,52 @@ impl GuiBottomButtons {
         get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
         get_custom_label_from_widget(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
         get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
-        get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
         get_custom_label_from_widget(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
+        get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));
         self.buttons_select.set_tooltip_text(Some(&flg!("bottom_select_button_tooltip")));
         self.buttons_delete.set_tooltip_text(Some(&flg!("bottom_delete_button_tooltip")));
         self.buttons_save.set_tooltip_text(Some(&flg!("bottom_save_button_tooltip")));
         self.buttons_symlink.set_tooltip_text(Some(&flg!("bottom_symlink_button_tooltip")));
-        self.buttons_hardlink.set_tooltip_text(Some(&flg!("bottom_hardlink_button_tooltip")));
         self.buttons_move.set_tooltip_text(Some(&flg!("bottom_move_button_tooltip")));
+        if self.buttons_hardlink.is_sensitive() {
+            self.buttons_hardlink.set_tooltip_text(Some(&flg!("bottom_hardlink_button_tooltip")));
+        } else {
+            self.buttons_hardlink.set_tooltip_text(Some(&flg!("bottom_hardlink_button_not_available_tooltip")));
+        }
 
         self.buttons_show_errors.set_tooltip_text(Some(&flg!("bottom_show_errors_tooltip")));
         self.buttons_show_upper_notebook.set_tooltip_text(Some(&flg!("bottom_show_upper_notebook_tooltip")));
     }
+}
+
+#[cfg(target_family = "windows")]
+fn test_hardlinks() -> bool {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        let cache_dir = proj_dirs.cache_dir();
+        let cache_file = cache_dir.join(Path::new("GILLES_FROM_NOSE.temp"));
+        let cache_file_second = cache_dir.join(Path::new("ROBERCIG_LOWANDOWSKI.temp"));
+
+        if cache_file.exists() {
+            let _ = fs::remove_file(&cache_file);
+        }
+        if cache_file_second.exists() {
+            let _ = fs::remove_file(&cache_file_second);
+        }
+        if !cache_file.exists() && !cache_file_second.exists() {
+            if let Ok(mut file_handler) = fs::OpenOptions::new().write(true).create(true).open(&cache_file) {
+                let _ = writeln!(file_handler, "GURKA");
+            }
+            let _ = fs::hard_link(&cache_file, &cache_file_second);
+
+            if cache_file.exists() && cache_file_second.exists() {
+                return true;
+            }
+        }
+        let _ = fs::remove_file(&cache_file);
+        let _ = fs::remove_file(&cache_file_second);
+    }
+
+    false
 }

@@ -263,6 +263,11 @@ bottom_hardlink_button_tooltip =
         Create hardlinks.
         Only works when at least two results in a group are selected.
         First is unchanged and second and later are hardlinked to first.
+bottom_hardlink_button_not_available_tooltip =
+        Create hardlinks.
+        Button is disabled, because hardlinks cannot be created.
+        Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+        If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip = 
         Moves files to chosen directory.
         It copies all files to the directory without preserving the directory tree.
