@@ -303,7 +303,7 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     if current_text.is_empty() {
         buffer.set_text(string_to_append);
     } else {
-        buffer.set_text(format!("{}\n{}", current_text, string_to_append).as_str());
+        buffer.set_text(format!("{current_text}\n{string_to_append}").as_str());
     }
 }
 
@@ -669,7 +669,7 @@ pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
             widgets_to_check.push((next_free_number, current_number, widget));
             next_free_number += 1;
         }
-        println!("{}, {}, {:?} ", current_number, parent_number, widget);
+        println!("{current_number}, {parent_number}, {widget:?} ");
     }
 }
 

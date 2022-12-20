@@ -31,18 +31,18 @@ impl Extensions {
             }
 
             if !extension.starts_with('.') {
-                extension = format!(".{}", extension);
+                extension = format!(".{extension}");
             }
 
             if extension[1..].contains('.') {
-                text_messages.warnings.push(format!("{} is not valid extension because contains dot inside", extension));
+                text_messages.warnings.push(format!("{extension} is not valid extension because contains dot inside"));
                 continue;
             }
 
             if extension[1..].contains(' ') {
                 text_messages
                     .warnings
-                    .push(format!("{} is not valid extension because contains empty space inside", extension));
+                    .push(format!("{extension} is not valid extension because contains empty space inside"));
                 continue;
             }
 

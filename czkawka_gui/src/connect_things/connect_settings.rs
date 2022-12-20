@@ -84,7 +84,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                 let cache_dir = proj_dirs.cache_dir();
 
                 if let Err(e) = open::that(cache_dir) {
-                    println!("Failed to open config folder {:?}, reason {}", cache_dir, e);
+                    println!("Failed to open config folder {cache_dir:?}, reason {e}");
                 };
             }
         });
@@ -97,7 +97,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                 let config_dir = proj_dirs.config_dir();
 
                 if let Err(e) = open::that(config_dir) {
-                    println!("Failed to open config folder {:?}, reason {}", config_dir, e);
+                    println!("Failed to open config folder {config_dir:?}, reason {e}");
                 };
             }
         });

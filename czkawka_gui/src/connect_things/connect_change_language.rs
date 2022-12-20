@@ -28,7 +28,7 @@ fn change_language(gui_data: &GuiData) {
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).unwrap()];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
-            eprintln!("Error while loadings languages for {} {:?}", lib, error);
+            eprintln!("Error while loadings languages for {lib} {error:?}");
         }
     }
     gui_data.update_language();

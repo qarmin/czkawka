@@ -389,12 +389,12 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
                                     pixbuf = t;
                                 }
                                 Err(e) => {
-                                    println!("Failed to open image {}, reason {}", full_path, e);
+                                    println!("Failed to open image {full_path}, reason {e}");
                                 }
                             };
                         }
                         Err(e) => {
-                            println!("Failed to open image {}, reason {}", full_path, e);
+                            println!("Failed to open image {full_path}, reason {e}");
                         }
                     };
                     break 'czystka;
@@ -407,7 +407,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
                     pixbuf = t;
                 }
                 Err(e) => {
-                    println!("Failed to open image {}, reason {}", full_path, e);
+                    println!("Failed to open image {full_path}, reason {e}");
                 }
             };
         }
@@ -416,14 +416,14 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         loop {
             let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Nearest) {
                 None => {
-                    println!("Failed to resize image {}.", full_path);
+                    println!("Failed to resize image {full_path}.");
                     break;
                 }
                 Some(pixbuf) => pixbuf,
             };
             let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Nearest) {
                 None => {
-                    println!("Failed to resize image {}.", full_path);
+                    println!("Failed to resize image {full_path}.");
                     break;
                 }
                 Some(pixbuf) => pixbuf,

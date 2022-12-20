@@ -212,10 +212,10 @@ impl Common {
             path = Path::new(entry);
             if path.is_dir() {
                 if let Err(e) = fs::remove_dir_all(entry) {
-                    warnings.push(format!("Failed to remove folder {}, reason {}", entry, e));
+                    warnings.push(format!("Failed to remove folder {entry}, reason {e}"));
                 }
             } else if let Err(e) = fs::remove_file(entry) {
-                warnings.push(format!("Failed to remove file {}, reason {}", entry, e));
+                warnings.push(format!("Failed to remove file {entry}, reason {e}"));
             }
         }
         warnings
@@ -225,10 +225,10 @@ impl Common {
         let mut warning: String = String::from("");
         if path.is_dir() {
             if let Err(e) = fs::remove_dir_all(entry) {
-                warning = format!("Failed to remove folder {}, reason {}", entry, e)
+                warning = format!("Failed to remove folder {entry}, reason {e}")
             }
         } else if let Err(e) = fs::remove_file(entry) {
-            warning = format!("Failed to remove file {}, reason {}", entry, e)
+            warning = format!("Failed to remove file {entry}, reason {e}")
         }
         warning
     }

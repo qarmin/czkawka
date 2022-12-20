@@ -36,7 +36,7 @@ fn main() {
     set_default_number_of_threads();
     println!("Set thread number to {}", get_number_of_threads());
     #[cfg(debug_assertions)]
-    println!("{:?}", command);
+    println!("{command:?}");
 
     match command {
         Commands::Duplicates(duplicates_args) => duplicates(duplicates_args),

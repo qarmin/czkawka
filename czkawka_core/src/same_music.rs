@@ -445,7 +445,7 @@ impl SameMusic {
                     let minutes = length_number / 1000;
                     let seconds = (length_number % 1000) * 6 / 100;
                     if minutes != 0 || seconds != 0 {
-                        length = format!("{}:{:02}", minutes, seconds);
+                        length = format!("{minutes}:{seconds:02}");
                     } else if old_length_number > 0 {
                         // That means, that audio have length smaller that second, but length is properly read
                         length = "0:01".to_string();
@@ -897,7 +897,7 @@ impl SaveResults for SameMusic {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
+                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -908,7 +908,7 @@ impl SaveResults for SameMusic {
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
+            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 
