@@ -130,6 +130,11 @@ impl GuiBottomButtons {
 
 #[cfg(target_family = "windows")]
 fn test_hardlinks() -> bool {
+    use directories_next::ProjectDirs;
+    use std::fs;
+    use std::io::Write;
+    use std::path::Path;
+
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = proj_dirs.cache_dir();
         let cache_file = cache_dir.join(Path::new("GILLES_FROM_NOSE.temp"));
