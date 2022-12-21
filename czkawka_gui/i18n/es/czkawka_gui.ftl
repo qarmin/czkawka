@@ -45,7 +45,7 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Cada imagen comprobada produce un hash especial que se puede comparar entre sí, y la pequeña diferencia entre ellas significa que estas imágenes son similares.
     
-    El tamaño de 8 hash es bastante bueno para encontrar imágenes que son poco similares a las originales. Con un conjunto más grande de imágenes (>1000) producirá una gran cantidad de falsos positivos, así que recomiendo usar para tal cantidad mayor de tamaño de hash.
+    El tamaño de 8 hash es bastante bueno para encontrar imágenes que son poco similares a las originales. Con un conjunto más grande de imágenes(>1000) producirá una gran cantidad de falsos positivos, así que recomiendo usar para tal cantidad mayor de tamaño de hash.
     
     16 es el tamaño predeterminado del hash, lo cual es bastante bueno entre encontrar incluso un poco de imágenes similares y tener una pequeña cantidad de colisiones hash.
     
@@ -225,6 +225,11 @@ bottom_hardlink_button_tooltip =
     Crear enlaces hardlinks.
     Solo funciona cuando al menos dos resultados en grupo son seleccionados.
     El primero no ha cambiado y el segundo y más tarde están enlazados por hardlinks a la primera.
+bottom_hardlink_button_not_available_tooltip =
+    Create hardlinks.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
     Mover los archivos a la carpeta elegida.
     Copia todos los archivos a la carpeta sin preservar el árbol de directorios.
@@ -252,6 +257,9 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 
 ## General
 
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
 settings_ignore_other_filesystems = Ignorar otros sistemas de ficheros (sólo Linux)
 settings_ignore_other_filesystems_tooltip =
     ignora los archivos que no están en el mismo sistema de archivos que los directorios buscados.

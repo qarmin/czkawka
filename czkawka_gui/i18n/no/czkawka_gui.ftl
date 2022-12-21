@@ -45,7 +45,7 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Hvert avmerket bilde produserer spesielle hash som kan sammenlignes med hverandre, og en liten forskjell mellom dem betyr at dette bildet er likt.
     
-    8 hash-størrelse er ganske bra for å finne bilder som er lite likt original. Med et større sett med bilder (>1000) vil jeg gi store mengder falske positive, så jeg anbefaler å bruke for så mye større hash-størrelse.
+    8 hash-størrelse er ganske bra for å finne bilder som er lite likt original. Med et større sett med bilder(>1000) vil jeg gi store mengder falske positive, så jeg anbefaler å bruke for så mye større hash-størrelse.
     
     16 er standard hash-størrelse som er ganske godt kompromiss mellom å finne enda litt lignende bilder og å ha en liten mengde hash-kollisjoner.
     
@@ -225,6 +225,11 @@ bottom_hardlink_button_tooltip =
     Opprette fastkoblinger.
     Virker bare når minst to resultater i en gruppe er valgt.
     Først er uendret og annet og senere er vanskelig knyttet til først.
+bottom_hardlink_button_not_available_tooltip =
+    Create hardlinks.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
     Flytter filer til valgt mappe.
     Den kopierer alle filer til mappen uten å lagre mappetreet.
@@ -252,6 +257,9 @@ header_about_button_tooltip = Åpner dialog med info om app.
 
 ## General
 
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
 settings_ignore_other_filesystems = Ignorer andre filsystemer (bare Linux)
 settings_ignore_other_filesystems_tooltip =
     ignorerer filer som ikke er i samme filsystem som søk-kataloger.

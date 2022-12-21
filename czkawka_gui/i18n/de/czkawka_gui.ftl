@@ -15,10 +15,10 @@ music_genre_checkbox = Genre
 music_length_checkbox = Dauer
 music_comparison_checkbox = Ungefährer Vergleich
 music_comparison_checkbox_tooltip =
-    Mit Hilfe von einer KI, die maschinelles Lernen nutzt, um Klammern aus Phrasen zu entfernen, wird nach ähnlichen Musikdateien gesucht. Wenn die Option aktiviert ist, werden die folgenden Dateien zum Beispiel als Duplikate betrachtet:
+    Mit Hilfe von einer KI, die maschinelles Lernen nutzt, um Klammern aus Sätzen zu entfernen, wird nach ähnlichen Musikdateien gesucht. Wenn die Option aktiviert ist, werden die folgenden Dateien zum Beispiel als Duplikate betrachtet:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Gross- /kleinschreibung beachtend
+duplicate_case_sensitive_name = Gross-/Kleinschreibung beachten
 duplicate_case_sensitive_name_tooltip =
     Wenn aktiviert, gruppieren Sie nur Datensätze, wenn sie genau denselben Namen haben, z. żoŁD <-> Żołd
     Deaktivieren dieser Option gruppiert Namen ohne zu überprüfen, ob jeder Buchstabe die gleiche Größe wie żoŁD <-> Żołd
@@ -66,15 +66,15 @@ image_hash_alg_tooltip =
 big_files_mode_combobox_tooltip = Erlaubt die Suche nach kleinsten/größten Dateien
 big_files_mode_label = Überprüfte Dateien
 big_files_mode_smallest_combo_box = Die kleinsten
-big_files_mode_biggest_combo_box = Die Größten
-main_notebook_duplicates = Dateien duplizieren
+big_files_mode_biggest_combo_box = Die größten
+main_notebook_duplicates = Doppelte Dateien
 main_notebook_empty_directories = Leere Verzeichnisse
 main_notebook_big_files = Große Dateien
 main_notebook_empty_files = Leere Dateien
 main_notebook_temporary = Temporäre Dateien
 main_notebook_similar_images = Ähnliche Bilder
 main_notebook_similar_videos = Ähnliche Videos
-main_notebook_same_music = Musik Duplikate
+main_notebook_same_music = Gleiche Musik
 main_notebook_symlinks = Ungültige Symlinks
 main_notebook_broken_files = Defekte Dateien
 main_notebook_bad_extensions = Falsche Erweiterungen
@@ -139,10 +139,10 @@ upper_manual_add_excluded_button_tooltip =
     
     /home/roman;/home/krokiet wird zwei Verzeichnisse /home/roman und /home/keokiet hinzufügen
 upper_add_excluded_button_tooltip = Verzeichnis hinzufügen, das bei der Suche ausgeschlossen werden soll.
-upper_remove_excluded_button_tooltip = Verzeichnis von ausgeschlossen löschen.
-upper_notebook_items_configuration = Artikelkonfiguration
+upper_remove_excluded_button_tooltip = Ausgeschlossene Verzeichnisse löschen.
+upper_notebook_items_configuration = Suchbedingungen
 upper_notebook_excluded_directories = Ausgeschlossene Verzeichnisse
-upper_notebook_included_directories = Inklusive Verzeichnisse
+upper_notebook_included_directories = Einbezogene Verzeichnisse
 upper_allowed_extensions_tooltip =
     Erlaubte Erweiterungen müssen durch Kommas getrennt werden (standardmäßig sind alle verfügbar).
     
@@ -224,6 +224,11 @@ bottom_hardlink_button_tooltip =
     Erstelle Hardlinks.
     Funktioniert nur, wenn mindestens zwei Ergebnisse einer Gruppe ausgewählt sind.
     Das Erste bleibt dabei unverändert, und das Zweite und alle Weiteren werden zu Hardlinks auf das Erste umgewandelt.
+bottom_hardlink_button_not_available_tooltip =
+    Create hardlinks.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
     Verschiebt Dateien in den ausgewählten Ordner.
     Kopiert alle Dateien in den Ordner, ohne den Verzeichnisbaum zu erhalten.
@@ -251,6 +256,9 @@ header_about_button_tooltip = Öffnet den Dialog mit Informationen über die App
 
 ## General
 
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
 settings_ignore_other_filesystems = Andere Dateisysteme ignorieren (nur Linux)
 settings_ignore_other_filesystems_tooltip =
     ignoriert Dateien, die nicht im selben Dateisystem sind wie durchsuchte Verzeichnisse.
@@ -375,7 +383,7 @@ progress_scanning_music_tags = Lese Tags von { $file_checked }/{ $all_files } Mu
 progress_scanning_empty_folders = Scanne { $folder_number } Ordner
 progress_scanning_size = Scanne Größe der { $file_number } Datei
 progress_scanning_name = Scanne Name der { $file_number } Datei
-progress_analyzed_partial_hash = Analysierter Teilhash von { $file_checked }/{ $all_files } Dateien
+progress_analyzed_partial_hash = Teilhash von { $file_checked }/{ $all_files } Dateien analysiert
 progress_analyzed_full_hash = Analysiert voller Hash von { $file_checked }/{ $all_files } Dateien
 progress_current_stage = Aktuelle Stufe:{ " " }
 progress_all_stages = Alle Stufen:{ " " }
@@ -384,9 +392,9 @@ saving_loading_saving_success = Konfiguration in Datei { $name } gespeichert.
 saving_loading_saving_failure = Konfigurationsdaten konnten nicht in Datei { $name } gespeichert werden.
 saving_loading_reset_configuration = Aktuelle Konfiguration wurde gelöscht.
 saving_loading_loading_success = Richtig geladene App-Konfiguration.
-saving_loading_invalid_string = Für Schlüssel "{ $key }" fand ungültiges Ergebnis - "{ $result }" das keine Zeichenkette ist.
-saving_loading_invalid_int = Für Schlüssel "{ $key }" fand ungültiges Ergebnis - "{ $result }" das keine ganze Zahl ist.
-saving_loading_invalid_bool = Für Schlüssel "{ $key }" fand ungültiges Ergebnis - "{ $result }" das kein Bool.
+saving_loading_invalid_string = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches keine Zeichenkette ist.
+saving_loading_invalid_int = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches keine ganze Zahl ist.
+saving_loading_invalid_bool = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches kein Boolean ist.
 saving_loading_decode_problem_bool = Fehler beim Dekodieren des Bools von Schlüssel "{ $key }" gefunden "{ $result }" aber erlaubte Werte sind 0, 1, true oder false.
 saving_loading_saving_same_keys = Versucht die Einstellung mit doppelter Taste "{ $key } " zu speichern.
 saving_loading_failed_to_get_home_directory = Home-Verzeichnis konnte nicht zum Öffnen und Speichern der Konfigurationsdatei geladen werden.
@@ -406,7 +414,7 @@ searching_for_data = Suche nach Daten, es kann eine Weile dauern, bitte warten..
 text_view_messages = NACHRICHT
 text_view_warnings = WARNUNGEN
 text_view_errors = FEHLER
-about_window_motto = Dieses Programm ist kostenlos zu benutzen und wird es immer sein.
+about_window_motto = Dieses Programm ist kostenlos zu benutzen und wird immer frei sein.
 # Various dialog
 dialogs_ask_next_time = Nächstes Mal fragen
 delete_file_failed = Fehler beim Entfernen der Datei { $name }, aufgrund von { $reason }
@@ -436,10 +444,10 @@ search_not_choosing_any_broken_files = FEHLER: Sie müssen mindestens ein Kontro
 include_folders_dialog_title = Einbezogene Ordner
 exclude_folders_dialog_title = Ausgeschlossene Ordner
 include_manually_directories_dialog_title = Verzeichnis manuell hinzufügen
-cache_properly_cleared = Richtig geleerter Cache
-cache_clear_duplicates_title = Leere Duplikaten-Cache
-cache_clear_similar_images_title = Leere ähnlichen Bildercache
-cache_clear_similar_videos_title = Lösche ähnlichen Videocache
+cache_properly_cleared = Cache vollständig geleert
+cache_clear_duplicates_title = Leere Duplikate-Cache
+cache_clear_similar_images_title = Leere Bilder-Cache
+cache_clear_similar_videos_title = Leere Video-Cache
 cache_clear_message_label_1 = Wollen Sie veraltete Einträge aus dem Cache löschen?
 cache_clear_message_label_2 = Dieser Vorgang entfernt alle Cache-Einträge, die auf ungültige Dateien verweisen.
 cache_clear_message_label_3 = Dies kann das Laden und Speichern zum Cache leicht beschleunigen.

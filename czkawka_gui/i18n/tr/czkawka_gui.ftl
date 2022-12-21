@@ -1,8 +1,8 @@
 # Window titles
 window_settings_title = Ayarlar
-window_main_title = Czkawka (Hiccup)
-window_progress_title = Taranıyor
-window_compare_images = Compare Images
+window_main_title = Czkawka (Hıçkırık)
+window_progress_title = Taranıyor...
+window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam
 general_close_button = Kapat
@@ -10,445 +10,495 @@ general_close_button = Kapat
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
 music_year_checkbox = Yıl
-music_bitrate_checkbox = Bit hızı
+music_bitrate_checkbox = Bit-hızı
 music_genre_checkbox = Müzik Türü
-music_length_checkbox = Yükseklik
-music_comparison_checkbox = Approximate Comparison
+music_length_checkbox = Uzunluk
+music_comparison_checkbox = Yaklaşık Karşılaştırma
 music_comparison_checkbox_tooltip =
-    It searches for similar music files using AI, which uses machine learning to remove parentheses from a phrase. For example, with this option enabled, the files in question will be considered duplicates:
+    Yapay zeka kullanarak benzer müzik dosyalarını arar. 
+    Örneğin, bir tümcenin parantezlerini kaldırmak için makine öğrenimini kullanır. 
+    Bu seçenek etkinleştirildiğinde, söz konusu dosyalar kopya olarak kabul edilecektir:
     
-    Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Büyük/Küçük harfe duyarlı
+    Geççek <--> Geççek (Tarkan 2022)
+duplicate_case_sensitive_name = Büyük/Küçük harfe Duyarlı
 duplicate_case_sensitive_name_tooltip =
-    When enabled, group only records when they have exactly same name e.g. Żołd <-> Żołd
+    Etkinleştirilse, dosya adları tam olarak aynı olduğunda eşleştirilir
+    ve bir grup oluşturulur.
     
-    Disabling such option will group names without checking if each letter is same size e.g. żoŁD <-> Żołd
-duplicate_mode_name_combo_box = Ad
-duplicate_mode_size_combo_box = Boyut
-duplicate_mode_hash_combo_box = Karma
+    fatih.kavalci <--> fatih.kavalci
+    
+    Etkisizleştirilirse, her bir harfin büyük/küçük yazılıp yazılmadığını 
+    denetlemeden aynı adları eşleyip grup oluşturur.
+    
+    fatih.kavalci <--> FatiH.KaVaLCi
+duplicate_mode_name_combo_box = Ad Karşılaştırma
+duplicate_mode_size_combo_box = Boyut Karşılaştırma
+duplicate_mode_hash_combo_box = SUÇ (hash) Karşılaştırma
 duplicate_hash_type_tooltip =
-    Czkawka offers 3 types of hashes:
+    Czkawka, 3 tür Sabit Uzunlukta Çıktı (SUÇ) üretimi sunar:
     
-    Blake3 - cryptographic hash function. This is the default because it is very fast.
+    Blake3 - kriptografik SUÇ üretim işlevi. Bu varsayılandır çünkü çok hızlıdır.
     
-    CRC32 - simple hash function. This should be faster than Blake3, but may very rarely have some collisions.
+    CRC32 - basit SUÇ üretim işlevi. Bu, Blake3'ten daha hızlı olmalıdır, 
+    ancak kimi zaman çakışmalar olabilir.
     
-    XXH3 - very similar in performance and hash quality to Blake3 (but non-cryptographic). So, such modes can be easily interchanged.
+    XXH3 - performans ve benzersiz SUÇ üretim kalitesi açısından Blake3'e çok benzer 
+    (ancak kriptografik değildir). Böylece, bu tür modlar kolayca değiştirilebilir.
 duplicate_check_method_tooltip =
-    For now, Czkawka offers three types of method to find duplicates by:
+    Czkawka, eş dosyaları bulmak için şimdilik üç tür yöntem sunar:
     
-    Name - Finds files which have the same name.
+    Ad Karşılaştırma - Aynı ada sahip dosyaları bulur.
     
-    Size - Finds files which have the same size.
+    Boyut Karşılaştırma - Aynı boyuta sahip dosyaları bulur.
     
-    Hash - Finds files which have the same content. This mode hashes the file and later compares this hash to find duplicates. This mode is the safest way to find duplicates. App heavily uses cache, so second and further scans of the same data should be a lot of faster than the first.
+    Hash (SUÇ) Karşılaştırma - Aynı içeriğe sahip dosyaları bulur. Bu mod her dosya için 
+    veri analizi sonucu sabit uzunlukta benzersiz birer çıktı üretir ve daha sonra eş doşyaları 
+    bulmak için bu çıktıları karşılaştırır. Bu mod, eş dosyaları bulmanın en güvenli yoludur. 
+    Czkawka, önbelleği yoğun olarak kullanır. Bu nedenle aynı verilerin ikinci ve sonraki taramaları 
+    ilkinden çok daha hızlı olmalıdır.
 image_hash_size_tooltip =
-    Each checked image produce special hash which can be compared with every other, and small difference between them means that this images are similar.
+    Resim dosyalarının karşılaştırılması için her resim dosyasından özel bir hash 
+    (Sabit Uzunluklu Resim Çıktısı : SURÇ) üretilmelidir. İki resmin SURÇ farkı küçük ise 
+    bu resimlerin benzer olduğu anlamına gelir.
     
-    8 hash size is quite good to find images that are only little similar to original. With bigger set of images (>1000) will produce big amount of false positives, so I recommend to use for such amount bigger hash size.
+    8'lik SURÇ boyutu aslına çok az benzeyen resimleri bulmak için oldukça iyidir. 
+    Büyük (>1000) resim kümelerinde çok sayıda hatalı eşleştirme yapacaktır. Bu nedenlenle 
+    büyük resim kümeleri ile çalışırken daha büyük bir SURÇ boyutu kullanmanız önerilir.
     
-    16 is default hash size which is quite good compromise between finding even a little similar images and having small amount of hash collisions.
+    16'lık varsayılan SURÇ boyutu kısa sürede az miktarda hatalı eşleştirme ile 
+    birbirine biraz benzer resimler bulmak için en uygun seçenektir. 
     
-    32 and 64 hashes finds only very similar images, but almost should not have any false positives (maybe except some images with alpha channel).
+    32 ve 64'lük SURÇ boyutları yalnızca bir birine çok benzeyen resimleri eşleştirir 
+    ve neredeyse (alfa kanallı kimi resimler dışında) hatalı eşleştirme yapmaz.
 image_resize_filter_tooltip =
-    To compute hash of image, library must first resize it.
+    Benzer resim dosyaları farklı biçimlerde, farklı boyutlarda, farklı sıkıştırma oranlarında olabilir. 
+    Sabit Uzunluklu Resim Çıktısı (SURÇ) üretimi öncesinde bir algoritma aracılığı ile yeniden boyutlandırılmalıdır.
     
-    Depend on chosen algorithm, resulted image used to calculate hash will may looks little different.
+    Seçilen algoritmaya bağlı olarak, elde edilen son görüntü biraz farklı görünecektir. 
     
-    The fastest algorithm to use, but also one which gives the worst results is Nearest, it is enabled by default, because with 16x16 hash size, lower quality it is not really visible.
+    Kullanılacak en hızlı aynı zamanda en kötü sonuçları veren algoritma Nearest'tir. Yine de varsayılan 
+    olarak etkindir. Çünkü kalite kaybı, 16x16 boyutluk SURÇ üretiminde gerçekten fark edilmez.
     
-    With 8x8 hash size is recommended to use different algorithm than Nearest, to have better groups of images.
+    8x8 boyutluk SURÇ üretimi ile daha iyi eşleştirilmiş resim gruplarına sahip olmak için 
+    Nearest'ten farklı bir algoritma kullanmanız önerilir.
 image_hash_alg_tooltip =
-    Users can choose from one of many algorithms of calculating the hash.
-    
-    Each has both strong and weaker points and will sometimes give better and sometimes worse results for different images.
-    
-    So, to determine the best one for you, manual testing is required.
-big_files_mode_combobox_tooltip = Allows to search for smallest/biggest files
-big_files_mode_label = Checked files
-big_files_mode_smallest_combo_box = The Smallest
-big_files_mode_biggest_combo_box = The Biggest
-main_notebook_duplicates = Duplicate Files
-main_notebook_empty_directories = Empty Directories
-main_notebook_big_files = Büyük Dosyalar
-main_notebook_empty_files = Empty Files
-main_notebook_temporary = Temporary Files
-main_notebook_similar_images = Similar Images
+    Kullanıcılar, SURÇ oluşturmanın birçok algoritmasından birini seçebilir. 
+    Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
+    bazen daha iyi, bazen daha kötü sonuçlar verir. Bu nedenle, size göre en iyisini belirlemek için 
+    elle test gereklidir.
+big_files_mode_combobox_tooltip = Boyut bakımından En Büyük/En Küçük dosyaları aramaya izin verir.
+big_files_mode_label = Denetim şekli
+big_files_mode_smallest_combo_box = En Küçük
+big_files_mode_biggest_combo_box = En Büyük
+main_notebook_duplicates = Eş Dosyalar
+main_notebook_empty_directories = Boş Dizinler
+main_notebook_big_files = Büyük/Küçük Dosyalar
+main_notebook_empty_files = Boş Dosyalar
+main_notebook_temporary = Geçici Dosyalar
+main_notebook_similar_images = Benzer Resimler
 main_notebook_similar_videos = Benzer Videolar
-main_notebook_same_music = Music Duplicates
-main_notebook_symlinks = Invalid Symlinks
-main_notebook_broken_files = Broken Files
-main_notebook_bad_extensions = Bad Extensions
+main_notebook_same_music = Müzik Kopyaları
+main_notebook_symlinks = Geçersiz Sembolik Bağlar
+main_notebook_broken_files = Bozuk Dosyalar
+main_notebook_bad_extensions = Hatalı Uzantılar
 main_tree_view_column_file_name = Dosya Adı
-main_tree_view_column_folder_name = Folder Name
+main_tree_view_column_folder_name = Klasör Adı
 main_tree_view_column_path = Yol
-main_tree_view_column_modification = Değiştirilme tarihi
-main_tree_view_column_size = Size
+main_tree_view_column_modification = Düzenleme Tarihi
+main_tree_view_column_size = Boyut
 main_tree_view_column_similarity = Benzerlik
-main_tree_view_column_dimensions = Boyutlar
+main_tree_view_column_dimensions = En x Boy
 main_tree_view_column_title = Başlık
 main_tree_view_column_artist = Sanatçı
 main_tree_view_column_year = Yıl
-main_tree_view_column_bitrate = Bit hızı
-main_tree_view_column_length = Yükseklik
-main_tree_view_column_genre = Müzik Türü
-main_tree_view_column_symlink_file_name = Symlink File Name
-main_tree_view_column_symlink_folder = Symlink Folder
-main_tree_view_column_destination_path = Hedef Yolu
-main_tree_view_column_type_of_error = Type Of Error
-main_tree_view_column_current_extension = Current Extension
-main_tree_view_column_proper_extensions = Proper Extension
-main_label_check_method = Check method
-main_label_hash_type = Hash type
-main_label_hash_size = Hash size
-main_label_size_bytes = Boyut (bayt)
-main_label_min_size = En az
-main_label_max_size = Azami
-main_label_shown_files = Number of shown files
-main_label_resize_algorithm = Resize algorithm
-main_label_similarity = Similarity{ "   " }
-main_check_box_broken_files_audio = Audio
+main_tree_view_column_bitrate = Bit-hızı
+main_tree_view_column_length = Uzunluk
+main_tree_view_column_genre = Tür
+main_tree_view_column_symlink_file_name = Sembolik Bağ Dosyası Adı
+main_tree_view_column_symlink_folder = Sembolik Bağlantı Klasörü
+main_tree_view_column_destination_path = Hedef Yol
+main_tree_view_column_type_of_error = Hata türü
+main_tree_view_column_current_extension = Geçerli Uzantı
+main_tree_view_column_proper_extensions = Uygun Uzantı
+main_label_check_method = Denetim yöntemi:
+main_label_hash_type = SUÇ türü:
+main_label_hash_size = SURÇ boyutu:
+main_label_size_bytes = Boyut (bayt):
+main_label_min_size = Min
+main_label_max_size = Max
+main_label_shown_files = Gösterilecek Dosya Sayısı:
+main_label_resize_algorithm = Yeniden boyutlandırma algoritması:
+main_label_similarity = Benzerlik: { "   " }
+main_check_box_broken_files_audio = Ses
 main_check_box_broken_files_pdf = Pdf
-main_check_box_broken_files_archive = Archive
-main_check_box_broken_files_image = Image
-check_button_general_same_size = Ignore same size
-check_button_general_same_size_tooltip = Ignore from results, files which have identical size - usually this are 1:1 duplicates
-main_label_size_bytes_tooltip = Size of files which will be used in scan
+main_check_box_broken_files_archive = Arşiv
+main_check_box_broken_files_image = Resim
+check_button_general_same_size = Aynı boyutu yok say
+check_button_general_same_size_tooltip = Aynı boyuta sahip dosyalar -genellikle 1'e 1 eştir- sonuçlarda gösterilmez.
+main_label_size_bytes_tooltip = Taramada kullanılacak dosyaların boyutu
 # Upper window
-upper_tree_view_included_folder_column_title = Folders to Search
-upper_tree_view_included_reference_column_title = Reference Folders
-upper_recursive_button = Recursive
-upper_recursive_button_tooltip = If selected, search also for files which are not placed directly under chosen folders.
-upper_manual_add_included_button = Manual Add
-upper_add_included_button = Eklemek
+upper_tree_view_included_folder_column_title = Aranacak Klasörler
+upper_tree_view_included_reference_column_title = Başvuru Klasörleri
+upper_recursive_button = Özyinelemeli
+upper_recursive_button_tooltip = Seçilirse, doğrudan "Aranacak Klasörler" listesindeki dizin altında yer almayan (alt dizinlerdeki dosyaları da) arar.
+upper_manual_add_included_button = Dizin Gir...
+upper_add_included_button = Ekle
 upper_remove_included_button = Kaldır
-upper_manual_add_excluded_button = Manual Add
-upper_add_excluded_button = Eklemek
+upper_manual_add_excluded_button = Dizin Gir...
+upper_add_excluded_button = Ekle
 upper_remove_excluded_button = Kaldır
 upper_manual_add_included_button_tooltip =
-    Add directory name to search by hand.
+    Arama yapılacak dizin yolunu doğrudan yazın.
     
-    To add multiple paths at once, separate them by ;
+    Aynı anda birden fazla girdi eklemek için bunları ";" ile ayırın.
     
-    /home/roman;/home/rozkaz will add two directories /home/roman and /home/rozkaz
-upper_add_included_button_tooltip = Add new directory to search.
-upper_remove_included_button_tooltip = Delete directory from search.
+    /home/fatih;/home/kavalci girdisi biri /home/fatih öteki /home/kavalci 
+    olmak üzere iki dizin ekleyecektir.
+upper_add_included_button_tooltip = "Aranacak Klasörler" listesine yeni bir dizin ekler.
+upper_remove_included_button_tooltip = Seçili dizini "Aranacak Klasörler" listesinden kaldırır.
 upper_manual_add_excluded_button_tooltip =
-    Add excluded directory name by hand.
+    Hariç tutulacak dizin yolunu doğrudan yazın.
     
-    To add multiple paths at once, separate them by ;
+    Aynı anda birden fazla girdi eklemek için bunları ";" ile ayırın.
     
-    /home/roman;/home/krokiet will add two directories /home/roman and /home/keokiet
-upper_add_excluded_button_tooltip = Add directory to be excluded in search.
-upper_remove_excluded_button_tooltip = Delete directory from excluded.
-upper_notebook_items_configuration = Items Configuration
-upper_notebook_excluded_directories = Excluded Directories
-upper_notebook_included_directories = Included Directories
+    /home/fatih;/home/kavalci girdisi biri /home/fatih öteki /home/kavalci 
+    olmak üzere iki dizin ekleyecektir.
+upper_add_excluded_button_tooltip = "Hariç Tutulacak Klasörler" listesine yeni bir dizin ekler.
+upper_remove_excluded_button_tooltip = Seçili dizini "Hariç Tutulacak Klasörler" listesinden kaldırır.
+upper_notebook_items_configuration = Öğe Yapılandırması
+upper_notebook_excluded_directories = Hariç Tutulan Dizinler
+upper_notebook_included_directories = Aranacak Dizinler
 upper_allowed_extensions_tooltip =
-    Allowed extensions must be separated by commas (by default all are available).
+    İzin verilen uzantılar virgülle ayrılmalıdır (varsayılan olarak her uzantı kullanılır).
     
-    The following Macros, which add multiple extensions at once, are also available: IMAGE, VIDEO, MUSIC, TEXT.
+    Aynı anda birden fazla (aynı tür) uzantı ekleyen makrolar da kullanılabilir: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Usage example  ".exe, IMAGE, VIDEO, .rar, 7z" - this means that images (e.g. jpg, png), videos (e.g. avi, mp4), exe, rar, and 7z files will be scanned.
+    Kullanım örneği: ".exe, IMAGE, VIDEO, .rar, .7z" -- Bu girdi, resimlerin (ör. jpg, png ...), 
+    videoların (ör. avi, mp4 ...), exe, rar ve 7z dosyalarının taranacağı anlamına gelir.
 upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Directories, so use it carefully.
-upper_excluded_items = Excluded Items:
-upper_allowed_extensions = Allowed Extensions:
+    Hariç tutulan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
+    Bu işlev, Hariç Tutulan Dizinlerden daha yavaştır, bu yüzden dikkatli kullanın.
+upper_excluded_items = Hariç Tutulan Öğeler:
+upper_allowed_extensions = İzin Verilen Uzantılar:
 # Popovers
 popover_select_all = Tümünü seç
 popover_unselect_all = Tümünün seçimini kaldır
-popover_reverse = Reverse Selection
-popover_select_all_except_oldest = Select all except oldest
-popover_select_all_except_newest = Select all except newest
-popover_select_one_oldest = Select one oldest
-popover_select_one_newest = Select one newest
-popover_select_custom = Select custom
-popover_unselect_custom = Unselect custom
-popover_select_all_images_except_biggest = Select all except biggest
-popover_select_all_images_except_smallest = Select all except smallest
+popover_reverse = Seçimi Ters Çevir
+popover_select_all_except_oldest = En eski olan hariç hepsini seç
+popover_select_all_except_newest = En yeni olan hariç hepsini seç
+popover_select_one_oldest = En eski olanı seç
+popover_select_one_newest = En yeni olanı seç
+popover_select_custom = Özel girdi ile seçim yap
+popover_unselect_custom = Özel girdi ile seçimi kaldır
+popover_select_all_images_except_biggest = En büyük olan hariç hepsini seç
+popover_select_all_images_except_smallest = En küçük olan hariç hepsini seç
 popover_custom_path_check_button_entry_tooltip =
-    Select records by path.
+    Kayıtları, kısmi yol girdisine göre seçer.
     
-    Example usage:
-    /home/pimpek/rzecz.txt can be found with /home/pim*
+    Örnek kullanım:
+    /home/fatih/kavalci.txt dosyası, /home/fat* girdisi ile bulunabilir
 popover_custom_name_check_button_entry_tooltip =
-    Select records by file names.
+    Kayıtları, kısmi dosya adı girdisine göre seçer.
     
-    Example usage:
-    /usr/ping/pong.txt can be found with *ong*
+    Örnek kullanım:
+    /home/fatih/kavalci.txt dosyası, *val* girdisi ile bulunabilir
 popover_custom_regex_check_button_entry_tooltip =
-    Select records by specified Regex.
+    Kayıtları, belirtilen Regex girdisine göre seçer.
     
-    With this mode, searched text is Path with Name.
+    Bu mod ile aranan metin, tam yol dosya adıdır.
     
-    Example usage:
-    /usr/bin/ziemniak.txt can be found with /ziem[a-z]+
+    Örnek kullanım:
+    /home/fatih/kavalcı.txt dosyası, h/ka[a-z]+ ile bulunabilir
     
-    This uses the default Rust regex implementation. You can read more about it here: https://docs.rs/regex.
+    Bu işlev, varsayılan Rust regex uygulamasını kullanır. 
+    Daha fazla bilgi için bakınız: https://docs.rs/regex.
 popover_custom_case_sensitive_check_button_tooltip =
-    Enables case-sensitive detection.
+    Büyük/Küçük harfe duyarlı algılamayı etkinleştirir.
     
-    When disabled /home/* finds both /HoMe/roman and /home/roman.
+    Etkisizleştirilir ise;
+    /home/fatih/* girdisi, hem /home/fatih/ hem de /home/FaTiH dizinlerini algılar.
 popover_custom_not_all_check_button_tooltip =
-    Prevents selecting all records in group.
+    Gruptaki tüm kayıtların seçilmesini engeller.
     
-    This is enabled by default, because in most situations, you don't want to delete both original and duplicates files, but want to leave at least one file.
+    Bu varsayılan olarak etkindir. Çünkü, çoğu durumda hem asıl dosyayı hem de kopyaları 
+    silmek istemezsiniz. En az bir dosya bırakmak istersiniz.
     
-    WARNING: This setting doesn't work if you have already manually selected all results in a group.
+    UYARI: Bir gruptaki tüm sonuçlar zaten elle seçilmiş ise bu ayar çalışmaz.
 popover_custom_regex_path_label = Yol
 popover_custom_regex_name_label = Ad
-popover_custom_regex_regex_label = Regex Path + Name
-popover_custom_case_sensitive_check_button = Büyük/küçük harf duyarlı
-popover_custom_all_in_group_label = Don't select all records in group
-popover_custom_mode_unselect = Unselect Custom
-popover_custom_mode_select = Özeli Seçin
-popover_invalid_regex = Regex is invalid
-popover_valid_regex = Regex is valid
+popover_custom_regex_regex_label = Regex Yolu + Adı
+popover_custom_case_sensitive_check_button = Büyük/Küçük harfe duyarlı
+popover_custom_all_in_group_label = Gruptaki tüm kayıtları seçme
+popover_custom_mode_unselect = Özel Girdi ile Seçimi Kaldır
+popover_custom_mode_select = Özel Girdi ile Seç
+popover_invalid_regex = Regex geçersiz (hatalı)
+popover_valid_regex = Regex geçerli (doğru)
 # Bottom buttons
 bottom_search_button = Ara
 bottom_select_button = Seç
 bottom_delete_button = Sil
-bottom_save_button = Save
-bottom_symlink_button = Sembolik link
-bottom_hardlink_button = Hardlink
+bottom_save_button = Kaydet
+bottom_symlink_button = Sembolik bağlantı
+bottom_hardlink_button = Sabit bağlantı
 bottom_move_button = Taşı
-bottom_search_button_tooltip = Aramayı başlat
-bottom_select_button_tooltip = Select records. Only selected files/folders can be later processed.
-bottom_delete_button_tooltip = Delete selected files/folders.
-bottom_save_button_tooltip = Save data about search to file
+bottom_search_button_tooltip = Aramayı başlatır.
+bottom_select_button_tooltip = Kayıtları seçer. Yalnızca seçilen dosyalara/klasörlere işlem uygulanabilir.
+bottom_delete_button_tooltip = Seçili dosyaları/klasörleri siler.
+bottom_save_button_tooltip = Aramayla ilgili verileri dosyaya kaydeder.
 bottom_symlink_button_tooltip =
-    Create symbolic links.
-    Only works when at least two results in a group are selected.
-    First is unchanged and second and later are symlinked to first.
+    Sembolik bağlantılar oluşturur.
+    Yalnızca bir gruptaki en az iki sonuç seçildiğinde çalışır.
+    Birincisi değişmez, ikincisi ve sonrası birinciye sembolik olarak bağlanır.
 bottom_hardlink_button_tooltip =
+    Sabit bağlantılar oluşturur.
+    Yalnızca bir gruptaki en az iki sonuç seçildiğinde çalışır.
+    Birincisi değişmez, ikincisi ve sonrası birinciye sabit olarak bağlanır.
+bottom_hardlink_button_not_available_tooltip =
     Create hardlinks.
-    Only works when at least two results in a group are selected.
-    First is unchanged and second and later are hardlinked to first.
+    Button is disabled, because hardlinks cannot be created.
+    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
+    If app already works with such privileges check for similar issues on Github.
 bottom_move_button_tooltip =
-    Moves files to chosen directory.
-    It copies all files to the directory without preserving the directory tree.
-    When trying to move two files with identical name to folder, second will fail and show error.
-bottom_show_errors_tooltip = Show/Hide bottom text panel.
-bottom_show_upper_notebook_tooltip = Show/Hide upper notebook panel.
+    Dosyaları seçilen dizine taşır.
+    Dizin ağacını korumadan tüm dosyaları dizine taşır.
+    Aynı ada sahip iki dosyayı klasöre taşımaya çalışırken, ikincisi başarısız olur ve hata gösterir.
+bottom_show_errors_tooltip = Alt çıktı panelini göster/gizle.
+bottom_show_upper_notebook_tooltip = Üst denetim panelini göster/gizle.
 # Progress Window
-progress_stop_button = Dur
-progress_stop_additional_message = Stop requested
+progress_stop_button = Durdur
+progress_stop_additional_message = İşlem durduruldu.
 # About Window
-about_repository_button_tooltip = Link to repository page with source code.
-about_donation_button_tooltip = Link to donation page.
-about_instruction_button_tooltip = Link to instruction page.
-about_translation_button_tooltip = Link to Crowdin page with app translations. Officially Polish and English are supported.
-about_repository_button = Veri Havuzu
-about_donation_button = Bağış yap
-about_instruction_button = Talimatlar
+about_repository_button_tooltip = Kaynak kodu depo sayfasına bağlanır.
+about_donation_button_tooltip = Bağış sayfasına bağlanır.
+about_instruction_button_tooltip = Kullanım yönergeleri sayfasına bağlanır.
+about_translation_button_tooltip = Czkawka çevirileriyle Crowdin sayfasına bağlanır. Resmi olarak Lehçe ve İngilizce desteklenmektedir.
+about_repository_button = Depo
+about_donation_button = Bağış
+about_instruction_button = Yönerge
 about_translation_button = Çeviri
 # Header
-header_setting_button_tooltip = Opens settings dialog.
-header_about_button_tooltip = Opens dialog with info about app.
+header_setting_button_tooltip = Ayarlar iletişim kutusunu açar.
+header_about_button_tooltip = Czkawka hakkında bilgi içeren iletişim kutusunu açar.
 
 # Settings
 
 
 ## General
 
-settings_ignore_other_filesystems = Ignore other filesystems (only Linux)
+settings_number_of_threads = Number of used threads
+settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+settings_label_restart = You need to restart app to apply settings!
+settings_ignore_other_filesystems = Öteki dosya sistemlerini yoksay (sadece Linux)
 settings_ignore_other_filesystems_tooltip =
-    ignores files that are not in the same file system as searched directories.
+    Aranan dizinlerle aynı dosya sisteminde olmayan dosyaları yoksayar.
     
-    Works same like -xdev option in find command on Linux
-settings_save_at_exit_button_tooltip = Save configuration to file when closing app.
+    Linux'ta find komutundaki -xdev seçeneği ile aynı şekilde çalışır.
+settings_save_at_exit_button_tooltip = Uygulamayı kapatırken yapılandırmayı dosyaya kaydeder.
 settings_load_at_start_button_tooltip =
-    Load configuration from file when opening app.
+    Uygulamayı açarken yapılandırmayı dosyadan yükler.
     
-    If not enabled, default settings will be used.
-settings_confirm_deletion_button_tooltip = Show confirmation dialog when clicking the delete button.
-settings_confirm_link_button_tooltip = Show confirmation dialog when clicking the hard/symlink button.
-settings_confirm_group_deletion_button_tooltip = Show warning dialog when trying to delete all records from the group.
-settings_show_text_view_button_tooltip = Show text panel at the bottom of the user interface.
-settings_use_cache_button_tooltip = Use file cache.
-settings_save_also_as_json_button_tooltip = Save cache to (human readable) JSON format. It is possible to modify its content. Cache from this file will be read automatically by app if binary format cache (with bin extension) is missing.
-settings_use_trash_button_tooltip = Moves files to trash instead deleting them permanently.
-settings_language_label_tooltip = Language for user interface.
-settings_save_at_exit_button = Save configuration when closing app
-settings_load_at_start_button = Load configuration when opening app
-settings_confirm_deletion_button = Show confirm dialog when deleting any files
-settings_confirm_link_button = Show confirm dialog when hard/symlinks any files
-settings_confirm_group_deletion_button = Show confirm dialog when deleting all files in group
-settings_show_text_view_button = Show bottom text panel
-settings_use_cache_button = Önbellek kullan
-settings_save_also_as_json_button = Also save cache as JSON file
-settings_use_trash_button = Move deleted files to trash
+    Etkinleştirilmezse, varsayılan ayarlar kullanılır.
+settings_confirm_deletion_button_tooltip = Sil düğmesine tıklandığında onay iletişim kutusunu gösterir.
+settings_confirm_link_button_tooltip = Sabit/sembolik bağlantı düğmesine tıklandığında onay iletişim kutusunu göster.
+settings_confirm_group_deletion_button_tooltip = Gruptan tüm kayıtları silmeye çalışırken uyarı iletişim kutusunu gösterir.
+settings_show_text_view_button_tooltip = Kullanıcı arayüzünün altında çıktı panelini gösterir.
+settings_use_cache_button_tooltip = Dosya önbelleğini kullanır.
+settings_save_also_as_json_button_tooltip =
+    Önbelleği (kullanıcı tarafından okunabilir) JSON biçiminde kaydeder. 
+    İçeriğini değiştirmek mümkündür. İkili biçim önbelleği (bin uzantılı) eksikse, 
+    bu dosyadaki önbellek uygulama tarafından otomatik olarak okunacaktır.
+settings_use_trash_button_tooltip = Dosyaları kalıcı olarak silmek yerine çöp kutusuna taşır.
+settings_language_label_tooltip = Kullanıcı arayüzü dilini değiştirir.
+settings_save_at_exit_button = Uygulamayı kapatırken yapılandırmayı kaydet
+settings_load_at_start_button = Uygulamayı açarken yapılandırmayı yükle
+settings_confirm_deletion_button = Herhangi bir dosyayı silerken onay iletişim kutusunu göster
+settings_confirm_link_button = Herhangi bir dosyaya sabit/sembolik bağlantı yapıldığında onay iletişim kutusunu göster
+settings_confirm_group_deletion_button = Gruptaki tüm dosyaları silerken onay iletişim kutusunu göster
+settings_show_text_view_button = Alt çıktı panelini göster
+settings_use_cache_button = Önbelleği kullan
+settings_save_also_as_json_button = Önbelleği JSON dosyası olarak da kaydet
+settings_use_trash_button = Silinen dosyaları çöp kutusuna taşı
 settings_language_label = Dil
-settings_multiple_delete_outdated_cache_checkbutton = Delete outdated cache entries automatically
+settings_multiple_delete_outdated_cache_checkbutton = Güncel olmayan önbellek girişlerini otomatik olarak sil
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Delete outdated cache results which point to non-existent files.
+    Var olmayan dosyalara işaret eden eski önbellek girdilerini siler.
     
-    When enabled, app makes sure when loading records, that all records point to valid files (broken ones are ignored).
+    Etkinleştirildiğinde, uygulama kayıtları yüklerken tüm kayıtların geçerli dosyalara 
+    işaret etmesini sağlar (bozuk olanlar yoksayılır).
     
-    Disabling this will help when scanning files on external drives, so cache entries about them will not be purged in the next scan.
+    Bunu devre dışı bırakmak, harici sürücülerdeki dosyaları tararken yardımcı olacaktır, 
+    bu nedenle bunlarla ilgili önbellek girdileri bir sonraki taramada temizlenmez.
     
-    In the case of having hundred of thousands records in cache, it is suggested to enable this, which will speedup cache loading/saving at start/end of the scan.
+    Önbellekte yüzbinlerce kayıt olması durumunda, taramanın başlangıcında/sonunda 
+    önbellek yükleme/kaydetme işlemini hızlandıracak olan bu özelliği etkinleştirmeniz önerilir.
 settings_notebook_general = Genel
-settings_notebook_duplicates = Tekrarlar
-settings_notebook_images = Similar Images
-settings_notebook_videos = Similar Video
+settings_notebook_duplicates = Eş Dosyalar
+settings_notebook_images = Benzer Resimler
+settings_notebook_videos = Benzer Videolar
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_image_preview_checkbutton_tooltip = Shows preview at right side (when selecting an image file).
-settings_multiple_image_preview_checkbutton = Show image preview
+settings_multiple_image_preview_checkbutton_tooltip = Sağ tarafta önizlemeyi gösterir (bir resim dosyası seçiliyken).
+settings_multiple_image_preview_checkbutton = Resim önizlemesini göster
 settings_multiple_clear_cache_button_tooltip =
-    Manually clear the cache of outdated entries.
-    This should only be used if automatic clearing has been disabled.
-settings_multiple_clear_cache_button = Remove outdated results from images cache
+    Güncel olmayan girişlerin önbelleğini el ile temizleyin.
+    Bu, yalnızca otomatik temizleme devre dışı bırakılmışsa kullanılmalıdır.
+settings_multiple_clear_cache_button = Güncel olmayan girdileri resim önbelleğinden kaldır
 
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =
-    Hides all files except one, if all point to the same data (are hardlinked).
+    Hepsi aynı verilere işaret ediyorsa (sabit bağlantılıysa), biri dışındaki tüm dosyaları gizler.
     
-    Example: In the case where there are (on disk) seven files which are hardlinked to specific data and one different file with same data but a different inode, then in duplicate finder, only one unique file and one file from hardlinked ones will be shown.
+    Örnek: (Diskte) belirli verilere sabit bağlantılı yedi dosya ve aynı veriye ancak farklı 
+    bir düğüme sahip bir farklı dosya olması durumunda, yinelenen bulucuda yalnızca bir benzersiz dosya ve 
+    sabit bağlantılı dosyalardan bir dosya gösterilecektir.
 settings_duplicates_minimal_size_entry_tooltip =
-    Set the minimal file size which will be cached.
+    Önbelleğe alınacak minimum dosya boyutunu ayarlayın.
     
-    Choosing a smaller value will generate more records. This will speedup search, but slowdown cache loading/saving.
+    Daha küçük bir değer seçmek daha fazla kayıt üretecektir. 
+    Bu, aramayı hızlandıracak, ancak önbellek yüklemeyi/kaydetmeyi yavaşlatacaktır.
 settings_duplicates_prehash_checkbutton_tooltip =
-    Enables caching of prehash (a hash computed from a small part of the file) which allows earlier dismissal of non-duplicated results.
+    Yinelenmeyen sonuçların daha önce reddedilmesine izin veren kısmi-SUÇ 
+    (dosyanın küçük bir bölümünden hesaplanan bir SUÇ) değerinin önbelleğe alınmasını sağlar.
     
-    It is disabled by default because it can cause slowdowns in some situations.
+    Bazı durumlarda yavaşlamaya neden olabileceğinden varsayılan olarak devre dışıdır.
     
-    It is highly recommended to use it when scanning hundred of thousands or million files, because it can speedup search by multiple times.
-settings_duplicates_prehash_minimal_entry_tooltip = Minimal size of cached entry.
-settings_duplicates_hide_hard_link_button = Hide hard links (only Linux and macOS)
-settings_duplicates_prehash_checkbutton = Use prehash cache
-settings_duplicates_minimal_size_cache_label = Minimal size of files (in bytes) saved to cache
-settings_duplicates_minimal_size_cache_prehash_label = Minimal size of files (in bytes) saved to prehash cache
+    Aramayı birden çok kez hızlandırabileceğinden, yüz binlerce veya milyonlarca dosyayı 
+    tararken kullanılması şiddetle tavsiye edilir.
+settings_duplicates_prehash_minimal_entry_tooltip = Önbelleğe alınacak girişlerin minimum boyutu.
+settings_duplicates_hide_hard_link_button = Sabit bağlantıları gizle (yalnızca Linux ve macOS)
+settings_duplicates_prehash_checkbutton = kısmi-SUÇ önbelleği kullan
+settings_duplicates_minimal_size_cache_label = Önbelleğe kaydedilen minimum dosya boyutu (bayt cinsinden):
+settings_duplicates_minimal_size_cache_prehash_label = kısmi-SUÇ önbelleğine kaydedilen minimum dosya boyutu (bayt cinsinden):
 
 ## Saving/Loading settings
 
-settings_saving_button_tooltip = Save the current settings configuration to file.
-settings_loading_button_tooltip = Load settings from file and replace the current configuration with them.
-settings_reset_button_tooltip = Reset the current configuration to the default one.
+settings_saving_button_tooltip = Geçerli ayar yapılandırmasını dosyaya kaydeder.
+settings_loading_button_tooltip = Dosyadan ayarları yükler ve geçerli yapılandırmayı bunlarla değiştirir.
+settings_reset_button_tooltip = Geçerli yapılandırmayı varsayılana sıfırlar.
 settings_saving_button = Yapılandırmayı kaydet
-settings_loading_button = Yapılandırmayı yükleyin
+settings_loading_button = Yapılandırma yükle
 settings_reset_button = Yapılandırmayı sıfırla
 
 ## Opening cache/config folders
 
 settings_folder_cache_open_tooltip =
-    Opens the folder where the cache txt files are stored.
+    Önbellek txt dosyalarının depolandığı klasörü açar.
     
-    Modifying the cache files may cause invalid results to be shown. However, modifying path may save time when moving a big amount of files to a different location.
+    Önbellek dosyalarının değiştirilmesi geçersiz sonuçların gösterilmesine neden olabilir. 
+    Ancak, büyük miktarda dosyayı farklı bir konuma taşırken yolu değiştirmek zaman kazandırabilir.
     
-    You can copy these files between computers to save time on scanning again for files (of course if they have similar directory structure).
+    Dosyaları tekrar taramaktan zaman kazanmak için bu dosyaları bilgisayarlar arasında 
+    kopyalayabilirsiniz (tabii ki benzer dizin yapısına sahiplerse).
     
-    In the case of problems with the cache, these files can be removed. The app will automatically regenerate them.
+    Önbellekte sorun olması durumunda bu dosyalar kaldırılabilir. Uygulama onları 
+    otomatik olarak yeniden oluşturacaktır.
 settings_folder_settings_open_tooltip =
-    Opens the folder where the Czkawka config is stored.
+    Czkawka yapılandırmasının depolandığı klasörü açar.
     
-    WARNING: Manually modifying the config may break your workflow.
-settings_folder_cache_open = Open cache folder
-settings_folder_settings_open = Open settings folder
+    UYARI: Yapılandırmayı elle değiştirmek iş akışınızı bozabilir.
+settings_folder_cache_open = Önbellek klasörünü aç
+settings_folder_settings_open = Ayarlar klasörünü aç
 # Compute results
-compute_stopped_by_user = Searching was stopped by user
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups
-compute_found_empty_folders = Found { $number_files } empty folders
-compute_found_empty_files = Found { $number_files } empty files
-compute_found_big_files = Found { $number_files } big files
-compute_found_temporary_files = Found { $number_files } temporary files
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups
-compute_found_invalid_symlinks = Found { $number_files } invalid symlinks
-compute_found_broken_files = Found { $number_files } broken files
-compute_found_bad_extensions = Found { $number_files } files with invalid extensions
+compute_stopped_by_user = Arama, kullanıcı tarafından durduruldu.
+compute_found_duplicates_hash_size = { $number_groups } grupta, { $size } yer kaplayan, toplam { $number_files } adet kopya bulundu.
+compute_found_duplicates_name = { $number_groups } grupta, { $number_files } adet kopya bulundu.
+compute_found_empty_folders = { $number_files } adet boş klasör bulundu.
+compute_found_empty_files = { $number_files } adet boş dosya bulundu.
+compute_found_big_files = { $number_files } adet büyük/küçük dosya bulundu.
+compute_found_temporary_files = { $number_files } adet geçici dosya bulundu.
+compute_found_images = { $number_groups } grupta, { $number_files } adet benzer resim bulundu.
+compute_found_videos = { $number_groups } grupta, { $number_files } adet benzer video bulundu.
+compute_found_music = { $number_groups } grupta, { $number_files } adet benzer müzik dosyası bulundu.
+compute_found_invalid_symlinks = { $number_files } adet geçersiz sembolik bağlantı bulundu.
+compute_found_broken_files = { $number_files } adet bozuk dosya bulundu.
+compute_found_bad_extensions = { $number_files } adet geçersiz uzantıya sahip dosya bulundu.
 # Progress window
-progress_scanning_general_file = Scanning { $file_number } file
-progress_scanning_extension_of_files = Checking extension of { $file_checked }/{ $all_files } file
-progress_scanning_broken_files = Checking { $file_checked }/{ $all_files } file
-progress_scanning_video = Hashing of { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashing of { $file_checked }/{ $all_files } image
-progress_comparing_image_hashes = Comparing { $file_checked }/{ $all_files } image hash
-progress_scanning_music_tags_end = Comparing tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_tags = Reading tags of { $file_checked }/{ $all_files } music file
-progress_scanning_empty_folders = Scanning { $folder_number } folder
-progress_scanning_size = Scanning size of { $file_number } file
-progress_scanning_name = Scanning name of { $file_number } file
-progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files
-progress_analyzed_full_hash = Analyzed full hash of { $file_checked }/{ $all_files } files
-progress_current_stage = Current Stage:{ "  " }
-progress_all_stages = All Stages:{ "  " }
+progress_scanning_general_file = { $file_number } dosya tarandı.
+progress_scanning_extension_of_files = { $file_checked }/{ $all_files } dosyanın uzantısı kontrol edildi.
+progress_scanning_broken_files = { $file_checked }/{ $all_files } dosya kontrol edildi.
+progress_scanning_video = { $file_checked }/{ $all_files } videonun SUÇ kaydı oluşturuldu. ;-)
+progress_scanning_image = { $file_checked }/{ $all_files } resmin SURÇ kaydı oluşturuldu. ;-)
+progress_comparing_image_hashes = { $file_checked }/{ $all_files } resim SURÇ kaydı karşılaştırıldı.
+progress_scanning_music_tags_end = { $file_checked }/{ $all_files } müzik dosyasının etiketleri karşılaştırıldı.
+progress_scanning_music_tags = { $file_checked }/{ $all_files } müzik dosyasının etiketleri okundu.
+progress_scanning_empty_folders = { $folder_number } klasör tarandı.
+progress_scanning_size = { $file_number } dosyanın boyutu tarandı.
+progress_scanning_name = { $file_number } dosyanın adı tarandı.
+progress_analyzed_partial_hash = { $file_checked }/{ $all_files } dosyanın kısmi-SUÇ kaydı analiz edildi. ;-)
+progress_analyzed_full_hash = { $file_checked }/{ $all_files } dosyanın tam SUÇ kaydı analiz edildi. ;-)
+progress_current_stage = Geçerli Aşama: { " " }
+progress_all_stages = Tüm Aşamalar: { " " }
 # Saving loading 
-saving_loading_saving_success = Saved configuration to file { $name }.
-saving_loading_saving_failure = Failed to save configuration data to file { $name }.
-saving_loading_reset_configuration = Current configuration was cleared.
-saving_loading_loading_success = Properly loaded app configuration.
-saving_loading_invalid_string = For key "{ $key }" found invalid result - "{ $result }" which is not a string.
-saving_loading_invalid_int = For key "{ $key }" found invalid result - "{ $result }" which is not a integer.
-saving_loading_invalid_bool = For key "{ $key }" found invalid result - "{ $result }" which is not a bool.
-saving_loading_decode_problem_bool = Failed to decode bool from key "{ $key }" found "{ $result }" but allowed values are 0, 1, true or false.
-saving_loading_saving_same_keys = Trying to save setting with duplicated key "{ $key }".
-saving_loading_failed_to_get_home_directory = Failed to get home directory to open/save config file.
-saving_loading_folder_config_instead_file = Cannot create or open save configuration file in path "{ $path }" because already there is a folder.
-saving_loading_failed_to_create_configuration_folder = Failed configuration to create configuration folder "{ $path }", reason "{ $reason }".
-saving_loading_failed_to_create_config_file = Failed to create config file "{ $path }", reason "{ $reason }".
-saving_loading_failed_to_read_config_file = Cannot load configuration from "{ $path }" because it does not exist or is not a file.
-saving_loading_failed_to_read_data_from_file = Cannot read data from file "{ $path }", reason "{ $reason }".
-saving_loading_orphan_data = Found orphan data "{ $data }" in line "{ $line }".
-saving_loading_not_valid = Setting "{ $data }" does not exist in current app version.
+saving_loading_saving_success = Yapılandırma { $name } dosyasına kaydedildi.
+saving_loading_saving_failure = Yapılandırma verileri { $name } dosyasına kaydedilemedi.
+saving_loading_reset_configuration = Geçerli yapılandırma temizlendi.
+saving_loading_loading_success = Uygulama yapılandırması düzgünce yüklendi.
+saving_loading_invalid_string = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" bir dize(tümce) değil.
+saving_loading_invalid_int = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" tam sayı değil.
+saving_loading_invalid_bool = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" D/Y türünde değil.
+saving_loading_decode_problem_bool = "{ $key }" anahtarından D/Y kodu çözülemedi, "{ $result }" bulundu ancak izin verilen değerler 0, 1, doğru veya yanlış.
+saving_loading_saving_same_keys = Ayar, yinelenen "{ $key }" anahtarıyla kaydedilmeye çalışılıyor.
+saving_loading_failed_to_get_home_directory = Yapılandırma dosyasını açmak/kaydetmek için /home dizinine erşilemedi.
+saving_loading_folder_config_instead_file = "{ $path }" yolunda kaydetme yapılandırma dosyası oluşturulamıyor veya açılamıyor çünkü zaten bir klasör var.
+saving_loading_failed_to_create_configuration_folder = Yapılandırma klasörü "{ $path }" dizini oluşturulamadı, nedeni: "{ $reason }".
+saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandırma dosyası oluşturulamadı, nedeni:  "{ $reason }".
+saving_loading_failed_to_read_config_file = "{ $path }" dizininden yapılandırma dosyası yüklenemiyor, böyle dosya yok ya da bir dosya değil.
+saving_loading_failed_to_read_data_from_file = "{ $path }" dosyasından veri okunamıyor, nedeni: "{ $reason }".
+saving_loading_orphan_data = "{ $line }" satırda "{ $data }" ilişiksiz veri bulundu.
+saving_loading_not_valid = "{ $data }" ayarı geçerli uygulama sürümünde bulunmuyor.
 # Invalid symlinks
-invalid_symlink_infinite_recursion = Infinite recursion
-invalid_symlink_non_existent_destination = Non-existent destination file
+invalid_symlink_infinite_recursion = Sonsuz özyineleme
+invalid_symlink_non_existent_destination = Var olmayan hedef dosya
 # Other
-selected_all_reference_folders = Cannot start search, when all directories are set as reference folders
-searching_for_data = Searching data, it may take a while, please wait...
+selected_all_reference_folders = Tüm dizinler, "Başvuru Klasörü" olarak ayarlandığında arama başlatılamaz.
+searching_for_data = İşleminiz yürütülüyor, bu biraz zaman alabilir, lütfen bekleyin...
 text_view_messages = MESAJLAR
-text_view_warnings = WARNINGS
+text_view_warnings = UYARILAR
 text_view_errors = HATALAR
-about_window_motto = This program is free to use and will always be.
+about_window_motto = Bu programın kullanımı ücretsizdir ve her zaman öyle kalacaktır.
 # Various dialog
-dialogs_ask_next_time = Ask next time
-delete_file_failed = Failed to delete file { $name }, reason { $reason }
-delete_title_dialog = Silme onayı
-delete_question_label = Are you sure that you want to delete files?
-delete_all_files_in_group_title = Confirmation of deleting all files in group
-delete_all_files_in_group_label1 = In some groups all records are selected.
-delete_all_files_in_group_label2 = Are you sure that you want to delete them?
-delete_folder_failed = Failed to delete folder { $dir } because folder doesn't exist, you don't have permission or the folder isn't empty.
-delete_items_label = { $items } files will be deleted.
-delete_items_groups_label = { $items } files from { $groups } groups will be deleted.
-hardlink_failed = Failed to hardlink
-hard_sym_invalid_selection_title_dialog = Invalid selection with some groups
-hard_sym_invalid_selection_label_1 = In some groups there is only one record selected and it will be ignored.
-hard_sym_invalid_selection_label_2 = To be able to hard/sym link these files, at least two results in the group need to be selected.
-hard_sym_invalid_selection_label_3 = First in group is recognized as original and is not changed but second and later are modified.
-hard_sym_link_title_dialog = Link confirmation
-hard_sym_link_label = Are you sure that you want to link these files?
-move_folder_failed = Failed to move folder { $name }, reason { $reason }
-move_file_failed = Failed to move file { $name }, reason { $reason }
-move_files_title_dialog = Choose folder to which you want to move duplicated files
-move_files_choose_more_than_1_path = Only one path may be selected to be able to copy their duplicated files, selected { $path_number }.
-move_stats = Properly moved { $num_files }/{ $all_files } items
-save_results_to_file = Saved results to file { $name }
-search_not_choosing_any_music = ERROR: You must select at least one checkbox with music searching types.
-search_not_choosing_any_broken_files = ERROR: You must select at least one checkbox with type of checked broken files.
-include_folders_dialog_title = Folders to include
-exclude_folders_dialog_title = Folders to exclude
-include_manually_directories_dialog_title = Add directory manually
-cache_properly_cleared = Properly cleared cache
-cache_clear_duplicates_title = Clearing duplicates cache
-cache_clear_similar_images_title = Clearing similar images cache
-cache_clear_similar_videos_title = Clearing similar videos cache
-cache_clear_message_label_1 = Do you want to clear the cache of outdated entries?
-cache_clear_message_label_2 = This operation will remove all cache entries which point to invalid files.
-cache_clear_message_label_3 = This may slightly speedup loading/saving to cache.
-cache_clear_message_label_4 = WARNING: Operation will remove all cached data from unplugged external drives. So each hash will need to be regenerated.
+dialogs_ask_next_time = Bir dahaki sefere sor
+delete_file_failed = { $name } dosyası silinemedi, nedeni: { $reason }
+delete_title_dialog = Silmeyi onaylayın.
+delete_question_label = Dosyaları silmek istediğinizden emin misiniz?
+delete_all_files_in_group_title = Gruptaki tüm dosyaları silmeyi onaylayın.
+delete_all_files_in_group_label1 = Kimi gruplarda tüm kayıtlar seçilir.
+delete_all_files_in_group_label2 = Bunları silmek istediğinizden emin misiniz?
+delete_folder_failed = { $dir } klasörü; bulunmadığı, izniniz olmadığı veya klasör boş olmadığı için silinemedi.
+delete_items_label = { $items } dosya silinecek.
+delete_items_groups_label = { $groups } gruptan { $items } dosya silinecek.
+hardlink_failed = Sabit bağlantı kurulamadı.
+hard_sym_invalid_selection_title_dialog = Kimi gruplarda geçersiz seçim
+hard_sym_invalid_selection_label_1 = Bazı gruplarda sadece bir kayıt seçilmiştir ve bu kayıt yok sayılacaktır.
+hard_sym_invalid_selection_label_2 = Bu dosyaları sabit/sembolik bağlayabilmek için gruptaki en az iki sonucun seçilmesi gerekir.
+hard_sym_invalid_selection_label_3 = Gruptaki ilk resim asıl olarak tanınır ve değiştirilmez, ancak ikinci ve sonrakiler değiştirilir.
+hard_sym_link_title_dialog = Bağlantı vermeyi onaylayın
+hard_sym_link_label = Bu dosyaları bağlamak istediğinizden emin misiniz?
+move_folder_failed = { $name } klasörü taşınamadı, nedeni: { $reason }
+move_file_failed = { $name } dosyası taşınamadı, nedeni: { $reason }
+move_files_title_dialog = Eş dosyaları taşımak istediğiniz klasörü seçin
+move_files_choose_more_than_1_path = Eş dosyaları taşıyabilmek için yalnızca bir yol seçilebilir, { $path_number } seçildi.
+move_stats = { $num_files }/{ $all_files } öğe düzgün şekilde taşındı.
+save_results_to_file = Sonuçlar { $name } dosyasına kaydedildi.
+search_not_choosing_any_music = HATA: Müzik araması için en az bir onay kutusu seçmelisiniz.
+search_not_choosing_any_broken_files = HATA: Bozuk dosya araması için en az bir onay kutusu seçmelisiniz.
+include_folders_dialog_title = Aranacak Klasörler
+exclude_folders_dialog_title = Hariç Tutulan Klasörler
+include_manually_directories_dialog_title = Dizini elle ekle
+cache_properly_cleared = Önbellek, uygun şekilde temizlendi.
+cache_clear_duplicates_title = Eş dosyalar önbelleğini temizle
+cache_clear_similar_images_title = Benzer resimler önbelleğini temizle
+cache_clear_similar_videos_title = Benzer videolar önbelleğini temizle
+cache_clear_message_label_1 = Güncel olmayan girişleri önbellekten temizlemek istiyor musunuz?
+cache_clear_message_label_2 = Bu işlem, geçersiz dosyalara işaret eden tüm önbellek girişlerini kaldıracak.
+cache_clear_message_label_3 = Bu, önbelleğe yükleme/kaydetme işlemini biraz hızlandırabilir.
+cache_clear_message_label_4 = UYARI: İşlem, takılı olmayan harici sürücülerden önbelleğe alınmış tüm verileri kaldıracaktır. Yani her SUÇ kaydının yeniden oluşturulması gerekecek. ;-)
 # Show preview
-preview_image_resize_failure = Failed to resize image { $name }.
-preview_image_opening_failure = Failed to open image { $name }, reason { $reason }
+preview_image_resize_failure = { $name } adlı resim yeniden boyutlandırılamadı.
+preview_image_opening_failure = { $name } adlı resim dosyası açılamadı, nedeni: { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
-compare_groups_number = Group { $current_group }/{ $all_groups } ({ $images_in_group } images)
-compare_move_left_button = L
-compare_move_right_button = R
+compare_groups_number = Grup: { $current_group }/{ $all_groups } ({ $images_in_group } resim)
+compare_move_left_button = <-
+compare_move_right_button = ->

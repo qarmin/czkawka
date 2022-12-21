@@ -1,11 +1,11 @@
 # Core
 core_similarity_original = 원본
-core_similarity_very_high = 유사도 매우 높음
-core_similarity_high = 유사도 높음
-core_similarity_medium = 유사도 보통
-core_similarity_small = 유사도 적음
-core_similarity_very_small = 유사도 매우 적음
-core_similarity_minimal = 유사도 거의 없음
+core_similarity_very_high = 매우 높음
+core_similarity_high = 높음
+core_similarity_medium = 보통
+core_similarity_small = 낮음
+core_similarity_very_small = 매우 낮음
+core_similarity_minimal = 최소
 core_cannot_open_dir = { $dir } 디렉터리를 열 수 없습니다. 이유: { $reason }
 core_cannot_read_entry_dir = { $dir } 디렉터리를 열 수 없습니다. 이유: { $reason }
 core_cannot_read_metadata_dir = { $dir } 디렉터리의 메타데이터를 열 수 없습니다. 이유: { $reason }

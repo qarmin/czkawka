@@ -1003,7 +1003,7 @@ impl SaveResults for DuplicateFinder {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
+                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -1014,7 +1014,7 @@ impl SaveResults for DuplicateFinder {
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
+            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
         match self.check_method {
@@ -1117,7 +1117,7 @@ impl PrintResults for DuplicateFinder {
                     number_of_files += i.1.len() as u64;
                     number_of_groups += 1;
                 }
-                println!("Found {} files in {} groups with same name(may have different content)", number_of_files, number_of_groups,);
+                println!("Found {number_of_files} files in {number_of_groups} groups with same name(may have different content)",);
                 for (name, vector) in &self.files_with_identical_names {
                     println!("Name - {} - {} files ", name, vector.len());
                     for j in vector {
@@ -1282,7 +1282,7 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
             if file_entry.size >= minimal_cache_file_size {
                 let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
 
-                if let Err(e) = writeln!(writer, "{}", string) {
+                if let Err(e) = writeln!(writer, "{string}") {
                     text_messages
                         .warnings
                         .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
@@ -1411,7 +1411,7 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
 
 fn get_file_hash_name(type_of_hash: &HashType, is_prehash: bool) -> String {
     let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{:?}{}.txt", type_of_hash, prehash_str)
+    format!("cache_duplicates_{type_of_hash:?}{prehash_str}.txt")
 }
 
 impl MyHasher for blake3::Hasher {

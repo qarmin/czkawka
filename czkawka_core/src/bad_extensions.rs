@@ -424,7 +424,7 @@ impl BadExtensions {
                             }
                         }
 
-                        let mut guessed_multiple_extensions = format!("({}) - ", proper_extension);
+                        let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
                         for ext in &all_available_extensions {
                             guessed_multiple_extensions.push_str(ext);
                             guessed_multiple_extensions.push(',');
@@ -523,7 +523,7 @@ impl SaveResults for BadExtensions {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
+                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -534,7 +534,7 @@ impl SaveResults for BadExtensions {
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
+            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 

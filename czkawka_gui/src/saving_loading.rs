@@ -98,7 +98,7 @@ impl LoadSaveStruct {
     }
     pub fn get_integer_string(&self, key: String, default_value: String) -> String {
         if default_value.parse::<i64>().is_err() {
-            println!("Default value {} can't be convert to integer value", default_value);
+            println!("Default value {default_value} can't be convert to integer value");
             panic!();
         }
         let mut returned_value = self.get_string(key, default_value.clone());
@@ -119,7 +119,7 @@ impl LoadSaveStruct {
                     &self.text_view,
                     &flg!(
                         "saving_loading_invalid_string",
-                        generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
+                        generate_translation_hashmap(vec![("key", key), ("result", format!("{item:?}"))])
                     ),
                 );
                 default_value
@@ -145,7 +145,7 @@ impl LoadSaveStruct {
                     &self.text_view,
                     &flg!(
                         "saving_loading_invalid_int",
-                        generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
+                        generate_translation_hashmap(vec![("key", key), ("result", format!("{item:?}"))])
                     ),
                 );
                 default_value
@@ -178,7 +178,7 @@ impl LoadSaveStruct {
                     &self.text_view,
                     &flg!(
                         "saving_loading_invalid_bool",
-                        generate_translation_hashmap(vec![("key", key), ("result", format!("{:?}", item))])
+                        generate_translation_hashmap(vec![("key", key), ("result", format!("{item:?}"))])
                     ),
                 );
                 default_value
@@ -351,7 +351,7 @@ impl LoadSaveStruct {
         if let Some((mut config_file_handler, config_file)) = self.open_save_file(text_view_errors, true, false) {
             let mut data_saved: bool = false;
             for (key, vec_string) in &self.loaded_items {
-                match writeln!(config_file_handler, "{}", key) {
+                match writeln!(config_file_handler, "{key}") {
                     Ok(_inspected) => {
                         data_saved = true;
                     }
@@ -361,7 +361,7 @@ impl LoadSaveStruct {
                     }
                 }
                 for data in vec_string {
-                    match writeln!(config_file_handler, "{}", data) {
+                    match writeln!(config_file_handler, "{data}") {
                         Ok(_inspected) => {
                             data_saved = true;
                         }
@@ -492,8 +492,8 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
 
     for (load_text, string) in values {
-        hashmap_ls.insert(load_text, format!("--{}", string));
-        hashmap_sl.insert(format!("--{}", string), load_text);
+        hashmap_ls.insert(load_text, format!("--{string}"));
+        hashmap_sl.insert(format!("--{string}"), load_text);
     }
 
     (hashmap_ls, hashmap_sl)

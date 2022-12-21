@@ -1,5 +1,5 @@
 # Core
-core_similarity_original = Оригинал
+core_similarity_original = Оригинальное
 core_similarity_very_high = Очень высокое
 core_similarity_high = Высокое
 core_similarity_medium = Среднее

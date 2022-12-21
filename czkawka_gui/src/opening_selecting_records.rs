@@ -12,7 +12,7 @@ pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
-        println!("key_code {}", key_code);
+        println!("key_code {key_code}");
     }
 
     match get_notebook_upper_enum_from_tree_view(&tree_view) {
@@ -68,7 +68,7 @@ pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
-        println!("key_code {}", key_code);
+        println!("key_code {key_code}");
     }
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
@@ -132,7 +132,7 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
         };
 
         if let Err(e) = open::that(&end_path) {
-            println!("Failed to open file {}, reason {}", end_path, e);
+            println!("Failed to open file {end_path}, reason {e}");
         };
     }
 }
@@ -190,7 +190,7 @@ fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_ful
         let full_path = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_full_path);
 
         if let Err(e) = open::that(&full_path) {
-            println!("Failed to open file {}, reason {}", full_path, e);
+            println!("Failed to open file {full_path}, reason {e}");
         };
     }
 }

@@ -159,7 +159,7 @@ impl SimilarImages {
         self.hash_size = match hash_size {
             8 | 16 | 32 | 64 => hash_size,
             e => {
-                panic!("Invalid value of hash size {}", e);
+                panic!("Invalid value of hash size {e}");
             }
         }
     }
@@ -961,12 +961,12 @@ impl SimilarImages {
             let mut found = false;
             for (_hash, vec_file_entry) in collected_similar_images.iter() {
                 if vec_file_entry.is_empty() {
-                    println!("Empty Element {:?}", vec_file_entry);
+                    println!("Empty Element {vec_file_entry:?}");
                     found = true;
                     continue;
                 }
                 if vec_file_entry.len() == 1 {
-                    println!("Single Element {:?}", vec_file_entry);
+                    println!("Single Element {vec_file_entry:?}");
                     found = true;
                     continue;
                 }
@@ -974,7 +974,7 @@ impl SimilarImages {
                     let st = file_entry.path.to_string_lossy().to_string();
                     if result_hashset.contains(&st) {
                         found = true;
-                        println!("Duplicated Element {}", st);
+                        println!("Duplicated Element {st}");
                     } else {
                         result_hashset.insert(st);
                     }
@@ -1161,7 +1161,7 @@ impl SaveResults for SimilarImages {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {}, reason {}", file_name, e));
+                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -1172,7 +1172,7 @@ impl SaveResults for SimilarImages {
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {}, reason {}", file_name, e));
+            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 
@@ -1471,7 +1471,7 @@ fn debug_check_for_duplicated_things(
             for i in all_hashed_images.get(*hash).unwrap() {
                 let name = i.path.to_string_lossy().to_string();
                 if hashmap_names.contains(&name) {
-                    println!("------1--NAME--{}  {:?}", numm, name);
+                    println!("------1--NAME--{numm}  {name:?}");
                     found_broken_thing = true;
                 }
                 hashmap_names.insert(name);
@@ -1488,7 +1488,7 @@ fn debug_check_for_duplicated_things(
         for i in all_hashed_images.get(*hash).unwrap() {
             let name = i.path.to_string_lossy().to_string();
             if hashmap_names.contains(&name) {
-                println!("------2--NAME--{}  {:?}", numm, name);
+                println!("------2--NAME--{numm}  {name:?}");
                 found_broken_thing = true;
             }
             hashmap_names.insert(name);
