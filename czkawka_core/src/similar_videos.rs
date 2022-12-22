@@ -814,7 +814,7 @@ fn get_cache_file() -> String {
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {
-    let vid = "999999999999999999.txt";
+    let vid = "9999czekoczekoczekolada999.txt";
     if let Err(DetermineVideo {
         src_path: _a,
         error: FfmpegNotFound,
