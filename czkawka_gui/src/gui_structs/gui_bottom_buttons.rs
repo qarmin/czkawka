@@ -135,6 +135,8 @@ fn test_hardlinks() -> bool {
     use std::io::Write;
     use std::path::Path;
 
+    let mut hardlinked = false;
+
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = proj_dirs.cache_dir();
         let cache_file = cache_dir.join(Path::new("GILLES_FROM_NOSE.temp"));
@@ -153,12 +155,12 @@ fn test_hardlinks() -> bool {
             let _ = fs::hard_link(&cache_file, &cache_file_second);
 
             if cache_file.exists() && cache_file_second.exists() {
-                return true;
+                hardlinked = true;
             }
         }
         let _ = fs::remove_file(&cache_file);
         let _ = fs::remove_file(&cache_file_second);
     }
 
-    false
+    hardlinked
 }
