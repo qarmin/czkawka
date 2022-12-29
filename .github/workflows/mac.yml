@@ -35,13 +35,19 @@ jobs:
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - name: Override link[WORKAROUND] # Looks that this is a bug with current homebrew or GitHub CI
-        run: rm '/usr/local/bin/2to3'
+        run: |
+          rm '/usr/local/bin/2to3' || true
+          rm '/usr/local/bin/2to3-3.11' || true
+          rm '/usr/local/bin/idle3' || true
 
       - name: Install Python3.10
         run: brew install python@3.10
 
       - name: Override link[WORKAROUND] # Looks that this is a bug with current homebrew or GitHub CI
-        run: rm '/usr/local/bin/2to3'
+        run: |
+          rm '/usr/local/bin/2to3' || true
+          rm '/usr/local/bin/2to3-3.11' || true
+          rm '/usr/local/bin/idle3' || true
 
       - name: Install GTK4
         run: brew install rust gtk4 libheif
