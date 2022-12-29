@@ -3,7 +3,7 @@ name = "czkawka_core"
 version = "5.0.2"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.63"
+rust-version = "1.65.0"
 description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -26,7 +26,7 @@ hamming = "0.1.3"
 
 # Needed by same music
 bitflags = "1.3.2"
-lofty = "0.9.0"
+lofty = "0.10.0"
 
 # Futures - needed by async progress sender
 futures = "0.3.25"
@@ -34,7 +34,7 @@ futures = "0.3.25"
 # Needed by broken files
 zip = { version = "0.6.3", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1.0"
-pdf = "0.7.2"
+pdf = "0.8.0"
 
 # Hashes for duplicate files
 blake3 = "1.3.3"
