@@ -809,7 +809,7 @@ fn unpack_pdf_error(e: PdfError) -> PdfError {
         file: _,
         line: _,
         column: _,
-        // context: _,
+        context: _,
         source,
     } = e
     {

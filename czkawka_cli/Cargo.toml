@@ -10,7 +10,7 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-clap = { version = "4.0.29", features = ["derive"] }
+clap = { version = "4.0", features = ["derive"] }
 
 # For enum types
 image_hasher = "1.1.2"

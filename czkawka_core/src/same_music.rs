@@ -10,6 +10,7 @@ use std::time::{Duration, SystemTime};
 use std::{mem, panic, thread};
 
 use crossbeam_channel::Receiver;
+use lofty::TaggedFileExt;
 use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
