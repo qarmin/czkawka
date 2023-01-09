@@ -414,14 +414,14 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
 
         #[allow(clippy::never_loop)]
         loop {
-            let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Nearest) {
+            let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Bilinear) {
                 None => {
                     println!("Failed to resize image {full_path}.");
                     break;
                 }
                 Some(pixbuf) => pixbuf,
             };
-            let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Nearest) {
+            let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Bilinear) {
                 None => {
                     println!("Failed to resize image {full_path}.");
                     break;
