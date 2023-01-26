@@ -132,7 +132,13 @@ pub fn connect_button_search(
             Some(ColumnsIncludedDirectory::ReferenceButton as i32),
         ));
         let recursive_search = check_button_recursive.is_active();
-        let excluded_items = entry_excluded_items.text().as_str().to_string().split(',').map(|e| e.to_string()).collect::<Vec<String>>();
+        let excluded_items = entry_excluded_items
+            .text()
+            .as_str()
+            .to_string()
+            .split(',')
+            .map(std::string::ToString::to_string)
+            .collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.is_active();
         let use_cache = check_button_settings_use_cache.is_active();

@@ -73,6 +73,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -109,6 +110,7 @@ pub struct DuplicateFinder {
 }
 
 impl DuplicateFinder {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -184,10 +186,12 @@ impl DuplicateFinder {
         self.case_sensitive_name_comparison = case_sensitive_name_comparison;
     }
 
+    #[must_use]
     pub const fn get_check_method(&self) -> &CheckingMethod {
         &self.check_method
     }
 
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
@@ -200,6 +204,7 @@ impl DuplicateFinder {
         self.minimal_prehash_cache_file_size = minimal_prehash_cache_file_size;
     }
 
+    #[must_use]
     pub const fn get_files_sorted_by_names(&self) -> &BTreeMap<String, Vec<FileEntry>> {
         &self.files_with_identical_names
     }
@@ -212,10 +217,12 @@ impl DuplicateFinder {
         self.use_prehash_cache = use_prehash_cache;
     }
 
+    #[must_use]
     pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.files_with_identical_size
     }
 
+    #[must_use]
     pub const fn get_files_sorted_by_hash(&self) -> &BTreeMap<u64, Vec<Vec<FileEntry>>> {
         &self.files_with_identical_hashes
     }
@@ -226,10 +233,12 @@ impl DuplicateFinder {
         };
     }
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -261,6 +270,7 @@ impl DuplicateFinder {
         };
     }
 
+    #[must_use]
     pub fn get_use_reference(&self) -> bool {
         self.use_reference_folders
     }
@@ -295,14 +305,17 @@ impl DuplicateFinder {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
+    #[must_use]
     pub fn get_files_with_identical_hashes_referenced(&self) -> &BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>> {
         &self.files_with_identical_hashes_referenced
     }
 
+    #[must_use]
     pub fn get_files_with_identical_name_referenced(&self) -> &BTreeMap<String, (FileEntry, Vec<FileEntry>)> {
         &self.files_with_identical_names_referenced
     }
 
+    #[must_use]
     pub fn get_files_with_identical_size_referenced(&self) -> &BTreeMap<u64, (FileEntry, Vec<FileEntry>)> {
         &self.files_with_identical_size_referenced
     }
@@ -520,7 +533,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = self.files_with_identical_size.values().map(|e| e.len()).sum();
+            let files_to_check = self.files_with_identical_size.values().map(std::vec::Vec::len).sum();
             let checking_method = self.check_method;
             thread::spawn(move || loop {
                 progress_send
@@ -679,7 +692,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = pre_checked_map.values().map(|vec_file_entry| vec_file_entry.len()).sum();
+            let files_to_check = pre_checked_map.values().map(std::vec::Vec::len).sum();
             let checking_method = self.check_method;
             thread::spawn(move || loop {
                 progress_send
@@ -895,7 +908,7 @@ impl DuplicateFinder {
         true
     }
 
-    /// Function to delete files, from filed before BTreeMap
+    /// Function to delete files, from filed before `BTreeMap`
     /// Using another function to delete files to avoid duplicates data
     fn delete_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
@@ -1127,7 +1140,7 @@ impl PrintResults for DuplicateFinder {
                 }
             }
             CheckingMethod::Hash => {
-                for (_size, vector) in self.files_with_identical_hashes.iter() {
+                for (_size, vector) in &self.files_with_identical_hashes {
                     for j in vector {
                         number_of_files += j.len() as u64;
                         number_of_groups += 1;
@@ -1190,7 +1203,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
         DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::HardLink => values.min_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
         DeleteMethod::None => values.next(),
     };
-    let q_index = q_index.map(|t| t.0).unwrap_or(0);
+    let q_index = q_index.map_or(0, |t| t.0);
     let n = match delete_method {
         DeleteMethod::OneNewest | DeleteMethod::OneOldest => 1,
         DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptOldest | DeleteMethod::None | DeleteMethod::HardLink => usize::MAX,
@@ -1372,7 +1385,7 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
 
         text_messages.messages.push(flc!(
             "core_loading_from_cache",
-            generate_translation_hashmap(vec![("number", hashmap_loaded_entries.values().map(|e| e.len()).sum::<usize>().to_string())])
+            generate_translation_hashmap(vec![("number", hashmap_loaded_entries.values().map(std::vec::Vec::len).sum::<usize>().to_string())])
         ));
 
         return Some(hashmap_loaded_entries);

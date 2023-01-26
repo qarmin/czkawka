@@ -258,7 +258,7 @@ pub fn get_path_buf_from_vector_of_strings(vec_string: Vec<String>) -> Vec<PathB
 }
 
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
-    let mut messages: String = String::from("");
+    let mut messages: String = String::new();
     if !text_messages.messages.is_empty() {
         messages += format!("############### {}({}) ###############\n", flg!("text_view_messages"), text_messages.messages.len()).as_str();
     }
@@ -395,9 +395,8 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if !model.get::<bool>(&current_iter, column_header) {
-            panic!("First deleted element, should be a header"); // First element should be header
-        };
+        // First element should be header
+        assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
         let mut next_iter;
         let mut next_next_iter;
@@ -405,9 +404,8 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
         // Empty means default check type
         if model.get::<String>(&current_iter, column_path).is_empty() {
             'main: loop {
-                if !model.get::<bool>(&current_iter, column_header) {
-                    panic!("First deleted element, should be a header"); // First element should be header
-                };
+                // First element should be header
+                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
                 if !model.iter_next(&next_iter) {
@@ -458,9 +456,8 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
         // Non empty means that header points at reference folder
         else {
             'reference: loop {
-                if !model.get::<bool>(&current_iter, column_header) {
-                    panic!("First deleted element, should be a header"); // First element should be header
-                };
+                // First element should be header
+                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
                 if !model.iter_next(&next_iter) {
@@ -614,8 +611,8 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
         let start_characters = 10;
         let difference = characters_in_filename - max_length;
         let second_part_start = start_characters + difference;
-        let mut string_pre = "".to_string();
-        let mut string_after = "".to_string();
+        let mut string_pre = String::new();
+        let mut string_after = String::new();
 
         for (index, character) in file_name.chars().enumerate() {
             if index < start_characters {

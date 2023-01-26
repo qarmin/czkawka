@@ -121,7 +121,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
                         for use_prehash in [true, false] {
-                            for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32].iter() {
+                            for type_of_hash in &[HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
                                 if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash, use_prehash) {
                                     let mut hashmap_to_save: BTreeMap<String, czkawka_core::common_dir_traversal::FileEntry> = Default::default();
                                     for (_, vec_file_entry) in cache_entries {
@@ -161,17 +161,15 @@ pub fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
-                        for hash_size in [8, 16, 32, 64].iter() {
-                            for image_filter in [
+                        for hash_size in &[8, 16, 32, 64] {
+                            for image_filter in &[
                                 FilterType::Lanczos3,
                                 FilterType::CatmullRom,
                                 FilterType::Gaussian,
                                 FilterType::Nearest,
                                 FilterType::Triangle,
-                            ]
-                            .iter()
-                            {
-                                for hash_alg in [HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean].iter() {
+                            ] {
+                                for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
                                     if let Some(cache_entries) = czkawka_core::similar_images::load_hashes_from_file(&mut messages, true, *hash_size, *hash_alg, *image_filter) {
                                         czkawka_core::similar_images::save_hashes_to_file(&cache_entries, &mut messages, false, *hash_size, *hash_alg, *image_filter);
                                     }

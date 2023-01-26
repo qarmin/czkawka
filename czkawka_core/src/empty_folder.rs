@@ -32,14 +32,16 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
 }
 
-/// Method implementation for EmptyFolder
+/// Method implementation for `EmptyFolder`
 impl EmptyFolder {
     /// New function providing basics values
+    #[must_use]
     pub fn new() -> Self {
         Self {
             information: Default::default(),
@@ -52,17 +54,21 @@ impl EmptyFolder {
         }
     }
 
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
 
+    #[must_use]
     pub const fn get_empty_folder_list(&self) -> &BTreeMap<PathBuf, FolderEntry> {
         &self.empty_folder_list
     }
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -121,7 +127,7 @@ impl EmptyFolder {
     }
 
     /// Function to check if folder are empty.
-    /// Parameter initial_checking for second check before deleting to be sure that checked folder is still empty
+    /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())

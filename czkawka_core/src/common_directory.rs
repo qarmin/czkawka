@@ -19,6 +19,7 @@ pub struct Directories {
 }
 
 impl Directories {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -323,6 +324,7 @@ impl Directories {
     }
 
     #[cfg(target_family = "unix")]
+    #[must_use]
     pub fn exclude_other_filesystems(&self) -> bool {
         self.exclude_other_filesystems.unwrap_or(false)
     }

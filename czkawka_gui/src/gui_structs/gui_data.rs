@@ -139,9 +139,9 @@ impl GuiData {
         let shared_buttons: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>::new()));
 
         // Show by default only search button
-        for i in get_all_main_tabs().iter() {
+        for i in &get_all_main_tabs() {
             let mut temp_hashmap: HashMap<BottomButtonsEnum, bool> = Default::default();
-            for button_name in bottom_buttons.buttons_names.iter() {
+            for button_name in &bottom_buttons.buttons_names {
                 if *button_name == BottomButtonsEnum::Search {
                     temp_hashmap.insert(*button_name, true);
                 } else {
@@ -165,7 +165,7 @@ impl GuiData {
         let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BrokenFiles::new()));
         let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BadExtensions::new()));
 
-        let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new("".to_string()));
+        let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new(String::new()));
 
         //// Entry
         let entry_info: gtk4::Entry = builder.object("entry_info").unwrap();

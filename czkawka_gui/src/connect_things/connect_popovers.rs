@@ -290,7 +290,7 @@ fn popover_custom_select_unselect(
                 let message;
                 let text_to_check = entry_rust_regex.text().to_string();
                 if text_to_check.is_empty() {
-                    message = "".to_string();
+                    message = String::new();
                 } else {
                     match Regex::new(&text_to_check) {
                         Ok(_) => message = flg!("popover_valid_regex"),

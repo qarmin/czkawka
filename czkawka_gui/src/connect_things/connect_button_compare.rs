@@ -457,9 +457,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
         returned_vector.push((full_name, name, model.path(&used_iter)));
     }
 
-    if !model.iter_next(&used_iter) {
-        panic!("Found only header!");
-    }
+    assert!(model.iter_next(&used_iter), "Found only header!");
 
     loop {
         let name = model.get::<String>(&used_iter, column_name);
@@ -490,13 +488,9 @@ fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_nex
     assert!(model.get::<bool>(&tree_iter, column_header));
 
     if go_next {
-        if !model.iter_next(&tree_iter) {
-            panic!("Found only header!");
-        }
+        assert!(model.iter_next(&tree_iter), "Found only header!");
     } else {
-        if !model.iter_previous(&tree_iter) {
-            panic!("Found only header!");
-        }
+        assert!(model.iter_previous(&tree_iter), "Found only header!");
     }
 
     loop {

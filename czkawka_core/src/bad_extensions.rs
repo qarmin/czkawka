@@ -166,6 +166,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -188,6 +189,7 @@ pub struct BadExtensions {
 }
 
 impl BadExtensions {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -219,10 +221,12 @@ impl BadExtensions {
         self.debug_print();
     }
 
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
 
+    #[must_use]
     pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
         &self.bad_extensions_files
     }
@@ -246,10 +250,12 @@ impl BadExtensions {
     #[cfg(not(target_family = "unix"))]
     pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -388,12 +394,12 @@ impl BadExtensions {
                     }
                     // Text longer than 10 characters is not considered as extension
                     if extension.len() > 10 {
-                        current_extension = "".to_string();
+                        current_extension = String::new();
                     } else {
                         current_extension = extension;
                     }
                 } else {
-                    current_extension = "".to_string();
+                    current_extension = String::new();
                 }
 
                 // Already have proper extension, no need to do more things
@@ -404,7 +410,7 @@ impl BadExtensions {
                 // Check for all extensions that file can use(not sure if it is worth to do it)
                 let mut all_available_extensions: BTreeSet<&str> = Default::default();
                 let think_extension = match current_extension.is_empty() {
-                    true => "".to_string(),
+                    true => String::new(),
                     false => {
                         for mim in mime_guess::from_ext(proper_extension) {
                             if let Some(all_ext) = get_mime_extensions(&mim) {
@@ -456,8 +462,8 @@ impl BadExtensions {
                 }))
             })
             .while_some()
-            .filter(|file_entry| file_entry.is_some())
-            .map(|file_entry| file_entry.unwrap())
+            .filter(std::option::Option::is_some)
+            .map(std::option::Option::unwrap)
             .collect::<Vec<_>>();
 
         // End thread which send info to gui
@@ -540,7 +546,7 @@ impl SaveResults for BadExtensions {
 
         if !self.bad_extensions_files.is_empty() {
             writeln!(writer, "Found {} files with invalid extension.", self.information.number_of_files_with_bad_extension).unwrap();
-            for file_entry in self.bad_extensions_files.iter() {
+            for file_entry in &self.bad_extensions_files {
                 writeln!(writer, "{} ----- {}", file_entry.path.display(), file_entry.proper_extensions).unwrap();
             }
         } else {
@@ -557,7 +563,7 @@ impl PrintResults for BadExtensions {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
-        for file_entry in self.bad_extensions_files.iter() {
+        for file_entry in &self.bad_extensions_files {
             println!("{} ----- {}", file_entry.path.display(), file_entry.proper_extensions);
         }
 

@@ -31,10 +31,12 @@ macro_rules! flc {
 }
 
 // Get the `Localizer` to be used for localizing this library.
+#[must_use]
 pub fn localizer_core() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CORE, &Localizations))
 }
 
+#[must_use]
 pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap<&'static str, String> {
     let mut hashmap: HashMap<&'static str, String> = Default::default();
     for (key, value) in vec {

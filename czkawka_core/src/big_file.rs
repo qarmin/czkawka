@@ -56,6 +56,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -77,6 +78,7 @@ pub struct BigFile {
 }
 
 impl BigFile {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Default::default(),
@@ -102,6 +104,7 @@ impl BigFile {
         self.delete_files();
         self.debug_print();
     }
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
@@ -110,14 +113,17 @@ impl BigFile {
         self.search_mode = search_mode;
     }
 
+    #[must_use]
     pub const fn get_big_files(&self) -> &Vec<(u64, FileEntry)> {
         &self.big_files
     }
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -470,7 +476,7 @@ impl SaveResults for BigFile {
             } else {
                 write!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files).unwrap();
             }
-            for (size, file_entry) in self.big_files.iter() {
+            for (size, file_entry) in &self.big_files {
                 writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display()).unwrap();
             }
         } else {
@@ -489,7 +495,7 @@ impl PrintResults for BigFile {
         } else {
             println!("{} the smallest files.\n\n", self.information.number_of_real_files);
         }
-        for (size, file_entry) in self.big_files.iter() {
+        for (size, file_entry) in &self.big_files {
             println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
         }
         Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());

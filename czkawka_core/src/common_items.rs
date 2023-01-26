@@ -10,6 +10,7 @@ pub struct ExcludedItems {
 }
 
 impl ExcludedItems {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }

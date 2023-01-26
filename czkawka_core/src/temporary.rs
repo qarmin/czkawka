@@ -45,6 +45,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -63,6 +64,7 @@ pub struct Temporary {
 }
 
 impl Temporary {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -86,17 +88,21 @@ impl Temporary {
         self.delete_files();
         self.debug_print();
     }
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
 
+    #[must_use]
     pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
         &self.temporary_files
     }
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -413,7 +419,7 @@ impl SaveResults for Temporary {
 
         if !self.temporary_files.is_empty() {
             writeln!(writer, "Found {} temporary files.", self.information.number_of_temporary_files).unwrap();
-            for file_entry in self.temporary_files.iter() {
+            for file_entry in &self.temporary_files {
                 writeln!(writer, "{}", file_entry.path.display()).unwrap();
             }
         } else {
@@ -428,7 +434,7 @@ impl PrintResults for Temporary {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} temporary files.\n", self.information.number_of_temporary_files);
-        for file_entry in self.temporary_files.iter() {
+        for file_entry in &self.temporary_files {
             println!("{}", file_entry.path.display());
         }
 

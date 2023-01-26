@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::ops::Deref;
+
 use std::path::Path;
 use std::rc::Rc;
 
@@ -581,7 +581,7 @@ fn show_preview(
 
             {
                 let preview_path = preview_path.borrow();
-                let preview_path = preview_path.deref();
+                let preview_path = &*preview_path;
                 if file_name == preview_path {
                     return; // Preview is already created, no need to recreate it
                 }
@@ -697,7 +697,7 @@ fn show_preview(
         image_preview.hide();
         {
             let mut preview_path = preview_path.borrow_mut();
-            *preview_path = "".to_string();
+            *preview_path = String::new();
         }
     }
 }

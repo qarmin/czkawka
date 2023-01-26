@@ -62,7 +62,7 @@ pub enum ErrorType {
 // Empty folders
 
 /// Enum with values which show if folder is empty.
-/// In function "optimize_folders" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
+/// In function "`optimize_folders`" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub(crate) enum FolderEmptiness {
     No,
@@ -134,6 +134,7 @@ impl<'a, 'b> Default for DirTraversalBuilder<'a, 'b, ()> {
 }
 
 impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
+    #[must_use]
     pub fn new() -> DirTraversalBuilder<'a, 'b, ()> {
         DirTraversalBuilder {
             group_by: None,
@@ -413,7 +414,7 @@ where
                             }
                         };
                         match (entry_type(&metadata), collect) {
-                            (EntryType::Dir, Collect::Files) | (EntryType::Dir, Collect::InvalidSymlinks) => {
+                            (EntryType::Dir, Collect::Files | Collect::InvalidSymlinks) => {
                                 if !recursive_search {
                                     continue 'dir;
                                 }
@@ -540,14 +541,14 @@ where
                                                 0
                                             }
                                         },
-                                        hash: "".to_string(),
+                                        hash: String::new(),
                                         symlink_info: None,
                                     };
 
                                     fe_result.push(fe);
                                 }
                             }
-                            (EntryType::File, Collect::EmptyFolders) | (EntryType::Symlink, Collect::EmptyFolders) => {
+                            (EntryType::File | EntryType::Symlink, Collect::EmptyFolders) => {
                                 #[cfg(target_family = "unix")]
                                 if directories.exclude_other_filesystems() {
                                     match directories.is_on_other_filesystems(current_folder) {
@@ -653,7 +654,7 @@ where
                                         }
                                     },
                                     size: 0,
-                                    hash: "".to_string(),
+                                    hash: String::new(),
                                     symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
                                 };
 

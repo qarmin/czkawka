@@ -91,7 +91,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
             } else {
                 image_preview_duplicates.hide();
             }
-            *preview_path.borrow_mut() = "".to_string();
+            *preview_path.borrow_mut() = String::new();
         }
         _ => {}
     }
@@ -154,9 +154,7 @@ fn hardlink_symlink(
             }
 
             current_symhardlink_data = None;
-            if !model.iter_next(&current_iter) {
-                panic!("HEADER, shouldn't be a last item.");
-            }
+            assert!(model.iter_next(&current_iter), "HEADER, shouldn't be a last item.");
             continue;
         }
 
@@ -201,7 +199,7 @@ fn hardlink_symlink(
     }
     if hardlinking == TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
-            for file_to_hardlink in symhardlink_data.files_to_symhardlink.into_iter() {
+            for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
@@ -210,7 +208,7 @@ fn hardlink_symlink(
         }
     } else {
         for symhardlink_data in vec_symhardlink_data {
-            for file_to_symlink in symhardlink_data.files_to_symhardlink.into_iter() {
+            for file_to_symlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,

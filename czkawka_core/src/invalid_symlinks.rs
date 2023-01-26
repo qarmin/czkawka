@@ -28,6 +28,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -47,6 +48,7 @@ pub struct InvalidSymlinks {
 }
 
 impl InvalidSymlinks {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -71,18 +73,22 @@ impl InvalidSymlinks {
         self.debug_print();
     }
 
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
 
+    #[must_use]
     pub const fn get_invalid_symlinks(&self) -> &Vec<FileEntry> {
         &self.invalid_symlinks
     }
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -235,7 +241,7 @@ impl SaveResults for InvalidSymlinks {
 
         if !self.invalid_symlinks.is_empty() {
             writeln!(writer, "Found {} invalid symlinks.", self.information.number_of_invalid_symlinks).unwrap();
-            for file_entry in self.invalid_symlinks.iter() {
+            for file_entry in &self.invalid_symlinks {
                 writeln!(
                     writer,
                     "{}\t\t{}\t\t{}",
@@ -262,7 +268,7 @@ impl PrintResults for InvalidSymlinks {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} invalid symlinks.\n", self.information.number_of_invalid_symlinks);
-        for file_entry in self.invalid_symlinks.iter() {
+        for file_entry in &self.invalid_symlinks {
             println!(
                 "{}\t\t{}\t\t{}",
                 file_entry.path.display(),

@@ -113,7 +113,7 @@ impl LoadSaveStruct {
             return if item.len() == 1 {
                 item[0].clone()
             } else if item.is_empty() {
-                "".to_string()
+                String::new()
             } else {
                 add_text_to_text_view(
                     &self.text_view,
@@ -312,7 +312,7 @@ impl LoadSaveStruct {
                 return;
             }
 
-            let mut header: String = "".to_string();
+            let mut header: String = String::new();
             let lines: Vec<String> = loaded_data.replace('\r', "").split('\n').map(String::from).collect::<Vec<String>>();
             for (index, line) in lines.iter().enumerate() {
                 let line = line.trim();
@@ -732,7 +732,7 @@ pub fn load_configuration(
         hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(),
         upper_notebook.entry_excluded_items.text().to_string(),
     );
-    let allowed_extensions: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().clone(), "".to_string());
+    let allowed_extensions: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().clone(), String::new());
     let minimal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
     let maximal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
 
@@ -999,7 +999,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
                     add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting C:\\ instead");
                     "C:\\".to_string()
                 } else {
-                    "".to_string()
+                    String::new()
                 }
             }
         };

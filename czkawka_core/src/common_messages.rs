@@ -6,14 +6,16 @@ pub struct Messages {
 }
 
 impl Messages {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
     pub fn print_messages(&self) {
         println!("{}", self.create_messages_text());
     }
+    #[must_use]
     pub fn create_messages_text(&self) -> String {
-        let mut text_to_return: String = "".to_string();
+        let mut text_to_return: String = String::new();
 
         if !self.messages.is_empty() {
             text_to_return += "-------------------------------MESSAGES--------------------------------\n";

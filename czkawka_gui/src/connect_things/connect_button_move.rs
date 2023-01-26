@@ -55,7 +55,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 } else {
                     image_preview_duplicates.hide();
                 }
-                *preview_path.borrow_mut() = "".to_string();
+                *preview_path.borrow_mut() = String::new();
             }
             _ => {}
         }
@@ -215,7 +215,7 @@ fn move_files_common(
     entry_info: &gtk4::Entry,
     text_view_errors: &gtk4::TextView,
 ) {
-    let mut messages: String = "".to_string();
+    let mut messages: String = String::new();
 
     let mut moved_files: u32 = 0;
 

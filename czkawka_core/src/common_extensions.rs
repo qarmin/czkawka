@@ -9,6 +9,7 @@ pub struct Extensions {
 }
 
 impl Extensions {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -24,7 +25,7 @@ impl Extensions {
         allowed_extensions = allowed_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
         allowed_extensions = allowed_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
 
-        let extensions: Vec<String> = allowed_extensions.split(',').map(|e| e.trim()).map(String::from).collect();
+        let extensions: Vec<String> = allowed_extensions.split(',').map(str::trim).map(String::from).collect();
         for mut extension in extensions {
             if extension.is_empty() || extension.replace(['.', ' '], "").trim().is_empty() {
                 continue;
@@ -59,6 +60,7 @@ impl Extensions {
         Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
     }
 
+    #[must_use]
     pub fn matches_filename(&self, file_name: &str) -> bool {
         // assert_eq!(file_name, file_name.to_lowercase());
         if !self.file_extensions.is_empty() && !self.file_extensions.iter().any(|e| file_name.ends_with(e)) {
@@ -67,6 +69,7 @@ impl Extensions {
         true
     }
 
+    #[must_use]
     pub fn using_custom_extensions(&self) -> bool {
         !self.file_extensions.is_empty()
     }
@@ -74,7 +77,7 @@ impl Extensions {
     pub fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
         for extension in file_extensions {
             assert!(extension.starts_with('.'));
-            self.file_extensions.push(extension.to_string());
+            self.file_extensions.push((*extension).to_string());
         }
     }
 
@@ -83,8 +86,8 @@ impl Extensions {
 
         for extension in file_extensions {
             assert!(extension.starts_with('.'));
-            if self.file_extensions.contains(&extension.to_string()) {
-                current_file_extensions.push(extension.to_string());
+            if self.file_extensions.contains(&(*extension).to_string()) {
+                current_file_extensions.push((*extension).to_string());
             }
         }
         self.file_extensions = current_file_extensions;
