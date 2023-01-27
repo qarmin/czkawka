@@ -98,10 +98,8 @@ fn popover_all_except_oldest_newest(
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
             let mut used_index: Option<usize> = None;
             let mut current_index: usize = 0;
-            let mut modification_time_min_max: u64 = match except_oldest {
-                true => u64::MAX,
-                false => 0,
-            };
+
+            let mut modification_time_min_max: u64 = if except_oldest { u64::MAX } else { 0 };
 
             let mut file_length: usize = 0;
 

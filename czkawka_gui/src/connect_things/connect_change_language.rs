@@ -43,7 +43,7 @@ pub fn load_system_language(gui_data: &GuiData) {
         // removes from e.g. en_zb, ending _zd since Czkawka don't support this(maybe could add this in future, but only when)
         for i in old_short_lang.chars() {
             if i.is_ascii_alphabetic() {
-                short_lang.push(i)
+                short_lang.push(i);
             } else {
                 break;
             }

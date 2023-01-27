@@ -134,7 +134,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         &gui_data.settings,
         &gui_data.text_view_errors,
         &gui_data.scrolled_window_errors,
-        arguments.to_owned(),
+        arguments,
     );
     set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value().round() as usize);
     println!("Set thread number to {}", get_number_of_threads());

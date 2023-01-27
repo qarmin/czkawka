@@ -78,8 +78,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
-            shared_image_cache.clone(),
-            shared_using_for_preview.clone(),
+            &shared_image_cache,
+            &shared_using_for_preview,
             &button_go_previous_compare_group,
             &button_go_next_compare_group,
         );
@@ -152,8 +152,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
-            shared_image_cache.clone(),
-            shared_using_for_preview.clone(),
+            &shared_image_cache,
+            &shared_using_for_preview,
             button_go_previous_compare_group,
             &button_go_next_compare_group,
         );
@@ -204,8 +204,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
-            shared_image_cache.clone(),
-            shared_using_for_preview.clone(),
+            &shared_image_cache,
+            &shared_using_for_preview,
             &button_go_previous_compare_group,
             button_go_next_compare_group,
         );
@@ -271,8 +271,8 @@ fn populate_groups_at_start(
     check_button_right_preview_text: &CheckButton,
     scrolled_window_compare_choose_images: &ScrolledWindow,
     label_group_info: &gtk4::Label,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
-    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     button_go_previous_compare_group: &gtk4::Button,
     button_go_next_compare_group: &gtk4::Button,
 ) {
@@ -318,8 +318,8 @@ fn populate_groups_at_start(
         &cache_all_images,
         image_compare_left,
         image_compare_right,
-        &shared_using_for_preview,
-        &shared_image_cache,
+        shared_using_for_preview,
+        shared_image_cache,
         check_button_left_preview_text,
         check_button_right_preview_text,
         model,
@@ -332,7 +332,7 @@ fn populate_groups_at_start(
     for i in get_all_direct_children(&scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk4::Viewport>().unwrap()) {
         if i.widget_name() == "all_box" {
             let gtk_box = i.downcast::<gtk4::Box>().unwrap();
-            update_bottom_buttons(&gtk_box, &shared_using_for_preview, &shared_image_cache);
+            update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
             found = true;
             break;
         }

@@ -86,7 +86,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         nb_object.column_path,
         column_header,
         nb_object.column_selection,
-        hardlinking,
+        &hardlinking,
         &text_view_errors,
     );
 
@@ -109,7 +109,7 @@ fn hardlink_symlink(
     column_path: i32,
     column_header: i32,
     column_selection: i32,
-    hardlinking: TypeOfTool,
+    hardlinking: &TypeOfTool,
     text_view_errors: &TextView,
 ) {
     reset_text_view(text_view_errors);
@@ -198,7 +198,7 @@ fn hardlink_symlink(
             break;
         }
     }
-    if hardlinking == TypeOfTool::Hardlinking {
+    if hardlinking == &TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {

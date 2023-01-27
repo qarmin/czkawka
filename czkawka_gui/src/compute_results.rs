@@ -1269,49 +1269,13 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                     (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
                                     (ColumnsSameMusic::Name as u32, &String::new()),
                                     (ColumnsSameMusic::Path as u32, &String::new()),
-                                    (
-                                        ColumnsSameMusic::Title as u32,
-                                        &(match is_track_title {
-                                            true => text.clone(),
-                                            false => String::new(),
-                                        }),
-                                    ),
-                                    (
-                                        ColumnsSameMusic::Artist as u32,
-                                        &(match is_track_artist {
-                                            true => text.clone(),
-                                            false => String::new(),
-                                        }),
-                                    ),
-                                    (
-                                        ColumnsSameMusic::Year as u32,
-                                        &(match is_year {
-                                            true => text.clone(),
-                                            false => String::new(),
-                                        }),
-                                    ),
-                                    (
-                                        ColumnsSameMusic::Bitrate as u32,
-                                        &(match is_bitrate {
-                                            true => text.clone(),
-                                            false => String::new(),
-                                        }),
-                                    ),
+                                    (ColumnsSameMusic::Title as u32, &(if is_track_title { text.clone() } else { String::new() })),
+                                    (ColumnsSameMusic::Artist as u32, &(if is_track_artist { text.clone() } else { String::new() })),
+                                    (ColumnsSameMusic::Year as u32, &(if is_year { text.clone() } else { String::new() })),
+                                    (ColumnsSameMusic::Bitrate as u32, &(if is_bitrate { text.clone() } else { String::new() })),
                                     (ColumnsSameMusic::BitrateAsNumber as u32, &(0)),
-                                    (
-                                        ColumnsSameMusic::Genre as u32,
-                                        &(match is_genre {
-                                            true => text.clone(),
-                                            false => String::new(),
-                                        }),
-                                    ),
-                                    (
-                                        ColumnsSameMusic::Length as u32,
-                                        &(match is_length {
-                                            true => text.clone(),
-                                            false => String::new(),
-                                        }),
-                                    ),
+                                    (ColumnsSameMusic::Genre as u32, &(if is_genre { text.clone() } else { String::new() })),
+                                    (ColumnsSameMusic::Length as u32, &(if is_length { text.clone() } else { String::new() })),
                                     (ColumnsSameMusic::Modification as u32, &String::new()),
                                     (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
                                     (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),

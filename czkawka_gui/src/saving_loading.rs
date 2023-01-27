@@ -188,7 +188,7 @@ impl LoadSaveStruct {
     }
 
     // Bool, int, string
-    pub fn save_var<T: ToString>(&mut self, key: String, value: T) {
+    pub fn save_var<T: ToString>(&mut self, key: String, value: &T) {
         if self.loaded_items.contains_key(&key) {
             add_text_to_text_view(
                 &self.text_view,
@@ -523,175 +523,175 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         &upper_notebook.tree_view_excluded_directories.clone(),
         ColumnsExcludedDirectory::Path as i32,
     );
-    saving_struct.save_var(hashmap_ls.get(&LoadText::ExcludedItems).unwrap().to_string(), upper_notebook.entry_excluded_items.text());
+    saving_struct.save_var(hashmap_ls.get(&LoadText::ExcludedItems).unwrap().to_string(), &upper_notebook.entry_excluded_items.text());
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().to_string(),
-        upper_notebook.entry_allowed_extensions.text(),
+        &upper_notebook.entry_allowed_extensions.text(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().to_string(),
-        upper_notebook.entry_general_minimal_size.text(),
+        &upper_notebook.entry_general_minimal_size.text(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().to_string(),
-        upper_notebook.entry_general_maximal_size.text(),
+        &upper_notebook.entry_general_maximal_size.text(),
     );
 
     // Check buttons
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::SaveAtExit).unwrap().to_string(),
-        settings.check_button_settings_save_at_exit.is_active(),
+        &settings.check_button_settings_save_at_exit.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::LoadAtStart).unwrap().to_string(),
-        settings.check_button_settings_load_at_start.is_active(),
+        &settings.check_button_settings_load_at_start.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ConfirmDeletionFiles).unwrap().to_string(),
-        settings.check_button_settings_confirm_deletion.is_active(),
+        &settings.check_button_settings_confirm_deletion.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ConfirmDeletionAllFilesInGroup).unwrap().to_string(),
-        settings.check_button_settings_confirm_group_deletion.is_active(),
+        &settings.check_button_settings_confirm_group_deletion.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ImagePreviewImage).unwrap().to_string(),
-        settings.check_button_settings_show_preview_similar_images.is_active(),
+        &settings.check_button_settings_show_preview_similar_images.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::DuplicatePreviewImage).unwrap().to_string(),
-        settings.check_button_settings_show_preview_duplicates.is_active(),
+        &settings.check_button_settings_show_preview_duplicates.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::HideHardLinks).unwrap().to_string(),
-        settings.check_button_settings_hide_hard_links.is_active(),
+        &settings.check_button_settings_hide_hard_links.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::UseCache).unwrap().to_string(),
-        settings.check_button_settings_use_cache.is_active(),
+        &settings.check_button_settings_use_cache.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::UseJsonCacheFile).unwrap().to_string(),
-        settings.check_button_settings_save_also_json.is_active(),
+        &settings.check_button_settings_save_also_json.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::DeleteToTrash).unwrap().to_string(),
-        settings.check_button_settings_use_trash.is_active(),
+        &settings.check_button_settings_use_trash.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ImageDeleteOutdatedCacheEntries).unwrap().to_string(),
-        settings.check_button_settings_similar_images_delete_outdated_cache.is_active(),
+        &settings.check_button_settings_similar_images_delete_outdated_cache.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::DuplicateDeleteOutdatedCacheEntries).unwrap().to_string(),
-        settings.check_button_settings_duplicates_delete_outdated_cache.is_active(),
+        &settings.check_button_settings_duplicates_delete_outdated_cache.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::VideoDeleteOutdatedCacheEntries).unwrap().to_string(),
-        settings.check_button_settings_similar_videos_delete_outdated_cache.is_active(),
+        &settings.check_button_settings_similar_videos_delete_outdated_cache.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::UsePrehashCache).unwrap().to_string(),
-        settings.check_button_duplicates_use_prehash_cache.is_active(),
+        &settings.check_button_duplicates_use_prehash_cache.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ShowBottomTextPanel).unwrap().to_string(),
-        settings.check_button_settings_show_text_view.is_active(),
+        &settings.check_button_settings_show_text_view.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::GeneralIgnoreOtherFilesystems).unwrap().to_string(),
-        settings.check_button_settings_one_filesystem.is_active(),
+        &settings.check_button_settings_one_filesystem.is_active(),
     );
 
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().to_string(),
-        main_notebook.check_button_broken_files_archive.is_active(),
+        &main_notebook.check_button_broken_files_archive.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().to_string(),
-        main_notebook.check_button_broken_files_image.is_active(),
+        &main_notebook.check_button_broken_files_image.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().to_string(),
-        main_notebook.check_button_broken_files_audio.is_active(),
+        &main_notebook.check_button_broken_files_audio.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().to_string(),
-        main_notebook.check_button_broken_files_pdf.is_active(),
+        &main_notebook.check_button_broken_files_pdf.is_active(),
     );
 
     // Others
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ThreadNumber).unwrap().to_string(),
-        settings.scale_settings_number_of_threads.value().round(),
+        &settings.scale_settings_number_of_threads.value().round(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().to_string(),
-        settings.entry_settings_cache_file_minimal_size.text(),
+        &settings.entry_settings_cache_file_minimal_size.text(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MinimalPrehashCacheSize).unwrap().to_string(),
-        settings.entry_settings_prehash_cache_file_minimal_size.text(),
+        &settings.entry_settings_prehash_cache_file_minimal_size.text(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::Language).unwrap().to_string(),
-        get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap()).short_text,
+        &get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap()).short_text,
     );
 
     // Comboboxes main notebook
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().to_string(),
-        main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
+        &main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().to_string(),
-        main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
+        &main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().to_string(),
-        main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
+        &main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().to_string(),
-        main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
+        &main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().to_string(),
-        main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
+        &main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().to_string(),
-        main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
+        &main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
     );
 
     // Other2
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::DuplicateNameCaseSensitive).unwrap().to_string(),
-        main_notebook.check_button_duplicate_case_sensitive_name.is_active(),
+        &main_notebook.check_button_duplicate_case_sensitive_name.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().to_string(),
-        main_notebook.entry_big_files_number.text(),
+        &main_notebook.entry_big_files_number.text(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().to_string(),
-        main_notebook.scale_similarity_similar_images.value(),
+        &main_notebook.scale_similarity_similar_images.value(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::SimilarImagesIgnoreSameSize).unwrap().to_string(),
-        main_notebook.check_button_image_ignore_same_size.is_active(),
+        &main_notebook.check_button_image_ignore_same_size.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().to_string(),
-        main_notebook.scale_similarity_similar_videos.value(),
+        &main_notebook.scale_similarity_similar_videos.value(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().to_string(),
-        main_notebook.check_button_video_ignore_same_size.is_active(),
+        &main_notebook.check_button_video_ignore_same_size.is_active(),
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::MusicApproximateComparison).unwrap().to_string(),
-        main_notebook.check_button_music_approximate_comparison.is_active(),
+        &main_notebook.check_button_music_approximate_comparison.is_active(),
     );
 
     saving_struct.save_to_file(&text_view_errors);
@@ -704,7 +704,7 @@ pub fn load_configuration(
     settings: &GuiSettings,
     text_view_errors: &TextView,
     scrolled_window_errors: &ScrolledWindow,
-    arguments: Vec<OsString>,
+    arguments: &[OsString],
 ) {
     let text_view_errors = text_view_errors.clone();
 
