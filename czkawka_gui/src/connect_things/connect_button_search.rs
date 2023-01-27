@@ -124,9 +124,9 @@ pub fn connect_button_search(
             return;
         }
 
-        let included_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
-        let excluded_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(&tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None));
-        let reference_directories = get_path_buf_from_vector_of_strings(get_string_from_list_store(
+        let included_directories = get_path_buf_from_vector_of_strings(&get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
+        let excluded_directories = get_path_buf_from_vector_of_strings(&get_string_from_list_store(&tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None));
+        let reference_directories = get_path_buf_from_vector_of_strings(&get_string_from_list_store(
             &tree_view_included_directories,
             ColumnsIncludedDirectory::Path as i32,
             Some(ColumnsIncludedDirectory::ReferenceButton as i32),

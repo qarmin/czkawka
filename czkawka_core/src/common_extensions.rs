@@ -57,7 +57,7 @@ impl Extensions {
                 .messages
                 .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
-        Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions");
     }
 
     #[must_use]

@@ -150,7 +150,7 @@ impl EmptyFiles {
                 }
                 self.information.number_of_empty_files = self.empty_files.len();
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -177,7 +177,7 @@ impl EmptyFiles {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -251,7 +251,7 @@ impl SaveResults for EmptyFiles {
         } else {
             write!(writer, "Not found any empty files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -266,6 +266,6 @@ impl PrintResults for EmptyFiles {
             println!("{}", file_entry.path.display());
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

@@ -23,7 +23,7 @@ fn change_language(gui_data: &GuiData) {
         ("czkawka_gui", localizer_gui::localizer_gui()),
     ];
 
-    let lang_short = get_language_from_combo_box_text(gui_data.settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text;
+    let lang_short = get_language_from_combo_box_text(&gui_data.settings.combo_box_settings_language.active_text().unwrap()).short_text;
 
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).unwrap()];
     for (lib, localizer) in localizers {

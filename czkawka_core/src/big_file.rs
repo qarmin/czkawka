@@ -361,7 +361,7 @@ impl BigFile {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "look_for_big_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "look_for_big_files");
         true
     }
 
@@ -404,7 +404,7 @@ impl BigFile {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -482,7 +482,7 @@ impl SaveResults for BigFile {
         } else {
             write!(writer, "Not found any files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -498,6 +498,6 @@ impl PrintResults for BigFile {
         for (size, file_entry) in &self.big_files {
             println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
         }
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

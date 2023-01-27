@@ -387,7 +387,7 @@ impl BrokenFiles {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files");
         true
     }
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -595,7 +595,7 @@ impl BrokenFiles {
 
         self.information.number_of_broken_files = self.broken_files.len();
 
-        Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
+        Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel");
 
         // Clean unused data
         self.files_to_check = Default::default();
@@ -619,7 +619,7 @@ impl BrokenFiles {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -692,7 +692,7 @@ impl SaveResults for BrokenFiles {
         } else {
             write!(writer, "Not found any broken files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -707,7 +707,7 @@ impl PrintResults for BrokenFiles {
             println!("{} - {}", file_entry.path.display(), file_entry.error_string);
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

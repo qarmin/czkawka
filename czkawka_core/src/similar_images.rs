@@ -479,7 +479,7 @@ impl SimilarImages {
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
-        Common::print_time(start_time, SystemTime::now(), "check_for_similar_images".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_for_similar_images");
         true
     }
 
@@ -522,11 +522,7 @@ impl SimilarImages {
             mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);
         }
 
-        Common::print_time(
-            hash_map_modification,
-            SystemTime::now(),
-            "sort_images - reading data from cache and preparing them".to_string(),
-        );
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from cache and preparing them");
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
@@ -645,7 +641,7 @@ impl SimilarImages {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parallel");
         let hash_map_modification = SystemTime::now();
 
         // Just connect loaded results with already calculated hashes
@@ -682,7 +678,7 @@ impl SimilarImages {
             return false;
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files");
         true
     }
 
@@ -849,7 +845,7 @@ impl SimilarImages {
 
                     #[cfg(debug_assertions)]
                     if !self.use_reference_folders {
-                        debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "BEFORE");
+                        debug_check_for_duplicated_things(&hashes_parents, &hashes_similarity, &all_hashed_images, "BEFORE");
                     }
 
                     Some((hashes_parents, hashes_similarity))
@@ -897,7 +893,7 @@ impl SimilarImages {
 
                 #[cfg(debug_assertions)]
                 if !self.use_reference_folders {
-                    debug_check_for_duplicated_things(hashes_parents.clone(), hashes_similarity.clone(), all_hashed_images.clone(), "LATTER");
+                    debug_check_for_duplicated_things(&hashes_parents, &hashes_similarity, &all_hashed_images, "LATTER");
                 }
 
                 // Just simple check if all original hashes with multiple entries are available in end results
@@ -967,7 +963,7 @@ impl SimilarImages {
         {
             let mut result_hashset: HashSet<String> = Default::default();
             let mut found = false;
-            for (_hash, vec_file_entry) in &collected_similar_images {
+            for vec_file_entry in collected_similar_images.values() {
                 if vec_file_entry.is_empty() {
                     println!("Empty Element {vec_file_entry:?}");
                     found = true;
@@ -1036,7 +1032,7 @@ impl SimilarImages {
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from HashMap".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from HashMap");
 
         if self.use_reference_folders {
             for (_fe, vector) in &self.similar_referenced_vectors {
@@ -1204,7 +1200,7 @@ impl SaveResults for SimilarImages {
             write!(writer, "Not found any similar images.").unwrap();
         }
 
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -1322,6 +1318,7 @@ fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType)
     )
 }
 
+#[must_use]
 pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
         8 => 0,
@@ -1459,15 +1456,15 @@ pub fn test_image_conversion_speed() {
 // E.g. /a.jpg is used also as master and similar image which is forbidden, because may
 // cause accidentally delete more pictures that user wanted
 fn debug_check_for_duplicated_things(
-    hashes_parents: HashMap<&Vec<u8>, u32>,
-    hashes_similarity: HashMap<&Vec<u8>, (&Vec<u8>, u32)>,
-    all_hashed_images: HashMap<Vec<u8>, Vec<FileEntry>>,
+    hashes_parents: &HashMap<&Vec<u8>, u32>,
+    hashes_similarity: &HashMap<&Vec<u8>, (&Vec<u8>, u32)>,
+    all_hashed_images: &HashMap<Vec<u8>, Vec<FileEntry>>,
     numm: &str,
 ) {
     let mut found_broken_thing = false;
     let mut hashmap_hashes: HashSet<_> = Default::default();
     let mut hashmap_names: HashSet<_> = Default::default();
-    for (hash, number_of_children) in &hashes_parents {
+    for (hash, number_of_children) in hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(*hash) {
                 println!("------1--HASH--{}  {:?}", numm, all_hashed_images.get(*hash).unwrap());

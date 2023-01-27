@@ -442,7 +442,7 @@ impl SimilarVideos {
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
-        Common::print_time(start_time, SystemTime::now(), "check_for_similar_videos".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_for_similar_videos");
         true
     }
 
@@ -478,11 +478,7 @@ impl SimilarVideos {
             mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
         }
 
-        Common::print_time(
-            hash_map_modification,
-            SystemTime::now(),
-            "sort_videos - reading data from cache and preparing them".to_string(),
-        );
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from cache and preparing them");
         let hash_map_modification = SystemTime::now();
 
         //// PROGRESS THREAD START
@@ -545,7 +541,7 @@ impl SimilarVideos {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from files in parallel".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from files in parallel");
         let hash_map_modification = SystemTime::now();
 
         // Just connect loaded results with already calculated hashes
@@ -579,7 +575,7 @@ impl SimilarVideos {
             return false;
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files");
         let hash_map_modification = SystemTime::now();
 
         let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
@@ -644,7 +640,7 @@ impl SimilarVideos {
             }
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap".to_string());
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap");
 
         // Clean unused data
         self.videos_hashes = Default::default();
@@ -732,7 +728,7 @@ impl SaveResults for SimilarVideos {
             write!(writer, "Not found any similar videos.").unwrap();
         }
 
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }

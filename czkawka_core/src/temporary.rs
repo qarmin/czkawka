@@ -331,7 +331,7 @@ impl Temporary {
         progress_thread_handle.join().unwrap();
         self.information.number_of_temporary_files = self.temporary_files.len();
 
-        Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files_size");
         true
     }
 
@@ -352,7 +352,7 @@ impl Temporary {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -425,7 +425,7 @@ impl SaveResults for Temporary {
         } else {
             write!(writer, "Not found any temporary files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -438,6 +438,6 @@ impl PrintResults for Temporary {
             println!("{}", file_entry.path.display());
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

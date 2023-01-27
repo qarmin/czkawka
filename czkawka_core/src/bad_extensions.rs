@@ -307,7 +307,7 @@ impl BadExtensions {
                     self.files_to_check = files_to_check.clone();
                 }
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -476,7 +476,7 @@ impl BadExtensions {
 
         self.information.number_of_files_with_bad_extension = self.bad_extensions_files.len();
 
-        Common::print_time(system_time, SystemTime::now(), "bad extension finding".to_string());
+        Common::print_time(system_time, SystemTime::now(), "bad extension finding");
 
         // Clean unused data
         self.files_to_check = Default::default();
@@ -551,7 +551,7 @@ impl SaveResults for BadExtensions {
         } else {
             write!(writer, "Not found any files with invalid extension.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -566,6 +566,6 @@ impl PrintResults for BadExtensions {
             println!("{} ----- {}", file_entry.path.display(), file_entry.proper_extensions);
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

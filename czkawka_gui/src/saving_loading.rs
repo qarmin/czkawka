@@ -83,10 +83,10 @@ impl LoadSaveStruct {
         }
     }
 
-    pub fn get_vector_string(&self, key: String, default_value: Vec<String>) -> Vec<String> {
-        if self.loaded_items.contains_key(&key) {
+    pub fn get_vector_string(&self, key: &str, default_value: Vec<String>) -> Vec<String> {
+        if self.loaded_items.contains_key(key) {
             let mut new_vector = Vec::new();
-            for i in self.loaded_items.get(&key).unwrap() {
+            for i in self.loaded_items.get(key).unwrap() {
                 if !i.trim().is_empty() {
                     new_vector.push(i.trim().to_string());
                 }
@@ -133,12 +133,11 @@ impl LoadSaveStruct {
             let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
 
             return if item.len() == 1 {
-                match item[0].parse::<T>() {
-                    Ok(t) => t,
-                    Err(_) => {
-                        println!("Failed to decode integer from \"{}\", found {:?}", key, item[0]);
-                        default_value
-                    }
+                if let Ok(t) = item[0].parse::<T>() {
+                    t
+                } else {
+                    println!("Failed to decode integer from \"{}\", found {:?}", key, item[0]);
+                    default_value
                 }
             } else {
                 add_text_to_text_view(
@@ -262,39 +261,38 @@ impl LoadSaveStruct {
                     }
                 };
                 return Some((config_file_handler, config_file));
-            } else {
-                if !config_file.exists() || !config_file.is_file() {
-                    if manual_execution {
-                        // Don't show errors when there is no configuration file when starting app
-                        add_text_to_text_view(
-                            text_view_errors,
-                            &flg!(
-                                "saving_loading_failed_to_read_config_file",
-                                generate_translation_hashmap(vec![("path", config_file.display().to_string())])
-                            ),
-                        );
-                    }
+            }
+            if !config_file.exists() || !config_file.is_file() {
+                if manual_execution {
+                    // Don't show errors when there is no configuration file when starting app
+                    add_text_to_text_view(
+                        text_view_errors,
+                        &flg!(
+                            "saving_loading_failed_to_read_config_file",
+                            generate_translation_hashmap(vec![("path", config_file.display().to_string())])
+                        ),
+                    );
+                }
+                return None;
+            }
+
+            let config_file_handler = match File::open(&config_file) {
+                Ok(t) => t,
+                Err(e) => {
+                    add_text_to_text_view(
+                        text_view_errors,
+                        &flg!(
+                            "saving_loading_failed_to_create_config_file",
+                            generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                        ),
+                    );
                     return None;
                 }
-
-                let config_file_handler = match File::open(&config_file) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            &flg!(
-                                "saving_loading_failed_to_create_config_file",
-                                generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
-                            ),
-                        );
-                        return None;
-                    }
-                };
-                return Some((config_file_handler, config_file));
-            }
-        } else {
-            add_text_to_text_view(text_view_errors, flg!("saving_loading_failed_to_get_home_directory").as_str());
+            };
+            return Some((config_file_handler, config_file));
         }
+        add_text_to_text_view(text_view_errors, flg!("saving_loading_failed_to_get_home_directory").as_str());
+
         None
     }
 
@@ -637,7 +635,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     );
     saving_struct.save_var(
         hashmap_ls.get(&LoadText::Language).unwrap().to_string(),
-        get_language_from_combo_box_text(settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text,
+        get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap()).short_text,
     );
 
     // Comboboxes main notebook
@@ -716,7 +714,7 @@ pub fn load_configuration(
     loaded_entries.open_and_read_content(&text_view_errors, manual_execution);
 
     // Load here language, default system language could change value in settings so we don't want to lose this value
-    let short_language = get_language_from_combo_box_text(settings.combo_box_settings_language.active_text().unwrap().to_string())
+    let short_language = get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap())
         .short_text
         .to_string();
 
@@ -726,8 +724,8 @@ pub fn load_configuration(
     // Loading data from hashmaps
     let (hashmap_ls, _hashmap_sl) = create_hash_map();
 
-    let mut included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().clone(), included_directories);
-    let mut excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().clone(), excluded_directories);
+    let mut included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap(), included_directories);
+    let mut excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap(), excluded_directories);
     let excluded_items: String = loaded_entries.get_string(
         hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(),
         upper_notebook.entry_excluded_items.text().to_string(),

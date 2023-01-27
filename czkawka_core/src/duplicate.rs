@@ -401,7 +401,7 @@ impl DuplicateFinder {
                     }
                 }
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -503,7 +503,7 @@ impl DuplicateFinder {
                     }
                 }
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_size".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files_size");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -677,7 +677,7 @@ impl DuplicateFinder {
 
         ///////////////////////////////////////////////////////////////////////////// PREHASHING END
 
-        Common::print_time(start_time, SystemTime::now(), "check_files_hash - prehash".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files_hash - prehash");
         let start_time: SystemTime = SystemTime::now();
 
         /////////////////////////
@@ -865,9 +865,8 @@ impl DuplicateFinder {
 
                         if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                             continue;
-                        } else {
-                            all_results_with_same_size.push((files_from_referenced_folders.pop().unwrap(), normal_files));
                         }
+                        all_results_with_same_size.push((files_from_referenced_folders.pop().unwrap(), normal_files));
                     }
                     if all_results_with_same_size.is_empty() {
                         None
@@ -899,7 +898,7 @@ impl DuplicateFinder {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "check_files_hash - full hash".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files_hash - full hash");
 
         // Clean unused data
         self.files_with_identical_size = Default::default();
@@ -939,7 +938,7 @@ impl DuplicateFinder {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -1110,7 +1109,7 @@ impl SaveResults for DuplicateFinder {
                 panic!();
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -1139,7 +1138,7 @@ impl PrintResults for DuplicateFinder {
                 }
             }
             CheckingMethod::Hash => {
-                for (_size, vector) in &self.files_with_identical_hashes {
+                for vector in self.files_with_identical_hashes.values() {
                     for j in vector {
                         number_of_files += j.len() as u64;
                         number_of_groups += 1;
@@ -1185,7 +1184,7 @@ impl PrintResults for DuplicateFinder {
                 panic!("Checking Method shouldn't be ever set to None");
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 
@@ -1210,7 +1209,8 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
     for (index, file) in vector.iter().enumerate() {
         if q_index == index {
             continue;
-        } else if removed_files + failed_to_remove_files >= n {
+        }
+        if removed_files + failed_to_remove_files >= n {
             break;
         }
 
@@ -1299,9 +1299,8 @@ pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages:
                         .warnings
                         .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
                     return;
-                } else {
-                    how_much += 1;
                 }
+                how_much += 1;
             }
         }
 

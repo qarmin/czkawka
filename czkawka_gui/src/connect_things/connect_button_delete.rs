@@ -245,22 +245,22 @@ pub async fn check_if_deleting_all_files_in_group(
 
     if !selected_all_records {
         return false;
-    } else {
-        let (confirmation_dialog_group_delete, check_button) = create_dialog_group_deletion(window_main);
+    }
 
-        let response_type = confirmation_dialog_group_delete.run_future().await;
-        if response_type == ResponseType::Ok {
-            if !check_button.is_active() {
-                check_button_settings_confirm_group_deletion.set_active(false);
-            }
-        } else {
-            confirmation_dialog_group_delete.hide();
-            confirmation_dialog_group_delete.close();
-            return true;
+    let (confirmation_dialog_group_delete, check_button) = create_dialog_group_deletion(window_main);
+
+    let response_type = confirmation_dialog_group_delete.run_future().await;
+    if response_type == ResponseType::Ok {
+        if !check_button.is_active() {
+            check_button_settings_confirm_group_deletion.set_active(false);
         }
+    } else {
         confirmation_dialog_group_delete.hide();
         confirmation_dialog_group_delete.close();
+        return true;
     }
+    confirmation_dialog_group_delete.hide();
+    confirmation_dialog_group_delete.close();
 
     false
 }

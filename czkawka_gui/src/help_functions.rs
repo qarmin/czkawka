@@ -253,7 +253,7 @@ pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, c
     }
 }
 
-pub fn get_path_buf_from_vector_of_strings(vec_string: Vec<String>) -> Vec<PathBuf> {
+pub fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
     vec_string.iter().map(PathBuf::from).collect()
 }
 
@@ -338,7 +338,7 @@ pub fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
     dialog.child().unwrap().downcast::<gtk4::Box>().unwrap()
 }
 
-pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
+pub fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]
     let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
     assert_eq!(vec.len(), 2); // 400x400 - should only have two elements, if have more, then something is not good
@@ -584,7 +584,7 @@ pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
     number_of_selected_groups
 }
 
-pub fn resize_pixbuf_dimension(pixbuf: Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
+pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
     let current_ratio = pixbuf.width() as f32 / pixbuf.height() as f32;
     let mut new_size;
     match current_ratio.partial_cmp(&(requested_size.0 as f32 / requested_size.1 as f32)).unwrap() {
@@ -634,9 +634,8 @@ pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
             return label;
-        } else {
-            widgets_to_check.extend(get_all_direct_children(&widget));
         }
+        widgets_to_check.extend(get_all_direct_children(&widget));
     }
     panic!("Button doesn't have proper custom label child");
 }
@@ -647,9 +646,8 @@ pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
             return image;
-        } else {
-            widgets_to_check.extend(get_all_direct_children(&widget));
         }
+        widgets_to_check.extend(get_all_direct_children(&widget));
     }
     panic!("Button doesn't have proper custom label child");
 }

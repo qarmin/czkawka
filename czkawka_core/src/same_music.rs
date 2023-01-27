@@ -297,7 +297,7 @@ impl SameMusic {
                     }
                 }
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -396,18 +396,17 @@ impl SameMusic {
                     }
                 });
 
-                let tagged_file = match result {
-                    Ok(t) => match t {
+                let tagged_file = if let Ok(t) = result {
+                    match t {
                         Some(r) => r,
                         None => {
                             return Some(Some(music_entry));
                         }
-                    },
-                    Err(_) => {
-                        let message = create_crash_message("Lofty", &path, "https://github.com/image-rs/image/issues");
-                        println!("{message}");
-                        return Some(None);
                     }
+                } else {
+                    let message = create_crash_message("Lofty", &path, "https://github.com/image-rs/image/issues");
+                    println!("{message}");
+                    return Some(None);
                 };
 
                 let properties = tagged_file.properties();
@@ -507,7 +506,7 @@ impl SameMusic {
             return false;
         }
 
-        Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded");
 
         true
     }
@@ -751,7 +750,7 @@ impl SameMusic {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "check_for_duplicates".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_for_duplicates");
 
         // Clear unused data
         self.music_entries.clear();
@@ -783,7 +782,7 @@ impl SameMusic {
         //     }
         // }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -929,7 +928,7 @@ impl SaveResults for SameMusic {
         } else {
             write!(writer, "Not found any empty files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -956,7 +955,7 @@ impl PrintResults for SameMusic {
             println!();
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

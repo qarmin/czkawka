@@ -199,7 +199,7 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
     #[allow(unused_variables)]
-    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
+    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: &str) {
         #[cfg(debug_assertions)]
         println!(
             "Execution of function \"{}\" took {:?}",
@@ -230,10 +230,10 @@ impl Common {
         let mut warning: String = String::new();
         if path.is_dir() {
             if let Err(e) = fs::remove_dir_all(entry) {
-                warning = format!("Failed to remove folder {entry}, reason {e}")
+                warning = format!("Failed to remove folder {entry}, reason {e}");
             }
         } else if let Err(e) = fs::remove_file(entry) {
-            warning = format!("Failed to remove file {entry}, reason {e}")
+            warning = format!("Failed to remove file {entry}, reason {e}");
         }
         warning
     }

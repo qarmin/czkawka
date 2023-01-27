@@ -90,7 +90,7 @@ impl Directories {
 
         self.included_directories = checked_directories;
 
-        Common::print_time(start_time, SystemTime::now(), "set_included_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_included_directory");
         true
     }
 
@@ -149,7 +149,7 @@ impl Directories {
         }
         self.excluded_directories = checked_directories;
 
-        Common::print_time(start_time, SystemTime::now(), "set_excluded_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_excluded_directory");
     }
 
     #[cfg(target_family = "unix")]
@@ -295,7 +295,7 @@ impl Directories {
         // Not needed, but better is to have sorted everything
         self.excluded_directories.sort_unstable();
         self.included_directories.sort_unstable();
-        Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
+        Common::print_time(start_time, SystemTime::now(), "optimize_directories");
 
         // Get device IDs for included directories
         #[cfg(target_family = "unix")]

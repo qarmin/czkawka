@@ -1,4 +1,5 @@
 #![allow(clippy::upper_case_acronyms)]
+#![allow(clippy::needless_pass_by_value)]
 #![cfg(not(target_os = "windows"))]
 
 use std::convert::From;

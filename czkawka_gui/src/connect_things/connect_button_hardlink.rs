@@ -19,6 +19,12 @@ enum TypeOfTool {
     Symlinking,
 }
 
+#[derive(Debug)]
+struct SymHardlinkData {
+    original_data: String,
+    files_to_symhardlink: Vec<String>,
+}
+
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     // Hardlinking
     {
@@ -62,7 +68,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
 
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
-    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection).await {
+    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection) {
         return;
     }
 
@@ -110,11 +116,6 @@ fn hardlink_symlink(
 
     let model = get_list_store(tree_view);
 
-    #[derive(Debug)]
-    struct SymHardlinkData {
-        original_data: String,
-        files_to_symhardlink: Vec<String>,
-    }
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of hardlinked files without its root
     let mut vec_symhardlink_data: Vec<SymHardlinkData> = Vec::new();
 
@@ -328,7 +329,7 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     true
 }
 
-pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
+pub fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {

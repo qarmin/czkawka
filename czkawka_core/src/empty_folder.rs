@@ -159,7 +159,7 @@ impl EmptyFolder {
 
                 self.text_messages.warnings.extend(warnings);
 
-                Common::print_time(start_time, SystemTime::now(), "check_for_empty_folder".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_for_empty_folder");
                 true
             }
             DirTraversalResult::Stopped => false,
@@ -177,7 +177,7 @@ impl EmptyFolder {
             };
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 
     /// Set included dir which needs to be relative, exists etc.
@@ -247,7 +247,7 @@ impl SaveResults for EmptyFolder {
         } else {
             write!(writer, "Not found any empty folders.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }

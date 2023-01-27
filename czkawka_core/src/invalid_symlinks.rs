@@ -148,7 +148,7 @@ impl InvalidSymlinks {
                 }
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files_name".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => unreachable!(),
@@ -173,7 +173,7 @@ impl InvalidSymlinks {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -257,7 +257,7 @@ impl SaveResults for InvalidSymlinks {
         } else {
             write!(writer, "Not found any invalid symlinks.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -280,6 +280,6 @@ impl PrintResults for InvalidSymlinks {
             );
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

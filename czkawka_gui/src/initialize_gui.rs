@@ -440,7 +440,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
-                preview_path,
+                &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
             );
@@ -465,7 +465,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
-                preview_path,
+                &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
             );
@@ -518,7 +518,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
-                preview_path,
+                &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
             );
@@ -546,7 +546,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,
                 &image_preview,
-                preview_path,
+                &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
             );
@@ -559,7 +559,7 @@ fn show_preview(
     text_view_errors: &TextView,
     check_button_settings_show_preview: &CheckButton,
     image_preview: &Image,
-    preview_path: Rc<RefCell<String>>,
+    preview_path: &Rc<RefCell<String>>,
     column_path: i32,
     column_name: i32,
 ) {
@@ -669,7 +669,7 @@ fn show_preview(
                 }
             };
 
-            pixbuf = match resize_pixbuf_dimension(pixbuf, (800, 800), InterpType::Bilinear) {
+            pixbuf = match resize_pixbuf_dimension(&pixbuf, (800, 800), InterpType::Bilinear) {
                 None => {
                     add_text_to_text_view(
                         text_view_errors,
