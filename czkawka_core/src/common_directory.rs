@@ -25,7 +25,7 @@ impl Directories {
     }
 
     pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        self.reference_directories = reference_directory
+        self.reference_directories = reference_directory;
     }
 
     /// Setting included directories, at least one must be provided or scan won't start
@@ -154,7 +154,7 @@ impl Directories {
 
     #[cfg(target_family = "unix")]
     pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.exclude_other_filesystems = Some(exclude_other_filesystems)
+        self.exclude_other_filesystems = Some(exclude_other_filesystems);
     }
 
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated etc.

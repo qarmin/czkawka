@@ -51,12 +51,12 @@ pub struct FileEntry {
 struct Hamming;
 
 impl bk_tree::Metric<Vec<u8>> for Hamming {
-    #[inline(always)]
+    #[inline]
     fn distance(&self, a: &Vec<u8>, b: &Vec<u8>) -> u32 {
         hamming::distance_fast(a, b).unwrap() as u32
     }
 
-    #[inline(always)]
+    #[inline]
     fn threshold_distance(&self, a: &Vec<u8>, b: &Vec<u8>, _threshold: u32) -> Option<u32> {
         Some(self.distance(a, b))
     }
@@ -137,7 +137,7 @@ impl SimilarVideos {
 
     pub fn set_tolerance(&mut self, tolerance: i32) {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
-        self.tolerance = tolerance
+        self.tolerance = tolerance;
     }
     pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
         self.save_also_as_json = save_also_as_json;

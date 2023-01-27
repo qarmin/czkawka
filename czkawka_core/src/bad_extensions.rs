@@ -409,36 +409,35 @@ impl BadExtensions {
 
                 // Check for all extensions that file can use(not sure if it is worth to do it)
                 let mut all_available_extensions: BTreeSet<&str> = Default::default();
-                let think_extension = match current_extension.is_empty() {
-                    true => String::new(),
-                    false => {
-                        for mim in mime_guess::from_ext(proper_extension) {
-                            if let Some(all_ext) = get_mime_extensions(&mim) {
-                                for ext in all_ext {
-                                    all_available_extensions.insert(ext);
-                                }
+                let think_extension = if current_extension.is_empty() {
+                    String::new()
+                } else {
+                    for mim in mime_guess::from_ext(proper_extension) {
+                        if let Some(all_ext) = get_mime_extensions(&mim) {
+                            for ext in all_ext {
+                                all_available_extensions.insert(ext);
                             }
                         }
-
-                        // Workarounds
-                        if let Some(vec_pre) = hashmap_workarounds.get(current_extension.as_str()) {
-                            for pre in vec_pre {
-                                if all_available_extensions.contains(pre) {
-                                    all_available_extensions.insert(current_extension.as_str());
-                                    break;
-                                }
-                            }
-                        }
-
-                        let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
-                        for ext in &all_available_extensions {
-                            guessed_multiple_extensions.push_str(ext);
-                            guessed_multiple_extensions.push(',');
-                        }
-                        guessed_multiple_extensions.pop();
-
-                        guessed_multiple_extensions
                     }
+
+                    // Workarounds
+                    if let Some(vec_pre) = hashmap_workarounds.get(current_extension.as_str()) {
+                        for pre in vec_pre {
+                            if all_available_extensions.contains(pre) {
+                                all_available_extensions.insert(current_extension.as_str());
+                                break;
+                            }
+                        }
+                    }
+
+                    let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
+                    for ext in &all_available_extensions {
+                        guessed_multiple_extensions.push_str(ext);
+                        guessed_multiple_extensions.push(',');
+                    }
+                    guessed_multiple_extensions.pop();
+
+                    guessed_multiple_extensions
                 };
 
                 if all_available_extensions.is_empty() {

@@ -40,7 +40,6 @@ pub enum HashType {
 }
 
 impl HashType {
-    #[inline(always)]
     fn hasher(self: &HashType) -> Box<dyn MyHasher> {
         match self {
             HashType::Blake3 => Box::new(blake3::Hasher::new()),
@@ -867,7 +866,7 @@ impl DuplicateFinder {
                         if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                             continue;
                         } else {
-                            all_results_with_same_size.push((files_from_referenced_folders.pop().unwrap(), normal_files))
+                            all_results_with_same_size.push((files_from_referenced_folders.pop().unwrap(), normal_files));
                         }
                     }
                     if all_results_with_same_size.is_empty() {

@@ -1116,7 +1116,7 @@ fn image_to_check<'a>(
         }
         // But when there is no record, just add it
         else {
-            need_to_add = true
+            need_to_add = true;
         }
     }
 
