@@ -371,12 +371,12 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
                                     pixbuf = t;
                                 }
                                 Err(e) => {
-                                    println!("Failed to open image {}, reason {}", full_path, e);
+                                    println!("Failed to open image {full_path}, reason {e}");
                                 }
                             };
                         }
                         Err(e) => {
-                            println!("Failed to open image {}, reason {}", full_path, e);
+                            println!("Failed to open image {full_path}, reason {e}");
                         }
                     };
                     break 'czystka;

@@ -867,8 +867,8 @@ mod test {
 
     #[test]
     fn test_change_dimension_to_krotka() {
-        assert_eq!(change_dimension_to_krotka("50x50".to_string()), (50, 50));
-        assert_eq!(change_dimension_to_krotka("6000x6000".to_string()), (6000, 6000));
+        assert_eq!(change_dimension_to_krotka("50x50"), (50, 50));
+        assert_eq!(change_dimension_to_krotka("6000x6000"), (6000, 6000));
     }
 
     #[gtk4::test]

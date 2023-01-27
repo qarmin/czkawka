@@ -562,8 +562,8 @@ impl BrokenFiles {
                 }
             })
             .while_some()
-            .filter(std::option::Option::is_some)
-            .map(std::option::Option::unwrap)
+            .filter(Option::is_some)
+            .map(Option::unwrap)
             .collect::<Vec<FileEntry>>();
 
         // End thread which send info to gui

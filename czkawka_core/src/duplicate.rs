@@ -532,7 +532,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = self.files_with_identical_size.values().map(std::vec::Vec::len).sum();
+            let files_to_check = self.files_with_identical_size.values().map(Vec::len).sum();
             let checking_method = self.check_method;
             thread::spawn(move || loop {
                 progress_send
@@ -691,7 +691,7 @@ impl DuplicateFinder {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = pre_checked_map.values().map(std::vec::Vec::len).sum();
+            let files_to_check = pre_checked_map.values().map(Vec::len).sum();
             let checking_method = self.check_method;
             thread::spawn(move || loop {
                 progress_send
