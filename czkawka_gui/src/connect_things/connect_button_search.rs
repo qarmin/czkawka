@@ -231,7 +231,7 @@ pub fn connect_button_search(
                     df.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
                     df.set_exclude_other_filesystems(ignore_other_filesystems);
                     df.find_duplicates(Some(&stop_receiver), Some(&futures_sender_duplicate_files));
-                    let _ = glib_stop_sender.send(Message::Duplicates(df));
+                    glib_stop_sender.send(Message::Duplicates(df)).unwrap();
                 });
             }
             NotebookMainEnum::EmptyFiles => {
@@ -253,7 +253,7 @@ pub fn connect_button_search(
                     vf.set_allowed_extensions(allowed_extensions);
                     vf.set_exclude_other_filesystems(ignore_other_filesystems);
                     vf.find_empty_files(Some(&stop_receiver), Some(&futures_sender_empty_files));
-                    let _ = glib_stop_sender.send(Message::EmptyFiles(vf));
+                    glib_stop_sender.send(Message::EmptyFiles(vf)).unwrap();
                 });
             }
             NotebookMainEnum::EmptyDirectories => {
@@ -272,7 +272,7 @@ pub fn connect_button_search(
                     ef.set_excluded_items(excluded_items);
                     ef.set_exclude_other_filesystems(ignore_other_filesystems);
                     ef.find_empty_folders(Some(&stop_receiver), Some(&futures_sender_empty_folder));
-                    let _ = glib_stop_sender.send(Message::EmptyFolders(ef));
+                    glib_stop_sender.send(Message::EmptyFolders(ef)).unwrap();
                 });
             }
             NotebookMainEnum::BigFiles => {
@@ -301,7 +301,7 @@ pub fn connect_button_search(
                     bf.set_search_mode(big_files_mode);
                     bf.set_exclude_other_filesystems(ignore_other_filesystems);
                     bf.find_big_files(Some(&stop_receiver), Some(&futures_sender_big_file));
-                    let _ = glib_stop_sender.send(Message::BigFiles(bf));
+                    glib_stop_sender.send(Message::BigFiles(bf)).unwrap();
                 });
             }
             NotebookMainEnum::Temporary => {
@@ -322,7 +322,7 @@ pub fn connect_button_search(
                     tf.set_excluded_items(excluded_items);
                     tf.set_exclude_other_filesystems(ignore_other_filesystems);
                     tf.find_temporary_files(Some(&stop_receiver), Some(&futures_sender_temporary));
-                    let _ = glib_stop_sender.send(Message::Temporary(tf));
+                    glib_stop_sender.send(Message::Temporary(tf)).unwrap();
                 });
             }
             NotebookMainEnum::SimilarImages => {
@@ -372,7 +372,7 @@ pub fn connect_button_search(
                     sf.set_save_also_as_json(save_also_as_json);
                     sf.set_exclude_other_filesystems(ignore_other_filesystems);
                     sf.find_similar_images(Some(&stop_receiver), Some(&futures_sender_similar_images));
-                    let _ = glib_stop_sender.send(Message::SimilarImages(sf));
+                    glib_stop_sender.send(Message::SimilarImages(sf)).unwrap();
                 });
             }
             NotebookMainEnum::SimilarVideos => {
@@ -408,7 +408,7 @@ pub fn connect_button_search(
                     sf.set_save_also_as_json(save_also_as_json);
                     sf.set_exclude_other_filesystems(ignore_other_filesystems);
                     sf.find_similar_videos(Some(&stop_receiver), Some(&futures_sender_similar_videos));
-                    let _ = glib_stop_sender.send(Message::SimilarVideos(sf));
+                    glib_stop_sender.send(Message::SimilarVideos(sf)).unwrap();
                 });
             }
             NotebookMainEnum::SameMusic => {
@@ -460,7 +460,7 @@ pub fn connect_button_search(
                         mf.set_save_also_as_json(save_also_as_json);
                         mf.set_exclude_other_filesystems(ignore_other_filesystems);
                         mf.find_same_music(Some(&stop_receiver), Some(&futures_sender_same_music));
-                        let _ = glib_stop_sender.send(Message::SameMusic(mf));
+                        glib_stop_sender.send(Message::SameMusic(mf)).unwrap();
                     });
                 } else {
                     set_buttons(
@@ -496,7 +496,7 @@ pub fn connect_button_search(
                     isf.set_allowed_extensions(allowed_extensions);
                     isf.set_exclude_other_filesystems(ignore_other_filesystems);
                     isf.find_invalid_links(Some(&stop_receiver), Some(&futures_sender_invalid_symlinks));
-                    let _ = glib_stop_sender.send(Message::InvalidSymlinks(isf));
+                    glib_stop_sender.send(Message::InvalidSymlinks(isf)).unwrap();
                 });
             }
             NotebookMainEnum::BrokenFiles => {
@@ -537,7 +537,7 @@ pub fn connect_button_search(
                         br.set_checked_types(checked_types);
                         br.set_exclude_other_filesystems(ignore_other_filesystems);
                         br.find_broken_files(Some(&stop_receiver), Some(&futures_sender_broken_files));
-                        let _ = glib_stop_sender.send(Message::BrokenFiles(br));
+                        glib_stop_sender.send(Message::BrokenFiles(br)).unwrap();
                     });
                 } else {
                     set_buttons(
@@ -575,7 +575,7 @@ pub fn connect_button_search(
                     be.set_recursive_search(recursive_search);
                     be.set_exclude_other_filesystems(ignore_other_filesystems);
                     be.find_bad_extensions_files(Some(&stop_receiver), Some(&futures_sender_bad_extensions));
-                    let _ = glib_stop_sender.send(Message::BadExtensions(be));
+                    glib_stop_sender.send(Message::BadExtensions(be)).unwrap();
                 });
             }
         }
