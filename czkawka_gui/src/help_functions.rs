@@ -253,12 +253,12 @@ pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, c
     }
 }
 
-pub fn get_path_buf_from_vector_of_strings(vec_string: Vec<String>) -> Vec<PathBuf> {
+pub fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
     vec_string.iter().map(PathBuf::from).collect()
 }
 
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
-    let mut messages: String = String::from("");
+    let mut messages: String = String::new();
     if !text_messages.messages.is_empty() {
         messages += format!("############### {}({}) ###############\n", flg!("text_view_messages"), text_messages.messages.len()).as_str();
     }
@@ -338,7 +338,7 @@ pub fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
     dialog.child().unwrap().downcast::<gtk4::Box>().unwrap()
 }
 
-pub fn change_dimension_to_krotka(dimensions: String) -> (u64, u64) {
+pub fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]
     let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
     assert_eq!(vec.len(), 2); // 400x400 - should only have two elements, if have more, then something is not good
@@ -395,9 +395,8 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
         let mut current_iter = first_iter;
-        if !model.get::<bool>(&current_iter, column_header) {
-            panic!("First deleted element, should be a header"); // First element should be header
-        };
+        // First element should be header
+        assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
         let mut next_iter;
         let mut next_next_iter;
@@ -405,9 +404,8 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
         // Empty means default check type
         if model.get::<String>(&current_iter, column_path).is_empty() {
             'main: loop {
-                if !model.get::<bool>(&current_iter, column_header) {
-                    panic!("First deleted element, should be a header"); // First element should be header
-                };
+                // First element should be header
+                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
                 if !model.iter_next(&next_iter) {
@@ -458,9 +456,8 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
         // Non empty means that header points at reference folder
         else {
             'reference: loop {
-                if !model.get::<bool>(&current_iter, column_header) {
-                    panic!("First deleted element, should be a header"); // First element should be header
-                };
+                // First element should be header
+                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
                 if !model.iter_next(&next_iter) {
@@ -587,7 +584,7 @@ pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
     number_of_selected_groups
 }
 
-pub fn resize_pixbuf_dimension(pixbuf: Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
+pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
     let current_ratio = pixbuf.width() as f32 / pixbuf.height() as f32;
     let mut new_size;
     match current_ratio.partial_cmp(&(requested_size.0 as f32 / requested_size.1 as f32)).unwrap() {
@@ -614,8 +611,8 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
         let start_characters = 10;
         let difference = characters_in_filename - max_length;
         let second_part_start = start_characters + difference;
-        let mut string_pre = "".to_string();
-        let mut string_after = "".to_string();
+        let mut string_pre = String::new();
+        let mut string_after = String::new();
 
         for (index, character) in file_name.chars().enumerate() {
             if index < start_characters {
@@ -637,9 +634,8 @@ pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
             return label;
-        } else {
-            widgets_to_check.extend(get_all_direct_children(&widget));
         }
+        widgets_to_check.extend(get_all_direct_children(&widget));
     }
     panic!("Button doesn't have proper custom label child");
 }
@@ -650,9 +646,8 @@ pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
     while let Some(widget) = widgets_to_check.pop() {
         if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
             return image;
-        } else {
-            widgets_to_check.extend(get_all_direct_children(&widget));
         }
+        widgets_to_check.extend(get_all_direct_children(&widget));
     }
     panic!("Button doesn't have proper custom label child");
 }
@@ -872,8 +867,8 @@ mod test {
 
     #[test]
     fn test_change_dimension_to_krotka() {
-        assert_eq!(change_dimension_to_krotka("50x50".to_string()), (50, 50));
-        assert_eq!(change_dimension_to_krotka("6000x6000".to_string()), (6000, 6000));
+        assert_eq!(change_dimension_to_krotka("50x50"), (50, 50));
+        assert_eq!(change_dimension_to_krotka("6000x6000"), (6000, 6000));
     }
 
     #[gtk4::test]

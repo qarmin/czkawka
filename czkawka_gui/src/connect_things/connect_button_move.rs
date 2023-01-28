@@ -55,7 +55,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
                 } else {
                     image_preview_duplicates.hide();
                 }
-                *preview_path.borrow_mut() = "".to_string();
+                *preview_path.borrow_mut() = String::new();
             }
             _ => {}
         }
@@ -122,12 +122,12 @@ fn move_things(
                         column_path,
                         column_header,
                         column_selection,
-                        folder,
+                        &folder,
                         &entry_info,
                         &text_view_errors,
                     );
                 } else {
-                    move_with_list(&tree_view, column_file_name, column_path, column_selection, folder, &entry_info, &text_view_errors);
+                    move_with_list(&tree_view, column_file_name, column_path, column_selection, &folder, &entry_info, &text_view_errors);
                 }
             }
         }
@@ -141,7 +141,7 @@ fn move_with_tree(
     column_path: i32,
     column_header: i32,
     column_selection: i32,
-    destination_folder: PathBuf,
+    destination_folder: &Path,
     entry_info: &gtk4::Entry,
     text_view_errors: &gtk4::TextView,
 ) {
@@ -169,7 +169,7 @@ fn move_with_tree(
         return; // No selected rows
     }
 
-    move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors);
+    move_files_common(&selected_rows, &model, column_file_name, column_path, destination_folder, entry_info, text_view_errors);
 
     clean_invalid_headers(&model, column_header, column_path);
 }
@@ -179,7 +179,7 @@ fn move_with_list(
     column_file_name: i32,
     column_path: i32,
     column_selection: i32,
-    destination_folder: PathBuf,
+    destination_folder: &Path,
     entry_info: &gtk4::Entry,
     text_view_errors: &gtk4::TextView,
 ) {
@@ -203,7 +203,7 @@ fn move_with_list(
         return; // No selected rows
     }
 
-    move_files_common(&selected_rows, &model, column_file_name, column_path, &destination_folder, entry_info, text_view_errors)
+    move_files_common(&selected_rows, &model, column_file_name, column_path, destination_folder, entry_info, text_view_errors);
 }
 
 fn move_files_common(
@@ -215,7 +215,7 @@ fn move_files_common(
     entry_info: &gtk4::Entry,
     text_view_errors: &gtk4::TextView,
 ) {
-    let mut messages: String = "".to_string();
+    let mut messages: String = String::new();
 
     let mut moved_files: u32 = 0;
 

@@ -75,6 +75,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -98,6 +99,7 @@ pub struct BrokenFiles {
 }
 
 impl BrokenFiles {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -131,10 +133,12 @@ impl BrokenFiles {
         self.debug_print();
     }
 
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
 
+    #[must_use]
     pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
         &self.broken_files
     }
@@ -143,10 +147,12 @@ impl BrokenFiles {
         self.checked_types = checked_types;
     }
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -354,7 +360,7 @@ impl BrokenFiles {
                                 },
                                 size: metadata.len(),
                                 type_of_file,
-                                error_string: "".to_string(),
+                                error_string: String::new(),
                             };
 
                             fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
@@ -381,7 +387,7 @@ impl BrokenFiles {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "check_files");
         true
     }
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -556,8 +562,8 @@ impl BrokenFiles {
                 }
             })
             .while_some()
-            .filter(|file_entry| file_entry.is_some())
-            .map(|file_entry| file_entry.unwrap())
+            .filter(Option::is_some)
+            .map(Option::unwrap)
             .collect::<Vec<FileEntry>>();
 
         // End thread which send info to gui
@@ -589,7 +595,7 @@ impl BrokenFiles {
 
         self.information.number_of_broken_files = self.broken_files.len();
 
-        Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel".to_string());
+        Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel");
 
         // Clean unused data
         self.files_to_check = Default::default();
@@ -602,7 +608,7 @@ impl BrokenFiles {
 
         match self.delete_method {
             DeleteMethod::Delete => {
-                for file_entry in self.broken_files.iter() {
+                for file_entry in &self.broken_files {
                     if fs::remove_file(&file_entry.path).is_err() {
                         self.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
@@ -613,7 +619,7 @@ impl BrokenFiles {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "delete_files".to_string());
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -680,13 +686,13 @@ impl SaveResults for BrokenFiles {
 
         if !self.broken_files.is_empty() {
             writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files).unwrap();
-            for file_entry in self.broken_files.iter() {
+            for file_entry in &self.broken_files {
                 writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.error_string).unwrap();
             }
         } else {
             write!(writer, "Not found any broken files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -697,11 +703,11 @@ impl PrintResults for BrokenFiles {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} broken files.\n", self.information.number_of_broken_files);
-        for file_entry in self.broken_files.iter() {
+        for file_entry in &self.broken_files {
             println!("{} - {}", file_entry.path.display(), file_entry.error_string);
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

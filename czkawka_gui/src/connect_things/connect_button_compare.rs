@@ -60,7 +60,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         }
 
         // Check selected items
-        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, tree_view.selection(), nb_object.column_header.unwrap());
+        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, &tree_view.selection(), nb_object.column_header.unwrap());
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -68,7 +68,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         populate_groups_at_start(
             nb_object,
             &model,
-            shared_current_path.clone(),
+            &shared_current_path,
             tree_path,
             &image_compare_left,
             &image_compare_right,
@@ -78,8 +78,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
-            shared_image_cache.clone(),
-            shared_using_for_preview.clone(),
+            &shared_image_cache,
+            &shared_using_for_preview,
             &button_go_previous_compare_group,
             &button_go_next_compare_group,
         );
@@ -142,7 +142,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         populate_groups_at_start(
             nb_object,
             &model,
-            shared_current_path.clone(),
+            &shared_current_path,
             tree_path,
             &image_compare_left,
             &image_compare_right,
@@ -152,8 +152,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
-            shared_image_cache.clone(),
-            shared_using_for_preview.clone(),
+            &shared_image_cache,
+            &shared_using_for_preview,
             button_go_previous_compare_group,
             &button_go_next_compare_group,
         );
@@ -194,7 +194,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         populate_groups_at_start(
             nb_object,
             &model,
-            shared_current_path.clone(),
+            &shared_current_path,
             tree_path,
             &image_compare_left,
             &image_compare_right,
@@ -204,8 +204,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &check_button_right_preview_text,
             &scrolled_window_compare_choose_images,
             &label_group_info,
-            shared_image_cache.clone(),
-            shared_using_for_preview.clone(),
+            &shared_image_cache,
+            &shared_using_for_preview,
             &button_go_previous_compare_group,
             button_go_next_compare_group,
         );
@@ -261,7 +261,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 fn populate_groups_at_start(
     nb_object: &NotebookObject,
     model: &TreeModel,
-    shared_current_path: Rc<RefCell<Option<TreePath>>>,
+    shared_current_path: &Rc<RefCell<Option<TreePath>>>,
     tree_path: TreePath,
     image_compare_left: &Image,
     image_compare_right: &Image,
@@ -271,8 +271,8 @@ fn populate_groups_at_start(
     check_button_right_preview_text: &CheckButton,
     scrolled_window_compare_choose_images: &ScrolledWindow,
     label_group_info: &gtk4::Label,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
-    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     button_go_previous_compare_group: &gtk4::Button,
     button_go_next_compare_group: &gtk4::Button,
 ) {
@@ -318,8 +318,8 @@ fn populate_groups_at_start(
         &cache_all_images,
         image_compare_left,
         image_compare_right,
-        shared_using_for_preview.clone(),
-        shared_image_cache.clone(),
+        shared_using_for_preview,
+        shared_image_cache,
         check_button_left_preview_text,
         check_button_right_preview_text,
         model,
@@ -371,12 +371,12 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
                                     pixbuf = t;
                                 }
                                 Err(e) => {
-                                    println!("Failed to open image {}, reason {}", full_path, e);
+                                    println!("Failed to open image {full_path}, reason {e}");
                                 }
                             };
                         }
                         Err(e) => {
-                            println!("Failed to open image {}, reason {}", full_path, e);
+                            println!("Failed to open image {full_path}, reason {e}");
                         }
                     };
                     break 'czystka;
@@ -414,14 +414,14 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
 
         #[allow(clippy::never_loop)]
         loop {
-            let pixbuf_big = match resize_pixbuf_dimension(pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Bilinear) {
+            let pixbuf_big = match resize_pixbuf_dimension(&pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Bilinear) {
                 None => {
                     println!("Failed to resize image {full_path}.");
                     break;
                 }
                 Some(pixbuf) => pixbuf,
             };
-            let pixbuf_small = match resize_pixbuf_dimension(pixbuf_big.clone(), (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Bilinear) {
+            let pixbuf_small = match resize_pixbuf_dimension(&pixbuf_big, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Bilinear) {
                 None => {
                     println!("Failed to resize image {full_path}.");
                     break;
@@ -457,9 +457,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
         returned_vector.push((full_name, name, model.path(&used_iter)));
     }
 
-    if !model.iter_next(&used_iter) {
-        panic!("Found only header!");
-    }
+    assert!(model.iter_next(&used_iter), "Found only header!");
 
     loop {
         let name = model.get::<String>(&used_iter, column_name);
@@ -490,13 +488,9 @@ fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_nex
     assert!(model.get::<bool>(&tree_iter, column_header));
 
     if go_next {
-        if !model.iter_next(&tree_iter) {
-            panic!("Found only header!");
-        }
+        assert!(model.iter_next(&tree_iter), "Found only header!");
     } else {
-        if !model.iter_previous(&tree_iter) {
-            panic!("Found only header!");
-        }
+        assert!(model.iter_previous(&tree_iter), "Found only header!");
     }
 
     loop {
@@ -523,8 +517,8 @@ fn populate_similar_scrolled_view(
     image_cache: &[(String, String, Image, Image, TreePath)],
     image_compare_left: &Image,
     image_compare_right: &Image,
-    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    shared_image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
     model: &TreeModel,
@@ -560,7 +554,7 @@ fn populate_similar_scrolled_view(
 
         button_left.connect_clicked(move |_button_left| {
             shared_using_for_preview_clone.borrow_mut().0 = Some(tree_path_clone.clone());
-            update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
+            update_bottom_buttons(&all_gtk_box_clone, &shared_using_for_preview_clone, &shared_image_cache_clone);
             image_compare_left.set_paintable(big_thumbnail_clone.paintable().as_ref());
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
@@ -579,7 +573,7 @@ fn populate_similar_scrolled_view(
 
         button_right.connect_clicked(move |_button_right| {
             shared_using_for_preview_clone.borrow_mut().1 = Some(tree_path_clone.clone());
-            update_bottom_buttons(&all_gtk_box_clone, shared_using_for_preview_clone.clone(), shared_image_cache_clone.clone());
+            update_bottom_buttons(&all_gtk_box_clone, &shared_using_for_preview_clone, &shared_image_cache_clone);
             image_compare_right.set_paintable(big_thumbnail_clone.paintable().as_ref());
 
             let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
@@ -615,8 +609,8 @@ fn populate_similar_scrolled_view(
 /// Disables/Enables L/R buttons at the bottom scrolled view
 fn update_bottom_buttons(
     all_gtk_box: &gtk4::Box,
-    shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    image_cache: Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
+    image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
 ) {
     let left_tree_view = (shared_using_for_preview.borrow()).0.clone().unwrap();
     let right_tree_view = (shared_using_for_preview.borrow()).1.clone().unwrap();
@@ -635,7 +629,7 @@ fn update_bottom_buttons(
     }
 }
 
-fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: TreeSelection, column_header: i32) -> (u32, TreePath) {
+fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: &TreeSelection, column_header: i32) -> (u32, TreePath) {
     let mut current_group = 1;
     let mut possible_group = 1;
     let mut header_clone: TreeIter;

@@ -19,6 +19,12 @@ enum TypeOfTool {
     Symlinking,
 }
 
+#[derive(Debug)]
+struct SymHardlinkData {
+    original_data: String,
+    files_to_symhardlink: Vec<String>,
+}
+
 pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     // Hardlinking
     {
@@ -62,7 +68,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
 
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
-    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection).await {
+    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection) {
         return;
     }
 
@@ -80,7 +86,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         nb_object.column_path,
         column_header,
         nb_object.column_selection,
-        hardlinking,
+        &hardlinking,
         &text_view_errors,
     );
 
@@ -91,7 +97,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
             } else {
                 image_preview_duplicates.hide();
             }
-            *preview_path.borrow_mut() = "".to_string();
+            *preview_path.borrow_mut() = String::new();
         }
         _ => {}
     }
@@ -103,18 +109,13 @@ fn hardlink_symlink(
     column_path: i32,
     column_header: i32,
     column_selection: i32,
-    hardlinking: TypeOfTool,
+    hardlinking: &TypeOfTool,
     text_view_errors: &TextView,
 ) {
     reset_text_view(text_view_errors);
 
     let model = get_list_store(tree_view);
 
-    #[derive(Debug)]
-    struct SymHardlinkData {
-        original_data: String,
-        files_to_symhardlink: Vec<String>,
-    }
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of hardlinked files without its root
     let mut vec_symhardlink_data: Vec<SymHardlinkData> = Vec::new();
 
@@ -154,9 +155,7 @@ fn hardlink_symlink(
             }
 
             current_symhardlink_data = None;
-            if !model.iter_next(&current_iter) {
-                panic!("HEADER, shouldn't be a last item.");
-            }
+            assert!(model.iter_next(&current_iter), "HEADER, shouldn't be a last item.");
             continue;
         }
 
@@ -199,9 +198,9 @@ fn hardlink_symlink(
             break;
         }
     }
-    if hardlinking == TypeOfTool::Hardlinking {
+    if hardlinking == &TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
-            for file_to_hardlink in symhardlink_data.files_to_symhardlink.into_iter() {
+            for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
                     add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
                     continue;
@@ -210,7 +209,7 @@ fn hardlink_symlink(
         }
     } else {
         for symhardlink_data in vec_symhardlink_data {
-            for file_to_symlink in symhardlink_data.files_to_symhardlink.into_iter() {
+            for file_to_symlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,
@@ -330,7 +329,7 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     true
 }
 
-pub async fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
+pub fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {

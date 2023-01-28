@@ -68,7 +68,7 @@ pub const LANGUAGES_ALL: [Language; 15] = [
     },
 ];
 
-pub fn get_language_from_combo_box_text(combo_box_text: String) -> Language {
+pub fn get_language_from_combo_box_text(combo_box_text: &str) -> Language {
     for lang in LANGUAGES_ALL {
         if lang.combo_box_text == combo_box_text {
             return lang;

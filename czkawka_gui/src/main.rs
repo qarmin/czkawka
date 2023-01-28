@@ -65,13 +65,13 @@ mod tests;
 fn main() {
     let application = Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
-        build_ui(app, cmdline.arguments());
+        build_ui(app, &cmdline.arguments());
         0
     });
     application.run_with_args(&env::args().collect::<Vec<_>>());
 }
 
-fn build_ui(application: &Application, arguments: Vec<OsString>) {
+fn build_ui(application: &Application, arguments: &[OsString]) {
     let mut gui_data: GuiData = GuiData::new_with_application(application);
 
     // Used for getting data from thread
@@ -134,7 +134,7 @@ fn build_ui(application: &Application, arguments: Vec<OsString>) {
         &gui_data.settings,
         &gui_data.text_view_errors,
         &gui_data.scrolled_window_errors,
-        arguments.clone(),
+        arguments,
     );
     set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value().round() as usize);
     println!("Set thread number to {}", get_number_of_threads());

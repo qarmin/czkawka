@@ -62,7 +62,7 @@ pub fn connect_settings(gui_data: &GuiData) {
         let button_settings_load_configuration = gui_data.settings.button_settings_load_configuration.clone();
         let scrolled_window_errors = gui_data.scrolled_window_errors.clone();
         button_settings_load_configuration.connect_clicked(move |_| {
-            load_configuration(true, &upper_notebook, &main_notebook, &settings, &text_view_errors, &scrolled_window_errors, Vec::new());
+            load_configuration(true, &upper_notebook, &main_notebook, &settings, &text_view_errors, &scrolled_window_errors, &Vec::new());
         });
     }
     // Connect reset configuration button
@@ -111,7 +111,7 @@ pub fn connect_settings(gui_data: &GuiData) {
             let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
 
             button_settings_duplicates_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog(flg!("cache_clear_duplicates_title"), &settings_window);
+                let dialog = create_clear_cache_dialog(&flg!("cache_clear_duplicates_title"), &settings_window);
                 dialog.show();
 
                 let text_view_errors = text_view_errors.clone();
@@ -121,7 +121,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
                         for use_prehash in [true, false] {
-                            for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32].iter() {
+                            for type_of_hash in &[HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
                                 if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash, use_prehash) {
                                     let mut hashmap_to_save: BTreeMap<String, czkawka_core::common_dir_traversal::FileEntry> = Default::default();
                                     for (_, vec_file_entry) in cache_entries {
@@ -135,7 +135,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                                         type_of_hash,
                                         use_prehash,
                                         entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024),
-                                    )
+                                    );
                                 }
                             }
 
@@ -153,7 +153,7 @@ pub fn connect_settings(gui_data: &GuiData) {
             let text_view_errors = gui_data.text_view_errors.clone();
 
             button_settings_similar_images_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog(flg!("cache_clear_similar_images_title"), &settings_window);
+                let dialog = create_clear_cache_dialog(&flg!("cache_clear_similar_images_title"), &settings_window);
                 dialog.show();
 
                 let text_view_errors = text_view_errors.clone();
@@ -161,17 +161,15 @@ pub fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
-                        for hash_size in [8, 16, 32, 64].iter() {
-                            for image_filter in [
+                        for hash_size in &[8, 16, 32, 64] {
+                            for image_filter in &[
                                 FilterType::Lanczos3,
                                 FilterType::CatmullRom,
                                 FilterType::Gaussian,
                                 FilterType::Nearest,
                                 FilterType::Triangle,
-                            ]
-                            .iter()
-                            {
-                                for hash_alg in [HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean].iter() {
+                            ] {
+                                for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
                                     if let Some(cache_entries) = czkawka_core::similar_images::load_hashes_from_file(&mut messages, true, *hash_size, *hash_alg, *image_filter) {
                                         czkawka_core::similar_images::save_hashes_to_file(&cache_entries, &mut messages, false, *hash_size, *hash_alg, *image_filter);
                                     }
@@ -192,7 +190,7 @@ pub fn connect_settings(gui_data: &GuiData) {
             let text_view_errors = gui_data.text_view_errors.clone();
 
             button_settings_similar_videos_clear_cache.connect_clicked(move |_| {
-                let dialog = create_clear_cache_dialog(flg!("cache_clear_similar_videos_title"), &settings_window);
+                let dialog = create_clear_cache_dialog(&flg!("cache_clear_similar_videos_title"), &settings_window);
                 dialog.show();
 
                 let text_view_errors = text_view_errors.clone();
@@ -214,8 +212,8 @@ pub fn connect_settings(gui_data: &GuiData) {
     }
 }
 
-fn create_clear_cache_dialog(title_str: String, window_settings: &Window) -> gtk4::Dialog {
-    let dialog = gtk4::Dialog::builder().title(&title_str).modal(true).transient_for(window_settings).build();
+fn create_clear_cache_dialog(title_str: &str, window_settings: &Window) -> gtk4::Dialog {
+    let dialog = gtk4::Dialog::builder().title(title_str).modal(true).transient_for(window_settings).build();
     dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 

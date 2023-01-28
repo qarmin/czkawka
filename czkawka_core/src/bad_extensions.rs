@@ -166,6 +166,7 @@ pub struct Info {
 }
 
 impl Info {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -188,6 +189,7 @@ pub struct BadExtensions {
 }
 
 impl BadExtensions {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             text_messages: Messages::new(),
@@ -219,10 +221,12 @@ impl BadExtensions {
         self.debug_print();
     }
 
+    #[must_use]
     pub fn get_stopped_search(&self) -> bool {
         self.stopped_search
     }
 
+    #[must_use]
     pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
         &self.bad_extensions_files
     }
@@ -246,10 +250,12 @@ impl BadExtensions {
     #[cfg(not(target_family = "unix"))]
     pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
 
+    #[must_use]
     pub const fn get_text_messages(&self) -> &Messages {
         &self.text_messages
     }
 
+    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -301,7 +307,7 @@ impl BadExtensions {
                     self.files_to_check = files_to_check.clone();
                 }
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files".to_string());
+                Common::print_time(start_time, SystemTime::now(), "check_files");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -388,12 +394,12 @@ impl BadExtensions {
                     }
                     // Text longer than 10 characters is not considered as extension
                     if extension.len() > 10 {
-                        current_extension = "".to_string();
+                        current_extension = String::new();
                     } else {
                         current_extension = extension;
                     }
                 } else {
-                    current_extension = "".to_string();
+                    current_extension = String::new();
                 }
 
                 // Already have proper extension, no need to do more things
@@ -403,36 +409,35 @@ impl BadExtensions {
 
                 // Check for all extensions that file can use(not sure if it is worth to do it)
                 let mut all_available_extensions: BTreeSet<&str> = Default::default();
-                let think_extension = match current_extension.is_empty() {
-                    true => "".to_string(),
-                    false => {
-                        for mim in mime_guess::from_ext(proper_extension) {
-                            if let Some(all_ext) = get_mime_extensions(&mim) {
-                                for ext in all_ext {
-                                    all_available_extensions.insert(ext);
-                                }
+                let think_extension = if current_extension.is_empty() {
+                    String::new()
+                } else {
+                    for mim in mime_guess::from_ext(proper_extension) {
+                        if let Some(all_ext) = get_mime_extensions(&mim) {
+                            for ext in all_ext {
+                                all_available_extensions.insert(ext);
                             }
                         }
-
-                        // Workarounds
-                        if let Some(vec_pre) = hashmap_workarounds.get(current_extension.as_str()) {
-                            for pre in vec_pre {
-                                if all_available_extensions.contains(pre) {
-                                    all_available_extensions.insert(current_extension.as_str());
-                                    break;
-                                }
-                            }
-                        }
-
-                        let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
-                        for ext in &all_available_extensions {
-                            guessed_multiple_extensions.push_str(ext);
-                            guessed_multiple_extensions.push(',');
-                        }
-                        guessed_multiple_extensions.pop();
-
-                        guessed_multiple_extensions
                     }
+
+                    // Workarounds
+                    if let Some(vec_pre) = hashmap_workarounds.get(current_extension.as_str()) {
+                        for pre in vec_pre {
+                            if all_available_extensions.contains(pre) {
+                                all_available_extensions.insert(current_extension.as_str());
+                                break;
+                            }
+                        }
+                    }
+
+                    let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
+                    for ext in &all_available_extensions {
+                        guessed_multiple_extensions.push_str(ext);
+                        guessed_multiple_extensions.push(',');
+                    }
+                    guessed_multiple_extensions.pop();
+
+                    guessed_multiple_extensions
                 };
 
                 if all_available_extensions.is_empty() {
@@ -456,8 +461,8 @@ impl BadExtensions {
                 }))
             })
             .while_some()
-            .filter(|file_entry| file_entry.is_some())
-            .map(|file_entry| file_entry.unwrap())
+            .filter(Option::is_some)
+            .map(Option::unwrap)
             .collect::<Vec<_>>();
 
         // End thread which send info to gui
@@ -471,7 +476,7 @@ impl BadExtensions {
 
         self.information.number_of_files_with_bad_extension = self.bad_extensions_files.len();
 
-        Common::print_time(system_time, SystemTime::now(), "bad extension finding".to_string());
+        Common::print_time(system_time, SystemTime::now(), "bad extension finding");
 
         // Clean unused data
         self.files_to_check = Default::default();
@@ -540,13 +545,13 @@ impl SaveResults for BadExtensions {
 
         if !self.bad_extensions_files.is_empty() {
             writeln!(writer, "Found {} files with invalid extension.", self.information.number_of_files_with_bad_extension).unwrap();
-            for file_entry in self.bad_extensions_files.iter() {
+            for file_entry in &self.bad_extensions_files {
                 writeln!(writer, "{} ----- {}", file_entry.path.display(), file_entry.proper_extensions).unwrap();
             }
         } else {
             write!(writer, "Not found any files with invalid extension.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file".to_string());
+        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -557,10 +562,10 @@ impl PrintResults for BadExtensions {
     fn print_results(&self) {
         let start_time: SystemTime = SystemTime::now();
         println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
-        for file_entry in self.bad_extensions_files.iter() {
+        for file_entry in &self.bad_extensions_files {
             println!("{} ----- {}", file_entry.path.display(), file_entry.proper_extensions);
         }
 
-        Common::print_time(start_time, SystemTime::now(), "print_entries".to_string());
+        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

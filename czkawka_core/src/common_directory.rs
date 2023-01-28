@@ -19,12 +19,13 @@ pub struct Directories {
 }
 
 impl Directories {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
 
     pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        self.reference_directories = reference_directory
+        self.reference_directories = reference_directory;
     }
 
     /// Setting included directories, at least one must be provided or scan won't start
@@ -89,7 +90,7 @@ impl Directories {
 
         self.included_directories = checked_directories;
 
-        Common::print_time(start_time, SystemTime::now(), "set_included_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_included_directory");
         true
     }
 
@@ -148,12 +149,12 @@ impl Directories {
         }
         self.excluded_directories = checked_directories;
 
-        Common::print_time(start_time, SystemTime::now(), "set_excluded_directory".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_excluded_directory");
     }
 
     #[cfg(target_family = "unix")]
     pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.exclude_other_filesystems = Some(exclude_other_filesystems)
+        self.exclude_other_filesystems = Some(exclude_other_filesystems);
     }
 
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated etc.
@@ -294,7 +295,7 @@ impl Directories {
         // Not needed, but better is to have sorted everything
         self.excluded_directories.sort_unstable();
         self.included_directories.sort_unstable();
-        Common::print_time(start_time, SystemTime::now(), "optimize_directories".to_string());
+        Common::print_time(start_time, SystemTime::now(), "optimize_directories");
 
         // Get device IDs for included directories
         #[cfg(target_family = "unix")]
@@ -323,6 +324,7 @@ impl Directories {
     }
 
     #[cfg(target_family = "unix")]
+    #[must_use]
     pub fn exclude_other_filesystems(&self) -> bool {
         self.exclude_other_filesystems.unwrap_or(false)
     }

@@ -10,6 +10,7 @@ pub struct ExcludedItems {
 }
 
 impl ExcludedItems {
+    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -54,7 +55,7 @@ impl ExcludedItems {
             checked_expressions.push(expression);
         }
         self.items = checked_expressions;
-        Common::print_time(start_time, SystemTime::now(), "set_excluded_items".to_string());
+        Common::print_time(start_time, SystemTime::now(), "set_excluded_items");
     }
 
     /// Checks whether a specified path is excluded from searching

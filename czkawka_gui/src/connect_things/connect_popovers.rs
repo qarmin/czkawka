@@ -98,10 +98,8 @@ fn popover_all_except_oldest_newest(
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
             let mut used_index: Option<usize> = None;
             let mut current_index: usize = 0;
-            let mut modification_time_min_max: u64 = match except_oldest {
-                true => u64::MAX,
-                false => 0,
-            };
+
+            let mut modification_time_min_max: u64 = if except_oldest { u64::MAX } else { 0 };
 
             let mut file_length: usize = 0;
 
@@ -172,10 +170,7 @@ fn popover_one_oldest_newest(
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
             let mut used_index: Option<usize> = None;
             let mut current_index: usize = 0;
-            let mut modification_time_min_max: u64 = match check_oldest {
-                true => u64::MAX,
-                false => 0,
-            };
+            let mut modification_time_min_max: u64 = if check_oldest { u64::MAX } else { 0 };
 
             let mut file_length: usize = 0;
 
@@ -242,9 +237,10 @@ fn popover_custom_select_unselect(
 ) {
     popover.popdown();
 
-    let window_title = match select_things {
-        false => flg!("popover_custom_mode_unselect"),
-        true => flg!("popover_custom_mode_select"),
+    let window_title = if select_things {
+        flg!("popover_custom_mode_select")
+    } else {
+        flg!("popover_custom_mode_unselect")
     };
 
     // Dialog for select/unselect items
@@ -290,7 +286,7 @@ fn popover_custom_select_unselect(
                 let message;
                 let text_to_check = entry_rust_regex.text().to_string();
                 if text_to_check.is_empty() {
-                    message = "".to_string();
+                    message = String::new();
                 } else {
                     match Regex::new(&text_to_check) {
                         Ok(_) => message = flg!("popover_valid_regex"),
@@ -382,26 +378,25 @@ fn popover_custom_select_unselect(
                 let check_all_selected = check_button_select_not_all_results.is_active();
 
                 if check_button_path.is_active() || check_button_name.is_active() || check_button_rust_regex.is_active() {
-                    let compiled_regex = match check_regex {
-                        true => match Regex::new(&regex_wildcard) {
-                            Ok(t) => t,
-                            Err(_) => {
-                                eprintln!("What? Regex should compile properly.");
-                                confirmation_dialog_select_unselect.close();
-                                return;
-                            }
-                        },
-                        false => Regex::new("").unwrap(),
+                    let compiled_regex = if check_regex {
+                        if let Ok(t) = Regex::new(&regex_wildcard) {
+                            t
+                        } else {
+                            eprintln!("What? Regex should compile properly.");
+                            confirmation_dialog_select_unselect.close();
+                            return;
+                        }
+                    } else {
+                        Regex::new("").unwrap()
                     };
 
                     let model = get_list_store(&tree_view);
 
-                    let iter = match model.iter_first() {
-                        Some(t) => t,
-                        None => {
-                            confirmation_dialog_select_unselect.close();
-                            return;
-                        }
+                    let iter = if let Some(t) = model.iter_first() {
+                        t
+                    } else {
+                        confirmation_dialog_select_unselect.close();
+                        return;
                     };
 
                     let mut number_of_all_things = 0;
@@ -524,14 +519,8 @@ fn popover_all_except_biggest_smallest(
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
             let mut used_index: Option<usize> = None;
             let mut current_index: usize = 0;
-            let mut size_as_bytes_min_max: u64 = match except_biggest {
-                true => 0,
-                false => u64::MAX,
-            };
-            let mut number_of_pixels_min_max: u64 = match except_biggest {
-                true => 0,
-                false => u64::MAX,
-            };
+            let mut size_as_bytes_min_max: u64 = if except_biggest { 0 } else { u64::MAX };
+            let mut number_of_pixels_min_max: u64 = if except_biggest { 0 } else { u64::MAX };
 
             loop {
                 if model.get::<bool>(&iter, column_header) {
@@ -547,7 +536,7 @@ fn popover_all_except_biggest_smallest(
                 if let Some(column_dimensions) = column_dimensions {
                     let dimensions_string = model.get::<String>(&iter, column_dimensions);
 
-                    let dimensions = change_dimension_to_krotka(dimensions_string);
+                    let dimensions = change_dimension_to_krotka(&dimensions_string);
                     let number_of_pixels = dimensions.0 * dimensions.1;
 
                     if except_biggest {

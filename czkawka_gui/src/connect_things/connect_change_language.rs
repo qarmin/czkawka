@@ -23,7 +23,7 @@ fn change_language(gui_data: &GuiData) {
         ("czkawka_gui", localizer_gui::localizer_gui()),
     ];
 
-    let lang_short = get_language_from_combo_box_text(gui_data.settings.combo_box_settings_language.active_text().unwrap().to_string()).short_text;
+    let lang_short = get_language_from_combo_box_text(&gui_data.settings.combo_box_settings_language.active_text().unwrap()).short_text;
 
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).unwrap()];
     for (lib, localizer) in localizers {
@@ -39,11 +39,11 @@ pub fn load_system_language(gui_data: &GuiData) {
 
     if let Some(language) = requested_languages.get(0) {
         let old_short_lang = language.to_string();
-        let mut short_lang = "".to_string();
+        let mut short_lang = String::new();
         // removes from e.g. en_zb, ending _zd since Czkawka don't support this(maybe could add this in future, but only when)
         for i in old_short_lang.chars() {
             if i.is_ascii_alphabetic() {
-                short_lang.push(i)
+                short_lang.push(i);
             } else {
                 break;
             }

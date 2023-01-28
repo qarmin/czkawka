@@ -26,6 +26,7 @@ pub fn get_number_of_threads() -> usize {
 pub fn set_default_number_of_threads() {
     set_number_of_threads(num_cpus::get());
 }
+#[must_use]
 pub fn get_default_number_of_threads() -> usize {
     num_cpus::get()
 }
@@ -181,6 +182,7 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     Some(DynamicImage::ImageRgb8(image))
 }
 
+#[must_use]
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
         (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
@@ -189,6 +191,7 @@ pub fn split_path(path: &Path) -> (String, String) {
     }
 }
 
+#[must_use]
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
     format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
 }
@@ -196,7 +199,7 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 impl Common {
     /// Printing time which took between start and stop point and prints also function name
     #[allow(unused_variables)]
-    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: String) {
+    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: &str) {
         #[cfg(debug_assertions)]
         println!(
             "Execution of function \"{}\" took {:?}",
@@ -205,6 +208,7 @@ impl Common {
         );
     }
 
+    #[must_use]
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
         let mut path: &Path;
         let mut warnings: Vec<String> = Vec::new();
@@ -220,15 +224,16 @@ impl Common {
         }
         warnings
     }
+    #[must_use]
     pub fn delete_one_entry(entry: &str) -> String {
         let path: &Path = Path::new(entry);
-        let mut warning: String = String::from("");
+        let mut warning: String = String::new();
         if path.is_dir() {
             if let Err(e) = fs::remove_dir_all(entry) {
-                warning = format!("Failed to remove folder {entry}, reason {e}")
+                warning = format!("Failed to remove folder {entry}, reason {e}");
             }
         } else if let Err(e) = fs::remove_file(entry) {
-            warning = format!("Failed to remove file {entry}, reason {e}")
+            warning = format!("Failed to remove file {entry}, reason {e}");
         }
         warning
     }
