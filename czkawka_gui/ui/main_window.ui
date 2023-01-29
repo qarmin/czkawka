@@ -1032,6 +1032,29 @@
                         </child>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkMenuButton" id="buttons_sort">
+                        <property name="focus-on-click">0</property>
+                        <property name="focusable">1</property>
+                        <property name="receives-default">1</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">center</property>
+                            <property name="spacing">2</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">image-missing</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_buttons_sort">
+                                <property name="label">SortMenu</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>

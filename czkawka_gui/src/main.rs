@@ -26,7 +26,7 @@ use connect_things::connect_change_language::*;
 use connect_things::connect_duplicate_buttons::connect_duplicate_combo_box;
 use connect_things::connect_header_buttons::*;
 use connect_things::connect_notebook_tabs::*;
-use connect_things::connect_popovers::*;
+use connect_things::connect_popovers_select::*;
 use connect_things::connect_progress_window::*;
 use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
@@ -37,6 +37,7 @@ use czkawka_core::*;
 use gui_structs::gui_data::*;
 
 use crate::compute_results::*;
+use crate::connect_things::connect_button_sort::connect_button_sort;
 use crate::initialize_gui::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::*;
@@ -160,6 +161,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         futures_sender_bad_extensions,
     );
     connect_button_select(&gui_data);
+    connect_button_sort(&gui_data);
     connect_button_stop(&gui_data);
     connect_button_hardlink_symlink(&gui_data);
     connect_button_move(&gui_data);

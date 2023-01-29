@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.10.3 -->
+<interface>
+  <!-- interface-name popover_sort.ui -->
+  <requires lib="gtk" version="4.6"/>
+  <object class="GtkPopover" id="popover_sort">
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkButton" id="buttons_popover_sort_file_name">
+            <property name="focusable">1</property>
+            <property name="label">Sort by file name</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_sort_folder_name">
+            <property name="focusable">1</property>
+            <property name="label">Sort by folder name</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_sort_full_name">
+            <property name="focusable">1</property>
+            <property name="label">Sort by full name</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_sort_size">
+            <property name="focusable">1</property>
+            <property name="label">Sort by size</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_sort_selection">
+            <property name="focusable">1</property>
+            <property name="label">Sort by selection</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

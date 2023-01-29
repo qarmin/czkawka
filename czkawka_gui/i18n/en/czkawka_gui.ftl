@@ -238,6 +238,11 @@ popover_custom_all_in_group_label = Don't select all records in group
 popover_custom_mode_unselect = Unselect Custom
 popover_custom_mode_select = Select Custom
 
+popover_sort_file_name = "Sort by file name"
+popover_sort_folder_name = "Sort by folder name"
+popover_sort_full_name = "Sort by full name"
+popover_sort_size = "Sort by size"
+popover_sort_selection = "Sort by selection"
 
 popover_invalid_regex = Regex is invalid
 popover_valid_regex = Regex is valid
@@ -250,6 +255,7 @@ bottom_save_button = Save
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Move
+bottom_sort_button = Sort
 
 bottom_search_button_tooltip = Start search
 bottom_select_button_tooltip = Select records. Only selected files/folders can be later processed.
@@ -268,10 +274,12 @@ bottom_hardlink_button_not_available_tooltip =
         Button is disabled, because hardlinks cannot be created.
         Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
         If app already works with such privileges check for similar issues on Github.
-bottom_move_button_tooltip = 
+bottom_move_button_tooltip =
         Moves files to chosen directory.
         It copies all files to the directory without preserving the directory tree.
         When trying to move two files with identical name to folder, second will fail and show error.
+bottom_sort_button_tooltip =
+        Sorts files/folders according to selected method.
 
 bottom_show_errors_tooltip = Show/Hide bottom text panel.
 bottom_show_upper_notebook_tooltip = Show/Hide upper notebook panel.

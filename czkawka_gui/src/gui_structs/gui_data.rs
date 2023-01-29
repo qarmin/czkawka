@@ -25,7 +25,8 @@ use crate::gui_structs::gui_bottom_buttons::GuiBottomButtons;
 use crate::gui_structs::gui_compare_images::GuiCompareImages;
 use crate::gui_structs::gui_header::GuiHeader;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
-use crate::gui_structs::gui_popovers::GuiPopovers;
+use crate::gui_structs::gui_popovers_select::GuiSelectPopovers;
+use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
@@ -33,25 +34,26 @@ use crate::help_functions::BottomButtonsEnum;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
-pub const ICON_ABOUT: &[u8; 4458] = include_bytes!("../../icons/icon_about.png");
-pub const CZK_ICON_ADD: &[u8; 677] = include_bytes!("../../icons/czk_add.svg");
-pub const CZK_ICON_COMPARE: &[u8; 5700] = include_bytes!("../../icons/czk_compare.svg");
-pub const CZK_ICON_DELETE: &[u8; 489] = include_bytes!("../../icons/czk_delete.svg");
-pub const CZK_ICON_HARDLINK: &[u8; 17326] = include_bytes!("../../icons/czk_hardlink.svg");
-pub const CZK_ICON_HIDE_DOWN: &[u8; 3057] = include_bytes!("../../icons/czk_hide_down.svg");
-pub const CZK_ICON_HIDE_UP: &[u8; 3310] = include_bytes!("../../icons/czk_hide_up.svg");
-pub const CZK_ICON_INFO: &[u8; 3325] = include_bytes!("../../icons/czk_info.svg");
-pub const CZK_ICON_LEFT: &[u8; 245] = include_bytes!("../../icons/czk_left.svg");
-pub const CZK_ICON_MANUAL_ADD: &[u8; 677] = include_bytes!("../../icons/czk_manual_add.svg");
-pub const CZK_ICON_MOVE: &[u8; 2535] = include_bytes!("../../icons/czk_move.svg");
-pub const CZK_ICON_RIGHT: &[u8; 278] = include_bytes!("../../icons/czk_right.svg");
-pub const CZK_ICON_SAVE: &[u8; 462] = include_bytes!("../../icons/czk_save.svg");
-pub const CZK_ICON_SEARCH: &[u8; 1517] = include_bytes!("../../icons/czk_search.svg");
-pub const CZK_ICON_SELECT: &[u8; 370] = include_bytes!("../../icons/czk_select.svg");
-pub const CZK_ICON_SETTINGS: &[u8; 11677] = include_bytes!("../../icons/czk_settings.svg");
-pub const CZK_ICON_STOP: &[u8; 618] = include_bytes!("../../icons/czk_stop.svg");
-pub const CZK_ICON_SYMLINK: &[u8; 2455] = include_bytes!("../../icons/czk_symlink.svg");
-pub const CZK_ICON_TRASH: &[u8; 709] = include_bytes!("../../icons/czk_trash.svg");
+pub const ICON_ABOUT: &[u8] = include_bytes!("../../icons/icon_about.png");
+pub const CZK_ICON_ADD: &[u8] = include_bytes!("../../icons/czk_add.svg");
+pub const CZK_ICON_COMPARE: &[u8] = include_bytes!("../../icons/czk_compare.svg");
+pub const CZK_ICON_DELETE: &[u8] = include_bytes!("../../icons/czk_delete.svg");
+pub const CZK_ICON_HARDLINK: &[u8] = include_bytes!("../../icons/czk_hardlink.svg");
+pub const CZK_ICON_HIDE_DOWN: &[u8] = include_bytes!("../../icons/czk_hide_down.svg");
+pub const CZK_ICON_HIDE_UP: &[u8] = include_bytes!("../../icons/czk_hide_up.svg");
+pub const CZK_ICON_INFO: &[u8] = include_bytes!("../../icons/czk_info.svg");
+pub const CZK_ICON_LEFT: &[u8] = include_bytes!("../../icons/czk_left.svg");
+pub const CZK_ICON_MANUAL_ADD: &[u8] = include_bytes!("../../icons/czk_manual_add.svg");
+pub const CZK_ICON_MOVE: &[u8] = include_bytes!("../../icons/czk_move.svg");
+pub const CZK_ICON_RIGHT: &[u8] = include_bytes!("../../icons/czk_right.svg");
+pub const CZK_ICON_SAVE: &[u8] = include_bytes!("../../icons/czk_save.svg");
+pub const CZK_ICON_SEARCH: &[u8] = include_bytes!("../../icons/czk_search.svg");
+pub const CZK_ICON_SELECT: &[u8] = include_bytes!("../../icons/czk_select.svg");
+pub const CZK_ICON_SETTINGS: &[u8] = include_bytes!("../../icons/czk_settings.svg");
+pub const CZK_ICON_SORT: &[u8] = include_bytes!("../../icons/czk_sort.svg");
+pub const CZK_ICON_STOP: &[u8] = include_bytes!("../../icons/czk_stop.svg");
+pub const CZK_ICON_SYMLINK: &[u8] = include_bytes!("../../icons/czk_symlink.svg");
+pub const CZK_ICON_TRASH: &[u8] = include_bytes!("../../icons/czk_trash.svg");
 
 #[derive(Clone)]
 pub struct GuiData {
@@ -64,7 +66,8 @@ pub struct GuiData {
 
     pub main_notebook: GuiMainNotebook,
     pub upper_notebook: GuiUpperNotebook,
-    pub popovers: GuiPopovers,
+    pub popovers_select: GuiSelectPopovers,
+    pub popovers_sort: GuiSortPopovers,
     pub bottom_buttons: GuiBottomButtons,
     pub progress_window: GuiProgressDialog,
     pub about: GuiAbout,
@@ -116,14 +119,15 @@ impl GuiData {
         window_main.set_title(Some(&flg!("window_main_title")));
         window_main.show();
 
-        let pixbuf = Pixbuf::from_read(std::io::BufReader::new(&ICON_ABOUT[..])).unwrap();
+        let pixbuf = Pixbuf::from_read(std::io::BufReader::new(ICON_ABOUT)).unwrap();
 
         window_main.set_application(Some(application));
 
         let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
-        let popovers = GuiPopovers::create_from_builder();
-        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers.popover_select);
+        let popovers_select = GuiSelectPopovers::create_from_builder();
+        let popovers_sort = GuiSortPopovers::create_from_builder();
+        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers_select.popover_select);
         let progress_window = GuiProgressDialog::create_from_builder(&window_main);
         let about = GuiAbout::create_from_builder(&window_main, &pixbuf);
         let header = GuiHeader::create_from_builder(&builder);
@@ -184,7 +188,8 @@ impl GuiData {
             window_main,
             main_notebook,
             upper_notebook,
-            popovers,
+            popovers_select,
+            popovers_sort,
             bottom_buttons,
             progress_window,
             about,
@@ -218,7 +223,8 @@ impl GuiData {
 
         self.main_notebook.update_language();
         self.upper_notebook.update_language();
-        self.popovers.update_language();
+        self.popovers_select.update_language();
+        self.popovers_sort.update_language();
         self.bottom_buttons.update_language();
         self.progress_window.update_language();
         self.about.update_language();

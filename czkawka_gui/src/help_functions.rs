@@ -64,6 +64,7 @@ pub enum BottomButtonsEnum {
     Hardlink,
     Move,
     Compare,
+    Sort,
 }
 
 pub enum Message {

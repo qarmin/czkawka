@@ -10,6 +10,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, panic, thread};
 
 use crossbeam_channel::Receiver;
+use pdf::object::ParseOptions;
 use pdf::PdfError;
 use pdf::PdfError::Try;
 use rayon::prelude::*;
@@ -521,41 +522,32 @@ impl BrokenFiles {
                         Err(_inspected) => Some(None),
                     },
 
-                    TypeOfFile::PDF => {
-                        match fs::read(&file_entry.path) {
-                            Ok(content) => {
-                                // Will be available in pdf > 0.7.2
-                                // let parser_options = ParseOptions {
-                                //     allow_error_in_option: true,
-                                //     allow_xref_error: true,
-                                //     allow_invalid_ops: true,
-                                //     allow_missing_endobj: true,
-                                // };
-                                // if let Err(e) = pdf::file::File::from_data_with_options(content, parser_options) {
+                    TypeOfFile::PDF => match fs::read(&file_entry.path) {
+                        Ok(content) => {
+                            let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
 
-                                let mut file_entry_clone = file_entry.clone();
-                                let result = panic::catch_unwind(|| {
-                                    if let Err(e) = pdf::file::File::from_data(content) {
-                                        file_entry.error_string = e.to_string();
-                                        let error = unpack_pdf_error(e);
-                                        if let PdfError::InvalidPassword = error {
-                                            return Some(None);
-                                        }
+                            let mut file_entry_clone = file_entry.clone();
+                            let result = panic::catch_unwind(|| {
+                                if let Err(e) = pdf::file::File::from_data_with_options(content, parser_options) {
+                                    file_entry.error_string = e.to_string();
+                                    let error = unpack_pdf_error(e);
+                                    if let PdfError::InvalidPassword = error {
+                                        return Some(None);
                                     }
-                                    Some(Some(file_entry))
-                                });
-                                if let Ok(pdf_result) = result {
-                                    pdf_result
-                                } else {
-                                    let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
-                                    println!("{message}");
-                                    file_entry_clone.error_string = message;
-                                    Some(Some(file_entry_clone))
                                 }
+                                Some(Some(file_entry))
+                            });
+                            if let Ok(pdf_result) = result {
+                                pdf_result
+                            } else {
+                                let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
+                                println!("{message}");
+                                file_entry_clone.error_string = message;
+                                Some(Some(file_entry_clone))
                             }
-                            Err(_inspected) => Some(None),
                         }
-                    }
+                        Err(_inspected) => Some(None),
+                    },
 
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
                     TypeOfFile::Unknown => Some(None),

@@ -4,7 +4,7 @@ use gtk4::Builder;
 use crate::flg;
 
 #[derive(Clone)]
-pub struct GuiPopovers {
+pub struct GuiSelectPopovers {
     pub buttons_popover_select_all: gtk4::Button,
     pub buttons_popover_unselect_all: gtk4::Button,
     pub buttons_popover_reverse: gtk4::Button,
@@ -29,7 +29,7 @@ pub struct GuiPopovers {
     pub popover_right_click: gtk4::Popover,
 }
 
-impl GuiPopovers {
+impl GuiSelectPopovers {
     pub fn create_from_builder() -> Self {
         let glade_src = include_str!("../../ui/popover_select.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
