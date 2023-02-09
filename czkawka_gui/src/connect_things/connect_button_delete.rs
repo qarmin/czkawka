@@ -140,7 +140,7 @@ pub async fn check_if_can_delete_files(
 }
 
 fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected_items: u64, number_of_selected_groups: u64) -> (Dialog, CheckButton) {
-    let dialog = Dialog::builder().title(&flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
+    let dialog = Dialog::builder().title(flg!("delete_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
@@ -178,7 +178,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
 
 fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
     let dialog = Dialog::builder()
-        .title(&flg!("delete_all_files_in_group_title"))
+        .title(flg!("delete_all_files_in_group_title"))
         .transient_for(window_main)
         .modal(true)
         .build();

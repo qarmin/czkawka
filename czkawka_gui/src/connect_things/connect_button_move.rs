@@ -76,7 +76,7 @@ fn move_things(
     reset_text_view(text_view_errors);
 
     let chooser = gtk4::FileChooserDialog::builder()
-        .title(&flg!("move_files_title_dialog"))
+        .title(flg!("move_files_title_dialog"))
         .action(gtk4::FileChooserAction::SelectFolder)
         .transient_for(window_main)
         .modal(true)

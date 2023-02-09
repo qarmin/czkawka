@@ -26,13 +26,13 @@ hamming = "0.1.3"
 
 # Needed by same music
 bitflags = "1.3.2"
-lofty = "0.10.0"
+lofty = "0.11.0"
 
 # Futures - needed by async progress sender
-futures = "0.3.25"
+futures = "0.3.26"
 
 # Needed by broken files
-zip = { version = "0.6.3", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "0.6.4", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1.0"
 pdf = "0.8.0"
 

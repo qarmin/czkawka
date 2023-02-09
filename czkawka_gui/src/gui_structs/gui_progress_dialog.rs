@@ -42,7 +42,7 @@ impl GuiProgressDialog {
 
         let button_stop_in_dialog: gtk4::Button = builder.object("button_stop_in_dialog").unwrap();
         let evk_button_stop_in_dialog = EventControllerKey::new();
-        button_stop_in_dialog.add_controller(&evk_button_stop_in_dialog);
+        button_stop_in_dialog.add_controller(evk_button_stop_in_dialog.clone());
 
         set_icon_of_button(&button_stop_in_dialog, CZK_ICON_STOP);
 

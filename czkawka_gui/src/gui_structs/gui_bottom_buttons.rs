@@ -53,8 +53,8 @@ impl GuiBottomButtons {
         let gc_buttons_select: GestureClick = GestureClick::new();
         let gc_buttons_sort: GestureClick = GestureClick::new();
 
-        buttons_select.add_controller(&gc_buttons_select);
-        buttons_select.add_controller(&gc_buttons_sort);
+        buttons_select.add_controller(gc_buttons_select.clone());
+        buttons_select.add_controller(gc_buttons_sort.clone());
 
         set_icon_of_button(&buttons_search, CZK_ICON_SEARCH);
         set_icon_of_button(&buttons_select, CZK_ICON_SELECT);

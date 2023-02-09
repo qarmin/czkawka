@@ -262,7 +262,7 @@ fn hardlink_symlink(
 
 fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     let dialog = Dialog::builder()
-        .title(&flg!("hard_sym_invalid_selection_title_dialog"))
+        .title(flg!("hard_sym_invalid_selection_title_dialog"))
         .transient_for(window_main)
         .modal(true)
         .build();
@@ -370,7 +370,7 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
 }
 
 fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
-    let dialog = Dialog::builder().title(&flg!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
+    let dialog = Dialog::builder().title(flg!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 

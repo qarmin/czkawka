@@ -245,18 +245,18 @@ fn popover_custom_select_unselect(
 
     // Dialog for select/unselect items
     {
-        let dialog = gtk4::Dialog::builder().title(&window_title).transient_for(window_main).modal(true).build();
+        let dialog = gtk4::Dialog::builder().title(window_title).transient_for(window_main).modal(true).build();
         dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
         dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-        let check_button_path = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_path_label")).build();
-        let check_button_name = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_name_label")).build();
-        let check_button_rust_regex = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_regex_label")).build();
+        let check_button_path = gtk4::CheckButton::builder().label(flg!("popover_custom_regex_path_label")).build();
+        let check_button_name = gtk4::CheckButton::builder().label(flg!("popover_custom_regex_name_label")).build();
+        let check_button_rust_regex = gtk4::CheckButton::builder().label(flg!("popover_custom_regex_regex_label")).build();
 
-        let check_button_case_sensitive = gtk4::CheckButton::builder().label(&flg!("popover_custom_case_sensitive_check_button")).build();
+        let check_button_case_sensitive = gtk4::CheckButton::builder().label(flg!("popover_custom_case_sensitive_check_button")).build();
         check_button_case_sensitive.set_active(false);
 
-        let check_button_select_not_all_results = gtk4::CheckButton::builder().label(&flg!("popover_custom_all_in_group_label")).build();
+        let check_button_select_not_all_results = gtk4::CheckButton::builder().label(flg!("popover_custom_all_in_group_label")).build();
         check_button_select_not_all_results.set_active(true);
 
         let entry_path = gtk4::Entry::new();

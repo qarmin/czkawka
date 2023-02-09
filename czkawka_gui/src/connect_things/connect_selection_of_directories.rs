@@ -87,7 +87,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
     };
 
     let file_chooser = gtk4::FileChooserDialog::builder()
-        .title(&folders_to)
+        .title(folders_to)
         .action(gtk4::FileChooserAction::SelectFolder)
         .transient_for(window_main)
         .modal(true)
@@ -136,7 +136,7 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let dialog = gtk4::Dialog::builder()
-        .title(&flg!("include_manually_directories_dialog_title"))
+        .title(flg!("include_manually_directories_dialog_title"))
         .transient_for(window_main)
         .modal(true)
         .build();
