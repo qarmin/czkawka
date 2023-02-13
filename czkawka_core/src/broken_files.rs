@@ -529,7 +529,15 @@ impl BrokenFiles {
                             let mut file_entry_clone = file_entry.clone();
                             let result = panic::catch_unwind(|| {
                                 if let Err(e) = pdf::file::File::from_data_with_options(content, parser_options) {
-                                    file_entry.error_string = e.to_string();
+                                    let mut error_string = e.to_string();
+                                    // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
+                                    if error_string.starts_with("Try at") {
+                                        if let Some(start_index) = error_string.find("/pdf-") {
+                                            error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
+                                        }
+                                    }
+
+                                    file_entry.error_string = error_string;
                                     let error = unpack_pdf_error(e);
                                     if let PdfError::InvalidPassword = error {
                                         return Some(None);
