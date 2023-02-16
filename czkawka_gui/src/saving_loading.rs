@@ -8,7 +8,7 @@ use std::{env, fs};
 use czkawka_core::common::get_default_number_of_threads;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
-use gtk4::{ComboBoxText, ScrolledWindow, TextView};
+use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::similar_images::SIMILAR_VALUES;
@@ -735,7 +735,7 @@ pub fn load_configuration(
     let maximal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
 
     let loading_at_start: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::LoadAtStart).unwrap().clone(), DEFAULT_LOAD_AT_START);
-    let saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SaveAtExit).unwrap().clone(), DEFAULT_SAVE_ON_EXIT);
+    let mut saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SaveAtExit).unwrap().clone(), DEFAULT_SAVE_ON_EXIT);
     let confirm_deletion: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ConfirmDeletionFiles).unwrap().clone(), DEFAULT_CONFIRM_DELETION);
     let confirm_group_deletion: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ConfirmDeletionAllFilesInGroup).unwrap().clone(), DEFAULT_CONFIRM_GROUP_DELETION);
     let show_previews_similar_images: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ImagePreviewImage).unwrap().clone(), DEFAULT_SHOW_IMAGE_PREVIEW);
@@ -802,72 +802,69 @@ pub fn load_configuration(
     let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_AUDIO);
     let thread_number = loaded_entries.get_object(hashmap_ls.get(&LoadText::ThreadNumber).unwrap().clone(), DEFAULT_THREAD_NUMBER);
 
-    // Setting data
-    if manual_execution || loading_at_start {
-        {
-            // Handle here arguments that were added to app e.g. czkawka_gui /home --/home/roman
-            if loading_at_start && arguments.len() > 1 {
-                let iter_i = arguments.iter().skip(1);
-                let iter_e = iter_i.clone();
-                included_directories = iter_i
-                    .filter_map(|e| {
-                        let r = e.to_string_lossy().to_string();
-                        if !r.starts_with("--") {
-                            let path = Path::new(&r);
-                            if !path.exists() {
-                                return None;
-                            }
-                            match path.canonicalize() {
-                                Ok(r) => Some(r.to_string_lossy().to_string()),
-                                Err(_) => None,
-                            }
-                        } else {
-                            None
+    let mut set_start_folders = false;
+    if !manual_execution {
+        // Handle here arguments that were added to app e.g. czkawka_gui /home --/home/roman
+        if arguments.len() > 1 {
+            let iter_i = arguments.iter().skip(1);
+            let iter_e = iter_i.clone();
+            let inc_dir = iter_i
+                .filter_map(|e| {
+                    let r = e.to_string_lossy().to_string();
+                    if !r.starts_with("--") {
+                        let path = Path::new(&r);
+                        if !path.exists() {
+                            return None;
                         }
-                    })
-                    .collect::<Vec<_>>();
-                excluded_directories = iter_e
-                    .filter_map(|e| {
-                        let r = e.to_string_lossy().to_string();
-                        if let Some(r) = r.strip_prefix("--") {
-                            let path = Path::new(&r);
-                            if !path.exists() {
-                                return None;
-                            }
-                            match path.canonicalize() {
-                                Ok(r) => Some(r.to_string_lossy().to_string()),
-                                Err(_) => None,
-                            }
-                        } else {
-                            None
+                        match path.canonicalize() {
+                            Ok(r) => Some(r.to_string_lossy().to_string()),
+                            Err(_) => None,
                         }
-                    })
-                    .collect::<Vec<_>>();
-            }
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+            let exc_dir = iter_e
+                .filter_map(|e| {
+                    let r = e.to_string_lossy().to_string();
+                    if let Some(r) = r.strip_prefix("--") {
+                        let path = Path::new(&r);
+                        if !path.exists() {
+                            return None;
+                        }
+                        match path.canonicalize() {
+                            Ok(r) => Some(r.to_string_lossy().to_string()),
+                            Err(_) => None,
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
 
-            // Include Directories
-            let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
-            let list_store = get_list_store(&tree_view_included_directories);
-            list_store.clear();
-
-            for directory in included_directories {
-                let values: [(u32, &dyn ToValue); 2] = [
-                    (ColumnsIncludedDirectory::Path as u32, &directory),
-                    (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-
-            //// Exclude Directories
-            let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
-            let list_store = get_list_store(&tree_view_excluded_directories);
-            list_store.clear();
-
-            for directory in excluded_directories {
-                let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &directory)];
-                list_store.set(&list_store.append(), &values);
+            if inc_dir.is_empty() {
+                println!("Arguments {arguments:?} should contains at least one directory to include")
+            } else {
+                included_directories = inc_dir;
+                excluded_directories = exc_dir;
+                saving_at_exit = false;
+                set_start_folders = true;
             }
         }
+    }
+
+    if manual_execution || loading_at_start || set_start_folders {
+        set_directories(
+            &upper_notebook.tree_view_included_directories,
+            &upper_notebook.tree_view_excluded_directories,
+            &included_directories,
+            &excluded_directories,
+        );
+    }
+
+    // Setting data
+    if loading_at_start || manual_execution {
         //// Language ComboBoxText
         {
             for (index, lang) in LANGUAGES_ALL.iter().enumerate() {
@@ -963,6 +960,29 @@ pub fn load_configuration(
         settings.scale_settings_number_of_threads.set_value(thread_number as f64);
     } else {
         settings.check_button_settings_load_at_start.set_active(false);
+    }
+}
+
+fn set_directories(tree_view_included_directories: &TreeView, tree_view_excluded_directories: &TreeView, included_directories: &[String], excluded_directories: &[String]) {
+    // Include Directories
+    let list_store = get_list_store(&tree_view_included_directories);
+    list_store.clear();
+
+    for directory in included_directories {
+        let values: [(u32, &dyn ToValue); 2] = [
+            (ColumnsIncludedDirectory::Path as u32, &directory),
+            (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+        ];
+        list_store.set(&list_store.append(), &values);
+    }
+
+    //// Exclude Directories
+    let list_store = get_list_store(&tree_view_excluded_directories);
+    list_store.clear();
+
+    for directory in excluded_directories {
+        let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &directory)];
+        list_store.set(&list_store.append(), &values);
     }
 }
 
