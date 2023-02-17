@@ -160,13 +160,13 @@ impl GuiData {
 
         // State of search results
 
-        let file_dialog_include_exclude_folder_selection = gtk4::FileChooserNative::builder()
+        let file_dialog_include_exclude_folder_selection = FileChooserNative::builder()
             .action(gtk4::FileChooserAction::SelectFolder)
             .transient_for(&window_main)
             .select_multiple(true)
             .modal(true)
             .build();
-        let file_dialog_move_to_folder = gtk4::FileChooserNative::builder()
+        let file_dialog_move_to_folder = FileChooserNative::builder()
             .title(flg!("move_files_title_dialog"))
             .action(gtk4::FileChooserAction::SelectFolder)
             .transient_for(&window_main)

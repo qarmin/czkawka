@@ -199,7 +199,7 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec![value.to_string()]);
     }
 
-    pub fn save_list_store(&mut self, key: String, tree_view: &gtk4::TreeView, column_path: i32) {
+    pub fn save_list_store(&mut self, key: String, tree_view: &TreeView, column_path: i32) {
         let mut vec_string = vec![];
         let list_store = get_list_store(tree_view);
         if let Some(iter) = list_store.iter_first() {

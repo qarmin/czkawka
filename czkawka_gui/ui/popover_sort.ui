@@ -10,35 +10,35 @@
         <child>
           <object class="GtkButton" id="buttons_popover_sort_file_name">
             <property name="focusable">1</property>
-            <property name="label">Sort by file name</property>
+            <property name="label">File name</property>
             <property name="receives-default">1</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="buttons_popover_sort_folder_name">
             <property name="focusable">1</property>
-            <property name="label">Sort by folder name</property>
+            <property name="label">Folder name</property>
             <property name="receives-default">1</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="buttons_popover_sort_full_name">
             <property name="focusable">1</property>
-            <property name="label">Sort by full name</property>
+            <property name="label">Full name</property>
             <property name="receives-default">1</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="buttons_popover_sort_size">
             <property name="focusable">1</property>
-            <property name="label">Sort by size</property>
+            <property name="label">Size</property>
             <property name="receives-default">1</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="buttons_popover_sort_selection">
             <property name="focusable">1</property>
-            <property name="label">Sort by selection</property>
+            <property name="label">Selection</property>
             <property name="receives-default">1</property>
           </object>
         </child>
