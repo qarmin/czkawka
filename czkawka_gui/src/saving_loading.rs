@@ -844,7 +844,7 @@ pub fn load_configuration(
                 .collect::<Vec<_>>();
 
             if inc_dir.is_empty() {
-                println!("Arguments {arguments:?} should contains at least one directory to include")
+                println!("Arguments {arguments:?} should contains at least one directory to include");
             } else {
                 included_directories = inc_dir;
                 excluded_directories = exc_dir;
@@ -965,7 +965,7 @@ pub fn load_configuration(
 
 fn set_directories(tree_view_included_directories: &TreeView, tree_view_excluded_directories: &TreeView, included_directories: &[String], excluded_directories: &[String]) {
     // Include Directories
-    let list_store = get_list_store(&tree_view_included_directories);
+    let list_store = get_list_store(tree_view_included_directories);
     list_store.clear();
 
     for directory in included_directories {
@@ -977,7 +977,7 @@ fn set_directories(tree_view_included_directories: &TreeView, tree_view_excluded
     }
 
     //// Exclude Directories
-    let list_store = get_list_store(&tree_view_excluded_directories);
+    let list_store = get_list_store(tree_view_excluded_directories);
     list_store.clear();
 
     for directory in excluded_directories {

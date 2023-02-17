@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crossbeam_channel::bounded;
 use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::prelude::*;
-use gtk4::Builder;
+use gtk4::{Builder, FileChooserNative};
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
@@ -74,6 +74,9 @@ pub struct GuiData {
     pub settings: GuiSettings,
     pub header: GuiHeader,
     pub compare_images: GuiCompareImages,
+
+    pub file_dialog_include_exclude_folder_selection: FileChooserNative,
+    pub file_dialog_move_to_folder: FileChooserNative,
 
     // Taskbar state
     pub taskbar_state: Rc<RefCell<TaskbarProgress>>,
@@ -157,6 +160,20 @@ impl GuiData {
 
         // State of search results
 
+        let file_dialog_include_exclude_folder_selection = gtk4::FileChooserNative::builder()
+            .action(gtk4::FileChooserAction::SelectFolder)
+            .transient_for(&window_main)
+            .select_multiple(true)
+            .modal(true)
+            .build();
+        let file_dialog_move_to_folder = gtk4::FileChooserNative::builder()
+            .title(flg!("move_files_title_dialog"))
+            .action(gtk4::FileChooserAction::SelectFolder)
+            .transient_for(&window_main)
+            .select_multiple(false)
+            .modal(true)
+            .build();
+
         let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
         let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
         let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFiles::new()));
@@ -196,6 +213,8 @@ impl GuiData {
             settings,
             header,
             compare_images,
+            file_dialog_include_exclude_folder_selection,
+            file_dialog_move_to_folder,
             taskbar_state,
             shared_buttons,
             shared_duplication_state,
