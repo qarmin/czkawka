@@ -2,7 +2,7 @@ pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = 11;
 // pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 3;
 
 // Needs to be updated when changed order of notebook tabs
-#[derive(Eq, PartialEq, Hash, Clone, Debug)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug, Copy)]
 pub enum NotebookMainEnum {
     Duplicate = 0,
     EmptyDirectories,
@@ -50,7 +50,7 @@ pub fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
     ]
 }
 
-#[derive(Eq, PartialEq, Hash, Clone, Debug)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug, Copy)]
 pub enum NotebookUpperEnum {
     IncludedDirectories = 0,
     ExcludedDirectories,

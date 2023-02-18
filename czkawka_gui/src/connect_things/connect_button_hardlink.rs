@@ -13,7 +13,7 @@ use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
     Hardlinking,
     Symlinking,

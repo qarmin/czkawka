@@ -34,7 +34,7 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: &No
     let separator_select_image_size = popovers_select.separator_select_image_size.clone();
     let separator_select_reverse = popovers_select.separator_select_reverse.clone();
 
-    let arr = &NOTEBOOKS_INFO[current_mode.clone() as usize].available_modes;
+    let arr = &NOTEBOOKS_INFO[*current_mode as usize].available_modes;
 
     if arr.contains(&PopoverTypes::All) {
         buttons_popover_select_all.show();

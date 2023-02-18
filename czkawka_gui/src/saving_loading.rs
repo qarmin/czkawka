@@ -157,7 +157,7 @@ impl LoadSaveStruct {
         if self.loaded_items.contains_key(&key) {
             let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
             return if item.len() == 1 {
-                let text = item[0].clone().trim().to_lowercase();
+                let text = item[0].trim().to_lowercase();
                 if text == "false" || text == "0" {
                     false
                 } else if text == "true" || text == "1" {
@@ -214,7 +214,6 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec_string);
     }
 
-    //noinspection RsLift
     pub fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
             // Lin: /home/username/.config/czkawka

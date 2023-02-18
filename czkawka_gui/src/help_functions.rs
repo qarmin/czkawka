@@ -45,7 +45,7 @@ pub const KEY_SPACE: u32 = 65;
 // pub const KEY_HOME: u32 = 115;
 // pub const KEY_END: u32 = 110;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Copy, Clone)]
 pub enum PopoverTypes {
     All,
     Size,
@@ -81,6 +81,7 @@ pub enum Message {
     BadExtensions(BadExtensions),
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview
     ActivatableSelectButton = 0,
@@ -95,6 +96,7 @@ pub enum ColumnsDuplicates {
     TextColor,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsEmptyFolders {
     // Columns for empty folder treeview
     SelectionButton = 0,
@@ -104,17 +106,20 @@ pub enum ColumnsEmptyFolders {
     ModificationAsSecs,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsIncludedDirectory {
     // Columns for Included Directories in upper Notebook
     Path = 0,
     ReferenceButton,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsExcludedDirectory {
     // Columns for Excluded Directories in upper Notebook
     Path = 0,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsBigFiles {
     SelectionButton = 0,
     Size,
@@ -125,6 +130,7 @@ pub enum ColumnsBigFiles {
     ModificationAsSecs,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsEmptyFiles {
     SelectionButton = 0,
     Name,
@@ -133,6 +139,7 @@ pub enum ColumnsEmptyFiles {
     ModificationAsSecs,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsTemporaryFiles {
     SelectionButton = 0,
     Name,
@@ -141,6 +148,7 @@ pub enum ColumnsTemporaryFiles {
     ModificationAsSecs,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsSimilarImages {
     ActivatableSelectButton = 0,
     SelectionButton,
@@ -157,6 +165,7 @@ pub enum ColumnsSimilarImages {
     TextColor,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsSimilarVideos {
     ActivatableSelectButton = 0,
     SelectionButton,
@@ -171,6 +180,7 @@ pub enum ColumnsSimilarVideos {
     TextColor,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsSameMusic {
     ActivatableSelectButton = 0,
     SelectionButton,
@@ -192,6 +202,7 @@ pub enum ColumnsSameMusic {
     TextColor,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsInvalidSymlinks {
     SelectionButton = 0,
     Name,
@@ -202,6 +213,7 @@ pub enum ColumnsInvalidSymlinks {
     ModificationAsSecs,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsBrokenFiles {
     SelectionButton = 0,
     Name,
@@ -211,6 +223,7 @@ pub enum ColumnsBrokenFiles {
     ModificationAsSecs,
 }
 
+#[derive(Clone, Copy)]
 pub enum ColumnsBadExtensions {
     SelectionButton = 0,
     Name,

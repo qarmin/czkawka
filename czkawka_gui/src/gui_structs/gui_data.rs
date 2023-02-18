@@ -155,7 +155,7 @@ impl GuiData {
                     temp_hashmap.insert(*button_name, false);
                 }
             }
-            shared_buttons.borrow_mut().insert(i.clone(), temp_hashmap);
+            shared_buttons.borrow_mut().insert(*i, temp_hashmap);
         }
 
         // State of search results

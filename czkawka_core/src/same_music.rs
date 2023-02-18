@@ -24,7 +24,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug, Copy)]
 pub enum DeleteMethod {
     None,
     Delete,
@@ -666,7 +666,7 @@ impl SameMusic {
                 for file_entry in vec_file_entry {
                     let thing = file_entry.genre.trim().to_lowercase();
                     if !thing.is_empty() {
-                        hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
+                        hash_map.entry(thing).or_insert_with(Vec::new).push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {

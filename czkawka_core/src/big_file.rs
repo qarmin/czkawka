@@ -43,7 +43,7 @@ pub enum SearchMode {
     SmallestFiles,
 }
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug, Copy)]
 pub enum DeleteMethod {
     None,
     Delete,
@@ -394,7 +394,7 @@ impl BigFile {
         match self.delete_method {
             DeleteMethod::Delete => {
                 for (_, file_entry) in &self.big_files {
-                    if fs::remove_file(file_entry.path.clone()).is_err() {
+                    if fs::remove_file(&file_entry.path).is_err() {
                         self.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
                 }
