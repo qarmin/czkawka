@@ -157,9 +157,13 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
             generate_translation_hashmap(vec![("items", number_of_selected_items.to_string()), ("groups", number_of_selected_groups.to_string())])
         ))),
     };
-    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
-    check_button.set_active(true);
-    check_button.set_halign(Align::Center);
+
+    let check_button: CheckButton = CheckButton::builder()
+        .label(flg!("dialogs_ask_next_time"))
+        .active(true)
+        .halign(Align::Center)
+        .margin_top(5)
+        .build();
 
     button_ok.grab_focus();
 
@@ -168,9 +172,6 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&check_button, Some(&label2));
-
-    // parent.set_margin(5); // TODO
-    check_button.set_margin_top(5);
 
     dialog.show();
     (dialog, check_button)
@@ -187,9 +188,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
 
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_all_files_in_group_label1")));
     let label2: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_all_files_in_group_label2")));
-    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
-    check_button.set_active(true);
-    check_button.set_halign(Align::Center);
+    let check_button: CheckButton = CheckButton::builder().label(&flg!("dialogs_ask_next_time")).active(true).halign(Align::Center).build();
 
     button_ok.grab_focus();
 

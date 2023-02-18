@@ -375,9 +375,7 @@ fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckBu
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_link_label")));
-    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
-    check_button.set_active(true);
-    check_button.set_halign(Align::Center);
+    let check_button: CheckButton = CheckButton::builder().label(&flg!("dialogs_ask_next_time")).active(true).halign(Align::Center).build();
 
     button_ok.grab_focus();
 

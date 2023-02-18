@@ -158,7 +158,7 @@ impl GuiData {
             shared_buttons.borrow_mut().insert(*i, temp_hashmap);
         }
 
-        // State of search results
+        // File Dialogs - Native file dialogs must exists all the time in opposite to normal dialog
 
         let file_dialog_include_exclude_folder_selection = FileChooserNative::builder()
             .action(gtk4::FileChooserAction::SelectFolder)
@@ -173,6 +173,8 @@ impl GuiData {
             .select_multiple(false)
             .modal(true)
             .build();
+
+        // State of search results
 
         let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
         let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
