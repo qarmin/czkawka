@@ -6,6 +6,10 @@ use crate::flg;
 #[derive(Clone)]
 pub struct GuiSortPopovers {
     pub buttons_popover_sort_file_name: gtk4::Button,
+    pub buttons_popover_sort_folder_name: gtk4::Button,
+    pub buttons_popover_sort_full_name: gtk4::Button,
+    pub buttons_popover_sort_size: gtk4::Button,
+    pub buttons_popover_sort_selection: gtk4::Button,
 
     pub popover_sort: gtk4::Popover,
 }
@@ -16,16 +20,27 @@ impl GuiSortPopovers {
         let builder = Builder::from_string(glade_src.as_str());
 
         let buttons_popover_sort_file_name: gtk4::Button = builder.object("buttons_popover_sort_file_name").unwrap();
+        let buttons_popover_sort_folder_name: gtk4::Button = builder.object("buttons_popover_sort_folder_name").unwrap();
+        let buttons_popover_sort_full_name: gtk4::Button = builder.object("buttons_popover_sort_full_name").unwrap();
+        let buttons_popover_sort_size: gtk4::Button = builder.object("buttons_popover_sort_size").unwrap();
+        let buttons_popover_sort_selection: gtk4::Button = builder.object("buttons_popover_sort_selection").unwrap();
 
         let popover_sort: gtk4::Popover = builder.object("popover_sort").unwrap();
 
         Self {
             buttons_popover_sort_file_name,
+            buttons_popover_sort_folder_name,
+            buttons_popover_sort_full_name,
+            buttons_popover_sort_size,
+            buttons_popover_sort_selection,
             popover_sort,
         }
     }
     pub fn update_language(&self) {
         self.buttons_popover_sort_file_name.set_label(&flg!("popover_sort_file_name"));
-        // TODO more languages
+        self.buttons_popover_sort_folder_name.set_label(&flg!("popover_sort_folder_name"));
+        self.buttons_popover_sort_full_name.set_label(&flg!("popover_sort_full_name"));
+        self.buttons_popover_sort_size.set_label(&flg!("popover_sort_size"));
+        self.buttons_popover_sort_selection.set_label(&flg!("popover_sort_selection"));
     }
 }

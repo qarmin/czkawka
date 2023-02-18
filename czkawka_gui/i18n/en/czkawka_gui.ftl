@@ -238,11 +238,11 @@ popover_custom_all_in_group_label = Don't select all records in group
 popover_custom_mode_unselect = Unselect Custom
 popover_custom_mode_select = Select Custom
 
-popover_sort_file_name = "Sort by file name"
-popover_sort_folder_name = "Sort by folder name"
-popover_sort_full_name = "Sort by full name"
-popover_sort_size = "Sort by size"
-popover_sort_selection = "Sort by selection"
+popover_sort_file_name = File name
+popover_sort_folder_name = Folder name
+popover_sort_full_name = Full name
+popover_sort_size = Size
+popover_sort_selection = Selection
 
 popover_invalid_regex = Regex is invalid
 popover_valid_regex = Regex is valid

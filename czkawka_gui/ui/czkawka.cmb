@@ -989,6 +989,8 @@
 	(9,59,"GtkAccessible","accessible-role","menu-item-checkbox",None,None,None,None,None),
 	(9,59,"GtkWidget","margin-bottom","4",None,None,None,None,None),
 	(9,59,"GtkWidget","margin-top","5",None,None,None,None,None),
+	(10,1,"GtkPopover","child",None,None,None,None,None,2),
+	(10,1,"GtkPopover","position","top",None,None,None,None,None),
 	(10,2,"GtkOrientable","orientation","vertical",None,None,None,None,None),
 	(10,3,"GtkButton","label","File name",None,None,None,None,None),
 	(10,3,"GtkWidget","focusable","1",None,None,None,None,None),

@@ -130,7 +130,7 @@ impl GuiData {
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
         let popovers_select = GuiSelectPopovers::create_from_builder();
         let popovers_sort = GuiSortPopovers::create_from_builder();
-        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers_select.popover_select);
+        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers_select.popover_select, &popovers_sort.popover_sort);
         let progress_window = GuiProgressDialog::create_from_builder(&window_main);
         let about = GuiAbout::create_from_builder(&window_main, &pixbuf);
         let header = GuiHeader::create_from_builder(&builder);

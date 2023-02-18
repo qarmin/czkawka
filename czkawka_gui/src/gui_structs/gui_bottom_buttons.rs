@@ -33,7 +33,7 @@ pub struct GuiBottomButtons {
 }
 
 impl GuiBottomButtons {
-    pub fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover) -> Self {
+    pub fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover, popover_sort: &gtk4::Popover) -> Self {
         let buttons_search: gtk4::Button = builder.object("buttons_search").unwrap();
         let buttons_select: gtk4::MenuButton = builder.object("buttons_select").unwrap();
         let buttons_delete: gtk4::Button = builder.object("buttons_delete").unwrap();
@@ -92,6 +92,7 @@ impl GuiBottomButtons {
         ];
 
         buttons_select.set_popover(Some(popover_select));
+        buttons_sort.set_popover(Some(popover_sort));
 
         #[cfg(target_family = "windows")]
         buttons_hardlink.set_sensitive(test_hardlinks());

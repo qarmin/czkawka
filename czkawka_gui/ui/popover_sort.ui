@@ -4,7 +4,7 @@
   <!-- interface-name popover_sort.ui -->
   <requires lib="gtk" version="4.6"/>
   <object class="GtkPopover" id="popover_sort">
-    <child>
+    <property name="child">
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <child>
@@ -43,6 +43,7 @@
           </object>
         </child>
       </object>
-    </child>
+    </property>
+    <property name="position">top</property>
   </object>
 </interface>
