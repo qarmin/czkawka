@@ -13,6 +13,7 @@ pub mod connect_duplicate_buttons;
 pub mod connect_header_buttons;
 pub mod connect_notebook_tabs;
 pub mod connect_popovers_select;
+pub mod connect_popovers_sort;
 pub mod connect_progress_window;
 pub mod connect_selection_of_directories;
 pub mod connect_settings;

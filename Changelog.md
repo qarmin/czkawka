@@ -1,3 +1,12 @@
+## Version 5.1.0 - ?.?.2023r
+- Added sort button - [](https://github.com/qarmin/czkawka/pull/?)
+- Allow to set number of thread used to scan -
+- Use FileChooserNative instead FileChooserDialog - 
+- Fix invalid music tags in music files when using reference folders - 
+- Updated pdf dependency - broken pdf will be 
+- Changed strange PDF error message - "Try at" - 
+- Improve thumbnail quality -
+
 ## Version 5.0.2 - 30.08.2022r
 - Fixed problem with missing some similar images when using similarity > 0  - [#799](https://github.com/qarmin/czkawka/pull/799)
 - Prebuilt Linux binaries are compiled without heif support - [24b](https://github.com/qarmin/czkawka/commit/24b64a32c65904c506b54270f0977ccbe5098cc8)

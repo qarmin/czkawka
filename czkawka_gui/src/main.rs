@@ -26,7 +26,6 @@ use connect_things::connect_change_language::*;
 use connect_things::connect_duplicate_buttons::connect_duplicate_combo_box;
 use connect_things::connect_header_buttons::*;
 use connect_things::connect_notebook_tabs::*;
-use connect_things::connect_popovers_select::*;
 use connect_things::connect_progress_window::*;
 use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
@@ -38,6 +37,8 @@ use gui_structs::gui_data::*;
 
 use crate::compute_results::*;
 use crate::connect_things::connect_button_sort::connect_button_sort;
+use crate::connect_things::connect_popovers_select::connect_popover_select;
+use crate::connect_things::connect_popovers_sort::connect_popover_sort;
 use crate::initialize_gui::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::*;
@@ -170,7 +171,8 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     connect_duplicate_combo_box(&gui_data);
     connect_notebook_tabs(&gui_data);
     connect_selection_of_directories(&gui_data);
-    connect_popovers(&gui_data);
+    connect_popover_select(&gui_data);
+    connect_popover_sort(&gui_data);
     connect_compute_results(&gui_data, glib_stop_receiver);
     connect_progress_window(
         &gui_data,

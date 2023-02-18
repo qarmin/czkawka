@@ -594,7 +594,7 @@ fn popover_all_except_biggest_smallest(
     popover.popdown();
 }
 
-pub fn connect_popovers(gui_data: &GuiData) {
+pub fn connect_popover_select(gui_data: &GuiData) {
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all = gui_data.popovers_select.buttons_popover_select_all.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
