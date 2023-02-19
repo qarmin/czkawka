@@ -133,11 +133,11 @@ mod test {
         }
         let mut iters = Vec::new();
         let iter = list_store.iter_first().unwrap();
-        iters.push(iter.clone());
+        iters.push(iter);
         list_store.iter_next(&iter);
-        iters.push(iter.clone());
+        iters.push(iter);
         list_store.iter_next(&iter);
-        iters.push(iter.clone());
+        iters.push(iter);
 
         sort_iters::<String>(&list_store, iters, 1);
 

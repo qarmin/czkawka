@@ -1,11 +1,16 @@
-## Version 5.1.0 - ?.?.2023r
-- Added sort button - [](https://github.com/qarmin/czkawka/pull/?)
-- Allow to set number of thread used to scan -
-- Use FileChooserNative instead FileChooserDialog - 
-- Fix invalid music tags in music files when using reference folders - 
-- Updated pdf dependency - broken pdf will be 
-- Changed strange PDF error message - "Try at" - 
-- Improve thumbnail quality -
+## Version 5.1.0 - 19.02.2023r
+- Added sort button - [#894](https://github.com/qarmin/czkawka/pull/894)
+- Allow to set number of thread used to scan - [#839](https://github.com/qarmin/czkawka/pull/839)
+- Faster similar images comparing with reference folders - [#826](https://github.com/qarmin/czkawka/pull/826)
+- Update to clap 4 - [#878](https://github.com/qarmin/czkawka/pull/878)
+- Use FileChooserNative instead FileChooserDialog - [#894](https://github.com/qarmin/czkawka/pull/894)
+- Fix invalid music tags in music files when using reference folders - [#894](https://github.com/qarmin/czkawka/pull/894)
+- Updated pdf dependency(a lot of less amount of broken pdf false positives) - [#894](https://github.com/qarmin/czkawka/pull/894)
+- Changed strange PDF error message - "Try at" - [#894](https://github.com/qarmin/czkawka/pull/894)
+- Treat extensions Mp4 and m4v as identical - [#834](https://github.com/qarmin/czkawka/pull/834)
+- Improve thumbnail quality - [#895](https://github.com/qarmin/czkawka/pull/895)
+- Verify if hardlinking works, and if not, disable button with proper message - [#881](https://github.com/qarmin/czkawka/pull/881) 
+- Apply some pydantic clippy lints on project - [#901](https://github.com/qarmin/czkawka/pull/901)
 
 ## Version 5.0.2 - 30.08.2022r
 - Fixed problem with missing some similar images when using similarity > 0  - [#799](https://github.com/qarmin/czkawka/pull/799)
