@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = Skill store og små bokstaver
 popover_custom_all_in_group_label = Ikke velg alle poster i gruppen
 popover_custom_mode_unselect = Avvelg egendefinert
 popover_custom_mode_select = Velg egendefinert
+popover_sort_file_name = Filnavn
+popover_sort_folder_name = Mappenavn
+popover_sort_full_name = Fullt navn
+popover_sort_size = Størrelse
+popover_sort_selection = Utvalg
 popover_invalid_regex = Regex er ugyldig
 popover_valid_regex = Regex er gyldig
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = Save
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Flytt
+bottom_sort_button = Sorter
 bottom_search_button_tooltip = Starte søk
 bottom_select_button_tooltip = Velg oppføringer. Bare valgte filer/mapper kan bli behandlet senere.
 bottom_delete_button_tooltip = Slett valgte filer/mapper.
@@ -226,14 +232,15 @@ bottom_hardlink_button_tooltip =
     Virker bare når minst to resultater i en gruppe er valgt.
     Først er uendret og annet og senere er vanskelig knyttet til først.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Opprett faste koblinger.
+    Knappen er deaktivert, fordi faste koblinger ikke kan opprettes.
+    Faste koblinger fungerer bare med administratorrettigheter i Windows, så pass på at du kjører programmet som administrator.
+    Hvis programmet allerede fungerer med slike privilegier, sjekk om lignende problemer er observert på GitHub.
 bottom_move_button_tooltip =
     Flytter filer til valgt mappe.
     Den kopierer alle filer til mappen uten å lagre mappetreet.
     Når du prøver å flytte to filer med identisk navn til mappe, vil det andre feile og vise feil.
+bottom_sort_button_tooltip = Sorter filer/mapper etter valgt metode.
 bottom_show_errors_tooltip = Vis/Skjul bunntekstpanelet.
 bottom_show_upper_notebook_tooltip = Vis/Skjul øvre notebook panel.
 # Progress Window
@@ -257,9 +264,9 @@ header_about_button_tooltip = Åpner dialog med info om app.
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = Antall brukte tråder
+settings_number_of_threads_tooltip = Antall brukte tråder. 0 betyr at alle tilgjengelige tråder vil bli brukt.
+settings_label_restart = Start programmet på nytt for å bruke innstillingene!
 settings_ignore_other_filesystems = Ignorer andre filsystemer (bare Linux)
 settings_ignore_other_filesystems_tooltip =
     ignorerer filer som ikke er i samme filsystem som søk-kataloger.

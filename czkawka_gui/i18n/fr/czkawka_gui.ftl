@@ -15,7 +15,7 @@ music_genre_checkbox = Genre
 music_length_checkbox = Longueur
 music_comparison_checkbox = Comparaison approximative
 music_comparison_checkbox_tooltip =
-    Il recherche des fichiers de musique similaires à l'aide d'une intelligence artificielle, qui utilise le machine learning pour supprimer les parenthèses d'une phrase, par exemple avec cette option activée, les fichiers en question seront considérés comme des doublons :
+    Il recherche des fichiers de musique similaires à l’aide d’une intelligence artificielle, qui utilise le machine learning pour supprimer les parenthèses d’une phrase, par exemple avec cette option activée, les fichiers en question seront considérés comme des doublons :
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = Sensible à la casse
@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = Sensible à la casse
 popover_custom_all_in_group_label = Ne pas sélectionner tous les enregistrements du groupe
 popover_custom_mode_unselect = Désélectionner la personnalisation
 popover_custom_mode_select = Sélectionner la personnalisation
+popover_sort_file_name = Nom du fichier
+popover_sort_folder_name = Nom dossier
+popover_sort_full_name = Nom
+popover_sort_size = Taille
+popover_sort_selection = Sélection
 popover_invalid_regex = La regex est invalide
 popover_valid_regex = La regex est valide
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = Enregistrer
 bottom_symlink_button = Lien symbolique
 bottom_hardlink_button = Lien dur
 bottom_move_button = Déplacer
+bottom_sort_button = Trier
 bottom_search_button_tooltip = Lancer la recherche
 bottom_select_button_tooltip = Sélectionnez les enregistrements. Seuls les fichiers/dossiers sélectionnés peuvent être traités plus tard.
 bottom_delete_button_tooltip = Supprimer les fichiers/dossiers sélectionnés.
@@ -226,14 +232,15 @@ bottom_hardlink_button_tooltip =
     Ne fonctionne que si au moins deux résultats dans un groupe sont sélectionnés.
     Le premier est inchangé et le second et plus tard sont hardliés au premier.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Créer des liens durs.
+    Le bouton est désactivé, car des liens durs ne peuvent être créés.
+    Les liens durs ne fonctionnent qu’avec les privilèges administrateur sous Windows pour être sûr d’exécuter l’application en tant qu’administrateur.
+    Si l’application fonctionne déjà avec ces privilèges, vérifiez les signalements de bogues similaires sur GitHub.
 bottom_move_button_tooltip =
     Déplace les fichiers vers le répertoire choisi.
     Il copie tous les fichiers dans le répertoire sans préserver l'arborescence des répertoires.
     En essayant de déplacer deux fichiers avec le même nom vers le dossier, le second échouera et affichera l'erreur.
+bottom_sort_button_tooltip = Trie les fichiers/dossiers selon la méthode sélectionnée.
 bottom_show_errors_tooltip = Afficher/Masquer le panneau de texte du bas.
 bottom_show_upper_notebook_tooltip = Afficher/Masquer le panneau supérieur du bloc-notes.
 # Progress Window
@@ -257,9 +264,9 @@ header_about_button_tooltip = Ouvre la boîte de dialogue avec les informations 
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = Nombre de threads utilisés
+settings_number_of_threads_tooltip = Nombre de threads utilisés, 0 signifie que tous les threads disponibles seront utilisés.
+settings_label_restart = Vous devez redémarrer l’application pour appliquer les paramètres !
 settings_ignore_other_filesystems = Ignorer les autres systèmes de fichiers (uniquement Linux)
 settings_ignore_other_filesystems_tooltip =
     ignore les fichiers qui ne sont pas dans le même système de fichiers que les répertoires recherchés.

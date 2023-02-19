@@ -27,6 +27,7 @@ impl GuiAbout {
         about_dialog.set_logo(Picture::for_pixbuf(logo).paintable().as_ref());
 
         // Taken from command - "git shortlog -s -n -e" - remember to remove duplicates
+        // First clean it with regex " \<[^\n]+" and next with " +[0-9]+\t" and at end replace "([^\n]+)" with ""$1","
         // This should be updated only before releasing new version
         about_dialog.set_authors(&[
             "Rafał Mikrut",
@@ -37,16 +38,18 @@ impl GuiAbout {
             "Ben Bodenmiller",
             "ChihWei Wang",
             "Dan Dascalescu",
+            "Dominik Piątkowski",
             "Igor",
             "Kerfuffle",
             "Shriraj Hegde",
             "krzysdz",
+            "0x4A6F",
             "0xflotus",
             "Adam Boguszewski",
+            "Alex",
             "Caduser2020",
             "Danny Kirkham",
             "Dariusz Niedoba",
-            "Dominik Piątkowski",
             "Douman",
             "Elazar Fine",
             "Farmadupe",
@@ -56,15 +59,19 @@ impl GuiAbout {
             "Joey Babcock",
             "Jona",
             "Jonathan Hult",
+            "Kian-Meng Ang",
             "Meir Klemfner",
             "Mek101",
             "Michael Grigoryan",
             "Nikita Karamov",
+            "OMEGA_RAZER",
+            "Rodrigo Torres",
             "Sbgodin",
             "Spirit",
             "Stefan Seering",
             "Syfaro",
             "Yuri Slobodyanyuk",
+            "alexdraconian",
             "bakeromso",
             "bellrise",
             "cyqsimon",
@@ -101,7 +108,7 @@ impl GuiAbout {
     }
 
     pub fn update_language(&self) {
-        let mut comment_text: String = "2020 - 2022  Rafał Mikrut(qarmin)\n\n".to_string();
+        let mut comment_text: String = "2020 - 2023  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &flg!("about_window_motto");
         self.about_dialog.set_comments(Some(&comment_text));
 

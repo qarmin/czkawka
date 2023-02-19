@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = 大文字と小文字を区別
 popover_custom_all_in_group_label = グループ内のすべてのレコードを選択しない
 popover_custom_mode_unselect = カスタム選択を解除
 popover_custom_mode_select = カスタム選択
+popover_sort_file_name = ファイル名
+popover_sort_folder_name = フォルダー名
+popover_sort_full_name = カード名義人
+popover_sort_size = サイズ
+popover_sort_selection = 選択
 popover_invalid_regex = 正規表現が無効です
 popover_valid_regex = 正規表現が有効です
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = 保存
 bottom_symlink_button = シンボリックリンク
 bottom_hardlink_button = ハードリンク
 bottom_move_button = 移動
+bottom_sort_button = 並び替え
 bottom_search_button_tooltip = 検索を開始
 bottom_select_button_tooltip = レコードを選択します。選択したファイル/フォルダのみが後で処理できます。
 bottom_delete_button_tooltip = 選択したファイル/フォルダを削除します。
@@ -234,6 +240,7 @@ bottom_move_button_tooltip =
     選択したフォルダにファイルを移動します。
     ディレクトリツリーを維持したまま、すべてのファイルをフォルダにコピーします。
     同じ名前の2つのファイルをフォルダに移動しようとすると、2番目のファイルが失敗し、エラーが表示されます。
+bottom_sort_button_tooltip = 選択した方法に従ってファイル/フォルダを並べ替えます。
 bottom_show_errors_tooltip = 下部のエラーパネルを表示/非表示にします。
 bottom_show_upper_notebook_tooltip = 上部のノートブックパネルを表示/非表示にします。
 # Progress Window
@@ -257,9 +264,9 @@ header_about_button_tooltip = アプリに関する情報を含むダイアロ�
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = 使用されるスレッドの数
+settings_number_of_threads_tooltip = 使用するスレッドの数、0 は、使用可能なすべてのスレッドが使用されることを意味します。
+settings_label_restart = 設定を適用するにはアプリを再起動する必要があります！
 settings_ignore_other_filesystems = 他のファイルシステムを無視(Linuxのみ)
 settings_ignore_other_filesystems_tooltip =
     検索されたディレクトリと同じファイルシステムにないファイルを無視します。

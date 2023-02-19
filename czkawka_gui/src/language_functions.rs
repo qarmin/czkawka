@@ -35,35 +35,35 @@ pub const LANGUAGES_ALL: [Language; 15] = [
         short_text: "ko",
     },
     Language {
-        combo_box_text: "Česky (Czech) - Computer translation",
+        combo_box_text: "Česky (Czech)",
         short_text: "cs",
     },
     Language {
-        combo_box_text: "Deutsch (German) - Computer translation",
+        combo_box_text: "Deutsch (German)",
         short_text: "de",
     },
     Language {
-        combo_box_text: "やまと (Japanese) - Computer translation",
+        combo_box_text: "やまと (Japanese)",
         short_text: "ja",
     },
     Language {
-        combo_box_text: "Português (Portuguese) - Computer translation",
+        combo_box_text: "Português (Portuguese)",
         short_text: "pt",
     },
     Language {
-        combo_box_text: "简体中文 (Simplified Chinese) - Computer translation",
+        combo_box_text: "简体中文 (Simplified Chinese)",
         short_text: "zh",
     },
     Language {
-        combo_box_text: "Español (Spanish) - Computer translation",
+        combo_box_text: "Español (Spanish)",
         short_text: "es",
     },
     Language {
-        combo_box_text: "Norsk (Norwegian) - Computer translation",
+        combo_box_text: "Norsk (Norwegian)",
         short_text: "no",
     },
     Language {
-        combo_box_text: "Swedish (Svenska) - Computer translation",
+        combo_box_text: "Swedish (Svenska)",
         short_text: "sv",
     },
 ];

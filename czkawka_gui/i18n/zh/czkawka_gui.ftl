@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = 区分大小写
 popover_custom_all_in_group_label = 不在组中选择所有记录
 popover_custom_mode_unselect = 取消选择自定义
 popover_custom_mode_select = 选择自定义
+popover_sort_file_name = 文件名称
+popover_sort_folder_name = 文件夹名称
+popover_sort_full_name = 全名
+popover_sort_size = 大小
+popover_sort_selection = 选择
 popover_invalid_regex = 正则表达式无效
 popover_valid_regex = 正则表达式有效
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = 保存
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = 移动
+bottom_sort_button = 排序
 bottom_search_button_tooltip = 开始搜索
 bottom_select_button_tooltip = 选择记录。只能稍后处理选定的文件/文件夹。
 bottom_delete_button_tooltip = 删除选中的文件/文件夹。
@@ -226,14 +232,15 @@ bottom_hardlink_button_tooltip =
     只在选定组中至少两个结果时有效。
     第一个不变，第二个和第二个后来是与第一个联系在一起的。
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    创建硬链接。
+    按钮已禁用，因为无法创建硬链接。
+    硬链接仅适用于管理员在Windows上的权限，所以必须以管理员身份运行应用程序。
+    如果应用程序已经使用了这种权限，请检查类似的 Github。
 bottom_move_button_tooltip =
     移动文件到选定的目录。
     它复制所有文件到目录，而不保留目录树。
     试图将两个具有相同名称的文件移动到文件夹时，第二个将失败并显示错误。
+bottom_sort_button_tooltip = 根据选定的方法排序文件/文件夹。
 bottom_show_errors_tooltip = 显示/隐藏底部文本面板。
 bottom_show_upper_notebook_tooltip = 显示/隐藏主笔记本面板。
 # Progress Window
@@ -257,9 +264,9 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = 使用的线程数
+settings_number_of_threads_tooltip = 用过的线程数，0表示所有可用线程都将被使用。
+settings_label_restart = 您需要重新启动应用才能应用设置！
 settings_ignore_other_filesystems = 忽略其它文件系统 (仅限Linux)
 settings_ignore_other_filesystems_tooltip =
     忽略与搜索的目录不在同一个文件系统中的文件。

@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = Distingue mayúsculas y minúsculas
 popover_custom_all_in_group_label = No seleccionar todos los registros en el grupo
 popover_custom_mode_unselect = Deseleccionar Personalizado
 popover_custom_mode_select = Seleccionar Personalizado
+popover_sort_file_name = Nombre de archivo
+popover_sort_folder_name = Nombre de la carpeta
+popover_sort_full_name = Nombre completo
+popover_sort_size = Tamaño
+popover_sort_selection = Selección
 popover_invalid_regex = Regex no es válido
 popover_valid_regex = Regex es válido
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = Guardar
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Mover
+bottom_sort_button = Ordenar
 bottom_search_button_tooltip = Iniciar búsqueda
 bottom_select_button_tooltip = Seleccionar registros. Sólo los archivos/carpetas seleccionados pueden ser procesados más tarde.
 bottom_delete_button_tooltip = Eliminar archivos/carpetas seleccionadas.
@@ -226,14 +232,15 @@ bottom_hardlink_button_tooltip =
     Solo funciona cuando al menos dos resultados en grupo son seleccionados.
     El primero no ha cambiado y el segundo y más tarde están enlazados por hardlinks a la primera.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Crear enlaces duros.
+    Botón deshabilitado, porque no se pueden crear enlaces duros.
+    Hardlinks sólo funciona con privilegios de administrador en Windows, así que asegúrese de ejecutar la aplicación como administrador.
+    Si la aplicación ya funciona con dichos privilegios, compruebe si hay problemas similares en Github.
 bottom_move_button_tooltip =
     Mover los archivos a la carpeta elegida.
     Copia todos los archivos a la carpeta sin preservar el árbol de directorios.
     Al intentar mover dos archivos con el mismo nombre a la carpeta, el segundo fallará y mostrará el error.
+bottom_sort_button_tooltip = Ordenar archivos/carpetas de acuerdo al método seleccionado.
 bottom_show_errors_tooltip = Mostrar/Ocultar panel de texto inferior.
 bottom_show_upper_notebook_tooltip = Mostrar / Ocultar panel de cuaderno superior.
 # Progress Window
@@ -257,9 +264,9 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = Número de hilos usados
+settings_number_of_threads_tooltip = Número de hilos usados, 0 significa que se utilizarán todos los hilos disponibles.
+settings_label_restart = ¡Necesitas reiniciar la aplicación para aplicar la configuración!
 settings_ignore_other_filesystems = Ignorar otros sistemas de ficheros (sólo Linux)
 settings_ignore_other_filesystems_tooltip =
     ignora los archivos que no están en el mismo sistema de archivos que los directorios buscados.

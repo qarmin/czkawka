@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = С учётом регистра
 popover_custom_all_in_group_label = Не выбирать все записи в группе
 popover_custom_mode_unselect = Снять выбор
 popover_custom_mode_select = Выбрать произвольный
+popover_sort_file_name = Имя файла
+popover_sort_folder_name = Название папки
+popover_sort_full_name = Полное имя
+popover_sort_size = Размер
+popover_sort_selection = Выбранные объекты
 popover_invalid_regex = Некорректное регулярное выражение
 popover_valid_regex = Корректное регулярное выражение
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = Сохранить
 bottom_symlink_button = Симв. ссылка
 bottom_hardlink_button = Жёст. ссылка
 bottom_move_button = Переместить
+bottom_sort_button = Сортировать
 bottom_search_button_tooltip = Начать поиск
 bottom_select_button_tooltip = Выберите записи. Только выбранные файлы/папки будут доступны для последующей обработки.
 bottom_delete_button_tooltip = Удалить выбранные файлы/папки.
@@ -226,14 +232,15 @@ bottom_hardlink_button_tooltip =
     Работает, только когда выбрано не менее двух результатов в группе.
     Первый результат оставляется, а второй и последующие делаются жёсткими ссылками на первый.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Создание жестких ссылок.
+    Кнопка отключена, так как невозможно создать жёсткие ссылки.
+    Связи работают только с правами администратора в Windows, поэтому не забудьте запустить приложение от имени администратора.
+    Если приложение уже работает с такими привилегиями, проверьте аналогичные проблемы на Github.
 bottom_move_button_tooltip =
     Перемещение файлов в выбранный каталог.
     Копирует все файлы в папку без сохранения структуры дерева каталогов.
     При попытке переместить два файла с одинаковым именем в одну и ту же папку второй не будет перемещён и появится сообщение об ошибке.
+bottom_sort_button_tooltip = Сортировка файлов/папок по выбранному методу.
 bottom_show_errors_tooltip = Показать/скрыть нижнюю текстовую панель.
 bottom_show_upper_notebook_tooltip = Показать/скрыть верхнюю панель блокнота.
 # Progress Window
@@ -257,9 +264,9 @@ header_about_button_tooltip = Открыть окно с информацией 
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = Количество использованных тем
+settings_number_of_threads_tooltip = Количество используемых потоков, 0 означает, что будут использоваться все доступные потоки.
+settings_label_restart = Вам нужно перезапустить приложение, чтобы применить настройки!
 settings_ignore_other_filesystems = Игнорировать другие файловые системы (только Linux)
 settings_ignore_other_filesystems_tooltip =
     игнорирует файлы, которые находятся в той же файловой системе, что и поисковые директории.

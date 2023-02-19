@@ -231,6 +231,11 @@ popover_custom_case_sensitive_check_button = Büyük/Küçük harfe duyarlı
 popover_custom_all_in_group_label = Gruptaki tüm kayıtları seçme
 popover_custom_mode_unselect = Özel Girdi ile Seçimi Kaldır
 popover_custom_mode_select = Özel Girdi ile Seç
+popover_sort_file_name = Dosya adı
+popover_sort_folder_name = Klasör adı
+popover_sort_full_name = Tam ad
+popover_sort_size = Boyut
+popover_sort_selection = Seçim
 popover_invalid_regex = Regex geçersiz (hatalı)
 popover_valid_regex = Regex geçerli (doğru)
 # Bottom buttons
@@ -241,6 +246,7 @@ bottom_save_button = Kaydet
 bottom_symlink_button = Sembolik bağlantı
 bottom_hardlink_button = Sabit bağlantı
 bottom_move_button = Taşı
+bottom_sort_button = Sırala
 bottom_search_button_tooltip = Aramayı başlatır.
 bottom_select_button_tooltip = Kayıtları seçer. Yalnızca seçilen dosyalara/klasörlere işlem uygulanabilir.
 bottom_delete_button_tooltip = Seçili dosyaları/klasörleri siler.
@@ -254,14 +260,15 @@ bottom_hardlink_button_tooltip =
     Yalnızca bir gruptaki en az iki sonuç seçildiğinde çalışır.
     Birincisi değişmez, ikincisi ve sonrası birinciye sabit olarak bağlanır.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Hardlinkler oluştur.
+    Düğme devre dışı, çünkü hardlinkler oluşturulamaz.
+    Hardlinkler Windows üzerinde yalnızca administrator ayrıcalıklarıyla çalışır, bu yüzden uygulamayı yönetici olarak çalıştırdığınızdan emin olun.
+    Eğer uygulama zaten yeterli ayrıcalıklarla çalışıyorsa Github üzerindeki benzer sorunları gözden geçirin.
 bottom_move_button_tooltip =
     Dosyaları seçilen dizine taşır.
     Dizin ağacını korumadan tüm dosyaları dizine taşır.
     Aynı ada sahip iki dosyayı klasöre taşımaya çalışırken, ikincisi başarısız olur ve hata gösterir.
+bottom_sort_button_tooltip = Sorts files/folders according to selected method.
 bottom_show_errors_tooltip = Alt çıktı panelini göster/gizle.
 bottom_show_upper_notebook_tooltip = Üst denetim panelini göster/gizle.
 # Progress Window
@@ -285,9 +292,9 @@ header_about_button_tooltip = Czkawka hakkında bilgi içeren iletişim kutusunu
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = Kullanılan iş parçacığı sayısı
+settings_number_of_threads_tooltip = Kullanılan iş parçacığı sayısı, 0 tüm uygun iş parçacıklarının kullanılacağı anlamına gelir.
+settings_label_restart = Ayarları uygulamak için uygulamayı yeniden başlatmanız gerekir!
 settings_ignore_other_filesystems = Öteki dosya sistemlerini yoksay (sadece Linux)
 settings_ignore_other_filesystems_tooltip =
     Aranan dizinlerle aynı dosya sisteminde olmayan dosyaları yoksayar.

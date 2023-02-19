@@ -502,7 +502,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_cli"
-version = "5.0.2"
+version = "5.1.0"
 dependencies = [
  "clap",
  "czkawka_core",
@@ -511,7 +511,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "5.0.2"
+version = "5.1.0"
 dependencies = [
  "anyhow",
  "audio_checker",
@@ -552,7 +552,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "5.0.2"
+version = "5.1.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",

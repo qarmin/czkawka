@@ -203,6 +203,11 @@ popover_custom_case_sensitive_check_button = Rozlišit malá a velká písmena
 popover_custom_all_in_group_label = Nesbírat všechny záznamy ve skupině
 popover_custom_mode_unselect = Zrušit výběr vlastních
 popover_custom_mode_select = Vybrat vlastní
+popover_sort_file_name = Název souboru
+popover_sort_folder_name = Název adresáře
+popover_sort_full_name = Jméno a příjmení
+popover_sort_size = Velikost
+popover_sort_selection = Výběr
 popover_invalid_regex = Regex je neplatný
 popover_valid_regex = Regex je platný
 # Bottom buttons
@@ -213,6 +218,7 @@ bottom_save_button = Uložit
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Přesunout
+bottom_sort_button = Seřadit
 bottom_search_button_tooltip = Začít hledání
 bottom_select_button_tooltip = Vyberte záznamy. Pouze vybrané soubory/složky mohou být později zpracovány.
 bottom_delete_button_tooltip = Odstranit vybrané soubory/složky.
@@ -226,14 +232,15 @@ bottom_hardlink_button_tooltip =
     Funguje pouze tehdy, pokud jsou vybrány alespoň dva výsledky ve skupině.
     Nejprve je nezměněna a druhé a později jsou těžce propojeny s prvními.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Vytvořit hardwarové odkazy.
+    Tlačítko je zakázáno, protože hardwarové odkazy nelze vytvořit.
+    Hardlinky fungují pouze s oprávněními administrátora v systému Windows, tak se ujistěte, že používáte aplikaci jako administrátora.
+    Pokud aplikace s takovými oprávněními již funguje, podívejte se na podobné problémy na Githubu.
 bottom_move_button_tooltip =
     Přesune soubory do vybraného adresáře.
     Zkopíruje všechny soubory do adresáře bez uchování stromu adresáře.
     Při pokusu přesunout dva soubory se stejným názvem do složky, druhý selže a zobrazí chybu.
+bottom_sort_button_tooltip = Seřazuje soubory/složky podle zvolené metody.
 bottom_show_errors_tooltip = Zobrazit/skrýt spodní textový panel.
 bottom_show_upper_notebook_tooltip = Zobrazit/skrýt horní panel sešitu.
 # Progress Window
@@ -257,10 +264,10 @@ header_about_button_tooltip = Otevře dialog s informacemi o aplikaci.
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
-settings_ignore_other_filesystems = Ignorovat další souborové systémy (pouze Linux)
+settings_number_of_threads = Počet použitých vláken
+settings_number_of_threads_tooltip = Počet použitých vláken, 0 znamená, že budou použita všechna dostupná vlákna.
+settings_label_restart = Pro použití nastavení je třeba restartovat aplikaci!
+settings_ignore_other_filesystems = Ignorovat ostatní souborové systémy (pouze Linux)
 settings_ignore_other_filesystems_tooltip =
     ignoruje soubory, které nejsou ve stejném souborovém systému jako prohledávané adresáře.
     

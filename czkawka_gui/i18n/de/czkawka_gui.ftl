@@ -67,7 +67,7 @@ big_files_mode_combobox_tooltip = Erlaubt die Suche nach kleinsten/größten Dat
 big_files_mode_label = Überprüfte Dateien
 big_files_mode_smallest_combo_box = Die kleinsten
 big_files_mode_biggest_combo_box = Die größten
-main_notebook_duplicates = Doppelte Dateien
+main_notebook_duplicates = Gleiche Dateien
 main_notebook_empty_directories = Leere Verzeichnisse
 main_notebook_big_files = Große Dateien
 main_notebook_empty_files = Leere Dateien
@@ -202,6 +202,11 @@ popover_custom_case_sensitive_check_button = Groß-/Kleinschreibung beachten
 popover_custom_all_in_group_label = Nicht alle Datensätze in der Gruppe auswählen
 popover_custom_mode_unselect = Eigene Abwählen
 popover_custom_mode_select = Eigene auswählen
+popover_sort_file_name = Dateiname
+popover_sort_folder_name = Verzeichnisname
+popover_sort_full_name = Vollständiger Name
+popover_sort_size = Größe
+popover_sort_selection = Auswahl
 popover_invalid_regex = Regex ist ungültig
 popover_valid_regex = Regex ist gültig
 # Bottom buttons
@@ -212,6 +217,7 @@ bottom_save_button = Speichern
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Bewegen
+bottom_sort_button = Sortierung
 bottom_search_button_tooltip = Suche starten
 bottom_select_button_tooltip = Datensätze auswählen. Nur ausgewählte Dateien/Ordner können später verarbeitet werden.
 bottom_delete_button_tooltip = Ausgewählte Dateien/Ordner löschen.
@@ -225,14 +231,15 @@ bottom_hardlink_button_tooltip =
     Funktioniert nur, wenn mindestens zwei Ergebnisse einer Gruppe ausgewählt sind.
     Das Erste bleibt dabei unverändert, und das Zweite und alle Weiteren werden zu Hardlinks auf das Erste umgewandelt.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    Erstellen von Hardlinks.
+    Button ist deaktiviert, da Hardlinks nicht erstellt werden können.
+    Hardlinks funktionieren nur mit Administratorrechten unter Windows, also stellen Sie sicher, dass Sie die App als Administrator ausführen.
+    Wenn die App bereits mit solchen Rechten arbeitet, überprüfen Sie auf Github auf ähnliche Probleme.
 bottom_move_button_tooltip =
     Verschiebt Dateien in den ausgewählten Ordner.
     Kopiert alle Dateien in den Ordner, ohne den Verzeichnisbaum zu erhalten.
     Beim Versuch, zwei Dateien mit identischem Namen in einen Ordner zu verschieben, schlägt das Kopieren der Zweiten fehl und zeigt einen Fehler an.
+bottom_sort_button_tooltip = Sortiert Dateien/Ordner nach der gewählten Methode.
 bottom_show_errors_tooltip = Ein-/Ausblenden des unteren Textfeldes.
 bottom_show_upper_notebook_tooltip = Ein-/Ausblenden des oberen Notizbuch-Panels.
 # Progress Window
@@ -256,9 +263,9 @@ header_about_button_tooltip = Öffnet den Dialog mit Informationen über die App
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = Anzahl der verwendeten Threads
+settings_number_of_threads_tooltip = Anzahl der verwendeten Threads, 0 bedeutet, dass alle verfügbaren Threads verwendet werden.
+settings_label_restart = Sie müssen die App neu starten, um die Einstellungen anzuwenden!
 settings_ignore_other_filesystems = Andere Dateisysteme ignorieren (nur Linux)
 settings_ignore_other_filesystems_tooltip =
     ignoriert Dateien, die nicht im selben Dateisystem sind wie durchsuchte Verzeichnisse.
