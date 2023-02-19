@@ -24,16 +24,18 @@ fn show_required_popovers(popovers_sort: &GuiSortPopovers, current_mode: &Notebo
 
     let arr = &NOTEBOOKS_INFO[*current_mode as usize].available_modes;
 
+    buttons_popover_sort_full_name.hide();
+
     if arr.contains(&PopoverTypes::All) {
         buttons_popover_sort_selection.show();
         buttons_popover_sort_file_name.show();
         buttons_popover_sort_folder_name.show();
-        buttons_popover_sort_full_name.show();
+        // buttons_popover_sort_full_name.show(); // TODO, this needs to be handled a little different
     } else {
         buttons_popover_sort_selection.hide();
         buttons_popover_sort_file_name.hide();
         buttons_popover_sort_folder_name.hide();
-        buttons_popover_sort_full_name.hide();
+        // buttons_popover_sort_full_name.hide();
     }
 
     if arr.contains(&PopoverTypes::Size) {

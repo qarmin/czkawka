@@ -1,5 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
+use std::fmt::Debug;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
@@ -7,7 +8,7 @@ use crate::notebook_info::NOTEBOOKS_INFO;
 
 fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_sort: i32, column_header: i32)
 where
-    T: Ord + for<'b> glib::value::FromValue<'b> + 'static + std::fmt::Debug,
+    T: Ord + for<'b> glib::value::FromValue<'b> + 'static + Debug,
 {
     let model = get_list_store(tree_view);
 
@@ -43,7 +44,7 @@ where
 
 fn sort_iters<T>(model: &ListStore, mut iters: Vec<TreeIter>, column_sort: i32)
 where
-    T: Ord + for<'b> glib::value::FromValue<'b> + 'static,
+    T: Ord + for<'b> glib::value::FromValue<'b> + 'static + Debug,
 {
     assert!(iters.len() >= 2);
     loop {
@@ -74,6 +75,45 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
 
         popover_sort_general::<String>(&popover_sort, tree_view, nb_object.column_name, nb_object.column_header.unwrap());
     });
+
+    let popover_sort = gui_data.popovers_sort.popover_sort.clone();
+    let buttons_popover_sort_folder_name = gui_data.popovers_sort.buttons_popover_sort_folder_name.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    buttons_popover_sort_folder_name.connect_clicked(move |_| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+
+        popover_sort_general::<String>(&popover_sort, tree_view, nb_object.column_path, nb_object.column_header.unwrap());
+    });
+
+    let popover_sort = gui_data.popovers_sort.popover_sort.clone();
+    let buttons_popover_sort_selection = gui_data.popovers_sort.buttons_popover_sort_selection.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    buttons_popover_sort_selection.connect_clicked(move |_| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+
+        popover_sort_general::<bool>(&popover_sort, tree_view, nb_object.column_selection, nb_object.column_header.unwrap());
+    });
+
+    let popover_sort = gui_data.popovers_sort.popover_sort.clone();
+    let buttons_popover_sort_size = gui_data.popovers_sort.buttons_popover_sort_size.clone();
+    let notebook_main = gui_data.main_notebook.notebook_main.clone();
+    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    buttons_popover_sort_size.connect_clicked(move |_| {
+        let nb_number = notebook_main.current_page().unwrap();
+        let tree_view = &main_tree_views[nb_number as usize];
+        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+
+        popover_sort_general::<u64>(&popover_sort, tree_view, nb_object.column_size_as_bytes.unwrap(), nb_object.column_header.unwrap());
+    });
 }
 
 #[cfg(test)]
@@ -101,19 +141,15 @@ mod test {
 
         sort_iters::<String>(&list_store, iters, 1);
 
-        let first = list_store.iter_first().unwrap();
-        let second = first.clone();
-        list_store.iter_next(&second);
-        let third = second.clone();
-        list_store.iter_next(&third);
-
-        assert_eq!(list_store.get::<String>(&first, 1), "AAA");
-        assert_eq!(list_store.get::<String>(&second, 1), "BBB");
-        assert_eq!(list_store.get::<String>(&third, 1), "CCC");
-
-        assert_eq!(list_store.get::<u32>(&first, 0), 2);
-        assert_eq!(list_store.get::<u32>(&second, 0), 1);
-        assert_eq!(list_store.get::<u32>(&third, 0), 3);
+        let expected = [(2, "AAA"), (1, "BBB"), (3, "CCC")];
+        let curr_iter = list_store.iter_first().unwrap();
+        for exp in expected {
+            let real_0 = list_store.get::<u32>(&curr_iter, 0);
+            assert_eq!(real_0, exp.0);
+            let real_1 = list_store.get::<String>(&curr_iter, 1);
+            assert_eq!(real_1, exp.1);
+            list_store.iter_next(&curr_iter);
+        }
     }
 
     #[gtk4::test]

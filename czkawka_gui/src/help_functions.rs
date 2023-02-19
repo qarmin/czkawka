@@ -45,7 +45,7 @@ pub const KEY_SPACE: u32 = 65;
 // pub const KEY_HOME: u32 = 115;
 // pub const KEY_END: u32 = 110;
 
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum PopoverTypes {
     All,
     Size,
@@ -87,6 +87,7 @@ pub enum ColumnsDuplicates {
     ActivatableSelectButton = 0,
     SelectionButton,
     Size,
+    SizeAsBytes,
     Name,
     Path,
     Modification,
