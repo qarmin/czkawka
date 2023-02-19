@@ -2,9 +2,8 @@ use std::collections::BTreeMap;
 use std::default::Default;
 
 use directories_next::ProjectDirs;
-use gtk4::builders::LabelBuilder;
 use gtk4::prelude::*;
-use gtk4::{ResponseType, Window};
+use gtk4::{Label, ResponseType, Window};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 
@@ -217,10 +216,10 @@ fn create_clear_cache_dialog(title_str: &str, window_settings: &Window) -> gtk4:
     dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let label = LabelBuilder::new().label(&flg!("cache_clear_message_label_1")).build();
-    let label2 = LabelBuilder::new().label(&flg!("cache_clear_message_label_2")).build();
-    let label3 = LabelBuilder::new().label(&flg!("cache_clear_message_label_3")).build();
-    let label4 = LabelBuilder::new().label(&flg!("cache_clear_message_label_4")).build();
+    let label = Label::builder().label(flg!("cache_clear_message_label_1")).build();
+    let label2 = Label::builder().label(flg!("cache_clear_message_label_2")).build();
+    let label3 = Label::builder().label(flg!("cache_clear_message_label_3")).build();
+    let label4 = Label::builder().label(flg!("cache_clear_message_label_4")).build();
 
     let internal_box = get_dialog_box_child(&dialog);
     internal_box.append(&label);

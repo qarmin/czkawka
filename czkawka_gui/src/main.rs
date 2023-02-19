@@ -26,7 +26,6 @@ use connect_things::connect_change_language::*;
 use connect_things::connect_duplicate_buttons::connect_duplicate_combo_box;
 use connect_things::connect_header_buttons::*;
 use connect_things::connect_notebook_tabs::*;
-use connect_things::connect_popovers::*;
 use connect_things::connect_progress_window::*;
 use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
@@ -37,6 +36,9 @@ use czkawka_core::*;
 use gui_structs::gui_data::*;
 
 use crate::compute_results::*;
+use crate::connect_things::connect_button_sort::connect_button_sort;
+use crate::connect_things::connect_popovers_select::connect_popover_select;
+use crate::connect_things::connect_popovers_sort::connect_popover_sort;
 use crate::initialize_gui::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::*;
@@ -63,7 +65,7 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
-    let application = Application::new(None, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
+    let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
         build_ui(app, &cmdline.arguments());
         0
@@ -160,6 +162,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         futures_sender_bad_extensions,
     );
     connect_button_select(&gui_data);
+    connect_button_sort(&gui_data);
     connect_button_stop(&gui_data);
     connect_button_hardlink_symlink(&gui_data);
     connect_button_move(&gui_data);
@@ -168,7 +171,8 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     connect_duplicate_combo_box(&gui_data);
     connect_notebook_tabs(&gui_data);
     connect_selection_of_directories(&gui_data);
-    connect_popovers(&gui_data);
+    connect_popover_select(&gui_data);
+    connect_popover_sort(&gui_data);
     connect_compute_results(&gui_data, glib_stop_receiver);
     connect_progress_window(
         &gui_data,

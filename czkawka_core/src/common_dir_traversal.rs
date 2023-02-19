@@ -53,7 +53,7 @@ pub struct SymlinkInfo {
     pub type_of_error: ErrorType,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum ErrorType {
     InfiniteRecursion,
     NonExistentFile,
@@ -87,7 +87,7 @@ pub enum Collect {
     Files,
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Copy, Clone)]
 enum EntryType {
     File,
     Dir,

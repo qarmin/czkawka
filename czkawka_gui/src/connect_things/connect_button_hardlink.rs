@@ -13,7 +13,7 @@ use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
     Hardlinking,
     Symlinking,
@@ -262,7 +262,7 @@ fn hardlink_symlink(
 
 fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     let dialog = Dialog::builder()
-        .title(&flg!("hard_sym_invalid_selection_title_dialog"))
+        .title(flg!("hard_sym_invalid_selection_title_dialog"))
         .transient_for(window_main)
         .modal(true)
         .build();
@@ -370,14 +370,12 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
 }
 
 fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckButton) {
-    let dialog = Dialog::builder().title(&flg!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
+    let dialog = Dialog::builder().title(flg!("hard_sym_link_title_dialog")).transient_for(window_main).modal(true).build();
     let button_ok = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("hard_sym_link_label")));
-    let check_button: CheckButton = CheckButton::with_label(&flg!("dialogs_ask_next_time"));
-    check_button.set_active(true);
-    check_button.set_halign(Align::Center);
+    let check_button: CheckButton = CheckButton::builder().label(flg!("dialogs_ask_next_time")).active(true).halign(Align::Center).build();
 
     button_ok.grab_focus();
 

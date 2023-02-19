@@ -128,7 +128,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
 pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
     let im = HeifContext::read_from_file(path)?;
     let handle = im.primary_image_handle()?;
-    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), false)?;
+    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None)?;
     let width = image.width(Channel::Interleaved).map_err(|e| anyhow::anyhow!("{}", e))?;
     let height = image.height(Channel::Interleaved).map_err(|e| anyhow::anyhow!("{}", e))?;
     let planes = image.planes();

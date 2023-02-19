@@ -59,7 +59,7 @@ pub struct FileEntry {
 }
 
 /// Used by CLI tool when we cannot use directly values
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum SimilarityPreset {
     Original,
     VeryHigh,

@@ -26,7 +26,7 @@ pub struct ProgressData {
     pub files_checked: usize,
 }
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug, Copy)]
 pub enum DeleteMethod {
     None,
     Delete,

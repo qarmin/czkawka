@@ -391,6 +391,7 @@ impl SimilarVideos {
                                 if self.excluded_items.is_excluded(&current_file_name) {
                                     continue 'dir;
                                 }
+                                let current_file_name_str = current_file_name.to_string_lossy().to_string();
 
                                 let fe: FileEntry = FileEntry {
                                     path: current_file_name.clone(),
@@ -401,7 +402,7 @@ impl SimilarVideos {
                                             Err(_inspected) => {
                                                 warnings.push(flc!(
                                                     "core_file_modified_before_epoch",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                                                    generate_translation_hashmap(vec![("name", current_file_name_str.clone())])
                                                 ));
                                                 0
                                             }
@@ -409,7 +410,7 @@ impl SimilarVideos {
                                         Err(e) => {
                                             warnings.push(flc!(
                                                 "core_file_no_modification_date",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
+                                                generate_translation_hashmap(vec![("name", current_file_name_str.clone()), ("reason", e.to_string())])
                                             ));
                                             0
                                         }
@@ -418,7 +419,7 @@ impl SimilarVideos {
                                     error: String::new(),
                                 };
 
-                                fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
+                                fe_result.push((current_file_name_str, fe));
                             }
                         }
                     }

@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use gtk4::prelude::*;
-use gtk4::{ResponseType, TreePath};
+use gtk4::{FileChooserNative, ResponseType, TreePath};
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -22,9 +22,8 @@ pub fn connect_button_move(gui_data: &GuiData) {
     let entry_info = gui_data.entry_info.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let window_main = gui_data.window_main.clone();
-
     let preview_path = gui_data.preview_path.clone();
+    let file_dialog_move_to_folder = gui_data.file_dialog_move_to_folder.clone();
 
     buttons_move.connect_clicked(move |_| {
         let nb_number = notebook_main.current_page().unwrap();
@@ -45,7 +44,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
             nb_object.column_selection,
             &entry_info,
             &text_view_errors,
-            &window_main,
+            &file_dialog_move_to_folder,
         );
 
         match &nb_object.notebook_type {
@@ -71,26 +70,14 @@ fn move_things(
     column_selection: i32,
     entry_info: &gtk4::Entry,
     text_view_errors: &gtk4::TextView,
-    window_main: &gtk4::Window,
+    file_dialog_move_to_folder: &FileChooserNative,
 ) {
     reset_text_view(text_view_errors);
-
-    let chooser = gtk4::FileChooserDialog::builder()
-        .title(&flg!("move_files_title_dialog"))
-        .action(gtk4::FileChooserAction::SelectFolder)
-        .transient_for(window_main)
-        .modal(true)
-        .build();
-    chooser.add_button(&flg!("general_ok_button"), ResponseType::Ok);
-    chooser.add_button(&flg!("general_close_button"), ResponseType::Cancel);
-
-    chooser.set_select_multiple(false);
-    chooser.show();
 
     let entry_info = entry_info.clone();
     let text_view_errors = text_view_errors.clone();
     let tree_view = tree_view.clone();
-    chooser.connect_response(move |file_chooser, response_type| {
+    file_dialog_move_to_folder.connect_response(move |file_chooser, response_type| {
         if response_type == ResponseType::Ok {
             let mut folders: Vec<PathBuf> = Vec::new();
             let g_files = file_chooser.files();
@@ -131,7 +118,7 @@ fn move_things(
                 }
             }
         }
-        file_chooser.close();
+        // file_chooser.close();
     });
 }
 

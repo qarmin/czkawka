@@ -245,41 +245,44 @@ fn popover_custom_select_unselect(
 
     // Dialog for select/unselect items
     {
-        let dialog = gtk4::Dialog::builder().title(&window_title).transient_for(window_main).modal(true).build();
+        let dialog = gtk4::Dialog::builder().title(window_title).transient_for(window_main).modal(true).build();
         dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
         dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-        let check_button_path = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_path_label")).build();
-        let check_button_name = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_name_label")).build();
-        let check_button_rust_regex = gtk4::CheckButton::builder().label(&flg!("popover_custom_regex_regex_label")).build();
+        let check_button_path = gtk4::CheckButton::builder()
+            .label(flg!("popover_custom_regex_path_label"))
+            .tooltip_text(flg!("popover_custom_path_check_button_entry_tooltip"))
+            .build();
+        let check_button_name = gtk4::CheckButton::builder()
+            .label(flg!("popover_custom_regex_name_label"))
+            .tooltip_text(flg!("popover_custom_name_check_button_entry_tooltip"))
+            .build();
+        let check_button_rust_regex = gtk4::CheckButton::builder()
+            .label(flg!("popover_custom_regex_regex_label"))
+            .tooltip_text(flg!("popover_custom_regex_check_button_entry_tooltip"))
+            .build();
 
-        let check_button_case_sensitive = gtk4::CheckButton::builder().label(&flg!("popover_custom_case_sensitive_check_button")).build();
-        check_button_case_sensitive.set_active(false);
+        let check_button_case_sensitive = gtk4::CheckButton::builder()
+            .label(flg!("popover_custom_case_sensitive_check_button"))
+            .tooltip_text(flg!("popover_custom_case_sensitive_check_button_tooltip"))
+            .active(false)
+            .build();
 
-        let check_button_select_not_all_results = gtk4::CheckButton::builder().label(&flg!("popover_custom_all_in_group_label")).build();
-        check_button_select_not_all_results.set_active(true);
+        let check_button_select_not_all_results = gtk4::CheckButton::builder()
+            .label(flg!("popover_custom_all_in_group_label"))
+            .tooltip_text(flg!("popover_custom_not_all_check_button_tooltip"))
+            .active(true)
+            .build();
 
-        let entry_path = gtk4::Entry::new();
-        let entry_name = gtk4::Entry::new();
-        let entry_rust_regex = gtk4::Entry::new();
-        entry_rust_regex.set_sensitive(false); // By default check button regex is disabled
+        let entry_path = gtk4::Entry::builder().tooltip_text(flg!("popover_custom_path_check_button_entry_tooltip")).build();
+        let entry_name = gtk4::Entry::builder().tooltip_text(flg!("popover_custom_name_check_button_entry_tooltip")).build();
+        let entry_rust_regex = gtk4::Entry::builder()
+            .tooltip_text(flg!("popover_custom_regex_check_button_entry_tooltip"))
+            .sensitive(false)
+            .build(); // By default check button regex is disabled
 
         let label_regex_valid = gtk4::Label::new(None);
 
-        // Tooltips
-        {
-            check_button_path.set_tooltip_text(Some(&flg!("popover_custom_path_check_button_entry_tooltip")));
-            entry_path.set_tooltip_text(Some(&flg!("popover_custom_path_check_button_entry_tooltip")));
-
-            check_button_name.set_tooltip_text(Some(&flg!("popover_custom_name_check_button_entry_tooltip")));
-            entry_name.set_tooltip_text(Some(&flg!("popover_custom_name_check_button_entry_tooltip")));
-
-            check_button_rust_regex.set_tooltip_text(Some(&flg!("popover_custom_regex_check_button_entry_tooltip")));
-            entry_rust_regex.set_tooltip_text(Some(&flg!("popover_custom_regex_check_button_entry_tooltip")));
-
-            check_button_case_sensitive.set_tooltip_text(Some(&flg!("popover_custom_case_sensitive_check_button_tooltip")));
-            check_button_select_not_all_results.set_tooltip_text(Some(&flg!("popover_custom_not_all_check_button_tooltip")));
-        }
         {
             let label_regex_valid = label_regex_valid.clone();
             entry_rust_regex.connect_changed(move |entry_rust_regex| {
@@ -332,9 +335,7 @@ fn popover_custom_select_unselect(
         // Configure look of things
         {
             // TODO Label should have const width, and rest should fill entry, but for now is 50%-50%
-            let grid = gtk4::Grid::new();
-            grid.set_row_homogeneous(true);
-            grid.set_column_homogeneous(true);
+            let grid = gtk4::Grid::builder().row_homogeneous(true).column_homogeneous(true).build();
 
             grid.attach(&check_button_name, 0, 1, 1, 1);
             grid.attach(&check_button_path, 0, 2, 1, 1);
@@ -593,9 +594,9 @@ fn popover_all_except_biggest_smallest(
     popover.popdown();
 }
 
-pub fn connect_popovers(gui_data: &GuiData) {
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_all = gui_data.popovers.buttons_popover_select_all.clone();
+pub fn connect_popover_select(gui_data: &GuiData) {
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all = gui_data.popovers_select.buttons_popover_select_all.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
@@ -607,8 +608,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_unselect_all = gui_data.popovers.buttons_popover_unselect_all.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_unselect_all = gui_data.popovers_select.buttons_popover_unselect_all.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_unselect_all.connect_clicked(move |_| {
@@ -619,8 +620,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_unselect_all(&popover_select, tree_view, nb_object.column_selection as u32);
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_reverse = gui_data.popovers.buttons_popover_reverse.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_reverse = gui_data.popovers_select.buttons_popover_reverse.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_reverse.connect_clicked(move |_| {
@@ -631,8 +632,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_all_except_oldest = gui_data.popovers.buttons_popover_select_all_except_oldest.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all_except_oldest = gui_data.popovers_select.buttons_popover_select_all_except_oldest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
@@ -651,8 +652,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_all_except_newest = gui_data.popovers.buttons_popover_select_all_except_newest.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all_except_newest = gui_data.popovers_select.buttons_popover_select_all_except_newest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
@@ -671,8 +672,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_one_oldest = gui_data.popovers.buttons_popover_select_one_oldest.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_oldest = gui_data.popovers_select.buttons_popover_select_one_oldest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
@@ -691,8 +692,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_one_newest = gui_data.popovers.buttons_popover_select_one_newest.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_newest = gui_data.popovers_select.buttons_popover_select_one_newest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_one_newest.connect_clicked(move |_| {
@@ -711,8 +712,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_custom = gui_data.popovers.buttons_popover_select_custom.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_custom = gui_data.popovers_select.buttons_popover_select_custom.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let window_main = gui_data.window_main.clone();
@@ -733,8 +734,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_unselect_custom = gui_data.popovers.buttons_popover_unselect_custom.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_unselect_custom = gui_data.popovers_select.buttons_popover_unselect_custom.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let window_main = gui_data.window_main.clone();
@@ -755,8 +756,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_all_images_except_biggest = gui_data.popovers.buttons_popover_select_all_images_except_biggest.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all_images_except_biggest = gui_data.popovers_select.buttons_popover_select_all_images_except_biggest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
@@ -775,8 +776,8 @@ pub fn connect_popovers(gui_data: &GuiData) {
         );
     });
 
-    let popover_select = gui_data.popovers.popover_select.clone();
-    let buttons_popover_select_all_images_except_smallest = gui_data.popovers.buttons_popover_select_all_images_except_smallest.clone();
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all_images_except_smallest = gui_data.popovers_select.buttons_popover_select_all_images_except_smallest.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {

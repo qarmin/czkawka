@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use gtk4::prelude::*;
-use gtk4::{Orientation, ResponseType, TreeView, Window};
+use gtk4::{FileChooserNative, Orientation, ResponseType, TreeView, Window};
 
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
@@ -32,19 +32,19 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add included directory
     {
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
-        let window_main = gui_data.window_main.clone();
         let buttons_add_included_directory = gui_data.upper_notebook.buttons_add_included_directory.clone();
+        let file_dialog_include_exclude_folder_selection = gui_data.file_dialog_include_exclude_folder_selection.clone();
         buttons_add_included_directory.connect_clicked(move |_| {
-            add_chosen_directories(&window_main, &tree_view_included_directories, false);
+            add_chosen_directories(&file_dialog_include_exclude_folder_selection, &tree_view_included_directories, false);
         });
     }
     // Add excluded directory
     {
         let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
-        let window_main = gui_data.window_main.clone();
         let buttons_add_excluded_directory = gui_data.upper_notebook.buttons_add_excluded_directory.clone();
+        let file_dialog_include_exclude_folder_selection = gui_data.file_dialog_include_exclude_folder_selection.clone();
         buttons_add_excluded_directory.connect_clicked(move |_| {
-            add_chosen_directories(&window_main, &tree_view_excluded_directories, true);
+            add_chosen_directories(&file_dialog_include_exclude_folder_selection, &tree_view_excluded_directories, true);
         });
     }
     // Remove Excluded Folder
@@ -79,28 +79,19 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
 }
 
-fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
+fn add_chosen_directories(file_dialog_include_exclude_folder_selection: &FileChooserNative, tree_view: &TreeView, excluded_items: bool) {
     let folders_to = if excluded_items {
         flg!("exclude_folders_dialog_title")
     } else {
         flg!("include_folders_dialog_title")
     };
 
-    let file_chooser = gtk4::FileChooserDialog::builder()
-        .title(&folders_to)
-        .action(gtk4::FileChooserAction::SelectFolder)
-        .transient_for(window_main)
-        .modal(true)
-        .build();
-    file_chooser.add_button(&flg!("general_ok_button"), ResponseType::Ok);
-    file_chooser.add_button(&flg!("general_close_button"), ResponseType::Cancel);
-
-    file_chooser.set_select_multiple(true);
-    file_chooser.show();
+    file_dialog_include_exclude_folder_selection.show();
+    file_dialog_include_exclude_folder_selection.set_title(&folders_to);
 
     let tree_view = tree_view.clone();
-    file_chooser.connect_response(move |file_chooser, response_type| {
-        if response_type == ResponseType::Ok {
+    file_dialog_include_exclude_folder_selection.connect_response(move |file_chooser, response_type| {
+        if response_type == ResponseType::Accept {
             let mut folders: Vec<PathBuf> = Vec::new();
             let g_files = file_chooser.files();
             for index in 0..g_files.n_items() {
@@ -130,13 +121,12 @@ fn add_chosen_directories(window_main: &Window, tree_view: &TreeView, excluded_i
                 }
             }
         }
-        file_chooser.close();
     });
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
     let dialog = gtk4::Dialog::builder()
-        .title(&flg!("include_manually_directories_dialog_title"))
+        .title(flg!("include_manually_directories_dialog_title"))
         .transient_for(window_main)
         .modal(true)
         .build();

@@ -22,20 +22,28 @@ pub struct NotebookObject {
 pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
     NotebookObject {
         notebook_type: NotebookMainEnum::Duplicate,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date],
+        available_modes: &[
+            PopoverTypes::All,
+            PopoverTypes::Reverse,
+            PopoverTypes::Custom,
+            PopoverTypes::Date,
+            PopoverTypes::Size,
+            PopoverTypes::All,
+        ],
         column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
         column_path: ColumnsDuplicates::Path as i32,
         column_name: ColumnsDuplicates::Name as i32,
         column_selection: ColumnsDuplicates::SelectionButton as i32,
         column_header: Some(ColumnsDuplicates::IsHeader as i32),
         column_dimensions: None,
-        column_size: None,          // Do not add, useless in hash and size mode
-        column_size_as_bytes: None, // Do not add, useless in hash and size mode
+        column_size: Some(ColumnsDuplicates::Size as i32), // Useless with duplicates by hash or size, but needed by sorting by name
+        column_size_as_bytes: Some(ColumnsDuplicates::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
         columns_types: &[
             glib::types::Type::BOOL,   // ActivatableSelectButton
             glib::types::Type::BOOL,   // SelectionButton
             glib::types::Type::STRING, // Size
+            glib::types::Type::U64,    // SizeAsBytes
             glib::types::Type::STRING, // Name
             glib::types::Type::STRING, // Path
             glib::types::Type::STRING, // Modification

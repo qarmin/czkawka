@@ -1,40 +1,40 @@
 use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::gui_structs::gui_popovers::GuiPopovers;
+use crate::gui_structs::gui_popovers_select::GuiSelectPopovers;
 use crate::help_functions::PopoverTypes;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
 pub fn connect_button_select(gui_data: &GuiData) {
-    let popovers = gui_data.popovers.clone();
+    let popovers_select = gui_data.popovers_select.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let gc_buttons_select = gui_data.bottom_buttons.gc_buttons_select.clone();
 
     gc_buttons_select.connect_pressed(move |_, _, _, _| {
-        show_required_popovers(&popovers, &to_notebook_main_enum(notebook_main.current_page().unwrap()));
+        show_required_popovers(&popovers_select, &to_notebook_main_enum(notebook_main.current_page().unwrap()));
     });
 }
 
-fn show_required_popovers(popovers: &GuiPopovers, current_mode: &NotebookMainEnum) {
-    let buttons_popover_select_all = popovers.buttons_popover_select_all.clone();
-    let buttons_popover_unselect_all = popovers.buttons_popover_unselect_all.clone();
-    let buttons_popover_reverse = popovers.buttons_popover_reverse.clone();
-    let buttons_popover_select_all_except_oldest = popovers.buttons_popover_select_all_except_oldest.clone();
-    let buttons_popover_select_all_except_newest = popovers.buttons_popover_select_all_except_newest.clone();
-    let buttons_popover_select_one_oldest = popovers.buttons_popover_select_one_oldest.clone();
-    let buttons_popover_select_one_newest = popovers.buttons_popover_select_one_newest.clone();
-    let buttons_popover_select_custom = popovers.buttons_popover_select_custom.clone();
-    let buttons_popover_unselect_custom = popovers.buttons_popover_unselect_custom.clone();
-    let buttons_popover_select_all_images_except_biggest = popovers.buttons_popover_select_all_images_except_biggest.clone();
-    let buttons_popover_select_all_images_except_smallest = popovers.buttons_popover_select_all_images_except_smallest.clone();
+fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: &NotebookMainEnum) {
+    let buttons_popover_select_all = popovers_select.buttons_popover_select_all.clone();
+    let buttons_popover_unselect_all = popovers_select.buttons_popover_unselect_all.clone();
+    let buttons_popover_reverse = popovers_select.buttons_popover_reverse.clone();
+    let buttons_popover_select_all_except_oldest = popovers_select.buttons_popover_select_all_except_oldest.clone();
+    let buttons_popover_select_all_except_newest = popovers_select.buttons_popover_select_all_except_newest.clone();
+    let buttons_popover_select_one_oldest = popovers_select.buttons_popover_select_one_oldest.clone();
+    let buttons_popover_select_one_newest = popovers_select.buttons_popover_select_one_newest.clone();
+    let buttons_popover_select_custom = popovers_select.buttons_popover_select_custom.clone();
+    let buttons_popover_unselect_custom = popovers_select.buttons_popover_unselect_custom.clone();
+    let buttons_popover_select_all_images_except_biggest = popovers_select.buttons_popover_select_all_images_except_biggest.clone();
+    let buttons_popover_select_all_images_except_smallest = popovers_select.buttons_popover_select_all_images_except_smallest.clone();
 
-    let separator_select_custom = popovers.separator_select_custom.clone();
-    let separator_select_date = popovers.separator_select_date.clone();
-    let separator_select_image_size = popovers.separator_select_image_size.clone();
-    let separator_select_reverse = popovers.separator_select_reverse.clone();
+    let separator_select_custom = popovers_select.separator_select_custom.clone();
+    let separator_select_date = popovers_select.separator_select_date.clone();
+    let separator_select_image_size = popovers_select.separator_select_image_size.clone();
+    let separator_select_reverse = popovers_select.separator_select_reverse.clone();
 
-    let arr = &NOTEBOOKS_INFO[current_mode.clone() as usize].available_modes;
+    let arr = &NOTEBOOKS_INFO[*current_mode as usize].available_modes;
 
     if arr.contains(&PopoverTypes::All) {
         buttons_popover_select_all.show();
