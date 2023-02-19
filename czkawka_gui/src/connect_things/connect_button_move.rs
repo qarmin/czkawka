@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use gtk4::prelude::*;
-use gtk4::{FileChooserNative, ResponseType, TreePath};
+use gtk4::{ResponseType, TreePath};
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -25,7 +25,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
     let preview_path = gui_data.preview_path.clone();
     let file_dialog_move_to_folder = gui_data.file_dialog_move_to_folder.clone();
 
-    buttons_move.connect_clicked(move |_| {
+    file_dialog_move_to_folder.connect_response(move |file_chooser, response_type| {
         let nb_number = notebook_main.current_page().unwrap();
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
@@ -36,49 +36,10 @@ pub fn connect_button_move(gui_data: &GuiData) {
         if number_of_selected_items == 0 {
             return;
         }
-        move_things(
-            tree_view,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_header,
-            nb_object.column_selection,
-            &entry_info,
-            &text_view_errors,
-            &file_dialog_move_to_folder,
-        );
 
-        match &nb_object.notebook_type {
-            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
-                    image_preview_similar_images.hide();
-                } else {
-                    image_preview_duplicates.hide();
-                }
-                *preview_path.borrow_mut() = String::new();
-            }
-            _ => {}
-        }
-    });
-}
+        reset_text_view(&text_view_errors);
 
-// TODO add progress bar
-fn move_things(
-    tree_view: &gtk4::TreeView,
-    column_file_name: i32,
-    column_path: i32,
-    column_header: Option<i32>,
-    column_selection: i32,
-    entry_info: &gtk4::Entry,
-    text_view_errors: &gtk4::TextView,
-    file_dialog_move_to_folder: &FileChooserNative,
-) {
-    reset_text_view(text_view_errors);
-
-    let entry_info = entry_info.clone();
-    let text_view_errors = text_view_errors.clone();
-    let tree_view = tree_view.clone();
-    file_dialog_move_to_folder.connect_response(move |file_chooser, response_type| {
-        if response_type == ResponseType::Ok {
+        if response_type == ResponseType::Accept {
             let mut folders: Vec<PathBuf> = Vec::new();
             let g_files = file_chooser.files();
             for index in 0..g_files.n_items() {
@@ -102,23 +63,45 @@ fn move_things(
                 );
             } else {
                 let folder = folders[0].clone();
-                if let Some(column_header) = column_header {
+                if let Some(column_header) = nb_object.column_header {
                     move_with_tree(
-                        &tree_view,
-                        column_file_name,
-                        column_path,
+                        tree_view,
+                        nb_object.column_name,
+                        nb_object.column_path,
                         column_header,
-                        column_selection,
+                        nb_object.column_selection,
                         &folder,
                         &entry_info,
                         &text_view_errors,
                     );
                 } else {
-                    move_with_list(&tree_view, column_file_name, column_path, column_selection, &folder, &entry_info, &text_view_errors);
+                    move_with_list(
+                        tree_view,
+                        nb_object.column_name,
+                        nb_object.column_path,
+                        nb_object.column_selection,
+                        &folder,
+                        &entry_info,
+                        &text_view_errors,
+                    );
                 }
             }
         }
-        // file_chooser.close();
+        match &nb_object.notebook_type {
+            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
+                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+                    image_preview_similar_images.hide();
+                } else {
+                    image_preview_duplicates.hide();
+                }
+                *preview_path.borrow_mut() = String::new();
+            }
+            _ => {}
+        }
+    });
+
+    buttons_move.connect_clicked(move |_| {
+        file_dialog_move_to_folder.show();
     });
 }
 
