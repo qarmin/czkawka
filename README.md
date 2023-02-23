@@ -28,7 +28,8 @@
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
 ## Supported OS
-Linux - Ubuntu 22.04+, Fedora 36+, Alpine Linux 3.16+, Debian 12+ and a lot of more   
+Linux - Ubuntu 22.04+, Fedora 36+, Alpine Linux 3.16+, Debian 12+ and a lot of more 
+
 Windows - 7, 8.1, 10, 11  
 MacOS - 10.15+
 
@@ -103,26 +104,26 @@ Bleachbit is a master at finding and removing temporary files, while Czkawka onl
 |         Language         |    Rust     |   Python   |   Python/Obj-C    |   Python    |
 |            OS            | Lin,Mac,Win |    Lin     |    Lin,Mac,Win    | Lin,Mac,Win |
 |        Framework         |    GTK 4    |   PyGTK2   | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|     Duplicate finder     |      •      |     •      |         •         |             |
-|       Empty files        |      •      |     •      |                   |             |
-|      Empty folders       |      •      |     •      |                   |             |
-|     Temporary files      |      •      |     •      |                   |      •      |
-|        Big files         |      •      |            |                   |             |
-|      Similar images      |      •      |            |         •         |             |
-|      Similar videos      |      •      |            |                   |             |
-|  Music duplicates(tags)  |      •      |            |         •         |             |
-|     Invalid symlinks     |      •      |     •      |                   |             |
-|       Broken files       |      •      |            |                   |             |
-|      Names conflict      |      •      |     •      |                   |             |
-| Invalid names/extensions |      •      |     •      |                   |             |
-|    Installed packages    |             |     •      |                   |             |
-|          Bad ID          |             |     •      |                   |             |
-|  Non stripped binaries   |             |     •      |                   |             |
-|   Redundant whitespace   |             |     •      |                   |             |
-|    Overwriting files     |             |     •      |                   |      •      |
-|    Multiple languages    |      •      |     •      |         •         |      •      |
-|      Cache support       |      •      |            |         •         |             |
-|  In active development   |     Yes     |     No     |        Yes        |     Yes     |
+|     Duplicate finder     |     ✔       |      ✔     |        ✔          |             |
+|       Empty files        |     ✔       |      ✔     |                   |             |
+|      Empty folders       |     ✔       |      ✔     |                   |             |
+|     Temporary files      |     ✔       |      ✔     |                   |     ✔       |
+|        Big files         |     ✔       |            |                   |             |
+|      Similar images      |     ✔       |            |        ✔          |             |
+|      Similar videos      |     ✔       |            |                   |             |
+|  Music duplicates(tags)  |     ✔       |            |        ✔          |             |
+|     Invalid symlinks     |     ✔       |      ✔     |                   |             |
+|       Broken files       |     ✔       |            |                   |             |
+|      Names conflict      |     ✔       |      ✔     |                   |             |
+| Invalid names/extensions |     ✔       |      ✔     |                   |             |
+|    Installed packages    |             |      ✔     |                   |             |
+|          Bad ID          |             |      ✔     |                   |             |
+|  Non stripped binaries   |             |      ✔     |                   |             |
+|   Redundant whitespace   |             |      ✔     |                   |             |
+|    Overwriting files     |             |      ✔     |                   |     ✔       |
+|    Multiple languages    |     ✔       |      ✔     |        ✔          |     ✔       |
+|      Cache support       |     ✔       |            |        ✔          |             |
+|  In active development   |     Yes     |      No    |        Yes        |     Yes     |
 
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse:  
