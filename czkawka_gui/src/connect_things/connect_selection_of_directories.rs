@@ -48,7 +48,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             file_dialog_include_exclude_folder_selection.set_title(&flg!("exclude_folders_dialog_title"));
         });
     }
-    // Conect
+    // Connect
     {
         let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();

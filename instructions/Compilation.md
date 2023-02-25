@@ -8,6 +8,7 @@ FFmpeg is not included here because it is not needed to build - it is dynamicall
 
 Support for heif images is optional and require to install libheif library.
 
+New versions of GTK fixes some bugs, so e.g. middle button selection will work only with GTK >=4.8.
 
 | Program | Min    | What for                                                                             |
 |---------|--------|--------------------------------------------------------------------------------------|
@@ -33,19 +34,14 @@ You need to install Rust via Homebrew, GTK Libraries and optionally heif library
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install gtk4 adwaita-icon-theme librsvg libheif
+brew install gtk4 adwaita-icon-theme librsvg libheif webp-pixbuf-loader
 ```
 
 ### Windows
 
-*Will be available in the future*
+Compiling Czkawka on Windows is possible, but due using GTK is very hard.
 
-For Linux-to-Windows cross-building instruction look at the CI.
-
-<!-- First you need to install Visual C++ components from Visual Studio installer - https://visualstudio.microsoft.com/downloads/
-Next install Rust from site https://rustup.rs/
-After that the latest GTK 4 runtime must be installed from(not available yet for GTK 4) https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
--->
+In CI we use cross compilation which simplify a lot of things, so for now there is no instruction how to compile native binaries on Windows.
 
 ### Docker
 

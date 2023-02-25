@@ -60,7 +60,7 @@ jobs:
           find package -iname "*.dll" -or -iname "*.exe" -type f -exec mingw-strip {} +
 
           cd package/share
-          wget2 https://github.com/qarmin/czkawka/files/8880216/gtk4_theme.zip
+          wget2 https://github.com/qarmin/czkawka/files/10832192/gtk4_theme.zip
           unzip gtk4_theme.zip
           rm gtk4_theme.zip
           cd ../..
@@ -76,7 +76,7 @@ jobs:
   container_cli:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
+      image: ghcr.io/piegamesde/gtk4-cross:gtk-4.8
     steps:
       - uses: actions/checkout@v1
       - name: Install additional dependencies
@@ -126,7 +126,7 @@ jobs:
           find package -iname "*.dll" -or -iname "*.exe" -type f -exec mingw-strip {} +
 
           cd package/share
-          wget2 https://github.com/qarmin/czkawka/files/8880216/gtk4_theme.zip
+          wget2 https://github.com/qarmin/czkawka/files/10832192/gtk4_theme.zip
           unzip gtk4_theme.zip
           rm gtk4_theme.zip
           cd ../..
