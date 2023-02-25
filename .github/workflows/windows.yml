@@ -133,7 +133,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: czkawka-windows-${{ github.sha }}
+          name: czkawka-windows-${{ github.sha }}-console
           path: |
             ./package
           if-no-files-found: error
