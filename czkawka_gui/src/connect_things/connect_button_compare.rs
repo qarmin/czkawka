@@ -6,10 +6,6 @@ use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
 
-#[cfg(feature = "heif")]
-use czkawka_core::common::get_dynamic_image_from_heic;
-use czkawka_core::common::HEIC_EXTENSIONS;
-
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{
@@ -355,62 +351,15 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         let big_img = Image::new();
 
         let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).unwrap();
-        let name_lowercase = name.to_lowercase();
-        let is_heic = HEIC_EXTENSIONS.iter().any(|extension| name_lowercase.ends_with(extension));
-        let is_webp = name.to_lowercase().ends_with(".webp");
 
-        if is_heic || is_webp {
-            #[allow(clippy::never_loop)]
-            'czystka: loop {
-                #[cfg(feature = "heif")]
-                if is_heic {
-                    match get_dynamic_image_from_heic(&full_path) {
-                        Ok(t) => {
-                            match get_pixbuf_from_dynamic_image(&t) {
-                                Ok(t) => {
-                                    pixbuf = t;
-                                }
-                                Err(e) => {
-                                    println!("Failed to open image {full_path}, reason {e}");
-                                }
-                            };
-                        }
-                        Err(e) => {
-                            println!("Failed to open image {full_path}, reason {e}");
-                        }
-                    };
-                    break 'czystka;
-                }
-                if is_webp {
-                    match image::open(&full_path) {
-                        Ok(t) => {
-                            match get_pixbuf_from_dynamic_image(&t) {
-                                Ok(t) => {
-                                    pixbuf = t;
-                                }
-                                Err(e) => {
-                                    println!("Failed to open image {full_path}, reason {e}");
-                                }
-                            };
-                        }
-                        Err(e) => {
-                            println!("Failed to open image {full_path}, reason {e}");
-                        }
-                    };
-                    break 'czystka;
-                }
-                break 'czystka;
+        match Pixbuf::from_file(&full_path) {
+            Ok(t) => {
+                pixbuf = t;
             }
-        } else {
-            match Pixbuf::from_file(&full_path) {
-                Ok(t) => {
-                    pixbuf = t;
-                }
-                Err(e) => {
-                    println!("Failed to open image {full_path}, reason {e}");
-                }
-            };
-        }
+            Err(e) => {
+                println!("Failed to open image {full_path}, reason {e}");
+            }
+        };
 
         #[allow(clippy::never_loop)]
         loop {

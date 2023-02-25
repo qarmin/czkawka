@@ -6,6 +6,8 @@ If you only want the terminal version without a GUI, just skip all the packages 
 
 FFmpeg is not included here because it is not needed to build - it is dynamically loaded.
 
+Webp and heif pixbuf are needed to show preview of image files with this extensions.
+
 Support for heif images is optional and require to install libheif library.
 
 
@@ -18,7 +20,7 @@ Support for heif images is optional and require to install libheif library.
 ```shell
 sudo apt install -y curl git build-essential # Needed by Rust update tool
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Download the latest stable Rust
-sudo apt install -y libgtk-4-dev
+sudo apt install -y libgtk-4-dev webp-pixbuf-loader heif-gdk-pixbuf
 ```
 
 #### Fedora / CentOS / Rocky Linux
@@ -33,7 +35,7 @@ You need to install Rust via Homebrew, GTK Libraries and optionally heif library
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install rustup
 rustup-init
-brew install gtk4 adwaita-icon-theme librsvg libheif
+brew install gtk4 adwaita-icon-theme librsvg libheif webp-pixbuf-loader
 ```
 
 ### Windows
