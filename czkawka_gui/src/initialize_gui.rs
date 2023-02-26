@@ -575,56 +575,33 @@ fn show_preview(
             }
 
             let is_heic;
-            let is_webp;
             if let Some(extension) = Path::new(&name).extension() {
                 let extension = format!(".{}", extension.to_string_lossy().to_lowercase());
                 is_heic = HEIC_EXTENSIONS.contains(&extension.as_str());
-                is_webp = ".webp" == extension;
                 if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) && !is_heic {
                     break 'dir;
                 }
             } else {
                 break 'dir;
             }
-            let mut pixbuf = if is_heic || is_webp {
-                let image = if is_heic {
-                    #[cfg(feature = "heif")]
-                    match get_dynamic_image_from_heic(file_name) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            add_text_to_text_view(
-                                text_view_errors,
-                                flg!(
-                                    "preview_image_opening_failure",
-                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
-                                )
-                                .as_str(),
-                            );
-                            break 'dir;
-                        }
+            let mut pixbuf = if cfg!(feature = "heif") && is_heic {
+                #[cfg(feature = "heif")]
+                let image = match get_dynamic_image_from_heic(file_name) {
+                    Ok(t) => t,
+                    Err(e) => {
+                        add_text_to_text_view(
+                            text_view_errors,
+                            flg!(
+                                "preview_image_opening_failure",
+                                generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                            )
+                            .as_str(),
+                        );
+                        break 'dir;
                     }
-
-                    #[cfg(not(feature = "heif"))]
-                    panic!("")
-                } else if is_webp {
-                    match image::open(file_name) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            add_text_to_text_view(
-                                text_view_errors,
-                                flg!(
-                                    "preview_image_opening_failure",
-                                    generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
-                                )
-                                .as_str(),
-                            );
-                            break 'dir;
-                        }
-                    }
-                } else {
-                    panic!("");
                 };
 
+                #[cfg(feature = "heif")]
                 match get_pixbuf_from_dynamic_image(&image) {
                     Ok(t) => t,
                     Err(e) => {
@@ -639,6 +616,9 @@ fn show_preview(
                         break 'dir;
                     }
                 }
+
+                #[cfg(not(feature = "heif"))]
+                unreachable!()
             } else {
                 match Pixbuf::from_file(file_name) {
                     Ok(pixbuf) => pixbuf,
