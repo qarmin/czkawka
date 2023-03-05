@@ -244,11 +244,8 @@ pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, c
 
     let mut string_vector: Vec<String> = Vec::new();
 
-    let tree_iter = match list_store.iter_first() {
-        Some(t) => t,
-        None => {
+    let Some(tree_iter) =  list_store.iter_first() else {
             return string_vector;
-        }
     };
     match column_selection {
         Some(column_selection) => loop {

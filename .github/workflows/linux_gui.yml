@@ -12,7 +12,7 @@ jobs:
   linux-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.65.0 ]
+        toolchain: [ stable, 1.67.1 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
@@ -39,7 +39,7 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.65.0') }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.67.1') }}
 
       - name: Build Release
         run: cargo build --release

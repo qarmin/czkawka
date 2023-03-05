@@ -381,10 +381,7 @@ impl SameMusic {
                     return None;
                 }
 
-                let mut file = match File::open(&path) {
-                    Ok(t) => t,
-                    Err(_) => return Some(None),
-                };
+                let Ok(mut file) = File::open(&path) else{return Some(None)};
 
                 let result = panic::catch_unwind(move || {
                     match read_from(&mut file) {
