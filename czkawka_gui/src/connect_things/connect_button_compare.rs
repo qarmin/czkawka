@@ -395,19 +395,13 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
 
         #[allow(clippy::never_loop)]
         loop {
-            let pixbuf_big = match resize_pixbuf_dimension(&pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Bilinear) {
-                None => {
+            let Some(pixbuf_big) = resize_pixbuf_dimension(&pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Bilinear) else{
                     println!("Failed to resize image {full_path}.");
                     break;
-                }
-                Some(pixbuf) => pixbuf,
             };
-            let pixbuf_small = match resize_pixbuf_dimension(&pixbuf_big, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Bilinear) {
-                None => {
+            let Some(pixbuf_small) =  resize_pixbuf_dimension(&pixbuf_big, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Bilinear) else  {
                     println!("Failed to resize image {full_path}.");
                     break;
-                }
-                Some(pixbuf) => pixbuf,
             };
 
             big_img.set_from_pixbuf(Some(&pixbuf_big));

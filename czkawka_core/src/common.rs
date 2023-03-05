@@ -11,7 +11,7 @@ use directories_next::ProjectDirs;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
-use libheif_rs::{Channel, ColorSpace, HeifContext, RgbChroma};
+use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 
 static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
 
@@ -129,8 +129,8 @@ pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
     let im = HeifContext::read_from_file(path)?;
     let handle = im.primary_image_handle()?;
     let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None)?;
-    let width = image.width(Channel::Interleaved).map_err(|e| anyhow::anyhow!("{}", e))?;
-    let height = image.height(Channel::Interleaved).map_err(|e| anyhow::anyhow!("{}", e))?;
+    let width = image.width();
+    let height = image.height();
     let planes = image.planes();
     let interleaved_plane = planes.interleaved.unwrap();
     ImageBuffer::from_raw(width, height, interleaved_plane.data.to_owned())
@@ -171,11 +171,8 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
         }
     };
 
-    let image = match ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) {
-        Some(image) => image,
-        None => {
+    let Some(image) =  ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
             return None;
-        }
     };
 
     // println!("Properly hashed {:?}", path);

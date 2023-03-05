@@ -393,9 +393,7 @@ fn popover_custom_select_unselect(
 
                     let model = get_list_store(&tree_view);
 
-                    let iter = if let Some(t) = model.iter_first() {
-                        t
-                    } else {
+                    let Some(iter) = model.iter_first() else {
                         confirmation_dialog_select_unselect.close();
                         return;
                     };

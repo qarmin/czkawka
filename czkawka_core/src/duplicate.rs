@@ -1315,10 +1315,7 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
         open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, false, &mut text_messages.warnings)
     {
         // Unwrap could fail when failed to open cache file, but json would exists
-        let file_handler = match file_handler {
-            Some(t) => t,
-            _ => return Default::default(),
-        };
+        let Some(file_handler) = file_handler else { return Default::default() };
         let reader = BufReader::new(file_handler);
 
         let mut hashmap_loaded_entries: BTreeMap<u64, Vec<FileEntry>> = Default::default();
