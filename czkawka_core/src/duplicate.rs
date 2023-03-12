@@ -11,7 +11,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime};
 use std::{fs, mem, thread};
 
@@ -148,24 +148,24 @@ impl DuplicateFinder {
 
         match self.check_method {
             CheckingMethod::Name => {
-                if !self.check_files_name(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                self.stopped_search = !self.check_files_name(stop_receiver, progress_sender);
+                if self.stopped_search {
                     return;
                 }
             }
             CheckingMethod::Size => {
-                if !self.check_files_size(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                self.stopped_search = !self.check_files_size(stop_receiver, progress_sender);
+                if self.stopped_search {
                     return;
                 }
             }
             CheckingMethod::Hash => {
-                if !self.check_files_size(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                self.stopped_search = !self.check_files_size(stop_receiver, progress_sender);
+                if self.stopped_search {
                     return;
                 }
-                if !self.check_files_hash(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                self.stopped_search = !self.check_files_hash(stop_receiver, progress_sender);
+                if self.stopped_search {
                     return;
                 }
             }
@@ -459,49 +459,8 @@ impl DuplicateFinder {
                     }
                 }
 
-                // Reference - only use in size, because later hash will be counted differently
-                if self.use_reference_folders && self.check_method == CheckingMethod::Size {
-                    let mut btree_map = Default::default();
-                    mem::swap(&mut self.files_with_identical_size, &mut btree_map);
-                    let reference_directories = self.directories.reference_directories.clone();
-                    let vec = btree_map
-                        .into_iter()
-                        .filter_map(|(_size, vec_file_entry)| {
-                            let mut files_from_referenced_folders = Vec::new();
-                            let mut normal_files = Vec::new();
-                            for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                                    files_from_referenced_folders.push(file_entry);
-                                } else {
-                                    normal_files.push(file_entry);
-                                }
-                            }
-
-                            if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
-                                None
-                            } else {
-                                Some((files_from_referenced_folders.pop().unwrap(), normal_files))
-                            }
-                        })
-                        .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
-                    for (fe, vec_fe) in vec {
-                        self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
-                    }
-                }
-
-                if self.use_reference_folders {
-                    for (size, (_fe, vector)) in &self.files_with_identical_size_referenced {
-                        self.information.number_of_duplicated_files_by_size += vector.len();
-                        self.information.number_of_groups_by_size += 1;
-                        self.information.lost_space_by_size += (vector.len() as u64) * size;
-                    }
-                } else {
-                    for (size, vector) in &self.files_with_identical_size {
-                        self.information.number_of_duplicated_files_by_size += vector.len() - 1;
-                        self.information.number_of_groups_by_size += 1;
-                        self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
-                    }
-                }
+                self.check_references_for_size();
+                self.calculate_size_stats();
 
                 Common::print_time(start_time, SystemTime::now(), "check_files_size");
                 true
@@ -510,6 +469,90 @@ impl DuplicateFinder {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
+        }
+    }
+
+    fn calculate_size_stats(&mut self) {
+        if self.use_reference_folders {
+            for (size, (_fe, vector)) in &self.files_with_identical_size_referenced {
+                self.information.number_of_duplicated_files_by_size += vector.len();
+                self.information.number_of_groups_by_size += 1;
+                self.information.lost_space_by_size += (vector.len() as u64) * size;
+            }
+        } else {
+            for (size, vector) in &self.files_with_identical_size {
+                self.information.number_of_duplicated_files_by_size += vector.len() - 1;
+                self.information.number_of_groups_by_size += 1;
+                self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
+            }
+        }
+    }
+
+    /// This step check for references, only when checking for size.
+    /// This is needed, because later reference folders looks for hashes, not size
+    fn check_references_for_size(&mut self) {
+        if self.use_reference_folders && self.check_method == CheckingMethod::Size {
+            let mut btree_map = Default::default();
+            mem::swap(&mut self.files_with_identical_size, &mut btree_map);
+            let reference_directories = self.directories.reference_directories.clone();
+            let vec = btree_map
+                .into_iter()
+                .filter_map(|(_size, vec_file_entry)| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+            for (fe, vec_fe) in vec {
+                self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
+            }
+        }
+    }
+
+    // TODO Generalize this if possible
+    fn prepare_hash_thread_handler(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: Arc<AtomicBool>,
+        atomic_counter: Arc<AtomicUsize>,
+        current_stage: u8,
+        max_stage: u8,
+        max_value: usize,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
+            let progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run;
+            let atomic_counter = atomic_counter;
+            let checking_method = self.check_method;
+            thread::spawn(move || loop {
+                progress_send
+                    .unbounded_send(ProgressData {
+                        checking_method,
+                        current_stage,
+                        max_stage,
+                        entries_checked: atomic_counter.load(Ordering::Relaxed),
+                        entries_to_check: max_value,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            })
+        } else {
+            thread::spawn(|| {})
         }
     }
 
@@ -523,37 +566,16 @@ impl DuplicateFinder {
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = self.files_with_identical_size.values().map(Vec::len).sum();
-            let checking_method = self.check_method;
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method,
-                        current_stage: 1,
-                        max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
-                        entries_to_check: files_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-
-        //// PROGRESS THREAD END
+        let progress_thread_handle = self.prepare_hash_thread_handler(
+            progress_sender,
+            progress_thread_run.clone(),
+            atomic_file_counter.clone(),
+            1,
+            2,
+            self.files_with_identical_size.values().map(Vec::len).sum(),
+        );
 
         ///////////////////////////////////////////////////////////////////////////// PREHASHING START
         {
@@ -684,33 +706,16 @@ impl DuplicateFinder {
 
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = pre_checked_map.values().map(Vec::len).sum();
-            let checking_method = self.check_method;
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method,
-                        current_stage: 2,
-                        max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
-                        entries_to_check: files_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
+        let progress_thread_handle = self.prepare_hash_thread_handler(
+            progress_sender,
+            progress_thread_run.clone(),
+            atomic_file_counter.clone(),
+            2,
+            2,
+            pre_checked_map.values().map(Vec::len).sum(),
+        );
 
         //// PROGRESS THREAD END
 
