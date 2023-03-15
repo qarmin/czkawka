@@ -64,6 +64,19 @@ Ready-to-go executables for Linux, Windows and macOS are available [**here**](ht
 If the app does not run when clicking the launcher, run it through a terminal.  
 You don't need to have any additional libraries for CLI Czkawka.
 
+Install the GUI version on Linux:
+
+```shell
+# download
+curl --location https://github.com/qarmin/czkawka/releases/download/5.1.0/linux_czkawka_gui --output ~/.local/bin/linux_czkawka_gui
+# mark as executable
+chmod +x ~/.local/bin/linux_czkawka_gui
+# run
+linux_czkawka_gui
+```
+
+>**Note** This requires that the `$PATH` environment variable contains `~/.local/bin/`.
+
 ### Nightly Builds
 Artifacts from each commit can be downloaded [**here**](https://github.com/qarmin/czkawka/actions)
 
