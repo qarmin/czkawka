@@ -86,7 +86,7 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
 
-      - name: Download appimage dependiences
+      - name: Download appimage dependencies
         run: |
           pwd
           wget -c "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
