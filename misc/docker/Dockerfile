@@ -1,4 +1,4 @@
-FROM debian:11
+FROM ubuntu:22.04
 
 # curl is needed by Rust update tool
 RUN apt-get update \
