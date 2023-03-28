@@ -699,27 +699,15 @@ impl DuplicateFinder {
         Some(())
     }
 
-    fn full_hashing(&mut self) {}
-
-    /// The slowest checking type, which must be applied after checking for size
-    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        assert_eq!(self.check_method, CheckingMethod::Hash);
-
-        let check_type = self.hash_type;
-
+    fn full_hashing(
+        &mut self,
+        stop_receiver: Option<&Receiver<()>>,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
+    ) -> Option<()> {
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
-        ///////////////////////////////////////////////////////////////////////////// PREHASHING START
-
-        let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-        let ret = self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map);
-        if ret.is_none() {
-            return false;
-        }
-
-        ///////////////////////////////////////////////////////////////////////////// PREHASHING END
-
-        /////////////////////////
+        let check_type = self.hash_type;
         let start_time: SystemTime = SystemTime::now();
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -850,7 +838,7 @@ impl DuplicateFinder {
 
             // Break if stop was clicked after saving to cache
             if check_was_stopped.load(Ordering::Relaxed) {
-                return false;
+                return None;
             }
 
             for (size, hash_map, mut errors) in full_hash_results {
@@ -862,9 +850,11 @@ impl DuplicateFinder {
                 }
             }
         }
+        Common::print_time(start_time, SystemTime::now(), "delete_files");
+        Some(())
+    }
 
-        ///////////////////////////////////////////////////////////////////////////// HASHING END
-
+    fn hash_reference_folders(&mut self) {
         // Reference - only use in size, because later hash will be counted differently
         if self.use_reference_folders {
             let mut btree_map = Default::default();
@@ -919,8 +909,24 @@ impl DuplicateFinder {
                 }
             }
         }
+    }
 
-        Common::print_time(start_time, SystemTime::now(), "check_files_hash - full hash");
+    /// The slowest checking type, which must be applied after checking for size
+    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        assert_eq!(self.check_method, CheckingMethod::Hash);
+
+        let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+        let ret = self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map);
+        if ret.is_none() {
+            return false;
+        }
+
+        let ret = self.full_hashing(stop_receiver, progress_sender, pre_checked_map);
+        if ret.is_none() {
+            return false;
+        }
+
+        self.hash_reference_folders();
 
         // Clean unused data
         self.files_with_identical_size = Default::default();
