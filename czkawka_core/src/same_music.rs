@@ -31,6 +31,7 @@ pub enum DeleteMethod {
 }
 
 bitflags! {
+    #[derive(PartialEq, Copy, Clone, Debug)]
     pub struct MusicSimilarity : u32 {
         const NONE = 0;
 
