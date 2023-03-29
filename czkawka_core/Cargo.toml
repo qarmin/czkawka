@@ -69,7 +69,7 @@ infer = "0.13.0"
 num_cpus = "1.15.0"
 
 # Heif/Heic
-libheif-rs = { version = "0.19.2", optional = true }
+libheif-rs = { version = "0.18.0", optional = true } # TODO update this, decode function is missing in this version
 anyhow = { version = "1.0", optional = true }
 
 state="0.5.3"

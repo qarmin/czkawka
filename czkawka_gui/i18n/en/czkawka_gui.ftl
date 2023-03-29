@@ -28,6 +28,7 @@ duplicate_case_sensitive_name_tooltip =
 
         Disabling such option will group names without checking if each letter is same size e.g. żoŁD <-> Żołd
 
+duplicate_mode_size_name_combo_box = Size and Name
 duplicate_mode_name_combo_box = Name
 duplicate_mode_size_combo_box = Size
 duplicate_mode_hash_combo_box = Hash
@@ -447,6 +448,7 @@ progress_scanning_music_tags_end = Comparing tags of {$file_checked}/{$all_files
 progress_scanning_music_tags = Reading tags of {$file_checked}/{$all_files} music file
 progress_scanning_empty_folders = Scanning {$folder_number} folder
 progress_scanning_size = Scanning size of {$file_number} file
+progress_scanning_size_name = Scanning name and size of {$file_number} file
 progress_scanning_name = Scanning name of {$file_number} file
 progress_analyzed_partial_hash = Analyzed partial hash of {$file_checked}/{$all_files} files
 progress_analyzed_full_hash = Analyzed full hash of {$file_checked}/{$all_files} files

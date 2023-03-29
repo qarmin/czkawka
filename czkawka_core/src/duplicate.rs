@@ -67,6 +67,8 @@ pub struct Info {
     pub number_of_duplicated_files_by_hash: usize,
     pub number_of_groups_by_name: usize,
     pub number_of_duplicated_files_by_name: usize,
+    pub number_of_groups_by_size_name: usize,
+    pub number_of_duplicated_files_by_size_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
 }
@@ -152,7 +154,13 @@ impl DuplicateFinder {
 
         match self.check_method {
             CheckingMethod::Name => {
-                self.stopped_search = !self.check_files_size_name(stop_receiver, progress_sender); // TODO restore this to name
+                self.stopped_search = !self.check_files_name(stop_receiver, progress_sender); // TODO restore this to name
+                if self.stopped_search {
+                    return;
+                }
+            }
+            CheckingMethod::SizeName => {
+                self.stopped_search = !self.check_files_size_name(stop_receiver, progress_sender);
                 if self.stopped_search {
                     return;
                 }
@@ -223,6 +231,11 @@ impl DuplicateFinder {
     #[must_use]
     pub const fn get_files_sorted_by_size(&self) -> &BTreeMap<u64, Vec<FileEntry>> {
         &self.files_with_identical_size
+    }
+
+    #[must_use]
+    pub const fn get_files_sorted_by_size_name(&self) -> &BTreeMap<(u64, String), Vec<FileEntry>> {
+        &self.files_with_identical_size_names
     }
 
     #[must_use]
@@ -321,6 +334,11 @@ impl DuplicateFinder {
     #[must_use]
     pub fn get_files_with_identical_size_referenced(&self) -> &BTreeMap<u64, (FileEntry, Vec<FileEntry>)> {
         &self.files_with_identical_size_referenced
+    }
+
+    #[must_use]
+    pub fn get_files_with_identical_size_names_referenced(&self) -> &BTreeMap<(u64, String), (FileEntry, Vec<FileEntry>)> {
+        &self.files_with_identical_size_names_referenced
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -484,18 +502,35 @@ impl DuplicateFinder {
                         })
                         .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
                     for (fe, vec_fe) in vec {
-                        self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
+                        self.files_with_identical_size_names_referenced
+                            .insert((fe.size, fe.path.to_string_lossy().to_string()), (fe, vec_fe));
                     }
                 }
-                self.calculate_name_stats(); // TODO change this
+                self.calculate_size_name_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_name");
+                Common::print_time(start_time, SystemTime::now(), "check_files_size_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
+        }
+    }
+
+    fn calculate_size_name_stats(&mut self) {
+        if self.use_reference_folders {
+            for ((size, _name), (_fe, vector)) in &self.files_with_identical_size_names_referenced {
+                self.information.number_of_duplicated_files_by_size_name += vector.len();
+                self.information.number_of_groups_by_size_name += 1;
+                self.information.lost_space_by_size += (vector.len() as u64) * size;
+            }
+        } else {
+            for ((size, _name), vector) in &self.files_with_identical_size_names {
+                self.information.number_of_duplicated_files_by_size_name += vector.len() - 1;
+                self.information.number_of_groups_by_size_name += 1;
+                self.information.lost_space_by_size += (vector.len() as u64 - 1) * size;
+            }
         }
     }
 
@@ -1036,6 +1071,11 @@ impl DuplicateFinder {
                     let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                 }
             }
+            CheckingMethod::SizeName => {
+                for vector in self.files_with_identical_size_names.values() {
+                    let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
+                }
+            }
             CheckingMethod::Hash => {
                 for vector_vectors in self.files_with_identical_hashes.values() {
                     for vector in vector_vectors.iter() {
@@ -1169,6 +1209,30 @@ impl SaveResults for DuplicateFinder {
                     write!(writer, "Not found any files with same names.").unwrap();
                 }
             }
+            CheckingMethod::SizeName => {
+                if !self.files_with_identical_names.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same size and names-------------------------------------------------"
+                    )
+                    .unwrap();
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with same size and name(may have different content)",
+                        self.information.number_of_duplicated_files_by_size_name, self.information.number_of_groups_by_size_name,
+                    )
+                    .unwrap();
+                    for ((size, name), vector) in self.files_with_identical_size_names.iter().rev() {
+                        writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len()).unwrap();
+                        for j in vector {
+                            writeln!(writer, "{}", j.path.display()).unwrap();
+                        }
+                        writeln!(writer).unwrap();
+                    }
+                } else {
+                    write!(writer, "Not found any files with same size and names.").unwrap();
+                }
+            }
             CheckingMethod::Size => {
                 if !self.files_with_identical_size.is_empty() {
                     writeln!(
@@ -1247,6 +1311,20 @@ impl PrintResults for DuplicateFinder {
                 println!("Found {number_of_files} files in {number_of_groups} groups with same name(may have different content)",);
                 for (name, vector) in &self.files_with_identical_names {
                     println!("Name - {} - {} files ", name, vector.len());
+                    for j in vector {
+                        println!("{}", j.path.display());
+                    }
+                    println!();
+                }
+            }
+            CheckingMethod::SizeName => {
+                for i in &self.files_with_identical_size_names {
+                    number_of_files += i.1.len() as u64;
+                    number_of_groups += 1;
+                }
+                println!("Found {number_of_files} files in {number_of_groups} groups with same size and name(may have different content)",);
+                for ((size, name), vector) in &self.files_with_identical_size_names {
+                    println!("Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len());
                     for j in vector {
                         println!("{}", j.path.display());
                     }

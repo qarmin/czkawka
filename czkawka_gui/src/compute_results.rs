@@ -99,51 +99,48 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                     match df.get_check_method() {
                         CheckingMethod::Name => {
                             duplicates_number = information.number_of_duplicated_files_by_name;
-                            // duplicates_size = 0;
+                            duplicates_size = 0;
                             duplicates_group = information.number_of_groups_by_name;
-                            entry_info.set_text(
-                                flg!(
-                                    "compute_found_duplicates_name",
-                                    generate_translation_hashmap(vec![("number_files", duplicates_number.to_string()), ("number_groups", duplicates_group.to_string())])
-                                )
-                                .as_str(),
-                            );
                         }
                         CheckingMethod::Hash => {
                             duplicates_number = information.number_of_duplicated_files_by_hash;
                             duplicates_size = information.lost_space_by_hash;
                             duplicates_group = information.number_of_groups_by_hash;
-                            entry_info.set_text(
-                                flg!(
-                                    "compute_found_duplicates_hash_size",
-                                    generate_translation_hashmap(vec![
-                                        ("number_files", duplicates_number.to_string()),
-                                        ("number_groups", duplicates_group.to_string()),
-                                        ("size", format_size(duplicates_size, BINARY))
-                                    ])
-                                )
-                                .as_str(),
-                            );
                         }
                         CheckingMethod::Size => {
                             duplicates_number = information.number_of_duplicated_files_by_size;
                             duplicates_size = information.lost_space_by_size;
                             duplicates_group = information.number_of_groups_by_size;
-                            entry_info.set_text(
-                                flg!(
-                                    "compute_found_duplicates_hash_size",
-                                    generate_translation_hashmap(vec![
-                                        ("number_files", duplicates_number.to_string()),
-                                        ("number_groups", duplicates_group.to_string()),
-                                        ("size", format_size(duplicates_size, BINARY))
-                                    ])
-                                )
-                                .as_str(),
-                            );
+                        }
+                        CheckingMethod::SizeName => {
+                            duplicates_number = information.number_of_duplicated_files_by_size_name;
+                            duplicates_size = information.lost_space_by_size;
+                            duplicates_group = information.number_of_groups_by_size_name;
                         }
                         CheckingMethod::None => {
                             panic!();
                         }
+                    }
+                    if duplicates_size == 0 {
+                        entry_info.set_text(
+                            flg!(
+                                "compute_found_duplicates_name",
+                                generate_translation_hashmap(vec![("number_files", duplicates_number.to_string()), ("number_groups", duplicates_group.to_string())])
+                            )
+                            .as_str(),
+                        );
+                    } else {
+                        entry_info.set_text(
+                            flg!(
+                                "compute_found_duplicates_hash_size",
+                                generate_translation_hashmap(vec![
+                                    ("number_files", duplicates_number.to_string()),
+                                    ("number_groups", duplicates_group.to_string()),
+                                    ("size", format_size(duplicates_size, BINARY))
+                                ])
+                            )
+                            .as_str(),
+                        );
                     }
 
                     // Create GUI
@@ -335,6 +332,65 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                         }
                                     }
                                 }
+                                CheckingMethod::SizeName => {
+                                    let btreemap = df.get_files_with_identical_size_names_referenced();
+
+                                    for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_unstable_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+
+                                        // HEADER
+                                        let (directory, file) = split_path(&base_file_entry.path);
+                                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
+                                            (ColumnsDuplicates::SizeAsBytes as u32, &base_file_entry.size),
+                                            (ColumnsDuplicates::Name as u32, &file),
+                                            (ColumnsDuplicates::Path as u32, &directory),
+                                            (
+                                                ColumnsDuplicates::Modification as u32,
+                                                &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
+                                            ),
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::IsHeader as u32, &true),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        // MEAT
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
+                                                (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::IsHeader as u32, &false),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
                                 CheckingMethod::None => {
                                     panic!();
                                 }
@@ -457,6 +513,58 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
                                 }
                                 CheckingMethod::Size => {
                                     let btreemap = df.get_files_sorted_by_size();
+
+                                    for (_size, vector) in btreemap.iter().rev() {
+                                        // Sort
+                                        let vector = if vector.len() >= 2 {
+                                            let mut vector = vector.clone();
+                                            vector.sort_unstable_by_key(|e| {
+                                                let t = split_path(e.path.as_path());
+                                                (t.0, t.1)
+                                            });
+                                            vector
+                                        } else {
+                                            vector.clone()
+                                        };
+                                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                                            (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
+                                            (ColumnsDuplicates::SelectionButton as u32, &false),
+                                            (ColumnsDuplicates::Size as u32, (&String::new())),
+                                            (ColumnsDuplicates::SizeAsBytes as u32, &0),
+                                            (ColumnsDuplicates::Name as u32, (&String::new())),
+                                            (ColumnsDuplicates::Path as u32, (&String::new())),
+                                            (ColumnsDuplicates::Modification as u32, &String::new()), // No text in 3 column
+                                            (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),     // Not used here
+                                            (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
+                                            (ColumnsDuplicates::IsHeader as u32, &true),
+                                            (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                        ];
+
+                                        list_store.set(&list_store.append(), &values);
+                                        for entry in vector {
+                                            let (directory, file) = split_path(&entry.path);
+                                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                                                (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
+                                                (ColumnsDuplicates::SelectionButton as u32, &false),
+                                                (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
+                                                (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
+                                                (ColumnsDuplicates::Name as u32, &file),
+                                                (ColumnsDuplicates::Path as u32, &directory),
+                                                (
+                                                    ColumnsDuplicates::Modification as u32,
+                                                    &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
+                                                ),
+                                                (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
+                                                (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
+                                                (ColumnsDuplicates::IsHeader as u32, &false),
+                                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
+                                            ];
+                                            list_store.set(&list_store.append(), &values);
+                                        }
+                                    }
+                                }
+                                CheckingMethod::SizeName => {
+                                    let btreemap = df.get_files_sorted_by_size_name();
 
                                     for (_size, vector) in btreemap.iter().rev() {
                                         // Sort

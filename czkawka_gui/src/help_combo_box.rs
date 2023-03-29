@@ -29,7 +29,7 @@ pub struct CheckMethodStruct {
     pub check_method: CheckingMethod,
 }
 
-pub const DUPLICATES_CHECK_METHOD_COMBO_BOX: [CheckMethodStruct; 3] = [
+pub const DUPLICATES_CHECK_METHOD_COMBO_BOX: [CheckMethodStruct; 4] = [
     CheckMethodStruct {
         eng_name: "Hash",
         check_method: CheckingMethod::Hash,
@@ -41,6 +41,10 @@ pub const DUPLICATES_CHECK_METHOD_COMBO_BOX: [CheckMethodStruct; 3] = [
     CheckMethodStruct {
         eng_name: "Name",
         check_method: CheckingMethod::Name,
+    },
+    CheckMethodStruct {
+        eng_name: "Size and Name",
+        check_method: CheckingMethod::SizeName,
     },
 ];
 
