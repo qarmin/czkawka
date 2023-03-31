@@ -1474,7 +1474,7 @@ fn computer_duplicate_finder(
                             // MEAT
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                println!("{}", entry.size);
+
                                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                                     (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
                                     (ColumnsDuplicates::SelectionButton as u32, &false),
