@@ -31,6 +31,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
+use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
 
 pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<Message>) {
@@ -290,12 +291,7 @@ fn computer_bad_extensions(
         {
             *shared_state.borrow_mut() = be;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::Temporary,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                bad_extensions_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Temporary, bad_extensions_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(),
@@ -367,12 +363,7 @@ fn computer_broken_files(
         {
             *shared_state.borrow_mut() = br;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::BrokenFiles,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                broken_files_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::BrokenFiles, broken_files_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(),
@@ -450,12 +441,7 @@ fn computer_invalid_symlinks(
         {
             *shared_state.borrow_mut() = ifs;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::Symlinks,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                invalid_symlinks > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Symlinks, invalid_symlinks > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(),
@@ -628,20 +614,7 @@ fn computer_same_music(
         {
             *shared_state.borrow_mut() = mf;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::SameMusic,
-                &[
-                    BottomButtonsEnum::Save,
-                    BottomButtonsEnum::Delete,
-                    BottomButtonsEnum::Select,
-                    BottomButtonsEnum::Sort,
-                    BottomButtonsEnum::Symlink,
-                    BottomButtonsEnum::Hardlink,
-                    BottomButtonsEnum::Move,
-                ],
-                same_music_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::SameMusic, same_music_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(),
@@ -742,20 +715,7 @@ fn computer_similar_videos(
         {
             *shared_state.borrow_mut() = ff;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::SimilarVideos,
-                &[
-                    BottomButtonsEnum::Save,
-                    BottomButtonsEnum::Delete,
-                    BottomButtonsEnum::Select,
-                    BottomButtonsEnum::Sort,
-                    BottomButtonsEnum::Symlink,
-                    BottomButtonsEnum::Hardlink,
-                    BottomButtonsEnum::Move,
-                ],
-                found_any_duplicates,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::SimilarVideos, found_any_duplicates);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap(),
@@ -876,21 +836,7 @@ fn computer_similar_images(
         {
             *shared_state.borrow_mut() = sf;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::SimilarImages,
-                &[
-                    BottomButtonsEnum::Save,
-                    BottomButtonsEnum::Delete,
-                    BottomButtonsEnum::Select,
-                    BottomButtonsEnum::Sort,
-                    BottomButtonsEnum::Symlink,
-                    BottomButtonsEnum::Hardlink,
-                    BottomButtonsEnum::Move,
-                    BottomButtonsEnum::Compare,
-                ],
-                found_any_duplicates,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::SimilarImages, found_any_duplicates);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap(),
@@ -961,12 +907,7 @@ fn computer_temporary_files(
         {
             *shared_state.borrow_mut() = tf;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::Temporary,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                temporary_files_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Temporary, temporary_files_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(),
@@ -1032,12 +973,7 @@ fn computer_big_files(
         {
             *shared_state.borrow_mut() = bf;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::BigFiles,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                biggest_files_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::BigFiles, biggest_files_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap(),
@@ -1108,12 +1044,7 @@ fn computer_empty_files(
         {
             *shared_state.borrow_mut() = vf;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::EmptyFiles,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                empty_files_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::EmptyFiles, empty_files_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap(),
@@ -1183,12 +1114,7 @@ fn computer_empty_folders(
         {
             *shared_state.borrow_mut() = ef;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::EmptyDirectories,
-                &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
-                empty_folder_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::EmptyDirectories, empty_folder_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap(),
@@ -1489,20 +1415,7 @@ fn computer_duplicate_finder(
         {
             *shared_state.borrow_mut() = df;
 
-            set_specific_buttons_as_active(
-                shared_buttons,
-                &NotebookMainEnum::Duplicate,
-                &[
-                    BottomButtonsEnum::Save,
-                    BottomButtonsEnum::Delete,
-                    BottomButtonsEnum::Select,
-                    BottomButtonsEnum::Sort,
-                    BottomButtonsEnum::Symlink,
-                    BottomButtonsEnum::Hardlink,
-                    BottomButtonsEnum::Move,
-                ],
-                duplicates_number > 0,
-            );
+            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Duplicate, duplicates_number > 0);
 
             set_buttons(
                 &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap(),
@@ -1666,13 +1579,11 @@ fn same_music_add_to_list_store(
 
     list_store.set(&list_store.append(), &values);
 }
-fn set_specific_buttons_as_active(
-    buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    notebook_enum: &NotebookMainEnum,
-    buttons: &[BottomButtonsEnum],
-    value_to_set: bool,
-) {
-    for i in buttons {
-        *buttons_array.borrow_mut().get_mut(notebook_enum).unwrap().get_mut(i).unwrap() = value_to_set;
+fn set_specific_buttons_as_active(buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>, notebook_enum: &NotebookMainEnum, value_to_set: bool) {
+    let mut b_mut = buttons_array.borrow_mut();
+    let butt = b_mut.get_mut(notebook_enum).unwrap();
+    let allowed_buttons = NOTEBOOKS_INFO[*notebook_enum as usize].bottom_buttons;
+    for i in allowed_buttons {
+        *butt.get_mut(i).unwrap() = value_to_set;
     }
 }

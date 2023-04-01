@@ -1,6 +1,6 @@
 use crate::help_functions::{
-    ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks, ColumnsSameMusic,
-    ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
+    BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
+    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
 };
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
@@ -17,6 +17,7 @@ pub struct NotebookObject {
     pub column_size_as_bytes: Option<i32>,
     pub column_modification_as_secs: Option<i32>,
     pub columns_types: &'static [glib::types::Type],
+    pub bottom_buttons: &'static [BottomButtonsEnum],
 }
 
 pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
@@ -52,6 +53,15 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::BOOL,   // IsHeader
             glib::types::Type::STRING, // TextColor
         ],
+        bottom_buttons: &[
+            BottomButtonsEnum::Save,
+            BottomButtonsEnum::Delete,
+            BottomButtonsEnum::Select,
+            BottomButtonsEnum::Sort,
+            BottomButtonsEnum::Symlink,
+            BottomButtonsEnum::Hardlink,
+            BottomButtonsEnum::Move,
+        ],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::EmptyDirectories,
@@ -72,6 +82,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Modification
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BigFiles,
@@ -94,6 +105,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::U64,    // SizeAsBytes
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::EmptyFiles,
@@ -114,6 +126,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Modification
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::Temporary,
@@ -134,6 +147,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Modification
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SimilarImages,
@@ -162,6 +176,16 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::BOOL,   // IsHeader
             glib::types::Type::STRING, // TextColor
         ],
+        bottom_buttons: &[
+            BottomButtonsEnum::Save,
+            BottomButtonsEnum::Delete,
+            BottomButtonsEnum::Select,
+            BottomButtonsEnum::Sort,
+            BottomButtonsEnum::Symlink,
+            BottomButtonsEnum::Hardlink,
+            BottomButtonsEnum::Move,
+            BottomButtonsEnum::Compare,
+        ],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SimilarVideos,
@@ -187,6 +211,15 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Color
             glib::types::Type::BOOL,   // IsHeader
             glib::types::Type::STRING, // TextColor
+        ],
+        bottom_buttons: &[
+            BottomButtonsEnum::Save,
+            BottomButtonsEnum::Delete,
+            BottomButtonsEnum::Select,
+            BottomButtonsEnum::Sort,
+            BottomButtonsEnum::Symlink,
+            BottomButtonsEnum::Hardlink,
+            BottomButtonsEnum::Move,
         ],
     },
     NotebookObject {
@@ -221,6 +254,15 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::BOOL,   // IsHeader
             glib::types::Type::STRING, // TextColor
         ],
+        bottom_buttons: &[
+            BottomButtonsEnum::Save,
+            BottomButtonsEnum::Delete,
+            BottomButtonsEnum::Select,
+            BottomButtonsEnum::Sort,
+            BottomButtonsEnum::Symlink,
+            BottomButtonsEnum::Hardlink,
+            BottomButtonsEnum::Move,
+        ],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::Symlinks,
@@ -243,6 +285,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Modification
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BrokenFiles,
@@ -264,6 +307,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Modification
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BadExtensions,
@@ -286,5 +330,6 @@ pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
             glib::types::Type::STRING, // Modification
             glib::types::Type::U64,    // ModificationAsSecs
         ],
+        bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
     },
 ];
