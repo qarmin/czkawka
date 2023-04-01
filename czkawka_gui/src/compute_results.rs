@@ -4,15 +4,15 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use chrono::NaiveDateTime;
-use czkawka_core::bad_extensions::BadExtensions;
-use czkawka_core::big_file::BigFile;
-use czkawka_core::broken_files::BrokenFiles;
 use glib::Receiver;
 use gtk4::prelude::*;
-use gtk4::{Entry, TextView, TreeView, Widget};
+use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
 use humansize::format_size;
 use humansize::BINARY;
 
+use czkawka_core::bad_extensions::BadExtensions;
+use czkawka_core::big_file::BigFile;
+use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::split_path;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -475,7 +475,6 @@ fn computer_same_music(
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
 ) {
-    const COLUMNS_NUMBER: usize = 18;
     if mf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
     } else {
@@ -531,62 +530,46 @@ fn computer_same_music(
                     };
 
                     let (directory, file) = split_path(&base_file_entry.path);
-                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                        (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
-                        (ColumnsSameMusic::SelectionButton as u32, &false),
-                        (ColumnsSameMusic::Size as u32, &format_size(base_file_entry.size, BINARY)),
-                        (ColumnsSameMusic::SizeAsBytes as u32, &base_file_entry.size),
-                        (ColumnsSameMusic::Name as u32, &file),
-                        (ColumnsSameMusic::Path as u32, &directory),
-                        (ColumnsSameMusic::Title as u32, &base_file_entry.track_title),
-                        (ColumnsSameMusic::Artist as u32, &base_file_entry.track_artist),
-                        (ColumnsSameMusic::Year as u32, &base_file_entry.year.to_string()),
-                        (ColumnsSameMusic::Genre as u32, &base_file_entry.genre),
-                        (ColumnsSameMusic::Bitrate as u32, &(format!("{} kbps", base_file_entry.bitrate))),
-                        (ColumnsSameMusic::BitrateAsNumber as u32, &(base_file_entry.bitrate)),
-                        (ColumnsSameMusic::Length as u32, &base_file_entry.length),
-                        (
-                            ColumnsSameMusic::Modification as u32,
-                            &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                        ),
-                        (ColumnsSameMusic::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                        (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                        (ColumnsSameMusic::IsHeader as u32, &true),
-                        (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
-                    ];
-                    list_store.set(&list_store.append(), &values);
+                    same_music_add_to_list_store(
+                        &list_store,
+                        &file,
+                        &directory,
+                        base_file_entry.size,
+                        base_file_entry.modified_date,
+                        &base_file_entry.track_title,
+                        &base_file_entry.track_artist,
+                        &base_file_entry.year,
+                        base_file_entry.bitrate,
+                        &format!("{} kbps", base_file_entry.bitrate),
+                        &base_file_entry.genre,
+                        &base_file_entry.length,
+                        true,
+                        true,
+                    );
                     for file_entry in vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
-                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                            (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
-                            (ColumnsSameMusic::SelectionButton as u32, &false),
-                            (ColumnsSameMusic::Size as u32, &format_size(file_entry.size, BINARY)),
-                            (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
-                            (ColumnsSameMusic::Name as u32, &file),
-                            (ColumnsSameMusic::Path as u32, &directory),
-                            (ColumnsSameMusic::Title as u32, &file_entry.track_title),
-                            (ColumnsSameMusic::Artist as u32, &file_entry.track_artist),
-                            (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
-                            (ColumnsSameMusic::Genre as u32, &file_entry.genre),
-                            (ColumnsSameMusic::Bitrate as u32, &(format!("{} kbps", file_entry.bitrate))),
-                            (ColumnsSameMusic::BitrateAsNumber as u32, &(file_entry.bitrate)),
-                            (ColumnsSameMusic::Length as u32, &file_entry.length),
-                            (
-                                ColumnsSameMusic::Modification as u32,
-                                &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
-                            ),
-                            (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                            (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                            (ColumnsSameMusic::IsHeader as u32, &false),
-                            (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
-                        ];
-                        list_store.set(&list_store.append(), &values);
+                        same_music_add_to_list_store(
+                            &list_store,
+                            &file,
+                            &directory,
+                            file_entry.size,
+                            file_entry.modified_date,
+                            &file_entry.track_title,
+                            &file_entry.track_artist,
+                            &file_entry.year,
+                            file_entry.bitrate,
+                            &format!("{} kbps", file_entry.bitrate),
+                            &file_entry.genre,
+                            &file_entry.length,
+                            false,
+                            true,
+                        );
                     }
                 }
             } else {
                 let vector = mf.get_duplicated_music_entries();
 
-                let text: String = "-----".to_string();
+                let text: &str = "-----";
 
                 for vec_file_entry in vector {
                     // Sort
@@ -601,53 +584,40 @@ fn computer_same_music(
                         vec_file_entry.clone()
                     };
 
-                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                        (ColumnsSameMusic::ActivatableSelectButton as u32, &false),
-                        (ColumnsSameMusic::SelectionButton as u32, &false),
-                        (ColumnsSameMusic::Size as u32, &String::new()),
-                        (ColumnsSameMusic::SizeAsBytes as u32, &(0)),
-                        (ColumnsSameMusic::Name as u32, &String::new()),
-                        (ColumnsSameMusic::Path as u32, &String::new()),
-                        (ColumnsSameMusic::Title as u32, &(if is_track_title { text.clone() } else { String::new() })),
-                        (ColumnsSameMusic::Artist as u32, &(if is_track_artist { text.clone() } else { String::new() })),
-                        (ColumnsSameMusic::Year as u32, &(if is_year { text.clone() } else { String::new() })),
-                        (ColumnsSameMusic::Bitrate as u32, &(if is_bitrate { text.clone() } else { String::new() })),
-                        (ColumnsSameMusic::BitrateAsNumber as u32, &(0)),
-                        (ColumnsSameMusic::Genre as u32, &(if is_genre { text.clone() } else { String::new() })),
-                        (ColumnsSameMusic::Length as u32, &(if is_length { text.clone() } else { String::new() })),
-                        (ColumnsSameMusic::Modification as u32, &String::new()),
-                        (ColumnsSameMusic::ModificationAsSecs as u32, &(0)),
-                        (ColumnsSameMusic::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                        (ColumnsSameMusic::IsHeader as u32, &true),
-                        (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
-                    ];
-                    list_store.set(&list_store.append(), &values);
+                    same_music_add_to_list_store(
+                        &list_store,
+                        "",
+                        "",
+                        0,
+                        0,
+                        if is_track_title { text } else { "" },
+                        if is_track_artist { text } else { "" },
+                        if is_year { text } else { "" },
+                        0,
+                        if is_bitrate { text } else { "" },
+                        if is_genre { text } else { "" },
+                        if is_length { text } else { "" },
+                        true,
+                        false,
+                    );
                     for file_entry in vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
-                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                            (ColumnsSameMusic::ActivatableSelectButton as u32, &true),
-                            (ColumnsSameMusic::SelectionButton as u32, &false),
-                            (ColumnsSameMusic::Size as u32, &format_size(file_entry.size, BINARY)),
-                            (ColumnsSameMusic::SizeAsBytes as u32, &file_entry.size),
-                            (ColumnsSameMusic::Name as u32, &file),
-                            (ColumnsSameMusic::Path as u32, &directory),
-                            (ColumnsSameMusic::Title as u32, &file_entry.track_title),
-                            (ColumnsSameMusic::Artist as u32, &file_entry.track_artist),
-                            (ColumnsSameMusic::Year as u32, &file_entry.year.to_string()),
-                            (ColumnsSameMusic::Genre as u32, &file_entry.genre),
-                            (ColumnsSameMusic::Bitrate as u32, &(format!("{} kbps", file_entry.bitrate))),
-                            (ColumnsSameMusic::BitrateAsNumber as u32, &(file_entry.bitrate)),
-                            (ColumnsSameMusic::Length as u32, &file_entry.length),
-                            (
-                                ColumnsSameMusic::Modification as u32,
-                                &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
-                            ),
-                            (ColumnsSameMusic::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                            (ColumnsSameMusic::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                            (ColumnsSameMusic::IsHeader as u32, &false),
-                            (ColumnsSameMusic::TextColor as u32, &(TEXT_COLOR.to_string())),
-                        ];
-                        list_store.set(&list_store.append(), &values);
+                        same_music_add_to_list_store(
+                            &list_store,
+                            &file,
+                            &directory,
+                            file_entry.size,
+                            file_entry.modified_date,
+                            &file_entry.track_title,
+                            &file_entry.track_artist,
+                            &file_entry.year,
+                            file_entry.bitrate,
+                            &format!("{} kbps", file_entry.bitrate),
+                            &file_entry.genre,
+                            &file_entry.length,
+                            false,
+                            false,
+                        );
                     }
                 }
             }
@@ -681,6 +651,7 @@ fn computer_same_music(
         }
     }
 }
+
 fn computer_similar_videos(
     ff: SimilarVideos,
     entry_info: &Entry,
@@ -691,7 +662,6 @@ fn computer_similar_videos(
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
 ) {
-    const COLUMNS_NUMBER: usize = 11;
     if ff.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
     } else {
@@ -735,46 +705,10 @@ fn computer_similar_videos(
                         vec_file_entry.clone()
                     };
 
-                    // Header
-                    let (directory, file) = split_path(&base_file_entry.path);
-                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
-                        (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                        (ColumnsSimilarVideos::Size as u32, &format_size(base_file_entry.size, BINARY)),
-                        (ColumnsSimilarVideos::SizeAsBytes as u32, &base_file_entry.size),
-                        (ColumnsSimilarVideos::Name as u32, &file),
-                        (ColumnsSimilarVideos::Path as u32, &directory),
-                        (
-                            ColumnsSimilarVideos::Modification as u32,
-                            &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                        ),
-                        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                        (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                        (ColumnsSimilarVideos::IsHeader as u32, &true),
-                        (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
-                    ];
-                    list_store.set(&list_store.append(), &values);
-
-                    // Meat
+                    similar_videos_add_to_list_store(&list_store, "", "", base_file_entry.size, base_file_entry.modified_date, true, true);
                     for file_entry in &vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
-                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                            (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
-                            (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                            (ColumnsSimilarVideos::Size as u32, &format_size(file_entry.size, BINARY)),
-                            (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
-                            (ColumnsSimilarVideos::Name as u32, &file),
-                            (ColumnsSimilarVideos::Path as u32, &directory),
-                            (
-                                ColumnsSimilarVideos::Modification as u32,
-                                &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
-                            ),
-                            (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                            (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                            (ColumnsSimilarVideos::IsHeader as u32, &false),
-                            (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
-                        ];
-                        list_store.set(&list_store.append(), &values);
+                        similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true);
                     }
                 }
             } else {
@@ -793,42 +727,10 @@ fn computer_similar_videos(
                         vec_file_entry.clone()
                     };
 
-                    // Header
-                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &false),
-                        (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                        (ColumnsSimilarVideos::Size as u32, &String::new()),
-                        (ColumnsSimilarVideos::SizeAsBytes as u32, &(0)),
-                        (ColumnsSimilarVideos::Name as u32, &String::new()),
-                        (ColumnsSimilarVideos::Path as u32, &String::new()),
-                        (ColumnsSimilarVideos::Modification as u32, &String::new()),
-                        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(0)),
-                        (ColumnsSimilarVideos::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                        (ColumnsSimilarVideos::IsHeader as u32, &true),
-                        (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
-                    ];
-                    list_store.set(&list_store.append(), &values);
-
-                    // Meat
+                    similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false);
                     for file_entry in &vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
-                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                            (ColumnsSimilarVideos::ActivatableSelectButton as u32, &true),
-                            (ColumnsSimilarVideos::SelectionButton as u32, &false),
-                            (ColumnsSimilarVideos::Size as u32, &format_size(file_entry.size, BINARY)),
-                            (ColumnsSimilarVideos::SizeAsBytes as u32, &file_entry.size),
-                            (ColumnsSimilarVideos::Name as u32, &file),
-                            (ColumnsSimilarVideos::Path as u32, &directory),
-                            (
-                                ColumnsSimilarVideos::Modification as u32,
-                                &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
-                            ),
-                            (ColumnsSimilarVideos::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                            (ColumnsSimilarVideos::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                            (ColumnsSimilarVideos::IsHeader as u32, &false),
-                            (ColumnsSimilarVideos::TextColor as u32, &(TEXT_COLOR.to_string())),
-                        ];
-                        list_store.set(&list_store.append(), &values);
+                        similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, false);
                     }
                 }
             }
@@ -863,6 +765,7 @@ fn computer_similar_videos(
         }
     }
 }
+
 fn computer_similar_images(
     sf: SimilarImages,
     entry_info: &Entry,
@@ -874,7 +777,6 @@ fn computer_similar_images(
     buttons_names: &[BottomButtonsEnum; 9],
     hash_size: u8,
 ) {
-    const COLUMNS_NUMBER: usize = 13;
     if sf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
     } else {
@@ -918,51 +820,21 @@ fn computer_similar_images(
 
                     // Header
                     let (directory, file) = split_path(&base_file_entry.path);
-                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                        (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
-                        (ColumnsSimilarImages::SelectionButton as u32, &false),
-                        (ColumnsSimilarImages::Similarity as u32, &String::new()),
-                        (ColumnsSimilarImages::Size as u32, &format_size(base_file_entry.size, BINARY)),
-                        (ColumnsSimilarImages::SizeAsBytes as u32, &base_file_entry.size),
-                        (ColumnsSimilarImages::Dimensions as u32, &base_file_entry.dimensions),
-                        (ColumnsSimilarImages::Name as u32, &file),
-                        (ColumnsSimilarImages::Path as u32, &directory),
-                        (
-                            ColumnsSimilarImages::Modification as u32,
-                            &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                        ),
-                        (ColumnsSimilarImages::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                        (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                        (ColumnsSimilarImages::IsHeader as u32, &true),
-                        (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
-                    ];
-                    list_store.set(&list_store.append(), &values);
-
-                    // Meat
+                    similar_images_add_to_list_store(&list_store, &file, &directory, 0, 0, "", 0, 0, true, true);
                     for file_entry in &vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
-                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                            (ColumnsSimilarImages::ActivatableSelectButton as u32, &true),
-                            (ColumnsSimilarImages::SelectionButton as u32, &false),
-                            (
-                                ColumnsSimilarImages::Similarity as u32,
-                                &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
-                            ),
-                            (ColumnsSimilarImages::Size as u32, &format_size(file_entry.size, BINARY)),
-                            (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
-                            (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
-                            (ColumnsSimilarImages::Name as u32, &file),
-                            (ColumnsSimilarImages::Path as u32, &directory),
-                            (
-                                ColumnsSimilarImages::Modification as u32,
-                                &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
-                            ),
-                            (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                            (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                            (ColumnsSimilarImages::IsHeader as u32, &false),
-                            (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
-                        ];
-                        list_store.set(&list_store.append(), &values);
+                        similar_images_add_to_list_store(
+                            &list_store,
+                            &file,
+                            &directory,
+                            file_entry.size,
+                            file_entry.modified_date,
+                            &file_entry.dimensions,
+                            file_entry.similarity,
+                            hash_size,
+                            false,
+                            true,
+                        );
                     }
                 }
             } else {
@@ -978,49 +850,21 @@ fn computer_similar_images(
                         vec_file_entry.clone()
                     };
 
-                    // Header
-                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                        (ColumnsSimilarImages::ActivatableSelectButton as u32, &false),
-                        (ColumnsSimilarImages::SelectionButton as u32, &false),
-                        (ColumnsSimilarImages::Similarity as u32, &String::new()),
-                        (ColumnsSimilarImages::Size as u32, &String::new()),
-                        (ColumnsSimilarImages::SizeAsBytes as u32, &(0)),
-                        (ColumnsSimilarImages::Dimensions as u32, &String::new()),
-                        (ColumnsSimilarImages::Name as u32, &String::new()),
-                        (ColumnsSimilarImages::Path as u32, &String::new()),
-                        (ColumnsSimilarImages::Modification as u32, &String::new()),
-                        (ColumnsSimilarImages::ModificationAsSecs as u32, &(0)),
-                        (ColumnsSimilarImages::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                        (ColumnsSimilarImages::IsHeader as u32, &true),
-                        (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
-                    ];
-                    list_store.set(&list_store.append(), &values);
-
-                    // Meat
+                    similar_images_add_to_list_store(&list_store, "", "", 0, 0, "", 0, 0, true, false);
                     for file_entry in &vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
-                        let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                            (ColumnsSimilarImages::ActivatableSelectButton as u32, &true),
-                            (ColumnsSimilarImages::SelectionButton as u32, &false),
-                            (
-                                ColumnsSimilarImages::Similarity as u32,
-                                &(similar_images::get_string_from_similarity(&file_entry.similarity, hash_size).to_string()),
-                            ),
-                            (ColumnsSimilarImages::Size as u32, &format_size(file_entry.size, BINARY)),
-                            (ColumnsSimilarImages::SizeAsBytes as u32, &file_entry.size),
-                            (ColumnsSimilarImages::Dimensions as u32, &file_entry.dimensions),
-                            (ColumnsSimilarImages::Name as u32, &file),
-                            (ColumnsSimilarImages::Path as u32, &directory),
-                            (
-                                ColumnsSimilarImages::Modification as u32,
-                                &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
-                            ),
-                            (ColumnsSimilarImages::ModificationAsSecs as u32, &(file_entry.modified_date)),
-                            (ColumnsSimilarImages::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                            (ColumnsSimilarImages::IsHeader as u32, &false),
-                            (ColumnsSimilarImages::TextColor as u32, &(TEXT_COLOR.to_string())),
-                        ];
-                        list_store.set(&list_store.append(), &values);
+                        similar_images_add_to_list_store(
+                            &list_store,
+                            &file,
+                            &directory,
+                            file_entry.size,
+                            file_entry.modified_date,
+                            &file_entry.dimensions,
+                            file_entry.similarity,
+                            hash_size,
+                            false,
+                            false,
+                        );
                     }
                 }
             }
@@ -1364,7 +1208,6 @@ fn computer_duplicate_finder(
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
 ) {
-    const COLUMNS_NUMBER: usize = 11;
     if df.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
     } else {
@@ -1450,48 +1293,12 @@ fn computer_duplicate_finder(
                                 vector.clone()
                             };
 
-                            // HEADER
                             let (directory, file) = split_path(&base_file_entry.path);
-                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                (ColumnsDuplicates::SelectionButton as u32, &false),
-                                (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
-                                (ColumnsDuplicates::SizeAsBytes as u32, &base_file_entry.size),
-                                (ColumnsDuplicates::Name as u32, &file),
-                                (ColumnsDuplicates::Path as u32, &directory),
-                                (
-                                    ColumnsDuplicates::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                                ),
-                                (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsDuplicates::IsHeader as u32, &true),
-                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
+                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
 
-                            list_store.set(&list_store.append(), &values);
-
-                            // MEAT
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &false),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
                             }
                         }
                     }
@@ -1514,46 +1321,10 @@ fn computer_duplicate_finder(
 
                                 // HEADER
                                 let (directory, file) = split_path(&base_file_entry.path);
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &base_file_entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &true),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-
-                                // MEAT
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                                 for entry in vector {
                                     let (directory, file) = split_path(&entry.path);
-
-                                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                        (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                        (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                        (ColumnsDuplicates::Name as u32, &file),
-                                        (ColumnsDuplicates::Path as u32, &directory),
-                                        (
-                                            ColumnsDuplicates::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                        ),
-                                        (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                        (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                        (ColumnsDuplicates::IsHeader as u32, &false),
-                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                    ];
-
-                                    list_store.set(&list_store.append(), &values);
+                                    duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
                                 }
                             }
                         }
@@ -1574,46 +1345,11 @@ fn computer_duplicate_finder(
                                 vector.clone()
                             };
 
-                            // HEADER
                             let (directory, file) = split_path(&base_file_entry.path);
-                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                (ColumnsDuplicates::SelectionButton as u32, &false),
-                                (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
-                                (ColumnsDuplicates::SizeAsBytes as u32, &base_file_entry.size),
-                                (ColumnsDuplicates::Name as u32, &file),
-                                (ColumnsDuplicates::Path as u32, &directory),
-                                (
-                                    ColumnsDuplicates::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                                ),
-                                (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsDuplicates::IsHeader as u32, &true),
-                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-
-                            // MEAT
-                            list_store.set(&list_store.append(), &values);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &false),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
                             }
                         }
                     }
@@ -1633,46 +1369,11 @@ fn computer_duplicate_finder(
                                 vector.clone()
                             };
 
-                            // HEADER
                             let (directory, file) = split_path(&base_file_entry.path);
-                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                (ColumnsDuplicates::SelectionButton as u32, &false),
-                                (ColumnsDuplicates::Size as u32, (&format_size(base_file_entry.size, BINARY))),
-                                (ColumnsDuplicates::SizeAsBytes as u32, &base_file_entry.size),
-                                (ColumnsDuplicates::Name as u32, &file),
-                                (ColumnsDuplicates::Path as u32, &directory),
-                                (
-                                    ColumnsDuplicates::Modification as u32,
-                                    &(NaiveDateTime::from_timestamp_opt(base_file_entry.modified_date as i64, 0).unwrap().to_string()),
-                                ),
-                                (ColumnsDuplicates::ModificationAsSecs as u32, &(base_file_entry.modified_date)),
-                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsDuplicates::IsHeader as u32, &true),
-                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-
-                            // MEAT
-                            list_store.set(&list_store.append(), &values);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &false),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
                             }
                         }
                     }
@@ -1698,44 +1399,10 @@ fn computer_duplicate_finder(
                                 vector.clone()
                             };
 
-                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                (ColumnsDuplicates::SelectionButton as u32, &false),
-                                (ColumnsDuplicates::Size as u32, (&String::new())),
-                                (ColumnsDuplicates::SizeAsBytes as u32, &0),
-                                (ColumnsDuplicates::Name as u32, (&String::new())),
-                                (ColumnsDuplicates::Path as u32, (&(format!("{} results", vector.len())))),
-                                (ColumnsDuplicates::Modification as u32, (&String::new())), // No text in 3 column
-                                (ColumnsDuplicates::ModificationAsSecs as u32, (&(0))),     // Not used here
-                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsDuplicates::IsHeader as u32, &true),
-                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
-
-                            list_store.set(&list_store.append(), &values);
+                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(format!(
-                                            "{} - ({})",
-                                            NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap(),
-                                            format_size(entry.size, BINARY)
-                                        )),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &false),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
                             }
                         }
                     }
@@ -1755,43 +1422,11 @@ fn computer_duplicate_finder(
                                 } else {
                                     vector.clone()
                                 };
+                                duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
 
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&String::new())),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &0),
-                                    (ColumnsDuplicates::Name as u32, (&String::new())),
-                                    (ColumnsDuplicates::Path as u32, (&String::new())),
-                                    (ColumnsDuplicates::Modification as u32, &String::new()), // No text in 3 column
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),
-                                    (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &true),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-
-                                list_store.set(&list_store.append(), &values);
                                 for entry in vector {
                                     let (directory, file) = split_path(&entry.path);
-
-                                    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                        (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                        (ColumnsDuplicates::SelectionButton as u32, &false),
-                                        (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                        (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                        (ColumnsDuplicates::Name as u32, &file),
-                                        (ColumnsDuplicates::Path as u32, &directory),
-                                        (
-                                            ColumnsDuplicates::Modification as u32,
-                                            &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                        ),
-                                        (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                        (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                        (ColumnsDuplicates::IsHeader as u32, &false),
-                                        (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                    ];
-
-                                    list_store.set(&list_store.append(), &values);
+                                    duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
                                 }
                             }
                         }
@@ -1811,40 +1446,11 @@ fn computer_duplicate_finder(
                             } else {
                                 vector.clone()
                             };
-                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                (ColumnsDuplicates::SelectionButton as u32, &false),
-                                (ColumnsDuplicates::Size as u32, (&String::new())),
-                                (ColumnsDuplicates::SizeAsBytes as u32, &0),
-                                (ColumnsDuplicates::Name as u32, (&String::new())),
-                                (ColumnsDuplicates::Path as u32, (&String::new())),
-                                (ColumnsDuplicates::Modification as u32, &String::new()), // No text in 3 column
-                                (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),     // Not used here
-                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsDuplicates::IsHeader as u32, &true),
-                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
+                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
 
-                            list_store.set(&list_store.append(), &values);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &false),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
                             }
                         }
                     }
@@ -1863,40 +1469,11 @@ fn computer_duplicate_finder(
                             } else {
                                 vector.clone()
                             };
-                            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                (ColumnsDuplicates::ActivatableSelectButton as u32, &false),
-                                (ColumnsDuplicates::SelectionButton as u32, &false),
-                                (ColumnsDuplicates::Size as u32, (&String::new())),
-                                (ColumnsDuplicates::SizeAsBytes as u32, &0),
-                                (ColumnsDuplicates::Name as u32, (&String::new())),
-                                (ColumnsDuplicates::Path as u32, (&String::new())),
-                                (ColumnsDuplicates::Modification as u32, &String::new()), // No text in 3 column
-                                (ColumnsDuplicates::ModificationAsSecs as u32, &(0)),     // Not used here
-                                (ColumnsDuplicates::Color as u32, &(HEADER_ROW_COLOR.to_string())),
-                                (ColumnsDuplicates::IsHeader as u32, &true),
-                                (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                            ];
+                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
 
-                            list_store.set(&list_store.append(), &values);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                                    (ColumnsDuplicates::ActivatableSelectButton as u32, &true),
-                                    (ColumnsDuplicates::SelectionButton as u32, &false),
-                                    (ColumnsDuplicates::Size as u32, (&format_size(entry.size, BINARY))),
-                                    (ColumnsDuplicates::SizeAsBytes as u32, &entry.size),
-                                    (ColumnsDuplicates::Name as u32, &file),
-                                    (ColumnsDuplicates::Path as u32, &directory),
-                                    (
-                                        ColumnsDuplicates::Modification as u32,
-                                        &(NaiveDateTime::from_timestamp_opt(entry.modified_date as i64, 0).unwrap().to_string()),
-                                    ),
-                                    (ColumnsDuplicates::ModificationAsSecs as u32, &(entry.modified_date)),
-                                    (ColumnsDuplicates::Color as u32, &(MAIN_ROW_COLOR.to_string())),
-                                    (ColumnsDuplicates::IsHeader as u32, &false),
-                                    (ColumnsDuplicates::TextColor as u32, &(TEXT_COLOR.to_string())),
-                                ];
-                                list_store.set(&list_store.append(), &values);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
                             }
                         }
                     }
@@ -1935,7 +1512,160 @@ fn computer_duplicate_finder(
         }
     }
 }
+fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
+    const COLUMNS_NUMBER: usize = 11;
+    let size_str;
+    let string_date;
+    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
 
+    if is_header && !is_reference_folder {
+        size_str = String::new();
+        string_date = String::new();
+    } else {
+        size_str = format_size(size, BINARY);
+        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+    };
+
+    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+        (ColumnsDuplicates::ActivatableSelectButton as u32, &(!is_header)),
+        (ColumnsDuplicates::SelectionButton as u32, &false),
+        (ColumnsDuplicates::Size as u32, &size_str),
+        (ColumnsDuplicates::SizeAsBytes as u32, &size),
+        (ColumnsDuplicates::Name as u32, &file),
+        (ColumnsDuplicates::Path as u32, &directory),
+        (ColumnsDuplicates::Modification as u32, &string_date),
+        (ColumnsDuplicates::ModificationAsSecs as u32, &modified_date),
+        (ColumnsDuplicates::Color as u32, &color),
+        (ColumnsDuplicates::IsHeader as u32, &is_header),
+        (ColumnsDuplicates::TextColor as u32, &TEXT_COLOR),
+    ];
+    list_store.set(&list_store.append(), &values);
+}
+fn similar_images_add_to_list_store(
+    list_store: &ListStore,
+    file: &str,
+    directory: &str,
+    size: u64,
+    modified_date: u64,
+    dimensions: &str,
+    similarity: u32,
+    hash_size: u8,
+    is_header: bool,
+    is_reference_folder: bool,
+) {
+    const COLUMNS_NUMBER: usize = 13;
+    let size_str;
+    let string_date;
+    let similarity_string;
+    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
+    if is_header && !is_reference_folder {
+        size_str = String::new();
+        string_date = String::new();
+        similarity_string = String::new();
+    } else {
+        size_str = format_size(size, BINARY);
+        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+        similarity_string = similar_images::get_string_from_similarity(&similarity, hash_size);
+    };
+
+    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+        (ColumnsSimilarImages::ActivatableSelectButton as u32, &(!is_header)),
+        (ColumnsSimilarImages::SelectionButton as u32, &false),
+        (ColumnsSimilarImages::Similarity as u32, &similarity_string),
+        (ColumnsSimilarImages::Size as u32, &size_str),
+        (ColumnsSimilarImages::SizeAsBytes as u32, &size),
+        (ColumnsSimilarImages::Dimensions as u32, &dimensions),
+        (ColumnsSimilarImages::Name as u32, &file),
+        (ColumnsSimilarImages::Path as u32, &directory),
+        (ColumnsSimilarImages::Modification as u32, &string_date),
+        (ColumnsSimilarImages::ModificationAsSecs as u32, &modified_date),
+        (ColumnsSimilarImages::Color as u32, &color),
+        (ColumnsSimilarImages::IsHeader as u32, &is_header),
+        (ColumnsSimilarImages::TextColor as u32, &TEXT_COLOR),
+    ];
+    list_store.set(&list_store.append(), &values);
+}
+
+fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
+    const COLUMNS_NUMBER: usize = 11;
+    let size_str;
+    let string_date;
+    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
+    if is_header && !is_reference_folder {
+        size_str = String::new();
+        string_date = String::new();
+    } else {
+        size_str = format_size(size, BINARY);
+        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+    };
+
+    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+        (ColumnsSimilarVideos::ActivatableSelectButton as u32, &(!is_header)),
+        (ColumnsSimilarVideos::SelectionButton as u32, &false),
+        (ColumnsSimilarVideos::Size as u32, &size_str),
+        (ColumnsSimilarVideos::SizeAsBytes as u32, &size),
+        (ColumnsSimilarVideos::Name as u32, &file),
+        (ColumnsSimilarVideos::Path as u32, &directory),
+        (ColumnsSimilarVideos::Modification as u32, &(string_date)),
+        (ColumnsSimilarVideos::ModificationAsSecs as u32, &(modified_date)),
+        (ColumnsSimilarVideos::Color as u32, &color),
+        (ColumnsSimilarVideos::IsHeader as u32, &false),
+        (ColumnsSimilarVideos::TextColor as u32, &TEXT_COLOR),
+    ];
+
+    list_store.set(&list_store.append(), &values);
+}
+fn same_music_add_to_list_store(
+    list_store: &ListStore,
+    file: &str,
+    directory: &str,
+    size: u64,
+    modified_date: u64,
+    track_title: &str,
+    track_artist: &str,
+    track_year: &str,
+    track_bitrate: u32,
+    bitrate_string: &str,
+    track_genre: &str,
+    track_length: &str,
+    is_header: bool,
+    is_reference_folder: bool,
+) {
+    const COLUMNS_NUMBER: usize = 18;
+    let size_str;
+    let string_date;
+    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
+    if is_header && !is_reference_folder {
+        size_str = String::new();
+        string_date = String::new();
+    } else {
+        size_str = format_size(size, BINARY);
+        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+    };
+
+    let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+        (ColumnsSameMusic::ActivatableSelectButton as u32, &(!is_header)),
+        (ColumnsSameMusic::SelectionButton as u32, &false),
+        (ColumnsSameMusic::Size as u32, &size_str),
+        (ColumnsSameMusic::SizeAsBytes as u32, &size),
+        (ColumnsSameMusic::Name as u32, &file),
+        (ColumnsSameMusic::Path as u32, &directory),
+        (ColumnsSameMusic::Title as u32, &track_title),
+        (ColumnsSameMusic::Artist as u32, &track_artist),
+        (ColumnsSameMusic::Year as u32, &track_year),
+        (ColumnsSameMusic::Genre as u32, &track_genre),
+        (ColumnsSameMusic::Bitrate as u32, &bitrate_string),
+        (ColumnsSameMusic::BitrateAsNumber as u32, &track_bitrate),
+        (ColumnsSameMusic::Length as u32, &track_length),
+        (ColumnsSameMusic::Modification as u32, &string_date),
+        (ColumnsSameMusic::ModificationAsSecs as u32, &modified_date),
+        (ColumnsSameMusic::Color as u32, &(color)),
+        (ColumnsSameMusic::IsHeader as u32, &is_header),
+        (ColumnsSameMusic::TextColor as u32, &TEXT_COLOR),
+    ];
+
+    list_store.set(&list_store.append(), &values);
+}
 fn set_specific_buttons_as_active(
     buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     notebook_enum: &NotebookMainEnum,

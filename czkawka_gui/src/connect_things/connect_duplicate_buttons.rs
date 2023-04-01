@@ -21,7 +21,7 @@ pub fn connect_duplicate_combo_box(gui_data: &GuiData) {
                 label_duplicate_hash_type.set_visible(false);
             }
 
-            if DUPLICATES_CHECK_METHOD_COMBO_BOX[chosen_index as usize].check_method == CheckingMethod::Name {
+            if [CheckingMethod::Name, CheckingMethod::SizeName].contains(&DUPLICATES_CHECK_METHOD_COMBO_BOX[chosen_index as usize].check_method) {
                 check_button_duplicate_case_sensitive_name.set_visible(true);
             } else {
                 check_button_duplicate_case_sensitive_name.set_visible(false);

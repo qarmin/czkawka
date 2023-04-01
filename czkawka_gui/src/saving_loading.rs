@@ -938,7 +938,7 @@ pub fn load_configuration(
                 main_notebook.label_duplicate_hash_type.set_visible(false);
             }
 
-            if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Name {
+            if [CheckingMethod::Name, CheckingMethod::SizeName].contains(&DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method) {
                 main_notebook.check_button_duplicate_case_sensitive_name.set_visible(true);
             } else {
                 main_notebook.check_button_duplicate_case_sensitive_name.set_visible(false);
