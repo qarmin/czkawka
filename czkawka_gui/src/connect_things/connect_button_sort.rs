@@ -1,9 +1,10 @@
+use gtk4::prelude::*;
+
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::help_functions::PopoverTypes;
 use crate::notebook_enums::{to_notebook_main_enum, NotebookMainEnum};
 use crate::notebook_info::NOTEBOOKS_INFO;
-use gtk4::prelude::*;
 
 pub fn connect_button_sort(gui_data: &GuiData) {
     let popovers_sort = gui_data.popovers_sort.clone();

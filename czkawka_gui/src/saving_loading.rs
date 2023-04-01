@@ -5,11 +5,11 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use czkawka_core::common::get_default_number_of_threads;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
+use czkawka_core::common::get_default_number_of_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 

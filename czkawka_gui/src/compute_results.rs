@@ -301,6 +301,7 @@ fn computer_bad_extensions(
         }
     }
 }
+
 fn computer_broken_files(
     br: BrokenFiles,
     entry_info: &Entry,
@@ -373,6 +374,7 @@ fn computer_broken_files(
         }
     }
 }
+
 fn computer_invalid_symlinks(
     ifs: InvalidSymlinks,
     entry_info: &Entry,
@@ -451,6 +453,7 @@ fn computer_invalid_symlinks(
         }
     }
 }
+
 fn computer_same_music(
     mf: SameMusic,
     entry_info: &Entry,
@@ -917,6 +920,7 @@ fn computer_temporary_files(
         }
     }
 }
+
 fn computer_big_files(
     bf: BigFile,
     entry_info: &Entry,
@@ -983,6 +987,7 @@ fn computer_big_files(
         }
     }
 }
+
 fn computer_empty_files(
     vf: EmptyFiles,
     entry_info: &Entry,
@@ -1054,6 +1059,7 @@ fn computer_empty_files(
         }
     }
 }
+
 fn computer_empty_folders(
     ef: EmptyFolder,
     entry_info: &Entry,
@@ -1124,6 +1130,7 @@ fn computer_empty_folders(
         }
     }
 }
+
 fn computer_duplicate_finder(
     df: DuplicateFinder,
     entry_info: &Entry,
@@ -1425,6 +1432,7 @@ fn computer_duplicate_finder(
         }
     }
 }
+
 fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
     const COLUMNS_NUMBER: usize = 11;
     let size_str;
@@ -1454,6 +1462,7 @@ fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &
     ];
     list_store.set(&list_store.append(), &values);
 }
+
 fn similar_images_add_to_list_store(
     list_store: &ListStore,
     file: &str,
@@ -1528,6 +1537,7 @@ fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, director
 
     list_store.set(&list_store.append(), &values);
 }
+
 fn same_music_add_to_list_store(
     list_store: &ListStore,
     file: &str,
@@ -1579,6 +1589,7 @@ fn same_music_add_to_list_store(
 
     list_store.set(&list_store.append(), &values);
 }
+
 fn set_specific_buttons_as_active(buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>, notebook_enum: &NotebookMainEnum, value_to_set: bool) {
     let mut b_mut = buttons_array.borrow_mut();
     let butt = b_mut.get_mut(notebook_enum).unwrap();
