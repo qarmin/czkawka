@@ -14,7 +14,7 @@ use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::split_path;
-use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -406,15 +406,7 @@ fn computer_invalid_symlinks(
         {
             let list_store = get_list_store(tree_view);
 
-            let vector = ifs.get_invalid_symlinks();
-
-            // Sort
-            let mut vector = vector.clone();
-
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.path.as_path());
-                (t.0, t.1)
-            });
+            let vector = vector_sort_simple_unstable_entry_by_path(ifs.get_invalid_symlinks());
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -882,7 +874,7 @@ fn computer_temporary_files(
 
             let vector = tf.get_temporary_files();
 
-            // Sort
+            // Sort // TODO maybe simplify this via common file entry
             let mut vector = vector.clone();
             vector.sort_unstable_by_key(|e| {
                 let t = split_path(e.path.as_path());
@@ -1020,13 +1012,7 @@ fn computer_empty_files(
             let list_store = get_list_store(tree_view);
 
             let vector = vf.get_empty_files();
-
-            // Sort
-            let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.path.as_path());
-                (t.0, t.1)
-            });
+            let vector = vector_sort_simple_unstable_entry_by_path(vector);
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -1214,18 +1200,7 @@ fn computer_duplicate_finder(
                         let btreemap = df.get_files_with_identical_name_referenced();
 
                         for (_name, (base_file_entry, vector)) in btreemap.iter().rev() {
-                            // Sort
-                            let vector = if vector.len() >= 2 {
-                                let mut vector = vector.clone();
-                                vector.sort_unstable_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vector
-                            } else {
-                                vector.clone()
-                            };
-
+                            let vector = vector_sort_unstable_entry_by_path(vector);
                             let (directory, file) = split_path(&base_file_entry.path);
                             duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
 
@@ -1240,19 +1215,7 @@ fn computer_duplicate_finder(
 
                         for (_size, vectors_vector) in btreemap.iter().rev() {
                             for (base_file_entry, vector) in vectors_vector {
-                                // Sort
-                                let vector = if vector.len() >= 2 {
-                                    let mut vector = vector.clone();
-                                    vector.sort_unstable_by_key(|e| {
-                                        let t = split_path(e.path.as_path());
-                                        (t.0, t.1)
-                                    });
-                                    vector
-                                } else {
-                                    vector.clone()
-                                };
-
-                                // HEADER
+                                let vector = vector_sort_unstable_entry_by_path(vector);
                                 let (directory, file) = split_path(&base_file_entry.path);
                                 duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                                 for entry in vector {
@@ -1266,18 +1229,7 @@ fn computer_duplicate_finder(
                         let btreemap = df.get_files_with_identical_size_referenced();
 
                         for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
-                            // Sort
-                            let vector = if vector.len() >= 2 {
-                                let mut vector = vector.clone();
-                                vector.sort_unstable_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vector
-                            } else {
-                                vector.clone()
-                            };
-
+                            let vector = vector_sort_unstable_entry_by_path(vector);
                             let (directory, file) = split_path(&base_file_entry.path);
                             duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                             for entry in vector {
@@ -1290,18 +1242,7 @@ fn computer_duplicate_finder(
                         let btreemap = df.get_files_with_identical_size_names_referenced();
 
                         for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
-                            // Sort
-                            let vector = if vector.len() >= 2 {
-                                let mut vector = vector.clone();
-                                vector.sort_unstable_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vector
-                            } else {
-                                vector.clone()
-                            };
-
+                            let vector = vector_sort_unstable_entry_by_path(vector);
                             let (directory, file) = split_path(&base_file_entry.path);
                             duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                             for entry in vector {
@@ -1320,18 +1261,7 @@ fn computer_duplicate_finder(
                         let btreemap = df.get_files_sorted_by_names();
 
                         for (_name, vector) in btreemap.iter().rev() {
-                            // Sort
-                            let vector = if vector.len() >= 2 {
-                                let mut vector = vector.clone();
-                                vector.sort_unstable_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vector
-                            } else {
-                                vector.clone()
-                            };
-
+                            let vector = vector_sort_unstable_entry_by_path(vector);
                             duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
@@ -1344,17 +1274,7 @@ fn computer_duplicate_finder(
 
                         for (_size, vectors_vector) in btreemap.iter().rev() {
                             for vector in vectors_vector {
-                                // Sort
-                                let vector = if vector.len() >= 2 {
-                                    let mut vector = vector.clone();
-                                    vector.sort_unstable_by_key(|e| {
-                                        let t = split_path(e.path.as_path());
-                                        (t.0, t.1)
-                                    });
-                                    vector
-                                } else {
-                                    vector.clone()
-                                };
+                                let vector = vector_sort_unstable_entry_by_path(vector);
                                 duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
 
                                 for entry in vector {
@@ -1368,17 +1288,7 @@ fn computer_duplicate_finder(
                         let btreemap = df.get_files_sorted_by_size();
 
                         for (_size, vector) in btreemap.iter().rev() {
-                            // Sort
-                            let vector = if vector.len() >= 2 {
-                                let mut vector = vector.clone();
-                                vector.sort_unstable_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vector
-                            } else {
-                                vector.clone()
-                            };
+                            let vector = vector_sort_unstable_entry_by_path(vector);
                             duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
 
                             for entry in vector {
@@ -1391,17 +1301,7 @@ fn computer_duplicate_finder(
                         let btreemap = df.get_files_sorted_by_size_name();
 
                         for (_size, vector) in btreemap.iter().rev() {
-                            // Sort
-                            let vector = if vector.len() >= 2 {
-                                let mut vector = vector.clone();
-                                vector.sort_unstable_by_key(|e| {
-                                    let t = split_path(e.path.as_path());
-                                    (t.0, t.1)
-                                });
-                                vector
-                            } else {
-                                vector.clone()
-                            };
+                            let vector = vector_sort_unstable_entry_by_path(vector);
                             duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
 
                             for entry in vector {
@@ -1431,6 +1331,27 @@ fn computer_duplicate_finder(
             );
         }
     }
+}
+
+fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry> {
+    if vector.len() >= 2 {
+        let mut vector = vector.clone();
+        vector.sort_unstable_by_key(|e| {
+            let t = split_path(e.path.as_path());
+            (t.0, t.1)
+        });
+        vector
+    } else {
+        vector.clone()
+    }
+}
+fn vector_sort_simple_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
+    let mut vector = vector.to_owned();
+    vector.sort_unstable_by_key(|e| {
+        let t = split_path(e.path.as_path());
+        (t.0, t.1)
+    });
+    vector
 }
 
 fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
