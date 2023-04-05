@@ -59,6 +59,7 @@ pub enum TypeOfFile {
 }
 
 bitflags! {
+    #[derive(PartialEq, Copy, Clone)]
     pub struct CheckedTypes : u32 {
         const NONE = 0;
 

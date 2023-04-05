@@ -584,6 +584,7 @@ fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "name" => Ok(CheckingMethod::Name),
         "size" => Ok(CheckingMethod::Size),
+        "size_name" => Ok(CheckingMethod::SizeName),
         "hash" => Ok(CheckingMethod::Hash),
         _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
     }

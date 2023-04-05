@@ -109,6 +109,16 @@ pub fn connect_progress_window(
                         ));
                         taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                     }
+                    common_dir_traversal::CheckingMethod::SizeName => {
+                        label_stage.show();
+                        grid_progress_stages.hide();
+
+                        label_stage.set_text(&flg!(
+                            "progress_scanning_size_name",
+                            generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
+                        ));
+                        taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+                    }
                     common_dir_traversal::CheckingMethod::Size => {
                         label_stage.show();
                         grid_progress_stages.hide();

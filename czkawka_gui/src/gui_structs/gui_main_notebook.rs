@@ -549,9 +549,8 @@ impl GuiMainNotebook {
                     CheckingMethod::Hash => flg!("duplicate_mode_hash_combo_box"),
                     CheckingMethod::Size => flg!("duplicate_mode_size_combo_box"),
                     CheckingMethod::Name => flg!("duplicate_mode_name_combo_box"),
-                    _ => {
-                        panic!()
-                    }
+                    CheckingMethod::SizeName => flg!("duplicate_mode_size_name_combo_box"),
+                    CheckingMethod::None => panic!(),
                 };
                 self.combo_box_duplicate_check_method.append_text(&text);
             }

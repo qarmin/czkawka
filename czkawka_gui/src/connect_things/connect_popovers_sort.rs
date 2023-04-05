@@ -1,6 +1,7 @@
+use std::fmt::Debug;
+
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
-use std::fmt::Debug;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
@@ -118,9 +119,10 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
 
 #[cfg(test)]
 mod test {
-    use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
     use gtk4::prelude::*;
     use gtk4::{Popover, TreeView};
+
+    use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
 
     #[gtk4::test]
     fn test_sort_iters() {

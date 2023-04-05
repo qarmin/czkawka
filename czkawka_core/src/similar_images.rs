@@ -965,7 +965,7 @@ impl SimilarImages {
             let mut found = false;
             for vec_file_entry in collected_similar_images.values() {
                 if vec_file_entry.is_empty() {
-                    println!("Empty Element {vec_file_entry:?}");
+                    println!("Empty group");
                     found = true;
                     continue;
                 }
@@ -984,7 +984,7 @@ impl SimilarImages {
                     }
                 }
             }
-            assert!(!found, "Found Invalid entries");
+            assert!(!found, "Found Invalid entries, verify errors before"); // TODO crashes with empty result with reference folder, verify why
         }
         self.similar_vectors = collected_similar_images.into_values().collect();
 

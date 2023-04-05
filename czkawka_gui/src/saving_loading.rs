@@ -5,11 +5,11 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use czkawka_core::common::get_default_number_of_threads;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
+use czkawka_core::common::get_default_number_of_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 
@@ -938,7 +938,7 @@ pub fn load_configuration(
                 main_notebook.label_duplicate_hash_type.set_visible(false);
             }
 
-            if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Name {
+            if [CheckingMethod::Name, CheckingMethod::SizeName].contains(&DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method) {
                 main_notebook.check_button_duplicate_case_sensitive_name.set_visible(true);
             } else {
                 main_notebook.check_button_duplicate_case_sensitive_name.set_visible(false);

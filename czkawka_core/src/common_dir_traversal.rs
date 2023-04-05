@@ -30,6 +30,7 @@ pub struct ProgressData {
 pub enum CheckingMethod {
     None,
     Name,
+    SizeName,
     Size,
     Hash,
 }
