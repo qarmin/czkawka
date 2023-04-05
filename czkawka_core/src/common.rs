@@ -10,8 +10,8 @@ use anyhow::Result;
 use directories_next::ProjectDirs;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
-#[cfg(feature = "heif")]
-use libheif_rs::LibHeif;
+// #[cfg(feature = "heif")]
+// use libheif_rs::LibHeif;
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 
@@ -128,10 +128,11 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
 
 #[cfg(feature = "heif")]
 pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
-    let libheif = LibHeif::new();
+    // let libheif = LibHeif::new();
     let im = HeifContext::read_from_file(path)?;
     let handle = im.primary_image_handle()?;
-    let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?;
+    // let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?; // Enable when using libheif 0.19
+    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None)?;
     let width = image.width();
     let height = image.height();
     let planes = image.planes();
