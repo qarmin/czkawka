@@ -47,7 +47,19 @@ Prebuilt binaries are available only for x86_64, so if you use ARM e.g. Mac M1/M
 
 **Compilation is simple, and takes less than 10 minutes on an M1/M2 mac.**
 
-User [@bauchdj](https://github.com/bauchdj) wrote [working rust complication instuctions](https://github.com/qarmin/czkawka/issues/689#issuecomment-1310549801)
+```
+# Install Rust and Libraries
+brew install rustup
+rustup-init
+brew install gtk4 adwaita-icon-theme librsvg libheif
+```
+```
+# Clone and Build
+git clone https://github.com/qarmin/czkawka.git
+cd czkawka
+cargo run --release --bin czkawka_gui
+```
+Credit to User [@bauchdj](https://github.com/bauchdj)
 
 #### x86 on ARM
 There is also a way to use x86_64 binaries on ARM, but this requires to install special version of required libraries probably via:
