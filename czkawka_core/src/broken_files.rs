@@ -10,6 +10,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, panic, thread};
 
 use crossbeam_channel::Receiver;
+use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
 use pdf::PdfError;
 use pdf::PdfError::Try;
@@ -523,40 +524,41 @@ impl BrokenFiles {
                         Err(_inspected) => Some(None),
                     },
 
-                    TypeOfFile::PDF => match fs::read(&file_entry.path) {
-                        Ok(content) => {
-                            let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
+                    TypeOfFile::PDF => {
+                        let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
 
-                            let mut file_entry_clone = file_entry.clone();
-                            let result = panic::catch_unwind(|| {
-                                if let Err(e) = pdf::file::File::from_data_with_options(content, parser_options) {
-                                    let mut error_string = e.to_string();
-                                    // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
-                                    if error_string.starts_with("Try at") {
-                                        if let Some(start_index) = error_string.find("/pdf-") {
-                                            error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
-                                        }
-                                    }
+                        let mut file_entry_clone = file_entry.clone();
+                        let result = panic::catch_unwind(|| {
+                            if let Err(e) = FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
+                                if let PdfError::Io { .. } = e {
+                                    return Some(None);
+                                }
 
-                                    file_entry.error_string = error_string;
-                                    let error = unpack_pdf_error(e);
-                                    if let PdfError::InvalidPassword = error {
-                                        return Some(None);
+                                let mut error_string = e.to_string();
+                                // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
+                                if error_string.starts_with("Try at") {
+                                    if let Some(start_index) = error_string.find("/pdf-") {
+                                        error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
                                     }
                                 }
-                                Some(Some(file_entry))
-                            });
-                            if let Ok(pdf_result) = result {
-                                pdf_result
-                            } else {
-                                let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
-                                println!("{message}");
-                                file_entry_clone.error_string = message;
-                                Some(Some(file_entry_clone))
+
+                                file_entry.error_string = error_string;
+                                let error = unpack_pdf_error(e);
+                                if let PdfError::InvalidPassword = error {
+                                    return Some(None);
+                                }
                             }
+                            Some(Some(file_entry))
+                        });
+                        if let Ok(pdf_result) = result {
+                            pdf_result
+                        } else {
+                            let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
+                            println!("{message}");
+                            file_entry_clone.error_string = message;
+                            Some(Some(file_entry_clone))
                         }
-                        Err(_inspected) => Some(None),
-                    },
+                    }
 
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
                     TypeOfFile::Unknown => Some(None),

@@ -1499,7 +1499,5 @@ fn debug_check_for_duplicated_things(
         }
     }
 
-    if found_broken_thing {
-        panic!();
-    }
+    assert!(!found_broken_thing);
 }
