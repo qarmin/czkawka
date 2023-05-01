@@ -325,12 +325,12 @@ impl BadExtensions {
         //// PROGRESS THREAD START
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
 
         let progress_thread_handle = prepare_thread_handler_common(
             progress_sender,
             &progress_thread_run,
-            &atomic_file_counter,
+            &atomic_counter,
             1,
             1,
             self.files_to_check.len(),
@@ -350,7 +350,7 @@ impl BadExtensions {
             hashmap_workarounds.entry(found).or_insert_with(Vec::new).push(proper);
         }
 
-        self.bad_extensions_files = self.verify_extensions(files_to_check, &atomic_file_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);
+        self.bad_extensions_files = self.verify_extensions(files_to_check, &atomic_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
@@ -374,7 +374,7 @@ impl BadExtensions {
     fn verify_extensions(
         &self,
         files_to_check: Vec<FileEntry>,
-        atomic_file_counter: &Arc<AtomicUsize>,
+        atomic_counter: &Arc<AtomicUsize>,
         stop_receiver: Option<&Receiver<()>>,
         check_was_stopped: &AtomicBool,
         hashmap_workarounds: &HashMap<&str, Vec<&str>>,
@@ -382,7 +382,7 @@ impl BadExtensions {
         files_to_check
             .into_par_iter()
             .map(|file_entry| {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;

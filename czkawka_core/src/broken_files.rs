@@ -241,8 +241,8 @@ impl BrokenFiles {
 
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_file_counter, 0, 1, 0);
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0);
 
         //// PROGRESS THREAD END
 
@@ -319,7 +319,7 @@ impl BrokenFiles {
 
                             dir_result.push(next_folder);
                         } else if metadata.is_file() {
-                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                            atomic_counter.fetch_add(1, Ordering::Relaxed);
 
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,
@@ -443,13 +443,13 @@ impl BrokenFiles {
         }
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_file_counter, 1, 1, non_cached_files_to_check.len());
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_counter, 1, 1, non_cached_files_to_check.len());
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, mut file_entry)| {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return None;
                 }

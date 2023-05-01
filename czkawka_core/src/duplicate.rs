@@ -655,11 +655,11 @@ impl DuplicateFinder {
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
         let progress_thread_handle = prepare_thread_handler_common(
             progress_sender,
             &progress_thread_run,
-            &atomic_file_counter,
+            &atomic_counter,
             1,
             2,
             self.files_with_identical_size.values().map(Vec::len).sum(),
@@ -716,7 +716,7 @@ impl DuplicateFinder {
                 let mut errors: Vec<String> = Vec::new();
                 let mut buffer = [0u8; 1024 * 2];
 
-                atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 for file_entry in vec_file_entry {
                     if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                         check_was_stopped.store(true, Ordering::Relaxed);
@@ -800,12 +800,12 @@ impl DuplicateFinder {
         let start_time: SystemTime = SystemTime::now();
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
 
         let progress_thread_handle = prepare_thread_handler_common(
             progress_sender,
             &progress_thread_run,
-            &atomic_file_counter,
+            &atomic_counter,
             2,
             2,
             pre_checked_map.values().map(Vec::len).sum(),
@@ -866,7 +866,7 @@ impl DuplicateFinder {
                     let mut errors: Vec<String> = Vec::new();
                     let mut buffer = [0u8; 1024 * 16];
 
-                    atomic_file_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                    atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                     for mut file_entry in vec_file_entry {
                         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                             check_was_stopped.store(true, Ordering::Relaxed);

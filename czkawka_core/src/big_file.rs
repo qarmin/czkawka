@@ -152,16 +152,16 @@ impl BigFile {
         &self,
         progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
         progress_thread_run: &Arc<AtomicBool>,
-        atomic_file_counter: &Arc<AtomicU64>,
+        atomic_counter: &Arc<AtomicU64>,
     ) -> JoinHandle<()> {
         if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
+            let atomic_counter = atomic_counter.clone();
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed) as usize,
+                        files_checked: atomic_counter.load(Ordering::Relaxed) as usize,
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -185,8 +185,8 @@ impl BigFile {
         }
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicU64::new(0));
-        let progress_thread_handle = self.prepare_thread_handler(progress_sender, &progress_thread_run, &atomic_file_counter);
+        let atomic_counter = Arc::new(AtomicU64::new(0));
+        let progress_thread_handle = self.prepare_thread_handler(progress_sender, &progress_thread_run, &atomic_counter);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -239,7 +239,7 @@ impl BigFile {
                         if metadata.is_dir() {
                             self.check_folder_children(&mut dir_result, &mut warnings, current_folder, &entry_data);
                         } else if metadata.is_file() {
-                            self.collect_file_entry(&atomic_file_counter, &metadata, &entry_data, &mut fe_result, &mut warnings, current_folder);
+                            self.collect_file_entry(&atomic_counter, &metadata, &entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -297,14 +297,14 @@ impl BigFile {
 
     pub fn collect_file_entry(
         &self,
-        atomic_file_counter: &Arc<AtomicU64>,
+        atomic_counter: &Arc<AtomicU64>,
         metadata: &Metadata,
         entry_data: &DirEntry,
         fe_result: &mut Vec<(u64, FileEntry)>,
         warnings: &mut Vec<String>,
         current_folder: &Path,
     ) {
-        atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+        atomic_counter.fetch_add(1, Ordering::Relaxed);
 
         if metadata.len() == 0 {
             return;

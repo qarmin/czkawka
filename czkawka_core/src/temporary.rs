@@ -146,18 +146,18 @@ impl Temporary {
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
 
         let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
+            let atomic_counter = atomic_counter.clone();
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         current_stage: 0,
                         max_stage: 0,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
+                        files_checked: atomic_counter.load(Ordering::Relaxed),
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -243,7 +243,7 @@ impl Temporary {
 
                             dir_result.push(next_folder);
                         } else if metadata.is_file() {
-                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                            atomic_counter.fetch_add(1, Ordering::Relaxed);
 
                             let file_name_lowercase: String = match entry_data.file_name().into_string() {
                                 Ok(t) => t,

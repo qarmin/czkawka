@@ -360,12 +360,12 @@ impl SameMusic {
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
 
         let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
+            let atomic_counter = atomic_counter.clone();
             let music_to_check = non_cached_files_to_check.len();
             thread::spawn(move || loop {
                 progress_send
@@ -373,7 +373,7 @@ impl SameMusic {
                         checking_method: CheckingMethod::None,
                         current_stage: 1,
                         max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
+                        entries_checked: atomic_counter.load(Ordering::Relaxed),
                         entries_to_check: music_to_check,
                     })
                     .unwrap();
@@ -391,7 +391,7 @@ impl SameMusic {
         let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
             .map(|(path, mut music_entry)| {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
@@ -530,12 +530,12 @@ impl SameMusic {
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
 
         let progress_thread_handle = if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
+            let atomic_counter = atomic_counter.clone();
             let music_to_check = self.music_to_check.len();
             thread::spawn(move || loop {
                 progress_send
@@ -543,7 +543,7 @@ impl SameMusic {
                         checking_method: CheckingMethod::None,
                         current_stage: 2,
                         max_stage: 2,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
+                        entries_checked: atomic_counter.load(Ordering::Relaxed),
                         entries_to_check: music_to_check,
                     })
                     .unwrap();
@@ -562,7 +562,7 @@ impl SameMusic {
 
         if (self.music_similarity & MusicSimilarity::TRACK_TITLE) == MusicSimilarity::TRACK_TITLE {
             for vec_file_entry in old_duplicates {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
@@ -590,7 +590,7 @@ impl SameMusic {
         }
         if (self.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
             for vec_file_entry in old_duplicates {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
@@ -618,7 +618,7 @@ impl SameMusic {
         }
         if (self.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
             for vec_file_entry in old_duplicates {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
@@ -643,7 +643,7 @@ impl SameMusic {
         }
         if (self.music_similarity & MusicSimilarity::LENGTH) == MusicSimilarity::LENGTH {
             for vec_file_entry in old_duplicates {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
@@ -668,7 +668,7 @@ impl SameMusic {
         }
         if (self.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
             for vec_file_entry in old_duplicates {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
@@ -693,7 +693,7 @@ impl SameMusic {
         }
         if (self.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
             for vec_file_entry in old_duplicates {
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     // End thread which send info to gui
                     progress_thread_run.store(false, Ordering::Relaxed);
