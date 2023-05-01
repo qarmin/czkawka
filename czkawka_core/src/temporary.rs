@@ -1,7 +1,7 @@
-use std::fs::{File, Metadata};
+use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
 use std::io::BufWriter;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
@@ -12,6 +12,7 @@ use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
 use crate::common::{Common, LOOP_DURATION};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
@@ -189,129 +190,23 @@ impl Temporary {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
-                    // Read current dir children
-                    let read_dir = match fs::read_dir(current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(flc!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result);
-                        }
+
+                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                        return (dir_result, warnings, fe_result);
                     };
 
                     // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
+                    for entry in read_dir {
+                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                            continue;
                         };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
+
                         if metadata.is_dir() {
-                            if !self.recursive_search {
-                                continue 'dir;
-                            }
-
-                            let next_folder = current_folder.join(entry_data.file_name());
-                            if self.directories.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            if self.excluded_items.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            #[cfg(target_family = "unix")]
-                            if self.directories.exclude_other_filesystems() {
-                                match self.directories.is_on_other_filesystems(&next_folder) {
-                                    Ok(true) => continue 'dir,
-                                    Err(e) => warnings.push(e.to_string()),
-                                    _ => (),
-                                }
-                            }
-
-                            dir_result.push(next_folder);
+                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
                         } else if metadata.is_file() {
-                            atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(flc!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
+                            if let Some(file_entry) = self.get_file_entry(&metadata, &atomic_counter, entry_data, &mut warnings, current_folder) {
+                                fe_result.push(file_entry);
                             }
-                            .to_lowercase();
-
-                            if ![
-                                "#",
-                                "thumbs.db",
-                                ".bak",
-                                "~",
-                                ".tmp",
-                                ".temp",
-                                ".ds_store",
-                                ".crdownload",
-                                ".part",
-                                ".cache",
-                                ".dmp",
-                                ".download",
-                                ".partial",
-                            ]
-                            .iter()
-                            .any(|f| file_name_lowercase.ends_with(f))
-                            {
-                                continue 'dir;
-                            }
-                            let current_file_name = current_folder.join(entry_data.file_name());
-                            if self.excluded_items.is_excluded(&current_file_name) {
-                                continue 'dir;
-                            }
-
-                            // Creating new file entry
-                            let fe: FileEntry = FileEntry {
-                                path: current_file_name.clone(),
-                                modified_date: match metadata.modified() {
-                                    Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                        Ok(d) => d.as_secs(),
-                                        Err(_inspected) => {
-                                            warnings.push(flc!(
-                                                "core_file_modified_before_epoch",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-                                    Err(e) => {
-                                        warnings.push(flc!(
-                                            "core_file_no_modification_date",
-                                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                        ));
-                                        0
-                                    } // Permissions Denied
-                                },
-                            };
-
-                            fe_result.push(fe);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -338,6 +233,103 @@ impl Temporary {
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size");
         true
+    }
+    pub fn get_file_entry(
+        &self,
+        metadata: &Metadata,
+        atomic_counter: &Arc<AtomicUsize>,
+        entry_data: &DirEntry,
+        warnings: &mut Vec<String>,
+        current_folder: &Path,
+    ) -> Option<FileEntry> {
+        atomic_counter.fetch_add(1, Ordering::Relaxed);
+
+        let file_name_lowercase: String = match entry_data.file_name().into_string() {
+            Ok(t) => t,
+            Err(_inspected) => {
+                warnings.push(flc!(
+                    "core_file_not_utf8_name",
+                    generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                ));
+                return None;
+            }
+        }
+        .to_lowercase();
+
+        if ![
+            "#",
+            "thumbs.db",
+            ".bak",
+            "~",
+            ".tmp",
+            ".temp",
+            ".ds_store",
+            ".crdownload",
+            ".part",
+            ".cache",
+            ".dmp",
+            ".download",
+            ".partial",
+        ]
+        .iter()
+        .any(|f| file_name_lowercase.ends_with(f))
+        {
+            return None;
+        }
+        let current_file_name = current_folder.join(entry_data.file_name());
+        if self.excluded_items.is_excluded(&current_file_name) {
+            return None;
+        }
+
+        // Creating new file entry
+        Some(FileEntry {
+            path: current_file_name.clone(),
+            modified_date: match metadata.modified() {
+                Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                    Ok(d) => d.as_secs(),
+                    Err(_inspected) => {
+                        warnings.push(flc!(
+                            "core_file_modified_before_epoch",
+                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                        ));
+                        0
+                    }
+                },
+                Err(e) => {
+                    warnings.push(flc!(
+                        "core_file_no_modification_date",
+                        generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
+                    ));
+                    0
+                } // Permissions Denied
+            },
+        })
+    }
+
+    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
+        if !self.recursive_search {
+            return;
+        }
+
+        let next_folder = current_folder.join(entry_data.file_name());
+        if self.directories.is_excluded(&next_folder) {
+            return;
+        }
+
+        if self.excluded_items.is_excluded(&next_folder) {
+            return;
+        }
+
+        #[cfg(target_family = "unix")]
+        if self.directories.exclude_other_filesystems() {
+            match self.directories.is_on_other_filesystems(&next_folder) {
+                Ok(true) => return,
+                Err(e) => warnings.push(e),
+                _ => (),
+            }
+        }
+
+        dir_result.push(next_folder);
     }
 
     /// Function to delete files, from filed Vector

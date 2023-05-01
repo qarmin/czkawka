@@ -1,16 +1,16 @@
 use std::collections::BTreeMap;
-use std::fs::Metadata;
+use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
+use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
-use std::{fs};
 
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
-use crate::common::{prepare_thread_handler_common};
+use crate::common::prepare_thread_handler_common;
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -373,40 +373,17 @@ where
                     let mut fe_result = vec![];
                     let mut set_as_not_empty_folder_list = vec![];
                     let mut folder_entries_list = vec![];
-                    // Read current dir children
-                    let read_dir = match fs::read_dir(current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(flc!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list);
-                        }
+
+                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                        return (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list);
                     };
 
                     // Check every sub folder/file/link etc.
                     'dir: for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
+                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                            continue;
                         };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
+
                         match (entry_type(&metadata), collect) {
                             (EntryType::Dir, Collect::Files | Collect::InvalidSymlinks) => {
                                 if !recursive_search {
@@ -701,6 +678,42 @@ where
             },
         }
     }
+}
+
+pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<ReadDir> {
+    match fs::read_dir(current_folder) {
+        Ok(t) => Some(t),
+        Err(e) => {
+            warnings.push(flc!(
+                "core_cannot_open_dir",
+                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+            ));
+            None
+        }
+    }
+}
+pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<(&'a DirEntry, Metadata)> {
+    let entry_data = match entry {
+        Ok(t) => t,
+        Err(e) => {
+            warnings.push(flc!(
+                "core_cannot_read_entry_dir",
+                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+            ));
+            return None;
+        }
+    };
+    let metadata: Metadata = match entry_data.metadata() {
+        Ok(t) => t,
+        Err(e) => {
+            warnings.push(flc!(
+                "core_cannot_read_metadata_dir",
+                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+            ));
+            return None;
+        }
+    };
+    Some((entry_data, metadata))
 }
 
 fn set_as_not_empty_folder(folder_entries: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &Path) {

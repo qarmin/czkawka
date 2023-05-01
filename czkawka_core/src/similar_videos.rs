@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::{File, Metadata};
+use std::fs::{DirEntry, File};
 use std::io::Write;
 use std::io::*;
 use std::path::{Path, PathBuf};
@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, mem, thread};
+use std::{mem, thread};
 
 use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
@@ -20,6 +20,7 @@ use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::VIDEO_FILES_EXTENSIONS;
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -316,64 +317,19 @@ impl SimilarVideos {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
-                    // Read current dir children
-                    let read_dir = match fs::read_dir(current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(flc!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result);
-                        }
+
+                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                        return (dir_result, warnings, fe_result);
                     };
 
                     // Check every sub folder/file/link etc.
                     'dir: for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
+                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                            continue;
                         };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue 'dir;
-                            }
-                        };
+
                         if metadata.is_dir() {
-                            if !self.recursive_search {
-                                continue 'dir;
-                            }
-
-                            let next_folder = current_folder.join(entry_data.file_name());
-                            if self.directories.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            if self.excluded_items.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            #[cfg(target_family = "unix")]
-                            if self.directories.exclude_other_filesystems() {
-                                match self.directories.is_on_other_filesystems(&next_folder) {
-                                    Ok(true) => continue 'dir,
-                                    Err(e) => warnings.push(e.to_string()),
-                                    _ => (),
-                                }
-                            }
-
-                            dir_result.push(next_folder);
+                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
                         } else if metadata.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
 
@@ -455,6 +411,31 @@ impl SimilarVideos {
         true
     }
 
+    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
+        if !self.recursive_search {
+            return;
+        }
+
+        let next_folder = current_folder.join(entry_data.file_name());
+        if self.directories.is_excluded(&next_folder) {
+            return;
+        }
+
+        if self.excluded_items.is_excluded(&next_folder) {
+            return;
+        }
+
+        #[cfg(target_family = "unix")]
+        if self.directories.exclude_other_filesystems() {
+            match self.directories.is_on_other_filesystems(&next_folder) {
+                Ok(true) => return,
+                Err(e) => warnings.push(e),
+                _ => (),
+            }
+        }
+
+        dir_result.push(next_folder);
+    }
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 

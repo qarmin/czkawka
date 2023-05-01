@@ -17,6 +17,7 @@ use rayon::prelude::*;
 
 use crate::common::split_path;
 use crate::common::{Common, LOOP_DURATION};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -202,44 +203,21 @@ impl BigFile {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
-                    // Read current dir children
-                    let read_dir = match fs::read_dir(current_folder) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            warnings.push(flc!(
-                                "core_cannot_open_dir",
-                                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                            ));
-                            return (dir_result, warnings, fe_result);
-                        }
+
+                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                        return (dir_result, warnings, fe_result);
                     };
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let entry_data = match entry {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_entry_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue;
-                            }
+                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                            continue;
                         };
-                        let metadata: Metadata = match entry_data.metadata() {
-                            Ok(t) => t,
-                            Err(e) => {
-                                warnings.push(flc!(
-                                    "core_cannot_read_metadata_dir",
-                                    generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
-                                ));
-                                continue;
-                            }
-                        };
+
                         if metadata.is_dir() {
-                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, &entry_data);
+                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
                         } else if metadata.is_file() {
-                            self.collect_file_entry(&atomic_counter, &metadata, &entry_data, &mut fe_result, &mut warnings, current_folder);
+                            self.collect_file_entry(&atomic_counter, &metadata, entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
