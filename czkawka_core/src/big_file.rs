@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
-use std::fs::{File, Metadata};
+use std::fs::{DirEntry, File, Metadata};
 use std::io::{BufWriter, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::Arc;
@@ -232,82 +232,9 @@ impl BigFile {
                             }
                         };
                         if metadata.is_dir() {
-                            if !self.recursive_search {
-                                continue 'dir;
-                            }
-
-                            let next_folder = current_folder.join(entry_data.file_name());
-                            if self.directories.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            if self.excluded_items.is_excluded(&next_folder) {
-                                continue 'dir;
-                            }
-
-                            #[cfg(target_family = "unix")]
-                            if self.directories.exclude_other_filesystems() {
-                                match self.directories.is_on_other_filesystems(&next_folder) {
-                                    Ok(true) => continue 'dir,
-                                    Err(e) => warnings.push(e.to_string()),
-                                    _ => (),
-                                }
-                            }
-
-                            dir_result.push(next_folder);
+                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, &entry_data);
                         } else if metadata.is_file() {
-                            atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-
-                            if metadata.len() == 0 {
-                                continue 'dir;
-                            }
-
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(flc!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
-                            }
-                            .to_lowercase();
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            let current_file_name = current_folder.join(entry_data.file_name());
-                            if self.excluded_items.is_excluded(&current_file_name) {
-                                continue 'dir;
-                            }
-
-                            let fe: FileEntry = FileEntry {
-                                path: current_file_name.clone(),
-                                size: metadata.len(),
-                                modified_date: match metadata.modified() {
-                                    Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                        Ok(d) => d.as_secs(),
-                                        Err(_inspected) => {
-                                            warnings.push(flc!(
-                                                "core_file_modified_before_epoch",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-                                    Err(e) => {
-                                        warnings.push(flc!(
-                                            "core_file_no_modification_date",
-                                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                        ));
-                                        0
-                                    }
-                                },
-                            };
-
-                            fe_result.push((fe.size, fe));
+                            self.collect_file_entry(&atomic_file_counter, &metadata, &entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -331,8 +258,102 @@ impl BigFile {
         progress_thread_run.store(false, Ordering::Relaxed);
         progress_thread_handle.join().unwrap();
 
-        // Extract n biggest files to new TreeMap
+        self.extract_n_biggest_files(old_map);
 
+        Common::print_time(start_time, SystemTime::now(), "look_for_big_files");
+        true
+    }
+
+    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
+        if !self.recursive_search {
+            return;
+        }
+
+        let next_folder = current_folder.join(entry_data.file_name());
+        if self.directories.is_excluded(&next_folder) {
+            return;
+        }
+
+        if self.excluded_items.is_excluded(&next_folder) {
+            return;
+        }
+
+        #[cfg(target_family = "unix")]
+        if self.directories.exclude_other_filesystems() {
+            match self.directories.is_on_other_filesystems(&next_folder) {
+                Ok(true) => return,
+                Err(e) => warnings.push(e),
+                _ => (),
+            }
+        }
+
+        dir_result.push(next_folder);
+    }
+
+    pub fn collect_file_entry(
+        &self,
+        atomic_file_counter: &Arc<AtomicU64>,
+        metadata: &Metadata,
+        entry_data: &DirEntry,
+        fe_result: &mut Vec<(u64, FileEntry)>,
+        warnings: &mut Vec<String>,
+        current_folder: &Path,
+    ) {
+        atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+
+        if metadata.len() == 0 {
+            return;
+        }
+
+        let file_name_lowercase: String = match entry_data.file_name().into_string() {
+            Ok(t) => t,
+            Err(_inspected) => {
+                warnings.push(flc!(
+                    "core_file_not_utf8_name",
+                    generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                ));
+                return;
+            }
+        }
+        .to_lowercase();
+
+        if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+            return;
+        }
+
+        let current_file_name = current_folder.join(entry_data.file_name());
+        if self.excluded_items.is_excluded(&current_file_name) {
+            return;
+        }
+
+        let fe: FileEntry = FileEntry {
+            path: current_file_name.clone(),
+            size: metadata.len(),
+            modified_date: match metadata.modified() {
+                Ok(t) => match t.duration_since(UNIX_EPOCH) {
+                    Ok(d) => d.as_secs(),
+                    Err(_inspected) => {
+                        warnings.push(flc!(
+                            "core_file_modified_before_epoch",
+                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
+                        ));
+                        0
+                    }
+                },
+                Err(e) => {
+                    warnings.push(flc!(
+                        "core_file_no_modification_date",
+                        generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
+                    ));
+                    0
+                }
+            },
+        };
+
+        fe_result.push((fe.size, fe));
+    }
+
+    pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
         let iter: Box<dyn Iterator<Item = _>>;
         if self.search_mode == SearchMode::SmallestFiles {
             iter = Box::new(old_map.into_iter());
@@ -360,9 +381,6 @@ impl BigFile {
                 break;
             }
         }
-
-        Common::print_time(start_time, SystemTime::now(), "look_for_big_files");
-        true
     }
 
     pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {

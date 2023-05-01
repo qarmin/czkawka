@@ -30,6 +30,12 @@ pub enum DeleteMethod {
     Delete,
 }
 
+#[derive(Eq, PartialEq, Clone, Debug, Copy)]
+pub enum AudioCheckMethod {
+    Tags,
+    Content,
+}
+
 bitflags! {
     #[derive(PartialEq, Copy, Clone, Debug)]
     pub struct MusicSimilarity : u32 {
@@ -112,6 +118,7 @@ pub struct SameMusic {
     delete_outdated_cache: bool, // TODO add this to GUI
     use_reference_folders: bool,
     save_also_as_json: bool,
+    check_type: AudioCheckMethod,
 }
 
 impl SameMusic {
@@ -138,6 +145,7 @@ impl SameMusic {
             use_reference_folders: false,
             duplicated_music_entries_referenced: vec![],
             save_also_as_json: false,
+            check_type: AudioCheckMethod::Content,
         }
     }
 
@@ -148,13 +156,20 @@ impl SameMusic {
             self.stopped_search = true;
             return;
         }
-        if !self.check_records_multithreaded(stop_receiver, progress_sender) {
-            self.stopped_search = true;
-            return;
-        }
-        if !self.check_for_duplicates(stop_receiver, progress_sender) {
-            self.stopped_search = true;
-            return;
+        match self.check_type {
+            AudioCheckMethod::Tags => {
+                if !self.read_tags(stop_receiver, progress_sender) {
+                    self.stopped_search = true;
+                    return;
+                }
+                if !self.check_for_duplicate_tags(stop_receiver, progress_sender) {
+                    self.stopped_search = true;
+                    return;
+                }
+            }
+            AudioCheckMethod::Content => {
+                unimplemented!();
+            }
         }
         self.delete_files();
         self.debug_print();
@@ -308,7 +323,7 @@ impl SameMusic {
         }
     }
 
-    fn check_records_multithreaded(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
         let loaded_hash_map;
@@ -504,11 +519,11 @@ impl SameMusic {
             return false;
         }
 
-        Common::print_time(start_time, SystemTime::now(), "check_records_multithreaded");
+        Common::print_time(start_time, SystemTime::now(), "read_tags");
 
         true
     }
-    fn check_for_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         assert!(MusicSimilarity::NONE != self.music_similarity, "This can't be none");
         let start_time: SystemTime = SystemTime::now();
 
@@ -748,7 +763,7 @@ impl SameMusic {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "check_for_duplicates");
+        Common::print_time(start_time, SystemTime::now(), "check_for_duplicate_tags");
 
         // Clear unused data
         self.music_entries.clear();

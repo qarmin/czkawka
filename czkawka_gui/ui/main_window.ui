@@ -729,6 +729,15 @@
                             <property name="margin-end">5</property>
                             <property name="margin-start">5</property>
                             <child>
+                              <object class="GtkLabel" id="label_audio_check_type">
+                                <property name="label">Audio check type</property>
+                                <property name="margin-end">2</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="combo_box_audio_check_type"/>
+                            </child>
+                            <child>
                               <object class="GtkCheckButton" id="check_button_music_approximate_comparison">
                                 <property name="focusable">1</property>
                                 <property name="label" translatable="yes">Approximate Comparison</property>
