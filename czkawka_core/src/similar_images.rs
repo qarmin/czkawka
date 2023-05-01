@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime};
 use std::{mem, thread};
 
 use bk_tree::BKTree;
@@ -25,14 +25,13 @@ use crate::common::{
     check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, Common, HEIC_EXTENSIONS,
     IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
 };
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 use crate::flc;
-use crate::localizer_core::generate_translation_hashmap;
 
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [1, 2, 5, 7, 14, 20],    // 8
@@ -376,17 +375,9 @@ impl SimilarImages {
                         } else if metadata.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-                            let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                Ok(t) => t,
-                                Err(_inspected) => {
-                                    warnings.push(flc!(
-                                        "core_file_not_utf8_name",
-                                        generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                    ));
-                                    continue 'dir;
-                                }
-                            }
-                            .to_lowercase();
+                            let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
+                                continue 'dir;
+                            };
 
                             if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
                                 continue 'dir;
@@ -403,26 +394,7 @@ impl SimilarImages {
                                     path: current_file_name.clone(),
                                     size: metadata.len(),
                                     dimensions: String::new(),
-                                    modified_date: match metadata.modified() {
-                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                            Ok(d) => d.as_secs(),
-                                            Err(_inspected) => {
-                                                warnings.push(flc!(
-                                                    "core_file_modified_before_epoch",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
-                                        Err(e) => {
-                                            warnings.push(flc!(
-                                                "core_file_no_modification_date",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
-
+                                    modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
                                     hash: Vec::new(),
                                     similarity: 0,
                                 };

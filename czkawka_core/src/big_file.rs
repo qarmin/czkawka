@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 use std::{fs, thread};
 
 use crossbeam_channel::Receiver;
@@ -17,14 +17,12 @@ use rayon::prelude::*;
 
 use crate::common::{check_folder_children, split_path};
 use crate::common::{Common, LOOP_DURATION};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-use crate::flc;
-use crate::localizer_core::generate_translation_hashmap;
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -270,17 +268,9 @@ impl BigFile {
             return;
         }
 
-        let file_name_lowercase: String = match entry_data.file_name().into_string() {
-            Ok(t) => t,
-            Err(_inspected) => {
-                warnings.push(flc!(
-                    "core_file_not_utf8_name",
-                    generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                ));
-                return;
-            }
-        }
-        .to_lowercase();
+        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
+            return;
+        };
 
         if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
             return;
@@ -294,25 +284,7 @@ impl BigFile {
         let fe: FileEntry = FileEntry {
             path: current_file_name.clone(),
             size: metadata.len(),
-            modified_date: match metadata.modified() {
-                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                    Ok(d) => d.as_secs(),
-                    Err(_inspected) => {
-                        warnings.push(flc!(
-                            "core_file_modified_before_epoch",
-                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                        ));
-                        0
-                    }
-                },
-                Err(e) => {
-                    warnings.push(flc!(
-                        "core_file_no_modification_date",
-                        generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                    ));
-                    0
-                }
-            },
+            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
         };
 
         fe_result.push((fe.size, fe));

@@ -5,20 +5,34 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime};
 use std::{fs, thread};
 
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, Common, LOOP_DURATION};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-use crate::flc;
-use crate::localizer_core::generate_translation_hashmap;
+
+const TEMP_EXTENSIONS: &[&str] = &[
+    "#",
+    "thumbs.db",
+    ".bak",
+    "~",
+    ".tmp",
+    ".temp",
+    ".ds_store",
+    ".crdownload",
+    ".part",
+    ".cache",
+    ".dmp",
+    ".download",
+    ".partial",
+];
 
 #[derive(Debug)]
 pub struct ProgressData {
@@ -252,36 +266,11 @@ impl Temporary {
     ) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-        let file_name_lowercase: String = match entry_data.file_name().into_string() {
-            Ok(t) => t,
-            Err(_inspected) => {
-                warnings.push(flc!(
-                    "core_file_not_utf8_name",
-                    generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                ));
-                return None;
-            }
-        }
-        .to_lowercase();
+        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
+            return None;
+        };
 
-        if ![
-            "#",
-            "thumbs.db",
-            ".bak",
-            "~",
-            ".tmp",
-            ".temp",
-            ".ds_store",
-            ".crdownload",
-            ".part",
-            ".cache",
-            ".dmp",
-            ".download",
-            ".partial",
-        ]
-        .iter()
-        .any(|f| file_name_lowercase.ends_with(f))
-        {
+        if !TEMP_EXTENSIONS.iter().any(|f| file_name_lowercase.ends_with(f)) {
             return None;
         }
         let current_file_name = current_folder.join(entry_data.file_name());
@@ -292,25 +281,7 @@ impl Temporary {
         // Creating new file entry
         Some(FileEntry {
             path: current_file_name.clone(),
-            modified_date: match metadata.modified() {
-                Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                    Ok(d) => d.as_secs(),
-                    Err(_inspected) => {
-                        warnings.push(flc!(
-                            "core_file_modified_before_epoch",
-                            generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                        ));
-                        0
-                    }
-                },
-                Err(e) => {
-                    warnings.push(flc!(
-                        "core_file_no_modification_date",
-                        generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                    ));
-                    0
-                } // Permissions Denied
-            },
+            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
         })
     }
 

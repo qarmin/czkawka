@@ -1,10 +1,9 @@
 use std::collections::BTreeMap;
+use std::fs;
 use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
-use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crossbeam_channel::Receiver;
@@ -433,42 +432,16 @@ where
                                     FolderEntry {
                                         parent_path: Some(current_folder.clone()),
                                         is_empty: FolderEmptiness::Maybe,
-                                        modified_date: match metadata.modified() {
-                                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                                Ok(d) => d.as_secs(),
-                                                Err(_inspected) => {
-                                                    warnings.push(flc!(
-                                                        "core_folder_modified_before_epoch",
-                                                        generate_translation_hashmap(vec![("name", current_folder.display().to_string())])
-                                                    ));
-                                                    0
-                                                }
-                                            },
-                                            Err(e) => {
-                                                warnings.push(flc!(
-                                                    "core_folder_no_modification_date",
-                                                    generate_translation_hashmap(vec![("name", current_folder.display().to_string()), ("reason", e.to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
+                                        modified_date: get_modified_time(&metadata, &mut warnings, current_folder, true),
                                     },
                                 ));
                             }
                             (EntryType::File, Collect::Files) => {
                                 atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
 
-                                let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                    Ok(t) => t,
-                                    Err(_inspected) => {
-                                        warnings.push(flc!(
-                                            "core_file_not_utf8_name",
-                                            generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                        ));
-                                        continue 'dir;
-                                    }
-                                }
-                                .to_lowercase();
+                                let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
+                                    continue 'dir;
+                                };
 
                                 if !allowed_extensions.matches_filename(&file_name_lowercase) {
                                     continue 'dir;
@@ -493,25 +466,7 @@ where
                                     let fe: FileEntry = FileEntry {
                                         path: current_file_name.clone(),
                                         size: metadata.len(),
-                                        modified_date: match metadata.modified() {
-                                            Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                                Ok(d) => d.as_secs(),
-                                                Err(_inspected) => {
-                                                    warnings.push(flc!(
-                                                        "core_file_modified_before_epoch",
-                                                        generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                                    ));
-                                                    0
-                                                }
-                                            },
-                                            Err(e) => {
-                                                warnings.push(flc!(
-                                                    "core_file_no_modification_date",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
+                                        modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
                                         hash: String::new(),
                                         symlink_info: None,
                                     };
@@ -537,17 +492,9 @@ where
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
                                 atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
 
-                                let file_name_lowercase: String = match entry_data.file_name().into_string() {
-                                    Ok(t) => t,
-                                    Err(_inspected) => {
-                                        warnings.push(flc!(
-                                            "core_file_not_utf8_name",
-                                            generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
-                                        ));
-                                        continue 'dir;
-                                    }
-                                }
-                                .to_lowercase();
+                                let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
+                                    continue 'dir;
+                                };
 
                                 if !allowed_extensions.matches_filename(&file_name_lowercase) {
                                     continue 'dir;
@@ -605,25 +552,7 @@ where
                                 // Creating new file entry
                                 let fe: FileEntry = FileEntry {
                                     path: current_file_name.clone(),
-                                    modified_date: match metadata.modified() {
-                                        Ok(t) => match t.duration_since(UNIX_EPOCH) {
-                                            Ok(d) => d.as_secs(),
-                                            Err(_inspected) => {
-                                                warnings.push(flc!(
-                                                    "core_file_modified_before_epoch",
-                                                    generate_translation_hashmap(vec![("name", current_file_name.display().to_string())])
-                                                ));
-                                                0
-                                            }
-                                        },
-                                        Err(e) => {
-                                            warnings.push(flc!(
-                                                "core_file_no_modification_date",
-                                                generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())])
-                                            ));
-                                            0
-                                        }
-                                    },
+                                    modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
                                     size: 0,
                                     hash: String::new(),
                                     symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
@@ -714,6 +643,46 @@ pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::E
         }
     };
     Some((entry_data, metadata))
+}
+pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, current_file_name: &Path, is_folder: bool) -> u64 {
+    match metadata.modified() {
+        Ok(t) => match t.duration_since(UNIX_EPOCH) {
+            Ok(d) => d.as_secs(),
+            Err(_inspected) => {
+                let translation_hashmap = generate_translation_hashmap(vec![("name", current_file_name.display().to_string())]);
+                if is_folder {
+                    warnings.push(flc!("core_folder_modified_before_epoch", translation_hashmap));
+                } else {
+                    warnings.push(flc!("core_file_modified_before_epoch", translation_hashmap));
+                }
+                0
+            }
+        },
+        Err(e) => {
+            let translation_hashmap = generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())]);
+            if is_folder {
+                warnings.push(flc!("core_folder_no_modification_date", translation_hashmap));
+            } else {
+                warnings.push(flc!("core_file_no_modification_date", translation_hashmap));
+            }
+            0
+        }
+    }
+}
+
+pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<String> {
+    let name = match entry_data.file_name().into_string() {
+        Ok(t) => t,
+        Err(_inspected) => {
+            warnings.push(flc!(
+                "core_file_not_utf8_name",
+                generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+            ));
+            return None;
+        }
+    }
+    .to_lowercase();
+    Some(name)
 }
 
 fn set_as_not_empty_folder(folder_entries: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &Path) {
