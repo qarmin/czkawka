@@ -686,9 +686,9 @@ pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> 
 }
 
 fn set_as_not_empty_folder(folder_entries: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &Path) {
-    // Not folder so it may be a file or symbolic link so it isn't empty
-    folder_entries.get_mut(current_folder).unwrap().is_empty = FolderEmptiness::No;
     let mut d = folder_entries.get_mut(current_folder).unwrap();
+    // Not folder so it may be a file or symbolic link so it isn't empty
+    d.is_empty = FolderEmptiness::No;
     // Loop to recursively set as non empty this and all his parent folders
     loop {
         d.is_empty = FolderEmptiness::No;
