@@ -11,7 +11,7 @@ use std::{fs, thread};
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
-use crate::common::{Common, LOOP_DURATION};
+use crate::common::{check_folder_children, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
@@ -202,7 +202,15 @@ impl Temporary {
                         };
 
                         if metadata.is_dir() {
-                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
+                            check_folder_children(
+                                &mut dir_result,
+                                &mut warnings,
+                                current_folder,
+                                entry_data,
+                                self.recursive_search,
+                                &self.directories,
+                                &self.excluded_items,
+                            );
                         } else if metadata.is_file() {
                             if let Some(file_entry) = self.get_file_entry(&metadata, &atomic_counter, entry_data, &mut warnings, current_folder) {
                                 fe_result.push(file_entry);
@@ -304,32 +312,6 @@ impl Temporary {
                 } // Permissions Denied
             },
         })
-    }
-
-    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
-        if !self.recursive_search {
-            return;
-        }
-
-        let next_folder = current_folder.join(entry_data.file_name());
-        if self.directories.is_excluded(&next_folder) {
-            return;
-        }
-
-        if self.excluded_items.is_excluded(&next_folder) {
-            return;
-        }
-
-        #[cfg(target_family = "unix")]
-        if self.directories.exclude_other_filesystems() {
-            match self.directories.is_on_other_filesystems(&next_folder) {
-                Ok(true) => return,
-                Err(e) => warnings.push(e),
-                _ => (),
-            }
-        }
-
-        dir_result.push(next_folder);
     }
 
     /// Function to delete files, from filed Vector

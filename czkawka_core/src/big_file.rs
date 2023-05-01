@@ -15,7 +15,7 @@ use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
 
-use crate::common::split_path;
+use crate::common::{check_folder_children, split_path};
 use crate::common::{Common, LOOP_DURATION};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
@@ -215,7 +215,15 @@ impl BigFile {
                         };
 
                         if metadata.is_dir() {
-                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
+                            check_folder_children(
+                                &mut dir_result,
+                                &mut warnings,
+                                current_folder,
+                                entry_data,
+                                self.recursive_search,
+                                &self.directories,
+                                &self.excluded_items,
+                            );
                         } else if metadata.is_file() {
                             self.collect_file_entry(&atomic_counter, &metadata, entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
@@ -245,32 +253,6 @@ impl BigFile {
 
         Common::print_time(start_time, SystemTime::now(), "look_for_big_files");
         true
-    }
-
-    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
-        if !self.recursive_search {
-            return;
-        }
-
-        let next_folder = current_folder.join(entry_data.file_name());
-        if self.directories.is_excluded(&next_folder) {
-            return;
-        }
-
-        if self.excluded_items.is_excluded(&next_folder) {
-            return;
-        }
-
-        #[cfg(target_family = "unix")]
-        if self.directories.exclude_other_filesystems() {
-            match self.directories.is_on_other_filesystems(&next_folder) {
-                Ok(true) => return,
-                Err(e) => warnings.push(e),
-                _ => (),
-            }
-        }
-
-        dir_result.push(next_folder);
     }
 
     pub fn collect_file_entry(

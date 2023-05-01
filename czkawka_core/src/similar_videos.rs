@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::{DirEntry, File};
+use std::fs::File;
 use std::io::Write;
 use std::io::*;
 use std::path::{Path, PathBuf};
@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::VIDEO_FILES_EXTENSIONS;
+use crate::common::{check_folder_children, VIDEO_FILES_EXTENSIONS};
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
@@ -329,7 +329,15 @@ impl SimilarVideos {
                         };
 
                         if metadata.is_dir() {
-                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
+                            check_folder_children(
+                                &mut dir_result,
+                                &mut warnings,
+                                current_folder,
+                                entry_data,
+                                self.recursive_search,
+                                &self.directories,
+                                &self.excluded_items,
+                            );
                         } else if metadata.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
 
@@ -411,31 +419,6 @@ impl SimilarVideos {
         true
     }
 
-    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
-        if !self.recursive_search {
-            return;
-        }
-
-        let next_folder = current_folder.join(entry_data.file_name());
-        if self.directories.is_excluded(&next_folder) {
-            return;
-        }
-
-        if self.excluded_items.is_excluded(&next_folder) {
-            return;
-        }
-
-        #[cfg(target_family = "unix")]
-        if self.directories.exclude_other_filesystems() {
-            match self.directories.is_on_other_filesystems(&next_folder) {
-                Ok(true) => return,
-                Err(e) => warnings.push(e),
-                _ => (),
-            }
-        }
-
-        dir_result.push(next_folder);
-    }
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 

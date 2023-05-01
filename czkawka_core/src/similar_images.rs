@@ -1,5 +1,5 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
-use std::fs::{DirEntry, File};
+use std::fs::File;
 use std::io::Write;
 use std::io::*;
 use std::panic;
@@ -22,8 +22,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION,
-    RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, Common, HEIC_EXTENSIONS,
+    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir};
 use crate::common_directory::Directories;
@@ -364,7 +364,15 @@ impl SimilarImages {
                         };
 
                         if metadata.is_dir() {
-                            self.check_folder_children(&mut dir_result, &mut warnings, current_folder, entry_data);
+                            check_folder_children(
+                                &mut dir_result,
+                                &mut warnings,
+                                current_folder,
+                                entry_data,
+                                self.recursive_search,
+                                &self.directories,
+                                &self.excluded_items,
+                            );
                         } else if metadata.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
 
@@ -984,31 +992,6 @@ impl SimilarImages {
 
     pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
-    }
-    pub fn check_folder_children(&self, dir_result: &mut Vec<PathBuf>, warnings: &mut Vec<String>, current_folder: &Path, entry_data: &DirEntry) {
-        if !self.recursive_search {
-            return;
-        }
-
-        let next_folder = current_folder.join(entry_data.file_name());
-        if self.directories.is_excluded(&next_folder) {
-            return;
-        }
-
-        if self.excluded_items.is_excluded(&next_folder) {
-            return;
-        }
-
-        #[cfg(target_family = "unix")]
-        if self.directories.exclude_other_filesystems() {
-            match self.directories.is_on_other_filesystems(&next_folder) {
-                Ok(true) => return,
-                Err(e) => warnings.push(e),
-                _ => (),
-            }
-        }
-
-        dir_result.push(next_folder);
     }
 }
 

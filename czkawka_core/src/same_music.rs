@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use std::time::{SystemTime};
+use std::time::SystemTime;
 use std::{mem, panic};
 
 use crossbeam_channel::Receiver;
