@@ -210,7 +210,7 @@ impl BigFile {
                     };
 
                     // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
+                    for entry in read_dir {
                         let entry_data = match entry {
                             Ok(t) => t,
                             Err(e) => {
@@ -218,7 +218,7 @@ impl BigFile {
                                     "core_cannot_read_entry_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
-                                continue 'dir;
+                                continue;
                             }
                         };
                         let metadata: Metadata = match entry_data.metadata() {
@@ -228,7 +228,7 @@ impl BigFile {
                                     "core_cannot_read_metadata_dir",
                                     generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
                                 ));
-                                continue 'dir;
+                                continue;
                             }
                         };
                         if metadata.is_dir() {

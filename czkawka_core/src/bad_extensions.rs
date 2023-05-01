@@ -320,8 +320,6 @@ impl BadExtensions {
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
-        let include_files_without_extension = self.include_files_without_extension;
-
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         //// PROGRESS THREAD START
@@ -358,112 +356,14 @@ impl BadExtensions {
 
         let mut hashmap_workarounds: HashMap<&str, Vec<&str>> = Default::default();
         for (proper, found) in WORKAROUNDS {
-            // This should be enabled when items will have only 1 possible workaround items
+            // This should be enabled when items will have only 1 possible workaround items, but looks that some have 2 or even more, so at least for now this is disabled
             // if hashmap_workarounds.contains_key(found) {
             //     panic!("Already have {} key", found);
             // }
             hashmap_workarounds.entry(found).or_insert_with(Vec::new).push(proper);
         }
 
-        self.bad_extensions_files = files_to_check
-            .into_par_iter()
-            .map(|file_entry| {
-                println!("{:?}", file_entry.path);
-                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_stopped.store(true, Ordering::Relaxed);
-                    return None;
-                }
-
-                // Check what exactly content file contains
-                let kind = match infer::get_from_path(&file_entry.path) {
-                    Ok(k) => match k {
-                        Some(t) => t,
-                        None => return Some(None),
-                    },
-                    Err(_) => return Some(None),
-                };
-                let proper_extension = kind.extension();
-
-                // Extract current extension from file
-                let current_extension;
-                if let Some(extension) = file_entry.path.extension() {
-                    let extension = extension.to_string_lossy().to_lowercase();
-                    if DISABLED_EXTENSIONS.contains(&extension.as_str()) {
-                        return Some(None);
-                    }
-                    // Text longer than 10 characters is not considered as extension
-                    if extension.len() > 10 {
-                        current_extension = String::new();
-                    } else {
-                        current_extension = extension;
-                    }
-                } else {
-                    current_extension = String::new();
-                }
-
-                // Already have proper extension, no need to do more things
-                if current_extension == proper_extension {
-                    return Some(None);
-                }
-
-                // Check for all extensions that file can use(not sure if it is worth to do it)
-                let mut all_available_extensions: BTreeSet<&str> = Default::default();
-                let think_extension = if current_extension.is_empty() {
-                    String::new()
-                } else {
-                    for mim in mime_guess::from_ext(proper_extension) {
-                        if let Some(all_ext) = get_mime_extensions(&mim) {
-                            for ext in all_ext {
-                                all_available_extensions.insert(ext);
-                            }
-                        }
-                    }
-
-                    // Workarounds
-                    if let Some(vec_pre) = hashmap_workarounds.get(current_extension.as_str()) {
-                        for pre in vec_pre {
-                            if all_available_extensions.contains(pre) {
-                                all_available_extensions.insert(current_extension.as_str());
-                                break;
-                            }
-                        }
-                    }
-
-                    let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
-                    for ext in &all_available_extensions {
-                        guessed_multiple_extensions.push_str(ext);
-                        guessed_multiple_extensions.push(',');
-                    }
-                    guessed_multiple_extensions.pop();
-
-                    guessed_multiple_extensions
-                };
-
-                if all_available_extensions.is_empty() {
-                    // Not found any extension
-                    return Some(None);
-                } else if current_extension.is_empty() {
-                    if !include_files_without_extension {
-                        return Some(None);
-                    }
-                } else if all_available_extensions.take(&current_extension.as_str()).is_some() {
-                    // Found proper extension
-                    return Some(None);
-                }
-
-                Some(Some(BadFileEntry {
-                    path: file_entry.path,
-                    modified_date: file_entry.modified_date,
-                    size: file_entry.size,
-                    current_extension,
-                    proper_extensions: think_extension,
-                }))
-            })
-            .while_some()
-            .filter(Option::is_some)
-            .map(Option::unwrap)
-            .collect::<Vec<_>>();
+        self.bad_extensions_files = self.verify_extensions(files_to_check, &atomic_file_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);
 
         // End thread which send info to gui
         progress_thread_run.store(false, Ordering::Relaxed);
@@ -482,6 +382,131 @@ impl BadExtensions {
         self.files_to_check = Default::default();
 
         true
+    }
+
+    fn verify_extensions(
+        &self,
+        files_to_check: Vec<FileEntry>,
+        atomic_file_counter: &Arc<AtomicUsize>,
+        stop_receiver: Option<&Receiver<()>>,
+        check_was_stopped: &AtomicBool,
+        hashmap_workarounds: &HashMap<&str, Vec<&str>>,
+    ) -> Vec<BadFileEntry> {
+        files_to_check
+            .into_par_iter()
+            .map(|file_entry| {
+                atomic_file_counter.fetch_add(1, Ordering::Relaxed);
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    check_was_stopped.store(true, Ordering::Relaxed);
+                    return None;
+                }
+
+                // Check what exactly content file contains
+                let kind = match infer::get_from_path(&file_entry.path) {
+                    Ok(k) => match k {
+                        Some(t) => t,
+                        None => return Some(None),
+                    },
+                    Err(_) => return Some(None),
+                };
+                let proper_extension = kind.extension();
+
+                let Some(current_extension)= self.get_and_validate_extension(&file_entry, proper_extension) else {
+                    return Some(None);
+                };
+
+                // Check for all extensions that file can use(not sure if it is worth to do it)
+                let (mut all_available_extensions, valid_extensions) = self.check_for_all_extensions_that_file_can_use(hashmap_workarounds, &current_extension, proper_extension);
+
+                if all_available_extensions.is_empty() {
+                    // Not found any extension
+                    return Some(None);
+                } else if current_extension.is_empty() {
+                    if !self.include_files_without_extension {
+                        return Some(None);
+                    }
+                } else if all_available_extensions.take(&current_extension).is_some() {
+                    // Found proper extension
+                    return Some(None);
+                }
+
+                Some(Some(BadFileEntry {
+                    path: file_entry.path,
+                    modified_date: file_entry.modified_date,
+                    size: file_entry.size,
+                    current_extension,
+                    proper_extensions: valid_extensions,
+                }))
+            })
+            .while_some()
+            .filter(Option::is_some)
+            .map(Option::unwrap)
+            .collect::<Vec<_>>()
+    }
+
+    fn get_and_validate_extension(&self, file_entry: &FileEntry, proper_extension: &str) -> Option<String> {
+        let current_extension;
+        // Extract current extension from file
+        if let Some(extension) = file_entry.path.extension() {
+            let extension = extension.to_string_lossy().to_lowercase();
+            if DISABLED_EXTENSIONS.contains(&extension.as_str()) {
+                return None;
+            }
+            // Text longer than 10 characters is not considered as extension
+            if extension.len() > 10 {
+                current_extension = String::new();
+            } else {
+                current_extension = extension;
+            }
+        } else {
+            current_extension = String::new();
+        }
+
+        // Already have proper extension, no need to do more things
+        if current_extension == proper_extension {
+            return None;
+        }
+        Some(current_extension)
+    }
+
+    fn check_for_all_extensions_that_file_can_use(
+        &self,
+        hashmap_workarounds: &HashMap<&str, Vec<&str>>,
+        current_extension: &str,
+        proper_extension: &str,
+    ) -> (BTreeSet<String>, String) {
+        let mut all_available_extensions: BTreeSet<String> = Default::default();
+        let valid_extensions = if current_extension.is_empty() {
+            String::new()
+        } else {
+            for mim in mime_guess::from_ext(proper_extension) {
+                if let Some(all_ext) = get_mime_extensions(&mim) {
+                    for ext in all_ext {
+                        all_available_extensions.insert((*ext).to_string());
+                    }
+                }
+            }
+
+            // Workarounds
+            if let Some(vec_pre) = hashmap_workarounds.get(current_extension) {
+                for pre in vec_pre {
+                    if all_available_extensions.contains(*pre) {
+                        all_available_extensions.insert(current_extension.to_string());
+                        break;
+                    }
+                }
+            }
+
+            let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
+            for ext in &all_available_extensions {
+                guessed_multiple_extensions.push_str(ext);
+                guessed_multiple_extensions.push(',');
+            }
+            guessed_multiple_extensions.pop();
+
+            guessed_multiple_extensions
+        };
+        (all_available_extensions, valid_extensions)
     }
 }
 
