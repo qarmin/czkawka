@@ -1,9 +1,12 @@
 use std::ffi::OsString;
-use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use std::time::SystemTime;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::{sleep, JoinHandle};
+use std::time::{Duration, SystemTime};
+use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
@@ -12,6 +15,7 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
+use crate::common_dir_traversal::{CheckingMethod, ProgressData};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 
@@ -316,6 +320,38 @@ impl Common {
             }
             _ => path.to_path_buf(),
         }
+    }
+}
+pub fn prepare_thread_handler_common(
+    progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+    progress_thread_run: &Arc<AtomicBool>,
+    atomic_counter: &Arc<AtomicUsize>,
+    current_stage: u8,
+    max_stage: u8,
+    max_value: usize,
+    checking_method: CheckingMethod,
+) -> JoinHandle<()> {
+    if let Some(progress_sender) = progress_sender {
+        let progress_send = progress_sender.clone();
+        let progress_thread_run = progress_thread_run.clone();
+        let atomic_counter = atomic_counter.clone();
+        thread::spawn(move || loop {
+            progress_send
+                .unbounded_send(ProgressData {
+                    checking_method,
+                    current_stage,
+                    max_stage,
+                    entries_checked: atomic_counter.load(Ordering::Relaxed),
+                    entries_to_check: max_value,
+                })
+                .unwrap();
+            if !progress_thread_run.load(Ordering::Relaxed) {
+                break;
+            }
+            sleep(Duration::from_millis(LOOP_DURATION as u64));
+        })
+    } else {
+        thread::spawn(|| {})
     }
 }
 

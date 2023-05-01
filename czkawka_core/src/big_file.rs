@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
@@ -148,22 +148,13 @@ impl BigFile {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-        let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-
-        // Add root folders for finding
-        for id in &self.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
-
-        //// PROGRESS THREAD START
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let atomic_file_counter = Arc::new(AtomicU64::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
+    pub fn prepare_thread_handler(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: &Arc<AtomicBool>,
+        atomic_file_counter: &Arc<AtomicU64>,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_file_counter = atomic_file_counter.clone();
@@ -180,9 +171,23 @@ impl BigFile {
             })
         } else {
             thread::spawn(|| {})
-        };
+        }
+    }
 
-        //// PROGRESS THREAD END
+    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+
+        // Add root folders for finding
+        for id in &self.directories.included_directories {
+            folders_to_check.push(id.clone());
+        }
+
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+        let atomic_file_counter = Arc::new(AtomicU64::new(0));
+        let progress_thread_handle = self.prepare_thread_handler(progress_sender, &progress_thread_run, &atomic_file_counter);
+
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 // End thread which send info to gui

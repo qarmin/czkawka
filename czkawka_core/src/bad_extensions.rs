@@ -5,15 +5,15 @@ use std::io::BufWriter;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
-use std::{mem, thread};
+
+use std::mem;
+use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
-use crate::common::{Common, LOOP_DURATION};
+use crate::common::{prepare_thread_handler_common, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -317,39 +317,6 @@ impl BadExtensions {
         }
     }
 
-    fn prepare_bad_extension_thread_handler(
-        &self,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
-        progress_thread_run: Arc<AtomicBool>,
-        atomic_counter: Arc<AtomicUsize>,
-        current_stage: u8,
-        max_stage: u8,
-        max_value: usize,
-    ) -> JoinHandle<()> {
-        if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run;
-            let atomic_counter = atomic_counter;
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method: CheckingMethod::None,
-                        current_stage,
-                        max_stage,
-                        entries_checked: atomic_counter.load(Ordering::Relaxed),
-                        entries_to_check: max_value,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        }
-    }
-
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
@@ -360,8 +327,15 @@ impl BadExtensions {
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
 
-        let progress_thread_handle =
-            self.prepare_bad_extension_thread_handler(progress_sender, progress_thread_run.clone(), atomic_file_counter.clone(), 1, 1, self.files_to_check.len());
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_file_counter,
+            1,
+            1,
+            self.files_to_check.len(),
+            CheckingMethod::None,
+        );
 
         let mut files_to_check = Default::default();
         mem::swap(&mut files_to_check, &mut self.files_to_check);

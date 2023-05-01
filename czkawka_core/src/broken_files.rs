@@ -5,7 +5,7 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, panic, thread};
 
@@ -198,6 +198,38 @@ impl BrokenFiles {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
+    pub fn prepare_thread_handler_broken_files(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: &Arc<AtomicBool>,
+        atomic_counter: &Arc<AtomicUsize>,
+        current_stage: u8,
+        max_stage: u8,
+        max_value: usize,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
+            let progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_counter = atomic_counter.clone();
+            thread::spawn(move || loop {
+                progress_send
+                    .unbounded_send(ProgressData {
+                        current_stage,
+                        max_stage,
+                        files_checked: atomic_counter.load(Ordering::Relaxed),
+                        files_to_check: max_value,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            })
+        } else {
+            thread::spawn(|| {})
+        }
+    }
+
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -209,30 +241,9 @@ impl BrokenFiles {
 
         //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_file_counter, 0, 1, 0);
 
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 0,
-                        max_stage: 1,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
-                        files_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
         //// PROGRESS THREAD END
 
         while !folders_to_check.is_empty() {
@@ -431,33 +442,10 @@ impl BrokenFiles {
             non_cached_files_to_check = files_to_check;
         }
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_file_counter, 1, 1, non_cached_files_to_check.len());
 
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            let files_to_check = non_cached_files_to_check.len();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 1,
-                        max_stage: 1,
-                        files_checked: atomic_file_counter.load(Ordering::Relaxed),
-                        files_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, mut file_entry)| {
