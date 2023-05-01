@@ -240,6 +240,7 @@ impl Common {
     }
 
     /// Function to check if directory match expression
+    #[must_use]
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
             return true;
@@ -292,6 +293,7 @@ impl Common {
         true
     }
 
+    #[must_use]
     pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
         let path = path_to_change.as_ref();
 

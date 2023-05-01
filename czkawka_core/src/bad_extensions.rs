@@ -5,7 +5,7 @@ use std::io::BufWriter;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime};
 use std::{mem, thread};
 
@@ -317,28 +317,27 @@ impl BadExtensions {
         }
     }
 
-    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let system_time = SystemTime::now();
-
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
-        //// PROGRESS THREAD START
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
+    fn prepare_bad_extension_thread_handler(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: Arc<AtomicBool>,
+        atomic_counter: Arc<AtomicUsize>,
+        current_stage: u8,
+        max_stage: u8,
+        max_value: usize,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_file_counter = atomic_file_counter.clone();
-            let entries_to_check = self.files_to_check.len();
+            let progress_thread_run = progress_thread_run;
+            let atomic_counter = atomic_counter;
             thread::spawn(move || loop {
                 progress_send
                     .unbounded_send(ProgressData {
                         checking_method: CheckingMethod::None,
-                        current_stage: 1,
-                        max_stage: 1,
-                        entries_checked: atomic_file_counter.load(Ordering::Relaxed),
-                        entries_to_check,
+                        current_stage,
+                        max_stage,
+                        entries_checked: atomic_counter.load(Ordering::Relaxed),
+                        entries_to_check: max_value,
                     })
                     .unwrap();
                 if !progress_thread_run.load(Ordering::Relaxed) {
@@ -348,7 +347,21 @@ impl BadExtensions {
             })
         } else {
             thread::spawn(|| {})
-        };
+        }
+    }
+
+    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        let system_time = SystemTime::now();
+
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+
+        //// PROGRESS THREAD START
+
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+        let atomic_file_counter = Arc::new(AtomicUsize::new(0));
+
+        let progress_thread_handle =
+            self.prepare_bad_extension_thread_handler(progress_sender, progress_thread_run.clone(), atomic_file_counter.clone(), 1, 1, self.files_to_check.len());
 
         let mut files_to_check = Default::default();
         mem::swap(&mut files_to_check, &mut self.files_to_check);
