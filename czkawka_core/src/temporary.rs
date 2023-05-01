@@ -4,7 +4,7 @@ use std::io::BufWriter;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, thread};
 
@@ -134,21 +134,13 @@ impl Temporary {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
-
-        // Add root folders for finding
-        for id in &self.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
-
-        //// PROGRESS THREAD START
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
+    fn prepare_thread_handler_temporary(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: &Arc<AtomicBool>,
+        atomic_counter: &Arc<AtomicUsize>,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
             let progress_send = progress_sender.clone();
             let progress_thread_run = progress_thread_run.clone();
             let atomic_counter = atomic_counter.clone();
@@ -167,8 +159,21 @@ impl Temporary {
             })
         } else {
             thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
+        }
+    }
+
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+
+        // Add root folders for finding
+        for id in &self.directories.included_directories {
+            folders_to_check.push(id.clone());
+        }
+
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_temporary(progress_sender, &progress_thread_run, &atomic_counter);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {

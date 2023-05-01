@@ -5,7 +5,7 @@ use std::io::*;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
@@ -246,6 +246,38 @@ impl SimilarVideos {
     //     self.delete_folders = delete_folder;
     // }
 
+    pub fn prepare_thread_handler_similar_video(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: &Arc<AtomicBool>,
+        atomic_counter: &Arc<AtomicUsize>,
+        current_stage: u8,
+        max_stage: u8,
+        max_value: usize,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
+            let progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_counter = atomic_counter.clone();
+            thread::spawn(move || loop {
+                progress_send
+                    .unbounded_send(ProgressData {
+                        current_stage,
+                        max_stage,
+                        videos_checked: atomic_counter.load(Ordering::Relaxed),
+                        videos_to_check: max_value,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            })
+        } else {
+            thread::spawn(|| {})
+        }
+    }
+
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -266,33 +298,9 @@ impl SimilarVideos {
             folders_to_check.push(id.clone());
         }
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 0,
-                        max_stage: 1,
-                        videos_checked: atomic_counter.load(Ordering::Relaxed),
-                        videos_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
+        let progress_thread_handle = self.prepare_thread_handler_similar_video(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -487,30 +495,8 @@ impl SimilarVideos {
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_similar_video(progress_sender, &progress_thread_run, &atomic_counter, 1, 1, non_cached_files_to_check.len());
 
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            let videos_to_check = non_cached_files_to_check.len();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 1,
-                        max_stage: 1,
-                        videos_checked: atomic_counter.load(Ordering::Relaxed),
-                        videos_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {

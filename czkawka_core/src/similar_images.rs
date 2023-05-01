@@ -6,7 +6,7 @@ use std::panic;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{fs, mem, thread};
 
@@ -277,6 +277,38 @@ impl SimilarImages {
     //     self.delete_folders = delete_folder;
     // }
 
+    pub fn prepare_thread_handler_similar_images(
+        &self,
+        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_thread_run: &Arc<AtomicBool>,
+        atomic_counter: &Arc<AtomicUsize>,
+        current_stage: u8,
+        max_stage: u8,
+        max_value: usize,
+    ) -> JoinHandle<()> {
+        if let Some(progress_sender) = progress_sender {
+            let progress_send = progress_sender.clone();
+            let progress_thread_run = progress_thread_run.clone();
+            let atomic_counter = atomic_counter.clone();
+            thread::spawn(move || loop {
+                progress_send
+                    .unbounded_send(ProgressData {
+                        current_stage,
+                        max_stage,
+                        images_checked: atomic_counter.load(Ordering::Relaxed),
+                        images_to_check: max_value,
+                    })
+                    .unwrap();
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
+            })
+        } else {
+            thread::spawn(|| {})
+        }
+    }
+
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
@@ -301,33 +333,9 @@ impl SimilarImages {
             folders_to_check.push(id.clone());
         }
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 0,
-                        max_stage: 3,
-                        images_checked: atomic_counter.load(Ordering::Relaxed),
-                        images_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
+        let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_counter, 0, 3, 0);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -525,36 +533,11 @@ impl SimilarImages {
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from cache and preparing them");
         let hash_map_modification = SystemTime::now();
 
-        //// PROGRESS THREAD START
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_counter, 1, 3, non_cached_files_to_check.len());
 
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            let images_to_check = non_cached_files_to_check.len();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 1,
-                        max_stage: 3,
-                        images_checked: atomic_counter.load(Ordering::Relaxed),
-                        images_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-
-        //// PROGRESS THREAD END
         let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, mut file_entry)| {
@@ -706,34 +689,10 @@ impl SimilarImages {
                 }
             }
         } else {
-            //// PROGRESS THREAD START
             let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
             let progress_thread_run = Arc::new(AtomicBool::new(true));
             let atomic_mode_counter = Arc::new(AtomicUsize::new(0));
-
-            let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-                let progress_send = progress_sender.clone();
-                let progress_thread_run = progress_thread_run.clone();
-                let atomic_mode_counter = atomic_mode_counter.clone();
-                let all_combinations_to_check = all_hashes.len();
-                thread::spawn(move || loop {
-                    progress_send
-                        .unbounded_send(ProgressData {
-                            current_stage: 2,
-                            max_stage: 2,
-                            images_checked: atomic_mode_counter.load(Ordering::Relaxed),
-                            images_to_check: all_combinations_to_check,
-                        })
-                        .unwrap();
-                    if !progress_thread_run.load(Ordering::Relaxed) {
-                        break;
-                    }
-                    sleep(Duration::from_millis(LOOP_DURATION as u64));
-                })
-            } else {
-                thread::spawn(|| {})
-            };
-            //// PROGRESS THREAD END
+            let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_mode_counter, 2, 2, all_hashes.len());
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
             let mut hashes_with_multiple_images: HashSet<_> = Default::default(); // Fast way to check if hash have multiple images

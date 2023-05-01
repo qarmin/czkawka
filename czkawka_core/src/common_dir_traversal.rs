@@ -3,14 +3,14 @@ use std::fs::Metadata;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::{fs, thread};
+
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::{fs};
 
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
-use crate::common::LOOP_DURATION;
+use crate::common::{prepare_thread_handler_common};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -333,37 +333,17 @@ where
         // Add root folders for finding
         folders_to_check.extend(self.root_dirs);
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_entry_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = self.progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_entry_counter = atomic_entry_counter.clone();
-            let checking_method = self.checking_method;
-            let max_stage = self.max_stage;
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method,
-                        current_stage: 0,
-                        max_stage,
-                        entries_checked: atomic_entry_counter.load(Ordering::Relaxed),
-                        entries_to_check: 0,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-
-        //// PROGRESS THREAD END
+        let progress_thread_handle = prepare_thread_handler_common(
+            self.progress_sender,
+            &progress_thread_run,
+            &atomic_entry_counter,
+            0,
+            self.max_stage,
+            0,
+            self.checking_method,
+        );
 
         let DirTraversal {
             collect,

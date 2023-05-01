@@ -5,9 +5,9 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::sleep;
-use std::time::{Duration, SystemTime};
-use std::{mem, panic, thread};
+
+use std::time::{SystemTime};
+use std::{mem, panic};
 
 use crossbeam_channel::Receiver;
 use lofty::TaggedFileExt;
@@ -15,8 +15,8 @@ use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{create_crash_message, AUDIO_FILES_EXTENSIONS};
-use crate::common::{open_cache_folder, Common, LOOP_DURATION};
+use crate::common::{create_crash_message, prepare_thread_handler_common, AUDIO_FILES_EXTENSIONS};
+use crate::common::{open_cache_folder, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -357,35 +357,17 @@ impl SameMusic {
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            let music_to_check = non_cached_files_to_check.len();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method: CheckingMethod::None,
-                        current_stage: 1,
-                        max_stage: 2,
-                        entries_checked: atomic_counter.load(Ordering::Relaxed),
-                        entries_to_check: music_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            1,
+            2,
+            non_cached_files_to_check.len(),
+            CheckingMethod::None,
+        );
 
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
@@ -524,38 +506,20 @@ impl SameMusic {
         true
     }
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        assert!(MusicSimilarity::NONE != self.music_similarity, "This can't be none");
+        assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
         let start_time: SystemTime = SystemTime::now();
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            let music_to_check = self.music_to_check.len();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        checking_method: CheckingMethod::None,
-                        current_stage: 2,
-                        max_stage: 2,
-                        entries_checked: atomic_counter.load(Ordering::Relaxed),
-                        entries_to_check: music_to_check,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        };
-        //// PROGRESS THREAD END
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            2,
+            2,
+            self.music_to_check.len(),
+            CheckingMethod::None,
+        );
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
