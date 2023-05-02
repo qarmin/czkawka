@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::File;
+use std::fs::{DirEntry, File, Metadata};
 use std::io::Write;
 use std::io::*;
 use std::path::{Path, PathBuf};
@@ -321,7 +321,7 @@ impl SimilarVideos {
                     };
 
                     // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
+                    for entry in read_dir {
                         let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
@@ -338,33 +338,7 @@ impl SimilarVideos {
                             );
                         } else if metadata.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
-                                continue 'dir;
-                            };
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            // Checking files
-                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                                let current_file_name = current_folder.join(entry_data.file_name());
-                                if self.excluded_items.is_excluded(&current_file_name) {
-                                    continue 'dir;
-                                }
-                                let current_file_name_str = current_file_name.to_string_lossy().to_string();
-
-                                let fe: FileEntry = FileEntry {
-                                    path: current_file_name.clone(),
-                                    size: metadata.len(),
-                                    modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
-                                    vhash: Default::default(),
-                                    error: String::new(),
-                                };
-
-                                fe_result.push((current_file_name_str, fe));
-                            }
+                            self.add_video_file_entry(&metadata, entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -389,11 +363,38 @@ impl SimilarVideos {
         true
     }
 
-    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let hash_map_modification = SystemTime::now();
+    fn add_video_file_entry(&self, metadata: &Metadata, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>, current_folder: &Path) {
+        let Some(file_name_lowercase) = get_lowercase_name(entry_data,
+                                                           warnings) else {
+           return;
+        };
 
+        if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+            return;
+        }
+
+        // Checking files
+        if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
+            let current_file_name = current_folder.join(entry_data.file_name());
+            if self.excluded_items.is_excluded(&current_file_name) {
+                return;
+            }
+            let current_file_name_str = current_file_name.to_string_lossy().to_string();
+
+            let fe: FileEntry = FileEntry {
+                path: current_file_name.clone(),
+                size: metadata.len(),
+                modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+                vhash: Default::default(),
+                error: String::new(),
+            };
+
+            fe_result.push((current_file_name_str, fe));
+        }
+    }
+
+    fn load_cache_at_start(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
         let loaded_hash_map;
-
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
@@ -420,6 +421,13 @@ impl SimilarVideos {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
         }
+        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+    }
+
+    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        let hash_map_modification = SystemTime::now();
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from cache and preparing them");
         let hash_map_modification = SystemTime::now();
@@ -496,8 +504,32 @@ impl SimilarVideos {
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files");
         let hash_map_modification = SystemTime::now();
 
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
+        self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
+        self.remove_from_reference_folders();
 
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
+
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap");
+
+        // Clean unused data
+        self.videos_hashes = Default::default();
+        self.videos_to_check = Default::default();
+
+        true
+    }
+
+    fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, FileEntry>) {
+        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
         let mut collected_similar_videos: Vec<Vec<FileEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<FileEntry> = Vec::new();
@@ -519,7 +551,9 @@ impl SimilarVideos {
         }
 
         self.similar_vectors = collected_similar_videos;
+    }
 
+    fn remove_from_reference_folders(&mut self) {
         if self.use_reference_folders {
             let mut similar_vector = Default::default();
             mem::swap(&mut self.similar_vectors, &mut similar_vector);
@@ -545,26 +579,6 @@ impl SimilarVideos {
                 })
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
-
-        if self.use_reference_folders {
-            for (_fe, vector) in &self.similar_referenced_vectors {
-                self.information.number_of_duplicates += vector.len();
-                self.information.number_of_groups += 1;
-            }
-        } else {
-            for vector in &self.similar_vectors {
-                self.information.number_of_duplicates += vector.len() - 1;
-                self.information.number_of_groups += 1;
-            }
-        }
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap");
-
-        // Clean unused data
-        self.videos_hashes = Default::default();
-        self.videos_to_check = Default::default();
-
-        true
     }
 
     /// Set included dir which needs to be relative, exists etc.
