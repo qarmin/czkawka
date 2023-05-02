@@ -42,15 +42,32 @@ At the end execute it:
 ```shell
 ./mac_czkawka_gui
 ```
+#### Compiling on Apple Silicon
+Prebuilt binaries are available only for x86_64, so if you use ARM e.g. Mac M1/M2, you must compile the app manually.  
 
-**Warning**  
-Prebuilt binaries are available only for x86_64, so if you use ARM machine like e.g. Mac M1, you need to compile manually app.  
+**Compilation is simple, and takes less than 10 minutes on an M1/M2 mac.**
 
+```
+# Install Rust and Libraries
+brew install rustup
+rustup-init
+brew install gtk4 adwaita-icon-theme librsvg libheif
+```
+```
+# Clone and Build
+git clone https://github.com/qarmin/czkawka.git
+cd czkawka
+cargo run --release --bin czkawka_gui
+```
+Credit to User [@bauchdj](https://github.com/bauchdj)
+
+#### x86 on ARM
 There is also a way to use x86_64 binaries on ARM, but this requires to install special version of required libraries probably via:
 ```shell
 arch -x86_64 /usr/local/bin/brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif
 ```
 Sadly this doesn't work for all users, so feel free to update this part of documentation(look at https://github.com/qarmin/czkawka/issues/689 and https://github.com/qarmin/czkawka/issues/637 for more info)
+
 
 ### Windows
 By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 4`
