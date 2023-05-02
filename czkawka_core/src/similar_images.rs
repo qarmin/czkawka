@@ -732,6 +732,119 @@ impl SimilarImages {
         (chunks, hashes_with_multiple_images)
     }
 
+    fn collect_hash_compare_result(
+        &self,
+        hashes_parents: HashMap<ImHash, u32>,
+        hashes_with_multiple_images: &HashSet<ImHash>,
+        all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
+        collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
+        hashes_similarity: HashMap<ImHash, (ImHash, u32)>,
+    ) {
+        if self.use_reference_folders {
+            // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
+
+            // Collecting results to vector
+            for (parent_hash, child_number) in hashes_parents {
+                // If hash contains other hasher OR multiple images are available for checked hash
+                if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
+                    let vec_fe = all_hashed_images
+                        .get(&parent_hash)
+                        .unwrap()
+                        .iter()
+                        .filter(|e| is_in_reference_folder(&self.directories.reference_directories, &e.path))
+                        .cloned()
+                        .collect();
+                    collected_similar_images.insert(parent_hash.clone(), vec_fe);
+                }
+            }
+
+            for (child_hash, (parent_hash, similarity)) in hashes_similarity {
+                let mut vec_fe: Vec<_> = all_hashed_images
+                    .get(&child_hash)
+                    .unwrap()
+                    .iter()
+                    .filter(|e| !is_in_reference_folder(&self.directories.reference_directories, &e.path))
+                    .cloned()
+                    .collect();
+                for mut fe in &mut vec_fe {
+                    fe.similarity = similarity;
+                }
+                collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
+            }
+        } else {
+            // Collecting results to vector
+            for (parent_hash, child_number) in hashes_parents {
+                // If hash contains other hasher OR multiple images are available for checked hash
+                if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
+                    let vec_fe = all_hashed_images.get(&parent_hash).unwrap().clone();
+                    collected_similar_images.insert(parent_hash.clone(), vec_fe);
+                }
+            }
+
+            for (child_hash, (parent_hash, similarity)) in hashes_similarity {
+                let mut vec_fe = all_hashed_images.get(&child_hash).unwrap().clone();
+                for mut fe in &mut vec_fe {
+                    fe.similarity = similarity;
+                }
+                collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
+            }
+        }
+    }
+
+    fn check_for_duplicate_hashes(
+        &self,
+        parts: Vec<(HashMap<ImHash, u32>, HashMap<ImHash, (ImHash, u32)>)>,
+        hashes_with_multiple_images: &HashSet<ImHash>,
+        all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
+        collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
+    ) {
+        let mut hashes_parents: HashMap<ImHash, u32> = Default::default();
+        let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default();
+        let mut iter = parts.into_iter();
+        // At start fill arrays with first item
+        // Normal algorithm would do exactly same thing, but slower, one record after one
+        if let Some((first_hashes_parents, first_hashes_similarity)) = iter.next() {
+            hashes_parents = first_hashes_parents;
+            hashes_similarity = first_hashes_similarity;
+        }
+
+        for (partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
+            for (parent_hash, _child_number) in partial_hashes_with_parents {
+                if !hashes_parents.contains_key(&parent_hash) && !hashes_similarity.contains_key(&parent_hash) {
+                    hashes_parents.insert(parent_hash, 0);
+                }
+            }
+
+            for (hash_to_check, (compared_hash, similarity)) in partial_hashes_with_similarity {
+                image_to_check(
+                    &mut hashes_parents,
+                    &mut hashes_similarity,
+                    hashes_with_multiple_images,
+                    &hash_to_check,
+                    &compared_hash,
+                    similarity,
+                );
+            }
+        }
+
+        #[cfg(debug_assertions)]
+        if !self.use_reference_folders {
+            debug_check_for_duplicated_things(&hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
+        }
+
+        // Just simple check if all original hashes with multiple entries are available in end results
+        let original_hashes_at_start = hashes_with_multiple_images.len();
+        let original_hashes_in_end_results = hashes_parents
+            .iter()
+            .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
+            .count();
+        if !self.use_reference_folders {
+            assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
+        }
+
+        self.collect_hash_compare_result(hashes_parents, hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
+    }
+
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         if self.image_hashes.is_empty() {
             return true;
@@ -787,103 +900,89 @@ impl SimilarImages {
                 return false;
             }
 
-            {
-                let mut hashes_parents: HashMap<ImHash, u32> = Default::default();
-                let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default();
-                let mut iter = parts.into_iter();
-                // At start fill arrays with first item
-                // Normal algorithm would do exactly same thing, but slower, one record after one
-                if let Some((first_hashes_parents, first_hashes_similarity)) = iter.next() {
-                    hashes_parents = first_hashes_parents;
-                    hashes_similarity = first_hashes_similarity;
-                }
+            self.check_for_duplicate_hashes(parts, &hashes_with_multiple_images, &all_hashed_images, &mut collected_similar_images);
+        }
 
-                for (partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
-                    for (parent_hash, _child_number) in partial_hashes_with_parents {
-                        if !hashes_parents.contains_key(&parent_hash) && !hashes_similarity.contains_key(&parent_hash) {
-                            hashes_parents.insert(parent_hash, 0);
-                        }
-                    }
+        self.verify_duplicated_items(&collected_similar_images);
 
-                    for (hash_to_check, (compared_hash, similarity)) in partial_hashes_with_similarity {
-                        image_to_check(
-                            &mut hashes_parents,
-                            &mut hashes_similarity,
-                            &hashes_with_multiple_images,
-                            &hash_to_check,
-                            &compared_hash,
-                            similarity,
-                        );
-                    }
-                }
+        self.similar_vectors = collected_similar_images.into_values().collect();
 
-                #[cfg(debug_assertions)]
-                if !self.use_reference_folders {
-                    debug_check_for_duplicated_things(&hashes_parents, &hashes_similarity, &all_hashed_images, "LATTER");
-                }
+        self.exclude_items_with_same_size();
 
-                // Just simple check if all original hashes with multiple entries are available in end results
-                let original_hashes_at_start = hashes_with_multiple_images.len();
-                let original_hashes_in_end_results = hashes_parents
-                    .iter()
-                    .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
-                    .count();
-                if !self.use_reference_folders {
-                    assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
-                }
+        self.check_for_reference_folders();
 
-                if self.use_reference_folders {
-                    // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
+        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from HashMap");
 
-                    // Collecting results to vector
-                    for (parent_hash, child_number) in hashes_parents {
-                        // If hash contains other hasher OR multiple images are available for checked hash
-                        if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
-                            let vec_fe = all_hashed_images
-                                .get(&parent_hash)
-                                .unwrap()
-                                .iter()
-                                .filter(|e| is_in_reference_folder(&self.directories.reference_directories, &e.path))
-                                .cloned()
-                                .collect();
-                            collected_similar_images.insert(parent_hash.clone(), vec_fe);
-                        }
-                    }
-
-                    for (child_hash, (parent_hash, similarity)) in hashes_similarity {
-                        let mut vec_fe: Vec<_> = all_hashed_images
-                            .get(&child_hash)
-                            .unwrap()
-                            .iter()
-                            .filter(|e| !is_in_reference_folder(&self.directories.reference_directories, &e.path))
-                            .cloned()
-                            .collect();
-                        for mut fe in &mut vec_fe {
-                            fe.similarity = similarity;
-                        }
-                        collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
-                    }
-                } else {
-                    // Collecting results to vector
-                    for (parent_hash, child_number) in hashes_parents {
-                        // If hash contains other hasher OR multiple images are available for checked hash
-                        if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
-                            let vec_fe = all_hashed_images.get(&parent_hash).unwrap().clone();
-                            collected_similar_images.insert(parent_hash.clone(), vec_fe);
-                        }
-                    }
-
-                    for (child_hash, (parent_hash, similarity)) in hashes_similarity {
-                        let mut vec_fe = all_hashed_images.get(&child_hash).unwrap().clone();
-                        for mut fe in &mut vec_fe {
-                            fe.similarity = similarity;
-                        }
-                        collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
-                    }
-                }
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
             }
         }
 
+        // Clean unused data
+        self.image_hashes = Default::default();
+        self.images_to_check = Default::default();
+        self.bktree = BKTree::new(Hamming);
+
+        true
+    }
+
+    fn exclude_items_with_same_size(&mut self) {
+        if self.exclude_images_with_same_size {
+            let mut new_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut new_vector);
+            for vec_file_entry in new_vector {
+                let mut bt_sizes: BTreeSet<u64> = Default::default();
+                let mut vec_values = Vec::new();
+                for file_entry in vec_file_entry {
+                    if !bt_sizes.contains(&file_entry.size) {
+                        bt_sizes.insert(file_entry.size);
+                        vec_values.push(file_entry);
+                    }
+                }
+                if vec_values.len() > 1 {
+                    self.similar_vectors.push(vec_values);
+                }
+            }
+        }
+    }
+
+    fn check_for_reference_folders(&mut self) {
+        if self.use_reference_folders {
+            let mut similar_vector = Default::default();
+            mem::swap(&mut self.similar_vectors, &mut similar_vector);
+            let reference_directories = self.directories.reference_directories.clone();
+            self.similar_referenced_vectors = similar_vector
+                .into_iter()
+                .filter_map(|vec_file_entry| {
+                    let mut files_from_referenced_folders = Vec::new();
+                    let mut normal_files = Vec::new();
+                    for file_entry in vec_file_entry {
+                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
+                            files_from_referenced_folders.push(file_entry);
+                        } else {
+                            normal_files.push(file_entry);
+                        }
+                    }
+
+                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                        None
+                    } else {
+                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                    }
+                })
+                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<FileEntry>>) {
         // Validating if group contains duplicated results
         #[cfg(debug_assertions)]
         {
@@ -912,72 +1011,6 @@ impl SimilarImages {
             }
             assert!(!found, "Found Invalid entries, verify errors before"); // TODO crashes with empty result with reference folder, verify why
         }
-        self.similar_vectors = collected_similar_images.into_values().collect();
-
-        if self.exclude_images_with_same_size {
-            let mut new_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut new_vector);
-            for vec_file_entry in new_vector {
-                let mut bt_sizes: BTreeSet<u64> = Default::default();
-                let mut vec_values = Vec::new();
-                for file_entry in vec_file_entry {
-                    if !bt_sizes.contains(&file_entry.size) {
-                        bt_sizes.insert(file_entry.size);
-                        vec_values.push(file_entry);
-                    }
-                }
-                if vec_values.len() > 1 {
-                    self.similar_vectors.push(vec_values);
-                }
-            }
-        }
-
-        if self.use_reference_folders {
-            let mut similar_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut similar_vector);
-            let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = similar_vector
-                .into_iter()
-                .filter_map(|vec_file_entry| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
-                    }
-
-                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
-                        None
-                    } else {
-                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
-                    }
-                })
-                .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
-        }
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from HashMap");
-
-        if self.use_reference_folders {
-            for (_fe, vector) in &self.similar_referenced_vectors {
-                self.information.number_of_duplicates += vector.len();
-                self.information.number_of_groups += 1;
-            }
-        } else {
-            for vector in &self.similar_vectors {
-                self.information.number_of_duplicates += vector.len() - 1;
-                self.information.number_of_groups += 1;
-            }
-        }
-
-        // Clean unused data
-        self.image_hashes = Default::default();
-        self.images_to_check = Default::default();
-        self.bktree = BKTree::new(Hamming);
-
-        true
     }
 
     /// Set included dir which needs to be relative, exists etc.
