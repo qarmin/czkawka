@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::io::BufReader;
 use std::path::PathBuf;
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
@@ -714,7 +715,7 @@ const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
 pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
     let image = get_custom_image_from_widget(&button.clone());
-    let pixbuf = Pixbuf::from_read(std::io::BufReader::new(data)).unwrap();
+    let pixbuf = Pixbuf::from_read(BufReader::new(data)).unwrap();
     let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).unwrap();
     image.set_from_pixbuf(Some(&pixbuf));
 }
@@ -778,6 +779,7 @@ pub fn scale_step_function(scale: &gtk4::Scale, _scroll_type: ScrollType, value:
 
 #[cfg(test)]
 mod test {
+    use glib::types::Type;
     use gtk4::prelude::*;
     use gtk4::Orientation;
     use image::DynamicImage;
@@ -789,7 +791,7 @@ mod test {
 
     #[gtk4::test]
     fn test_check_if_list_store_column_have_all_same_values() {
-        let columns_types: &[glib::types::Type] = &[glib::types::Type::BOOL];
+        let columns_types: &[Type] = &[Type::BOOL];
         let list_store = gtk4::ListStore::new(columns_types);
 
         list_store.clear();
@@ -823,7 +825,7 @@ mod test {
 
     #[gtk4::test]
     fn test_check_if_value_is_in_list_store() {
-        let columns_types: &[glib::types::Type] = &[glib::types::Type::STRING];
+        let columns_types: &[Type] = &[Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"Koczkodan"), (0, &"Kachir")];
         for i in values_to_add {
@@ -833,7 +835,7 @@ mod test {
         assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
         assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
 
-        let columns_types: &[glib::types::Type] = &[glib::types::Type::STRING, glib::types::Type::STRING];
+        let columns_types: &[Type] = &[Type::STRING, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
         for i in values_to_add {

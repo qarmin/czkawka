@@ -5,12 +5,13 @@ use std::io::*;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
-use std::{mem, thread};
+
+use std::mem;
+use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
+use futures::channel::mpsc::UnboundedSender;
 use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
@@ -18,9 +19,9 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::{check_folder_children, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
-use crate::common::{open_cache_folder, Common, LOOP_DURATION};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
+use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{open_cache_folder, Common};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -30,14 +31,6 @@ use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
 pub const MAX_TOLERANCE: i32 = 20;
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub videos_checked: usize,
-    pub videos_to_check: usize,
-}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileEntry {
@@ -215,7 +208,7 @@ impl SimilarVideos {
     }
 
     /// Public function used by CLI to search for empty folders
-    pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
             self.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -247,41 +240,9 @@ impl SimilarVideos {
     //     self.delete_folders = delete_folder;
     // }
 
-    pub fn prepare_thread_handler_similar_video(
-        &self,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
-        progress_thread_run: &Arc<AtomicBool>,
-        atomic_counter: &Arc<AtomicUsize>,
-        current_stage: u8,
-        max_stage: u8,
-        max_value: usize,
-    ) -> JoinHandle<()> {
-        if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage,
-                        max_stage,
-                        videos_checked: atomic_counter.load(Ordering::Relaxed),
-                        videos_to_check: max_value,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        }
-    }
-
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
-    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -301,7 +262,7 @@ impl SimilarVideos {
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_similar_video(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0);
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -424,7 +385,7 @@ impl SimilarVideos {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
@@ -436,7 +397,15 @@ impl SimilarVideos {
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_similar_video(progress_sender, &progress_thread_run, &atomic_counter, 1, 1, non_cached_files_to_check.len());
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            1,
+            1,
+            non_cached_files_to_check.len(),
+            CheckingMethod::None,
+        );
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .par_iter()

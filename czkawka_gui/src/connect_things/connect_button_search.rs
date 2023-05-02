@@ -1,3 +1,4 @@
+use futures::channel::mpsc::UnboundedSender;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -8,7 +9,8 @@ use gtk4::prelude::*;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::{BrokenFiles, CheckedTypes};
-use czkawka_core::common_dir_traversal;
+
+use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -17,7 +19,6 @@ use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
-use czkawka_core::*;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
@@ -33,17 +34,17 @@ use crate::{flg, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_
 pub fn connect_button_search(
     gui_data: &GuiData,
     glib_stop_sender: Sender<Message>,
-    futures_sender_duplicate_files: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-    futures_sender_empty_files: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-    futures_sender_empty_folder: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-    futures_sender_big_file: futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
-    futures_sender_same_music: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-    futures_sender_similar_images: futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
-    futures_sender_similar_videos: futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
-    futures_sender_temporary: futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
-    futures_sender_invalid_symlinks: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-    futures_sender_broken_files: futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
-    futures_sender_bad_extensions: futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
+    futures_sender_duplicate_files: UnboundedSender<ProgressData>,
+    futures_sender_empty_files: UnboundedSender<ProgressData>,
+    futures_sender_empty_folder: UnboundedSender<ProgressData>,
+    futures_sender_big_file: UnboundedSender<ProgressData>,
+    futures_sender_same_music: UnboundedSender<ProgressData>,
+    futures_sender_similar_images: UnboundedSender<ProgressData>,
+    futures_sender_similar_videos: UnboundedSender<ProgressData>,
+    futures_sender_temporary: UnboundedSender<ProgressData>,
+    futures_sender_invalid_symlinks: UnboundedSender<ProgressData>,
+    futures_sender_broken_files: UnboundedSender<ProgressData>,
+    futures_sender_bad_extensions: UnboundedSender<ProgressData>,
 ) {
     let check_button_settings_one_filesystem = gui_data.settings.check_button_settings_one_filesystem.clone();
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();

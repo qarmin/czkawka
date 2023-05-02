@@ -5,6 +5,8 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
+use futures::channel::mpsc;
+use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
 use std::env;
 use std::ffi::OsString;
 
@@ -32,6 +34,7 @@ use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
 use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
+use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::*;
 use gui_structs::gui_data::*;
 
@@ -80,50 +83,17 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
     // Futures progress report
-    let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (
-        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_empty_files, futures_receiver_empty_files): (
-        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_empty_folder, futures_receiver_empty_folder): (
-        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_big_file, futures_receiver_big_files): (
-        futures::channel::mpsc::UnboundedSender<big_file::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<big_file::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_same_music, futures_receiver_same_music): (
-        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_similar_images, futures_receiver_similar_images): (
-        futures::channel::mpsc::UnboundedSender<similar_images::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<similar_images::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_similar_videos, futures_receiver_similar_videos): (
-        futures::channel::mpsc::UnboundedSender<similar_videos::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<similar_videos::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_temporary, futures_receiver_temporary): (
-        futures::channel::mpsc::UnboundedSender<temporary::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<temporary::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (
-        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_broken_files, futures_receiver_broken_files): (
-        futures::channel::mpsc::UnboundedSender<broken_files::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<broken_files::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
-    let (futures_sender_bad_extensions, futures_receiver_bad_extensions): (
-        futures::channel::mpsc::UnboundedSender<common_dir_traversal::ProgressData>,
-        futures::channel::mpsc::UnboundedReceiver<common_dir_traversal::ProgressData>,
-    ) = futures::channel::mpsc::unbounded();
+    let (futures_sender_duplicate_files, futures_receiver_duplicate_files): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_empty_files, futures_receiver_empty_files): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_empty_folder, futures_receiver_empty_folder): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_big_file, futures_receiver_big_files): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_same_music, futures_receiver_same_music): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_similar_images, futures_receiver_similar_images): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_similar_videos, futures_receiver_similar_videos): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_temporary, futures_receiver_temporary): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_invalid_symlinks, futures_receiver_invalid_symlinks): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_broken_files, futures_receiver_broken_files): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (futures_sender_bad_extensions, futures_receiver_bad_extensions): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
 
     initialize_gui(&mut gui_data);
     validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup

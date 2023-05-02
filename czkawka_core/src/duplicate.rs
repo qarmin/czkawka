@@ -15,9 +15,11 @@ use std::time::SystemTime;
 use std::{fs, mem};
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
+use xxhash_rust::xxh3::Xxh3;
 
 use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
@@ -43,7 +45,7 @@ impl HashType {
         match self {
             HashType::Blake3 => Box::new(blake3::Hasher::new()),
             HashType::Crc32 => Box::new(crc32fast::Hasher::new()),
-            HashType::Xxh3 => Box::new(xxhash_rust::xxh3::Xxh3::new()),
+            HashType::Xxh3 => Box::new(Xxh3::new()),
         }
     }
 }
@@ -147,7 +149,7 @@ impl DuplicateFinder {
         }
     }
 
-    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         self.use_reference_folders = !self.directories.reference_directories.is_empty();
 
@@ -340,7 +342,7 @@ impl DuplicateFinder {
         &self.files_with_identical_size_names_referenced
     }
 
-    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| fe.path.file_name().unwrap().to_string_lossy().to_string()
         } else {
@@ -435,7 +437,7 @@ impl DuplicateFinder {
         }
     }
 
-    fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| (fe.size, fe.path.file_name().unwrap().to_string_lossy().to_string())
         } else {
@@ -535,7 +537,7 @@ impl DuplicateFinder {
 
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
-    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let max_stage = match self.check_method {
             CheckingMethod::Size => 0,
             CheckingMethod::Hash => 2,
@@ -718,7 +720,7 @@ impl DuplicateFinder {
     fn prehashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let start_time: SystemTime = SystemTime::now();
@@ -886,7 +888,7 @@ impl DuplicateFinder {
     fn full_hashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+        progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
@@ -1018,7 +1020,7 @@ impl DuplicateFinder {
     }
 
     /// The slowest checking type, which must be applied after checking for size
-    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_eq!(self.check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -1617,7 +1619,7 @@ impl MyHasher for crc32fast::Hasher {
     }
 }
 
-impl MyHasher for xxhash_rust::xxh3::Xxh3 {
+impl MyHasher for Xxh3 {
     fn update(&mut self, bytes: &[u8]) {
         self.write(bytes);
     }

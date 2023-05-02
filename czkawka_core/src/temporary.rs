@@ -4,15 +4,16 @@ use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
-use std::{fs, thread};
+
+use std::fs;
+use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
 
-use crate::common::{check_folder_children, send_info_and_wait_for_ending_all_threads, Common, LOOP_DURATION};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
+use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
@@ -33,13 +34,6 @@ const TEMP_EXTENSIONS: &[&str] = &[
     ".download",
     ".partial",
 ];
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub files_checked: usize,
-}
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy)]
 pub enum DeleteMethod {
@@ -94,7 +88,7 @@ impl Temporary {
     }
 
     /// Finding temporary files, save results to internal struct variables
-    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -149,35 +143,7 @@ impl Temporary {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn prepare_thread_handler_temporary(
-        &self,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
-        progress_thread_run: &Arc<AtomicBool>,
-        atomic_counter: &Arc<AtomicUsize>,
-    ) -> JoinHandle<()> {
-        if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage: 0,
-                        max_stage: 0,
-                        files_checked: atomic_counter.load(Ordering::Relaxed),
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        }
-    }
-
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -188,7 +154,7 @@ impl Temporary {
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_temporary(progress_sender, &progress_thread_run, &atomic_counter);
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 0, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {

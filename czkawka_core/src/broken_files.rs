@@ -5,11 +5,12 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
-use std::{fs, mem, panic, thread};
+
+use std::time::SystemTime;
+use std::{fs, mem, panic};
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
 use pdf::PdfError;
@@ -17,22 +18,16 @@ use pdf::PdfError::Try;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{check_folder_children, create_crash_message, open_cache_folder, send_info_and_wait_for_ending_all_threads, Common, LOOP_DURATION, PDF_FILES_EXTENSIONS};
+use crate::common::{
+    check_folder_children, create_crash_message, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common, PDF_FILES_EXTENSIONS,
+};
 use crate::common::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::*;
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub files_checked: usize,
-    pub files_to_check: usize,
-}
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy)]
 pub enum DeleteMethod {
@@ -121,7 +116,7 @@ impl BrokenFiles {
         }
     }
 
-    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -197,39 +192,7 @@ impl BrokenFiles {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    pub fn prepare_thread_handler_broken_files(
-        &self,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
-        progress_thread_run: &Arc<AtomicBool>,
-        atomic_counter: &Arc<AtomicUsize>,
-        current_stage: u8,
-        max_stage: u8,
-        max_value: usize,
-    ) -> JoinHandle<()> {
-        if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage,
-                        max_stage,
-                        files_checked: atomic_counter.load(Ordering::Relaxed),
-                        files_to_check: max_value,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        }
-    }
-
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -240,7 +203,7 @@ impl BrokenFiles {
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0);
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -441,7 +404,7 @@ impl BrokenFiles {
         }
     }
 
-    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
         let loaded_hash_map;
@@ -481,7 +444,15 @@ impl BrokenFiles {
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_counter, 1, 1, non_cached_files_to_check.len());
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            1,
+            1,
+            non_cached_files_to_check.len(),
+            CheckingMethod::None,
+        );
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()

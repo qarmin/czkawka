@@ -7,6 +7,7 @@ use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
 
 use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
@@ -99,7 +100,7 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
     group_by: Option<F>,
     root_dirs: Vec<PathBuf>,
     stop_receiver: Option<&'a Receiver<()>>,
-    progress_sender: Option<&'b futures::channel::mpsc::UnboundedSender<ProgressData>>,
+    progress_sender: Option<&'b UnboundedSender<ProgressData>>,
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
     checking_method: CheckingMethod,
@@ -115,7 +116,7 @@ pub struct DirTraversal<'a, 'b, F> {
     group_by: F,
     root_dirs: Vec<PathBuf>,
     stop_receiver: Option<&'a Receiver<()>>,
-    progress_sender: Option<&'b futures::channel::mpsc::UnboundedSender<ProgressData>>,
+    progress_sender: Option<&'b UnboundedSender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
     excluded_items: ExcludedItems,
@@ -168,7 +169,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
     }
 
     #[must_use]
-    pub fn progress_sender(mut self, progress_sender: Option<&'b futures::channel::mpsc::UnboundedSender<ProgressData>>) -> Self {
+    pub fn progress_sender(mut self, progress_sender: Option<&'b UnboundedSender<ProgressData>>) -> Self {
         self.progress_sender = progress_sender;
         self
     }
@@ -333,16 +334,8 @@ where
         folders_to_check.extend(self.root_dirs);
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_entry_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            self.progress_sender,
-            &progress_thread_run,
-            &atomic_entry_counter,
-            0,
-            self.max_stage,
-            0,
-            self.checking_method,
-        );
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = prepare_thread_handler_common(self.progress_sender, &progress_thread_run, &atomic_counter, 0, self.max_stage, 0, self.checking_method);
 
         let DirTraversal {
             collect,
@@ -386,7 +379,7 @@ where
                                 process_dir_in_file_symlink_mode(recursive_search, current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
                             }
                             (EntryType::Dir, Collect::EmptyFolders) => {
-                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                                atomic_counter.fetch_add(1, Ordering::Relaxed);
                                 process_dir_in_dir_mode(
                                     &metadata,
                                     current_folder,
@@ -400,7 +393,7 @@ where
                                 );
                             }
                             (EntryType::File, Collect::Files) => {
-                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                                atomic_counter.fetch_add(1, Ordering::Relaxed);
                                 process_file_in_file_mode(
                                     &metadata,
                                     entry_data,
@@ -427,10 +420,10 @@ where
                                 set_as_not_empty_folder_list.push(current_folder.clone());
                             }
                             (EntryType::File, Collect::InvalidSymlinks) => {
-                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                                atomic_counter.fetch_add(1, Ordering::Relaxed);
                             }
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
-                                atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
+                                atomic_counter.fetch_add(1, Ordering::Relaxed);
                                 process_symlink_in_symlink_mode(
                                     &metadata,
                                     entry_data,

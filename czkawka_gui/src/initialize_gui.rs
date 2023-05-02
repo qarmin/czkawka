@@ -3,6 +3,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 use gdk4::gdk_pixbuf::Pixbuf;
+use glib::types::Type;
 use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
@@ -304,9 +305,9 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let evk = gui_data.upper_notebook.evk_tree_view_included_directories.clone();
             let gc = gui_data.upper_notebook.gc_tree_view_included_directories.clone();
 
-            let col_types: [glib::types::Type; 2] = [
-                glib::types::Type::STRING, // Path
-                glib::types::Type::BOOL,   // ReferenceButton
+            let col_types: [Type; 2] = [
+                Type::STRING, // Path
+                Type::BOOL,   // ReferenceButton
             ];
             let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
@@ -341,7 +342,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
             let evk = gui_data.upper_notebook.evk_tree_view_excluded_directories.clone();
             let gc = gui_data.upper_notebook.gc_tree_view_excluded_directories.clone();
 
-            let col_types: [glib::types::Type; 1] = [glib::types::Type::STRING];
+            let col_types: [Type; 1] = [Type::STRING];
             let list_store: gtk4::ListStore = gtk4::ListStore::new(&col_types);
 
             tree_view.set_model(Some(&list_store));

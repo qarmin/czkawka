@@ -6,12 +6,13 @@ use std::panic;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
-use std::{mem, thread};
+
+use std::mem;
+use std::time::SystemTime;
 
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use humansize::format_size;
 use humansize::BINARY;
 use image::GenericImageView;
@@ -22,10 +23,10 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, send_info_and_wait_for_ending_all_threads, Common,
-    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, prepare_thread_handler_common,
+    send_info_and_wait_for_ending_all_threads, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -41,14 +42,6 @@ pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [4, 10, 20, 40, 40, 40], // 32
     [6, 20, 40, 40, 40, 40], // 64
 ];
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub images_checked: usize,
-    pub images_to_check: usize,
-}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileEntry {
@@ -254,7 +247,7 @@ impl SimilarImages {
     }
 
     /// Public function used by CLI to search for empty folders
-    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
         self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
@@ -279,41 +272,9 @@ impl SimilarImages {
     //     self.delete_folders = delete_folder;
     // }
 
-    pub fn prepare_thread_handler_similar_images(
-        &self,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
-        progress_thread_run: &Arc<AtomicBool>,
-        atomic_counter: &Arc<AtomicUsize>,
-        current_stage: u8,
-        max_stage: u8,
-        max_value: usize,
-    ) -> JoinHandle<()> {
-        if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        current_stage,
-                        max_stage,
-                        images_checked: atomic_counter.load(Ordering::Relaxed),
-                        images_to_check: max_value,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        }
-    }
-
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
-    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -337,7 +298,7 @@ impl SimilarImages {
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_counter, 0, 3, 0);
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 2, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -466,7 +427,7 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
-    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let hash_map_modification = SystemTime::now();
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
@@ -477,7 +438,15 @@ impl SimilarImages {
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_counter, 1, 3, non_cached_files_to_check.len());
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            1,
+            2,
+            non_cached_files_to_check.len(),
+            CheckingMethod::None,
+        );
 
         let mut vec_file_entry: Vec<(FileEntry, ImHash)> = non_cached_files_to_check
             .into_par_iter()
@@ -610,7 +579,7 @@ impl SimilarImages {
     fn compare_hashes(
         &self,
         hashes_to_check: &[ImHash],
-        atomic_mode_counter: &Arc<AtomicUsize>,
+        atomic_counter: &Arc<AtomicUsize>,
         stop_receiver: Option<&Receiver<()>>,
         check_was_stopped: &AtomicBool,
         tolerance: u32,
@@ -632,7 +601,7 @@ impl SimilarImages {
             // Also don't add too often data to atomic variable
             const CYCLES_COUNTER: usize = 0b11_1111;
             if ((index & CYCLES_COUNTER) == CYCLES_COUNTER) && index != 0 {
-                atomic_mode_counter.fetch_add(CYCLES_COUNTER, Ordering::Relaxed);
+                atomic_counter.fetch_add(CYCLES_COUNTER, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
@@ -839,7 +808,7 @@ impl SimilarImages {
         self.collect_hash_compare_result(hashes_parents, hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
     }
 
-    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         if self.image_hashes.is_empty() {
             return true;
         }
@@ -865,8 +834,8 @@ impl SimilarImages {
         } else {
             let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
             let progress_thread_run = Arc::new(AtomicBool::new(true));
-            let atomic_mode_counter = Arc::new(AtomicUsize::new(0));
-            let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_mode_counter, 2, 2, all_hashes.len());
+            let atomic_counter = Arc::new(AtomicUsize::new(0));
+            let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 2, 2, all_hashes.len(), CheckingMethod::None);
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
 
@@ -877,7 +846,7 @@ impl SimilarImages {
                 .map(|hashes_to_check| {
                     self.compare_hashes(
                         &hashes_to_check,
-                        &atomic_mode_counter,
+                        &atomic_counter,
                         stop_receiver,
                         &check_was_stopped,
                         tolerance,

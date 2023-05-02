@@ -1,3 +1,4 @@
+use fs_extra::dir::CopyOptions;
 use std::path::{Path, PathBuf};
 
 use gtk4::prelude::*;
@@ -199,7 +200,7 @@ fn move_files_common(
         let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(file_name);
         if Path::new(&thing).is_dir() {
-            if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &fs_extra::dir::CopyOptions::new()) {
+            if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &CopyOptions::new()) {
                 messages += flg!("move_folder_failed", generate_translation_hashmap(vec![("name", thing), ("reason", e.to_string())])).as_str();
                 messages += "\n";
                 continue 'next_result;

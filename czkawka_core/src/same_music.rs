@@ -9,6 +9,7 @@ use std::time::SystemTime;
 use std::{mem, panic};
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use lofty::TaggedFileExt;
 use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
@@ -148,7 +149,7 @@ impl SameMusic {
         }
     }
 
-    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -276,7 +277,7 @@ impl SameMusic {
         self.use_reference_folders
     }
 
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         if !self.allowed_extensions.using_custom_extensions() {
             self.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         } else {
@@ -367,7 +368,7 @@ impl SameMusic {
         save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
     }
 
-    fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.read_tags_load_cache();
@@ -515,7 +516,7 @@ impl SameMusic {
         Some(music_entry)
     }
 
-    fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
         let start_time: SystemTime = SystemTime::now();
 

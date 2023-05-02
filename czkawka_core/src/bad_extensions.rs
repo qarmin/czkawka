@@ -10,6 +10,7 @@ use std::mem;
 use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
@@ -208,7 +209,7 @@ impl BadExtensions {
         }
     }
 
-    pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -283,7 +284,7 @@ impl BadExtensions {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -317,14 +318,13 @@ impl BadExtensions {
         }
     }
 
-    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-
         let progress_thread_handle = prepare_thread_handler_common(
             progress_sender,
             &progress_thread_run,

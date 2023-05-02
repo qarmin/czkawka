@@ -119,6 +119,7 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
 
 #[cfg(test)]
 mod test {
+    use glib::types::Type;
     use gtk4::prelude::*;
     use gtk4::{Popover, TreeView};
 
@@ -126,7 +127,7 @@ mod test {
 
     #[gtk4::test]
     fn test_sort_iters() {
-        let columns_types: &[glib::types::Type] = &[glib::types::Type::U32, glib::types::Type::STRING];
+        let columns_types: &[Type] = &[Type::U32, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
 
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &2), (1, &"AAA")], &[(0, &3), (1, &"CCC")], &[(0, &1), (1, &"BBB")]];
@@ -156,7 +157,7 @@ mod test {
 
     #[gtk4::test]
     pub fn test_popover_sort_general_simple() {
-        let columns_types: &[glib::types::Type] = &[glib::types::Type::BOOL, glib::types::Type::STRING];
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let tree_view = TreeView::builder().model(&list_store).build();
         let popover = Popover::new();
@@ -179,7 +180,7 @@ mod test {
 
     #[gtk4::test]
     pub fn test_popover_sort_general() {
-        let columns_types: &[glib::types::Type] = &[glib::types::Type::BOOL, glib::types::Type::STRING];
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let tree_view = TreeView::builder().model(&list_store).build();
         let popover = Popover::new();

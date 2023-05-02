@@ -11,6 +11,7 @@ use std::{fs, thread};
 #[cfg(feature = "heif")]
 use anyhow::Result;
 use directories_next::ProjectDirs;
+use futures::channel::mpsc::UnboundedSender;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 // #[cfg(feature = "heif")]
@@ -360,7 +361,7 @@ pub fn check_folder_children(
 }
 
 pub fn prepare_thread_handler_common(
-    progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
+    progress_sender: Option<&UnboundedSender<ProgressData>>,
     progress_thread_run: &Arc<AtomicBool>,
     atomic_counter: &Arc<AtomicUsize>,
     current_stage: u8,

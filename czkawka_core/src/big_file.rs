@@ -2,32 +2,27 @@ use std::collections::BTreeMap;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
-use std::sync::atomic::{AtomicBool, AtomicU64};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread::{sleep, JoinHandle};
-use std::time::Duration;
+
+use std::fs;
 use std::time::SystemTime;
-use std::{fs, thread};
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
 
-use crate::common::{check_folder_children, send_info_and_wait_for_ending_all_threads, split_path};
-use crate::common::{Common, LOOP_DURATION};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
+use crate::common::Common;
+use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub files_checked: usize,
-}
 
 #[derive(Clone)]
 pub struct FileEntry {
@@ -94,7 +89,7 @@ impl BigFile {
         }
     }
 
-    pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_directories();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -147,33 +142,7 @@ impl BigFile {
         self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
-    pub fn prepare_thread_handler(
-        &self,
-        progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>,
-        progress_thread_run: &Arc<AtomicBool>,
-        atomic_counter: &Arc<AtomicU64>,
-    ) -> JoinHandle<()> {
-        if let Some(progress_sender) = progress_sender {
-            let progress_send = progress_sender.clone();
-            let progress_thread_run = progress_thread_run.clone();
-            let atomic_counter = atomic_counter.clone();
-            thread::spawn(move || loop {
-                progress_send
-                    .unbounded_send(ProgressData {
-                        files_checked: atomic_counter.load(Ordering::Relaxed) as usize,
-                    })
-                    .unwrap();
-                if !progress_thread_run.load(Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            })
-        } else {
-            thread::spawn(|| {})
-        }
-    }
-
-    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -184,8 +153,8 @@ impl BigFile {
         }
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicU64::new(0));
-        let progress_thread_handle = self.prepare_thread_handler(progress_sender, &progress_thread_run, &atomic_counter);
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 0, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -251,7 +220,7 @@ impl BigFile {
 
     pub fn collect_file_entry(
         &self,
-        atomic_counter: &Arc<AtomicU64>,
+        atomic_counter: &Arc<AtomicUsize>,
         metadata: &Metadata,
         entry_data: &DirEntry,
         fe_result: &mut Vec<(u64, FileEntry)>,
