@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io::BufReader;
 use std::rc::Rc;
 
 use crossbeam_channel::bounded;
@@ -122,7 +123,7 @@ impl GuiData {
         window_main.set_title(Some(&flg!("window_main_title")));
         window_main.show();
 
-        let pixbuf = Pixbuf::from_read(std::io::BufReader::new(ICON_ABOUT)).unwrap();
+        let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT)).unwrap();
 
         window_main.set_application(Some(application));
 

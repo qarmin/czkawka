@@ -1,19 +1,27 @@
 use std::ffi::OsString;
-use std::fs;
-use std::fs::{File, OpenOptions};
+use std::fs::{DirEntry, File, OpenOptions};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use std::time::SystemTime;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread::{sleep, JoinHandle};
+use std::time::{Duration, SystemTime};
+use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
 use directories_next::ProjectDirs;
+use futures::channel::mpsc::UnboundedSender;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
-// #[cfg(feature = "heif")]
-// use libheif_rs::LibHeif;
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
+
+// #[cfg(feature = "heif")]
+// use libheif_rs::LibHeif;
+use crate::common_dir_traversal::{CheckingMethod, ProgressData};
+use crate::common_directory::Directories;
+use crate::common_items::ExcludedItems;
 
 static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
 
@@ -25,13 +33,16 @@ pub fn get_number_of_threads() -> usize {
         num_cpus::get()
     }
 }
+
 pub fn set_default_number_of_threads() {
     set_number_of_threads(num_cpus::get());
 }
+
 #[must_use]
 pub fn get_default_number_of_threads() -> usize {
     num_cpus::get()
 }
+
 pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
@@ -175,8 +186,8 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
         }
     };
 
-    let Some(image) =  ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
-            return None;
+    let Some(image) = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
+        return None;
     };
 
     // println!("Properly hashed {:?}", path);
@@ -240,6 +251,7 @@ impl Common {
     }
 
     /// Function to check if directory match expression
+    #[must_use]
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
             return true;
@@ -292,6 +304,7 @@ impl Common {
         true
     }
 
+    #[must_use]
     pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
         let path = path_to_change.as_ref();
 
@@ -315,6 +328,78 @@ impl Common {
             _ => path.to_path_buf(),
         }
     }
+}
+
+pub fn check_folder_children(
+    dir_result: &mut Vec<PathBuf>,
+    warnings: &mut Vec<String>,
+    current_folder: &Path,
+    entry_data: &DirEntry,
+    recursive_search: bool,
+    directories: &Directories,
+    excluded_items: &ExcludedItems,
+) {
+    if !recursive_search {
+        return;
+    }
+
+    let next_folder = current_folder.join(entry_data.file_name());
+    if directories.is_excluded(&next_folder) {
+        return;
+    }
+
+    if excluded_items.is_excluded(&next_folder) {
+        return;
+    }
+
+    #[cfg(target_family = "unix")]
+    if directories.exclude_other_filesystems() {
+        match directories.is_on_other_filesystems(&next_folder) {
+            Ok(true) => return,
+            Err(e) => warnings.push(e),
+            _ => (),
+        }
+    }
+
+    dir_result.push(next_folder);
+}
+
+pub fn prepare_thread_handler_common(
+    progress_sender: Option<&UnboundedSender<ProgressData>>,
+    progress_thread_run: &Arc<AtomicBool>,
+    atomic_counter: &Arc<AtomicUsize>,
+    current_stage: u8,
+    max_stage: u8,
+    max_value: usize,
+    checking_method: CheckingMethod,
+) -> JoinHandle<()> {
+    if let Some(progress_sender) = progress_sender {
+        let progress_send = progress_sender.clone();
+        let progress_thread_run = progress_thread_run.clone();
+        let atomic_counter = atomic_counter.clone();
+        thread::spawn(move || loop {
+            progress_send
+                .unbounded_send(ProgressData {
+                    checking_method,
+                    current_stage,
+                    max_stage,
+                    entries_checked: atomic_counter.load(Ordering::Relaxed),
+                    entries_to_check: max_value,
+                })
+                .unwrap();
+            if !progress_thread_run.load(Ordering::Relaxed) {
+                break;
+            }
+            sleep(Duration::from_millis(LOOP_DURATION as u64));
+        })
+    } else {
+        thread::spawn(|| {})
+    }
+}
+
+pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
+    progress_thread_run.store(false, Ordering::Relaxed);
+    progress_thread_handle.join().unwrap();
 }
 
 #[cfg(test)]

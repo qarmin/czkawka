@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
+use futures::channel::mpsc::UnboundedSender;
 
 use crate::common::Common;
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData};
@@ -88,7 +89,7 @@ impl EmptyFolder {
         self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
     }
     /// Public function used by CLI to search for empty folders
-    pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) {
+    pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.directories.optimize_directories(true, &mut self.text_messages);
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -128,7 +129,7 @@ impl EmptyFolder {
 
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
-    fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
             .group_by(|_fe| ())

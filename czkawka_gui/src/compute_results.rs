@@ -1345,6 +1345,7 @@ fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry>
         vector.clone()
     }
 }
+
 fn vector_sort_simple_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
     let mut vector = vector.to_owned();
     vector.sort_unstable_by_key(|e| {
