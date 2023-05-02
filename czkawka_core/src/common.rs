@@ -392,6 +392,11 @@ pub fn prepare_thread_handler_common(
     }
 }
 
+pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
+    progress_thread_run.store(false, Ordering::Relaxed);
+    progress_thread_handle.join().unwrap();
+}
+
 #[cfg(test)]
 mod test {
     use std::path::PathBuf;

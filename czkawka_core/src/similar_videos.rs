@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::{check_folder_children, VIDEO_FILES_EXTENSIONS};
+use crate::common::{check_folder_children, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
 use crate::common::{open_cache_folder, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
@@ -305,9 +305,7 @@ impl SimilarVideos {
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
+                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
 
@@ -386,9 +384,7 @@ impl SimilarVideos {
             }
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         Common::print_time(start_time, SystemTime::now(), "check_for_similar_videos");
         true
     }
@@ -428,7 +424,6 @@ impl SimilarVideos {
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from cache and preparing them");
         let hash_map_modification = SystemTime::now();
 
-        //// PROGRESS THREAD START
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
 
@@ -462,9 +457,7 @@ impl SimilarVideos {
             .while_some()
             .collect::<Vec<FileEntry>>();
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from files in parallel");
         let hash_map_modification = SystemTime::now();

@@ -15,7 +15,7 @@ use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{create_crash_message, prepare_thread_handler_common, AUDIO_FILES_EXTENSIONS};
+use crate::common::{create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
 use crate::common::{open_cache_folder, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
@@ -475,9 +475,7 @@ impl SameMusic {
             .map(Option::unwrap)
             .collect::<Vec<_>>();
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Just connect loaded results with already calculated
         for (_name, file_entry) in records_already_cached {
@@ -528,9 +526,7 @@ impl SameMusic {
             for vec_file_entry in old_duplicates {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // End thread which send info to gui
-                    progress_thread_run.store(false, Ordering::Relaxed);
-                    progress_thread_handle.join().unwrap();
+                    send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                     return false;
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -556,9 +552,7 @@ impl SameMusic {
             for vec_file_entry in old_duplicates {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // End thread which send info to gui
-                    progress_thread_run.store(false, Ordering::Relaxed);
-                    progress_thread_handle.join().unwrap();
+                    send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                     return false;
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -584,9 +578,7 @@ impl SameMusic {
             for vec_file_entry in old_duplicates {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // End thread which send info to gui
-                    progress_thread_run.store(false, Ordering::Relaxed);
-                    progress_thread_handle.join().unwrap();
+                    send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                     return false;
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -609,9 +601,7 @@ impl SameMusic {
             for vec_file_entry in old_duplicates {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // End thread which send info to gui
-                    progress_thread_run.store(false, Ordering::Relaxed);
-                    progress_thread_handle.join().unwrap();
+                    send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                     return false;
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -634,9 +624,7 @@ impl SameMusic {
             for vec_file_entry in old_duplicates {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // End thread which send info to gui
-                    progress_thread_run.store(false, Ordering::Relaxed);
-                    progress_thread_handle.join().unwrap();
+                    send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                     return false;
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -659,9 +647,7 @@ impl SameMusic {
             for vec_file_entry in old_duplicates {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    // End thread which send info to gui
-                    progress_thread_run.store(false, Ordering::Relaxed);
-                    progress_thread_handle.join().unwrap();
+                    send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                     return false;
                 }
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -683,9 +669,7 @@ impl SameMusic {
             // new_duplicates = Vec::new();
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         self.duplicated_music_entries = old_duplicates;
 

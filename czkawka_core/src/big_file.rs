@@ -15,7 +15,7 @@ use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
 
-use crate::common::{check_folder_children, split_path};
+use crate::common::{check_folder_children, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common::{Common, LOOP_DURATION};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
@@ -189,9 +189,7 @@ impl BigFile {
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
+                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
 
@@ -243,9 +241,7 @@ impl BigFile {
             }
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         self.extract_n_biggest_files(old_map);
 

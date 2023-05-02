@@ -22,8 +22,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, Common, HEIC_EXTENSIONS,
-    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, send_info_and_wait_for_ending_all_threads, Common,
+    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, LOOP_DURATION, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
@@ -339,9 +339,7 @@ impl SimilarImages {
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
+                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
 
@@ -420,9 +418,7 @@ impl SimilarImages {
             }
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         Common::print_time(start_time, SystemTime::now(), "check_for_similar_images");
         true
     }
@@ -556,9 +552,7 @@ impl SimilarImages {
             .map(Option::unwrap)
             .collect::<Vec<(FileEntry, Vec<u8>)>>();
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parallel");
         let hash_map_modification = SystemTime::now();
@@ -748,9 +742,7 @@ impl SimilarImages {
                 .while_some()
                 .collect();
 
-            // End thread which send info to gui
-            progress_thread_run.store(false, Ordering::Relaxed);
-            progress_thread_handle.join().unwrap();
+            send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
             if check_was_stopped.load(Ordering::Relaxed) {
                 return false;

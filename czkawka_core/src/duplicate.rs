@@ -20,7 +20,7 @@ use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
 
-use crate::common::{open_cache_folder, prepare_thread_handler_common, Common};
+use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -734,9 +734,7 @@ impl DuplicateFinder {
             .while_some()
             .collect();
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Check if user aborted search(only from GUI)
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -798,7 +796,7 @@ impl DuplicateFinder {
 
         let check_type = self.hash_type;
         let start_time: SystemTime = SystemTime::now();
-        //// PROGRESS THREAD START
+
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
 
@@ -811,8 +809,6 @@ impl DuplicateFinder {
             pre_checked_map.values().map(Vec::len).sum(),
             self.check_method,
         );
-
-        //// PROGRESS THREAD END
 
         ///////////////////////////////////////////////////////////////////////////// HASHING START
         {
@@ -922,9 +918,7 @@ impl DuplicateFinder {
                 save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
             }
 
-            // End thread which send info to gui
-            progress_thread_run.store(false, Ordering::Relaxed);
-            progress_thread_handle.join().unwrap();
+            send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
             // Break if stop was clicked after saving to cache
             if check_was_stopped.load(Ordering::Relaxed) {

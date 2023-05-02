@@ -11,7 +11,7 @@ use std::{fs, thread};
 use crossbeam_channel::Receiver;
 use rayon::prelude::*;
 
-use crate::common::{check_folder_children, Common, LOOP_DURATION};
+use crate::common::{check_folder_children, send_info_and_wait_for_ending_all_threads, Common, LOOP_DURATION};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
@@ -192,9 +192,7 @@ impl Temporary {
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
+                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
 
@@ -248,9 +246,7 @@ impl Temporary {
             }
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         self.information.number_of_temporary_files = self.temporary_files.len();
 
         Common::print_time(start_time, SystemTime::now(), "check_files_size");

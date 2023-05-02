@@ -13,7 +13,7 @@ use crossbeam_channel::Receiver;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
-use crate::common::{prepare_thread_handler_common, Common};
+use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -25,7 +25,7 @@ static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak", "data"]; // Such
 
 // This adds several workarounds for bugs/invalid recognizing types by external libraries
 // ("real_content_extension", "current_file_extension")
-static WORKAROUNDS: &[(&str, &str)] = &[
+const WORKAROUNDS: &[(&str, &str)] = &[
     // Wine/Windows
     ("der", "cat"),
     ("exe", "acm"),
@@ -322,8 +322,6 @@ impl BadExtensions {
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
-        //// PROGRESS THREAD START
-
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
 
@@ -339,7 +337,6 @@ impl BadExtensions {
 
         let mut files_to_check = Default::default();
         mem::swap(&mut files_to_check, &mut self.files_to_check);
-        //// PROGRESS THREAD END
 
         let mut hashmap_workarounds: HashMap<&str, Vec<&str>> = Default::default();
         for (proper, found) in WORKAROUNDS {
@@ -352,9 +349,7 @@ impl BadExtensions {
 
         self.bad_extensions_files = self.verify_extensions(files_to_check, &atomic_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Break if stop was clicked
         if check_was_stopped.load(Ordering::Relaxed) {

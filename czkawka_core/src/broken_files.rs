@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fs::File;
+use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
@@ -17,7 +17,7 @@ use pdf::PdfError::Try;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{check_folder_children, create_crash_message, open_cache_folder, Common, LOOP_DURATION, PDF_FILES_EXTENSIONS};
+use crate::common::{check_folder_children, create_crash_message, open_cache_folder, send_info_and_wait_for_ending_all_threads, Common, LOOP_DURATION, PDF_FILES_EXTENSIONS};
 use crate::common::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time};
 use crate::common_directory::Directories;
@@ -238,18 +238,13 @@ impl BrokenFiles {
             folders_to_check.push(id.clone());
         }
 
-        //// PROGRESS THREAD START
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
         let progress_thread_handle = self.prepare_thread_handler_broken_files(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0);
 
-        //// PROGRESS THREAD END
-
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                // End thread which send info to gui
-                progress_thread_run.store(false, Ordering::Relaxed);
-                progress_thread_handle.join().unwrap();
+                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
 
@@ -265,7 +260,7 @@ impl BrokenFiles {
                     };
 
                     // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
+                    for entry in read_dir {
                         let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
@@ -281,39 +276,9 @@ impl BrokenFiles {
                                 &self.excluded_items,
                             );
                         } else if metadata.is_file() {
-                            atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
-                                continue 'dir;
-                            };
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
+                            if let Some(file_entry) = self.get_file_entry(&metadata, &atomic_counter, entry_data, &mut warnings, current_folder) {
+                                fe_result.push((file_entry.path.to_string_lossy().to_string(), file_entry));
                             }
-
-                            let type_of_file = check_extension_availability(&file_name_lowercase);
-                            if type_of_file == TypeOfFile::Unknown {
-                                continue 'dir;
-                            }
-
-                            if !check_extension_allowed(&type_of_file, &self.checked_types) {
-                                continue 'dir;
-                            }
-
-                            let current_file_name = current_folder.join(entry_data.file_name());
-                            if self.excluded_items.is_excluded(&current_file_name) {
-                                continue 'dir;
-                            }
-
-                            let fe: FileEntry = FileEntry {
-                                path: current_file_name.clone(),
-                                modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
-                                size: metadata.len(),
-                                type_of_file,
-                                error_string: String::new(),
-                            };
-
-                            fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -333,13 +298,53 @@ impl BrokenFiles {
             }
         }
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         Common::print_time(start_time, SystemTime::now(), "check_files");
         true
     }
+    fn get_file_entry(
+        &self,
+        metadata: &Metadata,
+        atomic_counter: &Arc<AtomicUsize>,
+        entry_data: &DirEntry,
+        warnings: &mut Vec<String>,
+        current_folder: &Path,
+    ) -> Option<FileEntry> {
+        atomic_counter.fetch_add(1, Ordering::Relaxed);
+
+        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
+            return None;
+        };
+
+        if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+            return None;
+        }
+
+        let type_of_file = check_extension_availability(&file_name_lowercase);
+        if type_of_file == TypeOfFile::Unknown {
+            return None;
+        }
+
+        if !check_extension_allowed(&type_of_file, &self.checked_types) {
+            return None;
+        }
+
+        let current_file_name = current_folder.join(entry_data.file_name());
+        if self.excluded_items.is_excluded(&current_file_name) {
+            return None;
+        }
+
+        let fe: FileEntry = FileEntry {
+            path: current_file_name.clone(),
+            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+            size: metadata.len(),
+            type_of_file,
+            error_string: String::new(),
+        };
+        Some(fe)
+    }
+
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
@@ -493,9 +498,7 @@ impl BrokenFiles {
             .map(Option::unwrap)
             .collect::<Vec<FileEntry>>();
 
-        // End thread which send info to gui
-        progress_thread_run.store(false, Ordering::Relaxed);
-        progress_thread_handle.join().unwrap();
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Just connect loaded results with already calculated
         for (_name, file_entry) in records_already_cached {
