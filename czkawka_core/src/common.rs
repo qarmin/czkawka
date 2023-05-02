@@ -14,13 +14,14 @@ use directories_next::ProjectDirs;
 use futures::channel::mpsc::UnboundedSender;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
+#[cfg(feature = "heif")]
+use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
+
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 use crate::common_dir_traversal::{CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
-#[cfg(feature = "heif")]
-use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 
 static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
 
@@ -32,13 +33,16 @@ pub fn get_number_of_threads() -> usize {
         num_cpus::get()
     }
 }
+
 pub fn set_default_number_of_threads() {
     set_number_of_threads(num_cpus::get());
 }
+
 #[must_use]
 pub fn get_default_number_of_threads() -> usize {
     num_cpus::get()
 }
+
 pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
@@ -182,8 +186,8 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
         }
     };
 
-    let Some(image) =  ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
-            return None;
+    let Some(image) = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
+        return None;
     };
 
     // println!("Properly hashed {:?}", path);

@@ -4,10 +4,6 @@ use std::process;
 
 use clap::Parser;
 
-use crate::commands::{
-    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs, SimilarImagesArgs,
-    SimilarVideosArgs, TemporaryArgs,
-};
 use commands::Commands;
 use czkawka_core::big_file::SearchMode;
 use czkawka_core::common::{get_number_of_threads, set_default_number_of_threads};
@@ -26,6 +22,11 @@ use czkawka_core::{
     similar_images::{return_similarity_from_similarity_preset, SimilarImages},
     similar_videos::SimilarVideos,
     temporary::{self, Temporary},
+};
+
+use crate::commands::{
+    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs, SimilarImagesArgs,
+    SimilarVideosArgs, TemporaryArgs,
 };
 
 mod commands;

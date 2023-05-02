@@ -370,7 +370,7 @@ where
 
                     // Check every sub folder/file/link etc.
                     'dir: for entry in read_dir {
-                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
 
@@ -692,6 +692,7 @@ pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Opt
         }
     }
 }
+
 pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<(&'a DirEntry, Metadata)> {
     let entry_data = match entry {
         Ok(t) => t,
@@ -715,6 +716,7 @@ pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::E
     };
     Some((entry_data, metadata))
 }
+
 pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, current_file_name: &Path, is_folder: bool) -> u64 {
     match metadata.modified() {
         Ok(t) => match t.duration_since(UNIX_EPOCH) {

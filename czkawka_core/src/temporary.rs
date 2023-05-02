@@ -1,11 +1,10 @@
+use std::fs;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
-use std::fs;
 use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
@@ -175,7 +174,7 @@ impl Temporary {
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
 

@@ -1,15 +1,14 @@
-use futures::channel::mpsc::UnboundedSender;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
+use futures::channel::mpsc::UnboundedSender;
 use glib::Sender;
 use gtk4::prelude::*;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::{BrokenFiles, CheckedTypes};
-
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;

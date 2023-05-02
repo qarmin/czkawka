@@ -2,11 +2,10 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs::{DirEntry, File, Metadata};
 use std::io::Write;
 use std::io::*;
+use std::mem;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
-use std::mem;
 use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
@@ -283,7 +282,7 @@ impl SimilarVideos {
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
 
@@ -327,7 +326,7 @@ impl SimilarVideos {
     fn add_video_file_entry(&self, metadata: &Metadata, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>, current_folder: &Path) {
         let Some(file_name_lowercase) = get_lowercase_name(entry_data,
                                                            warnings) else {
-           return;
+            return;
         };
 
         if !self.allowed_extensions.matches_filename(&file_name_lowercase) {

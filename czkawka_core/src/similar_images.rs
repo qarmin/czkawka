@@ -2,12 +2,11 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::{DirEntry, File, Metadata};
 use std::io::Write;
 use std::io::*;
+use std::mem;
 use std::panic;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
-use std::mem;
 use std::time::SystemTime;
 
 use bk_tree::BKTree;
@@ -92,7 +91,8 @@ pub struct SimilarImages {
     recursive_search: bool,
     minimal_file_size: u64,
     maximal_file_size: u64,
-    image_hashes: HashMap<ImHash, Vec<FileEntry>>, // Hashmap with image hashes and Vector with names of files
+    image_hashes: HashMap<ImHash, Vec<FileEntry>>,
+    // Hashmap with image hashes and Vector with names of files
     stopped_search: bool,
     similarity: u32,
     images_to_check: HashMap<String, FileEntry>,
@@ -318,7 +318,7 @@ impl SimilarImages {
                     };
 
                     for entry in read_dir {
-                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
 

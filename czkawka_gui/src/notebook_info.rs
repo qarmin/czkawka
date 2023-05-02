@@ -1,9 +1,10 @@
+use glib::types::Type;
+
 use crate::help_functions::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
     ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
 };
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
-use glib::types::Type;
 
 pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,

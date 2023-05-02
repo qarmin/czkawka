@@ -2,11 +2,10 @@ use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
+use std::mem;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
-use std::mem;
 use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
@@ -393,7 +392,7 @@ impl BadExtensions {
                 };
                 let proper_extension = kind.extension();
 
-                let Some(current_extension)= self.get_and_validate_extension(&file_entry, proper_extension) else {
+                let Some(current_extension) = self.get_and_validate_extension(&file_entry, proper_extension) else {
                     return Some(None);
                 };
 

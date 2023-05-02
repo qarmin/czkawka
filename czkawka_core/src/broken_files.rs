@@ -5,7 +5,6 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
 use std::time::SystemTime;
 use std::{fs, mem, panic};
 
@@ -91,7 +90,8 @@ pub struct BrokenFiles {
     stopped_search: bool,
     checked_types: CheckedTypes,
     use_cache: bool,
-    delete_outdated_cache: bool, // TODO add this to GUI
+    // TODO add this to GUI
+    delete_outdated_cache: bool,
     save_also_as_json: bool,
 }
 
@@ -224,7 +224,7 @@ impl BrokenFiles {
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
 

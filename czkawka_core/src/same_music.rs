@@ -424,7 +424,7 @@ impl SameMusic {
         true
     }
     fn read_single_file_tag(&self, path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {
-        let Ok(mut file) = File::open(path) else{return None};
+        let Ok(mut file) = File::open(path) else { return None; };
 
         let result = panic::catch_unwind(move || {
             match read_from(&mut file) {

@@ -1,6 +1,6 @@
-use fs_extra::dir::CopyOptions;
 use std::path::{Path, PathBuf};
 
+use fs_extra::dir::CopyOptions;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
 
