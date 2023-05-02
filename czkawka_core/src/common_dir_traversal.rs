@@ -383,94 +383,36 @@ where
 
                         match (entry_type(&metadata), collect) {
                             (EntryType::Dir, Collect::Files | Collect::InvalidSymlinks) => {
-                                if !recursive_search {
-                                    continue 'dir;
-                                }
-
-                                let next_folder = current_folder.join(entry_data.file_name());
-                                if directories.is_excluded(&next_folder) {
-                                    continue 'dir;
-                                }
-
-                                if excluded_items.is_excluded(&next_folder) {
-                                    continue 'dir;
-                                }
-
-                                #[cfg(target_family = "unix")]
-                                if directories.exclude_other_filesystems() {
-                                    match directories.is_on_other_filesystems(&next_folder) {
-                                        Ok(true) => continue 'dir,
-                                        Err(e) => warnings.push(e.to_string()),
-                                        _ => (),
-                                    }
-                                }
-
-                                dir_result.push(next_folder);
+                                process_dir_in_file_symlink_mode(recursive_search, current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
                             }
                             (EntryType::Dir, Collect::EmptyFolders) => {
                                 atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
-                                let next_folder = current_folder.join(entry_data.file_name());
-                                if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
-                                    set_as_not_empty_folder_list.push(current_folder.clone());
-                                    continue 'dir;
-                                }
-
-                                #[cfg(target_family = "unix")]
-                                if directories.exclude_other_filesystems() {
-                                    match directories.is_on_other_filesystems(&next_folder) {
-                                        Ok(true) => continue 'dir,
-                                        Err(e) => warnings.push(e.to_string()),
-                                        _ => (),
-                                    }
-                                }
-
-                                dir_result.push(next_folder.clone());
-                                folder_entries_list.push((
-                                    next_folder.clone(),
-                                    FolderEntry {
-                                        parent_path: Some(current_folder.clone()),
-                                        is_empty: FolderEmptiness::Maybe,
-                                        modified_date: get_modified_time(&metadata, &mut warnings, current_folder, true),
-                                    },
-                                ));
+                                process_dir_in_dir_mode(
+                                    &metadata,
+                                    current_folder,
+                                    entry_data,
+                                    &directories,
+                                    &mut dir_result,
+                                    &mut warnings,
+                                    &excluded_items,
+                                    &mut set_as_not_empty_folder_list,
+                                    &mut folder_entries_list,
+                                );
                             }
                             (EntryType::File, Collect::Files) => {
                                 atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
-
-                                let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
-                                    continue 'dir;
-                                };
-
-                                if !allowed_extensions.matches_filename(&file_name_lowercase) {
-                                    continue 'dir;
-                                }
-
-                                if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
-                                    let current_file_name = current_folder.join(entry_data.file_name());
-                                    if excluded_items.is_excluded(&current_file_name) {
-                                        continue 'dir;
-                                    }
-
-                                    #[cfg(target_family = "unix")]
-                                    if directories.exclude_other_filesystems() {
-                                        match directories.is_on_other_filesystems(&current_file_name) {
-                                            Ok(true) => continue 'dir,
-                                            Err(e) => warnings.push(e.to_string()),
-                                            _ => (),
-                                        }
-                                    }
-
-                                    // Creating new file entry
-                                    let fe: FileEntry = FileEntry {
-                                        path: current_file_name.clone(),
-                                        size: metadata.len(),
-                                        modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
-                                        hash: String::new(),
-                                        symlink_info: None,
-                                    };
-
-                                    fe_result.push(fe);
-                                }
+                                process_file_in_file_mode(
+                                    &metadata,
+                                    entry_data,
+                                    &mut warnings,
+                                    &mut fe_result,
+                                    &allowed_extensions,
+                                    current_folder,
+                                    &directories,
+                                    &excluded_items,
+                                    minimal_file_size,
+                                    maximal_file_size,
+                                );
                             }
                             (EntryType::File | EntryType::Symlink, Collect::EmptyFolders) => {
                                 #[cfg(target_family = "unix")]
@@ -544,6 +486,125 @@ where
             },
         }
     }
+}
+
+fn process_file_in_file_mode(
+    metadata: &Metadata,
+    entry_data: &DirEntry,
+    warnings: &mut Vec<String>,
+    fe_result: &mut Vec<FileEntry>,
+    allowed_extensions: &Extensions,
+    current_folder: &Path,
+    directories: &Directories,
+    excluded_items: &ExcludedItems,
+    minimal_file_size: u64,
+    maximal_file_size: u64,
+) {
+    let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
+        return;
+    };
+
+    if !allowed_extensions.matches_filename(&file_name_lowercase) {
+        return;
+    }
+
+    if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
+        let current_file_name = current_folder.join(entry_data.file_name());
+        if excluded_items.is_excluded(&current_file_name) {
+            return;
+        }
+
+        #[cfg(target_family = "unix")]
+        if directories.exclude_other_filesystems() {
+            match directories.is_on_other_filesystems(&current_file_name) {
+                Ok(true) => return,
+                Err(e) => warnings.push(e),
+                _ => (),
+            }
+        }
+
+        // Creating new file entry
+        let fe: FileEntry = FileEntry {
+            path: current_file_name.clone(),
+            size: metadata.len(),
+            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+            hash: String::new(),
+            symlink_info: None,
+        };
+
+        fe_result.push(fe);
+    }
+}
+
+fn process_dir_in_dir_mode(
+    metadata: &Metadata,
+    current_folder: &Path,
+    entry_data: &DirEntry,
+    directories: &Directories,
+    dir_result: &mut Vec<PathBuf>,
+    warnings: &mut Vec<String>,
+    excluded_items: &ExcludedItems,
+    set_as_not_empty_folder_list: &mut Vec<PathBuf>,
+    folder_entries_list: &mut Vec<(PathBuf, FolderEntry)>,
+) {
+    let next_folder = current_folder.join(entry_data.file_name());
+    if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
+        set_as_not_empty_folder_list.push(current_folder.to_path_buf());
+        return;
+    }
+
+    #[cfg(target_family = "unix")]
+    if directories.exclude_other_filesystems() {
+        match directories.is_on_other_filesystems(&next_folder) {
+            Ok(true) => return,
+            Err(e) => warnings.push(e),
+            _ => (),
+        }
+    }
+
+    dir_result.push(next_folder.clone());
+    folder_entries_list.push((
+        next_folder,
+        FolderEntry {
+            parent_path: Some(current_folder.to_path_buf()),
+            is_empty: FolderEmptiness::Maybe,
+            modified_date: get_modified_time(metadata, warnings, current_folder, true),
+        },
+    ));
+}
+
+fn process_dir_in_file_symlink_mode(
+    recursive_search: bool,
+    current_folder: &Path,
+    entry_data: &DirEntry,
+    directories: &Directories,
+    dir_result: &mut Vec<PathBuf>,
+    warnings: &mut Vec<String>,
+    excluded_items: &ExcludedItems,
+) {
+    if !recursive_search {
+        return;
+    }
+
+    let next_folder = current_folder.join(entry_data.file_name());
+    if directories.is_excluded(&next_folder) {
+        return;
+    }
+
+    if excluded_items.is_excluded(&next_folder) {
+        return;
+    }
+
+    #[cfg(target_family = "unix")]
+    if directories.exclude_other_filesystems() {
+        match directories.is_on_other_filesystems(&next_folder) {
+            Ok(true) => return,
+            Err(e) => warnings.push(e),
+            _ => (),
+        }
+    }
+
+    dir_result.push(next_folder);
 }
 
 fn process_symlink_in_symlink_mode(
