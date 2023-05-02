@@ -489,75 +489,16 @@ where
                             }
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
                                 atomic_entry_counter.fetch_add(1, Ordering::Relaxed);
-
-                                let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
-                                    continue 'dir;
-                                };
-
-                                if !allowed_extensions.matches_filename(&file_name_lowercase) {
-                                    continue 'dir;
-                                }
-
-                                let current_file_name = current_folder.join(entry_data.file_name());
-                                if excluded_items.is_excluded(&current_file_name) {
-                                    continue 'dir;
-                                }
-
-                                #[cfg(target_family = "unix")]
-                                if directories.exclude_other_filesystems() {
-                                    match directories.is_on_other_filesystems(current_folder) {
-                                        Ok(true) => continue 'dir,
-                                        Err(e) => warnings.push(e.to_string()),
-                                        _ => (),
-                                    }
-                                }
-
-                                let mut destination_path = PathBuf::new();
-                                let type_of_error;
-
-                                match current_file_name.read_link() {
-                                    Ok(t) => {
-                                        destination_path.push(t);
-                                        let mut number_of_loop = 0;
-                                        let mut current_path = current_file_name.clone();
-                                        loop {
-                                            if number_of_loop == 0 && !current_path.exists() {
-                                                type_of_error = ErrorType::NonExistentFile;
-                                                break;
-                                            }
-                                            if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
-                                                type_of_error = ErrorType::InfiniteRecursion;
-                                                break;
-                                            }
-
-                                            current_path = match current_path.read_link() {
-                                                Ok(t) => t,
-                                                Err(_inspected) => {
-                                                    // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
-                                                    continue 'dir;
-                                                }
-                                            };
-
-                                            number_of_loop += 1;
-                                        }
-                                    }
-                                    Err(_inspected) => {
-                                        // Failed to load info about it
-                                        type_of_error = ErrorType::NonExistentFile;
-                                    }
-                                }
-
-                                // Creating new file entry
-                                let fe: FileEntry = FileEntry {
-                                    path: current_file_name.clone(),
-                                    modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
-                                    size: 0,
-                                    hash: String::new(),
-                                    symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
-                                };
-
-                                // Adding files to Vector
-                                fe_result.push(fe);
+                                process_symlink_in_symlink_mode(
+                                    &metadata,
+                                    entry_data,
+                                    &mut warnings,
+                                    &mut fe_result,
+                                    &allowed_extensions,
+                                    current_folder,
+                                    &directories,
+                                    &excluded_items,
+                                );
                             }
                             (EntryType::Symlink, Collect::Files) | (EntryType::Other, _) => {
                                 // nothing to do
@@ -603,6 +544,86 @@ where
             },
         }
     }
+}
+
+fn process_symlink_in_symlink_mode(
+    metadata: &Metadata,
+    entry_data: &DirEntry,
+    warnings: &mut Vec<String>,
+    fe_result: &mut Vec<FileEntry>,
+    allowed_extensions: &Extensions,
+    current_folder: &Path,
+    directories: &Directories,
+    excluded_items: &ExcludedItems,
+) {
+    let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
+        return;
+    };
+
+    if !allowed_extensions.matches_filename(&file_name_lowercase) {
+        return;
+    }
+
+    let current_file_name = current_folder.join(entry_data.file_name());
+    if excluded_items.is_excluded(&current_file_name) {
+        return;
+    }
+
+    #[cfg(target_family = "unix")]
+    if directories.exclude_other_filesystems() {
+        match directories.is_on_other_filesystems(current_folder) {
+            Ok(true) => return,
+            Err(e) => warnings.push(e),
+            _ => (),
+        }
+    }
+
+    let mut destination_path = PathBuf::new();
+    let type_of_error;
+
+    match current_file_name.read_link() {
+        Ok(t) => {
+            destination_path.push(t);
+            let mut number_of_loop = 0;
+            let mut current_path = current_file_name.clone();
+            loop {
+                if number_of_loop == 0 && !current_path.exists() {
+                    type_of_error = ErrorType::NonExistentFile;
+                    break;
+                }
+                if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
+                    type_of_error = ErrorType::InfiniteRecursion;
+                    break;
+                }
+
+                current_path = match current_path.read_link() {
+                    Ok(t) => t,
+                    Err(_inspected) => {
+                        // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
+                        return;
+                    }
+                };
+
+                number_of_loop += 1;
+            }
+        }
+        Err(_inspected) => {
+            // Failed to load info about it
+            type_of_error = ErrorType::NonExistentFile;
+        }
+    }
+
+    // Creating new file entry
+    let fe: FileEntry = FileEntry {
+        path: current_file_name.clone(),
+        modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+        size: 0,
+        hash: String::new(),
+        symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
+    };
+
+    // Adding files to Vector
+    fe_result.push(fe);
 }
 
 pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<ReadDir> {

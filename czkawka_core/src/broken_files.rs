@@ -345,6 +345,102 @@ impl BrokenFiles {
         Some(fe)
     }
 
+    fn check_broken_image(&self, mut file_entry: FileEntry) -> Option<FileEntry> {
+        let mut file_entry_clone = file_entry.clone();
+
+        let result = panic::catch_unwind(|| {
+            if let Err(e) = image::open(&file_entry.path) {
+                let error_string = e.to_string();
+                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
+                if error_string.contains("spectral selection is not allowed in non-progressive scan") {
+                    return None;
+                }
+                file_entry.error_string = error_string;
+            }
+            Some(file_entry)
+        });
+
+        // If image crashed during opening, needs to be printed info about crashes thing
+        if let Ok(image_result) = result {
+            image_result
+        } else {
+            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
+            println!("{message}");
+            file_entry_clone.error_string = message;
+            Some(file_entry_clone)
+        }
+    }
+    fn check_broken_zip(&self, mut file_entry: FileEntry) -> Option<FileEntry> {
+        match File::open(&file_entry.path) {
+            Ok(file) => {
+                if let Err(e) = zip::ZipArchive::new(file) {
+                    file_entry.error_string = e.to_string();
+                }
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+    fn check_broken_audio(&self, mut file_entry: FileEntry) -> Option<FileEntry> {
+        match File::open(&file_entry.path) {
+            Ok(file) => {
+                let mut file_entry_clone = file_entry.clone();
+
+                let result = panic::catch_unwind(|| {
+                    if let Err(e) = audio_checker::parse_audio_file(file) {
+                        file_entry.error_string = e.to_string();
+                    }
+                    Some(file_entry)
+                });
+
+                if let Ok(audio_result) = result {
+                    audio_result
+                } else {
+                    let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
+                    println!("{message}");
+                    file_entry_clone.error_string = message;
+                    Some(file_entry_clone)
+                }
+            }
+            Err(_inspected) => None,
+        }
+    }
+    fn check_broken_pdf(&self, mut file_entry: FileEntry) -> Option<FileEntry> {
+        let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
+
+        let mut file_entry_clone = file_entry.clone();
+        let result = panic::catch_unwind(|| {
+            if let Err(e) = FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
+                if let PdfError::Io { .. } = e {
+                    return None;
+                }
+
+                let mut error_string = e.to_string();
+                // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
+                if error_string.starts_with("Try at") {
+                    if let Some(start_index) = error_string.find("/pdf-") {
+                        error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
+                    }
+                }
+
+                file_entry.error_string = error_string;
+                let error = unpack_pdf_error(e);
+                if let PdfError::InvalidPassword = error {
+                    return None;
+                }
+            }
+            Some(file_entry)
+        });
+        if let Ok(pdf_result) = result {
+            pdf_result
+        } else {
+            let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
+            println!("{message}");
+            file_entry_clone.error_string = message;
+            Some(file_entry_clone)
+        }
+    }
+
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         let system_time = SystemTime::now();
 
@@ -389,106 +485,17 @@ impl BrokenFiles {
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
-            .map(|(_, mut file_entry)| {
+            .map(|(_, file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     return None;
                 }
 
                 match file_entry.type_of_file {
-                    TypeOfFile::Image => {
-                        let mut file_entry_clone = file_entry.clone();
-
-                        let result = panic::catch_unwind(|| {
-                            if let Err(e) = image::open(&file_entry.path) {
-                                let error_string = e.to_string();
-                                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
-                                if error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                                    return Some(None);
-                                }
-                                file_entry.error_string = error_string;
-                            }
-                            Some(Some(file_entry))
-                        });
-
-                        // If image crashed during opening, needs to be printed info about crashes thing
-                        if let Ok(image_result) = result {
-                            image_result
-                        } else {
-                            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
-                            println!("{message}");
-                            file_entry_clone.error_string = message;
-                            Some(Some(file_entry_clone))
-                        }
-                    }
-                    TypeOfFile::ArchiveZip => match File::open(&file_entry.path) {
-                        Ok(file) => {
-                            if let Err(e) = zip::ZipArchive::new(file) {
-                                file_entry.error_string = e.to_string();
-                            }
-                            Some(Some(file_entry))
-                        }
-                        Err(_inspected) => Some(None),
-                    },
-                    TypeOfFile::Audio => match File::open(&file_entry.path) {
-                        Ok(file) => {
-                            let mut file_entry_clone = file_entry.clone();
-
-                            let result = panic::catch_unwind(|| {
-                                if let Err(e) = audio_checker::parse_audio_file(file) {
-                                    file_entry.error_string = e.to_string();
-                                }
-                                Some(Some(file_entry))
-                            });
-
-                            if let Ok(audio_result) = result {
-                                audio_result
-                            } else {
-                                let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
-                                println!("{message}");
-                                file_entry_clone.error_string = message;
-                                Some(Some(file_entry_clone))
-                            }
-                        }
-                        Err(_inspected) => Some(None),
-                    },
-
-                    TypeOfFile::PDF => {
-                        let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
-
-                        let mut file_entry_clone = file_entry.clone();
-                        let result = panic::catch_unwind(|| {
-                            if let Err(e) = FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
-                                if let PdfError::Io { .. } = e {
-                                    return Some(None);
-                                }
-
-                                let mut error_string = e.to_string();
-                                // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
-                                if error_string.starts_with("Try at") {
-                                    if let Some(start_index) = error_string.find("/pdf-") {
-                                        error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
-                                    }
-                                }
-
-                                file_entry.error_string = error_string;
-                                let error = unpack_pdf_error(e);
-                                if let PdfError::InvalidPassword = error {
-                                    return Some(None);
-                                }
-                            }
-                            Some(Some(file_entry))
-                        });
-                        if let Ok(pdf_result) = result {
-                            pdf_result
-                        } else {
-                            let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
-                            println!("{message}");
-                            file_entry_clone.error_string = message;
-                            Some(Some(file_entry_clone))
-                        }
-                    }
-
+                    TypeOfFile::Image => Some(self.check_broken_image(file_entry)),
+                    TypeOfFile::ArchiveZip => Some(self.check_broken_zip(file_entry)),
+                    TypeOfFile::Audio => Some(self.check_broken_audio(file_entry)),
+                    TypeOfFile::PDF => Some(self.check_broken_pdf(file_entry)),
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
                     TypeOfFile::Unknown => Some(None),
                 }
@@ -532,6 +539,7 @@ impl BrokenFiles {
 
         true
     }
+
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
         let start_time: SystemTime = SystemTime::now();
