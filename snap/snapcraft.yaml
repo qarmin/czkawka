@@ -9,13 +9,18 @@ grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 compression: lzo
 
+license: MIT
+website: https://github.com/qarmin/czkawka
+issues: https://github.com/qarmin/czkawka/issues
+donation: https://github.com/sponsors/qarmin
+
 parts:
-  user-part:
-    source: .
-    plugin: rust
-    build-packages: [cargo, rustc]
+  rust-deps:
+    plugin: nil
+    override-pull: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.68.2
   czkawka:
     plugin: rust
+    after: [ rust-deps ]
     source: https://github.com/qarmin/czkawka.git
     build-packages:
       - curl
