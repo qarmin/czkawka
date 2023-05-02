@@ -660,10 +660,7 @@ impl SimilarImages {
             }
         }
 
-        #[cfg(debug_assertions)]
-        if !self.use_reference_folders {
-            debug_check_for_duplicated_things(&hashes_parents, &hashes_similarity, all_hashed_images, "BEFORE");
-        }
+        debug_check_for_duplicated_things(self.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "BEFORE");
 
         Some((hashes_parents, hashes_similarity))
     }
@@ -827,10 +824,7 @@ impl SimilarImages {
             }
         }
 
-        #[cfg(debug_assertions)]
-        if !self.use_reference_folders {
-            debug_check_for_duplicated_things(&hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
-        }
+        debug_check_for_duplicated_things(self.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
 
         // Just simple check if all original hashes with multiple entries are available in end results
         let original_hashes_at_start = hashes_with_multiple_images.len();
@@ -982,35 +976,36 @@ impl SimilarImages {
     }
 
     #[allow(dead_code)]
+    #[allow(unreachable_code)]
+    #[allow(unused_variables)]
     pub fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<FileEntry>>) {
+        #[cfg(not(debug_assertions))]
+        return;
         // Validating if group contains duplicated results
-        #[cfg(debug_assertions)]
-        {
-            let mut result_hashset: HashSet<String> = Default::default();
-            let mut found = false;
-            for vec_file_entry in collected_similar_images.values() {
-                if vec_file_entry.is_empty() {
-                    println!("Empty group");
+        let mut result_hashset: HashSet<String> = Default::default();
+        let mut found = false;
+        for vec_file_entry in collected_similar_images.values() {
+            if vec_file_entry.is_empty() {
+                println!("Empty group");
+                found = true;
+                continue;
+            }
+            if vec_file_entry.len() == 1 {
+                println!("Single Element {vec_file_entry:?}");
+                found = true;
+                continue;
+            }
+            for file_entry in vec_file_entry {
+                let st = file_entry.path.to_string_lossy().to_string();
+                if result_hashset.contains(&st) {
                     found = true;
-                    continue;
-                }
-                if vec_file_entry.len() == 1 {
-                    println!("Single Element {vec_file_entry:?}");
-                    found = true;
-                    continue;
-                }
-                for file_entry in vec_file_entry {
-                    let st = file_entry.path.to_string_lossy().to_string();
-                    if result_hashset.contains(&st) {
-                        found = true;
-                        println!("Duplicated Element {st}");
-                    } else {
-                        result_hashset.insert(st);
-                    }
+                    println!("Duplicated Element {st}");
+                } else {
+                    result_hashset.insert(st);
                 }
             }
-            assert!(!found, "Found Invalid entries, verify errors before"); // TODO crashes with empty result with reference folder, verify why
         }
+        assert!(!found, "Found Invalid entries, verify errors before"); // TODO crashes with empty result with reference folder, verify why
     }
 
     /// Set included dir which needs to be relative, exists etc.
@@ -1391,15 +1386,25 @@ pub fn test_image_conversion_speed() {
 }
 
 #[allow(dead_code)]
+#[allow(unreachable_code)]
+#[allow(unused_variables)]
 // Function to validate if after first check there are any duplicated entries
 // E.g. /a.jpg is used also as master and similar image which is forbidden, because may
 // cause accidentally delete more pictures that user wanted
 fn debug_check_for_duplicated_things(
+    use_reference_folders: bool,
     hashes_parents: &HashMap<ImHash, u32>,
     hashes_similarity: &HashMap<ImHash, (ImHash, u32)>,
     all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
     numm: &str,
 ) {
+    #[cfg(not(debug_assertions))]
+    return;
+
+    if use_reference_folders {
+        return;
+    }
+
     let mut found_broken_thing = false;
     let mut hashmap_hashes: HashSet<_> = Default::default();
     let mut hashmap_names: HashSet<_> = Default::default();

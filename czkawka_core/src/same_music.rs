@@ -144,7 +144,7 @@ impl SameMusic {
             use_reference_folders: false,
             duplicated_music_entries_referenced: vec![],
             save_also_as_json: false,
-            check_type: AudioCheckMethod::Content,
+            check_type: AudioCheckMethod::Tags,
         }
     }
 
