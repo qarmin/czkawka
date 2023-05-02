@@ -1,5 +1,5 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
-use std::fs::File;
+use std::fs::{DirEntry, File, Metadata};
 use std::io::Write;
 use std::io::*;
 use std::panic;
@@ -354,8 +354,7 @@ impl SimilarImages {
                         return (dir_result, warnings, fe_result);
                     };
 
-                    // Check every sub folder/file/link etc.
-                    'dir: for entry in read_dir {
+                    for entry in read_dir {
                         let Some((entry_data,metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
@@ -372,33 +371,7 @@ impl SimilarImages {
                             );
                         } else if metadata.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-                            let Some(file_name_lowercase) = get_lowercase_name(entry_data, &mut warnings) else {
-                                continue 'dir;
-                            };
-
-                            if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
-                                continue 'dir;
-                            }
-
-                            // Checking files
-                            if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
-                                let current_file_name = current_folder.join(entry_data.file_name());
-                                if self.excluded_items.is_excluded(&current_file_name) {
-                                    continue 'dir;
-                                }
-
-                                let fe: FileEntry = FileEntry {
-                                    path: current_file_name.clone(),
-                                    size: metadata.len(),
-                                    dimensions: String::new(),
-                                    modified_date: get_modified_time(&metadata, &mut warnings, &current_file_name, false),
-                                    hash: Vec::new(),
-                                    similarity: 0,
-                                };
-
-                                fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
-                            }
+                            self.add_file_entry(&metadata, current_folder, entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -421,6 +394,35 @@ impl SimilarImages {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         Common::print_time(start_time, SystemTime::now(), "check_for_similar_images");
         true
+    }
+
+    fn add_file_entry(&self, metadata: &Metadata, current_folder: &Path, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
+        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
+            return;
+        };
+
+        if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+            return;
+        }
+
+        // Checking files
+        if (self.minimal_file_size..=self.maximal_file_size).contains(&metadata.len()) {
+            let current_file_name = current_folder.join(entry_data.file_name());
+            if self.excluded_items.is_excluded(&current_file_name) {
+                return;
+            }
+
+            let fe: FileEntry = FileEntry {
+                path: current_file_name.clone(),
+                size: metadata.len(),
+                dimensions: String::new(),
+                modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+                hash: Vec::new(),
+                similarity: 0,
+            };
+
+            fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
+        }
     }
 
     // Cache algorithm:
@@ -472,80 +474,13 @@ impl SimilarImages {
 
         let mut vec_file_entry: Vec<(FileEntry, Vec<u8>)> = non_cached_files_to_check
             .into_par_iter()
-            .map(|(_s, mut file_entry)| {
+            .map(|(_s, file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
-
-                let image;
-
-                #[allow(clippy::never_loop)] // Required to implement nice if/else
-                'krztyna: loop {
-                    if RAW_IMAGE_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                        image = match get_dynamic_image_from_raw_image(&file_entry.path) {
-                            Some(t) => t,
-                            None => return Some(Some((file_entry, Vec::new()))),
-                        };
-                        break 'krztyna;
-                    }
-
-                    #[cfg(feature = "heif")]
-                    if HEIC_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                        image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
-                            Ok(t) => t,
-                            Err(_) => {
-                                return Some(Some((file_entry, Vec::new())));
-                            }
-                        };
-                        break 'krztyna;
-                    }
-
-                    // Normal image extension, when any other fail, not using if/else
-                    let result = panic::catch_unwind(|| {
-                        match image::open(file_entry.path.clone()) {
-                            Ok(t) => Ok(t),
-                            // Err(_inspected) => return Some(None), // Something is wrong with image,
-                            // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
-                            // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
-                            Err(_inspected) => Err(()),
-                        }
-                    });
-
-                    // If image crashed during opening, we just skip checking its hash and go on
-                    if let Ok(image_result) = result {
-                        if let Ok(image2) = image_result {
-                            image = image2;
-                        } else {
-                            return Some(Some((file_entry, Vec::new())));
-                        }
-                    } else {
-                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-                        println!("{message}");
-                        return Some(Some((file_entry, Vec::new())));
-                    }
-
-                    break 'krztyna;
-                }
-
-                let dimensions = image.dimensions();
-
-                file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
-
-                let hasher_config = HasherConfig::new()
-                    .hash_size(self.hash_size as u32, self.hash_size as u32)
-                    .hash_alg(self.hash_alg)
-                    .resize_filter(self.image_filter);
-                let hasher = hasher_config.to_hasher();
-
-                let hash = hasher.hash_image(&image);
-                let buf: Vec<u8> = hash.as_bytes().to_vec();
-
-                file_entry.hash = buf.clone();
-
-                Some(Some((file_entry, buf)))
+                Some(Some(self.collect_image_file_entry(file_entry)))
             })
             .while_some()
             .filter(Option::is_some)
@@ -593,6 +528,76 @@ impl SimilarImages {
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files");
         true
+    }
+    fn collect_image_file_entry(&self, mut file_entry: FileEntry) -> (FileEntry, Vec<u8>) {
+        let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
+
+        let image;
+
+        #[allow(clippy::never_loop)] // Required to implement nice if/else
+        'krztyna: loop {
+            if RAW_IMAGE_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                image = match get_dynamic_image_from_raw_image(&file_entry.path) {
+                    Some(t) => t,
+                    None => return (file_entry, Vec::new()),
+                };
+                break 'krztyna;
+            }
+
+            #[cfg(feature = "heif")]
+            if HEIC_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
+                image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        return (file_entry, Vec::new());
+                    }
+                };
+                break 'krztyna;
+            }
+
+            // Normal image extension, when any other fail, not using if/else
+            let result = panic::catch_unwind(|| {
+                match image::open(file_entry.path.clone()) {
+                    Ok(t) => Ok(t),
+                    // Err(_inspected) => return Some(None), // Something is wrong with image,
+                    // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
+                    // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
+                    Err(_inspected) => Err(()),
+                }
+            });
+
+            // If image crashed during opening, we just skip checking its hash and go on
+            if let Ok(image_result) = result {
+                if let Ok(image2) = image_result {
+                    image = image2;
+                } else {
+                    return (file_entry, Vec::new());
+                }
+            } else {
+                let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
+                println!("{message}");
+                return (file_entry, Vec::new());
+            }
+
+            break 'krztyna;
+        }
+
+        let dimensions = image.dimensions();
+
+        file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
+
+        let hasher_config = HasherConfig::new()
+            .hash_size(self.hash_size as u32, self.hash_size as u32)
+            .hash_alg(self.hash_alg)
+            .resize_filter(self.image_filter);
+        let hasher = hasher_config.to_hasher();
+
+        let hash = hasher.hash_image(&image);
+        let buf: Vec<u8> = hash.as_bytes().to_vec();
+
+        file_entry.hash = buf.clone();
+
+        (file_entry, buf)
     }
 
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
