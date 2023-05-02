@@ -425,16 +425,7 @@ impl SimilarImages {
         }
     }
 
-    // Cache algorithm:
-    // - Load data from file
-    // - Remove from data to search, already loaded entries from cache(size and modified datamust match)
-    // - Check hash of files which doesn't have saved entry
-    // - Join already read hashes with hashes which were read from file
-    // - Join all hashes and save it to file
-
-    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
-        let hash_map_modification = SystemTime::now();
-
+    fn hash_images_load_cache(&mut self) -> (HashMap<String, FileEntry>, HashMap<String, FileEntry>, HashMap<String, FileEntry>) {
         let loaded_hash_map;
 
         let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
@@ -463,6 +454,20 @@ impl SimilarImages {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);
         }
+        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+    }
+
+    // Cache algorithm:
+    // - Load data from file
+    // - Remove from data to search, already loaded entries from cache(size and modified datamust match)
+    // - Check hash of files which doesn't have saved entry
+    // - Join already read hashes with hashes which were read from file
+    // - Join all hashes and save it to file
+
+    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
+        let hash_map_modification = SystemTime::now();
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from cache and preparing them");
         let hash_map_modification = SystemTime::now();
