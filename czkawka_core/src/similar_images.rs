@@ -609,12 +609,12 @@ impl SimilarImages {
 
     fn compare_hashes(
         &self,
-        hashes_to_check: &[&ImHash],
+        hashes_to_check: &[ImHash],
         atomic_mode_counter: &Arc<AtomicUsize>,
         stop_receiver: Option<&Receiver<()>>,
         check_was_stopped: &AtomicBool,
         tolerance: u32,
-        hashes_with_multiple_images: &HashSet<&ImHash>,
+        hashes_with_multiple_images: &HashSet<ImHash>,
         all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
     ) -> Option<(HashMap<ImHash, u32>, HashMap<ImHash, (ImHash, u32)>)> {
         let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
@@ -668,6 +668,70 @@ impl SimilarImages {
         Some((hashes_parents, hashes_similarity))
     }
 
+    fn chunk_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>, all_hashes: &Vec<ImHash>) -> (Vec<Vec<ImHash>>, HashSet<ImHash>) {
+        let mut hashes_with_multiple_images: HashSet<ImHash> = Default::default(); // Fast way to check if hash have multiple images
+        let mut files_from_referenced_folders: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
+        let mut normal_files: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
+
+        let number_of_processors = get_number_of_threads();
+        let chunk_size;
+
+        let mut initial_hashes: Vec<ImHash> = Vec::new();
+        let mut additional_chunk_to_check: Vec<ImHash> = Default::default();
+
+        let mut chunks: Vec<Vec<ImHash>>;
+        if self.use_reference_folders {
+            let reference_directories = self.directories.reference_directories.clone();
+            all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
+                for file_entry in vec_file_entry {
+                    if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
+                        files_from_referenced_folders.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
+                    } else {
+                        normal_files.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
+                    }
+                }
+            });
+
+            for (hash, vec_files) in normal_files {
+                if vec_files.len() >= 2 {
+                    hashes_with_multiple_images.insert(hash.clone());
+                }
+                self.bktree.add(hash);
+            }
+            for (hash, vec_files) in files_from_referenced_folders {
+                if vec_files.len() >= 2 {
+                    hashes_with_multiple_images.insert(hash.clone());
+                }
+                initial_hashes.push(hash);
+            }
+            chunk_size = initial_hashes.len() / number_of_processors;
+
+            chunks = if chunk_size > 0 {
+                initial_hashes.chunks(chunk_size).map(<[std::vec::Vec<u8>]>::to_vec).collect::<Vec<_>>()
+            } else {
+                vec![initial_hashes]
+            };
+        } else {
+            for (hash, vec_files) in all_hashed_images {
+                if vec_files.len() >= 2 {
+                    additional_chunk_to_check.push(hash.clone());
+                    hashes_with_multiple_images.insert(hash.clone());
+                } else {
+                    self.bktree.add(hash.clone());
+                }
+            }
+            chunk_size = all_hashes.len() / number_of_processors;
+            chunks = if chunk_size > 0 {
+                all_hashes.chunks(chunk_size).map(<[Vec<u8>]>::to_vec).collect::<Vec<_>>()
+            } else {
+                vec![all_hashes.clone()]
+            };
+            chunks.push(additional_chunk_to_check);
+        }
+
+        (chunks, hashes_with_multiple_images)
+    }
+
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&futures::channel::mpsc::UnboundedSender<ProgressData>>) -> bool {
         if self.image_hashes.is_empty() {
             return true;
@@ -682,7 +746,7 @@ impl SimilarImages {
         let mut all_hashed_images = Default::default();
         mem::swap(&mut all_hashed_images, &mut self.image_hashes);
 
-        let all_hashes: Vec<_> = all_hashed_images.keys().collect();
+        let all_hashes: Vec<_> = all_hashed_images.clone().into_keys().collect();
 
         // Checking entries with tolerance 0 is really easy and fast, because only entries with same hashes needs to be checked
         if tolerance == 0 {
@@ -698,72 +762,14 @@ impl SimilarImages {
             let progress_thread_handle = self.prepare_thread_handler_similar_images(progress_sender, &progress_thread_run, &atomic_mode_counter, 2, 2, all_hashes.len());
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
-            let mut hashes_with_multiple_images: HashSet<_> = Default::default(); // Fast way to check if hash have multiple images
 
-            let mut files_from_referenced_folders = HashMap::new();
-            let mut normal_files = HashMap::new();
-
-            let number_of_processors = get_number_of_threads();
-            let chunk_size;
-            let mut chunks: Vec<&[&ImHash]>;
-
-            let mut initial_hashes: Vec<&ImHash> = Vec::new();
-            let mut additional_chunk_to_check: Vec<&ImHash> = Default::default();
-
-            if self.use_reference_folders {
-                let reference_directories = self.directories.reference_directories.clone();
-                all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                            files_from_referenced_folders.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
-                        } else {
-                            normal_files.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
-                        }
-                    }
-                });
-
-                for (hash, vec_files) in &normal_files {
-                    if vec_files.len() >= 2 {
-                        hashes_with_multiple_images.insert(hash);
-                    }
-                    self.bktree.add(hash.clone());
-                }
-                for (hash, vec_files) in &files_from_referenced_folders {
-                    if vec_files.len() >= 2 {
-                        hashes_with_multiple_images.insert(hash);
-                    }
-                    initial_hashes.push(hash);
-                }
-                chunk_size = initial_hashes.len() / number_of_processors;
-
-                chunks = if chunk_size > 0 {
-                    initial_hashes.chunks(chunk_size).collect::<Vec<_>>()
-                } else {
-                    vec![&initial_hashes]
-                };
-            } else {
-                for (hash, vec_files) in &all_hashed_images {
-                    if vec_files.len() >= 2 {
-                        additional_chunk_to_check.push(hash);
-                        hashes_with_multiple_images.insert(hash);
-                    } else {
-                        self.bktree.add(hash.clone());
-                    }
-                }
-                chunk_size = all_hashes.len() / number_of_processors;
-                chunks = if chunk_size > 0 {
-                    all_hashes.chunks(chunk_size).collect::<Vec<_>>()
-                } else {
-                    vec![&all_hashes]
-                };
-                chunks.push(&additional_chunk_to_check);
-            }
+            let (chunks, hashes_with_multiple_images) = self.chunk_hashes(&all_hashed_images, &all_hashes);
 
             let parts: Vec<_> = chunks
                 .into_par_iter()
                 .map(|hashes_to_check| {
                     self.compare_hashes(
-                        hashes_to_check,
+                        &hashes_to_check,
                         &atomic_mode_counter,
                         stop_receiver,
                         &check_was_stopped,
@@ -995,7 +1001,7 @@ impl SimilarImages {
 fn image_to_check<'a>(
     hashes_parents: &mut HashMap<ImHash, u32>,
     hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
-    hashes_with_multiple_images: &HashSet<&'a ImHash>,
+    hashes_with_multiple_images: &HashSet<ImHash>,
     hash_to_check: &'a ImHash,
     compared_hash: &'a ImHash,
     similarity: u32,
