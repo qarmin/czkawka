@@ -1,11 +1,10 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-
 use std::{mem, panic};
 
 use anyhow::Context;
@@ -14,7 +13,7 @@ use futures::channel::mpsc::UnboundedSender;
 use lofty::TaggedFileExt;
 use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
-use rusty_chromaprint::{Configuration, Fingerprinter};
+use rusty_chromaprint::{match_fingerprints, Configuration, Fingerprinter};
 use serde::{Deserialize, Serialize};
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::{DecoderOptions, CODEC_TYPE_NULL};
@@ -130,8 +129,8 @@ pub struct SameMusic {
     save_also_as_json: bool,
     check_type: AudioCheckMethod,
     hash_preset_config: Configuration,
-    minimal_segment_duration: f32,
-    minimum_similarity_score: f32,
+    minimum_segment_duration: f32,
+    maximum_difference: f64,
 }
 
 impl SameMusic {
@@ -160,8 +159,8 @@ impl SameMusic {
             save_also_as_json: false,
             check_type: AudioCheckMethod::Content,
             hash_preset_config: Configuration::preset_test1(), // TODO allow to change this
-            minimal_segment_duration: 10.0,
-            minimum_similarity_score: 2.0,
+            minimum_segment_duration: 10.0,
+            maximum_difference: 2.0,
         }
     }
 
@@ -185,6 +184,10 @@ impl SameMusic {
             }
             AudioCheckMethod::Content => {
                 if !self.calculate_fingerprint(stop_receiver, progress_sender) {
+                    self.stopped_search = true;
+                    return;
+                }
+                if !self.check_for_duplicate_fingerprints(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
@@ -672,6 +675,101 @@ impl SameMusic {
 
         self.duplicated_music_entries = old_duplicates;
 
+        self.filter_reference_folders();
+
+        if self.use_reference_folders {
+            for (_fe, vector) in &self.duplicated_music_entries_referenced {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.duplicated_music_entries {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
+
+        // Clear unused data
+        self.music_entries.clear();
+
+        true
+    }
+
+    fn compare_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {
+        // TODO do optimization
+        // Multithreading
+        // Grouping same hashes(not sure how common, but probably with a lot of files can save some time)
+        // Better algorithm of finding similar fingerprints
+
+        let mut used_paths: HashSet<String> = Default::default();
+        let configuration = &self.hash_preset_config;
+        let minimum_segment_duration = self.minimum_segment_duration;
+        let maximum_difference = self.maximum_difference;
+
+        let mut duplicated_music_entries = Vec::new();
+
+        for (f_idx, f_entry) in self.music_entries.iter().enumerate() {
+            if f_idx + 1 == self.music_entries.len() {
+                break;
+            }
+
+            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                return None;
+            }
+            atomic_counter.fetch_add(1, Ordering::Relaxed);
+
+            let f_string = f_entry.path.to_string_lossy().to_string();
+            if used_paths.contains(&f_string) {
+                continue;
+            }
+
+            let mut similar_fingerprints = Vec::new();
+            for e_entry in &self.music_entries[f_idx + 1..] {
+                let e_string = e_entry.path.to_string_lossy().to_string();
+                if used_paths.contains(&e_string) {
+                    continue;
+                }
+                let mut segments = match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration).unwrap();
+                segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
+                if !segments.is_empty() {
+                    similar_fingerprints.push(e_entry.clone());
+                    used_paths.insert(e_string);
+                }
+            }
+            if !similar_fingerprints.is_empty() {
+                used_paths.insert(f_string);
+                similar_fingerprints.push(f_entry.clone());
+                duplicated_music_entries.push(similar_fingerprints);
+            }
+        }
+        Some(duplicated_music_entries)
+    }
+
+    fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
+
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            2,
+            2,
+            self.music_to_check.len(),
+            CheckingMethod::None,
+        );
+
+        let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter) else {
+            send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+            return false;
+        };
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+
+        // TODO fill this with proper values
+        self.duplicated_music_entries = duplicated_music_entries;
+        // Use
         self.filter_reference_folders();
 
         if self.use_reference_folders {
