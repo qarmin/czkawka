@@ -723,23 +723,33 @@ impl SameMusic {
                 continue;
             }
 
-            let mut similar_fingerprints = Vec::new();
-            for e_entry in &self.music_entries[f_idx + 1..] {
-                let e_string = e_entry.path.to_string_lossy().to_string();
-                if used_paths.contains(&e_string) {
-                    continue;
+            let mut collected_similar_items = self.music_entries[f_idx + 1..]
+                .par_iter()
+                .filter_map(|e_entry| {
+                    let e_string = e_entry.path.to_string_lossy().to_string();
+                    if used_paths.contains(&e_string) {
+                        return None;
+                    }
+                    let mut segments = match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration).unwrap();
+                    segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
+                    if segments.is_empty() {
+                        None
+                    } else {
+                        Some((e_string, e_entry))
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            collected_similar_items.retain(|(path, _entry)| !used_paths.contains(path));
+            if !collected_similar_items.is_empty() {
+                let mut music_entries = Vec::new();
+                for (path, entry) in collected_similar_items {
+                    used_paths.insert(path);
+                    music_entries.push(entry.clone());
                 }
-                let mut segments = match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration).unwrap();
-                segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
-                if !segments.is_empty() {
-                    similar_fingerprints.push(e_entry.clone());
-                    used_paths.insert(e_string);
-                }
-            }
-            if !similar_fingerprints.is_empty() {
                 used_paths.insert(f_string);
-                similar_fingerprints.push(f_entry.clone());
-                duplicated_music_entries.push(similar_fingerprints);
+                music_entries.push(f_entry.clone());
+                duplicated_music_entries.push(music_entries);
             }
         }
         Some(duplicated_music_entries)
