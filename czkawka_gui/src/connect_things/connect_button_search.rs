@@ -451,6 +451,7 @@ pub fn connect_button_search(
                         mf.set_excluded_directory(excluded_directories);
                         mf.set_reference_directory(reference_directories);
                         mf.set_excluded_items(excluded_items);
+                        mf.set_use_cache(use_cache);
                         mf.set_minimal_file_size(minimal_file_size);
                         mf.set_maximal_file_size(maximal_file_size);
                         mf.set_allowed_extensions(allowed_extensions);
