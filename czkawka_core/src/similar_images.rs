@@ -400,16 +400,18 @@ impl SimilarImages {
             };
 
             for (name, file_entry) in &self.images_to_check {
-                #[allow(clippy::if_same_then_else)]
                 if !loaded_hash_map.contains_key(name) {
                     // If loaded data doesn't contains current image info
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                } else if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
-                    // When size or modification date of image changed, then it is clear that is different image
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
-                    // Checking may be omitted when already there is entry with same size and modification date
-                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                    let loaded_item = loaded_hash_map.get(name).unwrap();
+                    if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
+                        // When size or modification date of image changed, then it is clear that is different image
+                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                    } else {
+                        // Checking may be omitted when already there is entry with same size and modification date
+                        records_already_cached.insert(name.clone(), loaded_item.clone());
+                    }
                 }
             }
         } else {
