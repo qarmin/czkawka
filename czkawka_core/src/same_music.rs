@@ -65,7 +65,6 @@ pub struct MusicEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub fingerprint: Vec<u32>,
-    pub cache_type: u8, // 0 - means not even once saved to cache, 1 - saved when reading tags, 2 - saved when calculating fingerprint, 3 - both
 
     pub track_title: String,
     pub track_artist: String,
@@ -83,7 +82,6 @@ impl FileEntry {
             modified_date: self.modified_date,
 
             fingerprint: vec![],
-            cache_type: 0,
             track_title: String::new(),
             track_artist: String::new(),
             year: String::new(),
@@ -347,22 +345,18 @@ impl SameMusic {
         let mut non_cached_files_to_check: HashMap<String, MusicEntry> = Default::default();
 
         if self.use_cache {
-            loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache) {
+            loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache, checking_tags) {
                 Some(t) => t,
                 None => Default::default(),
             };
 
             for (name, file_entry) in &self.music_to_check {
-                #[allow(clippy::if_same_then_else)]
                 if !loaded_hash_map.contains_key(name) {
                     // If loaded data doesn't contains current image info
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
                     let loaded_item = loaded_hash_map.get(name).unwrap();
-                    if (checking_tags && [0, 2].contains(&loaded_item.cache_type)) || (!checking_tags && [0, 1].contains(&loaded_item.cache_type)) {
-                        // File was not checked with current mode
-                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                    } else if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
+                    if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
                         // When size or modification date of image changed, then it is clear that is different image
                         non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                     } else {
@@ -378,7 +372,7 @@ impl SameMusic {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: HashMap<String, MusicEntry>) {
+    fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: HashMap<String, MusicEntry>, checking_tags: bool) {
         if !self.use_cache {
             return;
         }
@@ -388,7 +382,7 @@ impl SameMusic {
         for file_entry in vec_file_entry {
             all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
         }
-        save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+        save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json, checking_tags);
     }
 
     fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
@@ -424,10 +418,6 @@ impl SameMusic {
                 };
                 music_entry.fingerprint = fingerprint;
 
-                if [0, 1].contains(&music_entry.cache_type) {
-                    music_entry.cache_type += 2;
-                }
-
                 Some(Some(music_entry))
             })
             .while_some()
@@ -442,7 +432,7 @@ impl SameMusic {
 
         self.music_entries = vec_file_entry.clone();
 
-        self.save_cache(vec_file_entry, loaded_hash_map);
+        self.save_cache(vec_file_entry, loaded_hash_map, false);
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -492,7 +482,7 @@ impl SameMusic {
 
         self.music_entries = vec_file_entry.clone();
 
-        self.save_cache(vec_file_entry, loaded_hash_map);
+        self.save_cache(vec_file_entry, loaded_hash_map, true);
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -590,9 +580,6 @@ impl SameMusic {
         music_entry.length = length;
         music_entry.genre = genre;
         music_entry.bitrate = bitrate;
-        if [0, 2].contains(&music_entry.cache_type) {
-            music_entry.cache_type += 1;
-        }
 
         Some(music_entry)
     }
@@ -791,8 +778,10 @@ impl SameMusic {
     }
 }
 
-fn save_cache_to_file(hashmap: &HashMap<String, MusicEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
+fn save_cache_to_file(hashmap: &HashMap<String, MusicEntry>, text_messages: &mut Messages, save_also_as_json: bool, checking_tags: bool) {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
+        open_cache_folder(get_cache_file(checking_tags), true, save_also_as_json, &mut text_messages.warnings)
+    {
         {
             let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
             if let Err(e) = bincode::serialize_into(writer, hashmap) {
@@ -818,8 +807,8 @@ fn save_cache_to_file(hashmap: &HashMap<String, MusicEntry>, text_messages: &mut
     }
 }
 
-fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<HashMap<String, MusicEntry>> {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
+fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, checking_tags: bool) -> Option<HashMap<String, MusicEntry>> {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(get_cache_file(checking_tags), false, true, &mut text_messages.warnings) {
         let mut hashmap_loaded_entries: HashMap<String, MusicEntry>;
         if let Some(file_handler) = file_handler {
             let reader = BufReader::new(file_handler);
@@ -923,8 +912,13 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
     Ok(printer.fingerprint().to_vec())
 }
 
-fn get_cache_file() -> String {
-    "cache_same_music.bin".to_string()
+// Using different cache folders, because loading cache just for finding duplicated tags would be really slow
+fn get_cache_file(checking_tags: bool) -> &'static str {
+    if checking_tags {
+        "cache_same_music_tags.bin"
+    } else {
+        "cache_same_music_fingerprints.bin"
+    }
 }
 
 impl Default for SameMusic {
