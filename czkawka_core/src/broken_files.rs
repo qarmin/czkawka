@@ -5,7 +5,7 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
+
 use std::{fs, mem, panic};
 
 use crossbeam_channel::Receiver;
@@ -18,7 +18,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_folder_children, create_crash_message, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common, PDF_FILES_EXTENSIONS,
+    check_folder_children, create_crash_message, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, PDF_FILES_EXTENSIONS,
 };
 use crate::common::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
@@ -193,7 +193,6 @@ impl BrokenFiles {
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -263,7 +262,6 @@ impl BrokenFiles {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        Common::print_time(start_time, SystemTime::now(), "check_files");
         true
     }
     fn get_file_entry(
@@ -405,8 +403,6 @@ impl BrokenFiles {
     }
 
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let system_time = SystemTime::now();
-
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -479,9 +475,7 @@ impl BrokenFiles {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Just connect loaded results with already calculated
-        for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry);
-        }
+        vec_file_entry.extend(records_already_cached.into_values());
 
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
@@ -503,8 +497,6 @@ impl BrokenFiles {
 
         self.information.number_of_broken_files = self.broken_files.len();
 
-        Common::print_time(system_time, SystemTime::now(), "sort_images - reading data from files in parallel");
-
         // Clean unused data
         self.files_to_check = Default::default();
 
@@ -513,8 +505,6 @@ impl BrokenFiles {
 
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
-
         match self.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.broken_files {
@@ -527,8 +517,6 @@ impl BrokenFiles {
                 //Just do nothing
             }
         }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -569,7 +557,6 @@ impl DebugPrint for BrokenFiles {
 
 impl SaveResults for BrokenFiles {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -601,7 +588,7 @@ impl SaveResults for BrokenFiles {
         } else {
             write!(writer, "Not found any broken files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
@@ -610,13 +597,10 @@ impl PrintResults for BrokenFiles {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         println!("Found {} broken files.\n", self.information.number_of_broken_files);
         for file_entry in &self.broken_files {
             println!("{} - {}", file_entry.path.display(), file_entry.error_string);
         }
-
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

@@ -5,7 +5,7 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
+
 use std::{mem, panic};
 
 use anyhow::Context;
@@ -24,7 +24,7 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::{create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
-use crate::common::{open_cache_folder, Common};
+use crate::common::{open_cache_folder};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -323,18 +323,14 @@ impl SameMusic {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(music_to_check) = grouped_file_entries.get(&()) {
                     for fe in music_to_check {
                         self.music_to_check.insert(fe.path.to_string_lossy().to_string(), fe.to_music_entry());
                     }
                 }
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files");
+
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -397,8 +393,6 @@ impl SameMusic {
     }
 
     fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
@@ -445,9 +439,7 @@ impl SameMusic {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Just connect loaded results with already calculated
-        for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry);
-        }
+        vec_file_entry.extend(records_already_cached.into_values());
 
         self.music_entries = vec_file_entry.clone();
 
@@ -458,14 +450,10 @@ impl SameMusic {
             return false;
         }
 
-        Common::print_time(start_time, SystemTime::now(), "read_tags");
-
         true
     }
 
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
@@ -501,9 +489,7 @@ impl SameMusic {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Just connect loaded results with already calculated
-        for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry);
-        }
+        vec_file_entry.extend(records_already_cached.into_values());
 
         self.music_entries = vec_file_entry.clone();
 
@@ -513,8 +499,6 @@ impl SameMusic {
         if check_was_stopped.load(Ordering::Relaxed) {
             return false;
         }
-
-        Common::print_time(start_time, SystemTime::now(), "read_tags");
 
         true
     }
@@ -616,7 +600,6 @@ impl SameMusic {
 
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
-        let start_time: SystemTime = SystemTime::now();
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
@@ -717,8 +700,6 @@ impl SameMusic {
             }
         }
 
-        Common::print_time(start_time, SystemTime::now(), "check_for_duplicate_tags");
-
         // Clear unused data
         self.music_entries.clear();
 
@@ -794,7 +775,7 @@ impl SameMusic {
 
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
+
         // TODO
         // match self.delete_method {
         //     DeleteMethod::Delete => {
@@ -808,8 +789,6 @@ impl SameMusic {
         //         //Just do nothing
         //     }
         // }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -989,7 +968,6 @@ impl DebugPrint for SameMusic {
 
 impl SaveResults for SameMusic {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -1021,7 +999,7 @@ impl SaveResults for SameMusic {
         } else {
             write!(writer, "Not found any empty files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
@@ -1030,7 +1008,6 @@ impl PrintResults for SameMusic {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         println!("Found {} similar music files.\n", self.duplicated_music_entries.len());
         for vec_file_entry in &self.duplicated_music_entries {
             for file_entry in vec_file_entry {
@@ -1047,8 +1024,6 @@ impl PrintResults for SameMusic {
             }
             println!();
         }
-
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

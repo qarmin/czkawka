@@ -5,13 +5,13 @@ use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
+
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
 
-use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
+use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
@@ -143,7 +143,6 @@ impl Temporary {
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -214,7 +213,6 @@ impl Temporary {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         self.information.number_of_temporary_files = self.temporary_files.len();
 
-        Common::print_time(start_time, SystemTime::now(), "check_files_size");
         true
     }
     pub fn get_file_entry(
@@ -248,8 +246,6 @@ impl Temporary {
 
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
-
         match self.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.temporary_files {
@@ -262,8 +258,6 @@ impl Temporary {
                 //Just do nothing
             }
         }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -304,7 +298,6 @@ impl DebugPrint for Temporary {
 
 impl SaveResults for Temporary {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -336,19 +329,16 @@ impl SaveResults for Temporary {
         } else {
             write!(writer, "Not found any temporary files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
 
 impl PrintResults for Temporary {
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         println!("Found {} temporary files.\n", self.information.number_of_temporary_files);
         for file_entry in &self.temporary_files {
             println!("{}", file_entry.path.display());
         }
-
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

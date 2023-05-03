@@ -11,7 +11,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
+
 use std::{fs, mem};
 
 use crossbeam_channel::Receiver;
@@ -21,7 +21,7 @@ use humansize::BINARY;
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
+use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -364,11 +364,7 @@ impl DuplicateFinder {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
 
@@ -413,7 +409,6 @@ impl DuplicateFinder {
                 }
                 self.calculate_name_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -459,11 +454,7 @@ impl DuplicateFinder {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
 
@@ -509,7 +500,6 @@ impl DuplicateFinder {
                 }
                 self.calculate_size_name_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_size_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -559,11 +549,7 @@ impl DuplicateFinder {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
 
@@ -586,7 +572,6 @@ impl DuplicateFinder {
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_size");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -723,7 +708,6 @@ impl DuplicateFinder {
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
-        let start_time: SystemTime = SystemTime::now();
         let check_type = self.hash_type;
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
@@ -790,8 +774,6 @@ impl DuplicateFinder {
         }
 
         self.prehash_save_cache_at_exit(loaded_hash_map, &pre_hash_results);
-
-        Common::print_time(start_time, SystemTime::now(), "check_files_hash - prehash");
 
         Some(())
     }
@@ -894,7 +876,6 @@ impl DuplicateFinder {
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         let check_type = self.hash_type;
-        let start_time: SystemTime = SystemTime::now();
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
@@ -958,7 +939,7 @@ impl DuplicateFinder {
                 }
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
+
         Some(())
     }
 
@@ -1045,7 +1026,6 @@ impl DuplicateFinder {
     /// Function to delete files, from filed before `BTreeMap`
     /// Using another function to delete files to avoid duplicates data
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
         if self.delete_method == DeleteMethod::None {
             return;
         }
@@ -1078,8 +1058,6 @@ impl DuplicateFinder {
                 panic!("Checking method should never be none.");
             }
         }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -1146,7 +1124,6 @@ impl DebugPrint for DuplicateFinder {
 
 impl SaveResults for DuplicateFinder {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -1274,7 +1251,7 @@ impl SaveResults for DuplicateFinder {
                 panic!();
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
@@ -1283,7 +1260,6 @@ impl PrintResults for DuplicateFinder {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
         let mut number_of_groups: u64 = 0;
 
@@ -1363,7 +1339,6 @@ impl PrintResults for DuplicateFinder {
                 panic!("Checking Method shouldn't be ever set to None");
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

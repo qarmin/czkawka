@@ -4,7 +4,7 @@ use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{UNIX_EPOCH};
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
@@ -280,12 +280,10 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
 
 pub enum DirTraversalResult<T: Ord + PartialOrd> {
     SuccessFiles {
-        start_time: SystemTime,
         warnings: Vec<String>,
         grouped_file_entries: BTreeMap<T, Vec<FileEntry>>,
     },
     SuccessFolders {
-        start_time: SystemTime,
         warnings: Vec<String>,
         folder_entries: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
     },
@@ -314,7 +312,6 @@ where
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
         let mut folder_entries: BTreeMap<PathBuf, FolderEntry> = BTreeMap::new();
-        let start_time: SystemTime = SystemTime::now();
 
         // Add root folders into result (only for empty folder collection)
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -468,12 +465,10 @@ where
 
         match collect {
             Collect::Files | Collect::InvalidSymlinks => DirTraversalResult::SuccessFiles {
-                start_time,
                 grouped_file_entries,
                 warnings: all_warnings,
             },
             Collect::EmptyFolders => DirTraversalResult::SuccessFolders {
-                start_time,
                 folder_entries,
                 warnings: all_warnings,
             },

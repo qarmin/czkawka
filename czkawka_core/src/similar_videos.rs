@@ -6,7 +6,7 @@ use std::mem;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
+
 
 use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
@@ -19,7 +19,7 @@ use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
-use crate::common::{open_cache_folder, Common};
+use crate::common::{open_cache_folder};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -242,7 +242,6 @@ impl SimilarVideos {
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
@@ -319,7 +318,7 @@ impl SimilarVideos {
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        Common::print_time(start_time, SystemTime::now(), "check_for_similar_videos");
+
         true
     }
 
@@ -385,12 +384,7 @@ impl SimilarVideos {
     }
 
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let hash_map_modification = SystemTime::now();
-
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from cache and preparing them");
-        let hash_map_modification = SystemTime::now();
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -435,13 +429,8 @@ impl SimilarVideos {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from files in parallel");
-        let hash_map_modification = SystemTime::now();
-
         // Just connect loaded results with already calculated hashes
-        for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry);
-        }
+        vec_file_entry.extend(records_already_cached.into_values());
 
         let mut hashmap_with_file_entries: HashMap<String, FileEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
@@ -469,9 +458,6 @@ impl SimilarVideos {
             return false;
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files");
-        let hash_map_modification = SystemTime::now();
-
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
         self.remove_from_reference_folders();
 
@@ -486,8 +472,6 @@ impl SimilarVideos {
                 self.information.number_of_groups += 1;
             }
         }
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap");
 
         // Clean unused data
         self.videos_hashes = Default::default();
@@ -590,7 +574,6 @@ impl DebugPrint for SimilarVideos {
 
 impl SaveResults for SimilarVideos {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -628,7 +611,6 @@ impl SaveResults for SimilarVideos {
             write!(writer, "Not found any similar videos.").unwrap();
         }
 
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }

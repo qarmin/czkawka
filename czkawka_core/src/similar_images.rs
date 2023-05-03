@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
     check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, prepare_thread_handler_common,
-    send_info_and_wait_for_ending_all_threads, Common, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
@@ -275,7 +275,6 @@ impl SimilarImages {
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
@@ -355,7 +354,7 @@ impl SimilarImages {
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        Common::print_time(start_time, SystemTime::now(), "check_for_similar_images");
+
         true
     }
 
@@ -428,12 +427,7 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let hash_map_modification = SystemTime::now();
-
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from cache and preparing them");
-        let hash_map_modification = SystemTime::now();
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -465,11 +459,8 @@ impl SimilarImages {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - reading data from files in parallel");
-        let hash_map_modification = SystemTime::now();
-
         // Just connect loaded results with already calculated hashes
-        for (_name, file_entry) in records_already_cached {
+        for file_entry in records_already_cached.into_values() {
             vec_file_entry.push((file_entry.clone(), file_entry.hash));
         }
 
@@ -502,7 +493,6 @@ impl SimilarImages {
             return false;
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - saving data to files");
         true
     }
     fn collect_image_file_entry(&self, mut file_entry: FileEntry) -> (FileEntry, ImHash) {
@@ -813,7 +803,6 @@ impl SimilarImages {
             return true;
         }
 
-        let hash_map_modification = SystemTime::now();
         let tolerance = self.similarity;
 
         // Results
@@ -873,8 +862,6 @@ impl SimilarImages {
         self.exclude_items_with_same_size();
 
         self.check_for_reference_folders();
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_images - selecting data from HashMap");
 
         if self.use_reference_folders {
             for (_fe, vector) in &self.similar_referenced_vectors {
@@ -1077,7 +1064,6 @@ impl DebugPrint for SimilarImages {
 
 impl SaveResults for SimilarImages {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -1123,7 +1109,6 @@ impl SaveResults for SimilarImages {
             write!(writer, "Not found any similar images.").unwrap();
         }
 
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }

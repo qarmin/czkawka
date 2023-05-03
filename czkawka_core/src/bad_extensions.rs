@@ -6,14 +6,14 @@ use std::mem;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
+
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
-use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
+use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -298,16 +298,12 @@ impl BadExtensions {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(files_to_check) = grouped_file_entries.get(&()) {
                     self.files_to_check = files_to_check.clone();
                 }
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files");
+
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -318,8 +314,6 @@ impl BadExtensions {
     }
 
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let system_time = SystemTime::now();
-
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
@@ -356,8 +350,6 @@ impl BadExtensions {
         }
 
         self.information.number_of_files_with_bad_extension = self.bad_extensions_files.len();
-
-        Common::print_time(system_time, SystemTime::now(), "bad extension finding");
 
         // Clean unused data
         self.files_to_check = Default::default();
@@ -525,7 +517,6 @@ impl DebugPrint for BadExtensions {
 
 impl SaveResults for BadExtensions {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -557,7 +548,7 @@ impl SaveResults for BadExtensions {
         } else {
             write!(writer, "Not found any files with invalid extension.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
@@ -566,12 +557,9 @@ impl PrintResults for BadExtensions {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
         for file_entry in &self.bad_extensions_files {
             println!("{} ----- {}", file_entry.path.display(), file_entry.proper_extensions);
         }
-
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
