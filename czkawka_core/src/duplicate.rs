@@ -750,11 +750,11 @@ impl DuplicateFinder {
                 let mut buffer = [0u8; 1024 * 2];
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    check_was_stopped.store(true, Ordering::Relaxed);
+                    return None;
+                }
                 for file_entry in vec_file_entry {
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                        check_was_stopped.store(true, Ordering::Relaxed);
-                        return None;
-                    }
                     match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
                         Ok(hash_string) => {
                             hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new).push(file_entry.clone());
