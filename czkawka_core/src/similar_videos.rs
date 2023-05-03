@@ -440,7 +440,7 @@ impl SimilarVideos {
 
         // Just connect loaded results with already calculated hashes
         for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry.clone());
+            vec_file_entry.push(file_entry);
         }
 
         let mut hashmap_with_file_entries: HashMap<String, FileEntry> = Default::default();

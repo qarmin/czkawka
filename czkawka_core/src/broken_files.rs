@@ -480,7 +480,7 @@ impl BrokenFiles {
 
         // Just connect loaded results with already calculated
         for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry.clone());
+            vec_file_entry.push(file_entry);
         }
 
         if self.use_cache {

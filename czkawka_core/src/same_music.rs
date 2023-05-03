@@ -8,12 +8,20 @@ use std::sync::Arc;
 use std::time::SystemTime;
 use std::{mem, panic};
 
+use anyhow::Context;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use lofty::TaggedFileExt;
 use lofty::{read_from, AudioFile, ItemKey};
 use rayon::prelude::*;
+use rusty_chromaprint::{Configuration, Fingerprinter};
 use serde::{Deserialize, Serialize};
+use symphonia::core::audio::SampleBuffer;
+use symphonia::core::codecs::{DecoderOptions, CODEC_TYPE_NULL};
+use symphonia::core::formats::FormatOptions;
+use symphonia::core::io::MediaSourceStream;
+use symphonia::core::meta::MetadataOptions;
+use symphonia::core::probe::Hint;
 
 use crate::common::{create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
 use crate::common::{open_cache_folder, Common};
@@ -56,6 +64,8 @@ pub struct MusicEntry {
 
     pub path: PathBuf,
     pub modified_date: u64,
+    pub fingerprint: Vec<u32>,
+    pub cache_type: u8, // 0 - means not even once saved to cache, 1 - saved when reading tags, 2 - saved when calculating fingerprint, 3 - both
 
     pub track_title: String,
     pub track_artist: String,
@@ -72,6 +82,8 @@ impl FileEntry {
             path: self.path.clone(),
             modified_date: self.modified_date,
 
+            fingerprint: vec![],
+            cache_type: 0,
             track_title: String::new(),
             track_artist: String::new(),
             year: String::new(),
@@ -119,6 +131,9 @@ pub struct SameMusic {
     use_reference_folders: bool,
     save_also_as_json: bool,
     check_type: AudioCheckMethod,
+    hash_preset_config: Configuration,
+    minimal_segment_duration: f32,
+    minimum_similarity_score: f32,
 }
 
 impl SameMusic {
@@ -146,6 +161,9 @@ impl SameMusic {
             duplicated_music_entries_referenced: vec![],
             save_also_as_json: false,
             check_type: AudioCheckMethod::Tags,
+            hash_preset_config: Configuration::preset_test1(), // TODO allow to change this
+            minimal_segment_duration: 10.0,
+            minimum_similarity_score: 2.0,
         }
     }
 
@@ -168,7 +186,10 @@ impl SameMusic {
                 }
             }
             AudioCheckMethod::Content => {
-                unimplemented!();
+                if !self.calculate_fingerprint(stop_receiver, progress_sender) {
+                    self.stopped_search = true;
+                    return;
+                }
             }
         }
         self.delete_files();
@@ -323,7 +344,7 @@ impl SameMusic {
         }
     }
 
-    fn read_tags_load_cache(&mut self) -> (HashMap<String, MusicEntry>, HashMap<String, MusicEntry>, HashMap<String, MusicEntry>) {
+    fn load_cache(&mut self, checking_tags: bool) -> (HashMap<String, MusicEntry>, HashMap<String, MusicEntry>, HashMap<String, MusicEntry>) {
         let loaded_hash_map;
 
         let mut records_already_cached: HashMap<String, MusicEntry> = Default::default();
@@ -338,12 +359,19 @@ impl SameMusic {
             for (name, file_entry) in &self.music_to_check {
                 #[allow(clippy::if_same_then_else)]
                 if !loaded_hash_map.contains_key(name) {
+                    println!("Checking completelly not cached item");
                     // If loaded data doesn't contains current image info
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                } else if (checking_tags && ![1, 3].contains(&file_entry.cache_type)) || (!checking_tags && ![2, 3].contains(&file_entry.cache_type)) {
+                    println!("File was not checked with current mode");
+                    // File was not cheched with current mode
+                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
+                    println!("File have different size or modified date");
                     // When size or modification date of image changed, then it is clear that is different image
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
+                    println!("File was cached");
                     // Checking may be omitted when already there is entry with same size and modification date
                     records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
                 }
@@ -355,7 +383,7 @@ impl SameMusic {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    fn read_tags_save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: HashMap<String, MusicEntry>) {
+    fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: HashMap<String, MusicEntry>) {
         if !self.use_cache {
             return;
         }
@@ -368,10 +396,77 @@ impl SameMusic {
         save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
     }
 
+    fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        let start_time: SystemTime = SystemTime::now();
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
+
+        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
+
+        let progress_thread_run = Arc::new(AtomicBool::new(true));
+        let atomic_counter = Arc::new(AtomicUsize::new(0));
+        let progress_thread_handle = prepare_thread_handler_common(
+            progress_sender,
+            &progress_thread_run,
+            &atomic_counter,
+            1,
+            2,
+            non_cached_files_to_check.len(),
+            CheckingMethod::None,
+        );
+        let configuration = &self.hash_preset_config;
+
+        // Clean for duplicate files
+        let mut vec_file_entry = non_cached_files_to_check
+            .into_par_iter()
+            .map(|(path, mut music_entry)| {
+                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    check_was_stopped.store(true, Ordering::Relaxed);
+                    return None;
+                }
+
+                let Ok(fingerprint)  = calc_fingerprint_helper(path, configuration) else  {
+                        return Some(None);
+                };
+                music_entry.fingerprint = fingerprint;
+
+                if [0, 1].contains(&music_entry.cache_type) {
+                    music_entry.cache_type += 2;
+                }
+
+                Some(Some(music_entry))
+            })
+            .while_some()
+            .filter(Option::is_some)
+            .map(Option::unwrap)
+            .collect::<Vec<_>>();
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+
+        // Just connect loaded results with already calculated
+        for (_name, file_entry) in records_already_cached {
+            vec_file_entry.push(file_entry);
+        }
+
+        self.music_entries = vec_file_entry.clone();
+
+        self.save_cache(vec_file_entry, loaded_hash_map);
+
+        // Break if stop was clicked after saving to cache
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return false;
+        }
+
+        Common::print_time(start_time, SystemTime::now(), "read_tags");
+
+        true
+    }
+
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let start_time: SystemTime = SystemTime::now();
 
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.read_tags_load_cache();
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
@@ -407,12 +502,12 @@ impl SameMusic {
 
         // Just connect loaded results with already calculated
         for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry.clone());
+            vec_file_entry.push(file_entry);
         }
 
         self.music_entries = vec_file_entry.clone();
 
-        self.read_tags_save_cache(vec_file_entry, loaded_hash_map);
+        self.save_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -512,6 +607,9 @@ impl SameMusic {
         music_entry.length = length;
         music_entry.genre = genre;
         music_entry.bitrate = bitrate;
+        if [0, 2].contains(&music_entry.cache_type) {
+            music_entry.cache_type += 1;
+        }
 
         Some(music_entry)
     }
@@ -779,6 +877,72 @@ fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: boo
         return Some(hashmap_loaded_entries);
     }
     None
+}
+
+// TODO this should be taken from rusty-chromaprint repo, not reimplemented here
+fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> anyhow::Result<Vec<u32>> {
+    let path = path.as_ref();
+    let src = File::open(path).context("failed to open file")?;
+    let mss = MediaSourceStream::new(Box::new(src), Default::default());
+
+    let mut hint = Hint::new();
+    if let Some(ext) = path.extension().and_then(std::ffi::OsStr::to_str) {
+        hint.with_extension(ext);
+    }
+
+    let meta_opts: MetadataOptions = Default::default();
+    let fmt_opts: FormatOptions = Default::default();
+
+    let probed = symphonia::default::get_probe().format(&hint, mss, &fmt_opts, &meta_opts).context("unsupported format")?;
+
+    let mut format = probed.format;
+
+    let track = format
+        .tracks()
+        .iter()
+        .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
+        .context("no supported audio tracks")?;
+
+    let dec_opts: DecoderOptions = Default::default();
+
+    let mut decoder = symphonia::default::get_codecs().make(&track.codec_params, &dec_opts).context("unsupported codec")?;
+
+    let track_id = track.id;
+
+    let mut printer = Fingerprinter::new(config);
+    let sample_rate = track.codec_params.sample_rate.context("missing sample rate")?;
+    let channels = track.codec_params.channels.context("missing audio channels")?.count() as u32;
+    printer.start(sample_rate, channels).context("initializing fingerprinter")?;
+
+    let mut sample_buf = None;
+
+    loop {
+        let Ok(packet) = format.next_packet() else  { break };
+
+        if packet.track_id() != track_id {
+            continue;
+        }
+
+        match decoder.decode(&packet) {
+            Ok(audio_buf) => {
+                if sample_buf.is_none() {
+                    let spec = *audio_buf.spec();
+                    let duration = audio_buf.capacity() as u64;
+                    sample_buf = Some(SampleBuffer::<i16>::new(duration, spec));
+                }
+
+                if let Some(buf) = &mut sample_buf {
+                    buf.copy_interleaved_ref(audio_buf);
+                    printer.consume(buf.samples());
+                }
+            }
+            Err(symphonia::core::errors::Error::DecodeError(_)) => (),
+            Err(_) => break,
+        }
+    }
+
+    printer.finish();
+    Ok(printer.fingerprint().to_vec())
 }
 
 fn get_cache_file() -> String {
