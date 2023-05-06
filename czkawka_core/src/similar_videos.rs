@@ -517,7 +517,7 @@ impl SimilarVideos {
                 .into_iter()
                 .filter_map(|vec_file_entry| {
                     let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
-                        vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
+                        vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                     if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                         None

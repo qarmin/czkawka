@@ -34,6 +34,8 @@ pub enum CheckingMethod {
     SizeName,
     Size,
     Hash,
+    AudioTags,
+    AudioContent,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

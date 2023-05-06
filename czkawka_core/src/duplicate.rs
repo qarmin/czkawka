@@ -182,9 +182,7 @@ impl DuplicateFinder {
                     return;
                 }
             }
-            CheckingMethod::None => {
-                panic!();
-            }
+            _ => panic!(),
         }
         self.delete_files();
         self.debug_print();
@@ -384,7 +382,7 @@ impl DuplicateFinder {
                         .into_iter()
                         .filter_map(|(_name, vec_file_entry)| {
                             let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
-                                vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
+                                vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                             if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                                 None
@@ -464,7 +462,7 @@ impl DuplicateFinder {
                         .into_iter()
                         .filter_map(|(_size, vec_file_entry)| {
                             let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
-                                vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
+                                vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                             if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                                 None
@@ -584,7 +582,7 @@ impl DuplicateFinder {
                 .into_iter()
                 .filter_map(|(_size, vec_file_entry)| {
                     let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
-                        vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
+                        vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                     if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                         None
@@ -921,7 +919,7 @@ impl DuplicateFinder {
                     let mut all_results_with_same_size = Vec::new();
                     for vec_file_entry in vec_vec_file_entry {
                         let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
-                            vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
+                            vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                         if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                             continue;
@@ -1012,10 +1010,7 @@ impl DuplicateFinder {
                     let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                 }
             }
-            CheckingMethod::None => {
-                //Just do nothing
-                panic!("Checking method should never be none.");
-            }
+            _ => panic!(),
         }
     }
 }
@@ -1206,9 +1201,7 @@ impl SaveResults for DuplicateFinder {
                     write!(writer, "Not found any duplicates.").unwrap();
                 }
             }
-            CheckingMethod::None => {
-                panic!();
-            }
+            _ => panic!(),
         }
 
         true
@@ -1294,9 +1287,7 @@ impl PrintResults for DuplicateFinder {
                     println!();
                 }
             }
-            CheckingMethod::None => {
-                panic!("Checking Method shouldn't be ever set to None");
-            }
+            _ => panic!(),
         }
     }
 }

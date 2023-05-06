@@ -306,7 +306,7 @@ impl Directories {
     }
 
     #[must_use]
-    pub fn is_referenced_directory(&self, path: &Path) -> bool {
+    pub fn is_in_referenced_directory(&self, path: &Path) -> bool {
         self.reference_directories.iter().any(|e| path.starts_with(e))
     }
 

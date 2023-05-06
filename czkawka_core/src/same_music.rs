@@ -37,12 +37,6 @@ pub enum DeleteMethod {
     Delete,
 }
 
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum AudioCheckMethod {
-    Tags,
-    Content,
-}
-
 bitflags! {
     #[derive(PartialEq, Copy, Clone, Debug)]
     pub struct MusicSimilarity : u32 {
@@ -133,7 +127,7 @@ pub struct SameMusic {
     delete_outdated_cache: bool, // TODO add this to GUI
     use_reference_folders: bool,
     save_also_as_json: bool,
-    check_type: AudioCheckMethod,
+    check_type: CheckingMethod,
     hash_preset_config: Configuration,
     minimum_segment_duration: f32,
     maximum_difference: f64,
@@ -163,7 +157,7 @@ impl SameMusic {
             use_reference_folders: false,
             duplicated_music_entries_referenced: vec![],
             save_also_as_json: false,
-            check_type: AudioCheckMethod::Content,
+            check_type: CheckingMethod::AudioContent,
             hash_preset_config: Configuration::preset_test1(), // TODO allow to change this
             minimum_segment_duration: 10.0,
             maximum_difference: 2.0,
@@ -178,7 +172,7 @@ impl SameMusic {
             return;
         }
         match self.check_type {
-            AudioCheckMethod::Tags => {
+            CheckingMethod::AudioTags => {
                 if !self.read_tags(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
@@ -188,7 +182,7 @@ impl SameMusic {
                     return;
                 }
             }
-            AudioCheckMethod::Content => {
+            CheckingMethod::AudioContent => {
                 if !self.calculate_fingerprint(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
@@ -198,6 +192,7 @@ impl SameMusic {
                     return;
                 }
             }
+            _ => panic!(),
         }
         self.delete_files();
         self.debug_print();
@@ -703,51 +698,44 @@ impl SameMusic {
         true
     }
 
-    // fn split_fingerprints_to_check(&self) -> (Vec<MusicEntry>, Vec<MusicEntry>) {
-    //     let mut base_files: Vec<MusicEntry> = Vec::new();
-    //     let mut files_to_compare: Vec<MusicEntry> = Vec::new();
-    //
-    //     if self.use_reference_folders {
-    //         // base_files =
-    //     } else {
-    //         base_files = self.music_entries.clone();
-    //         files_to_compare = self.music_entries.clone();
-    //     }
-    //
-    //     (base_files, files_to_compare)
-    // }
+    fn split_fingerprints_to_check(&mut self) -> (Vec<MusicEntry>, Vec<MusicEntry>) {
+        let base_files: Vec<MusicEntry>;
+        let files_to_compare: Vec<MusicEntry>;
 
-    // fn compare_improved(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {}
+        if self.use_reference_folders {
+            (base_files, files_to_compare) = mem::take(&mut self.music_entries)
+                .into_iter()
+                .partition(|f| self.directories.is_in_referenced_directory(f.get_path()));
+        } else {
+            base_files = self.music_entries.clone();
+            files_to_compare = mem::take(&mut self.music_entries);
+        }
+
+        (base_files, files_to_compare)
+    }
 
     fn compare_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {
-        // TODO do optimization
-        // Multithreading
-        // Grouping same hashes(not sure how common, but probably with a lot of files can save some time)
-        // Better algorithm of finding similar fingerprints
-
         let mut used_paths: HashSet<String> = Default::default();
+
+        let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let configuration = &self.hash_preset_config;
         let minimum_segment_duration = self.minimum_segment_duration;
         let maximum_difference = self.maximum_difference;
 
         let mut duplicated_music_entries = Vec::new();
 
-        for (f_idx, f_entry) in self.music_entries.iter().enumerate() {
-            if f_idx + 1 == self.music_entries.len() {
-                break;
-            }
-
+        for f_entry in base_files {
+            atomic_counter.fetch_add(1, Ordering::Relaxed);
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 return None;
             }
-            atomic_counter.fetch_add(1, Ordering::Relaxed);
 
             let f_string = f_entry.path.to_string_lossy().to_string();
             if used_paths.contains(&f_string) {
                 continue;
             }
 
-            let mut collected_similar_items = self.music_entries[f_idx + 1..]
+            let mut collected_similar_items = files_to_compare
                 .par_iter()
                 .filter_map(|e_entry| {
                     let e_string = e_entry.path.to_string_lossy().to_string();
@@ -779,6 +767,66 @@ impl SameMusic {
         Some(duplicated_music_entries)
     }
 
+    // fn compare_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {
+    //     // TODO do optimization
+    //     // Multithreading
+    //     // Grouping same hashes(not sure how common, but probably with a lot of files can save some time)
+    //     // Better algorithm of finding similar fingerprints
+    //
+    //     let mut used_paths: HashSet<String> = Default::default();
+    //     let configuration = &self.hash_preset_config;
+    //     let minimum_segment_duration = self.minimum_segment_duration;
+    //     let maximum_difference = self.maximum_difference;
+    //
+    //     let mut duplicated_music_entries = Vec::new();
+    //
+    //     for (f_idx, f_entry) in self.music_entries.iter().enumerate() {
+    //         if f_idx + 1 == self.music_entries.len() {
+    //             break;
+    //         }
+    //
+    //         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+    //             return None;
+    //         }
+    //         atomic_counter.fetch_add(1, Ordering::Relaxed);
+    //
+    //         let f_string = f_entry.path.to_string_lossy().to_string();
+    //         if used_paths.contains(&f_string) {
+    //             continue;
+    //         }
+    //
+    //         let mut collected_similar_items = self.music_entries[f_idx + 1..]
+    //             .par_iter()
+    //             .filter_map(|e_entry| {
+    //                 let e_string = e_entry.path.to_string_lossy().to_string();
+    //                 if used_paths.contains(&e_string) {
+    //                     return None;
+    //                 }
+    //                 let mut segments = match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration).unwrap();
+    //                 segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
+    //                 if segments.is_empty() {
+    //                     None
+    //                 } else {
+    //                     Some((e_string, e_entry))
+    //                 }
+    //             })
+    //             .collect::<Vec<_>>();
+    //
+    //         collected_similar_items.retain(|(path, _entry)| !used_paths.contains(path));
+    //         if !collected_similar_items.is_empty() {
+    //             let mut music_entries = Vec::new();
+    //             for (path, entry) in collected_similar_items {
+    //                 used_paths.insert(path);
+    //                 music_entries.push(entry.clone());
+    //             }
+    //             used_paths.insert(f_string);
+    //             music_entries.push(f_entry.clone());
+    //             duplicated_music_entries.push(music_entries);
+    //         }
+    //     }
+    //     Some(duplicated_music_entries)
+    // }
+
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
 
@@ -801,9 +849,7 @@ impl SameMusic {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        // TODO fill this with proper values
         self.duplicated_music_entries = duplicated_music_entries;
-        // Use
 
         if self.use_reference_folders {
             self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.directories);

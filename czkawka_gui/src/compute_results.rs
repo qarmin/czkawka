@@ -1164,7 +1164,7 @@ fn computer_duplicate_finder(
                 duplicates_size = information.lost_space_by_size;
                 duplicates_group = information.number_of_groups_by_size_name;
             }
-            CheckingMethod::None => {
+            _ => {
                 panic!();
             }
         }
@@ -1251,7 +1251,7 @@ fn computer_duplicate_finder(
                             }
                         }
                     }
-                    CheckingMethod::None => {
+                    _ => {
                         panic!();
                     }
                 }
@@ -1310,7 +1310,7 @@ fn computer_duplicate_finder(
                             }
                         }
                     }
-                    CheckingMethod::None => {
+                    _ => {
                         panic!();
                     }
                 }
