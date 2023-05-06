@@ -436,22 +436,22 @@ impl SameMusic {
     }
 
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let (loaded_hash_map, records_already_cached, mut non_cached_files_to_check) = self.load_cache(true);
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type);
 
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
-            .par_iter_mut()
-            .map(|(path, music_entry)| {
+            .into_par_iter()
+            .map(|(path, mut music_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                if self.read_single_file_tag(path, music_entry) {
-                    Some(Some(music_entry.clone()))
+                if self.read_single_file_tag(&path, &mut music_entry) {
+                    Some(Some(music_entry))
                 } else {
                     Some(None)
                 }
