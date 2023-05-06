@@ -392,9 +392,10 @@ pub fn prepare_thread_handler_common(
     max_stage: u8,
     max_value: usize,
     checking_method: CheckingMethod,
-) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>) {
+) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
     let progress_thread_run = Arc::new(AtomicBool::new(true));
     let atomic_counter = Arc::new(AtomicUsize::new(0));
+    let check_was_stopped = AtomicBool::new(false);
     let progress_thread_sender = if let Some(progress_sender) = progress_sender {
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
@@ -417,7 +418,7 @@ pub fn prepare_thread_handler_common(
     } else {
         thread::spawn(|| {})
     };
-    (progress_thread_sender, progress_thread_run, atomic_counter)
+    (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
 }
 
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {

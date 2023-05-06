@@ -313,9 +313,8 @@ impl BadExtensions {
     }
 
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
-        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None);
 
         let files_to_check = mem::take(&mut self.files_to_check);
 

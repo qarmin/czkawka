@@ -9,7 +9,7 @@ use std::io::{BufReader, BufWriter};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::Ordering;
 
 use std::{fs, mem};
 
@@ -675,9 +675,7 @@ impl DuplicateFinder {
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let check_type = self.hash_type;
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
-        let (progress_thread_handle, progress_thread_run, atomic_counter) =
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 2, self.files_with_identical_size.values().map(Vec::len).sum(), self.check_method);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
@@ -830,11 +828,9 @@ impl DuplicateFinder {
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
         let check_type = self.hash_type;
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter) =
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 2, 2, pre_checked_map.values().map(Vec::len).sum(), self.check_method);
 
         ///////////////////////////////////////////////////////////////////////////// HASHING START

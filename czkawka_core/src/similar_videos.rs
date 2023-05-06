@@ -4,8 +4,7 @@ use std::io::Write;
 use std::io::*;
 use std::mem;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::atomic::Ordering;
 
 use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
@@ -262,7 +261,7 @@ impl SimilarVideos {
             folders_to_check.push(id.clone());
         }
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) = prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -390,11 +389,7 @@ impl SimilarVideos {
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-        let _progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let _atomic_counter = Arc::new(AtomicUsize::new(0));
-        let (progress_thread_handle, progress_thread_run, atomic_counter) =
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None);
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check

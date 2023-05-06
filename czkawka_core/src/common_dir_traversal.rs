@@ -338,7 +338,8 @@ where
         // Add root folders for finding
         folders_to_check.extend(self.root_dirs);
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method);
 
         let DirTraversal {
             collect,

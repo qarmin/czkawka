@@ -148,7 +148,7 @@ impl BigFile {
             folders_to_check.push(id.clone());
         }
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) = prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
