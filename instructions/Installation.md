@@ -32,7 +32,7 @@ One very straight-forward way to do this is by using [Homebrew](https://brew.sh/
 Installation in the terminal:
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif
+brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif pkg-config
 ```
 After that, go to the location where you downloaded Czkawka and add the `executable` permission to this file.
 ```shell
@@ -51,7 +51,7 @@ Prebuilt binaries are available only for x86_64, so if you use ARM e.g. Mac M1/M
 # Install Rust and Libraries
 brew install rustup
 rustup-init
-brew install gtk4 adwaita-icon-theme librsvg libheif
+brew install gtk4 adwaita-icon-theme librsvg libheif pkg-config
 ```
 ```
 # Clone and Build
