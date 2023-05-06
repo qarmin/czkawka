@@ -22,6 +22,7 @@ use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 use crate::common_dir_traversal::{CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
+use crate::common_traits::ResultEntry;
 
 static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
 
@@ -362,6 +363,25 @@ pub fn check_folder_children(
     }
 
     dir_result.push(next_folder);
+}
+
+#[must_use]
+pub fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
+where
+    T: ResultEntry,
+{
+    entries_to_check
+        .into_iter()
+        .filter_map(|vec_file_entry| {
+            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry.into_iter().partition(|e| directories.is_referenced_directory(e.get_path()));
+
+            if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                None
+            } else {
+                Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+            }
+        })
+        .collect::<Vec<(T, Vec<T>)>>()
 }
 
 pub fn prepare_thread_handler_common(

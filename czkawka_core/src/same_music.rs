@@ -22,8 +22,8 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
-use crate::common::open_cache_folder;
 use crate::common::{create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
+use crate::common::{filter_reference_folders_generic, open_cache_folder};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -71,6 +71,12 @@ pub struct MusicEntry {
     pub length: String,
     pub genre: String,
     pub bitrate: u32,
+}
+
+impl ResultEntry for MusicEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
 }
 
 impl FileEntry {
@@ -650,9 +656,8 @@ impl SameMusic {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
-
+            let old_duplicates_len = old_duplicates.len();
             for vec_file_entry in old_duplicates {
-                atomic_counter.fetch_add(1, Ordering::Relaxed);
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
                 for file_entry in vec_file_entry {
                     if file_entry.bitrate != 0 {
@@ -668,6 +673,7 @@ impl SameMusic {
                     }
                 }
             }
+            atomic_counter.fetch_add(old_duplicates_len, Ordering::Relaxed);
             old_duplicates = new_duplicates;
         }
 
@@ -675,7 +681,9 @@ impl SameMusic {
 
         self.duplicated_music_entries = old_duplicates;
 
-        self.filter_reference_folders();
+        if self.use_reference_folders {
+            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.directories);
+        }
 
         if self.use_reference_folders {
             for (_fe, vector) in &self.duplicated_music_entries_referenced {
@@ -694,6 +702,22 @@ impl SameMusic {
 
         true
     }
+
+    // fn split_fingerprints_to_check(&self) -> (Vec<MusicEntry>, Vec<MusicEntry>) {
+    //     let mut base_files: Vec<MusicEntry> = Vec::new();
+    //     let mut files_to_compare: Vec<MusicEntry> = Vec::new();
+    //
+    //     if self.use_reference_folders {
+    //         // base_files =
+    //     } else {
+    //         base_files = self.music_entries.clone();
+    //         files_to_compare = self.music_entries.clone();
+    //     }
+    //
+    //     (base_files, files_to_compare)
+    // }
+
+    // fn compare_improved(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {}
 
     fn compare_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {
         // TODO do optimization
@@ -780,7 +804,10 @@ impl SameMusic {
         // TODO fill this with proper values
         self.duplicated_music_entries = duplicated_music_entries;
         // Use
-        self.filter_reference_folders();
+
+        if self.use_reference_folders {
+            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.directories);
+        }
 
         if self.use_reference_folders {
             for (_fe, vector) in &self.duplicated_music_entries_referenced {
@@ -808,8 +835,8 @@ impl SameMusic {
         approximate_comparison: bool,
     ) -> Vec<Vec<MusicEntry>> {
         let mut new_duplicates: Vec<_> = Default::default();
+        let old_duplicates_len = old_duplicates.len();
         for vec_file_entry in old_duplicates {
-            atomic_counter.fetch_add(1, Ordering::Relaxed);
             let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
             for file_entry in vec_file_entry {
                 let mut thing = get_item(&file_entry).trim().to_lowercase();
@@ -826,38 +853,9 @@ impl SameMusic {
                 }
             }
         }
+        atomic_counter.fetch_add(old_duplicates_len, Ordering::Relaxed);
 
         new_duplicates
-    }
-
-    fn filter_reference_folders(&mut self) {
-        if !self.use_reference_folders {
-            return;
-        }
-
-        let mut similar_vector = Default::default();
-        mem::swap(&mut self.duplicated_music_entries, &mut similar_vector);
-        let reference_directories = self.directories.reference_directories.clone();
-        self.duplicated_music_entries_referenced = similar_vector
-            .into_iter()
-            .filter_map(|vec_file_entry| {
-                let mut files_from_referenced_folders = Vec::new();
-                let mut normal_files = Vec::new();
-                for file_entry in vec_file_entry {
-                    if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                        files_from_referenced_folders.push(file_entry);
-                    } else {
-                        normal_files.push(file_entry);
-                    }
-                }
-
-                if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
-                    None
-                } else {
-                    Some((files_from_referenced_folders.pop().unwrap(), normal_files))
-                }
-            })
-            .collect::<Vec<(MusicEntry, Vec<MusicEntry>)>>();
     }
 
     pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {

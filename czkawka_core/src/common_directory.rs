@@ -305,6 +305,11 @@ impl Directories {
         true
     }
 
+    #[must_use]
+    pub fn is_referenced_directory(&self, path: &Path) -> bool {
+        self.reference_directories.iter().any(|e| path.starts_with(e))
+    }
+
     /// Checks whether a specified directory is excluded from searching
     pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
         let path = path.as_ref();
