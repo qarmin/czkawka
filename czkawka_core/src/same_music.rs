@@ -436,21 +436,25 @@ impl SameMusic {
     }
 
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
+        let (loaded_hash_map, records_already_cached, mut non_cached_files_to_check) = self.load_cache(true);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type);
 
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
-            .into_par_iter()
+            .par_iter_mut()
             .map(|(path, music_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                Some(self.read_single_file_tag(&path, music_entry))
+                if self.read_single_file_tag(path, music_entry) {
+                    Some(Some(music_entry.clone()))
+                } else {
+                    Some(None)
+                }
             })
             .while_some()
             .filter(Option::is_some)
@@ -473,8 +477,8 @@ impl SameMusic {
 
         true
     }
-    fn read_single_file_tag(&self, path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {
-        let Ok(mut file) = File::open(path) else { return None; };
+    fn read_single_file_tag(&self, path: &str, music_entry: &mut MusicEntry) -> bool {
+        let Ok(mut file) = File::open(path) else { return false; };
 
         let result = panic::catch_unwind(move || {
             match read_from(&mut file) {
@@ -490,13 +494,13 @@ impl SameMusic {
             match t {
                 Some(r) => r,
                 None => {
-                    return Some(music_entry);
+                    return true;
                 }
             }
         } else {
             let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
             println!("{message}");
-            return None;
+            return false;
         };
 
         let properties = tagged_file.properties();
@@ -563,7 +567,7 @@ impl SameMusic {
         music_entry.genre = genre;
         music_entry.bitrate = bitrate;
 
-        Some(music_entry)
+        true
     }
 
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
