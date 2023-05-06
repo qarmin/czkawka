@@ -403,7 +403,7 @@ impl SameMusic {
             1,
             2,
             non_cached_files_to_check.len(),
-            CheckingMethod::None,
+            self.check_type,
         );
         let configuration = &self.hash_preset_config;
 
@@ -460,7 +460,7 @@ impl SameMusic {
             1,
             2,
             non_cached_files_to_check.len(),
-            CheckingMethod::None,
+            self.check_type,
         );
 
         // Clean for duplicate files
@@ -593,15 +593,7 @@ impl SameMusic {
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            2,
-            2,
-            self.music_to_check.len(),
-            CheckingMethod::None,
-        );
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 2, 2, self.music_to_check.len(), self.check_type);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
@@ -714,10 +706,15 @@ impl SameMusic {
         (base_files, files_to_compare)
     }
 
-    fn compare_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {
+    fn compare_fingerprints(
+        &mut self,
+        stop_receiver: Option<&Receiver<()>>,
+        atomic_counter: &Arc<AtomicUsize>,
+        base_files: Vec<MusicEntry>,
+        files_to_compare: Vec<MusicEntry>,
+    ) -> Option<Vec<Vec<MusicEntry>>> {
         let mut used_paths: HashSet<String> = Default::default();
 
-        let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let configuration = &self.hash_preset_config;
         let minimum_segment_duration = self.minimum_segment_duration;
         let maximum_difference = self.maximum_difference;
@@ -767,82 +764,16 @@ impl SameMusic {
         Some(duplicated_music_entries)
     }
 
-    // fn compare_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, atomic_counter: &Arc<AtomicUsize>) -> Option<Vec<Vec<MusicEntry>>> {
-    //     // TODO do optimization
-    //     // Multithreading
-    //     // Grouping same hashes(not sure how common, but probably with a lot of files can save some time)
-    //     // Better algorithm of finding similar fingerprints
-    //
-    //     let mut used_paths: HashSet<String> = Default::default();
-    //     let configuration = &self.hash_preset_config;
-    //     let minimum_segment_duration = self.minimum_segment_duration;
-    //     let maximum_difference = self.maximum_difference;
-    //
-    //     let mut duplicated_music_entries = Vec::new();
-    //
-    //     for (f_idx, f_entry) in self.music_entries.iter().enumerate() {
-    //         if f_idx + 1 == self.music_entries.len() {
-    //             break;
-    //         }
-    //
-    //         if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-    //             return None;
-    //         }
-    //         atomic_counter.fetch_add(1, Ordering::Relaxed);
-    //
-    //         let f_string = f_entry.path.to_string_lossy().to_string();
-    //         if used_paths.contains(&f_string) {
-    //             continue;
-    //         }
-    //
-    //         let mut collected_similar_items = self.music_entries[f_idx + 1..]
-    //             .par_iter()
-    //             .filter_map(|e_entry| {
-    //                 let e_string = e_entry.path.to_string_lossy().to_string();
-    //                 if used_paths.contains(&e_string) {
-    //                     return None;
-    //                 }
-    //                 let mut segments = match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration).unwrap();
-    //                 segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
-    //                 if segments.is_empty() {
-    //                     None
-    //                 } else {
-    //                     Some((e_string, e_entry))
-    //                 }
-    //             })
-    //             .collect::<Vec<_>>();
-    //
-    //         collected_similar_items.retain(|(path, _entry)| !used_paths.contains(path));
-    //         if !collected_similar_items.is_empty() {
-    //             let mut music_entries = Vec::new();
-    //             for (path, entry) in collected_similar_items {
-    //                 used_paths.insert(path);
-    //                 music_entries.push(entry.clone());
-    //             }
-    //             used_paths.insert(f_string);
-    //             music_entries.push(f_entry.clone());
-    //             duplicated_music_entries.push(music_entries);
-    //         }
-    //     }
-    //     Some(duplicated_music_entries)
-    // }
-
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
 
         let progress_thread_run = Arc::new(AtomicBool::new(true));
         let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            2,
-            2,
-            self.music_to_check.len(),
-            CheckingMethod::None,
-        );
 
-        let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter) else {
+        let (base_files, files_to_compare) = self.split_fingerprints_to_check();
+        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 2, 2, base_files.len(), self.check_type);
+
+        let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter, base_files, files_to_compare) else {
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
             return false;
         };

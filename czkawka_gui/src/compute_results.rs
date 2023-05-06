@@ -1164,9 +1164,7 @@ fn computer_duplicate_finder(
                 duplicates_size = information.lost_space_by_size;
                 duplicates_group = information.number_of_groups_by_size_name;
             }
-            _ => {
-                panic!();
-            }
+            _ => panic!(),
         }
         if duplicates_size == 0 {
             entry_info.set_text(
@@ -1251,9 +1249,7 @@ fn computer_duplicate_finder(
                             }
                         }
                     }
-                    _ => {
-                        panic!();
-                    }
+                    _ => panic!(),
                 }
             } else {
                 match df.get_check_method() {
@@ -1310,9 +1306,7 @@ fn computer_duplicate_finder(
                             }
                         }
                     }
-                    _ => {
-                        panic!();
-                    }
+                    _ => panic!(),
                 }
             }
             print_text_messages_to_text_view(text_messages, text_view_errors);
