@@ -394,17 +394,7 @@ impl SameMusic {
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            1,
-            2,
-            non_cached_files_to_check.len(),
-            self.check_type,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type);
         let configuration = &self.hash_preset_config;
 
         // Clean for duplicate files
@@ -451,17 +441,7 @@ impl SameMusic {
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            1,
-            2,
-            non_cached_files_to_check.len(),
-            self.check_type,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type);
 
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
@@ -591,9 +571,7 @@ impl SameMusic {
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 2, 2, self.music_to_check.len(), self.check_type);
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
@@ -711,7 +689,7 @@ impl SameMusic {
         stop_receiver: Option<&Receiver<()>>,
         atomic_counter: &Arc<AtomicUsize>,
         base_files: Vec<MusicEntry>,
-        files_to_compare: Vec<MusicEntry>,
+        files_to_compare: &[MusicEntry],
     ) -> Option<Vec<Vec<MusicEntry>>> {
         let mut used_paths: HashSet<String> = Default::default();
 
@@ -767,13 +745,10 @@ impl SameMusic {
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
-        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 2, 2, base_files.len(), self.check_type);
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 2, 2, base_files.len(), self.check_type);
 
-        let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter, base_files, files_to_compare) else {
+        let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter, base_files, &files_to_compare) else {
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
             return false;
         };

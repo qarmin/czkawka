@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::atomic::Ordering;
+
 use std::time::UNIX_EPOCH;
 
 use crossbeam_channel::Receiver;
@@ -338,9 +338,7 @@ where
         // Add root folders for finding
         folders_to_check.extend(self.root_dirs);
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(self.progress_sender, &progress_thread_run, &atomic_counter, 0, self.max_stage, 0, self.checking_method);
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method);
 
         let DirTraversal {
             collect,

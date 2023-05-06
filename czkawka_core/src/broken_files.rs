@@ -3,7 +3,7 @@ use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use std::{fs, mem, panic};
@@ -200,9 +200,7 @@ impl BrokenFiles {
             folders_to_check.push(id.clone());
         }
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -437,17 +435,8 @@ impl BrokenFiles {
             non_cached_files_to_check = files_to_check;
         }
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            1,
-            1,
-            non_cached_files_to_check.len(),
-            CheckingMethod::None,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter) =
+            prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None);
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()

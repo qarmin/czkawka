@@ -300,9 +300,7 @@ impl SimilarImages {
             folders_to_check.push(id.clone());
         }
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 2, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 0, 2, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -437,17 +435,8 @@ impl SimilarImages {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            1,
-            2,
-            non_cached_files_to_check.len(),
-            CheckingMethod::None,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter) =
+            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), CheckingMethod::None);
 
         let mut vec_file_entry: Vec<(FileEntry, ImHash)> = non_cached_files_to_check
             .into_par_iter()
@@ -828,9 +817,9 @@ impl SimilarImages {
             }
         } else {
             let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-            let progress_thread_run = Arc::new(AtomicBool::new(true));
-            let atomic_counter = Arc::new(AtomicUsize::new(0));
-            let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 2, 2, all_hashes.len(), CheckingMethod::None);
+            let _progress_thread_run = Arc::new(AtomicBool::new(true));
+            let _atomic_counter = Arc::new(AtomicUsize::new(0));
+            let (progress_thread_handle, progress_thread_run, atomic_counter) = prepare_thread_handler_common(progress_sender, 2, 2, all_hashes.len(), CheckingMethod::None);
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
 

@@ -385,16 +385,17 @@ where
         .collect::<Vec<(T, Vec<T>)>>()
 }
 
+#[must_use]
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&UnboundedSender<ProgressData>>,
-    progress_thread_run: &Arc<AtomicBool>,
-    atomic_counter: &Arc<AtomicUsize>,
     current_stage: u8,
     max_stage: u8,
     max_value: usize,
     checking_method: CheckingMethod,
-) -> JoinHandle<()> {
-    if let Some(progress_sender) = progress_sender {
+) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>) {
+    let progress_thread_run = Arc::new(AtomicBool::new(true));
+    let atomic_counter = Arc::new(AtomicUsize::new(0));
+    let progress_thread_sender = if let Some(progress_sender) = progress_sender {
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
         let atomic_counter = atomic_counter.clone();
@@ -415,7 +416,8 @@ pub fn prepare_thread_handler_common(
         })
     } else {
         thread::spawn(|| {})
-    }
+    };
+    (progress_thread_sender, progress_thread_run, atomic_counter)
 }
 
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
