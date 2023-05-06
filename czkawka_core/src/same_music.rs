@@ -713,7 +713,7 @@ impl SameMusic {
                 .par_iter()
                 .filter_map(|e_entry| {
                     let e_string = e_entry.path.to_string_lossy().to_string();
-                    if used_paths.contains(&e_string) {
+                    if used_paths.contains(&e_string) || e_string == f_string {
                         return None;
                     }
                     let mut segments = match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration).unwrap();
