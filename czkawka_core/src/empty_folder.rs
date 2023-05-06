@@ -4,10 +4,8 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 
-
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
-
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData};
 use crate::common_directory::Directories;

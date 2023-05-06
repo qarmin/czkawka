@@ -4,7 +4,7 @@ use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::{UNIX_EPOCH};
+use std::time::UNIX_EPOCH;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
@@ -14,6 +14,7 @@ use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
+use crate::common_traits::ResultEntry;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
@@ -42,6 +43,11 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub hash: String,
     pub symlink_info: Option<SymlinkInfo>,
+}
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
 }
 
 // Symlinks

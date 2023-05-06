@@ -407,8 +407,7 @@ impl BrokenFiles {
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
-        let mut files_to_check = Default::default();
-        mem::swap(&mut self.files_to_check, &mut files_to_check);
+        let files_to_check = mem::take(&mut self.files_to_check);
 
         if self.use_cache {
             loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache) {

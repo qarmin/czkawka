@@ -30,7 +30,7 @@ use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
 use crate::flc;
 
 type ImHash = Vec<u8>;
@@ -50,6 +50,11 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub hash: ImHash,
     pub similarity: u32,
+}
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
 }
 
 /// Used by CLI tool when we cannot use directly values
@@ -423,7 +428,7 @@ impl SimilarImages {
 
     // Cache algorithm:
     // - Load data from file
-    // - Remove from data to search, already loaded entries from cache(size and modified datamust match)
+    // - Remove from data to search, already loaded entries from cache(size and modified date must match)
     // - Check hash of files which doesn't have saved entry
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
@@ -810,8 +815,7 @@ impl SimilarImages {
         // Results
         let mut collected_similar_images: HashMap<ImHash, Vec<FileEntry>> = Default::default();
 
-        let mut all_hashed_images = Default::default();
-        mem::swap(&mut all_hashed_images, &mut self.image_hashes);
+        let all_hashed_images = mem::take(&mut self.image_hashes);
 
         let all_hashes: Vec<_> = all_hashed_images.clone().into_keys().collect();
 
@@ -877,7 +881,7 @@ impl SimilarImages {
             }
         }
 
-        // Clean unused data
+        // Clean unused data to save ram
         self.image_hashes = Default::default();
         self.images_to_check = Default::default();
         self.bktree = BKTree::new(Hamming);
@@ -887,9 +891,7 @@ impl SimilarImages {
 
     fn exclude_items_with_same_size(&mut self) {
         if self.exclude_images_with_same_size {
-            let mut new_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut new_vector);
-            for vec_file_entry in new_vector {
+            for vec_file_entry in mem::take(&mut self.similar_vectors) {
                 let mut bt_sizes: BTreeSet<u64> = Default::default();
                 let mut vec_values = Vec::new();
                 for file_entry in vec_file_entry {
@@ -907,21 +909,11 @@ impl SimilarImages {
 
     fn check_for_reference_folders(&mut self) {
         if self.use_reference_folders {
-            let mut similar_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut similar_vector);
-            let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = similar_vector
+            self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
                 .into_iter()
                 .filter_map(|vec_file_entry| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
-                    }
+                    let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                        vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
 
                     if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                         None

@@ -7,13 +7,11 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
-
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
-
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};

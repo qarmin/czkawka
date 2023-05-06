@@ -24,7 +24,7 @@ use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
@@ -37,6 +37,11 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub vhash: VideoHash,
     pub error: String,
+}
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
 }
 
 /// Distance metric to use with the BK-tree.
@@ -508,21 +513,11 @@ impl SimilarVideos {
 
     fn remove_from_reference_folders(&mut self) {
         if self.use_reference_folders {
-            let mut similar_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut similar_vector);
-            let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = similar_vector
+            self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
                 .into_iter()
                 .filter_map(|vec_file_entry| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
-                    }
+                    let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                        vec_file_entry.into_iter().partition(|e| self.directories.is_referenced_directory(e.get_path()));
 
                     if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                         None

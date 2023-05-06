@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use mime_guess::get_mime_extensions;
@@ -328,8 +327,7 @@ impl BadExtensions {
             CheckingMethod::None,
         );
 
-        let mut files_to_check = Default::default();
-        mem::swap(&mut files_to_check, &mut self.files_to_check);
+        let files_to_check = mem::take(&mut self.files_to_check);
 
         let mut hashmap_workarounds: HashMap<&str, Vec<&str>> = Default::default();
         for (proper, found) in WORKAROUNDS {

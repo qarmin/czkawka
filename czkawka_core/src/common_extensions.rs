@@ -1,6 +1,3 @@
-
-
-
 use crate::common_messages::Messages;
 
 #[derive(Clone, Default)]

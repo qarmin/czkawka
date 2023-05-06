@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
