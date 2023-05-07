@@ -16,6 +16,8 @@ music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Genre
 music_length_checkbox = Length
 music_comparison_checkbox = Approximate Comparison
+music_checking_by_tags = Tags
+music_checking_by_content = Content
 
 music_comparison_checkbox_tooltip =
         It searches for similar music files using AI, which uses machine learning to remove parentheses from a phrase. For example, with this option enabled, the files in question will be considered duplicates:

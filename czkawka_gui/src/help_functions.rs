@@ -7,7 +7,7 @@ use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use glib::signal::Inhibit;
 use glib::Error;
 use gtk4::prelude::*;
-use gtk4::{ListStore, ScrollType, TextView, TreeView, Widget};
+use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, EncodableLayout};
 use once_cell::sync::OnceCell;
@@ -770,7 +770,16 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
     false
 }
 
-pub fn scale_step_function(scale: &gtk4::Scale, _scroll_type: ScrollType, value: f64) -> Inhibit {
+pub fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
+    scale.set_range(minimum, maximum);
+    scale.set_fill_level(maximum);
+    scale.set_value(current_value);
+    if let Some(step) = step {
+        scale.adjustment().set_step_increment(step)
+    }
+}
+
+pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> Inhibit {
     scale.set_increments(1_f64, 1_f64);
     scale.set_round_digits(0);
     scale.set_fill_level(value.round());

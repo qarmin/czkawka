@@ -12,7 +12,7 @@ use gtk4::Grid;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::{BrokenFiles, CheckedTypes};
-use czkawka_core::common_dir_traversal::ProgressData;
+use czkawka_core::common_dir_traversal::{CheckingMethod, ProgressData};
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -24,8 +24,8 @@ use czkawka_core::temporary::Temporary;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
-    BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX,
-    IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
+    AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX,
+    IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
 use crate::help_functions::*;
 use crate::notebook_enums::*;
@@ -479,7 +479,10 @@ fn same_music_search(
     let check_button_music_length: gtk4::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
     let check_button_music_bitrate: gtk4::CheckButton = gui_data.main_notebook.check_button_music_bitrate.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
+    let combo_box_audio_check_type = gui_data.main_notebook.combo_box_audio_check_type.clone();
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
+    let scale_seconds_same_music = gui_data.main_notebook.scale_seconds_same_music.clone();
+    let scale_similarity_same_music = gui_data.main_notebook.scale_similarity_same_music.clone();
 
     get_list_store(&tree_view_same_music_finder).clear();
 
@@ -506,7 +509,13 @@ fn same_music_search(
         music_similarity |= MusicSimilarity::LENGTH;
     }
 
-    if music_similarity != MusicSimilarity::NONE {
+    let check_method_index = combo_box_audio_check_type.active().unwrap() as usize;
+    let check_method = AUDIO_TYPE_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
+
+    let maximum_difference = scale_similarity_same_music.value();
+    let minimum_segment_duration = scale_seconds_same_music.value() as f32;
+
+    if music_similarity != MusicSimilarity::NONE || check_method == CheckingMethod::AudioContent {
         thread::spawn(move || {
             let mut mf = SameMusic::new();
 
@@ -520,6 +529,9 @@ fn same_music_search(
             mf.set_allowed_extensions(loaded_common_items.allowed_extensions);
             mf.set_recursive_search(loaded_common_items.recursive_search);
             mf.set_music_similarity(music_similarity);
+            mf.set_maximum_difference(maximum_difference);
+            mf.set_minimum_segment_duration(minimum_segment_duration);
+            mf.set_check_type(check_method);
             mf.set_approximate_comparison(approximate_comparison);
             mf.set_save_also_as_json(loaded_common_items.save_also_as_json);
             mf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);

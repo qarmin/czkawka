@@ -259,8 +259,23 @@ impl SameMusic {
         self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
 
+    pub fn set_maximum_difference(&mut self, maximum_difference: f64) {
+        self.maximum_difference = maximum_difference;
+    }
+    pub fn set_minimum_segment_duration(&mut self, minimum_segment_duration: f32) {
+        self.minimum_segment_duration = minimum_segment_duration;
+    }
+
     pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
         self.directories.set_reference_directory(reference_directory);
+    }
+
+    pub fn set_check_type(&mut self, check_type: CheckingMethod) {
+        assert!([CheckingMethod::AudioTags, CheckingMethod::AudioContent].contains(&check_type));
+        self.check_type = check_type
+    }
+    pub fn get_check_type(&self) -> CheckingMethod {
+        self.check_type
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {

@@ -550,7 +550,7 @@ fn computer_same_music(
             } else {
                 let vector = mf.get_duplicated_music_entries();
 
-                let text: &str = "-----";
+                let text: &str = if mf.get_check_type() == CheckingMethod::AudioTags { "-----" } else { "" };
 
                 for vec_file_entry in vector {
                     // Sort

@@ -42,6 +42,7 @@ use crate::compute_results::*;
 use crate::connect_things::connect_button_sort::connect_button_sort;
 use crate::connect_things::connect_popovers_select::connect_popover_select;
 use crate::connect_things::connect_popovers_sort::connect_popover_sort;
+use crate::connect_things::connect_same_music_mode_changed::connect_same_music_change_mode;
 use crate::initialize_gui::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::*;
@@ -163,6 +164,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     connect_button_about(&gui_data);
     connect_about_buttons(&gui_data);
     connect_similar_image_size_change(&gui_data);
+    connect_same_music_change_mode(&gui_data);
 
     let window_main = gui_data.window_main.clone();
     let taskbar_state = gui_data.taskbar_state.clone();

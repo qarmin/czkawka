@@ -7,7 +7,7 @@ use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarit
 use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
 
 use crate::flg;
-use crate::help_combo_box::{BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
+use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
 use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
@@ -121,6 +121,12 @@ pub struct GuiMainNotebook {
     pub check_button_music_genre: CheckButton,
     pub check_button_music_length: CheckButton,
     pub check_button_music_approximate_comparison: CheckButton,
+    pub label_audio_check_type: Label,
+    pub combo_box_audio_check_type: ComboBoxText,
+    pub label_same_music_seconds: Label,
+    pub label_same_music_similarity: Label,
+    pub scale_seconds_same_music: Scale,
+    pub scale_similarity_same_music: Scale,
 }
 
 impl GuiMainNotebook {
@@ -247,6 +253,13 @@ impl GuiMainNotebook {
         let image_preview_similar_images: Image = builder.object("image_preview_similar_images").unwrap();
         let image_preview_duplicates: Image = builder.object("image_preview_duplicates").unwrap();
 
+        let label_audio_check_type: Label = builder.object("label_audio_check_type").unwrap();
+        let combo_box_audio_check_type: ComboBoxText = builder.object("combo_box_audio_check_type").unwrap();
+        let label_same_music_seconds: Label = builder.object("label_same_music_seconds").unwrap();
+        let label_same_music_similarity: Label = builder.object("label_same_music_similarity").unwrap();
+        let scale_seconds_same_music: Scale = builder.object("scale_seconds_same_music").unwrap();
+        let scale_similarity_same_music: Scale = builder.object("scale_similarity_same_music").unwrap();
+
         Self {
             notebook_main,
             scrolled_window_duplicate_finder,
@@ -289,6 +302,7 @@ impl GuiMainNotebook {
             check_button_music_genre,
             check_button_music_length,
             check_button_music_approximate_comparison,
+            label_audio_check_type,
             scale_similarity_similar_images,
             scale_similarity_similar_videos,
             check_button_broken_files_audio,
@@ -331,6 +345,11 @@ impl GuiMainNotebook {
             combo_box_big_files_mode,
             label_big_files_mode,
             check_button_broken_files_image,
+            combo_box_audio_check_type,
+            label_same_music_seconds,
+            label_same_music_similarity,
+            scale_seconds_same_music,
+            scale_similarity_same_music,
         }
     }
 
@@ -541,6 +560,19 @@ impl GuiMainNotebook {
             }
         }
 
+        {
+            let active = self.combo_box_audio_check_type.active().unwrap_or(0);
+            self.combo_box_audio_check_type.remove_all();
+            for i in &AUDIO_TYPE_CHECK_METHOD_COMBO_BOX {
+                let text = match i.check_method {
+                    CheckingMethod::AudioTags => flg!("music_checking_by_tags"),
+                    CheckingMethod::AudioContent => flg!("music_checking_by_content"),
+                    _ => panic!(),
+                };
+                self.combo_box_audio_check_type.append_text(&text);
+            }
+            self.combo_box_audio_check_type.set_active(Some(active));
+        }
         {
             let active = self.combo_box_duplicate_check_method.active().unwrap_or(0);
             self.combo_box_duplicate_check_method.remove_all();
