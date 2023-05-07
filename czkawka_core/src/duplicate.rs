@@ -9,9 +9,8 @@ use std::io::{BufReader, BufWriter};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::time::SystemTime;
+use std::sync::atomic::Ordering;
+
 use std::{fs, mem};
 
 use crossbeam_channel::Receiver;
@@ -21,7 +20,7 @@ use humansize::BINARY;
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, Common};
+use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -182,9 +181,7 @@ impl DuplicateFinder {
                     return;
                 }
             }
-            CheckingMethod::None => {
-                panic!();
-            }
+            _ => panic!(),
         }
         self.delete_files();
         self.debug_print();
@@ -364,11 +361,7 @@ impl DuplicateFinder {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
 
@@ -384,21 +377,11 @@ impl DuplicateFinder {
 
                 // Reference - only use in size, because later hash will be counted differently
                 if self.use_reference_folders {
-                    let mut btree_map = Default::default();
-                    mem::swap(&mut self.files_with_identical_names, &mut btree_map);
-                    let reference_directories = self.directories.reference_directories.clone();
-                    let vec = btree_map
+                    let vec = mem::take(&mut self.files_with_identical_names)
                         .into_iter()
-                        .filter_map(|(_size, vec_file_entry)| {
-                            let mut files_from_referenced_folders = Vec::new();
-                            let mut normal_files = Vec::new();
-                            for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                                    files_from_referenced_folders.push(file_entry);
-                                } else {
-                                    normal_files.push(file_entry);
-                                }
-                            }
+                        .filter_map(|(_name, vec_file_entry)| {
+                            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                                vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                             if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                                 None
@@ -413,7 +396,6 @@ impl DuplicateFinder {
                 }
                 self.calculate_name_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -459,11 +441,7 @@ impl DuplicateFinder {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
 
@@ -479,21 +457,11 @@ impl DuplicateFinder {
 
                 // Reference - only use in size, because later hash will be counted differently
                 if self.use_reference_folders {
-                    let mut btree_map = Default::default();
-                    mem::swap(&mut self.files_with_identical_size_names, &mut btree_map);
-                    let reference_directories = self.directories.reference_directories.clone();
-                    let vec = btree_map
+                    let vec = mem::take(&mut self.files_with_identical_size_names)
                         .into_iter()
                         .filter_map(|(_size, vec_file_entry)| {
-                            let mut files_from_referenced_folders = Vec::new();
-                            let mut normal_files = Vec::new();
-                            for file_entry in vec_file_entry {
-                                if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                                    files_from_referenced_folders.push(file_entry);
-                                } else {
-                                    normal_files.push(file_entry);
-                                }
-                            }
+                            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                                vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                             if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                                 None
@@ -509,7 +477,6 @@ impl DuplicateFinder {
                 }
                 self.calculate_size_name_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_size_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -559,17 +526,12 @@ impl DuplicateFinder {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
 
                 // Create new BTreeMap without single size entries(files have not duplicates)
-                let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-                mem::swap(&mut old_map, &mut self.files_with_identical_size);
+                let old_map: BTreeMap<u64, Vec<FileEntry>> = mem::take(&mut self.files_with_identical_size);
 
                 for (size, vec) in old_map {
                     if vec.len() <= 1 {
@@ -586,7 +548,6 @@ impl DuplicateFinder {
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();
 
-                Common::print_time(start_time, SystemTime::now(), "check_files_size");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -616,21 +577,11 @@ impl DuplicateFinder {
     /// This is needed, because later reference folders looks for hashes, not size
     fn filter_reference_folders_by_size(&mut self) {
         if self.use_reference_folders && self.check_method == CheckingMethod::Size {
-            let mut btree_map = Default::default();
-            mem::swap(&mut self.files_with_identical_size, &mut btree_map);
-            let reference_directories = self.directories.reference_directories.clone();
-            let vec = btree_map
+            let vec = mem::take(&mut self.files_with_identical_size)
                 .into_iter()
                 .filter_map(|(_size, vec_file_entry)| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
-                    }
+                    let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                        vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                     if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                         None
@@ -723,21 +674,9 @@ impl DuplicateFinder {
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
-        let start_time: SystemTime = SystemTime::now();
         let check_type = self.hash_type;
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            1,
-            2,
-            self.files_with_identical_size.values().map(Vec::len).sum(),
-            self.check_method,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 1, 2, self.files_with_identical_size.values().map(Vec::len).sum(), self.check_method);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
@@ -750,11 +689,11 @@ impl DuplicateFinder {
                 let mut buffer = [0u8; 1024 * 2];
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    check_was_stopped.store(true, Ordering::Relaxed);
+                    return None;
+                }
                 for file_entry in vec_file_entry {
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                        check_was_stopped.store(true, Ordering::Relaxed);
-                        return None;
-                    }
                     match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
                         Ok(hash_string) => {
                             hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new).push(file_entry.clone());
@@ -790,8 +729,6 @@ impl DuplicateFinder {
         }
 
         self.prehash_save_cache_at_exit(loaded_hash_map, &pre_hash_results);
-
-        Common::print_time(start_time, SystemTime::now(), "check_files_hash - prehash");
 
         Some(())
     }
@@ -891,23 +828,10 @@ impl DuplicateFinder {
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-
         let check_type = self.hash_type;
-        let start_time: SystemTime = SystemTime::now();
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            2,
-            2,
-            pre_checked_map.values().map(Vec::len).sum(),
-            self.check_method,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 2, 2, pre_checked_map.values().map(Vec::len).sum(), self.check_method);
 
         ///////////////////////////////////////////////////////////////////////////// HASHING START
         {
@@ -958,30 +882,20 @@ impl DuplicateFinder {
                 }
             }
         }
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
+
         Some(())
     }
 
     fn hash_reference_folders(&mut self) {
         // Reference - only use in size, because later hash will be counted differently
         if self.use_reference_folders {
-            let mut btree_map = Default::default();
-            mem::swap(&mut self.files_with_identical_hashes, &mut btree_map);
-            let reference_directories = self.directories.reference_directories.clone();
-            let vec = btree_map
+            let vec = mem::take(&mut self.files_with_identical_hashes)
                 .into_iter()
                 .filter_map(|(_size, vec_vec_file_entry)| {
                     let mut all_results_with_same_size = Vec::new();
                     for vec_file_entry in vec_vec_file_entry {
-                        let mut files_from_referenced_folders = Vec::new();
-                        let mut normal_files = Vec::new();
-                        for file_entry in vec_file_entry {
-                            if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                                files_from_referenced_folders.push(file_entry);
-                            } else {
-                                normal_files.push(file_entry);
-                            }
-                        }
+                        let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                            vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                         if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                             continue;
@@ -1045,7 +959,6 @@ impl DuplicateFinder {
     /// Function to delete files, from filed before `BTreeMap`
     /// Using another function to delete files to avoid duplicates data
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
         if self.delete_method == DeleteMethod::None {
             return;
         }
@@ -1073,13 +986,8 @@ impl DuplicateFinder {
                     let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                 }
             }
-            CheckingMethod::None => {
-                //Just do nothing
-                panic!("Checking method should never be none.");
-            }
+            _ => panic!(),
         }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -1146,7 +1054,6 @@ impl DebugPrint for DuplicateFinder {
 
 impl SaveResults for DuplicateFinder {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -1270,11 +1177,9 @@ impl SaveResults for DuplicateFinder {
                     write!(writer, "Not found any duplicates.").unwrap();
                 }
             }
-            CheckingMethod::None => {
-                panic!();
-            }
+            _ => panic!(),
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
@@ -1283,7 +1188,6 @@ impl PrintResults for DuplicateFinder {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         let mut number_of_files: u64 = 0;
         let mut number_of_groups: u64 = 0;
 
@@ -1359,11 +1263,8 @@ impl PrintResults for DuplicateFinder {
                     println!();
                 }
             }
-            CheckingMethod::None => {
-                panic!("Checking Method shouldn't be ever set to None");
-            }
+            _ => panic!(),
         }
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
 

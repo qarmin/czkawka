@@ -2,9 +2,9 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::atomic::Ordering;
+
+use std::time::UNIX_EPOCH;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
@@ -14,6 +14,7 @@ use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
+use crate::common_traits::ResultEntry;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
@@ -33,6 +34,8 @@ pub enum CheckingMethod {
     SizeName,
     Size,
     Hash,
+    AudioTags,
+    AudioContent,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -42,6 +45,11 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub hash: String,
     pub symlink_info: Option<SymlinkInfo>,
+}
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
 }
 
 // Symlinks
@@ -280,12 +288,10 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
 
 pub enum DirTraversalResult<T: Ord + PartialOrd> {
     SuccessFiles {
-        start_time: SystemTime,
         warnings: Vec<String>,
         grouped_file_entries: BTreeMap<T, Vec<FileEntry>>,
     },
     SuccessFolders {
-        start_time: SystemTime,
         warnings: Vec<String>,
         folder_entries: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
     },
@@ -314,7 +320,6 @@ where
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
         let mut folder_entries: BTreeMap<PathBuf, FolderEntry> = BTreeMap::new();
-        let start_time: SystemTime = SystemTime::now();
 
         // Add root folders into result (only for empty folder collection)
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -333,9 +338,8 @@ where
         // Add root folders for finding
         folders_to_check.extend(self.root_dirs);
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(self.progress_sender, &progress_thread_run, &atomic_counter, 0, self.max_stage, 0, self.checking_method);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method);
 
         let DirTraversal {
             collect,
@@ -468,12 +472,10 @@ where
 
         match collect {
             Collect::Files | Collect::InvalidSymlinks => DirTraversalResult::SuccessFiles {
-                start_time,
                 grouped_file_entries,
                 warnings: all_warnings,
             },
             Collect::EmptyFolders => DirTraversalResult::SuccessFolders {
-                start_time,
                 folder_entries,
                 warnings: all_warnings,
             },

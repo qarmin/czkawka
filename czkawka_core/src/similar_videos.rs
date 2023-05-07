@@ -4,9 +4,7 @@ use std::io::Write;
 use std::io::*;
 use std::mem;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::time::SystemTime;
+use std::sync::atomic::Ordering;
 
 use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
@@ -18,14 +16,14 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
+use crate::common::open_cache_folder;
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
-use crate::common::{open_cache_folder, Common};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
@@ -38,6 +36,11 @@ pub struct FileEntry {
     pub modified_date: u64,
     pub vhash: VideoHash,
     pub error: String,
+}
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
 }
 
 /// Distance metric to use with the BK-tree.
@@ -242,7 +245,6 @@ impl SimilarVideos {
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
@@ -259,9 +261,7 @@ impl SimilarVideos {
             folders_to_check.push(id.clone());
         }
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 1, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) = prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -319,7 +319,7 @@ impl SimilarVideos {
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        Common::print_time(start_time, SystemTime::now(), "check_for_similar_videos");
+
         true
     }
 
@@ -365,16 +365,18 @@ impl SimilarVideos {
             };
 
             for (name, file_entry) in &self.videos_to_check {
-                #[allow(clippy::if_same_then_else)]
                 if !loaded_hash_map.contains_key(name) {
                     // If loaded data doesn't contains current videos info
                     non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                } else if file_entry.size != loaded_hash_map.get(name).unwrap().size || file_entry.modified_date != loaded_hash_map.get(name).unwrap().modified_date {
-                    // When size or modification date of video changed, then it is clear that is different video
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
                 } else {
-                    // Checking may be omitted when already there is entry with same size and modification date
-                    records_already_cached.insert(name.clone(), loaded_hash_map.get(name).unwrap().clone());
+                    let loaded_item = loaded_hash_map.get(name).unwrap();
+                    if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
+                        // When size or modification date of video changed, then it is clear that is different video
+                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+                    } else {
+                        // Checking may be omitted when already there is entry with same size and modification date
+                        records_already_cached.insert(name.clone(), loaded_item.clone());
+                    }
                 }
             }
         } else {
@@ -385,26 +387,10 @@ impl SimilarVideos {
     }
 
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let hash_map_modification = SystemTime::now();
-
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from cache and preparing them");
-        let hash_map_modification = SystemTime::now();
-
-        let check_was_stopped = AtomicBool::new(false); // Used for breaking from GUI and ending check thread
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(
-            progress_sender,
-            &progress_thread_run,
-            &atomic_counter,
-            1,
-            1,
-            non_cached_files_to_check.len(),
-            CheckingMethod::None,
-        );
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None);
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .par_iter()
@@ -435,13 +421,8 @@ impl SimilarVideos {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - reading data from files in parallel");
-        let hash_map_modification = SystemTime::now();
-
         // Just connect loaded results with already calculated hashes
-        for (_name, file_entry) in records_already_cached {
-            vec_file_entry.push(file_entry.clone());
-        }
+        vec_file_entry.extend(records_already_cached.into_values());
 
         let mut hashmap_with_file_entries: HashMap<String, FileEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
@@ -469,9 +450,6 @@ impl SimilarVideos {
             return false;
         }
 
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - saving data to files");
-        let hash_map_modification = SystemTime::now();
-
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
         self.remove_from_reference_folders();
 
@@ -486,8 +464,6 @@ impl SimilarVideos {
                 self.information.number_of_groups += 1;
             }
         }
-
-        Common::print_time(hash_map_modification, SystemTime::now(), "sort_videos - selecting data from BtreeMap");
 
         // Clean unused data
         self.videos_hashes = Default::default();
@@ -523,21 +499,11 @@ impl SimilarVideos {
 
     fn remove_from_reference_folders(&mut self) {
         if self.use_reference_folders {
-            let mut similar_vector = Default::default();
-            mem::swap(&mut self.similar_vectors, &mut similar_vector);
-            let reference_directories = self.directories.reference_directories.clone();
-            self.similar_referenced_vectors = similar_vector
+            self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
                 .into_iter()
                 .filter_map(|vec_file_entry| {
-                    let mut files_from_referenced_folders = Vec::new();
-                    let mut normal_files = Vec::new();
-                    for file_entry in vec_file_entry {
-                        if reference_directories.iter().any(|e| file_entry.path.starts_with(e)) {
-                            files_from_referenced_folders.push(file_entry);
-                        } else {
-                            normal_files.push(file_entry);
-                        }
-                    }
+                    let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                        vec_file_entry.into_iter().partition(|e| self.directories.is_in_referenced_directory(e.get_path()));
 
                     if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
                         None
@@ -590,7 +556,6 @@ impl DebugPrint for SimilarVideos {
 
 impl SaveResults for SimilarVideos {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -628,7 +593,6 @@ impl SaveResults for SimilarVideos {
             write!(writer, "Not found any similar videos.").unwrap();
         }
 
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }

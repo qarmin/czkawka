@@ -15,6 +15,7 @@ pub mod connect_notebook_tabs;
 pub mod connect_popovers_select;
 pub mod connect_popovers_sort;
 pub mod connect_progress_window;
+pub mod connect_same_music_mode_changed;
 pub mod connect_selection_of_directories;
 pub mod connect_settings;
 pub mod connect_show_hide_ui;

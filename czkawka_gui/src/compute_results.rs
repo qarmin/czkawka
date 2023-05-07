@@ -550,7 +550,7 @@ fn computer_same_music(
             } else {
                 let vector = mf.get_duplicated_music_entries();
 
-                let text: &str = "-----";
+                let text: &str = if mf.get_check_type() == CheckingMethod::AudioTags { "-----" } else { "" };
 
                 for vec_file_entry in vector {
                     // Sort
@@ -1164,9 +1164,7 @@ fn computer_duplicate_finder(
                 duplicates_size = information.lost_space_by_size;
                 duplicates_group = information.number_of_groups_by_size_name;
             }
-            CheckingMethod::None => {
-                panic!();
-            }
+            _ => panic!(),
         }
         if duplicates_size == 0 {
             entry_info.set_text(
@@ -1251,9 +1249,7 @@ fn computer_duplicate_finder(
                             }
                         }
                     }
-                    CheckingMethod::None => {
-                        panic!();
-                    }
+                    _ => panic!(),
                 }
             } else {
                 match df.get_check_method() {
@@ -1310,9 +1306,7 @@ fn computer_duplicate_finder(
                             }
                         }
                     }
-                    CheckingMethod::None => {
-                        panic!();
-                    }
+                    _ => panic!(),
                 }
             }
             print_text_messages_to_text_view(text_messages, text_view_errors);

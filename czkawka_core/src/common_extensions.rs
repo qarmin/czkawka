@@ -1,6 +1,3 @@
-use std::time::SystemTime;
-
-use crate::common::Common;
 use crate::common_messages::Messages;
 
 #[derive(Clone, Default)]
@@ -16,7 +13,6 @@ impl Extensions {
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     /// After, extensions cannot contains any dot, commas etc.
     pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String, text_messages: &mut Messages) {
-        let start_time: SystemTime = SystemTime::now();
         if allowed_extensions.trim().is_empty() {
             return;
         }
@@ -57,7 +53,6 @@ impl Extensions {
                 .messages
                 .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
-        Common::print_time(start_time, SystemTime::now(), "set_allowed_extensions");
     }
 
     #[must_use]

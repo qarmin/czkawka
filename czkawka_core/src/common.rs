@@ -22,6 +22,7 @@ use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 use crate::common_dir_traversal::{CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
+use crate::common_traits::ResultEntry;
 
 static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
 
@@ -364,16 +365,38 @@ pub fn check_folder_children(
     dir_result.push(next_folder);
 }
 
+#[must_use]
+pub fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
+where
+    T: ResultEntry,
+{
+    entries_to_check
+        .into_iter()
+        .filter_map(|vec_file_entry| {
+            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
+                vec_file_entry.into_iter().partition(|e| directories.is_in_referenced_directory(e.get_path()));
+
+            if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                None
+            } else {
+                Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+            }
+        })
+        .collect::<Vec<(T, Vec<T>)>>()
+}
+
+#[must_use]
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&UnboundedSender<ProgressData>>,
-    progress_thread_run: &Arc<AtomicBool>,
-    atomic_counter: &Arc<AtomicUsize>,
     current_stage: u8,
     max_stage: u8,
     max_value: usize,
     checking_method: CheckingMethod,
-) -> JoinHandle<()> {
-    if let Some(progress_sender) = progress_sender {
+) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
+    let progress_thread_run = Arc::new(AtomicBool::new(true));
+    let atomic_counter = Arc::new(AtomicUsize::new(0));
+    let check_was_stopped = AtomicBool::new(false);
+    let progress_thread_sender = if let Some(progress_sender) = progress_sender {
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
         let atomic_counter = atomic_counter.clone();
@@ -394,7 +417,8 @@ pub fn prepare_thread_handler_common(
         })
     } else {
         thread::spawn(|| {})
-    }
+    };
+    (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
 }
 
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {

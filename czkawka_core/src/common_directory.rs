@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::time::SystemTime;
+
 #[cfg(target_family = "unix")]
 use std::{fs, os::unix::fs::MetadataExt};
 
@@ -30,8 +30,6 @@ impl Directories {
 
     /// Setting included directories, at least one must be provided or scan won't start
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>, text_messages: &mut Messages) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-
         if included_directory.is_empty() {
             text_messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
             return false;
@@ -90,13 +88,11 @@ impl Directories {
 
         self.included_directories = checked_directories;
 
-        Common::print_time(start_time, SystemTime::now(), "set_included_directory");
         true
     }
 
     /// Setting absolute path to exclude from search
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>, text_messages: &mut Messages) {
-        let start_time: SystemTime = SystemTime::now();
         if excluded_directory.is_empty() {
             return;
         }
@@ -148,8 +144,6 @@ impl Directories {
             checked_directories.push(directory);
         }
         self.excluded_directories = checked_directories;
-
-        Common::print_time(start_time, SystemTime::now(), "set_excluded_directory");
     }
 
     #[cfg(target_family = "unix")]
@@ -159,8 +153,6 @@ impl Directories {
 
     /// Remove unused entries when included or excluded overlaps with each other or are duplicated etc.
     pub fn optimize_directories(&mut self, recursive_search: bool, text_messages: &mut Messages) -> bool {
-        let start_time: SystemTime = SystemTime::now();
-
         let mut optimized_included: Vec<PathBuf> = Vec::new();
         let mut optimized_excluded: Vec<PathBuf> = Vec::new();
 
@@ -295,7 +287,6 @@ impl Directories {
         // Not needed, but better is to have sorted everything
         self.excluded_directories.sort_unstable();
         self.included_directories.sort_unstable();
-        Common::print_time(start_time, SystemTime::now(), "optimize_directories");
 
         // Get device IDs for included directories
         #[cfg(target_family = "unix")]
@@ -312,6 +303,11 @@ impl Directories {
         }
 
         true
+    }
+
+    #[must_use]
+    pub fn is_in_referenced_directory(&self, path: &Path) -> bool {
+        self.reference_directories.iter().any(|e| path.starts_with(e))
     }
 
     /// Checks whether a specified directory is excluded from searching

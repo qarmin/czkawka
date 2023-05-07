@@ -3,12 +3,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::path::PathBuf;
-use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 
-use crate::common::Common;
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -139,17 +137,12 @@ impl InvalidSymlinks {
             .build()
             .run();
         match result {
-            DirTraversalResult::SuccessFiles {
-                start_time,
-                grouped_file_entries,
-                warnings,
-            } => {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(((), invalid_symlinks)) = grouped_file_entries.into_iter().next() {
                     self.invalid_symlinks = invalid_symlinks;
                 }
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
                 self.text_messages.warnings.extend(warnings);
-                Common::print_time(start_time, SystemTime::now(), "check_files_name");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => unreachable!(),
@@ -159,8 +152,6 @@ impl InvalidSymlinks {
 
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
-
         match self.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.invalid_symlinks {
@@ -173,8 +164,6 @@ impl InvalidSymlinks {
                 //Just do nothing
             }
         }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -216,7 +205,6 @@ impl DebugPrint for InvalidSymlinks {
 
 impl SaveResults for InvalidSymlinks {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -258,7 +246,6 @@ impl SaveResults for InvalidSymlinks {
         } else {
             write!(writer, "Not found any invalid symlinks.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
         true
     }
 }
@@ -267,7 +254,6 @@ impl PrintResults for InvalidSymlinks {
     /// Print information's about duplicated entries
     /// Only needed for CLI
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         println!("Found {} invalid symlinks.\n", self.information.number_of_invalid_symlinks);
         for file_entry in &self.invalid_symlinks {
             println!(
@@ -280,7 +266,5 @@ impl PrintResults for InvalidSymlinks {
                 }
             );
         }
-
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }

@@ -721,6 +721,42 @@
                                 <property name="label">Length</property>
                               </object>
                             </child>
+                            <child>
+                              <object class="GtkLabel" id="label_same_music_seconds">
+                                <property name="label">Minimal  fragment second duration</property>
+                                <property name="margin-end">5</property>
+                                <property name="margin-start">5</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="scale_seconds_same_music">
+                                <property name="digits">0</property>
+                                <property name="draw-value">1</property>
+                                <property name="fill-level">100</property>
+                                <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="round-digits">1</property>
+                                <property name="value-pos">right</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_same_music_similarity">
+                                <property name="label">Max difference</property>
+                                <property name="margin-end">5</property>
+                                <property name="margin-start">5</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="scale_similarity_same_music">
+                                <property name="digits">0</property>
+                                <property name="draw-value">1</property>
+                                <property name="fill-level">100</property>
+                                <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="round-digits">1</property>
+                                <property name="value-pos">right</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                         <child>

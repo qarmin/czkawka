@@ -16,6 +16,23 @@ music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Genre
 music_length_checkbox = Length
 music_comparison_checkbox = Approximate Comparison
+music_checking_by_tags = Tags
+music_checking_by_content = Content
+same_music_seconds_label = Minimal fragment second duration
+same_music_similarity_label = Maximum difference
+
+same_music_tooltip =
+        Searching for similar music files by its content can be configured by setting:
+
+        - The minimum fragment time after which music files can be identified as similar
+        - The maximum difference difference between two tested fragments
+
+        The key to good results is to find sensible combinations of these parameters, for provided.
+
+        Setting the minimum time to 5s and the maximum difference to 1.0, will look for almost identical fragments in the files.
+        A time of 20s and a maximum difference of 6.0, on the other hand, works well for finding remixes/live versions etc.
+
+        By default, each music file is compared to each other and this can take a lot of time when testing many files, so it is usually better to use reference folders and specifying which files are to be compared with each other(with same amount of files, comparing fingerprints will be faster at least 4x than without reference folders).
 
 music_comparison_checkbox_tooltip =
         It searches for similar music files using AI, which uses machine learning to remove parentheses from a phrase. For example, with this option enabled, the files in question will be considered duplicates:
@@ -446,6 +463,8 @@ progress_scanning_image = Hashing of {$file_checked}/{$all_files} image
 progress_comparing_image_hashes = Comparing {$file_checked}/{$all_files} image hash
 progress_scanning_music_tags_end = Comparing tags of {$file_checked}/{$all_files} music file
 progress_scanning_music_tags = Reading tags of {$file_checked}/{$all_files} music file
+progress_scanning_music_content_end = Comparing fingerprint of {$file_checked}/{$all_files} music file
+progress_scanning_music_content = Calculating fingerprint of {$file_checked}/{$all_files} music file
 progress_scanning_empty_folders = Scanning {$folder_number} folder
 progress_scanning_size = Scanning size of {$file_number} file
 progress_scanning_size_name = Scanning name and size of {$file_number} file

@@ -142,6 +142,7 @@
                     <child>
                       <object class="GtkLabel" id="label_restart_needed">
                         <property name="accessible-role">menu-item-checkbox</property>
+                        <property name="label">Restart Required</property>
                         <property name="margin-bottom">4</property>
                         <property name="margin-top">5</property>
                       </object>

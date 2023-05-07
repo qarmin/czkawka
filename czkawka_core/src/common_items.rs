@@ -1,5 +1,4 @@
 use std::path::Path;
-use std::time::SystemTime;
 
 use crate::common::Common;
 use crate::common_messages::Messages;
@@ -17,8 +16,6 @@ impl ExcludedItems {
     /// Setting excluded items which needs to contains * wildcard
     /// Are a lot of slower than absolute path, so it should be used to heavy
     pub fn set_excluded_items(&mut self, excluded_items: Vec<String>, text_messages: &mut Messages) {
-        let start_time: SystemTime = SystemTime::now();
-
         if excluded_items.is_empty() {
             return;
         }
@@ -55,7 +52,6 @@ impl ExcludedItems {
             checked_expressions.push(expression);
         }
         self.items = checked_expressions;
-        Common::print_time(start_time, SystemTime::now(), "set_excluded_items");
     }
 
     /// Checks whether a specified path is excluded from searching

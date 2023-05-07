@@ -3,10 +3,9 @@ use std::fs;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::AtomicBool;
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::time::SystemTime;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
@@ -14,7 +13,6 @@ use humansize::format_size;
 use humansize::BINARY;
 use rayon::prelude::*;
 
-use crate::common::Common;
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
 use crate::common_directory::Directories;
@@ -142,7 +140,6 @@ impl BigFile {
     }
 
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
@@ -151,9 +148,7 @@ impl BigFile {
             folders_to_check.push(id.clone());
         }
 
-        let progress_thread_run = Arc::new(AtomicBool::new(true));
-        let atomic_counter = Arc::new(AtomicUsize::new(0));
-        let progress_thread_handle = prepare_thread_handler_common(progress_sender, &progress_thread_run, &atomic_counter, 0, 0, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) = prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -213,7 +208,6 @@ impl BigFile {
 
         self.extract_n_biggest_files(old_map);
 
-        Common::print_time(start_time, SystemTime::now(), "look_for_big_files");
         true
     }
 
@@ -308,8 +302,6 @@ impl BigFile {
 
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
-        let start_time: SystemTime = SystemTime::now();
-
         match self.delete_method {
             DeleteMethod::Delete => {
                 for (_, file_entry) in &self.big_files {
@@ -322,8 +314,6 @@ impl BigFile {
                 //Just do nothing
             }
         }
-
-        Common::print_time(start_time, SystemTime::now(), "delete_files");
     }
 }
 
@@ -365,7 +355,6 @@ impl DebugPrint for BigFile {
 impl SaveResults for BigFile {
     /// Saving results to provided file
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let start_time: SystemTime = SystemTime::now();
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
             k => k.to_string(),
@@ -401,14 +390,13 @@ impl SaveResults for BigFile {
         } else {
             write!(writer, "Not found any files.").unwrap();
         }
-        Common::print_time(start_time, SystemTime::now(), "save_results_to_file");
+
         true
     }
 }
 
 impl PrintResults for BigFile {
     fn print_results(&self) {
-        let start_time: SystemTime = SystemTime::now();
         if self.search_mode == SearchMode::BiggestFiles {
             println!("{} the biggest files.\n\n", self.information.number_of_real_files);
         } else {
@@ -417,6 +405,5 @@ impl PrintResults for BigFile {
         for (size, file_entry) in &self.big_files {
             println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
         }
-        Common::print_time(start_time, SystemTime::now(), "print_entries");
     }
 }
