@@ -1,3 +1,4 @@
+use std::cmp::max;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
@@ -188,6 +189,10 @@ impl SameMusic {
                     return;
                 }
                 if !self.check_for_duplicate_fingerprints(stop_receiver, progress_sender) {
+                    self.stopped_search = true;
+                    return;
+                }
+                if !self.read_tags_to_files_similar_by_content(stop_receiver, progress_sender) {
                     self.stopped_search = true;
                     return;
                 }
@@ -393,7 +398,7 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type);
+            prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type);
         let configuration = &self.hash_preset_config;
 
         // Clean for duplicate files
@@ -450,7 +455,7 @@ impl SameMusic {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                if self.read_single_file_tag(&path, &mut music_entry) {
+                if read_single_file_tag(&path, &mut music_entry) {
                     Some(Some(music_entry))
                 } else {
                     Some(None)
@@ -477,102 +482,8 @@ impl SameMusic {
 
         true
     }
-    fn read_single_file_tag(&self, path: &str, music_entry: &mut MusicEntry) -> bool {
-        let Ok(mut file) = File::open(path) else { return false; };
-
-        let result = panic::catch_unwind(move || {
-            match read_from(&mut file) {
-                Ok(t) => Some(t),
-                Err(_inspected) => {
-                    // println!("Failed to open {}", path);
-                    None
-                }
-            }
-        });
-
-        let tagged_file = if let Ok(t) = result {
-            match t {
-                Some(r) => r,
-                None => {
-                    return true;
-                }
-            }
-        } else {
-            let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
-            println!("{message}");
-            return false;
-        };
-
-        let properties = tagged_file.properties();
-
-        let mut track_title = String::new();
-        let mut track_artist = String::new();
-        let mut year = String::new();
-        let mut genre = String::new();
-
-        let bitrate = properties.audio_bitrate().unwrap_or(0);
-        let mut length = properties.duration().as_millis().to_string();
-
-        if let Some(tag) = tagged_file.primary_tag() {
-            track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or("").to_string();
-            track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or("").to_string();
-            year = tag.get_string(&ItemKey::Year).unwrap_or("").to_string();
-            genre = tag.get_string(&ItemKey::Genre).unwrap_or("").to_string();
-        }
-
-        for tag in tagged_file.tags() {
-            if track_title.is_empty() {
-                if let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle) {
-                    track_title = tag_value.to_string();
-                }
-            }
-            if track_artist.is_empty() {
-                if let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist) {
-                    track_artist = tag_value.to_string();
-                }
-            }
-            if year.is_empty() {
-                if let Some(tag_value) = tag.get_string(&ItemKey::Year) {
-                    year = tag_value.to_string();
-                }
-            }
-            if genre.is_empty() {
-                if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
-                    genre = tag_value.to_string();
-                }
-            }
-            // println!("{:?}", tag.items());
-        }
-
-        if let Ok(old_length_number) = length.parse::<u32>() {
-            let length_number = old_length_number / 60;
-            let minutes = length_number / 1000;
-            let seconds = (length_number % 1000) * 6 / 100;
-            if minutes != 0 || seconds != 0 {
-                length = format!("{minutes}:{seconds:02}");
-            } else if old_length_number > 0 {
-                // That means, that audio have length smaller that second, but length is properly read
-                length = "0:01".to_string();
-            } else {
-                length = String::new();
-            }
-        } else {
-            length = String::new();
-        }
-
-        music_entry.track_title = track_title;
-        music_entry.track_artist = track_artist;
-        music_entry.year = year;
-        music_entry.length = length;
-        music_entry.genre = genre;
-        music_entry.bitrate = bitrate;
-
-        true
-    }
 
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
-
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type);
 
@@ -670,6 +581,56 @@ impl SameMusic {
 
         true
     }
+    fn read_tags_to_files_similar_by_content(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        let groups_to_check = max(self.duplicated_music_entries.len(), self.duplicated_music_entries_referenced.len());
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type);
+
+        // TODO is ther a way to just run iterator and not collect any info?
+        if !self.duplicated_music_entries.is_empty() {
+            let _: Vec<_> = self
+                .duplicated_music_entries
+                .par_iter_mut()
+                .map(|vec_me| {
+                    atomic_counter.fetch_add(1, Ordering::Relaxed);
+                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                        check_was_stopped.store(true, Ordering::Relaxed);
+                        return None;
+                    }
+                    for me in vec_me {
+                        let me_path = me.path.to_string_lossy().to_string();
+                        read_single_file_tag(&me_path, me);
+                    }
+                    Some(())
+                })
+                .while_some()
+                .collect();
+        } else {
+            let _: Vec<_> = self
+                .duplicated_music_entries_referenced
+                .par_iter_mut()
+                .map(|(me_o, vec_me)| {
+                    atomic_counter.fetch_add(1, Ordering::Relaxed);
+                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                        check_was_stopped.store(true, Ordering::Relaxed);
+                        return None;
+                    }
+                    let me_o_path = me_o.path.to_string_lossy().to_string();
+                    read_single_file_tag(&me_o_path, me_o);
+                    for me in vec_me {
+                        let me_path = me.path.to_string_lossy().to_string();
+                        read_single_file_tag(&me_path, me);
+                    }
+                    Some(())
+                })
+                .while_some()
+                .collect();
+        }
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+
+        !check_was_stopped.load(Ordering::Relaxed)
+    }
 
     fn split_fingerprints_to_check(&mut self) -> (Vec<MusicEntry>, Vec<MusicEntry>) {
         let base_files: Vec<MusicEntry>;
@@ -746,11 +707,9 @@ impl SameMusic {
     }
 
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        assert_ne!(MusicSimilarity::NONE, self.music_similarity, "This can't be none");
-
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 2, base_files.len(), self.check_type);
+            prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type);
 
         let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter, base_files, &files_to_compare) else {
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -972,6 +931,99 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
 
     printer.finish();
     Ok(printer.fingerprint().to_vec())
+}
+
+fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
+    let Ok(mut file) = File::open(path) else { return false; };
+
+    let result = panic::catch_unwind(move || {
+        match read_from(&mut file) {
+            Ok(t) => Some(t),
+            Err(_inspected) => {
+                // println!("Failed to open {}", path);
+                None
+            }
+        }
+    });
+
+    let tagged_file = if let Ok(t) = result {
+        match t {
+            Some(r) => r,
+            None => {
+                return true;
+            }
+        }
+    } else {
+        let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
+        println!("{message}");
+        return false;
+    };
+
+    let properties = tagged_file.properties();
+
+    let mut track_title = String::new();
+    let mut track_artist = String::new();
+    let mut year = String::new();
+    let mut genre = String::new();
+
+    let bitrate = properties.audio_bitrate().unwrap_or(0);
+    let mut length = properties.duration().as_millis().to_string();
+
+    if let Some(tag) = tagged_file.primary_tag() {
+        track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or("").to_string();
+        track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or("").to_string();
+        year = tag.get_string(&ItemKey::Year).unwrap_or("").to_string();
+        genre = tag.get_string(&ItemKey::Genre).unwrap_or("").to_string();
+    }
+
+    for tag in tagged_file.tags() {
+        if track_title.is_empty() {
+            if let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle) {
+                track_title = tag_value.to_string();
+            }
+        }
+        if track_artist.is_empty() {
+            if let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist) {
+                track_artist = tag_value.to_string();
+            }
+        }
+        if year.is_empty() {
+            if let Some(tag_value) = tag.get_string(&ItemKey::Year) {
+                year = tag_value.to_string();
+            }
+        }
+        if genre.is_empty() {
+            if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
+                genre = tag_value.to_string();
+            }
+        }
+        // println!("{:?}", tag.items());
+    }
+
+    if let Ok(old_length_number) = length.parse::<u32>() {
+        let length_number = old_length_number / 60;
+        let minutes = length_number / 1000;
+        let seconds = (length_number % 1000) * 6 / 100;
+        if minutes != 0 || seconds != 0 {
+            length = format!("{minutes}:{seconds:02}");
+        } else if old_length_number > 0 {
+            // That means, that audio have length smaller that second, but length is properly read
+            length = "0:01".to_string();
+        } else {
+            length = String::new();
+        }
+    } else {
+        length = String::new();
+    }
+
+    music_entry.track_title = track_title;
+    music_entry.track_artist = track_artist;
+    music_entry.year = year;
+    music_entry.length = length;
+    music_entry.genre = genre;
+    music_entry.bitrate = bitrate;
+
+    true
 }
 
 // Using different cache folders, because loading cache just for finding duplicated tags would be really slow
