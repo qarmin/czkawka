@@ -775,7 +775,7 @@ pub fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, curre
     scale.set_fill_level(maximum);
     scale.set_value(current_value);
     if let Some(step) = step {
-        scale.adjustment().set_step_increment(step)
+        scale.adjustment().set_step_increment(step);
     }
 }
 

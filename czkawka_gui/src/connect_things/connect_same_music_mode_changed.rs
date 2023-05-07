@@ -65,12 +65,12 @@ pub fn connect_same_music_change_mode(gui_data: &GuiData) {
 fn disable_enable_buttons(buttons: &[CheckButton; 7], scales: &[Widget; 4], current_mode: CheckingMethod) {
     match current_mode {
         CheckingMethod::AudioTags => {
-            buttons.iter().for_each(|e| e.show());
-            scales.iter().for_each(|e| e.hide());
+            buttons.iter().for_each(WidgetExt::show);
+            scales.iter().for_each(WidgetExt::hide);
         }
         CheckingMethod::AudioContent => {
-            buttons.iter().for_each(|e| e.hide());
-            scales.iter().for_each(|e| e.show());
+            buttons.iter().for_each(WidgetExt::hide);
+            scales.iter().for_each(WidgetExt::show);
         }
         _ => panic!(),
     }

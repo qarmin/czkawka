@@ -272,8 +272,10 @@ impl SameMusic {
 
     pub fn set_check_type(&mut self, check_type: CheckingMethod) {
         assert!([CheckingMethod::AudioTags, CheckingMethod::AudioContent].contains(&check_type));
-        self.check_type = check_type
+        self.check_type = check_type;
     }
+
+    #[must_use]
     pub fn get_check_type(&self) -> CheckingMethod {
         self.check_type
     }
