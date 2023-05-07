@@ -18,6 +18,21 @@ music_length_checkbox = Length
 music_comparison_checkbox = Approximate Comparison
 music_checking_by_tags = Tags
 music_checking_by_content = Content
+same_music_seconds_label = Minimal fragment second duration
+same_music_similarity_label = Maximum difference
+
+same_music_tooltip =
+        Searching for similar music files by its content can be configured by setting:
+
+        - The minimum fragment time after which music files can be identified as similar
+        - The maximum difference difference between two tested fragments
+
+        The key to good results is to find sensible combinations of these parameters, for provided.
+
+        Setting the minimum time to 5s and the maximum difference to 1.0, will look for almost identical fragments in the files.
+        A time of 20s and a maximum difference of 6.0, on the other hand, works well for finding remixes/live versions etc.
+
+        By default, each music file is compared to each other and this can take a lot of time when testing many files, so it is usually better to use reference folders and specifying which files are to be compared with each other(with same amount of files, comparing fingerprints will be faster at least 4x than without reference folders).
 
 music_comparison_checkbox_tooltip =
         It searches for similar music files using AI, which uses machine learning to remove parentheses from a phrase. For example, with this option enabled, the files in question will be considered duplicates:

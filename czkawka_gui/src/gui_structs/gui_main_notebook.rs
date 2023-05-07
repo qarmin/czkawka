@@ -426,6 +426,13 @@ impl GuiMainNotebook {
         self.check_button_broken_files_image.set_label(Some(&flg!("main_check_box_broken_files_image")));
         self.check_button_broken_files_pdf.set_label(Some(&flg!("main_check_box_broken_files_pdf")));
 
+        self.label_same_music_seconds.set_label(&flg!("same_music_seconds_label"));
+        self.label_same_music_similarity.set_label(&flg!("same_music_similarity_label"));
+        self.label_same_music_seconds.set_tooltip_text(Some(&flg!("same_music_tooltip")));
+        self.label_same_music_similarity.set_tooltip_text(Some(&flg!("same_music_tooltip")));
+        self.scale_seconds_same_music.set_tooltip_text(Some(&flg!("same_music_tooltip")));
+        self.scale_similarity_similar_videos.set_tooltip_text(Some(&flg!("same_music_tooltip")));
+
         {
             let hash_size_index = self.combo_box_image_hash_size.active().unwrap() as usize;
             let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
