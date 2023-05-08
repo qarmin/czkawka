@@ -13,7 +13,7 @@ use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
 use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -172,6 +172,7 @@ impl Info {
 }
 
 pub struct BadExtensions {
+    tool_type: ToolType,
     text_messages: Messages,
     information: Info,
     files_to_check: Vec<FileEntry>,
@@ -191,6 +192,7 @@ impl BadExtensions {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::BadExtensions,
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,
@@ -314,7 +316,7 @@ impl BadExtensions {
 
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None);
+            prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.tool_type);
 
         let files_to_check = mem::take(&mut self.files_to_check);
 

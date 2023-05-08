@@ -25,7 +25,7 @@ use symphonia::core::probe::Hint;
 
 use crate::common::{create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
 use crate::common::{filter_reference_folders_generic, open_cache_folder};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -108,6 +108,7 @@ impl Info {
 
 /// Struct with required information's to work
 pub struct SameMusic {
+    tool_type: ToolType,
     text_messages: Messages,
     information: Info,
     music_to_check: HashMap<String, MusicEntry>,
@@ -138,6 +139,7 @@ impl SameMusic {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::SameMusic,
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,
@@ -415,7 +417,7 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type);
+            prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type, self.tool_type);
         let configuration = &self.hash_preset_config;
 
         // Clean for duplicate files
@@ -461,7 +463,7 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type);
+            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type, self.tool_type);
 
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
@@ -502,7 +504,7 @@ impl SameMusic {
 
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type);
+            prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type, self.tool_type);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
@@ -601,7 +603,7 @@ impl SameMusic {
     fn read_tags_to_files_similar_by_content(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let groups_to_check = max(self.duplicated_music_entries.len(), self.duplicated_music_entries_referenced.len());
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type);
+            prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type, self.tool_type);
 
         // TODO is ther a way to just run iterator and not collect any info?
         if !self.duplicated_music_entries.is_empty() {
@@ -726,7 +728,7 @@ impl SameMusic {
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type);
+            prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type, self.tool_type);
 
         let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter, base_files, &files_to_compare) else {
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);

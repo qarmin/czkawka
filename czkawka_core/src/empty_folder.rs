@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 
-use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData};
+use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
@@ -15,6 +15,8 @@ use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 /// Struct to store most basics info about all folder
 pub struct EmptyFolder {
+    #[allow(dead_code)]
+    tool_type: ToolType,
     information: Info,
     delete_folders: bool,
     text_messages: Messages,
@@ -43,6 +45,7 @@ impl EmptyFolder {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::EmptyFolders,
             information: Default::default(),
             delete_folders: false,
             text_messages: Messages::new(),

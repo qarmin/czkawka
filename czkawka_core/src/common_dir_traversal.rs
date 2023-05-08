@@ -3,7 +3,6 @@ use std::fs;
 use std::fs::{DirEntry, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
-
 use std::time::UNIX_EPOCH;
 
 use crossbeam_channel::Receiver;
@@ -25,6 +24,23 @@ pub struct ProgressData {
     pub max_stage: u8,
     pub entries_checked: usize,
     pub entries_to_check: usize,
+    pub tool_type: ToolType,
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+pub enum ToolType {
+    Duplicate,
+    EmptyFolders,
+    EmptyFiles,
+    InvalidSymlinks,
+    BrokenFiles,
+    BadExtensions,
+    BigFile,
+    SameMusic,
+    SimilarImages,
+    SimilarVideos,
+    TemporaryFiles,
+    None,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
@@ -118,6 +134,7 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
     directories: Option<Directories>,
     excluded_items: Option<ExcludedItems>,
     allowed_extensions: Option<Extensions>,
+    tool_type: ToolType,
 }
 
 pub struct DirTraversal<'a, 'b, F> {
@@ -133,6 +150,7 @@ pub struct DirTraversal<'a, 'b, F> {
     maximal_file_size: u64,
     checking_method: CheckingMethod,
     max_stage: u8,
+    tool_type: ToolType,
     collect: Collect,
 }
 
@@ -159,6 +177,7 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
             directories: None,
             allowed_extensions: None,
             excluded_items: None,
+            tool_type: ToolType::BadExtensions,
         }
     }
 }
@@ -236,6 +255,12 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
+    #[must_use]
+    pub fn tool_type(mut self, tool_type: ToolType) -> Self {
+        self.tool_type = tool_type;
+        self
+    }
+
     #[cfg(target_family = "unix")]
     #[must_use]
     pub fn exclude_other_filesystems(mut self, exclude_other_filesystems: bool) -> Self {
@@ -264,6 +289,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             collect: self.collect,
             checking_method: self.checking_method,
             max_stage: self.max_stage,
+            tool_type: self.tool_type,
         }
     }
 
@@ -282,6 +308,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             excluded_items: self.excluded_items.expect("could not build"),
             allowed_extensions: self.allowed_extensions.unwrap_or_default(),
             recursive_search: self.recursive_search,
+            tool_type: self.tool_type,
         }
     }
 }
@@ -339,7 +366,7 @@ where
         folders_to_check.extend(self.root_dirs);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method);
+            prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method, self.tool_type);
 
         let DirTraversal {
             collect,

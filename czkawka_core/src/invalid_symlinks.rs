@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 
-use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData};
+use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -35,6 +35,8 @@ impl Info {
 
 /// Struct with required information's to work
 pub struct InvalidSymlinks {
+    #[allow(dead_code)]
+    tool_type: ToolType,
     text_messages: Messages,
     information: Info,
     invalid_symlinks: Vec<FileEntry>,
@@ -50,6 +52,7 @@ impl InvalidSymlinks {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::InvalidSymlinks,
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,

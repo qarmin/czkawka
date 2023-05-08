@@ -21,7 +21,7 @@ use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
 use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData};
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -81,6 +81,7 @@ impl Info {
 }
 
 pub struct DuplicateFinder {
+    tool_type: ToolType,
     text_messages: Messages,
     information: Info,
     files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,                         // File Size, File Entry
@@ -116,6 +117,7 @@ impl DuplicateFinder {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::Duplicate,
             text_messages: Messages::new(),
             information: Info::new(),
             files_with_identical_names: Default::default(),
@@ -675,8 +677,14 @@ impl DuplicateFinder {
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let check_type = self.hash_type;
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 2, self.files_with_identical_size.values().map(Vec::len).sum(), self.check_method);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+            progress_sender,
+            1,
+            2,
+            self.files_with_identical_size.values().map(Vec::len).sum(),
+            self.check_method,
+            self.tool_type,
+        );
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
@@ -831,7 +839,7 @@ impl DuplicateFinder {
         let check_type = self.hash_type;
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 2, pre_checked_map.values().map(Vec::len).sum(), self.check_method);
+            prepare_thread_handler_common(progress_sender, 2, 2, pre_checked_map.values().map(Vec::len).sum(), self.check_method, self.tool_type);
 
         ///////////////////////////////////////////////////////////////////////////// HASHING START
         {
