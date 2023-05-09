@@ -124,6 +124,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "vbox"),      // VirtualBox
     ("xml", "vbox-prev"), // VirtualBox
     ("xml", "vcproj"),    // VisualStudio
+    ("xml", "vcxproj"),   // VisualStudio
     ("xml", "xba"),       // Libreoffice
     ("xml", "xcd"),       // Libreoffice files
     ("zip", "apk"),       // Android apk
