@@ -399,6 +399,7 @@ where
                         return (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list);
                     };
 
+                    let mut counter = 0;
                     // Check every sub folder/file/link etc.
                     'dir: for entry in read_dir {
                         let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
@@ -410,7 +411,7 @@ where
                                 process_dir_in_file_symlink_mode(recursive_search, current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
                             }
                             (EntryType::Dir, Collect::EmptyFolders) => {
-                                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                                counter += 1;
                                 process_dir_in_dir_mode(
                                     &metadata,
                                     current_folder,
@@ -424,7 +425,7 @@ where
                                 );
                             }
                             (EntryType::File, Collect::Files) => {
-                                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                                counter += 1;
                                 process_file_in_file_mode(
                                     &metadata,
                                     entry_data,
@@ -451,10 +452,10 @@ where
                                 set_as_not_empty_folder_list.push(current_folder.clone());
                             }
                             (EntryType::File, Collect::InvalidSymlinks) => {
-                                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                                counter += 1;
                             }
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
-                                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                                counter += 1;
                                 process_symlink_in_symlink_mode(
                                     &metadata,
                                     entry_data,
@@ -470,6 +471,10 @@ where
                                 // nothing to do
                             }
                         }
+                    }
+                    if counter > 0 {
+                        // Do not increase counter one by one in threads, because usually it
+                        atomic_counter.fetch_add(counter, Ordering::Relaxed);
                     }
                     (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list)
                 })
