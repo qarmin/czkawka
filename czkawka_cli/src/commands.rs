@@ -86,6 +86,8 @@ pub enum Commands {
 #[derive(Debug, clap::Args)]
 pub struct DuplicatesArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -164,6 +166,8 @@ pub struct DuplicatesArgs {
 #[derive(Debug, clap::Args)]
 pub struct EmptyFoldersArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -180,6 +184,8 @@ pub struct EmptyFoldersArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct BiggestFilesArgs {
+    #[clap(flatten)]
+    pub thread_number: ThreadNumber,
     #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
@@ -206,6 +212,8 @@ pub struct BiggestFilesArgs {
 #[derive(Debug, clap::Args)]
 pub struct EmptyFilesArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -227,6 +235,8 @@ pub struct EmptyFilesArgs {
 #[derive(Debug, clap::Args)]
 pub struct TemporaryArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -245,6 +255,8 @@ pub struct TemporaryArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct SimilarImagesArgs {
+    #[clap(flatten)]
+    pub thread_number: ThreadNumber,
     #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
@@ -314,6 +326,8 @@ pub struct SimilarImagesArgs {
 #[derive(Debug, clap::Args)]
 pub struct SameMusicArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -360,6 +374,8 @@ pub struct SameMusicArgs {
 #[derive(Debug, clap::Args)]
 pub struct InvalidSymlinksArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -381,6 +397,8 @@ pub struct InvalidSymlinksArgs {
 #[derive(Debug, clap::Args)]
 pub struct BrokenFilesArgs {
     #[clap(flatten)]
+    pub thread_number: ThreadNumber,
+    #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
     pub excluded_directories: ExcludedDirectories,
@@ -401,6 +419,8 @@ pub struct BrokenFilesArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct SimilarVideosArgs {
+    #[clap(flatten)]
+    pub thread_number: ThreadNumber,
     #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
@@ -449,6 +469,8 @@ pub struct SimilarVideosArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct BadExtensionsArgs {
+    #[clap(flatten)]
+    pub thread_number: ThreadNumber,
     #[clap(flatten)]
     pub directories: Directories,
     #[clap(flatten)]
@@ -515,6 +537,12 @@ pub struct AllowedExtensions {
 pub struct NotRecursive {
     #[clap(short = 'R', long, help = "Prevents from recursive check of folders")]
     pub not_recursive: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ThreadNumber {
+    #[clap(short = 'T', long, default_value = "0", help = "Limits thread number, 0(default) will use all available threads")]
+    pub thread_number: usize,
 }
 
 #[cfg(target_family = "unix")]

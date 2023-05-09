@@ -6,7 +6,7 @@ use clap::Parser;
 
 use commands::Commands;
 use czkawka_core::big_file::SearchMode;
-use czkawka_core::common::{get_number_of_threads, set_default_number_of_threads};
+use czkawka_core::common::{get_number_of_threads, set_default_number_of_threads, set_number_of_threads};
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 use czkawka_core::similar_images::test_image_conversion_speed;
@@ -34,8 +34,6 @@ mod commands;
 fn main() {
     let command = Args::parse().command;
 
-    set_default_number_of_threads();
-    println!("Set thread number to {}", get_number_of_threads());
     #[cfg(debug_assertions)]
     println!("{command:?}");
 
@@ -59,6 +57,7 @@ fn main() {
 
 fn duplicates(duplicates: DuplicatesArgs) {
     let DuplicatesArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -77,6 +76,8 @@ fn duplicates(duplicates: DuplicatesArgs) {
         dryrun,
         case_sensitive_name_comparison,
     } = duplicates;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut df = DuplicateFinder::new();
 
@@ -113,6 +114,7 @@ fn duplicates(duplicates: DuplicatesArgs) {
 
 fn empty_folders(empty_folders: EmptyFoldersArgs) {
     let EmptyFoldersArgs {
+        thread_number,
         directories,
         delete_folders,
         file_to_save,
@@ -121,6 +123,8 @@ fn empty_folders(empty_folders: EmptyFoldersArgs) {
         #[cfg(target_family = "unix")]
         exclude_other_filesystems,
     } = empty_folders;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut ef = EmptyFolder::new();
 
@@ -147,6 +151,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs) {
 
 fn biggest_files(biggest_files: BiggestFilesArgs) {
     let BiggestFilesArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -159,6 +164,8 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
         delete_files,
         smallest_mode,
     } = biggest_files;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut bf = BigFile::new();
 
@@ -193,6 +200,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
 
 fn empty_files(empty_files: EmptyFilesArgs) {
     let EmptyFilesArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -203,6 +211,8 @@ fn empty_files(empty_files: EmptyFilesArgs) {
         #[cfg(target_family = "unix")]
         exclude_other_filesystems,
     } = empty_files;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut ef = EmptyFiles::new();
 
@@ -234,6 +244,7 @@ fn empty_files(empty_files: EmptyFilesArgs) {
 
 fn temporary(temporary: TemporaryArgs) {
     let TemporaryArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -243,6 +254,8 @@ fn temporary(temporary: TemporaryArgs) {
         file_to_save,
         not_recursive,
     } = temporary;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut tf = Temporary::new();
 
@@ -273,6 +286,7 @@ fn temporary(temporary: TemporaryArgs) {
 
 fn similar_images(similar_images: SimilarImagesArgs) {
     let SimilarImagesArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -287,6 +301,8 @@ fn similar_images(similar_images: SimilarImagesArgs) {
         image_filter,
         hash_size,
     } = similar_images;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut sf = SimilarImages::new();
 
@@ -320,6 +336,7 @@ fn similar_images(similar_images: SimilarImagesArgs) {
 
 fn same_music(same_music: SameMusicArgs) {
     let SameMusicArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -332,6 +349,8 @@ fn same_music(same_music: SameMusicArgs) {
         maximal_file_size,
         music_similarity,
     } = same_music;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut mf = SameMusic::new();
 
@@ -365,6 +384,7 @@ fn same_music(same_music: SameMusicArgs) {
 
 fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
     let InvalidSymlinksArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -375,6 +395,8 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
         exclude_other_filesystems,
         delete_files,
     } = invalid_symlinks;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut ifs = InvalidSymlinks::new();
 
@@ -405,6 +427,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
 
 fn broken_files(broken_files: BrokenFilesArgs) {
     let BrokenFilesArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -415,6 +438,8 @@ fn broken_files(broken_files: BrokenFilesArgs) {
         #[cfg(target_family = "unix")]
         exclude_other_filesystems,
     } = broken_files;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut br = BrokenFiles::new();
 
@@ -446,6 +471,7 @@ fn broken_files(broken_files: BrokenFilesArgs) {
 
 fn similar_videos(similar_videos: SimilarVideosArgs) {
     let SimilarVideosArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -458,6 +484,8 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
         maximal_file_size,
         allowed_extensions,
     } = similar_videos;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut vr = SimilarVideos::new();
 
@@ -488,6 +516,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs) {
     let BadExtensionsArgs {
+        thread_number,
         directories,
         excluded_directories,
         excluded_items,
@@ -497,6 +526,8 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs) {
         exclude_other_filesystems,
         allowed_extensions,
     } = bad_extensions;
+
+    set_number_of_threads(thread_number.thread_number);
 
     let mut be = BadExtensions::new();
 
