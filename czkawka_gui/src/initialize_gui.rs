@@ -287,7 +287,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
                 tree_view.set_model(Some(&list_store));
                 tree_view.selection().set_mode(SelectionMode::Multiple);
 
-                create_tree_view_broken_files(&tree_view);
+                create_tree_view_bad_extensions(&tree_view);
 
                 tree_view.set_widget_name("tree_view_bad_extensions");
                 scrolled_window.set_child(Some(&tree_view));
