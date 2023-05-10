@@ -11,7 +11,7 @@ use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
@@ -60,6 +60,7 @@ impl Info {
 
 /// Struct with required information's to work
 pub struct Temporary {
+    tool_type: ToolType,
     text_messages: Messages,
     information: Info,
     temporary_files: Vec<FileEntry>,
@@ -74,6 +75,7 @@ impl Temporary {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::TemporaryFiles,
             text_messages: Messages::new(),
             information: Info::new(),
             recursive_search: true,
@@ -149,7 +151,8 @@ impl Temporary {
             folders_to_check.push(id.clone());
         }
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) = prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.tool_type);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {

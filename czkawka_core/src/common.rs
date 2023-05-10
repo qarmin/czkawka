@@ -19,7 +19,7 @@ use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
-use crate::common_dir_traversal::{CheckingMethod, ProgressData};
+use crate::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_traits::ResultEntry;
@@ -392,6 +392,7 @@ pub fn prepare_thread_handler_common(
     max_stage: u8,
     max_value: usize,
     checking_method: CheckingMethod,
+    tool_type: ToolType,
 ) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
     let progress_thread_run = Arc::new(AtomicBool::new(true));
     let atomic_counter = Arc::new(AtomicUsize::new(0));
@@ -408,6 +409,7 @@ pub fn prepare_thread_handler_common(
                     max_stage,
                     entries_checked: atomic_counter.load(Ordering::Relaxed),
                     entries_to_check: max_value,
+                    tool_type,
                 })
                 .unwrap();
             if !progress_thread_run.load(Ordering::Relaxed) {

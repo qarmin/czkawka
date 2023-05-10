@@ -6,7 +6,7 @@ use gdk4::gdk_pixbuf::Pixbuf;
 use glib::types::Type;
 use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
-use gtk4::{CheckButton, Image, SelectionMode, TextView, TreeView};
+use gtk4::{CheckButton, Image, ScrolledWindow, SelectionMode, TextView, TreeModel, TreePath, TreeSelection, TreeView};
 
 #[cfg(feature = "heif")]
 use czkawka_core::common::get_dynamic_image_from_heic;
@@ -24,7 +24,7 @@ use crate::help_combo_box::{
 use crate::help_functions::*;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::notebook_enums::NotebookMainEnum;
+use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
 
@@ -91,208 +91,104 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
         // Set step increment
         {
             let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
-            scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // This defaults to value of minimal size of hash 8
-            scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
-            scale_similarity_similar_images.adjustment().set_step_increment(1_f64);
+            scale_set_min_max_values(&scale_similarity_similar_images, 0_f64, SIMILAR_VALUES[0][5] as f64, 15_f64, Some(1_f64));
         }
         // Set step increment
         {
             let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
-            scale_similarity_similar_videos.set_range(0_f64, MAX_TOLERANCE as f64); // This defaults to value of minimal size of hash 8
-            scale_similarity_similar_videos.set_value(15_f64);
-            scale_similarity_similar_videos.set_fill_level(MAX_TOLERANCE as f64);
-            scale_similarity_similar_videos.adjustment().set_step_increment(1_f64);
+            scale_set_min_max_values(&scale_similarity_similar_videos, 0_f64, MAX_TOLERANCE as f64, 15_f64, Some(1_f64));
         }
 
         // Set Main Scrolled Window Treeviews
         {
-            // Duplicate Files
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_duplicate_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_duplicate_finder.clone();
-
-                let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
-                image_preview.hide();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(select_function_duplicates);
-
-                create_tree_view_duplicates(&tree_view);
-
-                tree_view.set_widget_name("tree_view_duplicate_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Empty Folders
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_empty_folder_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::EmptyDirectories as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_empty_folders(&tree_view);
-
-                tree_view.set_widget_name("tree_view_empty_folder_finder");
-
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Empty Files
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_empty_files_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::EmptyFiles as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_empty_files(&tree_view);
-
-                tree_view.set_widget_name("tree_view_empty_files_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Temporary Files
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_temporary_files_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::Temporary as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_temporary_files(&tree_view);
-
-                tree_view.set_widget_name("tree_view_temporary_files_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Big Files
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_big_files_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_big_files_finder.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::BigFiles as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_big_files(&tree_view);
-
-                tree_view.set_widget_name("tree_view_big_files_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Similar Images
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_similar_images_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_similar_images_finder.clone();
-
-                let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
-                image_preview.hide();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::SimilarImages as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(select_function_similar_images);
-
-                create_tree_view_similar_images(&tree_view);
-
-                tree_view.set_widget_name("tree_view_similar_images_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Similar Videos
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_similar_videos_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::SimilarVideos as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(select_function_similar_videos);
-
-                create_tree_view_similar_videos(&tree_view);
-
-                tree_view.set_widget_name("tree_view_similar_videos_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Same Music
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_same_music_finder.clone();
-                let tree_view = gui_data.main_notebook.tree_view_same_music_finder.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::SameMusic as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-                tree_view.selection().set_select_function(select_function_same_music);
-
-                create_tree_view_same_music(&tree_view);
-
-                tree_view.set_widget_name("tree_view_same_music_finder");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Invalid Symlinks
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_invalid_symlinks.clone();
-                let tree_view = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::Symlinks as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_invalid_symlinks(&tree_view);
-
-                tree_view.set_widget_name("tree_view_invalid_symlinks");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Broken Files
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_broken_files.clone();
-                let tree_view = gui_data.main_notebook.tree_view_broken_files.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::BrokenFiles as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_broken_files(&tree_view);
-
-                tree_view.set_widget_name("tree_view_broken_files");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
-            // Bad Extensions
-            {
-                let scrolled_window = gui_data.main_notebook.scrolled_window_bad_extensions.clone();
-                let tree_view = gui_data.main_notebook.tree_view_bad_extensions.clone();
-
-                let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[NotebookMainEnum::BadExtensions as usize].columns_types);
-
-                tree_view.set_model(Some(&list_store));
-                tree_view.selection().set_mode(SelectionMode::Multiple);
-
-                create_tree_view_broken_files(&tree_view);
-
-                tree_view.set_widget_name("tree_view_bad_extensions");
-                scrolled_window.set_child(Some(&tree_view));
-                scrolled_window.show();
-            }
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_duplicate_finder,
+                &gui_data.main_notebook.tree_view_duplicate_finder,
+                NotebookMainEnum::Duplicate,
+                Some(select_function_duplicates),
+                create_tree_view_duplicates,
+                Some(&gui_data.main_notebook.image_preview_duplicates),
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_similar_images_finder,
+                &gui_data.main_notebook.tree_view_similar_images_finder,
+                NotebookMainEnum::SimilarImages,
+                Some(select_function_similar_images),
+                create_tree_view_similar_images,
+                Some(&gui_data.main_notebook.image_preview_similar_images),
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_similar_videos_finder,
+                &gui_data.main_notebook.tree_view_similar_videos_finder,
+                NotebookMainEnum::SimilarVideos,
+                Some(select_function_similar_videos),
+                create_tree_view_similar_videos,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_same_music_finder,
+                &gui_data.main_notebook.tree_view_same_music_finder,
+                NotebookMainEnum::SameMusic,
+                Some(select_function_same_music),
+                create_tree_view_same_music,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_empty_folder_finder,
+                &gui_data.main_notebook.tree_view_empty_folder_finder,
+                NotebookMainEnum::EmptyDirectories,
+                None,
+                create_tree_view_empty_folders,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_empty_files_finder,
+                &gui_data.main_notebook.tree_view_empty_files_finder,
+                NotebookMainEnum::EmptyFiles,
+                None,
+                create_tree_view_empty_files,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_temporary_files_finder,
+                &gui_data.main_notebook.tree_view_temporary_files_finder,
+                NotebookMainEnum::Temporary,
+                None,
+                create_tree_view_temporary_files,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_big_files_finder,
+                &gui_data.main_notebook.tree_view_big_files_finder,
+                NotebookMainEnum::BigFiles,
+                None,
+                create_tree_view_big_files,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_invalid_symlinks,
+                &gui_data.main_notebook.tree_view_invalid_symlinks,
+                NotebookMainEnum::Symlinks,
+                None,
+                create_tree_view_invalid_symlinks,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_broken_files,
+                &gui_data.main_notebook.tree_view_broken_files,
+                NotebookMainEnum::BrokenFiles,
+                None,
+                create_tree_view_broken_files,
+                None,
+            );
+            create_column_types(
+                &gui_data.main_notebook.scrolled_window_bad_extensions,
+                &gui_data.main_notebook.tree_view_bad_extensions,
+                NotebookMainEnum::BadExtensions,
+                None,
+                create_tree_view_bad_extensions,
+                None,
+            );
         }
     }
 
@@ -316,7 +212,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
             create_tree_view_included_directories(&tree_view);
 
-            tree_view.set_widget_name("tree_view_upper_included_directories");
+            tree_view.set_widget_name(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories));
             scrolled_window.set_child(Some(&tree_view));
             scrolled_window.show();
 
@@ -350,7 +246,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
             create_tree_view_excluded_directories(&tree_view);
 
-            tree_view.set_widget_name("tree_view_upper_excluded_directories");
+            tree_view.set_widget_name(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories));
             scrolled_window.set_child(Some(&tree_view));
             scrolled_window.show();
 
@@ -385,6 +281,32 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
     // This not need to be run in different code block, but this looks a little less complicated if is available in
     connect_event_buttons(gui_data);
     connect_event_mouse(gui_data);
+}
+
+fn create_column_types(
+    scrolled_window: &ScrolledWindow,
+    tree_view: &TreeView,
+    notebook_enum: NotebookMainEnum,
+    select_function: Option<fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool>,
+    create_tree_view_func: fn(&TreeView),
+    image_preview: Option<&Image>,
+) {
+    if let Some(image_preview) = image_preview {
+        image_preview.hide();
+    }
+    let list_store: gtk4::ListStore = gtk4::ListStore::new(NOTEBOOKS_INFO[notebook_enum as usize].columns_types);
+
+    tree_view.set_model(Some(&list_store));
+    tree_view.selection().set_mode(SelectionMode::Multiple);
+    if let Some(select_function) = select_function {
+        tree_view.selection().set_select_function(select_function);
+    }
+
+    create_tree_view_func(tree_view);
+
+    tree_view.set_widget_name(get_tree_view_name_from_notebook_enum(notebook_enum));
+    scrolled_window.set_child(Some(tree_view));
+    scrolled_window.show();
 }
 
 fn connect_event_mouse(gui_data: &GuiData) {

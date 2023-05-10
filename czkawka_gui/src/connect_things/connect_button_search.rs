@@ -33,21 +33,7 @@ use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{flg, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
 
 #[allow(clippy::too_many_arguments)]
-pub fn connect_button_search(
-    gui_data: &GuiData,
-    glib_stop_sender: Sender<Message>,
-    futures_sender_duplicate_files: UnboundedSender<ProgressData>,
-    futures_sender_empty_files: UnboundedSender<ProgressData>,
-    futures_sender_empty_folder: UnboundedSender<ProgressData>,
-    futures_sender_big_file: UnboundedSender<ProgressData>,
-    futures_sender_same_music: UnboundedSender<ProgressData>,
-    futures_sender_similar_images: UnboundedSender<ProgressData>,
-    futures_sender_similar_videos: UnboundedSender<ProgressData>,
-    futures_sender_temporary: UnboundedSender<ProgressData>,
-    futures_sender_invalid_symlinks: UnboundedSender<ProgressData>,
-    futures_sender_broken_files: UnboundedSender<ProgressData>,
-    futures_sender_bad_extensions: UnboundedSender<ProgressData>,
-) {
+pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: Sender<Message>, progress_sender: UnboundedSender<ProgressData>) {
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
@@ -109,7 +95,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_duplicate_files.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::EmptyFiles => empty_files_search(
                 &gui_data,
@@ -117,7 +103,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_empty_files.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::EmptyDirectories => empty_directories_search(
                 &gui_data,
@@ -125,7 +111,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_empty_folder.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::BigFiles => big_files_search(
                 &gui_data,
@@ -133,7 +119,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_big_file.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::Temporary => temporary_files_search(
                 &gui_data,
@@ -141,7 +127,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_temporary.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::SimilarImages => similar_image_search(
                 &gui_data,
@@ -149,7 +135,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_similar_images.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::SimilarVideos => similar_video_search(
                 &gui_data,
@@ -157,7 +143,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_similar_videos.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::SameMusic => same_music_search(
                 &gui_data,
@@ -165,7 +151,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_same_music.clone(),
+                progress_sender.clone(),
                 &show_dialog,
             ),
             NotebookMainEnum::Symlinks => bad_symlinks_search(
@@ -174,7 +160,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_invalid_symlinks.clone(),
+                progress_sender.clone(),
             ),
             NotebookMainEnum::BrokenFiles => broken_files_search(
                 &gui_data,
@@ -182,7 +168,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_broken_files.clone(),
+                progress_sender.clone(),
                 &show_dialog,
             ),
             NotebookMainEnum::BadExtensions => bad_extensions_search(
@@ -191,7 +177,7 @@ pub fn connect_button_search(
                 stop_receiver,
                 glib_stop_sender,
                 &grid_progress_stages,
-                futures_sender_bad_extensions.clone(),
+                progress_sender.clone(),
             ),
         }
 

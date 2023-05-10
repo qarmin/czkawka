@@ -25,7 +25,7 @@ use crate::common::{
     check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, prepare_thread_handler_common,
     send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData};
+use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -85,6 +85,7 @@ impl bk_tree::Metric<ImHash> for Hamming {
 
 /// Struct to store most basics info about all folder
 pub struct SimilarImages {
+    tool_type: ToolType,
     information: Info,
     text_messages: Messages,
     directories: Directories,
@@ -131,6 +132,7 @@ impl SimilarImages {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            tool_type: ToolType::SimilarImages,
             information: Default::default(),
             text_messages: Messages::new(),
             directories: Directories::new(),
@@ -300,7 +302,8 @@ impl SimilarImages {
             folders_to_check.push(id.clone());
         }
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) = prepare_thread_handler_common(progress_sender, 0, 2, 0, CheckingMethod::None);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 0, 2, 0, CheckingMethod::None, self.tool_type);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -435,7 +438,7 @@ impl SimilarImages {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), CheckingMethod::None);
+            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), CheckingMethod::None, self.tool_type);
 
         let mut vec_file_entry: Vec<(FileEntry, ImHash)> = non_cached_files_to_check
             .into_par_iter()
@@ -816,7 +819,7 @@ impl SimilarImages {
             }
         } else {
             let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-                prepare_thread_handler_common(progress_sender, 2, 2, all_hashes.len(), CheckingMethod::None);
+                prepare_thread_handler_common(progress_sender, 2, 2, all_hashes.len(), CheckingMethod::None, self.tool_type);
 
             // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
 
