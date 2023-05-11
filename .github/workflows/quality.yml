@@ -14,20 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
-        with:
-          path: |
-            target
-          key: quality-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            quality-cli-${{github.ref}}-${{github.sha}}
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
-          override: true
-
       - name: Install Gtk 4
         run: sudo apt-get update; sudo apt install -y libgtk-4-dev libheif-dev -y
 

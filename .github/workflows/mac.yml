@@ -18,19 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            target
-          key: mac-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            mac-${{github.ref}}-${{github.sha}}
-
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -39,6 +26,9 @@ jobs:
           brew link --overwrite python@3.11
           brew install rust gtk4 libheif || true
           brew link --overwrite python@3.11
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
         run: cargo build --release
