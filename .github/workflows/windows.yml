@@ -18,6 +18,8 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
+      - name: Setup rust version
+        run: rustup default x86_64-pc-windows-gnu
       - name: Cache ~/.cargo
         uses: actions/cache@v1
         with:
@@ -68,7 +70,7 @@ jobs:
           if-no-files-found: error
 
   # Provide option to log things to windows CLI
-  container_cli:
+  container_console_window:
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.8
@@ -77,6 +79,8 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
+      - name: Setup rust version
+        run: rustup default x86_64-pc-windows-gnu
       - name: Cache ~/.cargo
         uses: actions/cache@v1
         with:
