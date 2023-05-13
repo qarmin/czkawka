@@ -8,13 +8,13 @@ use crate::help_functions::*;
 pub fn create_tree_view_included_directories(tree_view: &TreeView) {
     let model = get_list_store(tree_view);
 
-    create_default_column(tree_view, ColumnsIncludedDirectory::Path as i32, None, None);
+    create_default_column(tree_view, ColumnsIncludedDirectory::Path as i32, Some(None), None);
     create_default_selection_button_column(tree_view, ColumnsIncludedDirectory::ReferenceButton as i32, model, None);
 }
 
 pub fn create_tree_view_excluded_directories(tree_view: &TreeView) {
     tree_view.set_headers_visible(false);
-    create_default_column(tree_view, ColumnsExcludedDirectory::Path as i32, None, None);
+    create_default_column(tree_view, ColumnsExcludedDirectory::Path as i32, Some(None), None);
 }
 
 pub fn create_tree_view_duplicates(tree_view: &TreeView) {
@@ -39,12 +39,12 @@ pub fn create_tree_view_empty_folders(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsEmptyFolders::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsEmptyFolders::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsEmptyFolders::Path as i32, None, None);
+    create_default_column(tree_view, ColumnsEmptyFolders::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsEmptyFolders::Path as i32, Some(None), None);
     create_default_column(
         tree_view,
         ColumnsEmptyFolders::Modification as i32,
-        Some(ColumnsEmptyFolders::ModificationAsSecs as i32),
+        Some(Some(ColumnsEmptyFolders::ModificationAsSecs as i32)),
         None,
     );
 }
@@ -56,10 +56,15 @@ pub fn create_tree_view_big_files(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsBigFiles::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsBigFiles::Size as i32, None, None);
-    create_default_column(tree_view, ColumnsBigFiles::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsBigFiles::Path as i32, None, None);
-    create_default_column(tree_view, ColumnsBigFiles::Modification as i32, Some(ColumnsBigFiles::ModificationAsSecs as i32), None);
+    create_default_column(tree_view, ColumnsBigFiles::Size as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBigFiles::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBigFiles::Path as i32, Some(None), None);
+    create_default_column(
+        tree_view,
+        ColumnsBigFiles::Modification as i32,
+        Some(Some(ColumnsBigFiles::ModificationAsSecs as i32)),
+        None,
+    );
 }
 
 pub fn create_tree_view_temporary_files(tree_view: &TreeView) {
@@ -69,12 +74,12 @@ pub fn create_tree_view_temporary_files(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsTemporaryFiles::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsTemporaryFiles::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsTemporaryFiles::Path as i32, None, None);
+    create_default_column(tree_view, ColumnsTemporaryFiles::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsTemporaryFiles::Path as i32, Some(None), None);
     create_default_column(
         tree_view,
         ColumnsTemporaryFiles::Modification as i32,
-        Some(ColumnsTemporaryFiles::ModificationAsSecs as i32),
+        Some(Some(ColumnsTemporaryFiles::ModificationAsSecs as i32)),
         None,
     );
 }
@@ -86,9 +91,14 @@ pub fn create_tree_view_empty_files(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsEmptyFiles::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsEmptyFiles::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsEmptyFiles::Path as i32, None, None);
-    create_default_column(tree_view, ColumnsEmptyFiles::Modification as i32, Some(ColumnsEmptyFiles::ModificationAsSecs as i32), None);
+    create_default_column(tree_view, ColumnsEmptyFiles::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsEmptyFiles::Path as i32, Some(None), None);
+    create_default_column(
+        tree_view,
+        ColumnsEmptyFiles::Modification as i32,
+        Some(Some(ColumnsEmptyFiles::ModificationAsSecs as i32)),
+        None,
+    );
 }
 
 pub fn create_tree_view_similar_images(tree_view: &TreeView) {
@@ -151,14 +161,14 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsInvalidSymlinks::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsInvalidSymlinks::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsInvalidSymlinks::Path as i32, None, None);
-    create_default_column(tree_view, ColumnsInvalidSymlinks::DestinationPath as i32, None, None);
-    create_default_column(tree_view, ColumnsInvalidSymlinks::TypeOfError as i32, None, None);
+    create_default_column(tree_view, ColumnsInvalidSymlinks::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsInvalidSymlinks::Path as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsInvalidSymlinks::DestinationPath as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsInvalidSymlinks::TypeOfError as i32, Some(None), None);
     create_default_column(
         tree_view,
         ColumnsInvalidSymlinks::Modification as i32,
-        Some(ColumnsInvalidSymlinks::ModificationAsSecs as i32),
+        Some(Some(ColumnsInvalidSymlinks::ModificationAsSecs as i32)),
         None,
     );
 }
@@ -170,13 +180,13 @@ pub fn create_tree_view_broken_files(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsBrokenFiles::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsBrokenFiles::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsBrokenFiles::Path as i32, None, None);
-    create_default_column(tree_view, ColumnsBrokenFiles::ErrorType as i32, None, None);
+    create_default_column(tree_view, ColumnsBrokenFiles::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBrokenFiles::Path as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBrokenFiles::ErrorType as i32, Some(None), None);
     create_default_column(
         tree_view,
         ColumnsBrokenFiles::Modification as i32,
-        Some(ColumnsBrokenFiles::ModificationAsSecs as i32),
+        Some(Some(ColumnsBrokenFiles::ModificationAsSecs as i32)),
         None,
     );
 }
@@ -188,10 +198,10 @@ pub fn create_tree_view_bad_extensions(tree_view: &TreeView) {
 
     create_default_selection_button_column(tree_view, ColumnsBadExtensions::SelectionButton as i32, model, None);
 
-    create_default_column(tree_view, ColumnsBadExtensions::Name as i32, None, None);
-    create_default_column(tree_view, ColumnsBadExtensions::Path as i32, None, None);
-    create_default_column(tree_view, ColumnsBadExtensions::CurrentExtension as i32, None, None);
-    create_default_column(tree_view, ColumnsBadExtensions::ValidExtensions as i32, None, None);
+    create_default_column(tree_view, ColumnsBadExtensions::Name as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBadExtensions::Path as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBadExtensions::CurrentExtension as i32, Some(None), None);
+    create_default_column(tree_view, ColumnsBadExtensions::ValidExtensions as i32, Some(None), None);
 }
 
 fn create_default_selection_button_column(
@@ -220,7 +230,8 @@ fn create_default_selection_button_column(
     (renderer, column)
 }
 
-fn create_default_column(tree_view: &TreeView, column_id: i32, sort_column_id: Option<i32>, colors_columns_id: Option<(i32, i32)>) -> (CellRendererText, TreeViewColumn) {
+#[allow(clippy::option_option)]
+fn create_default_column(tree_view: &TreeView, column_id: i32, sort_column_id: Option<Option<i32>>, colors_columns_id: Option<(i32, i32)>) -> (CellRendererText, TreeViewColumn) {
     let renderer = CellRendererText::new();
     let column: TreeViewColumn = TreeViewColumn::new();
     column.pack_start(&renderer, true);
@@ -228,9 +239,11 @@ fn create_default_column(tree_view: &TreeView, column_id: i32, sort_column_id: O
     column.set_min_width(50);
     column.add_attribute(&renderer, "text", column_id);
     if let Some(sort_column_id) = sort_column_id {
-        column.set_sort_column_id(sort_column_id);
-    } else {
-        column.set_sort_column_id(column_id);
+        if let Some(sort_column_id) = sort_column_id {
+            column.set_sort_column_id(sort_column_id);
+        } else {
+            column.set_sort_column_id(column_id);
+        }
     }
     if let Some(colors_columns_id) = colors_columns_id {
         column.add_attribute(&renderer, "background", colors_columns_id.0);
