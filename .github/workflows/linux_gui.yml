@@ -18,21 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            target
-          key: linux-default-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            linux-default-${{github.ref}}-${{github.sha}}
-
       - name: Install basic libraries
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release Heif
         run: cargo build --release --features heif
@@ -64,21 +54,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            target
-          key: linux-appimage-gui-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            linux-appimage-gui-${{github.ref}}-${{github.sha}}
-
       - name: Install Dependencies
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
         run: cargo build --release
@@ -130,13 +110,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
       - name: Install Dependencies
         run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
 
       - name: Test
         run: xvfb-run cargo test

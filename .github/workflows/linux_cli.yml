@@ -18,21 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          override: true
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            target
-          key: linux-default-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            linux-default-${{github.ref}}-${{github.sha}}
-
       - name: Install basic libraries
         run: sudo apt-get update; sudo apt install libheif-dev -y
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_cli

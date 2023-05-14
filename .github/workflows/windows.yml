@@ -73,7 +73,7 @@ jobs:
           if-no-files-found: error
 
   # Provide option to log things to windows CLI
-  container_cli:
+  container_console_window:
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.8
