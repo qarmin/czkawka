@@ -18,8 +18,11 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
-      - name: Setup rust version
-        run: rustup default x86_64-pc-windows-gnu
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: x86_64-pc-windows-gnu
       - name: Cache ~/.cargo
         uses: actions/cache@v1
         with:
@@ -79,8 +82,11 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
-      - name: Setup rust version
-        run: rustup default x86_64-pc-windows-gnu
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: x86_64-pc-windows-gnu
       - name: Cache ~/.cargo
         uses: actions/cache@v1
         with:
