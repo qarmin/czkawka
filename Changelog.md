@@ -1,3 +1,15 @@
+## Version 5.2.0 - ?
+- Add finding similar audio files by content - [#970](https://github.com/qarmin/czkawka/pull/970)
+- Allow to find duplicates by name/size at once - [#956](https://github.com/qarmin/czkawka/pull/956)
+- Fixed bug when cache for music tags not worked - [#970](https://github.com/qarmin/czkawka/pull/970)
+- Allow to set number of threads from CLI - [#972](https://github.com/qarmin/czkawka/pull/972)
+- Fix problem with invalid item sorting in bad extensions mode - [#972](https://github.com/qarmin/czkawka/pull/972)
+- Big refactor/cleaning of code - [#956](https://github.com/qarmin/czkawka/pull/956)/[#970](https://github.com/qarmin/czkawka/pull/970)/[#972](https://github.com/qarmin/czkawka/pull/972)
+- Use builtin gtk webp preview loader - [#923](https://github.com/qarmin/czkawka/pull/923)
+- Fixed docker build - [#947](https://github.com/qarmin/czkawka/pull/947)
+- Restore snap builds broken since GTk 4 port - [#965](https://github.com/qarmin/czkawka/pull/947)
+- Instruction how to build native ARM64 binaries on Mac - [#945](https://github.com/qarmin/czkawka/pull/945)/[#971](https://github.com/qarmin/czkawka/pull/971)
+
 ## Version 5.1.0 - 19.02.2023r
 - Added sort button - [#894](https://github.com/qarmin/czkawka/pull/894)
 - Allow to set number of thread used to scan - [#839](https://github.com/qarmin/czkawka/pull/839)

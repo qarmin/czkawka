@@ -473,7 +473,7 @@ where
                         }
                     }
                     if counter > 0 {
-                        // Do not increase counter one by one in threads, because usually it
+                        // Increase counter in batch, because usually it may be slow to add multiple times atomic value
                         atomic_counter.fetch_add(counter, Ordering::Relaxed);
                     }
                     (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list)

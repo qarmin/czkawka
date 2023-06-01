@@ -14,7 +14,7 @@ gdk4 = "0.6.3"
 glib = "0.17.9"
 
 humansize = "2.1"
-chrono = "0.4.24"
+chrono = "0.4.26"
 
 # Used for sending stop signal across threads
 crossbeam-channel = "0.5.8"
