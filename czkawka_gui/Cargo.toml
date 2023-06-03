@@ -35,12 +35,12 @@ image = "0.24"
 regex = "1.8"
 
 # To get image_hasher types
-image_hasher = "1.1"
+image_hasher = "1.2"
 
 # Move files to trash
 trash = "3.0"
 
-# For moving files(why std::fs doesn't have such features)
+# For moving files(why std::fs doesn't have such features?)
 fs_extra = "1.3"
 
 # Language

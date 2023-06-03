@@ -737,7 +737,7 @@ impl SimilarImages {
 
             for (child_hash, (parent_hash, similarity)) in hashes_similarity {
                 let mut vec_fe = all_hashed_images.get(&child_hash).unwrap().clone();
-                for mut fe in &mut vec_fe {
+                for fe in &mut vec_fe {
                     fe.similarity = similarity;
                 }
                 collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);

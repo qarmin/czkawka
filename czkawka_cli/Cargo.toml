@@ -13,7 +13,7 @@ repository = "https://github.com/qarmin/czkawka"
 clap = { version = "4.3", features = ["derive"] }
 
 # For enum types
-image_hasher = "1.1"
+image_hasher = "1.2"
 
 [dependencies.czkawka_core]
 path = "../czkawka_core"

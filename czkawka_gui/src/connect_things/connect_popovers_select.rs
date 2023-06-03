@@ -311,7 +311,6 @@ fn popover_custom_select_unselect(
         {
             let check_button_path = check_button_path.clone();
             let check_button_name = check_button_name.clone();
-            let check_button_rust_regex = check_button_rust_regex.clone();
             let entry_path = entry_path.clone();
             let entry_name = entry_name.clone();
             let entry_rust_regex = entry_rust_regex.clone();

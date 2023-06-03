@@ -19,7 +19,7 @@ crossbeam-channel = "0.5"
 directories-next = "2.0"
 
 # Needed by similar images
-image_hasher = "1.1"
+image_hasher = "1.2"
 bk-tree = "0.5"
 image = "0.24"
 hamming = "0.1"
