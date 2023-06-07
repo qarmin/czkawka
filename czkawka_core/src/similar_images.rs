@@ -5,8 +5,7 @@ use std::io::*;
 use std::mem;
 use std::panic;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::time::SystemTime;
 
 use bk_tree::BKTree;
@@ -22,8 +21,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, get_number_of_threads, open_cache_folder, prepare_thread_handler_common,
-    send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
+    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
@@ -564,64 +563,6 @@ impl SimilarImages {
         (file_entry, buf)
     }
 
-    fn compare_hashes(
-        &self,
-        hashes_to_check: &[ImHash],
-        atomic_counter: &Arc<AtomicUsize>,
-        stop_receiver: Option<&Receiver<()>>,
-        check_was_stopped: &AtomicBool,
-        tolerance: u32,
-        hashes_with_multiple_images: &HashSet<ImHash>,
-        all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
-    ) -> Option<(HashMap<ImHash, u32>, HashMap<ImHash, (ImHash, u32)>)> {
-        let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
-        let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
-
-        // Sprawdź czy hash nie jest użyty jako master gdzie indziej
-        // Jeśli tak to przejdź do sprawdzania kolejnego elementu
-        // Zweryfikuj czy sprawdzany element ma rodzica
-        // Jeśli ma to sprawdź czy similarity nowego rodzica jest mniejsze niż starego
-        // // Jeśli tak to zmniejsz ilość dzieci starego rodzica, dodaj ilość dzieci w nowym rodzicu i podmień rekord hashes_similarity
-        // // Jeśli nie to dodaj nowy rekord w hashes_similarity jak i hashes_parents z liczbą dzieci równą 1
-
-        for (index, hash_to_check) in hashes_to_check.iter().enumerate() {
-            // Don't check for user stop too often
-            // Also don't add too often data to atomic variable
-            const CYCLES_COUNTER: usize = 0b11_1111;
-            if ((index & CYCLES_COUNTER) == CYCLES_COUNTER) && index != 0 {
-                atomic_counter.fetch_add(CYCLES_COUNTER, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
-                    check_was_stopped.store(true, Ordering::Relaxed);
-                    return None;
-                }
-            }
-            hashes_parents.insert((*hash_to_check).clone(), 0);
-
-            let mut found_items = self
-                .bktree
-                .find(hash_to_check, tolerance)
-                .filter(|(similarity, _hash)| if self.use_reference_folders { true } else { *similarity != 0 })
-                .collect::<Vec<_>>();
-
-            found_items.sort_unstable_by_key(|f| f.0);
-
-            for (similarity, compared_hash) in found_items {
-                image_to_check(
-                    &mut hashes_parents,
-                    &mut hashes_similarity,
-                    hashes_with_multiple_images,
-                    hash_to_check,
-                    compared_hash,
-                    similarity,
-                );
-            }
-        }
-
-        debug_check_for_duplicated_things(self.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "BEFORE");
-
-        Some((hashes_parents, hashes_similarity))
-    }
-
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
     fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, Vec<ImHash>, HashSet<ImHash>) {
         // Fast way to check if hash have multiple images - todo is this really needed?
@@ -657,74 +598,13 @@ impl SimilarImages {
                 base_hashes.push(hash.clone());
             }
         } else {
+            for (original_hash, _) in all_hashed_images {
+                self.bktree.add(original_hash.clone());
+            }
             base_hashes = all_hashed_images.clone().into_keys().collect::<Vec<_>>();
             hashes_to_compare = base_hashes.clone();
         }
         (base_hashes, hashes_to_compare, hashes_with_multiple_images)
-    }
-
-    fn chunk_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<Vec<ImHash>>, HashSet<ImHash>) {
-        let all_hashes = all_hashed_images.clone().into_keys().collect::<Vec<_>>();
-        let mut hashes_with_multiple_images: HashSet<ImHash> = Default::default(); // Fast way to check if hash have multiple images
-        let mut files_from_referenced_folders: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
-        let mut normal_files: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
-
-        let number_of_processors = get_number_of_threads();
-        let chunk_size;
-
-        let mut initial_hashes: Vec<ImHash> = Vec::new();
-        let mut additional_chunk_to_check: Vec<ImHash> = Default::default();
-
-        let mut chunks: Vec<Vec<ImHash>>;
-        if self.use_reference_folders {
-            all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
-                for file_entry in vec_file_entry {
-                    if is_in_reference_folder(&self.directories.reference_directories, &file_entry.path) {
-                        files_from_referenced_folders.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
-                    } else {
-                        normal_files.entry(hash.clone()).or_insert_with(Vec::new).push(file_entry);
-                    }
-                }
-            });
-
-            for (hash, vec_files) in normal_files {
-                if vec_files.len() >= 2 {
-                    hashes_with_multiple_images.insert(hash.clone());
-                }
-                self.bktree.add(hash);
-            }
-            for (hash, vec_files) in files_from_referenced_folders {
-                if vec_files.len() >= 2 {
-                    hashes_with_multiple_images.insert(hash.clone());
-                }
-                initial_hashes.push(hash);
-            }
-            chunk_size = initial_hashes.len() / number_of_processors;
-
-            chunks = if chunk_size > 0 {
-                initial_hashes.chunks(chunk_size).map(<[Vec<u8>]>::to_vec).collect::<Vec<_>>()
-            } else {
-                vec![initial_hashes]
-            };
-        } else {
-            for (hash, vec_files) in all_hashed_images {
-                if vec_files.len() >= 2 {
-                    additional_chunk_to_check.push(hash.clone());
-                    hashes_with_multiple_images.insert(hash.clone());
-                } else {
-                    self.bktree.add(hash.clone());
-                }
-            }
-            chunk_size = all_hashes.len() / number_of_processors;
-            chunks = if chunk_size > 0 {
-                all_hashes.chunks(chunk_size).map(<[Vec<u8>]>::to_vec).collect::<Vec<_>>()
-            } else {
-                vec![all_hashes.clone()]
-            };
-            chunks.push(additional_chunk_to_check);
-        }
-
-        (chunks, hashes_with_multiple_images)
     }
 
     fn collect_hash_compare_result(
@@ -786,70 +666,23 @@ impl SimilarImages {
         }
     }
 
-    fn check_for_duplicate_hashes(
-        &self,
-        parts: Vec<(HashMap<ImHash, u32>, HashMap<ImHash, (ImHash, u32)>)>,
-        hashes_with_multiple_images: &HashSet<ImHash>,
-        all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
-        collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
-    ) {
-        let mut hashes_parents: HashMap<ImHash, u32> = Default::default();
-        let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default();
-        let mut iter = parts.into_iter();
-        // At start fill arrays with first item
-        // Normal algorithm would do exactly same thing, but slower, one record after one
-        if let Some((first_hashes_parents, first_hashes_similarity)) = iter.next() {
-            hashes_parents = first_hashes_parents;
-            hashes_similarity = first_hashes_similarity;
-        }
-
-        for (partial_hashes_with_parents, partial_hashes_with_similarity) in iter {
-            for (parent_hash, _child_number) in partial_hashes_with_parents {
-                if !hashes_parents.contains_key(&parent_hash) && !hashes_similarity.contains_key(&parent_hash) {
-                    hashes_parents.insert(parent_hash, 0);
-                }
-            }
-
-            for (hash_to_check, (compared_hash, similarity)) in partial_hashes_with_similarity {
-                image_to_check(
-                    &mut hashes_parents,
-                    &mut hashes_similarity,
-                    hashes_with_multiple_images,
-                    &hash_to_check,
-                    &compared_hash,
-                    similarity,
-                );
-            }
-        }
-
-        debug_check_for_duplicated_things(self.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
-
-        // Just simple check if all original hashes with multiple entries are available in end results
-        if !self.use_reference_folders {
-            let original_hashes_at_start = hashes_with_multiple_images.len();
-            let original_hashes_in_end_results = hashes_parents
-                .iter()
-                .filter(|(parent_hash, _child_number)| hashes_with_multiple_images.contains(*parent_hash))
-                .count();
-            assert_eq!(original_hashes_at_start, original_hashes_in_end_results);
-        }
-
-        self.collect_hash_compare_result(hashes_parents, hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
-    }
-
     fn compare_hashes_with_non_zero_tolerance(
         &mut self,
         all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
         collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
         progress_sender: Option<&UnboundedSender<ProgressData>>,
+        stop_receiver: Option<&Receiver<()>>,
+        tolerance: u32,
     ) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 2, 2, all_hashed_images.len(), CheckingMethod::None, self.tool_type);
 
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
 
-        let (base_hashes, _hashes_to_compare, hashes_with_multiple_images) = self.split_hashes(&all_hashed_images);
-        base_hashes.into_par_iter();
+        let (base_hashes, _hashes_to_compare, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
+
+        let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
+        let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
 
         // Check them in chunks, to decrease number of used memory
         let base_hashes_chunks = base_hashes.chunks(1000);
@@ -857,6 +690,8 @@ impl SimilarImages {
             let partial_results = chunk
                 .into_par_iter()
                 .map(|hash_to_check| {
+                    atomic_counter.fetch_add(1, Ordering::Relaxed);
+
                     if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                         check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
@@ -864,13 +699,14 @@ impl SimilarImages {
                     let mut found_items = self
                         .bktree
                         .find(hash_to_check, tolerance)
-                        .filter(|(similarity, _hash)| if self.use_reference_folders { true } else { *similarity != 0 })
+                        .filter(|(similarity, _hash)| *similarity != 0)
                         .collect::<Vec<_>>();
 
                     found_items.sort_unstable_by_key(|f| f.0);
                     Some((hash_to_check, found_items))
                 })
                 .while_some()
+                .filter(|(_, vec_similar_hashes)| !vec_similar_hashes.is_empty())
                 .collect::<Vec<_>>();
 
             if check_was_stopped.load(Ordering::Relaxed) {
@@ -878,20 +714,74 @@ impl SimilarImages {
                 return false;
             }
 
-            self.connect_results(partial_results, &hashes_with_multiple_images, collected_similar_images);
+            self.connect_results(partial_results, &hashes_with_multiple_images, &mut hashes_parents, &mut hashes_similarity);
         }
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+
+        debug_check_for_duplicated_things(self.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
+        self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
+
         true
     }
 
-    fn connect_results(&mut self, partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>, hashes_with_multiple_images: &HashSet<ImHash>, collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>) {
-        let mut hashes_parents: HashMap<ImHash, u32> = Default::default();
-        for (original_hash, vec_compared_hashes) in partial_results{
+    fn connect_results(
+        &self,
+        partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
+        hashes_with_multiple_images: &HashSet<ImHash>,
+        hashes_parents: &mut HashMap<ImHash, u32>,
+        hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
+    ) {
+        for (original_hash, vec_compared_hashes) in partial_results {
+            let mut number_of_added_child_items = 0;
             for (similarity, compared_hash) in vec_compared_hashes {
-                if hashes_parents.contains_key(compared_hash) ||
-                     {
-                        return;
+                // If hash is already in results skip it
+                // Hashes with multiple images always are used as parent
+                if hashes_parents.contains_key(compared_hash) || hashes_with_multiple_images.contains(compared_hash) {
+                    continue;
+                }
+
+                // If there is already record, with smaller sensitivity, then replace it
+                let mut need_to_add = false;
+                let mut need_to_check = false;
+
+                // TODO consider to replace variables from above with closures
+                // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
+                if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(original_hash) {
+                    if *current_similarity_with_parent > similarity {
+                        need_to_check = true;
+
+                        *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
+                        if hashes_parents.get(current_parent_hash) == Some(&0) {
+                            hashes_parents.remove(current_parent_hash);
+                        }
+                        hashes_similarity.remove(original_hash).unwrap();
+                    }
+                } else {
+                    need_to_check = true;
+                }
+
+                if need_to_check {
+                    if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
+                        if *other_similarity > similarity {
+                            need_to_add = true;
+                            *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
+                        }
+                    }
+                    // But when there is no record, just add it
+                    else {
+                        need_to_add = true;
                     }
                 }
+
+                if need_to_add {
+                    hashes_similarity.insert(compared_hash.clone(), (original_hash.clone(), similarity));
+                    number_of_added_child_items += 1;
+                }
+            }
+
+            if number_of_added_child_items > 0 {
+                hashes_parents.insert((*original_hash).clone(), number_of_added_child_items);
             }
         }
     }
@@ -916,43 +806,9 @@ impl SimilarImages {
                 }
             }
         } else {
-            let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-                prepare_thread_handler_common(progress_sender, 2, 2, all_hashed_images.len(), CheckingMethod::None, self.tool_type);
-
-            if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender) {
+            if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance) {
                 return false;
             }
-
-            send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-            if check_was_stopped.load(Ordering::Relaxed) {
-                return false;
-            }
-
-            let (chunks, hashes_with_multiple_images) = self.chunk_hashes(&all_hashed_images);
-
-            let parts: Vec<_> = chunks
-                .into_par_iter()
-                .map(|hashes_to_check| {
-                    self.compare_hashes(
-                        &hashes_to_check,
-                        &atomic_counter,
-                        stop_receiver,
-                        &check_was_stopped,
-                        tolerance,
-                        &hashes_with_multiple_images,
-                        &all_hashed_images,
-                    )
-                })
-                .while_some()
-                .collect();
-
-            send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-
-            if check_was_stopped.load(Ordering::Relaxed) {
-                return false;
-            }
-
-            self.check_for_duplicate_hashes(parts, &hashes_with_multiple_images, &all_hashed_images, &mut collected_similar_images);
         }
 
         self.verify_duplicated_items(&collected_similar_images);
@@ -1070,61 +926,6 @@ impl SimilarImages {
 
     pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
         self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
-    }
-}
-
-fn image_to_check<'a>(
-    hashes_parents: &mut HashMap<ImHash, u32>,
-    hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
-    hashes_with_multiple_images: &HashSet<ImHash>,
-    hash_to_check: &'a ImHash,
-    compared_hash: &'a ImHash,
-    similarity: u32,
-) {
-    if let Some(children_number) = hashes_parents.get(compared_hash) {
-        if *children_number > 0 || hashes_with_multiple_images.contains(compared_hash) {
-            return;
-        }
-    }
-
-    // If there is already record, with smaller sensitivity, then replace it
-    let mut need_to_add = false;
-    let mut need_to_check = false;
-
-    // TODO consider to replace variables from above with closures
-    // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
-    if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(hash_to_check) {
-        if *current_similarity_with_parent > similarity {
-            need_to_check = true;
-
-            *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
-            hashes_similarity.remove(hash_to_check).unwrap();
-        }
-    } else {
-        need_to_check = true;
-    }
-
-    if need_to_check {
-        if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
-            if *other_similarity > similarity {
-                need_to_add = true;
-                *hashes_parents.get_mut(other_parent_hash).unwrap() -= 1;
-            }
-        }
-        // But when there is no record, just add it
-        else {
-            need_to_add = true;
-        }
-    }
-
-    if need_to_add {
-        hashes_similarity.insert(compared_hash.clone(), (hash_to_check.clone(), similarity));
-
-        if let Some(number_of_children) = hashes_parents.get_mut(hash_to_check) {
-            *number_of_children += 1;
-        } else {
-            hashes_parents.insert(hash_to_check.clone(), 1);
-        }
     }
 }
 
