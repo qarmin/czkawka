@@ -13,9 +13,9 @@ pub struct Directories {
     pub excluded_directories: Vec<PathBuf>,
     pub included_directories: Vec<PathBuf>,
     pub reference_directories: Vec<PathBuf>,
-    exclude_other_filesystems: Option<bool>,
+    pub exclude_other_filesystems: Option<bool>,
     #[cfg(target_family = "unix")]
-    included_dev_ids: Vec<u64>,
+    pub included_dev_ids: Vec<u64>,
 }
 
 impl Directories {

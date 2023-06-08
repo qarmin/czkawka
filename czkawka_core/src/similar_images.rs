@@ -565,8 +565,15 @@ impl SimilarImages {
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
     fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, HashSet<ImHash>) {
-        // Fast way to check if hash have multiple images - todo is this really needed?
-        let mut hashes_with_multiple_images: HashSet<ImHash> = Default::default();
+        let hashes_with_multiple_images: HashSet<ImHash> = all_hashed_images
+            .iter()
+            .filter_map(|(hash, vec_file_entry)| {
+                if vec_file_entry.len() >= 2 {
+                    return Some(hash.clone());
+                };
+                None
+            })
+            .collect();
         let mut base_hashes = Vec::new(); // Initial hashes
         if self.use_reference_folders {
             let mut files_from_referenced_folders: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
@@ -582,18 +589,12 @@ impl SimilarImages {
                 }
             });
 
-            for (hash, vec_files) in normal_files {
-                if vec_files.len() >= 2 {
-                    hashes_with_multiple_images.insert(hash.clone());
-                }
+            for hash in normal_files.into_keys() {
                 self.bktree.add(hash);
             }
 
-            for (hash, vec_files) in files_from_referenced_folders {
-                if vec_files.len() >= 2 {
-                    hashes_with_multiple_images.insert(hash.clone());
-                }
-                base_hashes.push(hash.clone());
+            for hash in files_from_referenced_folders.into_keys() {
+                base_hashes.push(hash);
             }
         } else {
             for original_hash in all_hashed_images.keys() {
@@ -715,7 +716,7 @@ impl SimilarImages {
                     Some((hash_to_check, found_items))
                 })
                 .while_some()
-                .filter(|(_, vec_similar_hashes)| !vec_similar_hashes.is_empty())
+                .filter(|(original_hash, vec_similar_hashes)| !vec_similar_hashes.is_empty() || hashes_with_multiple_images.contains(*original_hash))
                 .collect::<Vec<_>>();
 
             if check_was_stopped.load(Ordering::Relaxed) {
@@ -723,7 +724,7 @@ impl SimilarImages {
                 return false;
             }
 
-            self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity);
+            self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -739,6 +740,7 @@ impl SimilarImages {
         partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
         hashes_parents: &mut HashMap<ImHash, u32>,
         hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
+        hashes_with_multiple_images: &HashSet<ImHash>,
     ) {
         for (original_hash, vec_compared_hashes) in partial_results {
             let mut number_of_added_child_items = 0;
@@ -760,7 +762,7 @@ impl SimilarImages {
                         need_to_check = true;
 
                         *hashes_parents.get_mut(current_parent_hash).unwrap() -= 1;
-                        if hashes_parents.get(current_parent_hash) == Some(&0) {
+                        if hashes_parents.get(current_parent_hash) == Some(&0) && !hashes_with_multiple_images.contains(current_parent_hash) {
                             hashes_parents.remove(current_parent_hash);
                         }
                         hashes_similarity.remove(original_hash).unwrap();
@@ -788,7 +790,7 @@ impl SimilarImages {
                 }
             }
 
-            if number_of_added_child_items > 0 {
+            if number_of_added_child_items > 0 || hashes_with_multiple_images.contains(original_hash) {
                 hashes_parents.insert((*original_hash).clone(), number_of_added_child_items);
             }
         }
@@ -894,7 +896,7 @@ impl SimilarImages {
         // Validating if group contains duplicated results
         let mut result_hashset: HashSet<String> = Default::default();
         let mut found = false;
-        dbg!(collected_similar_images.len());
+        // dbg!(collected_similar_images.len());
         for vec_file_entry in collected_similar_images.values() {
             if vec_file_entry.is_empty() {
                 println!("Empty group");
@@ -1302,6 +1304,7 @@ fn debug_check_for_duplicated_things(
 
 #[cfg(test)]
 mod tests {
+    use crate::common_directory::Directories;
     use crate::similar_images::{FileEntry, SimilarImages};
     use std::path::PathBuf;
 
@@ -1314,8 +1317,10 @@ mod tests {
 
     #[test]
     fn test_compare_tolerance_0_normal_mode() {
-        let mut similar_images = SimilarImages::default();
-        similar_images.similarity = 0;
+        let mut similar_images = SimilarImages {
+            similarity: 0,
+            ..Default::default()
+        };
 
         let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
         let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
@@ -1341,14 +1346,15 @@ mod tests {
 
     #[test]
     fn test_simple_normal_one_group() {
-        let mut similar_images = SimilarImages::default();
-        similar_images.use_reference_folders = false;
-        similar_images.similarity = 1;
+        let mut similar_images = SimilarImages {
+            similarity: 1,
+            ..Default::default()
+        };
 
         let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
         let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
 
-        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1.clone(), fe2.clone()]);
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2]);
 
         similar_images.find_similar_hashes(None, None);
         assert_eq!(similar_images.get_similar_images().len(), 1);
@@ -1356,27 +1362,95 @@ mod tests {
 
     #[test]
     fn test_simple_normal_one_group_extended() {
-        let mut similar_images = SimilarImages::default();
-        similar_images.use_reference_folders = false;
-        similar_images.similarity = 2;
+        let mut similar_images = SimilarImages {
+            similarity: 2,
+            use_reference_folders: false,
+            ..Default::default()
+        };
 
         let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
         let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
         let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "rrd.txt");
 
-        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1.clone(), fe2.clone()]);
-        similar_images.image_hashes.insert(fe3.hash.clone(), vec![fe3.clone()]);
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2]);
+        similar_images.image_hashes.insert(fe3.hash.clone(), vec![fe3]);
 
         similar_images.find_similar_hashes(None, None);
         assert_eq!(similar_images.get_similar_images().len(), 1);
         assert_eq!(similar_images.get_similar_images()[0].len(), 3);
     }
 
+    #[test]
+    fn test_simple_referenced_same_group() {
+        let mut similar_images = SimilarImages {
+            similarity: 0,
+            use_reference_folders: true,
+            directories: Directories {
+                reference_directories: vec![PathBuf::from("/home/rr/")],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/bcd.txt");
+
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2]);
+
+        similar_images.find_similar_hashes(None, None);
+        assert_eq!(similar_images.get_similar_images().len(), 0);
+    }
+
+    #[test]
+    fn test_simple_referenced_group_extended() {
+        let mut similar_images = SimilarImages {
+            similarity: 0,
+            use_reference_folders: true,
+            directories: Directories {
+                reference_directories: vec![PathBuf::from("/home/rr/")],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/kk/bcd.txt");
+
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2]);
+
+        similar_images.find_similar_hashes(None, None);
+        assert_eq!(similar_images.get_similar_images_referenced().len(), 1);
+        assert_eq!(similar_images.get_similar_images_referenced()[0].1.len(), 1);
+    }
+
+    #[test]
+    fn test_simple_referenced_group_extended2() {
+        let mut similar_images = SimilarImages {
+            similarity: 0,
+            use_reference_folders: true,
+            directories: Directories {
+                reference_directories: vec![PathBuf::from("/home/rr/")],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc2.txt");
+        let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/kk/bcd.txt");
+
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2, fe3]);
+
+        similar_images.find_similar_hashes(None, None);
+        assert_eq!(similar_images.get_similar_images_referenced().len(), 1);
+        assert_eq!(similar_images.get_similar_images_referenced()[0].1.len(), 1);
+    }
+
     fn create_random_file_entry(hash: Vec<u8>, name: &str) -> FileEntry {
         FileEntry {
             path: PathBuf::from(name.to_string()),
             size: 0,
-            dimensions: "".to_string(),
+            dimensions: String::new(),
             modified_date: 0,
             hash,
             similarity: 0,
