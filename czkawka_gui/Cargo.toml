@@ -10,8 +10,8 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-gdk4 = "0.6.3"
-glib = "0.17.10"
+gdk4 = "0.6"
+glib = "0.17"
 
 humansize = "2.1"
 chrono = "0.4.26"

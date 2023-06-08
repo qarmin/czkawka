@@ -548,6 +548,7 @@ dependencies = [
  "imagepipe",
  "infer",
  "libheif-rs",
+ "libheif-sys",
  "lofty",
  "mime_guess",
  "num_cpus",
@@ -1721,12 +1722,11 @@ dependencies = [
 
 [[package]]
 name = "libheif-sys"
-version = "1.14.3"
+version = "1.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d309f5eecf6f9d0ba8a36c3a911f46e96bd13a84164ee4620d2c6e80eea66fdd"
+checksum = "6af8b7a4151ae10f6d2e8684f7172c43f09c0258c84190fd9704422588ceec63"
 dependencies = [
  "libc",
- "pkg-config",
 ]
 
 [[package]]

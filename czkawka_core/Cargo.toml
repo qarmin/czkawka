@@ -73,11 +73,12 @@ infer = "0.13"
 num_cpus = "1.15"
 
 # Heif/Heic
-libheif-rs = { version = "0.18.0", optional = true } # Do not upgrade now, since Ubuntu 22.04 not works with newer version
+libheif-rs = { version = "=0.18.0", optional = true } # Do not upgrade now, since Ubuntu 22.04 not works with newer version
+libheif-sys = { version = "=1.14.2", optional = true } # 1.14.3 brake compilation on Ubuntu 22.04
 anyhow = { version = "1.0" }
 
 state = "0.6"
 
 [features]
 default = []
-heif = ["dep:libheif-rs"]
+heif = ["dep:libheif-rs", "dep:libheif-sys"]
