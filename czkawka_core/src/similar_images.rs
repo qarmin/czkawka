@@ -638,7 +638,7 @@ impl SimilarImages {
                     .filter(|e| !is_in_reference_folder(&self.directories.reference_directories, &e.path))
                     .cloned()
                     .collect();
-                for mut fe in &mut vec_fe {
+                for fe in &mut vec_fe {
                     fe.similarity = similarity;
                 }
                 collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
@@ -1298,4 +1298,88 @@ fn debug_check_for_duplicated_things(
     }
 
     assert!(!found_broken_thing);
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::similar_images::{FileEntry, SimilarImages};
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_compare_no_images() {
+        let mut similar_images = SimilarImages::default();
+        similar_images.find_similar_images(None, None);
+        assert_eq!(similar_images.get_similar_images().len(), 0);
+    }
+
+    #[test]
+    fn test_compare_tolerance_0_normal_mode() {
+        let mut similar_images = SimilarImages::default();
+        similar_images.similarity = 0;
+
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
+        let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "cde.txt");
+        let fe4 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "rrt.txt");
+        let fe5 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "bld.txt");
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1.clone(), fe2.clone()]);
+        similar_images.image_hashes.insert(fe3.hash.clone(), vec![fe3.clone(), fe4.clone(), fe5.clone()]);
+
+        similar_images.find_similar_hashes(None, None);
+        assert_eq!(similar_images.get_similar_images().len(), 2);
+        let first_group = similar_images.get_similar_images()[0].iter().map(|e| &e.path).collect::<Vec<_>>();
+        let second_group = similar_images.get_similar_images()[1].iter().map(|e| &e.path).collect::<Vec<_>>();
+        // Initial order is not guaranteed, so we need to check both options
+        if similar_images.get_similar_images()[0][0].hash == fe1.hash {
+            assert_eq!(first_group, vec![&fe1.path, &fe2.path]);
+            assert_eq!(second_group, vec![&fe3.path, &fe4.path, &fe5.path]);
+        } else {
+            assert_eq!(first_group, vec![&fe3.path, &fe4.path, &fe5.path]);
+            assert_eq!(second_group, vec![&fe1.path, &fe2.path]);
+        }
+    }
+
+    #[test]
+    fn test_simple_normal_one_group() {
+        let mut similar_images = SimilarImages::default();
+        similar_images.use_reference_folders = false;
+        similar_images.similarity = 1;
+
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
+
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1.clone(), fe2.clone()]);
+
+        similar_images.find_similar_hashes(None, None);
+        assert_eq!(similar_images.get_similar_images().len(), 1);
+    }
+
+    #[test]
+    fn test_simple_normal_one_group_extended() {
+        let mut similar_images = SimilarImages::default();
+        similar_images.use_reference_folders = false;
+        similar_images.similarity = 2;
+
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
+        let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "rrd.txt");
+
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1.clone(), fe2.clone()]);
+        similar_images.image_hashes.insert(fe3.hash.clone(), vec![fe3.clone()]);
+
+        similar_images.find_similar_hashes(None, None);
+        assert_eq!(similar_images.get_similar_images().len(), 1);
+        assert_eq!(similar_images.get_similar_images()[0].len(), 3);
+    }
+
+    fn create_random_file_entry(hash: Vec<u8>, name: &str) -> FileEntry {
+        FileEntry {
+            path: PathBuf::from(name.to_string()),
+            size: 0,
+            dimensions: "".to_string(),
+            modified_date: 0,
+            hash,
+            similarity: 0,
+        }
+    }
 }
