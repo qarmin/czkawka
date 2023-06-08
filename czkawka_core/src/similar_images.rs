@@ -564,11 +564,10 @@ impl SimilarImages {
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
-    fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, Vec<ImHash>, HashSet<ImHash>) {
+    fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, HashSet<ImHash>) {
         // Fast way to check if hash have multiple images - todo is this really needed?
         let mut hashes_with_multiple_images: HashSet<ImHash> = Default::default();
         let mut base_hashes = Vec::new(); // Initial hashes
-        let mut hashes_to_compare = Vec::new();
         if self.use_reference_folders {
             let mut files_from_referenced_folders: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
             let mut normal_files: HashMap<ImHash, Vec<FileEntry>> = HashMap::new();
@@ -587,7 +586,6 @@ impl SimilarImages {
                 if vec_files.len() >= 2 {
                     hashes_with_multiple_images.insert(hash.clone());
                 }
-                hashes_to_compare.push(hash.clone());
                 self.bktree.add(hash);
             }
 
@@ -598,13 +596,12 @@ impl SimilarImages {
                 base_hashes.push(hash.clone());
             }
         } else {
-            for (original_hash, _) in all_hashed_images {
+            for original_hash in all_hashed_images.keys() {
                 self.bktree.add(original_hash.clone());
             }
-            base_hashes = all_hashed_images.clone().into_keys().collect::<Vec<_>>();
-            hashes_to_compare = base_hashes.clone();
+            base_hashes = all_hashed_images.keys().cloned().collect::<Vec<_>>();
         }
-        (base_hashes, hashes_to_compare, hashes_with_multiple_images)
+        (base_hashes, hashes_with_multiple_images)
     }
 
     fn collect_hash_compare_result(
@@ -679,7 +676,7 @@ impl SimilarImages {
 
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
 
-        let (base_hashes, _hashes_to_compare, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
+        let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
         let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
         let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
@@ -699,7 +696,19 @@ impl SimilarImages {
                     let mut found_items = self
                         .bktree
                         .find(hash_to_check, tolerance)
-                        .filter(|(similarity, _hash)| *similarity != 0)
+                        .filter(|(similarity, compared_hash)| {
+                            *similarity != 0 && !hashes_parents.contains_key(*compared_hash) && !hashes_with_multiple_images.contains(*compared_hash)
+                        })
+                        .filter(|(similarity, compared_hash)| {
+                            if let Some((_, other_similarity_with_parent)) = hashes_similarity.get(*compared_hash) {
+                                // If current hash is more similar to other hash than to current parent hash, then skip check earlier
+                                // Because there is no way to be more similar to other hash than to current parent hash
+                                if *similarity >= *other_similarity_with_parent {
+                                    return false;
+                                }
+                            }
+                            true
+                        })
                         .collect::<Vec<_>>();
 
                     found_items.sort_unstable_by_key(|f| f.0);
@@ -714,7 +723,7 @@ impl SimilarImages {
                 return false;
             }
 
-            self.connect_results(partial_results, &hashes_with_multiple_images, &mut hashes_parents, &mut hashes_similarity);
+            self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity);
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -728,7 +737,6 @@ impl SimilarImages {
     fn connect_results(
         &self,
         partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
-        hashes_with_multiple_images: &HashSet<ImHash>,
         hashes_parents: &mut HashMap<ImHash, u32>,
         hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
     ) {
@@ -736,8 +744,8 @@ impl SimilarImages {
             let mut number_of_added_child_items = 0;
             for (similarity, compared_hash) in vec_compared_hashes {
                 // If hash is already in results skip it
-                // Hashes with multiple images always are used as parent
-                if hashes_parents.contains_key(compared_hash) || hashes_with_multiple_images.contains(compared_hash) {
+                // This check duplicates check from bktree.find, but it is needed to because when iterating over elements, this structure can change
+                if hashes_parents.contains_key(compared_hash) {
                     continue;
                 }
 
@@ -1125,7 +1133,7 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
         16 => 1,
         32 => 2,
         64 => 3,
-        _ => panic!(),
+        _ => panic!("Invalid hash size {hash_size}"),
     };
 
     if *similarity == 0 {
