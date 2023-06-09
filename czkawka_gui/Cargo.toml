@@ -46,7 +46,7 @@ fs_extra = "1.3"
 # Language
 i18n-embed = { version = "0.13", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.6"
-rust-embed = "6.6"
+rust-embed = "6.7"
 once_cell = "1.18"
 
 [target.'cfg(windows)'.dependencies]
