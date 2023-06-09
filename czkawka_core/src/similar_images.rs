@@ -672,12 +672,11 @@ impl SimilarImages {
         stop_receiver: Option<&Receiver<()>>,
         tolerance: u32,
     ) -> bool {
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 2, all_hashed_images.len(), CheckingMethod::None, self.tool_type);
-
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
-
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
+
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 2, 2, base_hashes.len(), CheckingMethod::None, self.tool_type);
 
         let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
         let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
