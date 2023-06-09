@@ -1304,9 +1304,11 @@ fn debug_check_for_duplicated_things(
 
 #[cfg(test)]
 mod tests {
-    use crate::common_directory::Directories;
-    use crate::similar_images::{FileEntry, SimilarImages};
+    use bk_tree::BKTree;
     use std::path::PathBuf;
+
+    use crate::common_directory::Directories;
+    use crate::similar_images::{FileEntry, Hamming, SimilarImages};
 
     #[test]
     fn test_compare_no_images() {
@@ -1438,12 +1440,92 @@ mod tests {
         let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc.txt");
         let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc2.txt");
         let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/kk/bcd.txt");
+        let fe4 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/kk/bcd2.txt");
 
-        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2, fe3]);
+        similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1, fe2, fe3, fe4]);
 
         similar_images.find_similar_hashes(None, None);
-        assert_eq!(similar_images.get_similar_images_referenced().len(), 1);
-        assert_eq!(similar_images.get_similar_images_referenced()[0].1.len(), 1);
+        let res = similar_images.get_similar_images_referenced();
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].1.len(), 2);
+        assert!(res[0].1.iter().all(|e| e.path.starts_with("/home/kk/")));
+    }
+
+    #[test]
+    fn test_simple_normal_too_small_similarity() {
+        for _ in 0..50 {
+            let mut similar_images = SimilarImages {
+                similarity: 1,
+                use_reference_folders: false,
+                ..Default::default()
+            };
+
+            let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b00001], "abc.txt");
+            let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b00100], "bcd.txt");
+            let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b10000], "rrd.txt");
+
+            similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1]);
+            similar_images.image_hashes.insert(fe2.hash.clone(), vec![fe2]);
+            similar_images.image_hashes.insert(fe3.hash.clone(), vec![fe3]);
+
+            similar_images.find_similar_hashes(None, None);
+            let res = similar_images.get_similar_images();
+            // dbg!(&res);
+            assert!(res.is_empty());
+        }
+    }
+
+    #[test]
+    fn test_simple_normal_union_of_similarity() {
+        for _ in 0..100 {
+            let mut similar_images = SimilarImages {
+                similarity: 4,
+                use_reference_folders: false,
+                ..Default::default()
+            };
+
+            let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0000_0001], "abc.txt");
+            let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0000_1111], "bcd.txt");
+            let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0111_1111], "rrd.txt");
+
+            similar_images.image_hashes.insert(fe1.hash.clone(), vec![fe1]);
+            similar_images.image_hashes.insert(fe2.hash.clone(), vec![fe2]);
+            similar_images.image_hashes.insert(fe3.hash.clone(), vec![fe3]);
+
+            similar_images.find_similar_hashes(None, None);
+            let res = similar_images.get_similar_images();
+            assert_eq!(res.len(), 1);
+            let mut path = res[0].iter().map(|e| e.path.to_string_lossy().to_string()).collect::<Vec<_>>();
+            path.sort();
+            if res[0].len() == 3 {
+                assert_eq!(path, vec!["abc.txt".to_string(), "bcd.txt".to_string(), "rrd.txt".to_string()]);
+            } else if res[0].len() == 2 {
+                assert!(path == vec!["abc.txt".to_string(), "bcd.txt".to_string()] || path == vec!["bcd.txt".to_string(), "rrd.txt".to_string()]);
+            } else {
+                panic!("Invalid number of items");
+            }
+        }
+    }
+
+    #[test]
+    fn test_tolerance() {
+        // This test not really tests anything, but shows that current hamming distance works
+        // in bits instead of bytes
+        // I tried to make it work in bytes, but it was terrible, so Hamming should be really Ok
+
+        let fe1 = vec![1, 1, 1, 1, 1, 1, 1, 1];
+        let fe2 = vec![1, 1, 1, 1, 1, 1, 1, 2];
+        let mut bktree = BKTree::new(Hamming);
+        bktree.add(fe1);
+        let (similarity, _hash) = bktree.find(&fe2, 100).next().unwrap();
+        assert_eq!(similarity, 2);
+
+        let fe1 = vec![1, 1, 1, 1, 1, 1, 1, 1];
+        let fe2 = vec![1, 1, 1, 1, 1, 1, 1, 3];
+        let mut bktree = BKTree::new(Hamming);
+        bktree.add(fe1);
+        let (similarity, _hash) = bktree.find(&fe2, 100).next().unwrap();
+        assert_eq!(similarity, 1);
     }
 
     fn create_random_file_entry(hash: Vec<u8>, name: &str) -> FileEntry {
