@@ -775,7 +775,18 @@ fn computer_similar_images(
 
                     // Header
                     let (directory, file) = split_path(&base_file_entry.path);
-                    similar_images_add_to_list_store(&list_store, &file, &directory, 0, 0, "", 0, 0, true, true);
+                    similar_images_add_to_list_store(
+                        &list_store,
+                        &file,
+                        &directory,
+                        base_file_entry.size,
+                        base_file_entry.modified_date,
+                        &base_file_entry.dimensions,
+                        0,
+                        hash_size,
+                        true,
+                        true,
+                    );
                     for file_entry in &vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
                         similar_images_add_to_list_store(
@@ -1396,15 +1407,20 @@ fn similar_images_add_to_list_store(
     let string_date;
     let similarity_string;
     let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
+
+    if is_header {
+        similarity_string = String::new();
+    } else {
+        similarity_string = similar_images::get_string_from_similarity(&similarity, hash_size);
+    };
+
     if is_header && !is_reference_folder {
         size_str = String::new();
         string_date = String::new();
-        similarity_string = String::new();
     } else {
         size_str = format_size(size, BINARY);
         string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
-        similarity_string = similar_images::get_string_from_similarity(&similarity, hash_size);
-    };
+    }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarImages::ActivatableSelectButton as u32, &(!is_header)),

@@ -372,23 +372,27 @@ impl BrokenFiles {
 
         let mut file_entry_clone = file_entry.clone();
         let result = panic::catch_unwind(|| {
-            if let Err(e) = FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
-                if let PdfError::Io { .. } = e {
-                    return None;
-                }
-
-                let mut error_string = e.to_string();
-                // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
-                if error_string.starts_with("Try at") {
-                    if let Some(start_index) = error_string.find("/pdf-") {
-                        error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
+            match FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
+                Ok(file) => {
+                    for idx in 0..file.num_pages() {
+                        if let Err(e) = file.get_page(idx) {
+                            let err = validate_pdf_error(&mut file_entry, e);
+                            if let PdfError::InvalidPassword = err {
+                                return None;
+                            } else {
+                                break;
+                            }
+                        }
                     }
                 }
-
-                file_entry.error_string = error_string;
-                let error = unpack_pdf_error(e);
-                if let PdfError::InvalidPassword = error {
-                    return None;
+                Err(e) => {
+                    if let PdfError::Io { .. } = e {
+                        return None;
+                    }
+                    let err = validate_pdf_error(&mut file_entry, e);
+                    if let PdfError::InvalidPassword = err {
+                        return None;
+                    }
                 }
             }
             Some(file_entry)
@@ -707,4 +711,17 @@ fn unpack_pdf_error(e: PdfError) -> PdfError {
     } else {
         e
     }
+}
+
+fn validate_pdf_error(file_entry: &mut FileEntry, e: PdfError) -> PdfError {
+    let mut error_string = e.to_string();
+    // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
+    if error_string.starts_with("Try at") {
+        if let Some(start_index) = error_string.find("/pdf-") {
+            error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
+        }
+    }
+
+    file_entry.error_string = error_string;
+    unpack_pdf_error(e)
 }

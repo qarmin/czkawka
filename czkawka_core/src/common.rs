@@ -24,7 +24,7 @@ use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_traits::ResultEntry;
 
-static NUMBER_OF_THREADS: state::Storage<usize> = state::Storage::new();
+static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
