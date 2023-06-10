@@ -15,7 +15,7 @@ jobs:
         use_heif: [ non_heif, heif ]
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/piegamesde/gtk4-cross:gtk-4.10
+      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
     steps:
       - uses: actions/checkout@v1
       - name: Install additional dependencies
@@ -93,7 +93,7 @@ jobs:
   container_console_window:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/piegamesde/gtk4-cross:gtk-4.10
+      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
     steps:
       - uses: actions/checkout@v1
       - name: Install additional dependencies
