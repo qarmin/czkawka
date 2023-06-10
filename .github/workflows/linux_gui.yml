@@ -31,6 +31,13 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.67.1') }}
 
+      - name: Store Linux GUI Heif
+        uses: actions/upload-artifact@v3
+        with:
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
+          path: target/release/czkawka_gui
+        if: ${{ matrix.type == 'release' }}
+
       - name: Build Release
         run: cargo build --release
         env:
