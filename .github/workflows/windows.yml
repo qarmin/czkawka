@@ -12,7 +12,7 @@ jobs:
   container:
     strategy:
       matrix:
-        use_heif: [ non_heif, heif ]
+        use_heif: [ non_heif ] #, heif ] - heif problems with mingw
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
