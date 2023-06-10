@@ -14,6 +14,22 @@ music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Gatunek
 music_length_checkbox = Długość
 music_comparison_checkbox = Przybliżone Porównywanie
+music_checking_by_tags = Tagi
+music_checking_by_content = Zawartość
+same_music_seconds_label = Minimalny fragment drugi czas trwania
+same_music_similarity_label = Maksymalna różnica
+same_music_tooltip =
+    Wyszukiwanie podobnych plików muzycznych przez jego zawartość można skonfigurować przez ustawienie:
+    
+    - Minimalny czas fragmentu, po którym pliki muzyczne mogą być zidentyfikowane jako podobne
+    - Maksymalna różnica między dwoma testowanymi fragmentami
+    
+    Kluczem do dobrych wyników jest znalezienie rozsądnych kombinacji tych parametrów, do dostarczania.
+    
+    Ustawianie minimalnego czasu na 5s i maksymalnej różnicy na 1.0, będzie szukać prawie identycznych fragmentów w plikach.
+    Czas 20s i maksymalna różnica 6.0, z drugiej strony, dobrze działa w poszukiwaniu remiksów/wersji na żywo itp.
+    
+    Domyślnie każdy plik muzyczny jest porównywany ze sobą, co może zająć dużo czasu podczas testowania wielu plików, więc zwykle lepiej jest używać folderów referencyjnych i określać, które pliki mają być porównywane ze sobą (z taką samą ilością plików, porównywanie odcisków palców będzie szybsze niż bez folderów referencyjnych).
 music_comparison_checkbox_tooltip =
     Wyszukuje podobne pliki muzyczne za pomocą AI, która używa nauki maszynowej, aby usunąć nawiasy z frazy. Na przykład, z tą opcją włączoną, rozpatrywane pliki będą traktowane jako duplikaty:
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     Gdy włączone, grupowe rekordy tylko wtedy, gdy mają dokładnie taką samą nazwę, np. Żołd <-> Żołd
     
     Wyłączenie tej opcji spowoduje grupowanie nazw bez sprawdzania, czy każda litera ma ten sam rozmiar, np. żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Rozmiar i nazwa
 duplicate_mode_name_combo_box = Nazwa
 duplicate_mode_size_combo_box = Rozmiar
 duplicate_mode_hash_combo_box = Hash
@@ -388,8 +405,11 @@ progress_scanning_image = Hashowanie { $file_checked }/{ $all_files } obrazu
 progress_comparing_image_hashes = Porównywanie { $file_checked }/{ $all_files } hashu obrazu
 progress_scanning_music_tags_end = Porównywanie tagów { $file_checked }/{ $all_files } pliku audio
 progress_scanning_music_tags = Sczytywanie tagów { $file_checked }/{ $all_files } pliku audio
+progress_scanning_music_content_end = Porównywanie odcisku palca { $file_checked }/{ $all_files } pliku muzycznego
+progress_scanning_music_content = Obliczanie odcisku palca { $file_checked }/{ $all_files } pliku muzycznego
 progress_scanning_empty_folders = Przeszukiwanie { $folder_number } folderu
 progress_scanning_size = Sprawdzanie rozmiaru { $file_number } pliku
+progress_scanning_size_name = Skanowanie nazwy i rozmiaru pliku { $file_number }
 progress_scanning_name = Sprawdzanie nazwy { $file_number } pliku
 progress_analyzed_partial_hash = Obliczanie częściowego hashu { $file_checked }/{ $all_files } pliku
 progress_analyzed_full_hash = Obliczanie pełnego hashu { $file_checked }/{ $all_files } pliku

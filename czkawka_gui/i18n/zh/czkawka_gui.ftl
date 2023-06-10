@@ -14,6 +14,22 @@ music_bitrate_checkbox = 码率
 music_genre_checkbox = 流派
 music_length_checkbox = 长度
 music_comparison_checkbox = 近似比较
+music_checking_by_tags = 标签
+music_checking_by_content = 内容
+same_music_seconds_label = 最小碎片第二持续时间
+same_music_similarity_label = 最大差异
+same_music_tooltip =
+    通过设置搜索类似的音乐文件。
+    
+    - 可以在最小的片段时间之后将音乐文件识别为相似
+    - 两个测试片段之间的最大差异
+    
+    良好结果的关键是找到这些参数的合理组合， 提供的资料。
+    
+    将最小时间设置为5秒，最大差设置为1.0，将寻找文件中几乎相同的片段。
+    另一方面，20秒和最大差6.0之间的时间对寻找混编/实时版本等非常有用。
+    
+    默认情况下，每个音乐文件彼此比较，这可能需要很多时间来测试许多文件， 通常最好使用参考文件夹并指定哪些文件可以相互比较(文件数量相同) 比较指纹至少要比没有参考文件夹快4x)。
 music_comparison_checkbox_tooltip =
     它使用 AI搜索类似的音乐文件，它使用机器学习从短语中删除括号。 例如，启用此选项， 所涉文件将被视为重复：
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     启用时，仅当记录具有完全相同的名称时分组，例如 Żołd <-> Żołd
     
     禁用这种选项将不会检查每封字母是否相同的大小，例如 żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = 大小和名称
 duplicate_mode_name_combo_box = 名称
 duplicate_mode_size_combo_box = 大小
 duplicate_mode_hash_combo_box = 哈希
@@ -388,8 +405,11 @@ progress_scanning_image = 散列 { $file_checked }/{ $all_files } 图像
 progress_comparing_image_hashes = 比较 { $file_checked }/{ $all_files } 图像哈希
 progress_scanning_music_tags_end = 对比标签 { $file_checked }/{ $all_files } 音乐文件
 progress_scanning_music_tags = 正在读取标签 { $file_checked }/{ $all_files } 音乐文件
+progress_scanning_music_content_end = 比较指纹 { $file_checked }/{ $all_files } 音乐文件
+progress_scanning_music_content = 正在计算指纹 { $file_checked }/{ $all_files } 音乐文件
 progress_scanning_empty_folders = 正在扫描 { $folder_number } 文件夹
 progress_scanning_size = 正在扫描文件大小 { $file_number }
+progress_scanning_size_name = 扫描文件名和大小 { $file_number }
 progress_scanning_name = 正在扫描 { $file_number } 文件的名称
 progress_analyzed_partial_hash = 分析了 { $file_checked }/{ $all_files } 文件的部分哈希
 progress_analyzed_full_hash = 分析了 { $file_checked }/{ $all_files } 文件的完整哈希值

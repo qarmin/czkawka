@@ -1,4 +1,4 @@
-## Version 6.0.0 - ?
+## Version 6.0.0 - 10.06.2023r
 - Add finding similar audio files by content - [#970](https://github.com/qarmin/czkawka/pull/970)
 - Allow to find duplicates by name/size at once - [#956](https://github.com/qarmin/czkawka/pull/956)
 - Fix, simplify and speed up finding similar images - [#983](https://github.com/qarmin/czkawka/pull/956)

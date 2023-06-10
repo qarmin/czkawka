@@ -14,6 +14,22 @@ music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Genre
 music_length_checkbox = Längd
 music_comparison_checkbox = Ungefärlig jämförelse
+music_checking_by_tags = Taggar
+music_checking_by_content = Innehåll
+same_music_seconds_label = Minsta fragment sekund varaktighet
+same_music_similarity_label = Maximal skillnad
+same_music_tooltip =
+    Sökning efter liknande musikfiler genom dess innehåll kan konfigureras genom att ställa in:
+    
+    - Minsta fragmenttid efter vilken musikfiler kan identifieras som liknande
+    - Maximal skillnad mellan två testade fragment
+    
+    Nyckeln till bra resultat är att hitta förnuftiga kombinationer av dessa parametrar, för tillhandahållen.
+    
+    Att ställa in den minsta tiden till 5s och den maximala skillnaden till 1.0, kommer att leta efter nästan identiska fragment i filerna.
+    En tid på 20-talet och en maximal skillnad på 6,0, å andra sidan, fungerar bra för att hitta remixer/live-versioner etc.
+    
+    Som standard jämförs varje musikfil med varandra och detta kan ta mycket tid vid testning av många filer, så är det oftast bättre att använda referensmappar och ange vilka filer som ska jämföras med varandra(med samma mängd filer, Att jämföra fingeravtryck kommer att vara snabbare minst 4x än utan referensmappar).
 music_comparison_checkbox_tooltip =
     Den söker efter liknande musikfiler med AI, som använder maskininlärning för att ta bort parenteser från en fras. Till exempel, med detta alternativ aktiverat, filerna i fråga kommer att betraktas som dubbletter:
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     När detta är aktiverat spelar gruppen bara in när de har exakt samma namn t.ex. Żołd <-> Żołd
     
     Inaktivera sådana alternativ kommer gruppnamn utan att kontrollera om varje bokstav är samma storlek t.ex. żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Storlek och namn
 duplicate_mode_name_combo_box = Namn
 duplicate_mode_size_combo_box = Storlek
 duplicate_mode_hash_combo_box = Hash
@@ -388,8 +405,11 @@ progress_scanning_image = Hashning av { $file_checked }/{ $all_files } bild
 progress_comparing_image_hashes = Jämföra { $file_checked }/{ $all_files } bildhash
 progress_scanning_music_tags_end = Jämföra taggar för { $file_checked }/{ $all_files } musikfil
 progress_scanning_music_tags = Lästaggar för { $file_checked }/{ $all_files } musikfil
+progress_scanning_music_content_end = Jämföra fingeravtryck av { $file_checked }/{ $all_files } musikfil
+progress_scanning_music_content = Beräknar fingeravtryck av { $file_checked }/{ $all_files } musikfil
 progress_scanning_empty_folders = Skannar { $folder_number } mappen
 progress_scanning_size = Skannar storleken på { $file_number } fil
+progress_scanning_size_name = Skannar namn och storlek på { $file_number } fil
 progress_scanning_name = Skannar namn på { $file_number } fil
 progress_analyzed_partial_hash = Analyserade partiella hash av { $file_checked }/{ $all_files } filer
 progress_analyzed_full_hash = Analyserad full hash av { $file_checked }/{ $all_files } filer

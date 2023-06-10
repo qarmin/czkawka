@@ -14,6 +14,22 @@ music_bitrate_checkbox = Débit binaire
 music_genre_checkbox = Genre
 music_length_checkbox = Longueur
 music_comparison_checkbox = Comparaison approximative
+music_checking_by_tags = Tags
+music_checking_by_content = Contenus
+same_music_seconds_label = Durée minimale de seconde de fragment
+same_music_similarity_label = Différence maximale
+same_music_tooltip =
+    La recherche de fichiers de musique similaires par son contenu peut être configurée par la configuration :
+    
+    - Le temps de fragment minimum après lequel les fichiers musicaux peuvent être identifiés comme similaires
+    - La différence maximale entre deux fragments testés
+    
+    La clé de bons résultats est de trouver des combinaisons sensées de ces paramètres, pour ce qui est fourni.
+    
+    En fixant le temps minimum à 5 secondes et la différence maximale à 1.0, cherchera des fragments presque identiques dans les fichiers.
+    Un temps de 20 secondes et une différence maximale de 6.0, d'autre part, fonctionne bien pour trouver des remixes/versions live, etc.
+    
+    Par défaut, chaque fichier de musique est comparé l'un à l'autre et cela peut prendre beaucoup de temps lors du test de plusieurs fichiers, donc il est généralement préférable d'utiliser des dossiers de référence et de spécifier quels fichiers doivent être comparés les uns avec les autres (avec la même quantité de fichiers, la comparaison des empreintes digitales sera plus rapide au moins 4x que sans dossier de référence).
 music_comparison_checkbox_tooltip =
     Il recherche des fichiers de musique similaires à l’aide d’une intelligence artificielle, qui utilise le machine learning pour supprimer les parenthèses d’une phrase, par exemple avec cette option activée, les fichiers en question seront considérés comme des doublons :
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     Lorsqu'il est activé, ne grouper que les enregistrements quand ils ont exactement le même nom (p. ex. Żołd <-> Żołd
     
     Désactiver cette option va regrouper les noms sans vérifier si chaque lettre a la même taille, par exemple żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Taille et nom
 duplicate_mode_name_combo_box = Nom
 duplicate_mode_size_combo_box = Taille
 duplicate_mode_hash_combo_box = Hachage
@@ -388,8 +405,11 @@ progress_scanning_image = Hachage de l'image { $file_checked }/{ $all_files }
 progress_comparing_image_hashes = Comparaison du hachage de l'image { $file_checked }/{ $all_files }
 progress_scanning_music_tags_end = Comparaison des tags du fichier de musique { $file_checked }/{ $all_files }
 progress_scanning_music_tags = Lecture des balises du fichier de musique { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Comparaison de l'empreinte digitale du fichier de musique { $file_checked }/{ $all_files }
+progress_scanning_music_content = Calcul de l'empreinte digitale du fichier de musique { $file_checked }/{ $all_files }
 progress_scanning_empty_folders = Analyse du dossier { $folder_number }
 progress_scanning_size = Analyse de la taille du fichier { $file_number }
+progress_scanning_size_name = Analyse du nom et de la taille du fichier { $file_number }
 progress_scanning_name = Analyse du nom du fichier { $file_number }
 progress_analyzed_partial_hash = Hash partiel analysé des fichiers { $file_checked }/{ $all_files }
 progress_analyzed_full_hash = Hash complet analysé des fichiers { $file_checked }/{ $all_files }

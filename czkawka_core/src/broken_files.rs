@@ -379,9 +379,8 @@ impl BrokenFiles {
                             let err = validate_pdf_error(&mut file_entry, e);
                             if let PdfError::InvalidPassword = err {
                                 return None;
-                            } else {
-                                break;
                             }
+                            break;
                         }
                     }
                 }

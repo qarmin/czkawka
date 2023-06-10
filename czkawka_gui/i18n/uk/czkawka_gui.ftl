@@ -14,6 +14,22 @@ music_bitrate_checkbox = Бітрейт
 music_genre_checkbox = Жанр
 music_length_checkbox = Тривалість
 music_comparison_checkbox = Приблизне порівняння
+music_checking_by_tags = Мітки
+music_checking_by_content = Зміст
+same_music_seconds_label = Мінімальна тривалість фрагменту
+same_music_similarity_label = Максимальна різниця
+same_music_tooltip =
+    Пошук подібних музичних файлів за його вмістом може бути налаштований за налаштуванням:
+    
+    - Мінімальний час фрагменту, після якого музичні файли можна визначити як схожий
+    - Максимальна різниця між двома тестовими фрагментами
+    
+    —Що ключові з хороших результатів - знайти розумні комбінації цих параметрів, за умов.
+    
+    Встановлення мінімального часу на 5 сек і максимальна різниця складає 1.0, буде шукати майже однакові фрагменти у файлах.
+    Час 20 і максимальна різниця в 6.0, з іншого боку, добре працює для пошуку реміксиксів/живу версії і т. д.
+    
+    За замовчуванням, кожен музичний файл порівнюється один з одним, і це може зайняти багато часу при тестуванні багатьох файлів, так що використовувати референтні папки і вказати, які файли слід порівнювати один з одним (з тією ж кількістю файлів, порівняння відбитків пальців буде швидше 4x, ніж без стандартних папок).
 music_comparison_checkbox_tooltip =
     Шукає схожі музичні файли за допомогою ШІ, що використовує машинне навчання для видалення дужок із фраз. Наприклад, якщо ця опція увімкнена, наступні файли будуть вважатися дублікатами:
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     Коли увімкнено, записи групуються, тільки якщо вони повністю збігаються імена з точністю до кожного символу. Наприклад, «ХІТ Дискотека» не збігається з "хіт дискотека".
     
     Коли вимкнено, записи групуються незалежно від того, великі або малі літери використовувалися при написанні. Наприклад, «ХІТ Дискотека», «хіт дискотека», «хІт ДиСкОтЕКа» будуть еквівалентні.
+duplicate_mode_size_name_combo_box = Розмір і ім'я
 duplicate_mode_name_combo_box = Ім'я
 duplicate_mode_size_combo_box = Розмір
 duplicate_mode_hash_combo_box = Хеш
@@ -388,8 +405,11 @@ progress_scanning_image = Хешування зображення: { $file_check
 progress_comparing_image_hashes = Порівняння хешу зображення: { $file_checked }/{ $all_files }
 progress_scanning_music_tags_end = Порівняння тегів музичного файлу: { $file_checked }/{ $all_files }
 progress_scanning_music_tags = Читання тегів музичного файлу: { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Порівняння відбитку пальця { $file_checked }/{ $all_files } музичного файлу
+progress_scanning_music_content = Розрахунок відбитку пальця { $file_checked }/{ $all_files } музичного файлу
 progress_scanning_empty_folders = Сканування теки { $folder_number }
 progress_scanning_size = Сканування розміру файлу { $file_number }
+progress_scanning_size_name = Сканування назви і розміру файлу { $file_number }
 progress_scanning_name = Сканування імені файлу { $file_number }
 progress_analyzed_partial_hash = Аналіз часткового хешу файлу { $file_checked }/{ $all_files }
 progress_analyzed_full_hash = Аналіз повного хешу файлу { $file_checked }/{ $all_files }

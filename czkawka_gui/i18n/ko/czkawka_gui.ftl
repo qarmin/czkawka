@@ -14,6 +14,22 @@ music_bitrate_checkbox = 비트레이트
 music_genre_checkbox = 장르
 music_length_checkbox = 길이
 music_comparison_checkbox = 근사값 비교
+music_checking_by_tags = Tags
+music_checking_by_content = Content
+same_music_seconds_label = Minimal fragment second duration
+same_music_similarity_label = Maximum difference
+same_music_tooltip =
+    Searching for similar music files by its content can be configured by setting:
+    
+    - The minimum fragment time after which music files can be identified as similar
+    - The maximum difference difference between two tested fragments
+    
+    The key to good results is to find sensible combinations of these parameters, for provided.
+    
+    Setting the minimum time to 5s and the maximum difference to 1.0, will look for almost identical fragments in the files.
+    A time of 20s and a maximum difference of 6.0, on the other hand, works well for finding remixes/live versions etc.
+    
+    By default, each music file is compared to each other and this can take a lot of time when testing many files, so it is usually better to use reference folders and specifying which files are to be compared with each other(with same amount of files, comparing fingerprints will be faster at least 4x than without reference folders).
 music_comparison_checkbox_tooltip =
     기계학습을 통해 각 항목의 괄호를 제거합니다. 예를 들어, 다음 두 파일은 같은 파일로 인식될 것입니다.
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     대소문자 구분이 켜져 있으면, 완전히 같은 이름만이 중복 파일로 검색됩니다. 예시: Żołd <-> Żołd
     
     대소문자 구분이 꺼져 있으면, 대문자와 소문자 구별을 하지 않고 중복 파일을 검색합니다. 예시: żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Size and Name
 duplicate_mode_name_combo_box = 파일명
 duplicate_mode_size_combo_box = 파일 크기
 duplicate_mode_hash_combo_box = 해시
@@ -230,15 +247,15 @@ bottom_hardlink_button_tooltip =
     그룹 내에서 최소한 2개의 파일이 선택되어 있어야 합니다.
     첫 번째 파일은 그대로 남으며, 두 번째 이후 파일은 첫 번째 파일로 향하는 하드 링크가 됩니다.
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    하드 링크를 생성합니다.
+    현재 하드 링크를 만들 수 없어 버튼이 비활성화되었습니다.
+    Windows에서 하드 링크는 관리자 권한으로만 만들 수 있습니다. 프로그램이 관리자 권한으로 실행되었는지 확인하세요.
+    만일 프로그램이 이미 관리자 권한으로 실행되었다면, Github에서 비슷한 이슈가 있는지 확인해보세요.
 bottom_move_button_tooltip =
     선택된 디렉터리로 파일을 이동합니다.
     이 동작은 원본이 위치한 경로를 전부 무시하고, 선택한 경로로 파일을 전부 복사합니다.
     만일 2개 이상의 파일이 같은 이름을 가지고 있다면, 첫 번째 이후의 파일은 복사에 실패하고 오류 메시지를 보여줄 것입니다.
-bottom_sort_button_tooltip = Sorts files/folders according to selected method.
+bottom_sort_button_tooltip = 파일/폴더를 선택한 방법으로 정렬합니다.
 bottom_show_errors_tooltip = 하단 텍스트 패널을 보이거나 숨깁니다.
 bottom_show_upper_notebook_tooltip = 상단 패널을 보이거나 숨깁니다.
 # Progress Window
@@ -262,9 +279,9 @@ header_about_button_tooltip = 이 앱에 대한 정보창을 엽니다.
 
 ## General
 
-settings_number_of_threads = Number of used threads
-settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
-settings_label_restart = You need to restart app to apply settings!
+settings_number_of_threads = 스레드 수
+settings_number_of_threads_tooltip = 사용할 스레드 수입니다. 0이면 가능한 최대 스레드를 사용합니다.
+settings_label_restart = 이 설정을 적용하려면 프로그램을 재시작해야 합니다!
 settings_ignore_other_filesystems = 다른 파일시스템 무시(Linux에서만)
 settings_ignore_other_filesystems_tooltip =
     검색할 디렉터리와 파일시스템이 다른 디렉터리를 무시합니다.
@@ -280,7 +297,7 @@ settings_confirm_link_button_tooltip = 하드 링크/심볼릭 링크 버튼을 
 settings_confirm_group_deletion_button_tooltip = 그룹의 모든 항목을 삭제할 경우 경고창을 보여줍니다.
 settings_show_text_view_button_tooltip = UI 하단에 텍스트 패널을 보여줍니다.
 settings_use_cache_button_tooltip = 파일 캐시를 사용합니다.
-settings_save_also_as_json_button_tooltip = 캐시를 사람이 읽을 수 있도록 JSON 포맥으로 저장합니다. 캐시 내용을 수정할 수 있습니다. 만일 bin 확장자를 가진 바이너리 캐시 파일이 없으면, JSON 캐시가 프로그램 시작 시에 대신 로드됩니다.
+settings_save_also_as_json_button_tooltip = 캐시를 (사람이 읽을 수 있는) JSON 포맷으로 저장합니다. 캐시 내용을 수정할 수 있습니다. 만일 bin 확장자를 가진 바이너리 캐시 파일이 없으면, JSON 캐시가 프로그램 시작 시에 대신 로드됩니다.
 settings_use_trash_button_tooltip = 파일을 영구 삭제하는 대신 휴지통으로 이동합니다.
 settings_language_label_tooltip = UI에 표시될 언어를 설정합니다.
 settings_save_at_exit_button = 프로그램을 닫을 때 설정을 저장
@@ -386,8 +403,11 @@ progress_scanning_image = { $file_checked }/{ $all_files }개 이미지 해시 �
 progress_comparing_image_hashes = { $file_checked }/{ $all_files }개 이미지 해시 비교 중
 progress_scanning_music_tags_end = { $file_checked }/{ $all_files }개 음악 파일 태그 검색 중
 progress_scanning_music_tags = { $file_checked }/{ $all_files }개 음악 파일 태그 읽는 중
+progress_scanning_music_content_end = Comparing fingerprint of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content = Calculating fingerprint of { $file_checked }/{ $all_files } music file
 progress_scanning_empty_folders = { $folder_number }개 폴더 검색 중
 progress_scanning_size = { $file_number }개 파일의 크기 스캔 중
+progress_scanning_size_name = Scanning name and size of { $file_number } file
 progress_scanning_name = { $file_number }개 파일의 이름 스캔 중
 progress_analyzed_partial_hash = { $file_checked }/{ $all_files }개 파일의 부분 해시 계산 중
 progress_analyzed_full_hash = { $file_checked }/{ $all_files }개 파일의 전체 해시 계산 중
