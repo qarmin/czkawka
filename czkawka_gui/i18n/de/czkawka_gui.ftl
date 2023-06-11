@@ -14,6 +14,22 @@ music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Genre
 music_length_checkbox = Dauer
 music_comparison_checkbox = Ungefährer Vergleich
+music_checking_by_tags = Tags
+music_checking_by_content = Inhalt
+same_music_seconds_label = Minimale Dauer des Fragment Sekunde
+same_music_similarity_label = Maximaler Unterschied
+same_music_tooltip =
+    Die Suche nach ähnlichen Musikdateien nach dem Inhalt kann über die Einstellung konfiguriert werden:
+    
+    - Die minimale Fragmentzeit, nach der Musikdateien als ähnlich identifiziert werden können
+    - Der maximale Unterschied zwischen zwei getesteten Fragmenten
+    
+    Der Schlüssel zu guten Ergebnissen ist die Suche nach sinnvollen Kombinationen dieser Parameter. für bereitgestellt.
+    
+    Wenn Sie die minimale Zeit auf 5 Sekunden und den maximalen Unterschied auf 1,0 setzen, werden fast identische Fragmente in den Dateien gesucht.
+    Eine Zeit von 20 Sekunden und ein maximaler Unterschied von 6.0 hingegen funktioniert gut um Remix/Live-Versionen zu finden.
+    
+    Standardmäßig wird jede Musikdatei miteinander verglichen, und dies kann viel Zeit in Anspruch nehmen, wenn viele Dateien getestet werden so ist es in der Regel besser, Referenzordner zu verwenden und festzulegen, welche Dateien miteinander verglichen werden sollen (mit gleicher Dateigröße Der Vergleich von Fingerabdrücken wird mindestens 4x schneller als ohne Referenzordner sein).
 music_comparison_checkbox_tooltip =
     Mit Hilfe von einer KI, die maschinelles Lernen nutzt, um Klammern aus Sätzen zu entfernen, wird nach ähnlichen Musikdateien gesucht. Wenn die Option aktiviert ist, werden die folgenden Dateien zum Beispiel als Duplikate betrachtet:
     
@@ -22,6 +38,7 @@ duplicate_case_sensitive_name = Gross-/Kleinschreibung beachten
 duplicate_case_sensitive_name_tooltip =
     Wenn aktiviert, gruppieren Sie nur Datensätze, wenn sie genau denselben Namen haben, z. żoŁD <-> Żołd
     Deaktivieren dieser Option gruppiert Namen ohne zu überprüfen, ob jeder Buchstabe die gleiche Größe wie żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Größe und Name
 duplicate_mode_name_combo_box = Name
 duplicate_mode_size_combo_box = Größe
 duplicate_mode_hash_combo_box = Hash
@@ -387,8 +404,11 @@ progress_scanning_image = Hashing von { $file_checked }/{ $all_files } Bild
 progress_comparing_image_hashes = Vergleicht { $file_checked }/{ $all_files } Bild-Hash
 progress_scanning_music_tags_end = Vergleicht Tags von { $file_checked }/{ $all_files } Musikdatei
 progress_scanning_music_tags = Lese Tags von { $file_checked }/{ $all_files } Musikdatei
+progress_scanning_music_content_end = Vergleiche Fingerabdruck von { $file_checked }/{ $all_files } Musikdatei
+progress_scanning_music_content = Berechne Fingerabdruck von { $file_checked }/{ $all_files } Musikdatei
 progress_scanning_empty_folders = Scanne { $folder_number } Ordner
 progress_scanning_size = Scanne Größe der { $file_number } Datei
+progress_scanning_size_name = Scanne Namen und Größe der { $file_number } Datei
 progress_scanning_name = Scanne Name der { $file_number } Datei
 progress_analyzed_partial_hash = Teilhash von { $file_checked }/{ $all_files } Dateien analysiert
 progress_analyzed_full_hash = Analysiert voller Hash von { $file_checked }/{ $all_files } Dateien

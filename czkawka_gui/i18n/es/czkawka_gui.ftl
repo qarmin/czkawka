@@ -14,6 +14,22 @@ music_bitrate_checkbox = Tasa de bits
 music_genre_checkbox = Género
 music_length_checkbox = Duración
 music_comparison_checkbox = Comparación aproximada
+music_checking_by_tags = Etiquetas
+music_checking_by_content = Contenido
+same_music_seconds_label = Duración mínima del segundo fragmento
+same_music_similarity_label = Diferencia máxima
+same_music_tooltip =
+    Buscando archivos de música similares por su contenido se puede configurar configurando:
+    
+    - El tiempo mínimo de fragmento después del cual los archivos de música pueden ser identificados como similares
+    - La diferencia máxima entre dos fragmentos probados
+    
+    La clave para los buenos resultados es encontrar combinaciones sensatas de estos parámetros, para proporcionar.
+    
+    Establecer el tiempo mínimo a 5 s y la diferencia máxima a 1.0, buscará fragmentos casi idénticos en los archivos.
+    Un tiempo de 20 años y una diferencia máxima de 6.0, por otro lado, funciona bien para encontrar remixes/versiones en vivo, etc.
+    
+    Por defecto, cada archivo de música se compara entre sí y esto puede tomar mucho tiempo al probar muchos archivos, por lo que normalmente es mejor usar carpetas de referencia y especificar qué archivos deben compararse entre sí (con la misma cantidad de archivos, comparar las huellas dactilares será más rápido al menos 4x que sin carpetas de referencia).
 music_comparison_checkbox_tooltip =
     Busca archivos de música similares usando IA, que usa el aprendizaje automático para eliminar paréntesis de una frase. Por ejemplo, con esta opción activada, los archivos en cuestión se considerarán duplicados:
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     Cuando está habilitado, agrupa registros sólo cuando tienen exactamente el mismo nombre p.ej. Żołd <-> Żołd
     
     Deshabilitar tal opción agrupará nombres sin comprobar si cada letra tiene el mismo tamaño, p. ej. żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Tamaño y nombre
 duplicate_mode_name_combo_box = Nombre
 duplicate_mode_size_combo_box = Tamaño
 duplicate_mode_hash_combo_box = Hash
@@ -67,8 +84,8 @@ image_hash_alg_tooltip =
 big_files_mode_combobox_tooltip = Permite buscar archivos más pequeños/mayores
 big_files_mode_label = Archivos marcados
 big_files_mode_smallest_combo_box = El más pequeño
-big_files_mode_biggest_combo_box = El Bigote
-main_notebook_duplicates = Duplicar archivos
+big_files_mode_biggest_combo_box = El más grande
+main_notebook_duplicates = Archivos Duplicados
 main_notebook_empty_directories = Directorios vacíos
 main_notebook_big_files = Archivos grandes
 main_notebook_empty_files = Archivos vacíos
@@ -103,13 +120,13 @@ main_label_hash_type = Tipo de Hash
 main_label_hash_size = Tamaño hash
 main_label_size_bytes = Tamaño (bytes)
 main_label_min_size = Mínimo
-main_label_max_size = Máx
+main_label_max_size = Máximo
 main_label_shown_files = Número de archivos mostrados
-main_label_resize_algorithm = Redimensionar algoritmo
+main_label_resize_algorithm = Algoritmo de Redimensionar
 main_label_similarity = Similarity{ " " }
 main_check_box_broken_files_audio = Sonido
 main_check_box_broken_files_pdf = Pdf
-main_check_box_broken_files_archive = Archivar
+main_check_box_broken_files_archive = Guardar
 main_check_box_broken_files_image = Imagen
 check_button_general_same_size = Ignorar el mismo tamaño
 check_button_general_same_size_tooltip = Ignorar de los resultados, archivos que tienen el mismo tamaño - generalmente son 1:1 duplicados
@@ -162,7 +179,7 @@ popover_reverse = Invertir selección
 popover_select_all_except_oldest = Seleccionar todo excepto más antiguo
 popover_select_all_except_newest = Seleccionar todo excepto el más reciente
 popover_select_one_oldest = Seleccione uno más antiguo
-popover_select_one_newest = Seleccione un nuevo
+popover_select_one_newest = Seleccione uno más nuevo
 popover_select_custom = Seleccionar personalizado
 popover_unselect_custom = Deseleccionar personalizado
 popover_select_all_images_except_biggest = Seleccionar todo excepto mayor
@@ -388,8 +405,11 @@ progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagen
 progress_comparing_image_hashes = Comparando hash de imagen { $file_checked }/{ $all_files }
 progress_scanning_music_tags_end = Comparando etiquetas de { $file_checked }/{ $all_files } archivo de música
 progress_scanning_music_tags = Leyendo etiquetas del archivo de música { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Comparando huella dactilar de { $file_checked }/{ $all_files } archivo de música
+progress_scanning_music_content = Calculando huella dactilar de { $file_checked }/{ $all_files } archivo de música
 progress_scanning_empty_folders = Escaneando carpeta { $folder_number }
 progress_scanning_size = Escaneando tamaño del archivo { $file_number }
+progress_scanning_size_name = Escaneando nombre y tamaño del archivo { $file_number }
 progress_scanning_name = Escaneando nombre del archivo { $file_number }
 progress_analyzed_partial_hash = Has analizado el hash parcial de { $file_checked }/{ $all_files } archivos
 progress_analyzed_full_hash = Se ha analizado el hash completo de { $file_checked }/{ $all_files } archivos

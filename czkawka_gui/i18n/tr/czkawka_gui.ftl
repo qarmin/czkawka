@@ -14,6 +14,22 @@ music_bitrate_checkbox = Bit-hızı
 music_genre_checkbox = Müzik Türü
 music_length_checkbox = Uzunluk
 music_comparison_checkbox = Yaklaşık Karşılaştırma
+music_checking_by_tags = Tags
+music_checking_by_content = Content
+same_music_seconds_label = Minimal fragment second duration
+same_music_similarity_label = Maximum difference
+same_music_tooltip =
+    Searching for similar music files by its content can be configured by setting:
+    
+    - The minimum fragment time after which music files can be identified as similar
+    - The maximum difference difference between two tested fragments
+    
+    The key to good results is to find sensible combinations of these parameters, for provided.
+    
+    Setting the minimum time to 5s and the maximum difference to 1.0, will look for almost identical fragments in the files.
+    A time of 20s and a maximum difference of 6.0, on the other hand, works well for finding remixes/live versions etc.
+    
+    By default, each music file is compared to each other and this can take a lot of time when testing many files, so it is usually better to use reference folders and specifying which files are to be compared with each other(with same amount of files, comparing fingerprints will be faster at least 4x than without reference folders).
 music_comparison_checkbox_tooltip =
     Yapay zeka kullanarak benzer müzik dosyalarını arar. 
     Örneğin, bir tümcenin parantezlerini kaldırmak için makine öğrenimini kullanır. 
@@ -31,9 +47,10 @@ duplicate_case_sensitive_name_tooltip =
     denetlemeden aynı adları eşleyip grup oluşturur.
     
     fatih.kavalci <--> FatiH.KaVaLCi
+duplicate_mode_size_name_combo_box = Size and Name
 duplicate_mode_name_combo_box = Ad Karşılaştırma
 duplicate_mode_size_combo_box = Boyut Karşılaştırma
-duplicate_mode_hash_combo_box = SUÇ (hash) Karşılaştırma
+duplicate_mode_hash_combo_box = Özet Değeri
 duplicate_hash_type_tooltip =
     Czkawka, 3 tür Sabit Uzunlukta Çıktı (SUÇ) üretimi sunar:
     
@@ -82,7 +99,7 @@ image_resize_filter_tooltip =
     8x8 boyutluk SURÇ üretimi ile daha iyi eşleştirilmiş resim gruplarına sahip olmak için 
     Nearest'ten farklı bir algoritma kullanmanız önerilir.
 image_hash_alg_tooltip =
-    Kullanıcılar, SURÇ oluşturmanın birçok algoritmasından birini seçebilir. 
+    Kullanıcılar, SUÇ oluşturmanın birçok algoritmasından birini seçebilir. 
     Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
     bazen daha iyi, bazen daha kötü sonuçlar verir. Bu nedenle, size göre en iyisini belirlemek için 
     elle test gereklidir.
@@ -268,7 +285,7 @@ bottom_move_button_tooltip =
     Dosyaları seçilen dizine taşır.
     Dizin ağacını korumadan tüm dosyaları dizine taşır.
     Aynı ada sahip iki dosyayı klasöre taşımaya çalışırken, ikincisi başarısız olur ve hata gösterir.
-bottom_sort_button_tooltip = Sorts files/folders according to selected method.
+bottom_sort_button_tooltip = Dosyaları/Dizinleri seçilen metoda göre sırala.
 bottom_show_errors_tooltip = Alt çıktı panelini göster/gizle.
 bottom_show_upper_notebook_tooltip = Üst denetim panelini göster/gizle.
 # Progress Window
@@ -430,8 +447,11 @@ progress_scanning_image = { $file_checked }/{ $all_files } resmin SURÇ kaydı o
 progress_comparing_image_hashes = { $file_checked }/{ $all_files } resim SURÇ kaydı karşılaştırıldı.
 progress_scanning_music_tags_end = { $file_checked }/{ $all_files } müzik dosyasının etiketleri karşılaştırıldı.
 progress_scanning_music_tags = { $file_checked }/{ $all_files } müzik dosyasının etiketleri okundu.
+progress_scanning_music_content_end = Comparing fingerprint of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content = Calculating fingerprint of { $file_checked }/{ $all_files } music file
 progress_scanning_empty_folders = { $folder_number } klasör tarandı.
 progress_scanning_size = { $file_number } dosyanın boyutu tarandı.
+progress_scanning_size_name = Scanning name and size of { $file_number } file
 progress_scanning_name = { $file_number } dosyanın adı tarandı.
 progress_analyzed_partial_hash = { $file_checked }/{ $all_files } dosyanın kısmi-SUÇ kaydı analiz edildi. ;-)
 progress_analyzed_full_hash = { $file_checked }/{ $all_files } dosyanın tam SUÇ kaydı analiz edildi. ;-)

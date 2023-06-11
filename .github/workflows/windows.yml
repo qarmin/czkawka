@@ -10,9 +10,12 @@ env:
 
 jobs:
   container:
+    strategy:
+      matrix:
+        use_heif: [ non_heif ] #, heif ] - heif problems with mingw
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/piegamesde/gtk4-cross:gtk-4.8
+      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
     steps:
       - uses: actions/checkout@v1
       - name: Install additional dependencies
@@ -33,6 +36,18 @@ jobs:
         with:
           path: target
           key: windows-build-target
+
+      - name: Cross compile for Windows Heif
+        run: |
+          #!/bin/bash
+          set -euo pipefail
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --release --locked --features heif
+          mkdir -p package
+          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+        if: ${{ matrix.use_heif == 'heif' }}
+
       - name: Cross compile for Windows
         run: |
           #!/bin/bash
@@ -42,6 +57,8 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+        if: ${{ matrix.use_heif == 'non_heif' }}
+
       - name: Package
         run: |
           #!/bin/bash
@@ -67,7 +84,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: czkawka-windows-${{ github.sha }}
+          name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}
           path: |
             ./package
           if-no-files-found: error
@@ -76,7 +93,7 @@ jobs:
   container_console_window:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/piegamesde/gtk4-cross:gtk-4.8
+      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
     steps:
       - uses: actions/checkout@v1
       - name: Install additional dependencies

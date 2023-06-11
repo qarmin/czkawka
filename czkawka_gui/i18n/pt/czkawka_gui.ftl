@@ -14,6 +14,22 @@ music_bitrate_checkbox = Taxa de bits
 music_genre_checkbox = Género
 music_length_checkbox = Comprimento
 music_comparison_checkbox = Comparação aproximada
+music_checking_by_tags = Etiquetas
+music_checking_by_content = Conteúdo
+same_music_seconds_label = Duração mínima do fragmento segundo tempo
+same_music_similarity_label = Diferença máxima
+same_music_tooltip =
+    Procurar por arquivos de música semelhantes por seu conteúdo pode ser configurado pela configuração:
+    
+    - Tempo mínimo de fragmento depois do qual os arquivos de música podem ser identificados como semelhantes
+    - A diferença máxima entre dois fragmentos testados
+    
+    A chave para bons resultados é encontrar combinações sensíveis desses parâmetros, para fornecido.
+    
+    Definir o tempo mínimo para 5s e a diferença máxima para 1.0, irá procurar fragmentos quase idênticos nos arquivos.
+    Um tempo de 20s e uma diferença máxima de 6.0, por outro lado, funciona bem para encontrar versões remixes/ao vivo, etc.
+    
+    Por padrão, cada arquivo de música é comparado entre si, e isso pode levar muito tempo para testar muitos arquivos, portanto, é geralmente melhor usar pastas de referência e especificar quais arquivos devem ser comparados (com a mesma quantidade de arquivos, A comparação de impressões digitais será mais rápida pelo menos 4 vezes do que nas pastas de referência).
 music_comparison_checkbox_tooltip =
     Ele busca arquivos de música semelhantes usando IA, que usa aprendizado de máquina para remover parênteses duma frase. Por exemplo, com esta opção ativada, os arquivos em questão serão considerados duplicatas:
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     Quando ativado, o grupo só registra quando eles têm o mesmo nome, por exemplo, Żołd <-> Żołd
     
     Desativar esta opção agrupará os nomes sem verificar se cada letra é do mesmo tamanho, por exemplo, żoŁD <-> Żołd
+duplicate_mode_size_name_combo_box = Tamanho e Nome
 duplicate_mode_name_combo_box = Nome
 duplicate_mode_size_combo_box = Tamanho
 duplicate_mode_hash_combo_box = Hash
@@ -385,8 +402,11 @@ progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagem
 progress_comparing_image_hashes = Comparando de { $file_checked }/{ $all_files } hash de imagem
 progress_scanning_music_tags_end = Comparando etiquetas de { $file_checked }/{ $all_files } arquivo de música
 progress_scanning_music_tags = Lendo etiquetas de { $file_checked }/{ $all_files } arquivo de música
+progress_scanning_music_content_end = Comparação de impressão digital de { $file_checked }/{ $all_files } arquivo de música
+progress_scanning_music_content = Calculando impressão digital de { $file_checked }/{ $all_files } arquivo de música
 progress_scanning_empty_folders = Verificando { $folder_number } diretório
 progress_scanning_size = Verificando tamanho de { $file_number } arquivo
+progress_scanning_size_name = Verificando nome e tamanho de { $file_number } arquivo
 progress_scanning_name = Verificando nome de { $file_number } arquivo
 progress_analyzed_partial_hash = Hash parcial analisado de { $file_checked }/{ $all_files } arquivos
 progress_analyzed_full_hash = Hash completo analisado de { $file_checked }/{ $all_files } arquivos

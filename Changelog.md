@@ -1,6 +1,7 @@
-## Version 5.2.0 - ?
+## Version 6.0.0 - 11.06.2023r
 - Add finding similar audio files by content - [#970](https://github.com/qarmin/czkawka/pull/970)
 - Allow to find duplicates by name/size at once - [#956](https://github.com/qarmin/czkawka/pull/956)
+- Fix, simplify and speed up finding similar images - [#983](https://github.com/qarmin/czkawka/pull/956)
 - Fixed bug when cache for music tags not worked - [#970](https://github.com/qarmin/czkawka/pull/970)
 - Allow to set number of threads from CLI - [#972](https://github.com/qarmin/czkawka/pull/972)
 - Fix problem with invalid item sorting in bad extensions mode - [#972](https://github.com/qarmin/czkawka/pull/972)

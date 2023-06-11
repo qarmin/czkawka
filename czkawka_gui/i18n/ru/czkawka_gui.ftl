@@ -14,6 +14,22 @@ music_bitrate_checkbox = Битрейт
 music_genre_checkbox = Жанр
 music_length_checkbox = Длительность
 music_comparison_checkbox = Приблизительное сравнение
+music_checking_by_tags = Теги
+music_checking_by_content = Содержание
+same_music_seconds_label = Минимальная длительность второго фрагмента
+same_music_similarity_label = Максимальная разница
+same_music_tooltip =
+    Поиск похожих музыкальных файлов по его содержимому может быть настроен с помощью настройки:
+    
+    - Минимальное время фрагмента, после которого музыкальные файлы можно определить как похожие
+    - Максимальная разница между двумя проверенными фрагментами
+    
+    Ключ к хорошим результатам - найти разумные комбинации этих параметров, для предоставленных.
+    
+    Установка минимального времени на 5 секунд, а максимальная разница в 1.0, будет искать практически идентичные фрагменты файлов.
+    Время 20 секунд и максимальная разница в 6,0, с другой стороны, хорошо подходит для поиска ремиксов/версий и т.д.
+    
+    По умолчанию, каждый музыкальный файл сравнивается друг с другом, и это может занять много времени при тестировании множества файлов, поэтому обычно лучше использовать справочные папки и указать, какие файлы следует сравнивать друг с другом (одинаковое количество файлов), сравнение отпечатков пальцев будет быстрее по крайней мере на 4х, чем без ссылочных папок).
 music_comparison_checkbox_tooltip =
     Ищет похожие музыкальные файлы с помощью ИИ, использующего машинное обучение для удаления скобок из фраз. Например, если эта опция включена, следующие файлы будут считаться дубликатами:
     
@@ -23,6 +39,7 @@ duplicate_case_sensitive_name_tooltip =
     При включённой опции записи группируются, только если у них полностью совпадают имена с точностью до каждого символа. Например, «ХИТ Дискотека» не совпадёт с «хит дискотека».
     
     При отключённой опции записи группируются вне зависимости от того, заглавные или строчные буквы использовались при написании. Например, «ХИТ Дискотека», «хит дискотека», «хИт ДиСкОтЕКа» будут эквивалентны.
+duplicate_mode_size_name_combo_box = Размер и имя
 duplicate_mode_name_combo_box = Имя
 duplicate_mode_size_combo_box = Размер
 duplicate_mode_hash_combo_box = Хэш
@@ -312,7 +329,7 @@ settings_notebook_videos = Похожие видео
 ## Multiple - settings used in multiple tabs
 
 settings_multiple_image_preview_checkbutton_tooltip = Показывать предварительный просмотр справа (при выборе файла изображения).
-settings_multiple_image_preview_checkbutton = Предпросмотр изображения
+settings_multiple_image_preview_checkbutton = Показывать предпросмотр изображения
 settings_multiple_clear_cache_button_tooltip =
     Очистка устаревших записей кэша вручную.
     Следует использовать только в том случае, если автоматическая очистка отключена.
@@ -388,8 +405,11 @@ progress_scanning_image = Хэширование изображения: { $file
 progress_comparing_image_hashes = Сравнение хэша изображений: { $file_checked }/{ $all_files }
 progress_scanning_music_tags_end = Сравнение тегов { $file_checked }/{ $all_files } музыкального файла
 progress_scanning_music_tags = Чтение тэгов музыкальных файлов: { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Сравнение отпечатка пальца из { $file_checked }/{ $all_files } музыкального файла
+progress_scanning_music_content = Вычисление отпечатка пальца из { $file_checked }/{ $all_files } музыкального файла
 progress_scanning_empty_folders = Сканирование папки { $folder_number }
 progress_scanning_size = Сканирование размера файла { $file_number }
+progress_scanning_size_name = Сканирование имени и размера файла { $file_number }
 progress_scanning_name = Сканирование имени файла { $file_number }
 progress_analyzed_partial_hash = Анализ частичного хэша файла { $file_checked }/{ $all_files }
 progress_analyzed_full_hash = Анализ полного хэша файла { $file_checked }/{ $all_files }
