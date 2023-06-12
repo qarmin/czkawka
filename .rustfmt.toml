@@ -2,6 +2,5 @@ newline_style = "Unix"
 max_width = 180
 remove_nested_parens = true
 
-## Enable only with nightly channel via - cargo +nightly fmt
-#unstable_features = true
-#imports_granularity = "Module"
+# Enable only with nightly channel via - cargo +nightly fmt
+imports_granularity = "Module"
