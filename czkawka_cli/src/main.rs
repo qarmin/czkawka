@@ -5,24 +5,20 @@ use std::process;
 use clap::Parser;
 
 use commands::Commands;
-use czkawka_core::big_file::SearchMode;
+use czkawka_core::bad_extensions::BadExtensions;
+use czkawka_core::big_file::{self, BigFile, SearchMode};
+use czkawka_core::broken_files::{self, BrokenFiles};
 use czkawka_core::common::set_number_of_threads;
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
-use czkawka_core::similar_images::test_image_conversion_speed;
-use czkawka_core::{
-    bad_extensions::BadExtensions,
-    big_file::{self, BigFile},
-    broken_files::{self, BrokenFiles},
-    duplicate::DuplicateFinder,
-    empty_files::{self, EmptyFiles},
-    empty_folder::EmptyFolder,
-    invalid_symlinks::{self, InvalidSymlinks},
-    same_music::SameMusic,
-    similar_images::{return_similarity_from_similarity_preset, SimilarImages},
-    similar_videos::SimilarVideos,
-    temporary::{self, Temporary},
-};
+use czkawka_core::duplicate::DuplicateFinder;
+use czkawka_core::empty_files::{self, EmptyFiles};
+use czkawka_core::empty_folder::EmptyFolder;
+use czkawka_core::invalid_symlinks::{self, InvalidSymlinks};
+use czkawka_core::same_music::SameMusic;
+use czkawka_core::similar_images::{return_similarity_from_similarity_preset, test_image_conversion_speed, SimilarImages};
+use czkawka_core::similar_videos::SimilarVideos;
+use czkawka_core::temporary::{self, Temporary};
 
 use crate::commands::{
     Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs, SimilarImagesArgs,

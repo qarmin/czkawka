@@ -7,8 +7,7 @@ use chrono::NaiveDateTime;
 use glib::Receiver;
 use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
-use humansize::format_size;
-use humansize::BINARY;
+use humansize::{format_size, BINARY};
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;

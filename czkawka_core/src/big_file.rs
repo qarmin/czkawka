@@ -9,8 +9,7 @@ use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
-use humansize::format_size;
-use humansize::BINARY;
+use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};

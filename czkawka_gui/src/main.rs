@@ -12,8 +12,7 @@ use futures::channel::mpsc;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
-use gtk4::Application;
-use gtk4::Inhibit;
+use gtk4::{Application, Inhibit};
 
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;

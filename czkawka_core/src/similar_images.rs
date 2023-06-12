@@ -1,18 +1,15 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::{DirEntry, File, Metadata};
-use std::io::Write;
-use std::io::*;
-use std::mem;
-use std::panic;
+use std::io::{Write, *};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::time::SystemTime;
+use std::{mem, panic};
 
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
-use humansize::format_size;
-use humansize::BINARY;
+use humansize::{format_size, BINARY};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use rayon::prelude::*;
