@@ -68,7 +68,7 @@ imagepipe = "0.5"
 
 # Checking for invalid extensions
 mime_guess = "2.0"
-infer = "0.13"
+infer = "0.14"
 
 num_cpus = "1.15"
 

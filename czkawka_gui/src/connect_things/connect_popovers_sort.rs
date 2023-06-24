@@ -14,8 +14,8 @@ where
     let model = get_list_store(tree_view);
 
     if let Some(curr_iter) = model.iter_first() {
-        assert!(model.get::<bool>(&curr_iter, column_header));
-        assert!(model.iter_next(&curr_iter)); // Must be at least one item
+        assert!(model.get::<bool>(&curr_iter, column_header)); // First item should be header
+        assert!(model.iter_next(&curr_iter)); // Must be at least two items
         loop {
             let mut iters = Vec::new();
             let mut all_have = false;

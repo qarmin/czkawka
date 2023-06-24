@@ -6,6 +6,7 @@ use crate::help_functions::{
 };
 use crate::notebook_enums::{NotebookMainEnum, NUMBER_OF_NOTEBOOK_MAIN_TABS};
 
+#[derive(Debug)]
 pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,
     pub available_modes: &'static [PopoverTypes],

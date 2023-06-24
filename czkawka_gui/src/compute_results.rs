@@ -1462,7 +1462,7 @@ fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, director
         (ColumnsSimilarVideos::Modification as u32, &string_date),
         (ColumnsSimilarVideos::ModificationAsSecs as u32, &modified_date),
         (ColumnsSimilarVideos::Color as u32, &color),
-        (ColumnsSimilarVideos::IsHeader as u32, &false),
+        (ColumnsSimilarVideos::IsHeader as u32, &is_header),
         (ColumnsSimilarVideos::TextColor as u32, &TEXT_COLOR),
     ];
 

@@ -55,7 +55,7 @@ pub enum PopoverTypes {
     Date,
 }
 
-#[derive(Eq, PartialEq, Copy, Clone, Hash)]
+#[derive(Eq, PartialEq, Copy, Clone, Hash, Debug)]
 pub enum BottomButtonsEnum {
     Search,
     Select,
