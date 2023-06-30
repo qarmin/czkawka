@@ -1117,13 +1117,29 @@ impl SaveResults for SameMusic {
             return false;
         }
 
-        if !self.music_entries.is_empty() {
-            writeln!(writer, "Found {} same music files.", self.information.number_of_duplicates).unwrap();
-            for file_entry in &self.music_entries {
-                writeln!(writer, "{}", file_entry.path.display()).unwrap();
+        if !self.duplicated_music_entries.is_empty() {
+            writeln!(writer, "{} music files which have similar friends\n\n.", self.duplicated_music_entries.len()).unwrap();
+
+            for vec_file_entry in &self.duplicated_music_entries {
+                writeln!(writer, "Found {} music files which have similar friends", vec_file_entry.len()).unwrap();
+                for file_entry in vec_file_entry {
+                    writeln!(
+                        writer,
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
+                        file_entry.track_title,
+                        file_entry.track_artist,
+                        file_entry.year,
+                        file_entry.length,
+                        file_entry.genre,
+                        file_entry.bitrate,
+                        file_entry.path.display()
+                    )
+                    .unwrap();
+                }
+                writeln!(writer).unwrap();
             }
         } else {
-            write!(writer, "Not found any empty files.").unwrap();
+            write!(writer, "Not found any similar music files.").unwrap();
         }
 
         true
