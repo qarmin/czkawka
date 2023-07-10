@@ -997,7 +997,7 @@ impl SaveResults for SimilarImages {
             write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
 
             for struct_similar in &self.similar_vectors {
-                writeln!(writer, "Found {} images which have similar friends", self.similar_vectors.len()).unwrap();
+                writeln!(writer, "Found {} images which have similar friends", struct_similar.len()).unwrap();
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
