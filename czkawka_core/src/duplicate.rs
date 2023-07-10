@@ -4,8 +4,7 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
-use std::io::{self, Error, ErrorKind};
-use std::io::{BufReader, BufWriter};
+use std::io::{self, BufReader, BufWriter, Error, ErrorKind};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -15,8 +14,7 @@ use std::{fs, mem};
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
-use humansize::format_size;
-use humansize::BINARY;
+use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 

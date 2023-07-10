@@ -11,8 +11,7 @@ use std::{mem, panic};
 use anyhow::Context;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
-use lofty::TaggedFileExt;
-use lofty::{read_from, AudioFile, ItemKey};
+use lofty::{read_from, AudioFile, ItemKey, TaggedFileExt};
 use rayon::prelude::*;
 use rusty_chromaprint::{match_fingerprints, Configuration, Fingerprinter};
 use serde::{Deserialize, Serialize};
@@ -23,8 +22,9 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
-use crate::common::{create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
-use crate::common::{filter_reference_folders_generic, open_cache_folder};
+use crate::common::{
+    create_crash_message, filter_reference_folders_generic, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
