@@ -382,7 +382,7 @@ settings_multiple_clear_cache_button_tooltip =
         Manually clear the cache of outdated entries.
         This should only be used if automatic clearing has been disabled.
 
-settings_multiple_clear_cache_button = Remove outdated results from images cache
+settings_multiple_clear_cache_button = Remove outdated results from cache.
 
 ## Duplicates
 settings_duplicates_hide_hard_link_button_tooltip = 
