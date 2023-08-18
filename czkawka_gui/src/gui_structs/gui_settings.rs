@@ -228,23 +228,23 @@ impl GuiSettings {
             .set_label(Some(&flg!("settings_multiple_image_preview_checkbutton")));
         self.check_button_settings_similar_images_delete_outdated_cache
             .set_label(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton")));
-        self.button_settings_similar_images_clear_cache.set_label(&flg!("settings_multiple_clear_cache_button"));
+        self.button_settings_similar_images_clear_cache.set_label(&flg!("button_settings_similar_images_clear_cache"));
 
         self.check_button_settings_show_preview_similar_images
             .set_tooltip_text(Some(&flg!("settings_multiple_image_preview_checkbutton_tooltip")));
         self.check_button_settings_similar_images_delete_outdated_cache
             .set_tooltip_text(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
         self.button_settings_similar_images_clear_cache
-            .set_tooltip_text(Some(&flg!("settings_multiple_clear_cache_button_tooltip")));
+            .set_tooltip_text(Some(&flg!("button_settings_similar_images_clear_cache")));
 
         self.check_button_settings_similar_videos_delete_outdated_cache
             .set_label(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton")));
-        self.button_settings_similar_videos_clear_cache.set_label(&flg!("settings_multiple_clear_cache_button"));
+        self.button_settings_similar_videos_clear_cache.set_label(&flg!("button_settings_similar_videos_clear_cache"));
 
         self.check_button_settings_similar_videos_delete_outdated_cache
             .set_tooltip_text(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
         self.button_settings_similar_videos_clear_cache
-            .set_tooltip_text(Some(&flg!("settings_multiple_clear_cache_button_tooltip")));
+            .set_tooltip_text(Some(&flg!("button_settings_similar_videos_clear_cache")));
 
         self.button_settings_save_configuration.set_label(&flg!("settings_saving_button"));
         self.button_settings_load_configuration.set_label(&flg!("settings_loading_button"));
