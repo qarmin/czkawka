@@ -241,7 +241,7 @@ impl GuiSettings {
         self.check_button_settings_similar_videos_delete_outdated_cache
             .set_label(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton")));
         self.button_settings_similar_videos_clear_cache
-        .set_label(&flg!("button_settings_similar_videos_clear_cache"));
+            .set_label(&flg!("button_settings_similar_videos_clear_cache"));
 
         self.check_button_settings_similar_videos_delete_outdated_cache
             .set_tooltip_text(Some(&flg!("settings_multiple_delete_outdated_cache_checkbutton_tooltip")));
