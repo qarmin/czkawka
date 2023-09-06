@@ -3,9 +3,11 @@ window_settings_title = 设置
 window_main_title = Czkawka
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
+
 # General
 general_ok_button = 好的
 general_close_button = 关闭
+
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -16,29 +18,29 @@ music_length_checkbox = 长度
 music_comparison_checkbox = 近似比较
 music_checking_by_tags = 标签
 music_checking_by_content = 内容
-same_music_seconds_label = 最小碎片第二持续时间
+same_music_seconds_label = 最小分片秒持续时间
 same_music_similarity_label = 最大差异
 same_music_tooltip =
-    通过设置搜索类似的音乐文件。
+    通过设置以下内容，可以配置按其内容搜索类似的音乐文件：
     
-    - 可以在最小的片段时间之后将音乐文件识别为相似
-    - 两个测试片段之间的最大差异
+    - 可以识别音乐文件为类似文件的最小碎片时间
+    - 两个测试片段之间的最大差异度
     
-    良好结果的关键是找到这些参数的合理组合， 提供的资料。
+    找到这些参数的合理组合是获得好结果的关键。
     
-    将最小时间设置为5秒，最大差设置为1.0，将寻找文件中几乎相同的片段。
-    另一方面，20秒和最大差6.0之间的时间对寻找混编/实时版本等非常有用。
+    将最小时间设置为5秒，最大差异度设置为1.0，将寻找几乎相同的文件碎片。
+    另一方面，20秒的时间和6.0的最大差异度可以很好地找到混音/现场版本等内容。
     
-    默认情况下，每个音乐文件彼此比较，这可能需要很多时间来测试许多文件， 通常最好使用参考文件夹并指定哪些文件可以相互比较(文件数量相同) 比较指纹至少要比没有参考文件夹快4x)。
+    默认情况下，每个音乐文件都会与其他音乐文件进行比较，当测试许多文件时，这可能需要很长时间，因此通常最好使用参考文件夹并指定要相互比较的文件(如有相同数量的文件，则比较指纹至少比不使用参考文件夹快4倍)。
 music_comparison_checkbox_tooltip =
-    它使用 AI搜索类似的音乐文件，它使用机器学习从短语中删除括号。 例如，启用此选项， 所涉文件将被视为重复：
+    它使用AI搜索类似的音乐文件，利用机器学习从短语中移除括号。例如，启用此选项后，相关的文件将被视为重复文件：
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = 区分大小写
 duplicate_case_sensitive_name_tooltip =
-    启用时，仅当记录具有完全相同的名称时分组，例如 Żołd <-> Żołd
+    启用时，仅当记录具有完全相同的名称时才进行分组，例如 Żołd <-> Żołd
     
-    禁用这种选项将不会检查每封字母是否相同的大小，例如 żoŁD <-> Żołd
+    禁用此选项将不检查每个字母是否具有相同的大小写，例如 żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = 大小和名称
 duplicate_mode_name_combo_box = 名称
 duplicate_mode_size_combo_box = 大小
@@ -46,39 +48,39 @@ duplicate_mode_hash_combo_box = 哈希
 duplicate_hash_type_tooltip =
     Czkawka提供3种哈希类型：
     
-    Blake3 - 加密散列函数。 这是默认值，因为它很快。
+    Blake3 - 加密散列函数。这是默认选项，因为它非常快。
     
-    CRC32 - 简单的散列函数。 这应该比Blake3更快，但可能很少发生碰撞。
+    CRC32 - 简单的散列函数。这应该比Blake3更快，但极少情况下可能会有一些冲突。
     
-    XXH3 - 在性能和散列质量方面非常相似的 Blake3 (但非加密法) 。所以这种模式可以很容易地进行交流。
+    XXH3 - 与Blake3非常相似，性能和哈希质量也很高（但不是加密的）。因此，这些模式可以很容易地互换使用。
 duplicate_check_method_tooltip =
     目前，Czkawka提供三种方法来查找重复：
     
-    名称 - 查找具有相同名称的文件。
+    名称 - 查找名称相同的文件。
     
     大小 - 查找大小相同的文件。
     
-    哈希-查找内容相同的文件。 此模式将文件哈希，然后比较此哈希以找到重复。此模式是找到重复的最安全方法。 应用大量使用缓存，所以第二和进一步扫描同一数据应该比第一个更快一些。
+    哈希 - 查找内容相同的文件。这种模式会对文件进行哈希计算，然后将哈希值进行比较以查找重复项。这种模式是查找重复项的最安全方法。应用程序大量使用缓存，因此对相同数据进行的第二次及更多次扫描应比第一次更快。
 image_hash_size_tooltip =
-    每张选中的图像都会产生可相互比较的特殊哈希值，而它们之间的小差意味着这张图像是相似的。
+    每个图像在检查时都会生成一个特殊的哈希值，可以与其他图像的哈希值比较，它们之间的差异越小表明这些图像越相似。
     
-    8 个散列尺寸非常适合于找到与原始相似的图像。 随着更大的图像集(>1000) 将产生大量的虚假正数，因此我建议使用这种更大的散列大小。
+    8位哈希值大小非常适合查找与原始图像仅略微相似的图像。但如果图像集很大（> 1000），则会产生大量误报，因此建议在处理大量图像时使用更大的哈希值大小。
     
-    16 是默认的散列大小，它很好地影响了找到哪怕是略类似的图像和少量散列碰撞。
+    16位是默认的哈希值大小，可以在查找甚至略微相似的图像和减少哈希碰撞之间做出很好的妥协。
     
-    32和64 哈希只找到非常相似的图像，但几乎不应该有任何假正数(可能只有一些透明通道的图像)。
+    32位和64位哈希值只能找到非常相似的图像，但几乎不会出现任何误报（也许除了一些带有透明通道的图像）。
 image_resize_filter_tooltip =
-    要计算图像散列，库必须首先调整大小。
+    要计算图像的哈希值，库必须首先调整大小。
     
-    在选定的算法上花费钱，用来计算散列的结果图像可能看起来没有什么不同。
+    根据所选择的算法，用于计算哈希值的图像可能会略有不同。
     
-    最快使用的算法，但结果最差的算法是Nearest。 默认启用它，因为16x16散列尺寸较低的质量并不真正可见。
+    最快的算法是Nearest算法，但它也会产生最差的结果，因为在16x16的哈希大小下，低质量并不是真正可见的，因此该算法默认启用。
     
-    建议使用 8x8 散列大小，使用不同于Nearest的算法来拥有更好的图像组。
+    建议在8x8哈希大小下使用与Nearest算法不同的算法，以获得更好的图像组。
 image_hash_alg_tooltip =
     用户可以从许多计算哈希值的算法中选择一种。
     
-    每种算法都有强项和弱项，对于不同的图像，有时会有更好的结果，有时会有更差的结果。
+    每种算法都有强项和弱项，对于不同的图像，有时结果更好，有时结果更差。
     
     因此，为了确定最适合你的算法，需要进行人工测试。
 big_files_mode_combobox_tooltip = 允许搜索最小/最大的文件
@@ -129,8 +131,9 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = 归档
 main_check_box_broken_files_image = 图像
 check_button_general_same_size = 忽略相同的大小
-check_button_general_same_size_tooltip = 从结果忽略相同大小的文件 - 通常是 1:1 重复
+check_button_general_same_size_tooltip = 从结果中忽略相同大小的文件 - 通常是 1:1 重复
 main_label_size_bytes_tooltip = 将用于扫描的文件大小
+
 # Upper window
 upper_tree_view_included_folder_column_title = 要搜索的文件夹
 upper_tree_view_included_reference_column_title = 参考文件夹
@@ -145,33 +148,34 @@ upper_remove_excluded_button = 删除
 upper_manual_add_included_button_tooltip =
     手动添加目录名。
     
-    一次性添加多个路径，用……分隔它们；
+    如需一次性添加多个路径，请用分号;分隔它们
     
-    /home/roman；/home/rozkaz 将添加两个目录/home/roman和/home/rozkaz
+    /home/roman;/home/rozkaz 将添加 /home/roman 和 /home/rozkaz 两个目录
 upper_add_included_button_tooltip = 添加新目录进行搜索。
 upper_remove_included_button_tooltip = 从搜索中删除目录。
 upper_manual_add_excluded_button_tooltip =
     手动添加排除的目录名称。
     
-    一次要添加多个路径，请将它们分开。
+    如需一次性添加多个路径，请用分号;分隔它们
     
-    /home/roman;/home/krokiet 将添加两个目录/home/roman 和 /home/kookiet
-upper_add_excluded_button_tooltip = 添加要排除在搜索中的目录。
+    /home/roman;/home/krokiet 将添加 /home/roman 和 /home/kookiet 两个目录
+upper_add_excluded_button_tooltip = 添加在搜索中排除的目录。
 upper_remove_excluded_button_tooltip = 从排除中删除目录。
 upper_notebook_items_configuration = 项目配置
 upper_notebook_excluded_directories = 排除的目录
 upper_notebook_included_directories = 包含的目录
 upper_allowed_extensions_tooltip =
-    允许的扩展必须用逗号分隔(默认所有可用)。
+    允许的文件扩展名必须用逗号分隔（默认情况下全部可用）。
     
-    同时添加多个扩展的下列宏也可用: IMAGE, VIDEO, MUSIC, TEXT
+    还提供以下可同时添加多个扩展名的宏：IMAGE（图片）、VIDEO（视频）、MUSIC（音乐）、TEXT（文本）。
     
-    使用示例".exe, IMAGE, VIDEO, .rar, 7z" - 这意味着图像(e). . jpg、png、视频(例如avi、mp4)、ex、rar和7z 文件将被扫描。
+    使用示例：".exe, IMAGE, VIDEO, .rar, 7z"，这意味着将扫描图片文件（例如jpg、png）、视频文件（例如avi、mp4）、exe、rar和7z文件。
 upper_excluded_items_tooltip =
-    排除的项目必须包含 * 通配符，并且应该用逗号分隔。
-    这比排除的目录慢，所以请仔细使用。
+    被排除的项目必须包含 * 通配符，并用逗号分隔。
+    与排除目录相比，这种方式较慢，因此请小心使用。
 upper_excluded_items = 排除的项目：
 upper_allowed_extensions = 允许的扩展：
+
 # Popovers
 popover_select_all = 选择所有
 popover_unselect_all = 取消选择所有
@@ -188,31 +192,31 @@ popover_custom_path_check_button_entry_tooltip =
     通过路径选择记录。
     
     示例用法：
-    /home/pimpek/rzecz.txt可以通过 /home/pim* 找到
+    /home/pimpek/rzecz.txt 可以通过 /home/pim* 找到
 popover_custom_name_check_button_entry_tooltip =
     按文件名选择记录。
     
     示例用法：
-    /usr/ping/pong.txt可以在 *ong* 中找到。
+    /usr/ping/pong.txt 可以通过 *ong* 找到
 popover_custom_regex_check_button_entry_tooltip =
-    通过指定的 Regex选择记录。
+    按指定的正则表达式选择记录。
     
-    使用这种模式，搜索的文本是名的路径。
+    使用此模式，搜索的文本是带有名称的路径。
     
     示例用法：
-    /usr/bin/ziemniak。 xt 可以通过 /ziem[a-z]+
+    可以使用 /ziem[a-z]+ 查找 /usr/bin/ziemniak.txt
     
-    找到。这使用默认的 Rust regex 实现。你可以在这里阅读更多关于它的信息：https://docs.rs/regex。
+    这使用默认的Rust正则表达式实现。 您可以在此处阅读有关它的更多信息：https://docs.rs/regex。
 popover_custom_case_sensitive_check_button_tooltip =
-    启用区分大小写的检测。
+    启用大小写检测。
     
-    当禁用/home/* 同时找到 /HoMe/roman 和 /home/roman。
+    该选项禁用时，/home/* 将同时找到 /HoMe/roman 和 /home/roman。
 popover_custom_not_all_check_button_tooltip =
     禁止在分组中选择所有记录。
     
-    这是默认启用的，因为在大多数情况下， 您不想删除原始文件和重复文件，但想保留至少一个文件。
+    这是默认启用的，因为在大多数情况下， 您不想删除原始文件和重复文件，而是想留下至少一个文件。
     
-    警告：如果您已经手动选择了一个组中的所有结果，此设置将无法工作。
+    警告：如果您已经手动选择了一个组中的所有结果，则此设置不起作用。
 popover_custom_regex_path_label = 路径
 popover_custom_regex_name_label = 名称
 popover_custom_regex_regex_label = 正则表达式路径 + 名称
@@ -227,13 +231,14 @@ popover_sort_size = 大小
 popover_sort_selection = 选择
 popover_invalid_regex = 正则表达式无效
 popover_valid_regex = 正则表达式有效
+
 # Bottom buttons
 bottom_search_button = 搜索
 bottom_select_button = 选择
 bottom_delete_button = 删除
 bottom_save_button = 保存
-bottom_symlink_button = Symlink
-bottom_hardlink_button = Hardlink
+bottom_symlink_button = 软链接
+bottom_hardlink_button = 硬链接
 bottom_move_button = 移动
 bottom_sort_button = 排序
 bottom_search_button_tooltip = 开始搜索
@@ -241,28 +246,30 @@ bottom_select_button_tooltip = 选择记录。只能稍后处理选定的文件/
 bottom_delete_button_tooltip = 删除选中的文件/文件夹。
 bottom_save_button_tooltip = 保存搜索数据到文件
 bottom_symlink_button_tooltip =
-    创建符号链接。
-    只能在选择组中至少两个结果时生效。
-    第一个不变，第二个和以后两个都是对称的。
+    创建软链接。
+    只有在至少选择了一组中的两个结果时才起作用。
+    第一个结果保持不变，第二个及后续结果都会被软链接到第一个结果上。
 bottom_hardlink_button_tooltip =
     创建硬链接。
-    只在选定组中至少两个结果时有效。
-    第一个不变，第二个和第二个后来是与第一个联系在一起的。
+    只有在至少选择了一组中的两个结果时才起作用。
+    第一个结果保持不变，第二个及后续结果都会被硬链接到第一个结果上。
 bottom_hardlink_button_not_available_tooltip =
     创建硬链接。
     按钮已禁用，因为无法创建硬链接。
-    硬链接仅适用于管理员在Windows上的权限，所以必须以管理员身份运行应用程序。
-    如果应用程序已经使用了这种权限，请检查类似的 Github。
+    在 Windows 上，只有使用管理员权限才能使用硬链接，所以请确保以管理员身份运行该应用程序。
+    如果应用程序已经具有管理员权限，请在 Github 上查找类似的问题。
 bottom_move_button_tooltip =
-    移动文件到选定的目录。
-    它复制所有文件到目录，而不保留目录树。
-    试图将两个具有相同名称的文件移动到文件夹时，第二个将失败并显示错误。
+    将文件移动到所选目录。
+    它将所有文件复制到目录中，但不保留目录树。
+    尝试将具有相同名称的两个文件移动到文件夹时，第二个将失败并显示错误。
 bottom_sort_button_tooltip = 根据选定的方法排序文件/文件夹。
 bottom_show_errors_tooltip = 显示/隐藏底部文本面板。
 bottom_show_upper_notebook_tooltip = 显示/隐藏主笔记本面板。
+
 # Progress Window
 progress_stop_button = 停止
 progress_stop_additional_message = 停止请求
+
 # About Window
 about_repository_button_tooltip = 链接到源代码的仓库页面。
 about_donation_button_tooltip = 链接到捐赠页面。
@@ -272,6 +279,7 @@ about_repository_button = 存储库
 about_donation_button = 捐助
 about_instruction_button = 说明
 about_translation_button = 翻译
+
 # Header
 header_setting_button_tooltip = 打开设置对话框。
 header_about_button_tooltip = 打开包含应用程序信息的对话框。
@@ -280,9 +288,8 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。
 
 
 ## General
-
 settings_number_of_threads = 使用的线程数
-settings_number_of_threads_tooltip = 用过的线程数，0表示所有可用线程都将被使用。
+settings_number_of_threads_tooltip = 使用的线程数，0表示所有可用线程都将被使用。
 settings_label_restart = 您需要重新启动应用才能应用设置！
 settings_ignore_other_filesystems = 忽略其它文件系统 (仅限Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -314,20 +321,19 @@ settings_use_trash_button = 移动已删除的文件到回收站
 settings_language_label = 语言
 settings_multiple_delete_outdated_cache_checkbutton = 自动删除过时的缓存条目
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    删除指向不存在文件的过时缓存结果。
+    删除指向不存在文件的过期缓存结果。
     
-    如果启用，应用会确保当加载记录时，所有记录都指向有效的文件(被忽略的文件)。
+    当启用时，应用程序确保在加载记录时所有记录都指向有效文件（无法访问的文件将被忽略）。
     
-    禁用这将有助于扫描外部驱动器上的文件，所以在下次扫描中不会清除有关它们的缓存条目。
+    禁用此功能将有助于扫描外部驱动器上的文件时，避免在下一次扫描时清除与其相关的缓存条目。
     
-    在缓存中拥有成千上万条记录的情况下， 建议启用这个选项，这将加速扫描开始/结束时的缓存加载/保存。
+    如果缓存中有数十万条记录，则建议启用此功能，这将加快扫描开始/结束时的缓存加载/保存速度。
 settings_notebook_general = 概况
 settings_notebook_duplicates = 重复项
 settings_notebook_images = 相似图像
 settings_notebook_videos = 相似视频
 
 ## Multiple - settings used in multiple tabs
-
 settings_multiple_image_preview_checkbutton_tooltip = 在右侧显示预览 (当选择图像文件时)。
 settings_multiple_image_preview_checkbutton = 显示图像预览
 settings_multiple_clear_cache_button_tooltip =
@@ -336,21 +342,20 @@ settings_multiple_clear_cache_button_tooltip =
 settings_multiple_clear_cache_button = 从图像缓存中删除过时的结果
 
 ## Duplicates
-
 settings_duplicates_hide_hard_link_button_tooltip =
-    隐藏除一个之外的所有文件，如果所有文件都指向相同的数据(是硬链接)。
+    隐藏除一个以外的所有文件，如果所有文件都指向同一数据（即为硬链接）。
     
-    示例：在存在(磁盘) 的情况下，七个文件与特定数据有硬链接，一个不同的文件具有相同的数据但不同的内涵， 然后在重复的查找器中，将只显示一个唯一的文件和一个来自硬链接的文件。
+    例如，在磁盘上有七个文件都硬链接到特定数据，并且还有一个不同的文件，其数据相同，但索引节点不同，那么在重复文件查找器中，只会显示一个唯一的文件和一个硬链接文件。
 settings_duplicates_minimal_size_entry_tooltip =
-    设置将缓存的最小文件大小。
+    设置将被缓存的最小文件大小。
     
-    选择一个较小的值将生成更多的记录。 这将加速搜索，但减缓缓缓存加载/保存。
+    选择较小的值将会生成更多的记录。这将加快搜索速度，但会减慢缓存的加载/保存速度。
 settings_duplicates_prehash_checkbutton_tooltip =
-    启用封存(从文件的一小部分计算的散列) 的缓存，允许提早撤销不重复的结果。
+    启用预散列缓存（从文件的一小部分计算出的哈希），以便更早地排除非重复结果。
     
-    默认情况下禁用它，因为它会导致某些情况下的减速。
+    默认情况下禁用它，因为在某些情况下可能会导致减慢速度。
     
-    强烈建议在扫描数十万或100万个文件时使用它，因为它可以多次加速搜索。
+    强烈建议在扫描数十万或100万个文件时使用它，因为它可以将搜索加速多倍。
 settings_duplicates_prehash_minimal_entry_tooltip = 缓存条目的最小尺寸。
 settings_duplicates_hide_hard_link_button = 隐藏硬链接 (仅限Linux 和 macOS)
 settings_duplicates_prehash_checkbutton = 使用捕捉缓存
@@ -358,7 +363,6 @@ settings_duplicates_minimal_size_cache_label = 保存到缓存的文件最小大
 settings_duplicates_minimal_size_cache_prehash_label = 文件最小尺寸(字节) 保存到逮捕缓存
 
 ## Saving/Loading settings
-
 settings_saving_button_tooltip = 保存当前设置配置到文件。
 settings_loading_button_tooltip = 从文件加载设置并替换当前配置。
 settings_reset_button_tooltip = 重置当前配置为默认设置。
@@ -367,21 +371,21 @@ settings_loading_button = 加载配置
 settings_reset_button = 重置配置
 
 ## Opening cache/config folders
-
 settings_folder_cache_open_tooltip =
     打开存储缓存txt文件的文件夹。
     
-    修改缓存文件可能会导致显示无效结果。 然而，当将大量文件移动到另一个位置时，修改路径可能会节省时间。
+    修改缓存文件可能会导致显示无效的结果。然而，当将大量文件移动到另一个位置时，修改路径可能会节省时间。
     
-    您可以在计算机之间复制这些文件以便在扫描文件时节省时间(当然，如果它们具有类似的目录结构)。
+    您可以在计算机之间复制这些文件，以节省再次扫描文件的时间（当然，如果它们具有相似的目录结构）。
     
-    如果缓存出现问题，这些文件可以被删除。应用程序将自动重新生成它们。
+    如果缓存出现问题，可以删除这些文件。该应用程序将自动重新生成它们。
 settings_folder_settings_open_tooltip =
     打开保存Czkawka配置的文件夹。
     
-    警告：手动修改配置可能会破坏您的工作流。
+    警告：手动修改配置可能会破坏您的工作流程。
 settings_folder_cache_open = 打开缓存文件夹
 settings_folder_settings_open = 打开设置文件夹
+
 # Compute results
 compute_stopped_by_user = 搜索已被用户停止
 compute_found_duplicates_hash_size = 在 { $number_groups } 组中找到 { $number_files } 重复，被带去了 { $size }
@@ -396,6 +400,7 @@ compute_found_music = 在 { $number_groups } 组中找到 { $number_files } 类�
 compute_found_invalid_symlinks = 找到 { $number_files } 无效的符号链接
 compute_found_broken_files = 找到 { $number_files } 损坏的文件
 compute_found_bad_extensions = 找到 { $number_files } 文件，其扩展名无效
+
 # Progress window
 progress_scanning_general_file = 正在扫描 { $file_number } 文件
 progress_scanning_extension_of_files = 检查扩展名 { $file_checked }/{ $all_files } 文件
@@ -415,6 +420,7 @@ progress_analyzed_partial_hash = 分析了 { $file_checked }/{ $all_files } 文�
 progress_analyzed_full_hash = 分析了 { $file_checked }/{ $all_files } 文件的完整哈希值
 progress_current_stage = 当前阶段:{ "  " }
 progress_all_stages = 所有阶段:{ " " }
+
 # Saving loading 
 saving_loading_saving_success = 配置保存到文件 { $name }。
 saving_loading_saving_failure = 无法将配置数据保存到文件 { $name }
@@ -433,16 +439,19 @@ saving_loading_failed_to_read_config_file = 无法从 "{ $path }" 加载配置�
 saving_loading_failed_to_read_data_from_file = 无法从文件读取数据"{ $path }", 原因"{ $reason }".
 saving_loading_orphan_data = 在行中发现了孤儿数据“{ $data }”，{ $line }"。
 saving_loading_not_valid = 设置“{ $data }”在当前应用版本中不存在。
+
 # Invalid symlinks
 invalid_symlink_infinite_recursion = 无限递归性
 invalid_symlink_non_existent_destination = 目标文件不存在
+
 # Other
 selected_all_reference_folders = 当所有目录被设置为参考文件夹时，无法开始搜索
 searching_for_data = 正在搜索数据，可能需要一段时间，请稍候...
 text_view_messages = 消息
 text_view_warnings = 警告
 text_view_errors = 错误
-about_window_motto = 这个程序可以自由使用，并将永远使用。
+about_window_motto = 这个程序可以永久免费使用。
+
 # Various dialog
 dialogs_ask_next_time = 下次询问
 delete_file_failed = 删除文件 { $name } 失败，原因 { $reason }
@@ -480,9 +489,11 @@ cache_clear_message_label_1 = 您想要清除过时条目的缓存吗？
 cache_clear_message_label_2 = 此操作将删除所有指向无效文件的缓存项。
 cache_clear_message_label_3 = 这可能会稍微加速加载/保存到缓存。
 cache_clear_message_label_4 = 警告：操作将从未接入的外部驱动器中移除所有缓存数据。所以每个散列都需要重新生成。
+
 # Show preview
 preview_image_resize_failure = 调整图像大小失败 { $name }
 preview_image_opening_failure = 打开镜像 { $name } 失败，原因 { $reason }
+
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = 组 { $current_group }/{ $all_groups } ({ $images_in_group } 图像)
 compare_move_left_button = L
