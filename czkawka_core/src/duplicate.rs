@@ -15,6 +15,7 @@ use std::{fs, mem};
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
+use log::debug;
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
@@ -505,6 +506,7 @@ impl DuplicateFinder {
     /// Read file length and puts it to different boxes(each for different lengths)
     /// If in box is only 1 result, then it is removed
     fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_file_size - start");
         let max_stage = match self.check_method {
             CheckingMethod::Size => 0,
             CheckingMethod::Hash => 2,
@@ -525,6 +527,7 @@ impl DuplicateFinder {
             .maximal_file_size(self.maximal_file_size)
             .build()
             .run();
+        debug!("check_file_size - after finding file sizes");
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size = grouped_file_entries;
@@ -548,6 +551,7 @@ impl DuplicateFinder {
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();
 
+                debug!("check_file_size - after calculating size stats/duplicates");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -606,6 +610,7 @@ impl DuplicateFinder {
         let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         if self.use_prehash_cache {
+            debug!("prehash_load_cache_at_start - using prehash cache start");
             loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type, true) {
                 Some(t) => t,
                 None => Default::default(),
@@ -634,15 +639,19 @@ impl DuplicateFinder {
                     }
                 }
             }
+            debug!("prehash_load_cache_at_start - using prehash cache end");
         } else {
+            debug!("prehash_load_cache_at_start - not using prehash cache start");
             loaded_hash_map = Default::default();
             mem::swap(&mut self.files_with_identical_size, &mut non_cached_files_to_check);
+            debug!("prehash_load_cache_at_start - not using prehash cache end");
         }
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     fn prehash_save_cache_at_exit(&mut self, loaded_hash_map: BTreeMap<u64, Vec<FileEntry>>, pre_hash_results: &Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)>) {
         if self.use_prehash_cache {
+            debug!("prehash_save_cache_at_exit - saving prehash cache start");
             // All results = records already cached + computed results
             let mut save_cache_to_hashmap: BTreeMap<String, FileEntry> = Default::default();
 
@@ -665,6 +674,7 @@ impl DuplicateFinder {
             }
 
             save_hashes_to_file(&save_cache_to_hashmap, &mut self.text_messages, &self.hash_type, true, self.minimal_prehash_cache_file_size);
+            debug!("prehash_save_cache_at_exit - saving prehash cache end");
         }
     }
 
@@ -674,6 +684,7 @@ impl DuplicateFinder {
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
+        debug!("prehashing - start");
         let check_type = self.hash_type;
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
             progress_sender,
@@ -712,7 +723,9 @@ impl DuplicateFinder {
             .while_some()
             .collect();
 
+        debug!("prehashing - ended prehashing, start sending info to progress thread");
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        debug!("prehashing - ended prehashing, got info about progress thread end");
 
         // Check if user aborted search(only from GUI)
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -736,6 +749,7 @@ impl DuplicateFinder {
 
         self.prehash_save_cache_at_exit(loaded_hash_map, &pre_hash_results);
 
+        debug!("prehashing - end");
         Some(())
     }
 
@@ -743,11 +757,13 @@ impl DuplicateFinder {
         &mut self,
         mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> (BTreeMap<u64, Vec<FileEntry>>, BTreeMap<u64, Vec<FileEntry>>, BTreeMap<u64, Vec<FileEntry>>) {
+        debug!("full_hashing_load_cache_at_start - start");
         let loaded_hash_map;
         let mut records_already_cached: BTreeMap<u64, Vec<FileEntry>> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         if self.use_cache {
+            debug!("full_hashing_load_cache_at_start - using cache");
             loaded_hash_map = match load_hashes_from_file(&mut self.text_messages, self.delete_outdated_cache, &self.hash_type, false) {
                 Some(t) => t,
                 None => Default::default(),
@@ -778,9 +794,11 @@ impl DuplicateFinder {
                 }
             }
         } else {
+            debug!("full_hashing_load_cache_at_start - not using cache");
             loaded_hash_map = Default::default();
             mem::swap(&mut pre_checked_map, &mut non_cached_files_to_check);
         }
+        debug!("full_hashing_load_cache_at_start - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
@@ -790,6 +808,7 @@ impl DuplicateFinder {
         full_hash_results: &mut Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)>,
         loaded_hash_map: BTreeMap<u64, Vec<FileEntry>>,
     ) {
+        debug!("full_hashing_save_cache_at_exit - start");
         if !self.use_cache {
             return;
         }
@@ -826,6 +845,7 @@ impl DuplicateFinder {
             }
         }
         save_hashes_to_file(&all_results, &mut self.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
+        debug!("full_hashing_save_cache_at_exit - end");
     }
 
     fn full_hashing(
@@ -834,6 +854,7 @@ impl DuplicateFinder {
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
+        debug!("full_hashing - start");
         let check_type = self.hash_type;
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -872,7 +893,9 @@ impl DuplicateFinder {
 
             self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 
+            debug!("full_hashing - starting sending info to progress thread");
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+            debug!("full_hashing - after sending info to progress thread");
 
             // Break if stop was clicked after saving to cache
             if check_was_stopped.load(Ordering::Relaxed) {
@@ -889,6 +912,7 @@ impl DuplicateFinder {
             }
         }
 
+        debug!("full_hashing - end");
         Some(())
     }
 

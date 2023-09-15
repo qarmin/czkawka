@@ -79,6 +79,9 @@ anyhow = { version = "1.0" }
 
 state = "0.6"
 
+log = "0.4.20"
+handsome_logger = "0.6.0"
+
 [features]
 default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]

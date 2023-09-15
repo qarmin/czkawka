@@ -15,6 +15,9 @@ clap = { version = "4.3", features = ["derive"] }
 # For enum types
 image_hasher = "1.2"
 
+log = "0.4.20"
+handsome_logger = "0.6.0"
+
 [dependencies.czkawka_core]
 path = "../czkawka_core"
 version = "6.0.0"

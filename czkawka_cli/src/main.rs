@@ -3,6 +3,7 @@
 use std::process;
 
 use clap::Parser;
+use handsome_logger::{ColorChoice, Config, ConfigBuilder, LevelFilter, TerminalMode};
 
 use commands::Commands;
 use czkawka_core::bad_extensions::BadExtensions;
@@ -29,6 +30,8 @@ mod commands;
 
 fn main() {
     let command = Args::parse().command;
+
+    handsome_logger::TermLogger::init(ConfigBuilder::default().set_level(LevelFilter::Debug).build(), TerminalMode::Mixed, ColorChoice::Always).unwrap();
 
     #[cfg(debug_assertions)]
     println!("{command:?}");

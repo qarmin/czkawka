@@ -14,6 +14,7 @@ use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
 use gtk4::Application;
+use handsome_logger::{ColorChoice, ConfigBuilder, LevelFilter, TerminalMode};
 
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;
@@ -71,6 +72,7 @@ mod tests;
 fn main() {
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
+        handsome_logger::TermLogger::init(ConfigBuilder::default().set_level(LevelFilter::Debug).build(), TerminalMode::Mixed, ColorChoice::Always).unwrap();
         build_ui(app, &cmdline.arguments());
         0
     });

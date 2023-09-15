@@ -520,7 +520,9 @@ version = "6.0.0"
 dependencies = [
  "clap",
  "czkawka_core",
+ "handsome_logger",
  "image_hasher",
+ "log",
 ]
 
 [[package]]
@@ -539,6 +541,7 @@ dependencies = [
  "ffmpeg_cmdline_utils",
  "futures",
  "hamming",
+ "handsome_logger",
  "humansize",
  "i18n-embed",
  "i18n-embed-fl",
@@ -549,6 +552,7 @@ dependencies = [
  "libheif-rs",
  "libheif-sys",
  "lofty",
+ "log",
  "mime_guess",
  "num_cpus",
  "once_cell",
@@ -580,11 +584,13 @@ dependencies = [
  "gdk4",
  "glib",
  "gtk4",
+ "handsome_logger",
  "humansize",
  "i18n-embed",
  "i18n-embed-fl",
  "image",
  "image_hasher",
+ "log",
  "once_cell",
  "open",
  "regex",
@@ -1349,6 +1355,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65043da274378d68241eb9a8f8f8aa54e349136f7b8e12f63e3ef44043cc30e1"
 
 [[package]]
+name = "handsome_logger"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54cd219376bdbd869ce764bf83e45407ef1a640503e2927605e8524575fda474"
+dependencies = [
+ "log",
+ "termcolor",
+ "time",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1948,6 +1965,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
  "hermit-abi",
+ "libc",
+]
+
+[[package]]
+name = "num_threads"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2819ce041d2ee131036f4fc9d6ae7ae125a3a40e97ba64d04fe799ad9dabbb44"
+dependencies = [
  "libc",
 ]
 
@@ -3002,6 +3028,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "termcolor"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
+dependencies = [
+ "winapi-util",
+]
+
+[[package]]
 name = "thiserror"
 version = "1.0.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3049,8 +3084,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17f6bb557fd245c28e6411aa56b6403c689ad95061f50e4be16c274e70a17e48"
 dependencies = [
  "deranged",
+ "itoa",
+ "libc",
+ "num_threads",
  "serde",
  "time-core",
+ "time-macros",
 ]
 
 [[package]]
@@ -3058,6 +3097,15 @@ name = "time-core"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
+
+[[package]]
+name = "time-macros"
+version = "0.2.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a942f44339478ef67935ab2bbaec2fb0322496cf3cbe84b261e06ac3814c572"
+dependencies = [
+ "time-core",
+]
 
 [[package]]
 name = "tinystr"
