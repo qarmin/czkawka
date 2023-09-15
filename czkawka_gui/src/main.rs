@@ -10,9 +10,10 @@ use std::ffi::OsString;
 
 use futures::channel::mpsc;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
+use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
-use gtk4::{Application, Inhibit};
+use gtk4::Application;
 
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;
@@ -80,7 +81,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     let gui_data: GuiData = GuiData::new_with_application(application);
 
     // Used for getting data from thread
-    let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+    let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(Priority::default());
 
     // Futures progress report
     let (progress_sender, progress_receiver): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
@@ -138,6 +139,6 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
             // Save configuration at exit
         }
         taskbar_state.borrow_mut().release();
-        Inhibit(false)
+        glib::Propagation::Proceed
     });
 }

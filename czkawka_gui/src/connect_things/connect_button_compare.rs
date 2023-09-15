@@ -104,7 +104,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         *shared_using_for_preview.borrow_mut() = (None, None);
         image_compare_left.set_from_pixbuf(None);
         image_compare_right.set_from_pixbuf(None);
-        gtk4::Inhibit(true)
+        glib::Propagation::Stop
     });
 
     let button_go_previous_compare_group = gui_data.compare_images.button_go_previous_compare_group.clone();

@@ -224,7 +224,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
         }
         // Returning false here would close the receiver and have senders fail
-        Continue(true)
+        glib::ControlFlow::Continue
     });
 }
 

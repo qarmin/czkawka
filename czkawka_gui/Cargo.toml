@@ -10,8 +10,8 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-gdk4 = "0.6"
-glib = "0.17"
+gdk4 = "0.7.2"
+glib = "0.18.2"
 
 humansize = "2.1"
 chrono = "0.4.31"
@@ -52,8 +52,9 @@ once_cell = "1.18"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_core", "windef", "winerror", "wtypesbase", "winuser"] }
 
+
 [dependencies.gtk4]
-version = "0.6"
+version = "0.7"
 default-features = false
 features = ["v4_6"]
 
@@ -61,6 +62,8 @@ features = ["v4_6"]
 path = "../czkawka_core"
 version = "6.0.0"
 features = []
+#gtk4 = { version = "0.7.2", default-features = false, features = ["v4_6"] }
+#czkawka_core = { path = "../czkawka_core",version = "6.0.0",features = [] }
 
 [features]
 default = []

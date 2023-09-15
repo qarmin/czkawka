@@ -273,7 +273,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
 
         window_progress.connect_close_request(move |_| {
             stop_sender.send(()).unwrap();
-            gtk4::Inhibit(true)
+            glib::Propagation::Stop
         });
     }
 

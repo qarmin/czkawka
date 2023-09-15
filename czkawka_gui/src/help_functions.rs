@@ -4,7 +4,6 @@ use std::io::BufReader;
 use std::path::PathBuf;
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use glib::signal::Inhibit;
 use glib::Error;
 use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
@@ -799,11 +798,11 @@ pub fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, curre
     }
 }
 
-pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> Inhibit {
+pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> glib::Propagation {
     scale.set_increments(1_f64, 1_f64);
     scale.set_round_digits(0);
     scale.set_fill_level(value.round());
-    Inhibit(false)
+    glib::Propagation::Proceed
 }
 
 #[cfg(test)]
