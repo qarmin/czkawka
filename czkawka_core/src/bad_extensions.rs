@@ -327,7 +327,7 @@ impl BadExtensions {
             // if hashmap_workarounds.contains_key(found) {
             //     panic!("Already have {} key", found);
             // }
-            hashmap_workarounds.entry(found).or_insert_with(Vec::new).push(proper);
+            hashmap_workarounds.entry(found).or_default().push(proper);
         }
 
         self.bad_extensions_files = self.verify_extensions(files_to_check, &atomic_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);

@@ -14,7 +14,7 @@ gdk4 = "0.6"
 glib = "0.17"
 
 humansize = "2.1"
-chrono = "0.4.26"
+chrono = "0.4.31"
 
 # Used for sending stop signal across threads
 crossbeam-channel = "0.5.8"
@@ -44,9 +44,9 @@ trash = "3.0"
 fs_extra = "1.3"
 
 # Language
-i18n-embed = { version = "0.13", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.6"
-rust-embed = "6.8"
+i18n-embed = { version = "<=0.13", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.7"
+rust-embed = "<=6"  # TODO problems when updating to >= 8 version
 once_cell = "1.18"
 
 [target.'cfg(windows)'.dependencies]

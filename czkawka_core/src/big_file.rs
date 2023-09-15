@@ -201,7 +201,7 @@ impl BigFile {
                 folders_to_check.extend(segment);
                 self.text_messages.warnings.extend(warnings);
                 for (size, fe) in fe_result {
-                    old_map.entry(size).or_insert_with(Vec::new).push(fe);
+                    old_map.entry(size).or_default().push(fe);
                 }
             }
         }

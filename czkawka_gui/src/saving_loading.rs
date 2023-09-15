@@ -316,7 +316,7 @@ impl LoadSaveStruct {
                 if line.starts_with("--") {
                     header = line.to_string();
                 } else if !header.is_empty() {
-                    self.loaded_items.entry(header.clone()).or_insert_with(Vec::new).push(line.to_string());
+                    self.loaded_items.entry(header.clone()).or_default().push(line.to_string());
                 } else {
                     add_text_to_text_view(
                         text_view_errors,
@@ -1032,7 +1032,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
         let list_store = get_list_store(&tree_view_excluded_directories);
         list_store.clear();
-        for i in DEFAULT_EXCLUDED_DIRECTORIES.iter() {
+        for i in DEFAULT_EXCLUDED_DIRECTORIES {
             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
             list_store.set(&list_store.append(), &values);
         }

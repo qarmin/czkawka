@@ -324,8 +324,7 @@ impl SimilarVideos {
     }
 
     fn add_video_file_entry(&self, metadata: &Metadata, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>, current_folder: &Path) {
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data,
-                                                           warnings) else {
+        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
             return;
         };
 

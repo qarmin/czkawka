@@ -489,7 +489,7 @@ where
                 all_warnings.extend(warnings);
                 for fe in fe_result {
                     let key = (self.group_by)(&fe);
-                    grouped_file_entries.entry(key).or_insert_with(Vec::new).push(fe);
+                    grouped_file_entries.entry(key).or_default().push(fe);
                 }
                 for current_folder in &set_as_not_empty_folder_list {
                     set_as_not_empty_folder(&mut folder_entries, current_folder);

@@ -624,13 +624,13 @@ impl DuplicateFinder {
                     let name = file_entry.path.to_string_lossy().to_string();
                     if !loaded_hash_map2.contains_key(&name) {
                         // If loaded data doesn't contains current image info
-                        non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new).push(file_entry.clone());
+                        non_cached_files_to_check.entry(file_entry.size).or_default().push(file_entry.clone());
                     } else if file_entry.size != loaded_hash_map2.get(&name).unwrap().size || file_entry.modified_date != loaded_hash_map2.get(&name).unwrap().modified_date {
                         // When size or modification date of image changed, then it is clear that is different image
-                        non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new).push(file_entry.clone());
+                        non_cached_files_to_check.entry(file_entry.size).or_default().push(file_entry.clone());
                     } else {
                         // Checking may be omitted when already there is entry with same size and modification date
-                        records_already_cached.entry(file_entry.size).or_insert_with(Vec::new).push(file_entry.clone());
+                        records_already_cached.entry(file_entry.size).or_default().push(file_entry.clone());
                     }
                 }
             }
@@ -702,7 +702,7 @@ impl DuplicateFinder {
                 for file_entry in vec_file_entry {
                     match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
                         Ok(hash_string) => {
-                            hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new).push(file_entry.clone());
+                            hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry.clone());
                         }
                         Err(s) => errors.push(s),
                     }
@@ -721,7 +721,7 @@ impl DuplicateFinder {
 
         // Add data from cache
         for (size, vec_file_entry) in &records_already_cached {
-            pre_checked_map.entry(*size).or_insert_with(Vec::new).append(&mut vec_file_entry.clone());
+            pre_checked_map.entry(*size).or_default().append(&mut vec_file_entry.clone());
         }
 
         // Check results
@@ -729,7 +729,7 @@ impl DuplicateFinder {
             self.text_messages.warnings.append(&mut errors.clone());
             for vec_file_entry in hash_map.values() {
                 if vec_file_entry.len() > 1 {
-                    pre_checked_map.entry(*size).or_insert_with(Vec::new).append(&mut vec_file_entry.clone());
+                    pre_checked_map.entry(*size).or_default().append(&mut vec_file_entry.clone());
                 }
             }
         }
@@ -765,14 +765,14 @@ impl DuplicateFinder {
                         let mut found: bool = false;
                         for loaded_file_entry in loaded_vec_file_entry {
                             if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
-                                records_already_cached.entry(file_entry.size).or_insert_with(Vec::new).push(loaded_file_entry.clone());
+                                records_already_cached.entry(file_entry.size).or_default().push(loaded_file_entry.clone());
                                 found = true;
                                 break;
                             }
                         }
 
                         if !found {
-                            non_cached_files_to_check.entry(file_entry.size).or_insert_with(Vec::new).push(file_entry);
+                            non_cached_files_to_check.entry(file_entry.size).or_default().push(file_entry);
                         }
                     }
                 }
@@ -798,7 +798,7 @@ impl DuplicateFinder {
             for (full_size, full_hashmap, _errors) in &mut (*full_hash_results) {
                 if size == *full_size {
                     for file_entry in vec_file_entry {
-                        full_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new).push(file_entry);
+                        full_hashmap.entry(file_entry.hash.clone()).or_default().push(file_entry);
                     }
                     continue 'main;
                 }
@@ -806,7 +806,7 @@ impl DuplicateFinder {
             // Size doesn't exists add results to files
             let mut temp_hashmap: BTreeMap<String, Vec<FileEntry>> = Default::default();
             for file_entry in vec_file_entry {
-                temp_hashmap.entry(file_entry.hash.clone()).or_insert_with(Vec::new).push(file_entry);
+                temp_hashmap.entry(file_entry.hash.clone()).or_default().push(file_entry);
             }
             full_hash_results.push((size, temp_hashmap, Vec::new()));
         }
@@ -860,7 +860,7 @@ impl DuplicateFinder {
                         match hash_calculation(&mut buffer, &file_entry, &check_type, u64::MAX) {
                             Ok(hash_string) => {
                                 file_entry.hash = hash_string.clone();
-                                hashmap_with_hash.entry(hash_string.clone()).or_insert_with(Vec::new).push(file_entry);
+                                hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry);
                             }
                             Err(s) => errors.push(s),
                         }
@@ -883,7 +883,7 @@ impl DuplicateFinder {
                 self.text_messages.warnings.append(&mut errors);
                 for (_hash, vec_file_entry) in hash_map {
                     if vec_file_entry.len() > 1 {
-                        self.files_with_identical_hashes.entry(size).or_insert_with(Vec::new).push(vec_file_entry);
+                        self.files_with_identical_hashes.entry(size).or_default().push(vec_file_entry);
                     }
                 }
             }
@@ -982,7 +982,7 @@ impl DuplicateFinder {
             }
             CheckingMethod::Hash => {
                 for vector_vectors in self.files_with_identical_hashes.values() {
-                    for vector in vector_vectors.iter() {
+                    for vector in vector_vectors {
                         let _tuple: (u64, usize, usize) = delete_files(vector, &self.delete_method, &mut self.text_messages, self.dryrun);
                     }
                 }
@@ -1305,7 +1305,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
                 if dryrun {
                     Ok(Some(format!("Delete {}", file.path.display())))
                 } else {
-                    fs::remove_file(&file.path).map(|_| None)
+                    fs::remove_file(&file.path).map(|()| None)
                 }
             }
             DeleteMethod::HardLink => {
@@ -1313,7 +1313,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
                 if dryrun {
                     Ok(Some(format!("Replace file {} with hard link to {}", file.path.display(), src.display())))
                 } else {
-                    make_hard_link(src, &file.path).map(|_| None)
+                    make_hard_link(src, &file.path).map(|()| None)
                 }
             }
             DeleteMethod::None => Ok(None),
@@ -1401,7 +1401,9 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
         open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, false, &mut text_messages.warnings)
     {
         // Unwrap could fail when failed to open cache file, but json would exists
-        let Some(file_handler) = file_handler else { return Default::default(); };
+        let Some(file_handler) = file_handler else {
+            return Default::default();
+        };
         let reader = BufReader::new(file_handler);
 
         let mut hashmap_loaded_entries: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -1460,7 +1462,7 @@ pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache
                     hash: uuu[3].to_string(),
                     symlink_info: None,
                 };
-                hashmap_loaded_entries.entry(file_entry.size).or_insert_with(Vec::new).push(file_entry);
+                hashmap_loaded_entries.entry(file_entry.size).or_default().push(file_entry);
             }
         }
 

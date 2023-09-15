@@ -4,6 +4,8 @@ members = [
     "czkawka_cli",
     "czkawka_gui",
 ]
+resolver = "2"
+
 [profile.release]
 # panic = "unwind" in opposite to "abort", allows to catch panic!()
 # Since Czkawka parse different types of files with few libraries, it is possible

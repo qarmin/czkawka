@@ -430,8 +430,8 @@ impl SameMusic {
                     return None;
                 }
 
-                let Ok(fingerprint)  = calc_fingerprint_helper(path, configuration) else  {
-                        return Some(None);
+                let Ok(fingerprint) = calc_fingerprint_helper(path, configuration) else {
+                    return Some(None);
                 };
                 music_entry.fingerprint = fingerprint;
 
@@ -561,7 +561,7 @@ impl SameMusic {
                     if file_entry.bitrate != 0 {
                         let thing = file_entry.bitrate.to_string();
                         if !thing.is_empty() {
-                            hash_map.entry(thing.clone()).or_insert_with(Vec::new).push(file_entry);
+                            hash_map.entry(thing.clone()).or_default().push(file_entry);
                         }
                     }
                 }
@@ -778,7 +778,7 @@ impl SameMusic {
                     get_approximate_conversion(&mut thing);
                 }
                 if !thing.is_empty() {
-                    hash_map.entry(thing).or_insert_with(Vec::new).push(file_entry);
+                    hash_map.entry(thing).or_default().push(file_entry);
                 }
             }
             for (_title, vec_file_entry) in hash_map {
@@ -924,7 +924,7 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
     let mut sample_buf = None;
 
     loop {
-        let Ok(packet) = format.next_packet() else  { break };
+        let Ok(packet) = format.next_packet() else { break };
 
         if packet.track_id() != track_id {
             continue;
@@ -953,7 +953,9 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
 }
 
 fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
-    let Ok(mut file) = File::open(path) else { return false; };
+    let Ok(mut file) = File::open(path) else {
+        return false;
+    };
 
     let result = panic::catch_unwind(move || {
         match read_from(&mut file) {

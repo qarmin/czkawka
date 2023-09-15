@@ -659,7 +659,7 @@ fn computer_similar_videos(
             if ff.get_use_reference() {
                 let vec_struct_similar = ff.get_similar_videos_referenced();
 
-                for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                for (base_file_entry, vec_file_entry) in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -681,7 +681,7 @@ fn computer_similar_videos(
             } else {
                 let vec_struct_similar = ff.get_similar_videos();
 
-                for vec_file_entry in vec_struct_similar.iter() {
+                for vec_file_entry in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -761,7 +761,7 @@ fn computer_similar_images(
 
             if sf.get_use_reference() {
                 let vec_struct_similar: &Vec<(similar_images::FileEntry, Vec<similar_images::FileEntry>)> = sf.get_similar_images_referenced();
-                for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                for (base_file_entry, vec_file_entry) in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -804,7 +804,7 @@ fn computer_similar_images(
                 }
             } else {
                 let vec_struct_similar = sf.get_similar_images();
-                for vec_file_entry in vec_struct_similar.iter() {
+                for vec_file_entry in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -956,7 +956,7 @@ fn computer_big_files(
 
             let vector = bf.get_big_files();
 
-            for (size, file_entry) in vector.iter() {
+            for (size, file_entry) in vector {
                 let (directory, file) = split_path(&file_entry.path);
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsBigFiles::SelectionButton as u32, &false),

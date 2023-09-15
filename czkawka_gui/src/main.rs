@@ -77,7 +77,7 @@ fn main() {
 }
 
 fn build_ui(application: &Application, arguments: &[OsString]) {
-    let mut gui_data: GuiData = GuiData::new_with_application(application);
+    let gui_data: GuiData = GuiData::new_with_application(application);
 
     // Used for getting data from thread
     let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
@@ -85,7 +85,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     // Futures progress report
     let (progress_sender, progress_receiver): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
 
-    initialize_gui(&mut gui_data);
+    initialize_gui(&gui_data);
     validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
     reset_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
     load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file

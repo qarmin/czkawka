@@ -168,7 +168,7 @@ impl EmptyFolder {
         // Folders may be deleted or require too big privileges
         for name in self.empty_folder_list.keys() {
             match fs::remove_dir_all(name) {
-                Ok(_) => (),
+                Ok(()) => (),
                 Err(e) => self.text_messages.warnings.push(format!("Failed to remove folder {}, reason {}", name.display(), e)),
             };
         }

@@ -84,7 +84,7 @@ pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: Sender<Messag
         let glib_stop_sender = glib_stop_sender.clone();
         let stop_receiver = stop_receiver.clone();
         // Consume any stale stop messages.
-        stop_receiver.try_iter().for_each(|_| ());
+        stop_receiver.try_iter().for_each(|()| ());
 
         label_stage.show();
 
