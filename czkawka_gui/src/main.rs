@@ -14,7 +14,6 @@ use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
 use gtk4::Application;
-use handsome_logger::{ColorChoice, ConfigBuilder, LevelFilter, TerminalMode};
 
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;
@@ -34,7 +33,7 @@ use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
-use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
+use czkawka_core::common::{get_number_of_threads, set_number_of_threads, setup_logger};
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::*;
 use gui_structs::gui_data::*;
@@ -72,7 +71,7 @@ mod tests;
 fn main() {
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
-        handsome_logger::TermLogger::init(ConfigBuilder::default().set_level(LevelFilter::Debug).build(), TerminalMode::Mixed, ColorChoice::Always).unwrap();
+        setup_logger();
         build_ui(app, &cmdline.arguments());
         0
     });

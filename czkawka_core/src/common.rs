@@ -12,10 +12,12 @@ use std::{fs, thread};
 use anyhow::Result;
 use directories_next::ProjectDirs;
 use futures::channel::mpsc::UnboundedSender;
+use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
+use log::{LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -33,6 +35,24 @@ pub fn get_number_of_threads() -> usize {
     } else {
         num_cpus::get()
     }
+}
+
+fn filtering_messages(record: &Record) -> bool {
+    if let Some(module_path) = record.module_path() {
+        !module_path.contains("i18n_embed")
+    } else {
+        true
+    }
+}
+
+pub fn setup_logger() {
+    let config = ConfigBuilder::default()
+        .set_level(LevelFilter::Info)
+        .set_message_filtering(Some(filtering_messages))
+        .set_chrono_local_time_offset()
+        .unwrap()
+        .build();
+    handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
 }
 
 pub fn set_default_number_of_threads() {

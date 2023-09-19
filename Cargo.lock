@@ -1356,10 +1356,11 @@ checksum = "65043da274378d68241eb9a8f8f8aa54e349136f7b8e12f63e3ef44043cc30e1"
 
 [[package]]
 name = "handsome_logger"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54cd219376bdbd869ce764bf83e45407ef1a640503e2927605e8524575fda474"
+checksum = "5ac61d38cad8014a5875328d4c6094d49e2431ae9d4f6265bb0aa5db486ca2f4"
 dependencies = [
+ "chrono",
  "log",
  "termcolor",
  "time",
@@ -3029,9 +3030,9 @@ dependencies = [
 
 [[package]]
 name = "termcolor"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
+checksum = "6093bad37da69aab9d123a8091e4be0aa4a03e4d601ec641c327398315f62b64"
 dependencies = [
  "winapi-util",
 ]
