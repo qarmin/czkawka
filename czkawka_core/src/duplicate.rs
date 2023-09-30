@@ -723,9 +723,9 @@ impl DuplicateFinder {
             .while_some()
             .collect();
 
-        debug!("prehashing - ended prehashing, start sending info to progress thread");
+        debug!("prehashing - start sending info to progress thread");
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        debug!("prehashing - ended prehashing, got info about progress thread end");
+        debug!("prehashing - got info about progress thread end");
 
         // Check if user aborted search(only from GUI)
         if check_was_stopped.load(Ordering::Relaxed) {

@@ -45,13 +45,10 @@ fn filtering_messages(record: &Record) -> bool {
     }
 }
 
-pub fn setup_logger() {
-    let config = ConfigBuilder::default()
-        .set_level(LevelFilter::Info)
-        .set_message_filtering(Some(filtering_messages))
-        .set_chrono_local_time_offset()
-        .unwrap()
-        .build();
+pub fn setup_logger(disabled_printing: bool) {
+    let log_level = if disabled_printing { LevelFilter::Off } else { LevelFilter::Info };
+
+    let config = ConfigBuilder::default().set_level(log_level).set_message_filtering(Some(filtering_messages)).build();
     handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
 }
 

@@ -30,7 +30,7 @@ mod commands;
 fn main() {
     let command = Args::parse().command;
 
-    setup_logger();
+    setup_logger(true);
 
     #[cfg(debug_assertions)]
     println!("{command:?}");

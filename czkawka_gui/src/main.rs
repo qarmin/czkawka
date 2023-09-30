@@ -71,7 +71,7 @@ mod tests;
 fn main() {
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
-        setup_logger();
+        setup_logger(false);
         build_ui(app, &cmdline.arguments());
         0
     });
