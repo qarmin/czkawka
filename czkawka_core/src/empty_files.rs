@@ -8,7 +8,6 @@ use futures::channel::mpsc::UnboundedSender;
 use log::{debug, info};
 
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
@@ -46,6 +45,7 @@ impl CommonData for EmptyFiles {
         &mut self.common_data
     }
 }
+
 impl EmptyFiles {
     pub fn new() -> Self {
         Self {
@@ -149,22 +149,9 @@ impl DebugPrint for EmptyFiles {
             return;
         }
         println!("---------------DEBUG PRINT---------------");
-        println!("### Information's");
-
-        println!("Errors size - {}", self.common_data.text_messages.errors.len());
-        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
-        println!("Messages size - {}", self.common_data.text_messages.messages.len());
-
-        println!("### Other");
-
         println!("Empty list size - {}", self.empty_files.len());
-        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
-        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
-        println!("Recursive search - {}", self.common_data.recursive_search);
-        #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.common_data.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

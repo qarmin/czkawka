@@ -15,7 +15,6 @@ use rayon::prelude::*;
 
 use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
@@ -443,18 +442,7 @@ impl DebugPrint for BadExtensions {
             return;
         }
         println!("---------------DEBUG PRINT---------------");
-        println!("### Information's");
-
-        println!("Errors size - {}", self.common_data.text_messages.errors.len());
-        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
-        println!("Messages size - {}", self.common_data.text_messages.messages.len());
-
-        println!("### Other");
-
-        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
-        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
-        println!("Recursive search - {}", self.common_data.recursive_search);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

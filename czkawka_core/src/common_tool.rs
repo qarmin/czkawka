@@ -1,9 +1,10 @@
+use std::path::PathBuf;
+
 use crate::common_dir_traversal::ToolType;
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
-use std::path::PathBuf;
 
 #[derive(Debug, Clone, Default)]
 pub struct CommonToolData {

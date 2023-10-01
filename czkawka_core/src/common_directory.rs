@@ -1,10 +1,8 @@
 use std::path::{Path, PathBuf};
-
 #[cfg(target_family = "unix")]
 use std::{fs, os::unix::fs::MetadataExt};
 
 use crate::common::Common;
-
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
@@ -332,7 +330,6 @@ impl Directories {
     }
 
     #[cfg(target_family = "unix")]
-
     pub fn exclude_other_filesystems(&self) -> bool {
         self.exclude_other_filesystems.unwrap_or(false)
     }

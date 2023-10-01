@@ -27,7 +27,6 @@ use crate::common::{
     create_crash_message, filter_reference_folders_generic, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -859,7 +858,9 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
     let mut sample_buf = None;
 
     loop {
-        let Ok(packet) = format.next_packet() else { break };
+        let Ok(packet) = format.next_packet() else {
+            break;
+        };
 
         if packet.track_id() != track_id {
             continue;
@@ -1007,24 +1008,10 @@ impl DebugPrint for SameMusic {
             return;
         }
         println!("---------------DEBUG PRINT---------------");
-        println!("### Information's");
-
-        println!("Errors size - {}", self.common_data.text_messages.errors.len());
-        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
-        println!("Messages size - {}", self.common_data.text_messages.messages.len());
-
-        println!("### Other");
-
-        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
-        println!("Minimum file size - {:?}", self.common_data.minimal_file_size);
         println!("Found files music - {}", self.music_entries.len());
         println!("Found duplicated files music - {}", self.duplicated_music_entries.len());
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
-        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
-        println!("Recursive search - {}", self.common_data.recursive_search);
-        #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.common_data.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

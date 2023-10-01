@@ -13,7 +13,6 @@ use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
@@ -247,7 +246,7 @@ impl DebugPrint for Temporary {
         println!("### Information's");
         println!("Temporary list size - {}", self.temporary_files.len());
         println!("Delete Method - {:?}", self.delete_method);
-        self.print_results();
+        self.debug_print_common();
     }
 }
 

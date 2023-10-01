@@ -9,7 +9,6 @@ use std::io::{self, BufReader, BufWriter, Error, ErrorKind};
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
-
 use std::{fs, mem};
 
 use crossbeam_channel::Receiver;
@@ -21,7 +20,6 @@ use xxhash_rust::xxh3::Xxh3;
 
 use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -80,14 +78,22 @@ impl Info {
 pub struct DuplicateFinder {
     common_data: CommonToolData,
     information: Info,
-    files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,                         // File Size, File Entry
-    files_with_identical_size_names: BTreeMap<(u64, String), Vec<FileEntry>>,             // File (Size, Name), File Entry
-    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,                             // File Size, File Entry
-    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,                      // File Size, next grouped by file size, next grouped by hash
-    files_with_identical_names_referenced: BTreeMap<String, (FileEntry, Vec<FileEntry>)>, // File Size, File Entry
-    files_with_identical_size_names_referenced: BTreeMap<(u64, String), (FileEntry, Vec<FileEntry>)>, // File (Size, Name), File Entry
-    files_with_identical_size_referenced: BTreeMap<u64, (FileEntry, Vec<FileEntry>)>,     // File Size, File Entry
-    files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>>, // File Size, next grouped by file size, next grouped by hash
+    files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,
+    // File Size, File Entry
+    files_with_identical_size_names: BTreeMap<(u64, String), Vec<FileEntry>>,
+    // File (Size, Name), File Entry
+    files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,
+    // File Size, File Entry
+    files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
+    // File Size, next grouped by file size, next grouped by hash
+    files_with_identical_names_referenced: BTreeMap<String, (FileEntry, Vec<FileEntry>)>,
+    // File Size, File Entry
+    files_with_identical_size_names_referenced: BTreeMap<(u64, String), (FileEntry, Vec<FileEntry>)>,
+    // File (Size, Name), File Entry
+    files_with_identical_size_referenced: BTreeMap<u64, (FileEntry, Vec<FileEntry>)>,
+    // File Size, File Entry
+    files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>>,
+    // File Size, next grouped by file size, next grouped by hash
     check_method: CheckingMethod,
     delete_method: DeleteMethod,
     hash_type: HashType,
@@ -970,11 +976,6 @@ impl DebugPrint for DuplicateFinder {
             return;
         }
         println!("---------------DEBUG PRINT---------------");
-        println!("### Information's");
-
-        println!("Errors size - {}", self.common_data.text_messages.errors.len());
-        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
-        println!("Messages size - {}", self.common_data.text_messages.messages.len());
         println!(
             "Number of duplicated files by size(in groups) - {} ({})",
             self.information.number_of_duplicated_files_by_size, self.information.number_of_groups_by_size
@@ -1002,15 +1003,9 @@ impl DebugPrint for DuplicateFinder {
 
         println!("Files list size - {}", self.files_with_identical_size.len());
         println!("Hashed Files list size - {}", self.files_with_identical_hashes.len());
-        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
-        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
-        println!("Recursive search - {}", self.common_data.recursive_search);
-        #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.common_data.directories.exclude_other_filesystems());
-        println!("Minimum file size - {:?}", self.common_data.minimal_file_size);
         println!("Checking Method - {:?}", self.check_method);
         println!("Delete Method - {:?}", self.delete_method);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

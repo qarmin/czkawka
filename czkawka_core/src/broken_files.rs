@@ -5,7 +5,6 @@ use std::io::{BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-
 use std::{fs, mem, panic};
 
 use crossbeam_channel::Receiver;
@@ -23,7 +22,6 @@ use crate::common::{
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -489,21 +487,8 @@ impl DebugPrint for BrokenFiles {
             return;
         }
         println!("---------------DEBUG PRINT---------------");
-        println!("### Information's");
-
-        println!("Errors size - {}", self.common_data.text_messages.errors.len());
-        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
-        println!("Messages size - {}", self.common_data.text_messages.messages.len());
-
-        println!("### Other");
-
-        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
-        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
-        println!("Recursive search - {}", self.common_data.recursive_search);
-        #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.common_data.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

@@ -17,7 +17,6 @@ use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{check_folder_children, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
@@ -34,6 +33,7 @@ pub struct FileEntry {
     pub vhash: VideoHash,
     pub error: String,
 }
+
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
@@ -480,6 +480,7 @@ impl DebugPrint for SimilarVideos {
 
         println!("---------------DEBUG PRINT---------------");
         println!("Included directories - {:?}", self.common_data.directories.included_directories);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

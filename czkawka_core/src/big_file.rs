@@ -3,7 +3,6 @@ use std::fs;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
-
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
@@ -15,7 +14,6 @@ use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
@@ -292,6 +290,7 @@ impl DebugPrint for BigFile {
         println!("### INDIVIDUAL DEBUG PRINT ###");
         println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());
         println!("Number of files to check - {:?}", self.number_of_files_to_check);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }

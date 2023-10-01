@@ -23,7 +23,6 @@ use crate::common::{
     HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
@@ -47,6 +46,7 @@ pub struct FileEntry {
     pub hash: ImHash,
     pub similarity: u32,
 }
+
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
@@ -916,7 +916,7 @@ impl DebugPrint for SimilarImages {
         }
 
         println!("---------------DEBUG PRINT---------------");
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }
@@ -1262,9 +1262,10 @@ fn debug_check_for_duplicated_things(
 
 #[cfg(test)]
 mod tests {
-    use bk_tree::BKTree;
     use std::collections::HashMap;
     use std::path::PathBuf;
+
+    use bk_tree::BKTree;
 
     use crate::common_directory::Directories;
     use crate::common_tool::CommonToolData;
@@ -1517,6 +1518,7 @@ mod tests {
             }
         }
     }
+
     #[test]
     fn test_reference_similarity_only_one() {
         for _ in 0..100 {
@@ -1546,6 +1548,7 @@ mod tests {
             assert_eq!(res[0].1[0].path, PathBuf::from("/home/kk/bcd.txt"));
         }
     }
+
     #[test]
     fn test_reference_too_small_similarity() {
         for _ in 0..100 {

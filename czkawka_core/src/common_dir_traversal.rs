@@ -63,6 +63,7 @@ pub struct FileEntry {
     pub hash: String,
     pub symlink_info: Option<SymlinkInfo>,
 }
+
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
@@ -249,7 +250,6 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
     }
 
     #[cfg(target_family = "unix")]
-
     pub fn exclude_other_filesystems(mut self, exclude_other_filesystems: bool) -> Self {
         match self.directories {
             Some(ref mut directories) => directories.set_exclude_other_filesystems(exclude_other_filesystems),

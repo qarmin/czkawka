@@ -9,7 +9,6 @@ use futures::channel::mpsc::UnboundedSender;
 use log::{debug, info};
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
-
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
@@ -175,7 +174,7 @@ impl DebugPrint for EmptyFolder {
 
         println!("---------------DEBUG PRINT---------------");
         println!("Number of empty folders - {}", self.information.number_of_empty_folders);
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
+        self.debug_print_common();
         println!("-----------------------------------------");
     }
 }
