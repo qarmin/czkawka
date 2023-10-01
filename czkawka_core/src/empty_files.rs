@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
+use log::{debug, info};
 
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
@@ -67,6 +68,7 @@ impl EmptyFiles {
 
     /// Finding empty files, save results to internal struct variables
     pub fn find_empty_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding empty files");
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -128,6 +130,7 @@ impl EmptyFiles {
 
     /// Check files for any with size == 0
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -141,7 +144,8 @@ impl EmptyFiles {
             .recursive_search(self.recursive_search)
             .build()
             .run();
-        match result {
+        debug!("check_files - collected files to check");
+        let res = match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(empty_files) = grouped_file_entries.get(&()) {
                     self.empty_files = empty_files.clone();
@@ -155,7 +159,9 @@ impl EmptyFiles {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        }
+        };
+        debug!("check_files - end");
+        res
     }
 
     /// Function to delete files, from filed Vector

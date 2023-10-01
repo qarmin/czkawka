@@ -10,6 +10,7 @@ use std::{fs, mem, panic};
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
+use log::{debug, info};
 use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
 use pdf::PdfError;
@@ -119,6 +120,7 @@ impl BrokenFiles {
     }
 
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding broken files");
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -195,6 +197,7 @@ impl BrokenFiles {
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -263,6 +266,7 @@ impl BrokenFiles {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
+        debug!("check_files - end");
         true
     }
     fn get_file_entry(
@@ -406,7 +410,8 @@ impl BrokenFiles {
         }
     }
 
-    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
+        debug!("load_cache - start (using cache {})", self.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -440,6 +445,13 @@ impl BrokenFiles {
             loaded_hash_map = Default::default();
             non_cached_files_to_check = files_to_check;
         }
+        debug!("load_cache - end");
+        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+    }
+
+    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("look_for_broken_files - start");
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.tool_type);
@@ -471,18 +483,7 @@ impl BrokenFiles {
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
 
-        if self.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, FileEntry> = Default::default();
-
-            for file_entry in vec_file_entry.clone() {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-            for (_name, file_entry) in loaded_hash_map {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-            save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
-        }
+        self.save_to_cache(&vec_file_entry, loaded_hash_map);
 
         self.broken_files = vec_file_entry
             .into_par_iter()
@@ -494,7 +495,24 @@ impl BrokenFiles {
         // Clean unused data
         self.files_to_check = Default::default();
 
+        debug!("look_for_broken_files - end");
         true
+    }
+    fn save_to_cache(&mut self, vec_file_entry: &[FileEntry], loaded_hash_map: BTreeMap<String, FileEntry>) {
+        debug!("save_to_cache - start, using cache {}", self.use_cache);
+        if self.use_cache {
+            // Must save all results to file, old loaded from file with all currently counted results
+            let mut all_results: BTreeMap<String, FileEntry> = Default::default();
+
+            for file_entry in vec_file_entry.iter().cloned() {
+                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+            for (_name, file_entry) in loaded_hash_map {
+                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+            save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+        }
+        debug!("save_to_cache - end");
     }
 
     /// Function to delete files, from filed Vector

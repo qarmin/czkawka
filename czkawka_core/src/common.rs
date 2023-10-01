@@ -17,7 +17,7 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{LevelFilter, Record};
+use log::{debug, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -39,7 +39,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        !module_path.contains("i18n_embed")
+        !["symphonia", "i18n_embed"].iter().any(|&x| module_path.contains(x))
     } else {
         true
     }
@@ -441,8 +441,10 @@ pub fn prepare_thread_handler_common(
 }
 
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
+    debug!("Sending info to stop all threads");
     progress_thread_run.store(false, Ordering::Relaxed);
     progress_thread_handle.join().unwrap();
+    debug!("All threads stopped");
 }
 
 #[cfg(test)]

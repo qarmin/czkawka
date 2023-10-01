@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
+use log::{debug, info};
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
 use crate::common_directory::Directories;
@@ -66,6 +67,7 @@ impl InvalidSymlinks {
     }
 
     pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding invalid links");
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -127,6 +129,7 @@ impl InvalidSymlinks {
 
     /// Check files for any with size == 0
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -139,7 +142,8 @@ impl InvalidSymlinks {
             .recursive_search(self.recursive_search)
             .build()
             .run();
-        match result {
+        debug!("check_files - collected files");
+        let res = match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(((), invalid_symlinks)) = grouped_file_entries.into_iter().next() {
                     self.invalid_symlinks = invalid_symlinks;
@@ -150,7 +154,9 @@ impl InvalidSymlinks {
             }
             DirTraversalResult::SuccessFolders { .. } => unreachable!(),
             DirTraversalResult::Stopped => false,
-        }
+        };
+        debug!("check_files - end");
+        res
     }
 
     /// Function to delete files, from filed Vector

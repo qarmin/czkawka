@@ -9,6 +9,7 @@ use crossbeam_channel::Receiver;
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
+use log::{debug, info};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
@@ -210,6 +211,7 @@ impl SimilarVideos {
 
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding similar videos");
         if !check_if_ffmpeg_is_installed() {
             self.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -244,6 +246,7 @@ impl SimilarVideos {
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_for_similar_videos - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
@@ -320,6 +323,7 @@ impl SimilarVideos {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
+        debug!("check_for_similar_videos - end");
         true
     }
 
@@ -353,6 +357,7 @@ impl SimilarVideos {
     }
 
     fn load_cache_at_start(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
+        debug!("load_cache_at_start - start, use cache: {}", self.use_cache);
         let loaded_hash_map;
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
@@ -382,10 +387,12 @@ impl SimilarVideos {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
         }
+        debug!("load_cache_at_start - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("sort_videos - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -435,14 +442,7 @@ impl SimilarVideos {
             }
         }
 
-        if self.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
-            for file_entry in vec_file_entry {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-            save_hashes_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
-        }
+        self.save_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -468,10 +468,24 @@ impl SimilarVideos {
         self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
 
+        debug!("sort_videos - end");
         true
+    }
+    fn save_cache(&mut self, vec_file_entry: Vec<FileEntry>, loaded_hash_map: BTreeMap<String, FileEntry>) {
+        debug!("save_cache - start, use cache: {}", self.use_cache);
+        if self.use_cache {
+            // Must save all results to file, old loaded from file with all currently counted results
+            let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
+            for file_entry in vec_file_entry {
+                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            }
+            save_hashes_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+        }
+        debug!("save_cache - end");
     }
 
     fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, FileEntry>) {
+        debug!("match_groups_of_videos - start");
         let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
         let mut collected_similar_videos: Vec<Vec<FileEntry>> = Default::default();
         for i in match_group {
@@ -494,9 +508,11 @@ impl SimilarVideos {
         }
 
         self.similar_vectors = collected_similar_videos;
+        debug!("match_groups_of_videos - end");
     }
 
     fn remove_from_reference_folders(&mut self) {
+        debug!("remove_from_reference_folders - start, use reference folders: {}", self.use_reference_folders);
         if self.use_reference_folders {
             self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
                 .into_iter()
@@ -512,6 +528,7 @@ impl SimilarVideos {
                 })
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
+        debug!("remove_from_reference_folders - end");
     }
 
     /// Set included dir which needs to be relative, exists etc.

@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
+use log::{debug, info};
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
@@ -72,7 +73,15 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "mum"),
     ("xml", "resx"),
     ("zip", "wmz"),
+    // Games specific extensions - cannot be used here common extensions like zip
+    ("gz", "h3m"),     // Heroes 3
+    ("zip", "hashdb"), // Gog
+    ("c2", "zip"),     // King of the Dark Age
+    ("c2", "bmp"),     // King of the Dark Age
+    ("c2", "avi"),     // King of the Dark Age
+    ("c2", "exe"),     // King of the Dark Age
     // Other
+    ("der", "keystore"),  // Godot/Android keystore
     ("exe", "pyd"),       // Python/Mingw
     ("gz", "blend"),      // Blender
     ("gz", "crate"),      // Cargo
@@ -81,6 +90,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("html", "dtd"),      // Mingw
     ("html", "ent"),      // Mingw
     ("html", "md"),       // Markdown
+    ("html", "svelte"),   // Svelte
     ("jpg", "jfif"),      // Photo format
     ("m4v", "mp4"),       // m4v and mp4 are interchangeable
     ("mobi", "azw3"),     // Ebook format
@@ -91,6 +101,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("ods", "ots"),       // Libreoffice
     ("odt", "ott"),       // Libreoffice
     ("ogg", "ogv"),       // Audio format
+    ("pem", "key"),       // curl, openssl
     ("pptx", "ppsx"),     // Powerpoint
     ("sh", "bash"),       // Linux
     ("sh", "guess"),      // GNU
@@ -109,6 +120,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "dae"),       // 3D models
     ("xml", "docbook"),   //
     ("xml", "fb2"),       //
+    ("xml", "filters"),   // Visual studio
     ("xml", "gir"),       // GTK
     ("xml", "glade"),     // Glade
     ("xml", "iml"),       // Intelij Idea
@@ -211,6 +223,7 @@ impl BadExtensions {
     }
 
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding extensions files");
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -286,6 +299,7 @@ impl BadExtensions {
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -299,7 +313,8 @@ impl BadExtensions {
             .recursive_search(self.recursive_search)
             .build()
             .run();
-        match result {
+        debug!("check_files - collected files");
+        let res = match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(files_to_check) = grouped_file_entries.get(&()) {
                     self.files_to_check = files_to_check.clone();
@@ -312,10 +327,13 @@ impl BadExtensions {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        }
+        };
+        debug!("check_files - end");
+        res
     }
 
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("look_for_bad_extensions_files - start");
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.tool_type);
 
@@ -344,6 +362,7 @@ impl BadExtensions {
         // Clean unused data
         self.files_to_check = Default::default();
 
+        debug!("look_for_bad_extensions_files - end");
         true
     }
 
@@ -355,7 +374,8 @@ impl BadExtensions {
         check_was_stopped: &AtomicBool,
         hashmap_workarounds: &HashMap<&str, Vec<&str>>,
     ) -> Vec<BadFileEntry> {
-        files_to_check
+        debug!("verify_extensions - start");
+        let res = files_to_check
             .into_par_iter()
             .map(|file_entry| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
@@ -404,7 +424,9 @@ impl BadExtensions {
             .while_some()
             .filter(Option::is_some)
             .map(Option::unwrap)
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>();
+        debug!("verify_extensions - end");
+        res
     }
 
     fn get_and_validate_extension(&self, file_entry: &FileEntry, proper_extension: &str) -> Option<String> {

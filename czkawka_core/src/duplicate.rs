@@ -15,7 +15,7 @@ use std::{fs, mem};
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
-use log::debug;
+use log::{debug, info};
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
@@ -150,6 +150,7 @@ impl DuplicateFinder {
     }
 
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding duplicates");
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         self.use_reference_folders = !self.directories.reference_directories.is_empty();
 
@@ -341,6 +342,7 @@ impl DuplicateFinder {
     }
 
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files_name - starting checking for same names");
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| fe.path.file_name().unwrap().to_string_lossy().to_string()
         } else {
@@ -361,7 +363,8 @@ impl DuplicateFinder {
             .maximal_file_size(self.maximal_file_size)
             .build()
             .run();
-        match result {
+        debug!("check_files_name - after finding file sizes");
+        let res = match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
@@ -403,7 +406,9 @@ impl DuplicateFinder {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        }
+        };
+        debug!("check_files_name - finished checking for same names");
+        res
     }
 
     fn calculate_name_stats(&mut self) {
@@ -421,6 +426,7 @@ impl DuplicateFinder {
     }
 
     fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files_size_name - starting checking for same size and name");
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| (fe.size, fe.path.file_name().unwrap().to_string_lossy().to_string())
         } else {
@@ -441,7 +447,8 @@ impl DuplicateFinder {
             .maximal_file_size(self.maximal_file_size)
             .build()
             .run();
-        match result {
+        debug!("check_files_size_name - after finding file sizes");
+        let res = match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size_names = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
@@ -484,7 +491,9 @@ impl DuplicateFinder {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        }
+        };
+        debug!("check_files_size_name - finished checking for same size and name");
+        res
     }
 
     fn calculate_size_name_stats(&mut self) {
@@ -528,7 +537,7 @@ impl DuplicateFinder {
             .build()
             .run();
         debug!("check_file_size - after finding file sizes");
-        match result {
+        let res = match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.files_with_identical_size = grouped_file_entries;
                 self.text_messages.warnings.extend(warnings);
@@ -551,14 +560,15 @@ impl DuplicateFinder {
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();
 
-                debug!("check_file_size - after calculating size stats/duplicates");
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        }
+        };
+        debug!("check_file_size - after calculating size stats/duplicates");
+        res
     }
 
     fn calculate_size_stats(&mut self) {
@@ -639,19 +649,18 @@ impl DuplicateFinder {
                     }
                 }
             }
-            debug!("prehash_load_cache_at_start - using prehash cache end");
         } else {
             debug!("prehash_load_cache_at_start - not using prehash cache start");
             loaded_hash_map = Default::default();
             mem::swap(&mut self.files_with_identical_size, &mut non_cached_files_to_check);
-            debug!("prehash_load_cache_at_start - not using prehash cache end");
         }
+        debug!("prehash_load_cache_at_start - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     fn prehash_save_cache_at_exit(&mut self, loaded_hash_map: BTreeMap<u64, Vec<FileEntry>>, pre_hash_results: &Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)>) {
+        debug!("prehash_save_cache_at_exit - start - using prehash cache {}", self.use_prehash_cache);
         if self.use_prehash_cache {
-            debug!("prehash_save_cache_at_exit - saving prehash cache start");
             // All results = records already cached + computed results
             let mut save_cache_to_hashmap: BTreeMap<String, FileEntry> = Default::default();
 
@@ -723,9 +732,7 @@ impl DuplicateFinder {
             .while_some()
             .collect();
 
-        debug!("prehashing - start sending info to progress thread");
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        debug!("prehashing - got info about progress thread end");
 
         // Check if user aborted search(only from GUI)
         if check_was_stopped.load(Ordering::Relaxed) {
@@ -893,9 +900,7 @@ impl DuplicateFinder {
 
             self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 
-            debug!("full_hashing - starting sending info to progress thread");
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-            debug!("full_hashing - after sending info to progress thread");
 
             // Break if stop was clicked after saving to cache
             if check_was_stopped.load(Ordering::Relaxed) {

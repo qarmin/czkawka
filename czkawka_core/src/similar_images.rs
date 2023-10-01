@@ -12,6 +12,7 @@ use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
+use log::{debug, info};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -251,6 +252,7 @@ impl SimilarImages {
 
     /// Public function used by CLI to search for empty folders
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding similar images");
         self.directories.optimize_directories(true, &mut self.text_messages);
         self.use_reference_folders = !self.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
@@ -278,6 +280,7 @@ impl SimilarImages {
     /// Function to check if folder are empty.
     /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_for_similar_images - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.allowed_extensions.using_custom_extensions() {
@@ -357,6 +360,7 @@ impl SimilarImages {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
+        debug!("check_for_similar_images - end");
         true
     }
 
@@ -390,6 +394,7 @@ impl SimilarImages {
     }
 
     fn hash_images_load_cache(&mut self) -> (HashMap<String, FileEntry>, HashMap<String, FileEntry>, HashMap<String, FileEntry>) {
+        debug!("hash_images_load_cache - start, use cache: {}", self.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
@@ -420,6 +425,7 @@ impl SimilarImages {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);
         }
+        debug!("hash_images_load_cache - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
@@ -431,11 +437,13 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("hash_images - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), CheckingMethod::None, self.tool_type);
 
+        debug!("hash_images - start hashing images");
         let mut vec_file_entry: Vec<(FileEntry, ImHash)> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, file_entry)| {
@@ -450,6 +458,7 @@ impl SimilarImages {
             .filter(Option::is_some)
             .map(Option::unwrap)
             .collect::<Vec<(FileEntry, ImHash)>>();
+        debug!("hash_images - end hashing images");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -466,6 +475,20 @@ impl SimilarImages {
             }
         }
 
+        self.save_to_cache(vec_file_entry, loaded_hash_map);
+
+        // Break if stop was clicked after saving to cache
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return false;
+        }
+
+        debug!("hash_images - end");
+
+        true
+    }
+
+    fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: HashMap<String, FileEntry>) {
+        debug!("save_to_cache - start, using cache: {}", self.use_cache);
         if self.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: HashMap<String, FileEntry> = loaded_hash_map;
@@ -481,14 +504,9 @@ impl SimilarImages {
                 self.image_filter,
             );
         }
-
-        // Break if stop was clicked after saving to cache
-        if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
-        }
-
-        true
+        debug!("save_to_cache - end");
     }
+
     fn collect_image_file_entry(&self, mut file_entry: FileEntry) -> (FileEntry, ImHash) {
         let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
 
@@ -562,6 +580,7 @@ impl SimilarImages {
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
     fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, HashSet<ImHash>) {
+        debug!("split_hashes - start");
         let hashes_with_multiple_images: HashSet<ImHash> = all_hashed_images
             .iter()
             .filter_map(|(hash, vec_file_entry)| {
@@ -599,6 +618,7 @@ impl SimilarImages {
             }
             base_hashes = all_hashed_images.keys().cloned().collect::<Vec<_>>();
         }
+        debug!("split_hashes - end");
         (base_hashes, hashes_with_multiple_images)
     }
 
@@ -610,6 +630,7 @@ impl SimilarImages {
         collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
         hashes_similarity: HashMap<ImHash, (ImHash, u32)>,
     ) {
+        debug!("collect_hash_compare_result - start, use reference: {}", self.use_reference_folders);
         if self.use_reference_folders {
             // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
 
@@ -659,6 +680,7 @@ impl SimilarImages {
                 collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
             }
         }
+        debug!("collect_hash_compare_result - end");
     }
 
     fn compare_hashes_with_non_zero_tolerance(
@@ -669,6 +691,7 @@ impl SimilarImages {
         stop_receiver: Option<&Receiver<()>>,
         tolerance: u32,
     ) -> bool {
+        debug!("compare_hashes_with_non_zero_tolerance - start");
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
@@ -733,6 +756,7 @@ impl SimilarImages {
         debug_check_for_duplicated_things(self.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
+        debug!("compare_hashes_with_non_zero_tolerance - end");
         true
     }
 
@@ -743,6 +767,7 @@ impl SimilarImages {
         hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
         hashes_with_multiple_images: &HashSet<ImHash>,
     ) {
+        debug!("connect_results - start");
         for (original_hash, vec_compared_hashes) in partial_results {
             let mut number_of_added_child_items = 0;
             for (similarity, compared_hash) in vec_compared_hashes {
@@ -795,9 +820,11 @@ impl SimilarImages {
                 hashes_parents.insert((*original_hash).clone(), number_of_added_child_items);
             }
         }
+        debug!("connect_results - end");
     }
 
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("find_similar_hashes - start");
         if self.image_hashes.is_empty() {
             return true;
         }
@@ -848,10 +875,12 @@ impl SimilarImages {
         self.images_to_check = Default::default();
         self.bktree = BKTree::new(Hamming);
 
+        debug!("find_similar_hashes - end");
         true
     }
 
     fn exclude_items_with_same_size(&mut self) {
+        debug!("exclude_items_with_same_size - start, exclude: {}", self.exclude_images_with_same_size);
         if self.exclude_images_with_same_size {
             for vec_file_entry in mem::take(&mut self.similar_vectors) {
                 let mut bt_sizes: BTreeSet<u64> = Default::default();
@@ -867,9 +896,11 @@ impl SimilarImages {
                 }
             }
         }
+        debug!("exclude_items_with_same_size - end");
     }
 
     fn remove_multiple_records_from_reference_folders(&mut self) {
+        debug!("remove_multiple_records_from_reference_folders - start, use reference: {}", self.use_reference_folders);
         if self.use_reference_folders {
             self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
                 .into_iter()
@@ -885,6 +916,7 @@ impl SimilarImages {
                 })
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
+        debug!("remove_multiple_records_from_reference_folders - end");
     }
 
     #[allow(dead_code)]

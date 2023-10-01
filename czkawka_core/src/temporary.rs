@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
+use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
@@ -89,6 +90,7 @@ impl Temporary {
 
     /// Finding temporary files, save results to internal struct variables
     pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding temporary files");
         self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
         if !self.check_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -144,6 +146,7 @@ impl Temporary {
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -213,6 +216,7 @@ impl Temporary {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         self.information.number_of_temporary_files = self.temporary_files.len();
 
+        debug!("check_files - end");
         true
     }
     pub fn get_file_entry(

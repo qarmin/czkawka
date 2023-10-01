@@ -10,6 +10,7 @@ use std::sync::Arc;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
+use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
@@ -88,6 +89,7 @@ impl BigFile {
     }
 
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding big files");
         self.optimize_directories();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.stopped_search = true;
@@ -141,6 +143,7 @@ impl BigFile {
     }
 
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        debug!("look_for_big_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
@@ -210,6 +213,7 @@ impl BigFile {
 
         self.extract_n_biggest_files(old_map);
 
+        debug!("look_for_big_files - end");
         true
     }
 
@@ -251,6 +255,7 @@ impl BigFile {
     }
 
     pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
+        debug!("extract_n_biggest_files - start");
         let iter: Box<dyn Iterator<Item = _>>;
         if self.search_mode == SearchMode::SmallestFiles {
             iter = Box::new(old_map.into_iter());
@@ -278,6 +283,7 @@ impl BigFile {
                 break;
             }
         }
+        debug!("extract_n_biggest_files - end");
     }
 
     pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {
