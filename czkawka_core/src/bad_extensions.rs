@@ -15,10 +15,8 @@ use rayon::prelude::*;
 
 use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_directory::Directories;
-use crate::common_extensions::Extensions;
-use crate::common_items::ExcludedItems;
-use crate::common_messages::Messages;
+
+use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
 static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak", "data"]; // Such files can have any type inside
@@ -178,139 +176,73 @@ pub struct Info {
 }
 
 impl Info {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
 }
 
 pub struct BadExtensions {
-    tool_type: ToolType,
-    text_messages: Messages,
+    common_data: CommonToolData,
     information: Info,
     files_to_check: Vec<FileEntry>,
     bad_extensions_files: Vec<BadFileEntry>,
-    directories: Directories,
-    allowed_extensions: Extensions,
-    excluded_items: ExcludedItems,
-    minimal_file_size: u64,
-    maximal_file_size: u64,
-    recursive_search: bool,
-    stopped_search: bool,
-    save_also_as_json: bool,
     include_files_without_extension: bool,
 }
 
+impl CommonData for BadExtensions {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
 impl BadExtensions {
-    #[must_use]
     pub fn new() -> Self {
         Self {
-            tool_type: ToolType::BadExtensions,
-            text_messages: Messages::new(),
+            common_data: CommonToolData::new(ToolType::BadExtensions),
             information: Info::new(),
-            recursive_search: true,
-            allowed_extensions: Extensions::new(),
-            directories: Directories::new(),
-            excluded_items: ExcludedItems::new(),
             files_to_check: Default::default(),
-            stopped_search: false,
-            minimal_file_size: 8192,
-            maximal_file_size: u64::MAX,
             bad_extensions_files: Default::default(),
-            save_also_as_json: false,
             include_files_without_extension: true,
         }
     }
 
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding extensions files");
-        self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
+        self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         if !self.look_for_bad_extensions_files(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         self.debug_print();
     }
-
-    #[must_use]
-    pub fn get_stopped_search(&self) -> bool {
-        self.stopped_search
-    }
-
-    #[must_use]
     pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
         &self.bad_extensions_files
     }
 
-    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
-        self.maximal_file_size = match maximal_file_size {
-            0 => 1,
-            t => t,
-        };
-    }
-    pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
-        self.minimal_file_size = match minimal_file_size {
-            0 => 1,
-            t => t,
-        };
-    }
-    #[cfg(target_family = "unix")]
-    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
-    }
-    #[cfg(not(target_family = "unix"))]
-    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
-
-    #[must_use]
-    pub const fn get_text_messages(&self) -> &Messages {
-        &self.text_messages
-    }
-
-    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
-        self.save_also_as_json = save_also_as_json;
-    }
-
-    pub fn set_recursive_search(&mut self, recursive_search: bool) {
-        self.recursive_search = recursive_search;
-    }
-
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages)
-    }
-
-    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
-    }
-    pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
-        self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
-    }
-
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("check_files - start");
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.directories.included_directories.clone())
+            .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
-            .minimal_file_size(self.minimal_file_size)
-            .maximal_file_size(self.maximal_file_size)
-            .directories(self.directories.clone())
-            .allowed_extensions(self.allowed_extensions.clone())
-            .excluded_items(self.excluded_items.clone())
-            .recursive_search(self.recursive_search)
+            .minimal_file_size(self.common_data.minimal_file_size)
+            .maximal_file_size(self.common_data.maximal_file_size)
+            .directories(self.common_data.directories.clone())
+            .allowed_extensions(self.common_data.allowed_extensions.clone())
+            .excluded_items(self.common_data.excluded_items.clone())
+            .recursive_search(self.common_data.recursive_search)
             .build()
             .run();
         debug!("check_files - collected files");
@@ -319,7 +251,7 @@ impl BadExtensions {
                 if let Some(files_to_check) = grouped_file_entries.get(&()) {
                     self.files_to_check = files_to_check.clone();
                 }
-                self.text_messages.warnings.extend(warnings);
+                self.common_data.text_messages.warnings.extend(warnings);
 
                 true
             }
@@ -335,7 +267,7 @@ impl BadExtensions {
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("look_for_bad_extensions_files - start");
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.get_cd().tool_type);
 
         let files_to_check = mem::take(&mut self.files_to_check);
 
@@ -513,16 +445,16 @@ impl DebugPrint for BadExtensions {
         println!("---------------DEBUG PRINT---------------");
         println!("### Information's");
 
-        println!("Errors size - {}", self.text_messages.errors.len());
-        println!("Warnings size - {}", self.text_messages.warnings.len());
-        println!("Messages size - {}", self.text_messages.messages.len());
+        println!("Errors size - {}", self.common_data.text_messages.errors.len());
+        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
+        println!("Messages size - {}", self.common_data.text_messages.messages.len());
 
         println!("### Other");
 
-        println!("Excluded items - {:?}", self.excluded_items.items);
-        println!("Included directories - {:?}", self.directories.included_directories);
-        println!("Excluded directories - {:?}", self.directories.excluded_directories);
-        println!("Recursive search - {}", self.recursive_search);
+        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
+        println!("Included directories - {:?}", self.common_data.directories.included_directories);
+        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
+        println!("Recursive search - {}", self.common_data.recursive_search);
         println!("-----------------------------------------");
     }
 }
@@ -537,7 +469,7 @@ impl SaveResults for BadExtensions {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
+                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -546,9 +478,12 @@ impl SaveResults for BadExtensions {
         if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
+            self.common_data
+                .text_messages
+                .errors
+                .push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 

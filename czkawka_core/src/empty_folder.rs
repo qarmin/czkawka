@@ -9,22 +9,25 @@ use futures::channel::mpsc::UnboundedSender;
 use log::{debug, info};
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
-use crate::common_directory::Directories;
-use crate::common_items::ExcludedItems;
-use crate::common_messages::Messages;
+
+use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 /// Struct to store most basics info about all folder
 pub struct EmptyFolder {
-    #[allow(dead_code)]
-    tool_type: ToolType,
+    common_data: CommonToolData,
     information: Info,
     delete_folders: bool,
-    text_messages: Messages,
-    excluded_items: ExcludedItems,
     empty_folder_list: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
-    directories: Directories,
-    stopped_search: bool,
+}
+
+impl CommonData for EmptyFolder {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
 }
 
 /// Info struck with helpful information's about results
@@ -34,7 +37,6 @@ pub struct Info {
 }
 
 impl Info {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -43,59 +45,30 @@ impl Info {
 /// Method implementation for `EmptyFolder`
 impl EmptyFolder {
     /// New function providing basics values
-    #[must_use]
+
     pub fn new() -> Self {
         Self {
-            tool_type: ToolType::EmptyFolders,
+            common_data: CommonToolData::new(ToolType::EmptyFolders),
             information: Default::default(),
             delete_folders: false,
-            text_messages: Messages::new(),
-            excluded_items: Default::default(),
             empty_folder_list: Default::default(),
-            directories: Directories::new(),
-            stopped_search: false,
         }
     }
 
-    #[must_use]
-    pub fn get_stopped_search(&self) -> bool {
-        self.stopped_search
-    }
-
-    #[must_use]
     pub const fn get_empty_folder_list(&self) -> &BTreeMap<PathBuf, FolderEntry> {
         &self.empty_folder_list
     }
 
-    #[must_use]
-    pub const fn get_text_messages(&self) -> &Messages {
-        &self.text_messages
-    }
-    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
 
-    #[cfg(target_family = "unix")]
-    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
-    }
-    #[cfg(not(target_family = "unix"))]
-    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
-
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
-    }
-
-    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
-    }
     /// Public function used by CLI to search for empty folders
     pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding empty folders");
-        self.directories.optimize_directories(true, &mut self.text_messages);
+        self.optimize_dirs_before_start();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         self.optimize_folders();
@@ -135,12 +108,12 @@ impl EmptyFolder {
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("check_for_empty_folders - start");
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.directories.included_directories.clone())
+            .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
-            .directories(self.directories.clone())
-            .excluded_items(self.excluded_items.clone())
+            .directories(self.common_data.directories.clone())
+            .excluded_items(self.common_data.excluded_items.clone())
             .collect(Collect::EmptyFolders)
             .max_stage(0)
             .build()
@@ -159,7 +132,7 @@ impl EmptyFolder {
                     }
                 }
 
-                self.text_messages.warnings.extend(warnings);
+                self.common_data.text_messages.warnings.extend(warnings);
 
                 true
             }
@@ -175,14 +148,13 @@ impl EmptyFolder {
         for name in self.empty_folder_list.keys() {
             match fs::remove_dir_all(name) {
                 Ok(()) => (),
-                Err(e) => self.text_messages.warnings.push(format!("Failed to remove folder {}, reason {}", name.display(), e)),
+                Err(e) => self
+                    .common_data
+                    .text_messages
+                    .warnings
+                    .push(format!("Failed to remove folder {}, reason {}", name.display(), e)),
             };
         }
-    }
-
-    /// Set included dir which needs to be relative, exists etc.
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
 }
 
@@ -203,7 +175,7 @@ impl DebugPrint for EmptyFolder {
 
         println!("---------------DEBUG PRINT---------------");
         println!("Number of empty folders - {}", self.information.number_of_empty_folders);
-        println!("Included directories - {:?}", self.directories.included_directories);
+        println!("Included directories - {:?}", self.common_data.directories.included_directories);
         println!("-----------------------------------------");
     }
 }
@@ -218,7 +190,7 @@ impl SaveResults for EmptyFolder {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
+                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -227,9 +199,12 @@ impl SaveResults for EmptyFolder {
         if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?}",
-            self.directories.included_directories, self.directories.excluded_directories
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
+            self.common_data
+                .text_messages
+                .errors
+                .push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 

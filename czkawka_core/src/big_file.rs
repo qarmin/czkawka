@@ -15,10 +15,8 @@ use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_directory::Directories;
-use crate::common_extensions::Extensions;
-use crate::common_items::ExcludedItems;
-use crate::common_messages::Messages;
+
+use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
 #[derive(Clone)]
@@ -47,7 +45,6 @@ pub struct Info {
 }
 
 impl Info {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -55,69 +52,54 @@ impl Info {
 
 /// Struct with required information's to work
 pub struct BigFile {
-    tool_type: ToolType,
-    text_messages: Messages,
+    common_data: CommonToolData,
     information: Info,
     big_files: Vec<(u64, FileEntry)>,
-    excluded_items: ExcludedItems,
-    directories: Directories,
-    allowed_extensions: Extensions,
-    recursive_search: bool,
     number_of_files_to_check: usize,
     delete_method: DeleteMethod,
-    stopped_search: bool,
     search_mode: SearchMode,
 }
 
+impl CommonData for BigFile {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
 impl BigFile {
-    #[must_use]
     pub fn new() -> Self {
         Self {
-            tool_type: ToolType::BigFile,
-            text_messages: Default::default(),
+            common_data: CommonToolData::new(ToolType::BigFile),
             information: Info::new(),
             big_files: Default::default(),
-            excluded_items: ExcludedItems::new(),
-            directories: Directories::new(),
-            allowed_extensions: Extensions::new(),
-            recursive_search: true,
             number_of_files_to_check: 50,
             delete_method: DeleteMethod::None,
-            stopped_search: false,
             search_mode: SearchMode::BiggestFiles,
         }
     }
 
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding big files");
-        self.optimize_directories();
+        self.optimize_dirs_before_start();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         self.delete_files();
         self.debug_print();
-    }
-    #[must_use]
-    pub fn get_stopped_search(&self) -> bool {
-        self.stopped_search
     }
 
     pub fn set_search_mode(&mut self, search_mode: SearchMode) {
         self.search_mode = search_mode;
     }
 
-    #[must_use]
     pub const fn get_big_files(&self) -> &Vec<(u64, FileEntry)> {
         &self.big_files
     }
 
-    #[must_use]
-    pub const fn get_text_messages(&self) -> &Messages {
-        &self.text_messages
-    }
-
-    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -126,34 +108,18 @@ impl BigFile {
         self.delete_method = delete_method;
     }
 
-    pub fn set_recursive_search(&mut self, recursive_search: bool) {
-        self.recursive_search = recursive_search;
-    }
-
-    #[cfg(target_family = "unix")]
-    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
-    }
-    #[cfg(not(target_family = "unix"))]
-    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
-
-    /// List of allowed extensions, only files with this extensions will be checking if are duplicates
-    pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
-        self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
-    }
-
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("look_for_big_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         // Add root folders for finding
-        for id in &self.directories.included_directories {
+        for id in &self.common_data.directories.included_directories {
             folders_to_check.push(id.clone());
         }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.common_data.tool_type);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -184,9 +150,9 @@ impl BigFile {
                                 &mut warnings,
                                 current_folder,
                                 entry_data,
-                                self.recursive_search,
-                                &self.directories,
-                                &self.excluded_items,
+                                self.common_data.recursive_search,
+                                &self.common_data.directories,
+                                &self.common_data.excluded_items,
                             );
                         } else if metadata.is_file() {
                             self.collect_file_entry(&atomic_counter, &metadata, entry_data, &mut fe_result, &mut warnings, current_folder);
@@ -202,7 +168,7 @@ impl BigFile {
             // Process collected data
             for (segment, warnings, fe_result) in segments {
                 folders_to_check.extend(segment);
-                self.text_messages.warnings.extend(warnings);
+                self.common_data.text_messages.warnings.extend(warnings);
                 for (size, fe) in fe_result {
                     old_map.entry(size).or_default().push(fe);
                 }
@@ -236,12 +202,12 @@ impl BigFile {
             return;
         };
 
-        if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
             return;
         }
 
         let current_file_name = current_folder.join(entry_data.file_name());
-        if self.excluded_items.is_excluded(&current_file_name) {
+        if self.common_data.excluded_items.is_excluded(&current_file_name) {
             return;
         }
 
@@ -290,31 +256,13 @@ impl BigFile {
         self.number_of_files_to_check = number_of_files_to_check;
     }
 
-    /// Setting excluded items which needs to contains * wildcard
-    /// Are a lot of slower than absolute path, so it should be used to heavy
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
-    }
-
-    fn optimize_directories(&mut self) {
-        self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-    }
-
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages);
-    }
-
-    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
-    }
-
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
         match self.delete_method {
             DeleteMethod::Delete => {
                 for (_, file_entry) in &self.big_files {
                     if fs::remove_file(&file_entry.path).is_err() {
-                        self.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
                 }
             }
@@ -340,21 +288,9 @@ impl DebugPrint for BigFile {
         {
             return;
         }
-        println!("---------------DEBUG PRINT---------------");
-        println!("### Information's");
 
-        println!("Errors size - {}", self.text_messages.errors.len());
-        println!("Warnings size - {}", self.text_messages.warnings.len());
-        println!("Messages size - {}", self.text_messages.messages.len());
-
-        println!("### Other");
+        println!("### INDIVIDUAL DEBUG PRINT ###");
         println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());
-        println!("Excluded items - {:?}", self.excluded_items.items);
-        println!("Included directories - {:?}", self.directories.included_directories);
-        println!("Excluded directories - {:?}", self.directories.excluded_directories);
-        println!("Recursive search - {}", self.recursive_search);
-        #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
         println!("Number of files to check - {:?}", self.number_of_files_to_check);
         println!("-----------------------------------------");
     }
@@ -371,7 +307,7 @@ impl SaveResults for BigFile {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
+                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -380,9 +316,12 @@ impl SaveResults for BigFile {
         if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
+            self.common_data
+                .text_messages
+                .errors
+                .push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 

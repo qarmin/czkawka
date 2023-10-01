@@ -23,10 +23,9 @@ use crate::common::{
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_directory::Directories;
-use crate::common_extensions::Extensions;
-use crate::common_items::ExcludedItems;
+
 use crate::common_messages::Messages;
+use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy)]
@@ -72,74 +71,56 @@ pub struct Info {
 }
 
 impl Info {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
 }
 
 pub struct BrokenFiles {
-    tool_type: ToolType,
-    text_messages: Messages,
+    common_data: CommonToolData,
     information: Info,
     files_to_check: BTreeMap<String, FileEntry>,
     broken_files: Vec<FileEntry>,
-    directories: Directories,
-    allowed_extensions: Extensions,
-    excluded_items: ExcludedItems,
-    recursive_search: bool,
     delete_method: DeleteMethod,
-    stopped_search: bool,
     checked_types: CheckedTypes,
-    use_cache: bool,
-    // TODO add this to GUI
-    delete_outdated_cache: bool,
-    save_also_as_json: bool,
+}
+
+impl CommonData for BrokenFiles {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
 }
 
 impl BrokenFiles {
-    #[must_use]
     pub fn new() -> Self {
         Self {
-            tool_type: ToolType::BrokenFiles,
-            text_messages: Messages::new(),
+            common_data: CommonToolData::new(ToolType::BrokenFiles),
             information: Info::new(),
-            recursive_search: true,
-            allowed_extensions: Extensions::new(),
-            directories: Directories::new(),
-            excluded_items: ExcludedItems::new(),
             files_to_check: Default::default(),
             delete_method: DeleteMethod::None,
-            stopped_search: false,
             broken_files: Default::default(),
-            use_cache: true,
-            delete_outdated_cache: true,
-            save_also_as_json: false,
             checked_types: CheckedTypes::PDF | CheckedTypes::AUDIO | CheckedTypes::IMAGE | CheckedTypes::ARCHIVE,
         }
     }
 
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding broken files");
-        self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
+        self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         if !self.look_for_broken_files(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         self.delete_files();
         self.debug_print();
     }
 
-    #[must_use]
-    pub fn get_stopped_search(&self) -> bool {
-        self.stopped_search
-    }
-
-    #[must_use]
     pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
         &self.broken_files
     }
@@ -148,12 +129,6 @@ impl BrokenFiles {
         self.checked_types = checked_types;
     }
 
-    #[must_use]
-    pub const fn get_text_messages(&self) -> &Messages {
-        &self.text_messages
-    }
-
-    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -162,51 +137,17 @@ impl BrokenFiles {
         self.delete_method = delete_method;
     }
 
-    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
-        self.save_also_as_json = save_also_as_json;
-    }
-
-    pub fn set_use_cache(&mut self, use_cache: bool) {
-        self.use_cache = use_cache;
-    }
-
-    pub fn set_recursive_search(&mut self, recursive_search: bool) {
-        self.recursive_search = recursive_search;
-    }
-
-    #[cfg(target_family = "unix")]
-    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
-    }
-    #[cfg(not(target_family = "unix"))]
-    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
-
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> bool {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages)
-    }
-
-    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
-    }
-    pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
-        self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
-    }
-
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
-    }
-
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
-        for id in &self.directories.included_directories {
+        for id in &self.common_data.directories.included_directories {
             folders_to_check.push(id.clone());
         }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None, self.common_data.tool_type);
 
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
@@ -237,9 +178,9 @@ impl BrokenFiles {
                                 &mut warnings,
                                 current_folder,
                                 entry_data,
-                                self.recursive_search,
-                                &self.directories,
-                                &self.excluded_items,
+                                self.common_data.recursive_search,
+                                &self.common_data.directories,
+                                &self.common_data.excluded_items,
                             );
                         } else if metadata.is_file() {
                             if let Some(file_entry) = self.get_file_entry(&metadata, &atomic_counter, entry_data, &mut warnings, current_folder) {
@@ -257,7 +198,7 @@ impl BrokenFiles {
             // Process collected data
             for (segment, warnings, fe_result) in segments {
                 folders_to_check.extend(segment);
-                self.text_messages.warnings.extend(warnings);
+                self.common_data.text_messages.warnings.extend(warnings);
                 for (name, fe) in fe_result {
                     self.files_to_check.insert(name, fe);
                 }
@@ -283,7 +224,7 @@ impl BrokenFiles {
             return None;
         };
 
-        if !self.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
             return None;
         }
 
@@ -297,7 +238,7 @@ impl BrokenFiles {
         }
 
         let current_file_name = current_folder.join(entry_data.file_name());
-        if self.excluded_items.is_excluded(&current_file_name) {
+        if self.common_data.excluded_items.is_excluded(&current_file_name) {
             return None;
         }
 
@@ -411,15 +352,15 @@ impl BrokenFiles {
     }
 
     fn load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
-        debug!("load_cache - start (using cache {})", self.use_cache);
+        debug!("load_cache - start (using cache {})", self.common_data.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
         let files_to_check = mem::take(&mut self.files_to_check);
 
-        if self.use_cache {
-            loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache) {
+        if self.common_data.use_cache {
+            loaded_hash_map = match load_cache_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -454,7 +395,7 @@ impl BrokenFiles {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
 
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
@@ -499,8 +440,8 @@ impl BrokenFiles {
         true
     }
     fn save_to_cache(&mut self, vec_file_entry: &[FileEntry], loaded_hash_map: BTreeMap<String, FileEntry>) {
-        debug!("save_to_cache - start, using cache {}", self.use_cache);
-        if self.use_cache {
+        debug!("save_to_cache - start, using cache {}", self.common_data.use_cache);
+        if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, FileEntry> = Default::default();
 
@@ -510,7 +451,7 @@ impl BrokenFiles {
             for (_name, file_entry) in loaded_hash_map {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json);
+            save_cache_to_file(&all_results, &mut self.common_data.text_messages, self.common_data.save_also_as_json);
         }
         debug!("save_to_cache - end");
     }
@@ -521,7 +462,7 @@ impl BrokenFiles {
             DeleteMethod::Delete => {
                 for file_entry in &self.broken_files {
                     if fs::remove_file(&file_entry.path).is_err() {
-                        self.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
                 }
             }
@@ -550,18 +491,18 @@ impl DebugPrint for BrokenFiles {
         println!("---------------DEBUG PRINT---------------");
         println!("### Information's");
 
-        println!("Errors size - {}", self.text_messages.errors.len());
-        println!("Warnings size - {}", self.text_messages.warnings.len());
-        println!("Messages size - {}", self.text_messages.messages.len());
+        println!("Errors size - {}", self.common_data.text_messages.errors.len());
+        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
+        println!("Messages size - {}", self.common_data.text_messages.messages.len());
 
         println!("### Other");
 
-        println!("Excluded items - {:?}", self.excluded_items.items);
-        println!("Included directories - {:?}", self.directories.included_directories);
-        println!("Excluded directories - {:?}", self.directories.excluded_directories);
-        println!("Recursive search - {}", self.recursive_search);
+        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
+        println!("Included directories - {:?}", self.common_data.directories.included_directories);
+        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
+        println!("Recursive search - {}", self.common_data.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.common_data.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }
@@ -577,7 +518,7 @@ impl SaveResults for BrokenFiles {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
+                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -586,9 +527,12 @@ impl SaveResults for BrokenFiles {
         if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
+            self.common_data
+                .text_messages
+                .errors
+                .push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 

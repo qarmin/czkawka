@@ -14,6 +14,7 @@ use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::split_path;
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
+use czkawka_core::common_tool::CommonData;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;

@@ -24,6 +24,7 @@ pub mod common_directory;
 pub mod common_extensions;
 pub mod common_items;
 pub mod common_messages;
+pub mod common_tool;
 pub mod common_traits;
 pub mod localizer_core;
 

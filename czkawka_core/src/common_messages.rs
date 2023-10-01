@@ -1,4 +1,4 @@
-#[derive(Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Messages {
     pub messages: Vec<String>,
     pub warnings: Vec<String>,
@@ -6,14 +6,13 @@ pub struct Messages {
 }
 
 impl Messages {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
     pub fn print_messages(&self) {
         println!("{}", self.create_messages_text());
     }
-    #[must_use]
+
     pub fn create_messages_text(&self) -> String {
         let mut text_to_return: String = String::new();
 
@@ -47,5 +46,11 @@ impl Messages {
         }
 
         text_to_return
+    }
+
+    pub fn extend_messages_with(&mut self, messages: Vec<String>, warnings: Vec<String>, errors: Vec<String>) {
+        self.messages.extend(messages);
+        self.warnings.extend(warnings);
+        self.errors.extend(errors);
     }
 }

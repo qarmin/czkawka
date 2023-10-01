@@ -29,12 +29,11 @@ macro_rules! flc {
 }
 
 // Get the `Localizer` to be used for localizing this library.
-#[must_use]
+
 pub fn localizer_core() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CORE, &Localizations))
 }
 
-#[must_use]
 pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap<&'static str, String> {
     let mut hashmap: HashMap<&'static str, String> = Default::default();
     for (key, value) in vec {
@@ -43,12 +42,10 @@ pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap
     hashmap
 }
 
-#[must_use]
 pub fn fnc_get_similarity_very_high() -> String {
     flc!("core_similarity_very_high")
 }
 
-#[must_use]
 pub fn fnc_get_similarity_minimal() -> String {
     flc!("core_similarity_minimal")
 }

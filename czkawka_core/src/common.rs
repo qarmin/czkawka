@@ -56,7 +56,6 @@ pub fn set_default_number_of_threads() {
     set_number_of_threads(num_cpus::get());
 }
 
-#[must_use]
 pub fn get_default_number_of_threads() -> usize {
     num_cpus::get()
 }
@@ -212,7 +211,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     Some(DynamicImage::ImageRgb8(image))
 }
 
-#[must_use]
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
         (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
@@ -221,7 +219,6 @@ pub fn split_path(path: &Path) -> (String, String) {
     }
 }
 
-#[must_use]
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
     format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
 }
@@ -238,7 +235,6 @@ impl Common {
         );
     }
 
-    #[must_use]
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
         let mut path: &Path;
         let mut warnings: Vec<String> = Vec::new();
@@ -254,7 +250,7 @@ impl Common {
         }
         warnings
     }
-    #[must_use]
+
     pub fn delete_one_entry(entry: &str) -> String {
         let path: &Path = Path::new(entry);
         let mut warning: String = String::new();
@@ -269,7 +265,7 @@ impl Common {
     }
 
     /// Function to check if directory match expression
-    #[must_use]
+
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
             return true;
@@ -322,7 +318,6 @@ impl Common {
         true
     }
 
-    #[must_use]
     pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
         let path = path_to_change.as_ref();
 
@@ -382,7 +377,6 @@ pub fn check_folder_children(
     dir_result.push(next_folder);
 }
 
-#[must_use]
 pub fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
 where
     T: ResultEntry,
@@ -402,7 +396,6 @@ where
         .collect::<Vec<(T, Vec<T>)>>()
 }
 
-#[must_use]
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&UnboundedSender<ProgressData>>,
     current_stage: u8,

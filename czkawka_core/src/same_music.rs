@@ -27,10 +27,9 @@ use crate::common::{
     create_crash_message, filter_reference_folders_generic, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_directory::Directories;
-use crate::common_extensions::Extensions;
-use crate::common_items::ExcludedItems;
+
 use crate::common_messages::Messages;
+use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy)]
@@ -101,7 +100,6 @@ pub struct Info {
 }
 
 impl Info {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
@@ -109,58 +107,42 @@ impl Info {
 
 /// Struct with required information's to work
 pub struct SameMusic {
-    tool_type: ToolType,
-    text_messages: Messages,
+    common_data: CommonToolData,
     information: Info,
     music_to_check: HashMap<String, MusicEntry>,
     music_entries: Vec<MusicEntry>,
     duplicated_music_entries: Vec<Vec<MusicEntry>>,
     duplicated_music_entries_referenced: Vec<(MusicEntry, Vec<MusicEntry>)>,
-    directories: Directories,
-    allowed_extensions: Extensions,
-    excluded_items: ExcludedItems,
-    minimal_file_size: u64,
-    maximal_file_size: u64,
-    recursive_search: bool,
     delete_method: DeleteMethod,
     music_similarity: MusicSimilarity,
-    stopped_search: bool,
     approximate_comparison: bool,
-    use_cache: bool,
-    delete_outdated_cache: bool, // TODO add this to GUI
-    use_reference_folders: bool,
-    save_also_as_json: bool,
     check_type: CheckingMethod,
     hash_preset_config: Configuration,
     minimum_segment_duration: f32,
     maximum_difference: f64,
 }
 
+impl CommonData for SameMusic {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
 impl SameMusic {
-    #[must_use]
     pub fn new() -> Self {
         Self {
-            tool_type: ToolType::SameMusic,
-            text_messages: Messages::new(),
+            common_data: CommonToolData::new(ToolType::SameMusic),
             information: Info::new(),
-            recursive_search: true,
-            directories: Directories::new(),
-            allowed_extensions: Extensions::new(),
-            excluded_items: ExcludedItems::new(),
             music_entries: Vec::with_capacity(2048),
             delete_method: DeleteMethod::None,
             music_similarity: MusicSimilarity::NONE,
-            stopped_search: false,
-            minimal_file_size: 8192,
-            maximal_file_size: u64::MAX,
             duplicated_music_entries: vec![],
             music_to_check: Default::default(),
             approximate_comparison: true,
-            use_cache: false,
-            delete_outdated_cache: true,
-            use_reference_folders: false,
             duplicated_music_entries_referenced: vec![],
-            save_also_as_json: false,
             check_type: CheckingMethod::AudioContent,
             hash_preset_config: Configuration::preset_test1(), // TODO allow to change this
             minimum_segment_duration: 10.0,
@@ -170,34 +152,34 @@ impl SameMusic {
 
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding same music");
-        self.directories.optimize_directories(self.recursive_search, &mut self.text_messages);
-        self.use_reference_folders = !self.directories.reference_directories.is_empty();
+        self.optimize_dirs_before_start();
+        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
-            self.stopped_search = true;
+            self.common_data.stopped_search = true;
             return;
         }
         match self.check_type {
             CheckingMethod::AudioTags => {
                 if !self.read_tags(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                    self.common_data.stopped_search = true;
                     return;
                 }
                 if !self.check_for_duplicate_tags(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                    self.common_data.stopped_search = true;
                     return;
                 }
             }
             CheckingMethod::AudioContent => {
                 if !self.calculate_fingerprint(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                    self.common_data.stopped_search = true;
                     return;
                 }
                 if !self.check_for_duplicate_fingerprints(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                    self.common_data.stopped_search = true;
                     return;
                 }
                 if !self.read_tags_to_files_similar_by_content(stop_receiver, progress_sender) {
-                    self.stopped_search = true;
+                    self.common_data.stopped_search = true;
                     return;
                 }
             }
@@ -207,26 +189,14 @@ impl SameMusic {
         self.debug_print();
     }
 
-    #[must_use]
-    pub fn get_stopped_search(&self) -> bool {
-        self.stopped_search
-    }
-
-    #[must_use]
     pub const fn get_duplicated_music_entries(&self) -> &Vec<Vec<MusicEntry>> {
         &self.duplicated_music_entries
     }
-    #[must_use]
+
     pub const fn get_music_similarity(&self) -> &MusicSimilarity {
         &self.music_similarity
     }
 
-    #[must_use]
-    pub const fn get_text_messages(&self) -> &Messages {
-        &self.text_messages
-    }
-
-    #[must_use]
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
@@ -235,32 +205,8 @@ impl SameMusic {
         self.delete_method = delete_method;
     }
 
-    pub fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
-        self.save_also_as_json = save_also_as_json;
-    }
-
-    pub fn set_use_cache(&mut self, use_cache: bool) {
-        self.use_cache = use_cache;
-    }
-
     pub fn set_approximate_comparison(&mut self, approximate_comparison: bool) {
         self.approximate_comparison = approximate_comparison;
-    }
-
-    pub fn set_recursive_search(&mut self, recursive_search: bool) {
-        self.recursive_search = recursive_search;
-    }
-
-    #[cfg(target_family = "unix")]
-    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
-        self.directories.set_exclude_other_filesystems(exclude_other_filesystems);
-    }
-    #[cfg(not(target_family = "unix"))]
-    pub fn set_exclude_other_filesystems(&mut self, _exclude_other_filesystems: bool) {}
-
-    /// Set included dir which needs to be relative, exists etc.
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        self.directories.set_included_directory(included_directory, &mut self.text_messages);
     }
 
     pub fn set_maximum_difference(&mut self, maximum_difference: f64) {
@@ -270,83 +216,56 @@ impl SameMusic {
         self.minimum_segment_duration = minimum_segment_duration;
     }
 
-    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        self.directories.set_reference_directory(reference_directory);
-    }
-
     pub fn set_check_type(&mut self, check_type: CheckingMethod) {
         assert!([CheckingMethod::AudioTags, CheckingMethod::AudioContent].contains(&check_type));
         self.check_type = check_type;
     }
 
-    #[must_use]
     pub fn get_check_type(&self) -> CheckingMethod {
         self.check_type
-    }
-
-    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        self.directories.set_excluded_directory(excluded_directory, &mut self.text_messages);
-    }
-
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        self.excluded_items.set_excluded_items(excluded_items, &mut self.text_messages);
-    }
-
-    pub fn set_allowed_extensions(&mut self, allowed_extensions: String) {
-        self.allowed_extensions.set_allowed_extensions(allowed_extensions, &mut self.text_messages);
     }
 
     pub fn set_music_similarity(&mut self, music_similarity: MusicSimilarity) {
         self.music_similarity = music_similarity;
     }
 
-    pub fn set_maximal_file_size(&mut self, maximal_file_size: u64) {
-        self.maximal_file_size = match maximal_file_size {
-            0 => 1,
-            t => t,
-        };
-    }
-
-    #[must_use]
     pub fn get_similar_music_referenced(&self) -> &Vec<(MusicEntry, Vec<MusicEntry>)> {
         &self.duplicated_music_entries_referenced
     }
 
-    #[must_use]
     pub fn get_number_of_base_duplicated_files(&self) -> usize {
-        if self.use_reference_folders {
+        if self.common_data.use_reference_folders {
             self.duplicated_music_entries_referenced.len()
         } else {
             self.duplicated_music_entries.len()
         }
     }
 
-    #[must_use]
     pub fn get_use_reference(&self) -> bool {
-        self.use_reference_folders
+        self.common_data.use_reference_folders
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        if !self.allowed_extensions.using_custom_extensions() {
-            self.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
+        if !self.common_data.allowed_extensions.using_custom_extensions() {
+            self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         } else {
-            self.allowed_extensions.validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-            if !self.allowed_extensions.using_custom_extensions() {
+            self.common_data.allowed_extensions.validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
+            if !self.common_data.allowed_extensions.using_custom_extensions() {
                 return true;
             }
         }
 
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.directories.included_directories.clone())
+            .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
-            .minimal_file_size(self.minimal_file_size)
-            .maximal_file_size(self.maximal_file_size)
-            .directories(self.directories.clone())
-            .allowed_extensions(self.allowed_extensions.clone())
-            .excluded_items(self.excluded_items.clone())
-            .recursive_search(self.recursive_search)
+            .minimal_file_size(self.common_data.minimal_file_size)
+            .maximal_file_size(self.common_data.maximal_file_size)
+            .directories(self.common_data.directories.clone())
+            .allowed_extensions(self.common_data.allowed_extensions.clone())
+            .excluded_items(self.common_data.excluded_items.clone())
+            .recursive_search(self.common_data.recursive_search)
             .max_stage(2)
             .build()
             .run();
@@ -357,7 +276,7 @@ impl SameMusic {
                         self.music_to_check.insert(fe.path.to_string_lossy().to_string(), fe.to_music_entry());
                     }
                 }
-                self.text_messages.warnings.extend(warnings);
+                self.common_data.text_messages.warnings.extend(warnings);
 
                 true
             }
@@ -369,14 +288,14 @@ impl SameMusic {
     }
 
     fn load_cache(&mut self, checking_tags: bool) -> (HashMap<String, MusicEntry>, HashMap<String, MusicEntry>, HashMap<String, MusicEntry>) {
-        debug!("load_cache - start, using cache {}", self.use_cache);
+        debug!("load_cache - start, using cache {}", self.common_data.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: HashMap<String, MusicEntry> = Default::default();
         let mut non_cached_files_to_check: HashMap<String, MusicEntry> = Default::default();
 
-        if self.use_cache {
-            loaded_hash_map = match load_cache_from_file(&mut self.text_messages, self.delete_outdated_cache, checking_tags) {
+        if self.common_data.use_cache {
+            loaded_hash_map = match load_cache_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache, checking_tags) {
                 Some(t) => t,
                 None => Default::default(),
             };
@@ -405,8 +324,8 @@ impl SameMusic {
     }
 
     fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: HashMap<String, MusicEntry>, checking_tags: bool) {
-        debug!("save_cache - start, using cache {}", self.use_cache);
-        if !self.use_cache {
+        debug!("save_cache - start, using cache {}", self.common_data.use_cache);
+        if !self.common_data.use_cache {
             return;
         }
         // Must save all results to file, old loaded from file with all currently counted results
@@ -415,7 +334,7 @@ impl SameMusic {
         for file_entry in vec_file_entry {
             all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
         }
-        save_cache_to_file(&all_results, &mut self.text_messages, self.save_also_as_json, checking_tags);
+        save_cache_to_file(&all_results, &mut self.common_data.text_messages, self.common_data.save_also_as_json, checking_tags);
         debug!("save_cache - end");
     }
 
@@ -424,7 +343,7 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type, self.common_data.tool_type);
         let configuration = &self.hash_preset_config;
 
         // Clean for duplicate files
@@ -471,7 +390,7 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type, self.common_data.tool_type);
 
         debug!("read_tags - starting reading tags");
         // Clean for duplicate files
@@ -517,7 +436,7 @@ impl SameMusic {
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("check_for_duplicate_tags - start");
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type, self.common_data.tool_type);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
@@ -592,11 +511,11 @@ impl SameMusic {
 
         self.duplicated_music_entries = old_duplicates;
 
-        if self.use_reference_folders {
-            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.directories);
+        if self.common_data.use_reference_folders {
+            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.common_data.directories);
         }
 
-        if self.use_reference_folders {
+        if self.common_data.use_reference_folders {
             for (_fe, vector) in &self.duplicated_music_entries_referenced {
                 self.information.number_of_duplicates += vector.len();
                 self.information.number_of_groups += 1;
@@ -619,7 +538,7 @@ impl SameMusic {
         debug!("read_tags_to_files_similar_by_content - start");
         let groups_to_check = max(self.duplicated_music_entries.len(), self.duplicated_music_entries_referenced.len());
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type, self.common_data.tool_type);
 
         // TODO is ther a way to just run iterator and not collect any info?
         if !self.duplicated_music_entries.is_empty() {
@@ -672,10 +591,10 @@ impl SameMusic {
         let base_files: Vec<MusicEntry>;
         let files_to_compare: Vec<MusicEntry>;
 
-        if self.use_reference_folders {
+        if self.common_data.use_reference_folders {
             (base_files, files_to_compare) = mem::take(&mut self.music_entries)
                 .into_iter()
-                .partition(|f| self.directories.is_in_referenced_directory(f.get_path()));
+                .partition(|f| self.common_data.directories.is_in_referenced_directory(f.get_path()));
         } else {
             base_files = self.music_entries.clone();
             files_to_compare = mem::take(&mut self.music_entries);
@@ -748,7 +667,7 @@ impl SameMusic {
         debug!("check_for_duplicate_fingerprints - start");
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type, self.tool_type);
+            prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type, self.common_data.tool_type);
 
         let Some(duplicated_music_entries) = self.compare_fingerprints(stop_receiver, &atomic_counter, base_files, &files_to_compare) else {
             send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -759,11 +678,11 @@ impl SameMusic {
 
         self.duplicated_music_entries = duplicated_music_entries;
 
-        if self.use_reference_folders {
-            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.directories);
+        if self.common_data.use_reference_folders {
+            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.common_data.directories);
         }
 
-        if self.use_reference_folders {
+        if self.common_data.use_reference_folders {
             for (_fe, vector) in &self.duplicated_music_entries_referenced {
                 self.information.number_of_duplicates += vector.len();
                 self.information.number_of_groups += 1;
@@ -815,13 +734,6 @@ impl SameMusic {
         new_duplicates
     }
 
-    pub fn set_minimal_file_size(&mut self, minimal_file_size: u64) {
-        self.minimal_file_size = match minimal_file_size {
-            0 => 1,
-            t => t,
-        };
-    }
-
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
 
@@ -830,7 +742,7 @@ impl SameMusic {
         //     DeleteMethod::Delete => {
         //         for file_entry in &self.music_entries {
         //             if fs::remove_file(file_entry.path.clone()).is_err() {
-        //                 self.text_messages.warnings.push(file_entry.path.display().to_string());
+        //                 self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
         //             }
         //         }
         //     }
@@ -1097,21 +1009,21 @@ impl DebugPrint for SameMusic {
         println!("---------------DEBUG PRINT---------------");
         println!("### Information's");
 
-        println!("Errors size - {}", self.text_messages.errors.len());
-        println!("Warnings size - {}", self.text_messages.warnings.len());
-        println!("Messages size - {}", self.text_messages.messages.len());
+        println!("Errors size - {}", self.common_data.text_messages.errors.len());
+        println!("Warnings size - {}", self.common_data.text_messages.warnings.len());
+        println!("Messages size - {}", self.common_data.text_messages.messages.len());
 
         println!("### Other");
 
-        println!("Excluded items - {:?}", self.excluded_items.items);
-        println!("Minimum file size - {:?}", self.minimal_file_size);
+        println!("Excluded items - {:?}", self.common_data.excluded_items.items);
+        println!("Minimum file size - {:?}", self.common_data.minimal_file_size);
         println!("Found files music - {}", self.music_entries.len());
         println!("Found duplicated files music - {}", self.duplicated_music_entries.len());
-        println!("Included directories - {:?}", self.directories.included_directories);
-        println!("Excluded directories - {:?}", self.directories.excluded_directories);
-        println!("Recursive search - {}", self.recursive_search);
+        println!("Included directories - {:?}", self.common_data.directories.included_directories);
+        println!("Excluded directories - {:?}", self.common_data.directories.excluded_directories);
+        println!("Recursive search - {}", self.common_data.recursive_search);
         #[cfg(target_family = "unix")]
-        println!("Skip other filesystems - {}", self.directories.exclude_other_filesystems());
+        println!("Skip other filesystems - {}", self.common_data.directories.exclude_other_filesystems());
         println!("Delete Method - {:?}", self.delete_method);
         println!("-----------------------------------------");
     }
@@ -1127,7 +1039,7 @@ impl SaveResults for SameMusic {
         let file_handler = match File::create(&file_name) {
             Ok(t) => t,
             Err(e) => {
-                self.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
+                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
                 return false;
             }
         };
@@ -1136,9 +1048,12 @@ impl SaveResults for SameMusic {
         if let Err(e) = writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.directories.included_directories, self.directories.excluded_directories, self.excluded_items.items
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
         ) {
-            self.text_messages.errors.push(format!("Failed to save results to file {file_name}, reason {e}"));
+            self.common_data
+                .text_messages
+                .errors
+                .push(format!("Failed to save results to file {file_name}, reason {e}"));
             return false;
         }
 
