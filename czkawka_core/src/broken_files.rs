@@ -68,12 +68,6 @@ pub struct Info {
     pub number_of_broken_files: usize,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 pub struct BrokenFiles {
     common_data: CommonToolData,
     information: Info,
@@ -83,20 +77,11 @@ pub struct BrokenFiles {
     checked_types: CheckedTypes,
 }
 
-impl CommonData for BrokenFiles {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl BrokenFiles {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::BrokenFiles),
-            information: Info::new(),
+            information: Info::default(),
             files_to_check: Default::default(),
             delete_method: DeleteMethod::None,
             broken_files: Default::default(),
@@ -106,6 +91,12 @@ impl BrokenFiles {
 
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding broken files");
+        let start_time = std::time::Instant::now();
+        self.find_broken_files_internal(stop_receiver, progress_sender);
+        info!("Ended finding broken files which took {:?}", start_time.elapsed());
+    }
+
+    pub fn find_broken_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -670,4 +661,13 @@ fn validate_pdf_error(file_entry: &mut FileEntry, e: PdfError) -> PdfError {
 
     file_entry.error_string = error_string;
     unpack_pdf_error(e)
+}
+
+impl CommonData for BrokenFiles {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
 }

@@ -42,12 +42,6 @@ pub struct Info {
     pub number_of_real_files: usize,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// Struct with required information's to work
 pub struct BigFile {
     common_data: CommonToolData,
@@ -58,20 +52,11 @@ pub struct BigFile {
     search_mode: SearchMode,
 }
 
-impl CommonData for BigFile {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl BigFile {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::BigFile),
-            information: Info::new(),
+            information: Info::default(),
             big_files: Default::default(),
             number_of_files_to_check: 50,
             delete_method: DeleteMethod::None,
@@ -81,6 +66,12 @@ impl BigFile {
 
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding big files");
+        let start_time = std::time::Instant::now();
+        self.find_big_files_internal(stop_receiver, progress_sender);
+        info!("Ended finding big files which took {:?}", start_time.elapsed());
+    }
+
+    fn find_big_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -88,22 +79,6 @@ impl BigFile {
         }
         self.delete_files();
         self.debug_print();
-    }
-
-    pub fn set_search_mode(&mut self, search_mode: SearchMode) {
-        self.search_mode = search_mode;
-    }
-
-    pub const fn get_big_files(&self) -> &Vec<(u64, FileEntry)> {
-        &self.big_files
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
@@ -250,10 +225,6 @@ impl BigFile {
         debug!("extract_n_biggest_files - end");
     }
 
-    pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {
-        self.number_of_files_to_check = number_of_files_to_check;
-    }
-
     /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
         match self.delete_method {
@@ -351,5 +322,36 @@ impl PrintResults for BigFile {
         for (size, file_entry) in &self.big_files {
             println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
         }
+    }
+}
+
+impl CommonData for BigFile {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
+impl BigFile {
+    pub fn set_search_mode(&mut self, search_mode: SearchMode) {
+        self.search_mode = search_mode;
+    }
+
+    pub const fn get_big_files(&self) -> &Vec<(u64, FileEntry)> {
+        &self.big_files
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
+    }
+
+    pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {
+        self.number_of_files_to_check = number_of_files_to_check;
     }
 }

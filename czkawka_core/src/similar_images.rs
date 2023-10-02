@@ -96,26 +96,11 @@ pub struct SimilarImages {
     exclude_images_with_same_size: bool,
 }
 
-impl CommonData for SimilarImages {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
-}
-
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
 }
 
 /// Method implementation for `EmptyFolder`
@@ -139,50 +124,14 @@ impl SimilarImages {
         }
     }
 
-    pub fn set_hash_size(&mut self, hash_size: u8) {
-        self.hash_size = match hash_size {
-            8 | 16 | 32 | 64 => hash_size,
-            e => {
-                panic!("Invalid value of hash size {e}");
-            }
-        }
-    }
-
-    pub fn set_exclude_images_with_same_size(&mut self, exclude_images_with_same_size: bool) {
-        self.exclude_images_with_same_size = exclude_images_with_same_size;
-    }
-
-    pub fn set_hash_alg(&mut self, hash_alg: HashAlg) {
-        self.hash_alg = hash_alg;
-    }
-
-    pub fn set_image_filter(&mut self, image_filter: FilterType) {
-        self.image_filter = image_filter;
-    }
-
-    pub const fn get_similar_images(&self) -> &Vec<Vec<FileEntry>> {
-        &self.similar_vectors
-    }
-
-    pub fn get_similar_images_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
-        &self.similar_referenced_vectors
-    }
-
-    pub fn get_use_reference(&self) -> bool {
-        self.common_data.use_reference_folders
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_similarity(&mut self, similarity: u32) {
-        self.similarity = similarity;
-    }
-
-    /// Public function used by CLI to search for empty folders
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding similar images");
+        info!("Starting finding similar images files");
+        let start_time = std::time::Instant::now();
+        self.find_similar_images_internal(stop_receiver, progress_sender);
+        info!("Ended finding similar images which took {:?}", start_time.elapsed());
+    }
+
+    pub fn find_similar_images_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
@@ -1258,6 +1207,58 @@ fn debug_check_for_duplicated_things(
     }
 
     assert!(!found_broken_thing);
+}
+
+impl CommonData for SimilarImages {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
+impl SimilarImages {
+    pub fn set_hash_size(&mut self, hash_size: u8) {
+        self.hash_size = match hash_size {
+            8 | 16 | 32 | 64 => hash_size,
+            e => {
+                panic!("Invalid value of hash size {e}");
+            }
+        }
+    }
+
+    pub fn set_exclude_images_with_same_size(&mut self, exclude_images_with_same_size: bool) {
+        self.exclude_images_with_same_size = exclude_images_with_same_size;
+    }
+
+    pub fn set_hash_alg(&mut self, hash_alg: HashAlg) {
+        self.hash_alg = hash_alg;
+    }
+
+    pub fn set_image_filter(&mut self, image_filter: FilterType) {
+        self.image_filter = image_filter;
+    }
+
+    pub const fn get_similar_images(&self) -> &Vec<Vec<FileEntry>> {
+        &self.similar_vectors
+    }
+
+    pub fn get_similar_images_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        &self.similar_referenced_vectors
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.common_data.use_reference_folders
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn set_similarity(&mut self, similarity: u32) {
+        self.similarity = similarity;
+    }
 }
 
 #[cfg(test)]

@@ -23,12 +23,6 @@ pub struct Info {
     pub number_of_invalid_symlinks: usize,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// Struct with required information's to work
 pub struct InvalidSymlinks {
     common_data: CommonToolData,
@@ -37,27 +31,24 @@ pub struct InvalidSymlinks {
     delete_method: DeleteMethod,
 }
 
-impl CommonData for InvalidSymlinks {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl InvalidSymlinks {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::InvalidSymlinks),
-            information: Info::new(),
+            information: Info::default(),
             invalid_symlinks: vec![],
             delete_method: DeleteMethod::None,
         }
     }
 
     pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding invalid links");
+        info!("Starting finding invalid symlinks");
+        let start_time = std::time::Instant::now();
+        self.find_invalid_links_internal(stop_receiver, progress_sender);
+        info!("Ended finding invalid symlinks which took {:?}", start_time.elapsed());
+    }
+
+    fn find_invalid_links_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -217,5 +208,14 @@ impl PrintResults for InvalidSymlinks {
                 }
             );
         }
+    }
+}
+
+impl CommonData for InvalidSymlinks {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
     }
 }

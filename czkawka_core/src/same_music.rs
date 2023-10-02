@@ -98,12 +98,6 @@ pub struct Info {
     pub number_of_groups: u64,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// Struct with required information's to work
 pub struct SameMusic {
     common_data: CommonToolData,
@@ -121,20 +115,11 @@ pub struct SameMusic {
     maximum_difference: f64,
 }
 
-impl CommonData for SameMusic {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl SameMusic {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::SameMusic),
-            information: Info::new(),
+            information: Info::default(),
             music_entries: Vec::with_capacity(2048),
             delete_method: DeleteMethod::None,
             music_similarity: MusicSimilarity::NONE,
@@ -150,7 +135,13 @@ impl SameMusic {
     }
 
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding same music");
+        info!("Starting finding same music files");
+        let start_time = std::time::Instant::now();
+        self.find_same_music_internal(stop_receiver, progress_sender);
+        info!("Ended finding same music which took {:?}", start_time.elapsed());
+    }
+
+    fn find_same_music_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -186,62 +177,6 @@ impl SameMusic {
         }
         self.delete_files();
         self.debug_print();
-    }
-
-    pub const fn get_duplicated_music_entries(&self) -> &Vec<Vec<MusicEntry>> {
-        &self.duplicated_music_entries
-    }
-
-    pub const fn get_music_similarity(&self) -> &MusicSimilarity {
-        &self.music_similarity
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
-    }
-
-    pub fn set_approximate_comparison(&mut self, approximate_comparison: bool) {
-        self.approximate_comparison = approximate_comparison;
-    }
-
-    pub fn set_maximum_difference(&mut self, maximum_difference: f64) {
-        self.maximum_difference = maximum_difference;
-    }
-    pub fn set_minimum_segment_duration(&mut self, minimum_segment_duration: f32) {
-        self.minimum_segment_duration = minimum_segment_duration;
-    }
-
-    pub fn set_check_type(&mut self, check_type: CheckingMethod) {
-        assert!([CheckingMethod::AudioTags, CheckingMethod::AudioContent].contains(&check_type));
-        self.check_type = check_type;
-    }
-
-    pub fn get_check_type(&self) -> CheckingMethod {
-        self.check_type
-    }
-
-    pub fn set_music_similarity(&mut self, music_similarity: MusicSimilarity) {
-        self.music_similarity = music_similarity;
-    }
-
-    pub fn get_similar_music_referenced(&self) -> &Vec<(MusicEntry, Vec<MusicEntry>)> {
-        &self.duplicated_music_entries_referenced
-    }
-
-    pub fn get_number_of_base_duplicated_files(&self) -> usize {
-        if self.common_data.use_reference_folders {
-            self.duplicated_music_entries_referenced.len()
-        } else {
-            self.duplicated_music_entries.len()
-        }
-    }
-
-    pub fn get_use_reference(&self) -> bool {
-        self.common_data.use_reference_folders
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
@@ -752,6 +687,64 @@ impl SameMusic {
     }
 }
 
+impl SameMusic {
+    pub const fn get_duplicated_music_entries(&self) -> &Vec<Vec<MusicEntry>> {
+        &self.duplicated_music_entries
+    }
+
+    pub const fn get_music_similarity(&self) -> &MusicSimilarity {
+        &self.music_similarity
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
+    }
+
+    pub fn set_approximate_comparison(&mut self, approximate_comparison: bool) {
+        self.approximate_comparison = approximate_comparison;
+    }
+
+    pub fn set_maximum_difference(&mut self, maximum_difference: f64) {
+        self.maximum_difference = maximum_difference;
+    }
+    pub fn set_minimum_segment_duration(&mut self, minimum_segment_duration: f32) {
+        self.minimum_segment_duration = minimum_segment_duration;
+    }
+
+    pub fn set_check_type(&mut self, check_type: CheckingMethod) {
+        assert!([CheckingMethod::AudioTags, CheckingMethod::AudioContent].contains(&check_type));
+        self.check_type = check_type;
+    }
+
+    pub fn get_check_type(&self) -> CheckingMethod {
+        self.check_type
+    }
+
+    pub fn set_music_similarity(&mut self, music_similarity: MusicSimilarity) {
+        self.music_similarity = music_similarity;
+    }
+
+    pub fn get_similar_music_referenced(&self) -> &Vec<(MusicEntry, Vec<MusicEntry>)> {
+        &self.duplicated_music_entries_referenced
+    }
+
+    pub fn get_number_of_base_duplicated_files(&self) -> usize {
+        if self.common_data.use_reference_folders {
+            self.duplicated_music_entries_referenced.len()
+        } else {
+            self.duplicated_music_entries.len()
+        }
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.common_data.use_reference_folders
+    }
+}
+
 fn save_cache_to_file(hashmap: &HashMap<String, MusicEntry>, text_messages: &mut Messages, save_also_as_json: bool, checking_tags: bool) {
     if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
         open_cache_folder(get_cache_file(checking_tags), true, save_also_as_json, &mut text_messages.warnings)
@@ -1160,5 +1153,14 @@ mod tests {
         let mut what = "Kekistan (feat. roman) [Mix on Mix]".to_string();
         get_approximate_conversion(&mut what);
         assert_eq!(what, "Kekistan");
+    }
+}
+
+impl CommonData for SameMusic {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
     }
 }

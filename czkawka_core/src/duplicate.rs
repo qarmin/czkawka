@@ -28,8 +28,9 @@ use crate::localizer_core::generate_translation_hashmap;
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
 pub enum HashType {
+    #[default]
     Blake3,
     Crc32,
     Xxh3,
@@ -45,8 +46,9 @@ impl HashType {
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
+#[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
 pub enum DeleteMethod {
+    #[default]
     None,
     AllExceptNewest,
     AllExceptOldest,
@@ -69,31 +71,25 @@ pub struct Info {
     pub lost_space_by_hash: u64,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 pub struct DuplicateFinder {
     common_data: CommonToolData,
     information: Info,
+    // File Size, File Entry
     files_with_identical_names: BTreeMap<String, Vec<FileEntry>>,
-    // File Size, File Entry
+    // File (Size, Name), File Entry
     files_with_identical_size_names: BTreeMap<(u64, String), Vec<FileEntry>>,
-    // File (Size, Name), File Entry
+    // File Size, File Entry
     files_with_identical_size: BTreeMap<u64, Vec<FileEntry>>,
-    // File Size, File Entry
+    // File Size, next grouped by file size, next grouped by hash
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<FileEntry>>>,
-    // File Size, next grouped by file size, next grouped by hash
+    // File Size, File Entry
     files_with_identical_names_referenced: BTreeMap<String, (FileEntry, Vec<FileEntry>)>,
-    // File Size, File Entry
-    files_with_identical_size_names_referenced: BTreeMap<(u64, String), (FileEntry, Vec<FileEntry>)>,
     // File (Size, Name), File Entry
-    files_with_identical_size_referenced: BTreeMap<u64, (FileEntry, Vec<FileEntry>)>,
+    files_with_identical_size_names_referenced: BTreeMap<(u64, String), (FileEntry, Vec<FileEntry>)>,
     // File Size, File Entry
-    files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>>,
+    files_with_identical_size_referenced: BTreeMap<u64, (FileEntry, Vec<FileEntry>)>,
     // File Size, next grouped by file size, next grouped by hash
+    files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(FileEntry, Vec<FileEntry>)>>,
     check_method: CheckingMethod,
     delete_method: DeleteMethod,
     hash_type: HashType,
@@ -105,20 +101,11 @@ pub struct DuplicateFinder {
     case_sensitive_name_comparison: bool,
 }
 
-impl CommonData for DuplicateFinder {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl DuplicateFinder {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::Duplicate),
-            information: Info::new(),
+            information: Info::default(),
             files_with_identical_names: Default::default(),
             files_with_identical_size: Default::default(),
             files_with_identical_size_names: Default::default(),
@@ -141,6 +128,12 @@ impl DuplicateFinder {
 
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding duplicates");
+        let start_time = std::time::Instant::now();
+        self.find_duplicates_internal(stop_receiver, progress_sender);
+        info!("Ended finding duplicates which took {:?}", start_time.elapsed());
+    }
+
+    fn find_duplicates_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
@@ -1489,6 +1482,15 @@ impl MyHasher for Xxh3 {
     }
     fn finalize(&self) -> String {
         self.finish().to_string()
+    }
+}
+
+impl CommonData for DuplicateFinder {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
     }
 }
 

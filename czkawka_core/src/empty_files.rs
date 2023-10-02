@@ -23,12 +23,6 @@ pub struct Info {
     pub number_of_empty_files: usize,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// Struct with required information's to work
 pub struct EmptyFiles {
     common_data: CommonToolData,
@@ -50,15 +44,20 @@ impl EmptyFiles {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::EmptyFiles),
-            information: Info::new(),
+            information: Info::default(),
             empty_files: vec![],
             delete_method: DeleteMethod::None,
         }
     }
 
-    /// Finding empty files, save results to internal struct variables
     pub fn find_empty_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding empty files");
+        let start_time = std::time::Instant::now();
+        self.find_empty_files_internal(stop_receiver, progress_sender);
+        info!("Ended finding empty files which took {:?}", start_time.elapsed());
+    }
+
+    fn find_empty_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -66,18 +65,6 @@ impl EmptyFiles {
         }
         self.delete_files();
         self.debug_print();
-    }
-
-    pub const fn get_empty_files(&self) -> &Vec<FileEntry> {
-        &self.empty_files
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 
     /// Check files for any with size == 0
@@ -205,5 +192,19 @@ impl PrintResults for EmptyFiles {
         for file_entry in &self.empty_files {
             println!("{}", file_entry.path.display());
         }
+    }
+}
+
+impl EmptyFiles {
+    pub const fn get_empty_files(&self) -> &Vec<FileEntry> {
+        &self.empty_files
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
     }
 }

@@ -44,8 +44,9 @@ pub enum ToolType {
     None,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
 pub enum CheckingMethod {
+    #[default]
     None,
     Name,
     SizeName,

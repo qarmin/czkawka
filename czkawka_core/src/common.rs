@@ -82,7 +82,7 @@ pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
 ];
 pub const HEIC_EXTENSIONS: &[&str] = &[".heif", ".heifs", ".heic", ".heics", ".avci", ".avcs", ".avif", ".avifs"];
 
-pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
+pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip", ".jar"];
 
 pub const PDF_FILES_EXTENSIONS: &[&str] = &[".pdf"];
 
@@ -94,7 +94,8 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
 ];
 
-pub const LOOP_DURATION: u32 = 200; //ms
+pub const LOOP_DURATION: u32 = 20; //ms
+pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
 pub struct Common();
 
@@ -411,21 +412,28 @@ pub fn prepare_thread_handler_common(
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
         let atomic_counter = atomic_counter.clone();
-        thread::spawn(move || loop {
-            progress_send
-                .unbounded_send(ProgressData {
-                    checking_method,
-                    current_stage,
-                    max_stage,
-                    entries_checked: atomic_counter.load(Ordering::Relaxed),
-                    entries_to_check: max_value,
-                    tool_type,
-                })
-                .unwrap();
-            if !progress_thread_run.load(Ordering::Relaxed) {
-                break;
+        thread::spawn(move || {
+            let mut time_since_last_send = SystemTime::now();
+
+            loop {
+                if time_since_last_send.elapsed().unwrap().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
+                    progress_send
+                        .unbounded_send(ProgressData {
+                            checking_method,
+                            current_stage,
+                            max_stage,
+                            entries_checked: atomic_counter.load(Ordering::Relaxed),
+                            entries_to_check: max_value,
+                            tool_type,
+                        })
+                        .unwrap();
+                    time_since_last_send = SystemTime::now();
+                }
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
             }
-            sleep(Duration::from_millis(LOOP_DURATION as u64));
         })
     } else {
         thread::spawn(|| {})

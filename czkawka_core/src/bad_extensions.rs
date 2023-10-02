@@ -174,12 +174,6 @@ pub struct Info {
     pub number_of_files_with_bad_extension: usize,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 pub struct BadExtensions {
     common_data: CommonToolData,
     information: Info,
@@ -187,21 +181,11 @@ pub struct BadExtensions {
     bad_extensions_files: Vec<BadFileEntry>,
     include_files_without_extension: bool,
 }
-
-impl CommonData for BadExtensions {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl BadExtensions {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::BadExtensions),
-            information: Info::new(),
+            information: Info::default(),
             files_to_check: Default::default(),
             bad_extensions_files: Default::default(),
             include_files_without_extension: true,
@@ -209,7 +193,13 @@ impl BadExtensions {
     }
 
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding extensions files");
+        info!("Starting finding files with bad extensions");
+        let start_time = std::time::Instant::now();
+        self.find_bad_extensions_files_internal(stop_receiver, progress_sender);
+        info!("Ended finding files with bad extensions which took {:?}", start_time.elapsed());
+    }
+
+    fn find_bad_extensions_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -220,13 +210,6 @@ impl BadExtensions {
             return;
         }
         self.debug_print();
-    }
-    pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
-        &self.bad_extensions_files
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
@@ -496,5 +479,24 @@ impl PrintResults for BadExtensions {
         for file_entry in &self.bad_extensions_files {
             println!("{} ----- {}", file_entry.path.display(), file_entry.proper_extensions);
         }
+    }
+}
+
+impl BadExtensions {
+    pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
+        &self.bad_extensions_files
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+}
+
+impl CommonData for BadExtensions {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
     }
 }

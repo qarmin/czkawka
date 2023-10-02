@@ -26,7 +26,7 @@ hamming = "0.1"
 
 # Needed by same music
 bitflags = "2.4"
-lofty = "0.15"
+lofty = "0.16"
 
 # Futures - needed by async progress sender
 futures = "0.3.28"

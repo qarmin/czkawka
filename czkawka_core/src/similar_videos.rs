@@ -83,12 +83,6 @@ pub struct Info {
     pub number_of_groups: u64,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// Method implementation for `EmptyFolder`
 impl SimilarVideos {
     /// New function providing basics values
@@ -106,42 +100,14 @@ impl SimilarVideos {
         }
     }
 
-    pub fn set_exclude_videos_with_same_size(&mut self, exclude_videos_with_same_size: bool) {
-        self.exclude_videos_with_same_size = exclude_videos_with_same_size;
-    }
-
-    pub fn set_tolerance(&mut self, tolerance: i32) {
-        assert!((0..=MAX_TOLERANCE).contains(&tolerance));
-        self.tolerance = tolerance;
-    }
-
-    pub const fn get_similar_videos(&self) -> &Vec<Vec<FileEntry>> {
-        &self.similar_vectors
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn get_similar_videos_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
-        &self.similar_referenced_vectors
-    }
-
-    pub fn get_number_of_base_duplicated_files(&self) -> usize {
-        if self.common_data.use_reference_folders {
-            self.similar_referenced_vectors.len()
-        } else {
-            self.similar_vectors.len()
-        }
-    }
-
-    pub fn get_use_reference(&self) -> bool {
-        self.common_data.use_reference_folders
-    }
-
-    /// Public function used by CLI to search for empty folders
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding similar videos");
+        let start_time = std::time::Instant::now();
+        self.find_similar_videos_internal(stop_receiver, progress_sender);
+        info!("Ended finding similar videos which took {:?}", start_time.elapsed());
+    }
+
+    fn find_similar_videos_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -626,4 +592,39 @@ pub fn check_if_ffmpeg_is_installed() -> bool {
         return false;
     }
     true
+}
+
+impl SimilarVideos {
+    pub fn set_exclude_videos_with_same_size(&mut self, exclude_videos_with_same_size: bool) {
+        self.exclude_videos_with_same_size = exclude_videos_with_same_size;
+    }
+
+    pub fn set_tolerance(&mut self, tolerance: i32) {
+        assert!((0..=MAX_TOLERANCE).contains(&tolerance));
+        self.tolerance = tolerance;
+    }
+
+    pub const fn get_similar_videos(&self) -> &Vec<Vec<FileEntry>> {
+        &self.similar_vectors
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn get_similar_videos_referenced(&self) -> &Vec<(FileEntry, Vec<FileEntry>)> {
+        &self.similar_referenced_vectors
+    }
+
+    pub fn get_number_of_base_duplicated_files(&self) -> usize {
+        if self.common_data.use_reference_folders {
+            self.similar_referenced_vectors.len()
+        } else {
+            self.similar_vectors.len()
+        }
+    }
+
+    pub fn get_use_reference(&self) -> bool {
+        self.common_data.use_reference_folders
+    }
 }

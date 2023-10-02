@@ -50,12 +50,6 @@ pub struct Info {
     pub number_of_temporary_files: usize,
 }
 
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// Struct with required information's to work
 pub struct Temporary {
     common_data: CommonToolData,
@@ -64,28 +58,17 @@ pub struct Temporary {
     delete_method: DeleteMethod,
 }
 
-impl CommonData for Temporary {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 impl Temporary {
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::TemporaryFiles),
-            information: Info::new(),
+            information: Info::default(),
             delete_method: DeleteMethod::None,
             temporary_files: vec![],
         }
     }
 
-    /// Finding temporary files, save results to internal struct variables
-    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding temporary files");
+    fn find_temporary_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -95,16 +78,11 @@ impl Temporary {
         self.debug_print();
     }
 
-    pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
-        &self.temporary_files
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
+    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+        info!("Starting finding temporary files");
+        let start_time = std::time::Instant::now();
+        self.find_temporary_files_internal(stop_receiver, progress_sender);
+        info!("Ended finding temporary files which took {:?}", start_time.elapsed());
     }
 
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
@@ -229,27 +207,6 @@ impl Temporary {
     }
 }
 
-impl Default for Temporary {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl DebugPrint for Temporary {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
-    fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
-            return;
-        }
-        println!("### Information's");
-        println!("Temporary list size - {}", self.temporary_files.len());
-        println!("Delete Method - {:?}", self.delete_method);
-        self.debug_print_common();
-    }
-}
-
 impl SaveResults for Temporary {
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
@@ -297,5 +254,49 @@ impl PrintResults for Temporary {
         for file_entry in &self.temporary_files {
             println!("{}", file_entry.path.display());
         }
+    }
+}
+
+impl Default for Temporary {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DebugPrint for Temporary {
+    #[allow(dead_code)]
+    #[allow(unreachable_code)]
+    fn debug_print(&self) {
+        #[cfg(not(debug_assertions))]
+        {
+            return;
+        }
+        println!("### Information's");
+        println!("Temporary list size - {}", self.temporary_files.len());
+        println!("Delete Method - {:?}", self.delete_method);
+        self.debug_print_common();
+    }
+}
+
+impl CommonData for Temporary {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
+impl Temporary {
+    pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
+        &self.temporary_files
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
     }
 }

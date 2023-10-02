@@ -20,25 +20,10 @@ pub struct EmptyFolder {
     empty_folder_list: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
 }
 
-impl CommonData for EmptyFolder {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-}
-
 /// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_empty_folders: usize,
-}
-
-impl Info {
-    pub fn new() -> Self {
-        Default::default()
-    }
 }
 
 /// Method implementation for `EmptyFolder`
@@ -62,9 +47,14 @@ impl EmptyFolder {
         &self.information
     }
 
-    /// Public function used by CLI to search for empty folders
     pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         info!("Starting finding empty folders");
+        let start_time = std::time::Instant::now();
+        self.find_empty_folders_internal(stop_receiver, progress_sender);
+        info!("Ended finding empty folders which took {:?}", start_time.elapsed());
+    }
+
+    fn find_empty_folders_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -233,5 +223,14 @@ impl PrintResults for EmptyFolder {
         for name in self.empty_folder_list.keys() {
             println!("{}", name.display());
         }
+    }
+}
+
+impl CommonData for EmptyFolder {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
     }
 }
