@@ -181,6 +181,7 @@ pub struct BadExtensions {
     bad_extensions_files: Vec<BadFileEntry>,
     include_files_without_extension: bool,
 }
+
 impl BadExtensions {
     pub fn new() -> Self {
         Self {

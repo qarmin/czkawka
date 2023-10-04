@@ -377,6 +377,7 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnu
         }
     }
 }
+
 pub fn get_tree_view_name_from_notebook_enum(notebook_enum: NotebookMainEnum) -> &'static str {
     match notebook_enum {
         NotebookMainEnum::Duplicate => "tree_view_duplicate_finder",
@@ -400,6 +401,7 @@ pub fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookU
         e => panic!("{}", e),
     }
 }
+
 pub fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: NotebookUpperEnum) -> &'static str {
     match notebook_upper_enum {
         NotebookUpperEnum::IncludedDirectories => "tree_view_upper_included_directories",

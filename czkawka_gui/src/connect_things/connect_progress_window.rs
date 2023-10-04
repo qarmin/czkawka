@@ -44,6 +44,7 @@ pub fn connect_progress_window(gui_data: &GuiData, mut progress_receiver: Unboun
     };
     main_context.spawn_local(future);
 }
+
 fn process_bar_empty_files(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
@@ -51,6 +52,7 @@ fn process_bar_empty_files(gui_data: &GuiData, item: &ProgressData) {
     label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 }
+
 fn process_bar_empty_folder(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
@@ -61,6 +63,7 @@ fn process_bar_empty_folder(gui_data: &GuiData, item: &ProgressData) {
     ));
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 }
+
 fn process_bar_big_files(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
@@ -68,6 +71,7 @@ fn process_bar_big_files(gui_data: &GuiData, item: &ProgressData) {
     label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 }
+
 fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
@@ -110,6 +114,7 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
         _ => panic!(),
     }
 }
+
 fn process_bar_similar_images(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
@@ -135,6 +140,7 @@ fn process_bar_similar_images(gui_data: &GuiData, item: &ProgressData) {
         _ => panic!(),
     }
 }
+
 fn process_bar_similar_videos(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
@@ -155,6 +161,7 @@ fn process_bar_similar_videos(gui_data: &GuiData, item: &ProgressData) {
         _ => panic!(),
     }
 }
+
 fn process_bar_temporary(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
@@ -162,6 +169,7 @@ fn process_bar_temporary(gui_data: &GuiData, item: &ProgressData) {
     label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 }
+
 fn process_bar_invalid_symlinks(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
@@ -169,6 +177,7 @@ fn process_bar_invalid_symlinks(gui_data: &GuiData, item: &ProgressData) {
     label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 }
+
 fn process_bar_broken_files(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
@@ -189,6 +198,7 @@ fn process_bar_broken_files(gui_data: &GuiData, item: &ProgressData) {
         _ => panic!(),
     }
 }
+
 fn process_bar_bad_extensions(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
@@ -209,6 +219,7 @@ fn process_bar_bad_extensions(gui_data: &GuiData, item: &ProgressData) {
         _ => panic!(),
     }
 }
+
 fn process_bar_duplicates(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
@@ -289,6 +300,7 @@ fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, p
 fn file_number_tm(item: &ProgressData) -> HashMap<&'static str, String> {
     generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
 }
+
 fn progress_ratio_tm(item: &ProgressData) -> HashMap<&'static str, String> {
     generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
 }

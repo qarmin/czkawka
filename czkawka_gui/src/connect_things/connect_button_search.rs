@@ -1,9 +1,9 @@
-use crossbeam_channel::Receiver;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
+use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use glib::Sender;
 use gtk4::prelude::*;
@@ -209,6 +209,7 @@ struct LoadedCommonItems {
     maximal_file_size: u64,
     ignore_other_filesystems: bool,
 }
+
 impl LoadedCommonItems {
     fn load_items(gui_data: &GuiData) -> Self {
         let check_button_settings_one_filesystem = gui_data.settings.check_button_settings_one_filesystem.clone();
@@ -278,6 +279,7 @@ impl LoadedCommonItems {
         }
     }
 }
+
 fn duplicate_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -389,6 +391,7 @@ fn empty_directories_search(
         glib_stop_sender.send(Message::EmptyFolders(ef)).unwrap();
     });
 }
+
 fn big_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -424,6 +427,7 @@ fn big_files_search(
         glib_stop_sender.send(Message::BigFiles(bf)).unwrap();
     });
 }
+
 fn temporary_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -449,6 +453,7 @@ fn temporary_files_search(
         glib_stop_sender.send(Message::Temporary(tf)).unwrap();
     });
 }
+
 fn same_music_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -550,6 +555,7 @@ fn same_music_search(
         button_app_info.set_sensitive(true);
     }
 }
+
 fn broken_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -624,6 +630,7 @@ fn broken_files_search(
         button_app_info.set_sensitive(true);
     }
 }
+
 fn similar_image_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -685,6 +692,7 @@ fn similar_image_search(
         glib_stop_sender.send(Message::SimilarImages(sf)).unwrap();
     });
 }
+
 fn similar_video_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -728,6 +736,7 @@ fn similar_video_search(
         glib_stop_sender.send(Message::SimilarVideos(sf)).unwrap();
     });
 }
+
 fn bad_symlinks_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -754,6 +763,7 @@ fn bad_symlinks_search(
         glib_stop_sender.send(Message::InvalidSymlinks(isf)).unwrap();
     });
 }
+
 fn bad_extensions_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
