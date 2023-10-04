@@ -12,7 +12,7 @@ jobs:
   linux-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.67.1 ]
+        toolchain: [ stable, 1.70.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
@@ -29,7 +29,7 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.67.1') }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.70.0') }}
 
       - name: Store Linux GUI Heif
         uses: actions/upload-artifact@v3
