@@ -46,6 +46,8 @@ When using additional command line arguments, saving at exit option become disab
 
 Both relative and absolute path are supported, so user can use both `../home` and `/home`.
 
+After adding a path it is possible to mark one or more paths as a _Reference folder_. Files in the _Reference folder_ cannot be acted upon, e.g. selected, moved or removed. This behaviour can be useful if you want to leave a folder untouched, but still use it for comparison against others.
+
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
 
