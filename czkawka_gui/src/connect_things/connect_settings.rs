@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
-use czkawka_core::common::load_cache_from_file_generalized;
+use czkawka_core::common::{load_cache_from_file_generalized, save_cache_to_file_generalized};
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
@@ -176,7 +176,9 @@ pub fn connect_settings(gui_data: &GuiData) {
                                     );
 
                                     if let Some(cache_entries) = loaded_items {
-                                        czkawka_core::similar_images::save_hashes_to_file(&cache_entries, &mut messages, false, *hash_size, *hash_alg, *image_filter);
+                                        let save_messages =
+                                            save_cache_to_file_generalized(&czkawka_core::similar_images::get_cache_file(hash_size, hash_alg, image_filter), &cache_entries, false);
+                                        messages.extend_with_another_messages(save_messages);
                                     }
                                 }
                             }
@@ -206,7 +208,8 @@ pub fn connect_settings(gui_data: &GuiData) {
                             load_cache_from_file_generalized::<czkawka_core::similar_videos::FileEntry>(&czkawka_core::similar_videos::get_cache_file(), true);
 
                         if let Some(cache_entries) = loaded_items {
-                            czkawka_core::similar_videos::save_hashes_to_file(&cache_entries, &mut messages, false);
+                            let save_messages = save_cache_to_file_generalized(&czkawka_core::similar_videos::get_cache_file(), &cache_entries, false);
+                            messages.extend_with_another_messages(save_messages);
                         }
 
                         messages.messages.push(flg!("cache_properly_cleared"));

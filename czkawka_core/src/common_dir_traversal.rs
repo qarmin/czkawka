@@ -70,6 +70,12 @@ impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
     }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
+    }
 }
 
 // Symlinks

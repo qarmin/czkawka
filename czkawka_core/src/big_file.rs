@@ -17,7 +17,7 @@ use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_di
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,

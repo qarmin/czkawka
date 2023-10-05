@@ -24,11 +24,10 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::{
-    create_crash_message, filter_reference_folders_generic, load_cache_from_file_generalized, open_cache_folder, prepare_thread_handler_common,
+    create_crash_message, filter_reference_folders_generic, load_cache_from_file_generalized, prepare_thread_handler_common, save_cache_to_file_generalized,
     send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
@@ -71,6 +70,12 @@ pub struct MusicEntry {
 impl ResultEntry for MusicEntry {
     fn get_path(&self) -> &Path {
         &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
     }
 }
 
@@ -268,8 +273,9 @@ impl SameMusic {
         for file_entry in vec_file_entry {
             all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
         }
-        let save_also_as_json = self.get_save_also_as_json();
-        save_cache_to_file(&all_results, &mut self.common_data.text_messages, save_also_as_json, checking_tags);
+
+        let messages = save_cache_to_file_generalized(get_cache_file(checking_tags), &all_results, self.common_data.save_also_as_json);
+        self.get_text_messages_mut().extend_with_another_messages(messages);
         debug!("save_cache - end");
     }
 
@@ -746,35 +752,6 @@ impl SameMusic {
     }
 }
 
-fn save_cache_to_file(hashmap: &BTreeMap<String, MusicEntry>, text_messages: &mut Messages, save_also_as_json: bool, checking_tags: bool) {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
-        open_cache_folder(get_cache_file(checking_tags), true, save_also_as_json, &mut text_messages.warnings)
-    {
-        {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
-            if let Err(e) = bincode::serialize_into(writer, hashmap) {
-                text_messages
-                    .warnings
-                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        }
-        if save_also_as_json {
-            if let Some(file_handler_json) = file_handler_json {
-                let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, hashmap) {
-                    text_messages
-                        .warnings
-                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
-                    return;
-                }
-            }
-        }
-
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
-    }
-}
-
 // TODO this should be taken from rusty-chromaprint repo, not reimplemented here
 fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> anyhow::Result<Vec<u32>> {
     let path = path.as_ref();
@@ -941,9 +918,9 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
 // Using different cache folders, because loading cache just for finding duplicated tags would be really slow
 fn get_cache_file(checking_tags: bool) -> &'static str {
     if checking_tags {
-        "cache_same_music_tags.bin"
+        "cache_same_music_tags_61.bin"
     } else {
-        "cache_same_music_fingerprints.bin"
+        "cache_same_music_fingerprints_61.bin"
     }
 }
 

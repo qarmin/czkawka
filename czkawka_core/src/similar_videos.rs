@@ -16,10 +16,10 @@ use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{
-    check_folder_children, load_cache_from_file_generalized, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS,
+    check_folder_children, load_cache_from_file_generalized, prepare_thread_handler_common, save_cache_to_file_generalized, send_info_and_wait_for_ending_all_threads,
+    VIDEO_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
 use crate::flc;
@@ -39,6 +39,12 @@ pub struct FileEntry {
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
     }
 }
 
@@ -376,8 +382,9 @@ impl SimilarVideos {
             for file_entry in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            let save_also_as_json = self.get_save_also_as_json();
-            save_hashes_to_file(&all_results, &mut self.common_data.text_messages, save_also_as_json);
+
+            let messages = save_cache_to_file_generalized(&get_cache_file(), &all_results, self.common_data.save_also_as_json);
+            self.get_text_messages_mut().extend_with_another_messages(messages);
         }
         debug!("save_cache - end");
     }
@@ -514,35 +521,8 @@ impl PrintResults for SimilarVideos {
     }
 }
 
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
-        {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
-            if let Err(e) = bincode::serialize_into(writer, hashmap) {
-                text_messages
-                    .warnings
-                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        }
-        if save_also_as_json {
-            if let Some(file_handler_json) = file_handler_json {
-                let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, hashmap) {
-                    text_messages
-                        .warnings
-                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
-                    return;
-                }
-            }
-        }
-
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
-    }
-}
-
 pub fn get_cache_file() -> String {
-    "cache_similar_videos.bin".to_string()
+    "cache_similar_videos_61.bin".to_string()
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {
