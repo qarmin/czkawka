@@ -14,6 +14,7 @@ use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::split_path;
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
+use czkawka_core::common_tool::CommonData;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -224,7 +225,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
             }
         }
         // Returning false here would close the receiver and have senders fail
-        Continue(true)
+        glib::ControlFlow::Continue
     });
 }
 
@@ -659,7 +660,7 @@ fn computer_similar_videos(
             if ff.get_use_reference() {
                 let vec_struct_similar = ff.get_similar_videos_referenced();
 
-                for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                for (base_file_entry, vec_file_entry) in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -681,7 +682,7 @@ fn computer_similar_videos(
             } else {
                 let vec_struct_similar = ff.get_similar_videos();
 
-                for vec_file_entry in vec_struct_similar.iter() {
+                for vec_file_entry in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -761,7 +762,7 @@ fn computer_similar_images(
 
             if sf.get_use_reference() {
                 let vec_struct_similar: &Vec<(similar_images::FileEntry, Vec<similar_images::FileEntry>)> = sf.get_similar_images_referenced();
-                for (base_file_entry, vec_file_entry) in vec_struct_similar.iter() {
+                for (base_file_entry, vec_file_entry) in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -804,7 +805,7 @@ fn computer_similar_images(
                 }
             } else {
                 let vec_struct_similar = sf.get_similar_images();
-                for vec_file_entry in vec_struct_similar.iter() {
+                for vec_file_entry in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
@@ -956,7 +957,7 @@ fn computer_big_files(
 
             let vector = bf.get_big_files();
 
-            for (size, file_entry) in vector.iter() {
+            for (size, file_entry) in vector {
                 let (directory, file) = split_path(&file_entry.path);
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsBigFiles::SelectionButton as u32, &false),

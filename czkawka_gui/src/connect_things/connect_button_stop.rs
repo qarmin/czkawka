@@ -8,7 +8,7 @@ use crate::help_functions::KEY_ENTER;
 fn send_stop_message(stop_sender: &Sender<()>) {
     stop_sender
         .try_send(())
-        .map_or_else(|e| if matches!(e, TrySendError::Full(_)) { Ok(()) } else { Err(e) }, |_| Ok(()))
+        .map_or_else(|e| if matches!(e, TrySendError::Full(())) { Ok(()) } else { Err(e) }, |()| Ok(()))
         .unwrap();
 }
 

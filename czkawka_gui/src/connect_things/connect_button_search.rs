@@ -1,18 +1,20 @@
-use crossbeam_channel::Receiver;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
+use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use glib::Sender;
 use gtk4::prelude::*;
 use gtk4::Grid;
+use log::debug;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::{BrokenFiles, CheckedTypes};
 use czkawka_core::common_dir_traversal::{CheckingMethod, ProgressData};
+use czkawka_core::common_tool::CommonData;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -84,7 +86,7 @@ pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: Sender<Messag
         let glib_stop_sender = glib_stop_sender.clone();
         let stop_receiver = stop_receiver.clone();
         // Consume any stale stop messages.
-        stop_receiver.try_iter().for_each(|_| ());
+        stop_receiver.try_iter().for_each(|()| ());
 
         label_stage.show();
 
@@ -207,6 +209,7 @@ struct LoadedCommonItems {
     maximal_file_size: u64,
     ignore_other_filesystems: bool,
 }
+
 impl LoadedCommonItems {
     fn load_items(gui_data: &GuiData) -> Self {
         let check_button_settings_one_filesystem = gui_data.settings.check_button_settings_one_filesystem.clone();
@@ -276,6 +279,7 @@ impl LoadedCommonItems {
         }
     }
 }
+
 fn duplicate_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -296,7 +300,7 @@ fn duplicate_search(
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
 
     image_preview_duplicates.hide();
-    get_list_store(&tree_view_duplicate_finder).clear();
+    clean_tree_view(&tree_view_duplicate_finder);
 
     let check_method_index = combo_box_duplicate_check_method.active().unwrap() as usize;
     let check_method = DUPLICATES_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
@@ -348,7 +352,7 @@ fn empty_files_search(
     grid_progress_stages.hide();
 
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-    get_list_store(&tree_view_empty_files_finder).clear();
+    clean_tree_view(&tree_view_empty_files_finder);
     // Find empty files
     thread::spawn(move || {
         let mut vf = EmptyFiles::new();
@@ -375,7 +379,7 @@ fn empty_directories_search(
     grid_progress_stages.hide();
 
     let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-    get_list_store(&tree_view_empty_folder_finder).clear();
+    clean_tree_view(&tree_view_empty_folder_finder);
 
     thread::spawn(move || {
         let mut ef = EmptyFolder::new();
@@ -387,6 +391,7 @@ fn empty_directories_search(
         glib_stop_sender.send(Message::EmptyFolders(ef)).unwrap();
     });
 }
+
 fn big_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -400,7 +405,7 @@ fn big_files_search(
     let combo_box_big_files_mode = gui_data.main_notebook.combo_box_big_files_mode.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
     let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
-    get_list_store(&tree_view_big_files_finder).clear();
+    clean_tree_view(&tree_view_big_files_finder);
 
     let big_files_mode_index = combo_box_big_files_mode.active().unwrap() as usize;
     let big_files_mode = BIG_FILES_CHECK_METHOD_COMBO_BOX[big_files_mode_index].check_method;
@@ -422,6 +427,7 @@ fn big_files_search(
         glib_stop_sender.send(Message::BigFiles(bf)).unwrap();
     });
 }
+
 fn temporary_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -433,7 +439,7 @@ fn temporary_files_search(
     grid_progress_stages.hide();
 
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-    get_list_store(&tree_view_temporary_files_finder).clear();
+    clean_tree_view(&tree_view_temporary_files_finder);
 
     thread::spawn(move || {
         let mut tf = Temporary::new();
@@ -447,6 +453,7 @@ fn temporary_files_search(
         glib_stop_sender.send(Message::Temporary(tf)).unwrap();
     });
 }
+
 fn same_music_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -470,7 +477,7 @@ fn same_music_search(
     let scale_seconds_same_music = gui_data.main_notebook.scale_seconds_same_music.clone();
     let scale_similarity_same_music = gui_data.main_notebook.scale_similarity_same_music.clone();
 
-    get_list_store(&tree_view_same_music_finder).clear();
+    clean_tree_view(&tree_view_same_music_finder);
 
     let approximate_comparison = check_button_music_approximate_comparison.is_active();
 
@@ -548,6 +555,7 @@ fn same_music_search(
         button_app_info.set_sensitive(true);
     }
 }
+
 fn broken_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -565,7 +573,7 @@ fn broken_files_search(
     let check_button_broken_files_image: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_image.clone();
     let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
 
-    get_list_store(&tree_view_broken_files).clear();
+    clean_tree_view(&tree_view_broken_files);
 
     let mut checked_types: CheckedTypes = CheckedTypes::NONE;
 
@@ -622,6 +630,7 @@ fn broken_files_search(
         button_app_info.set_sensitive(true);
     }
 }
+
 fn similar_image_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -641,7 +650,7 @@ fn similar_image_search(
     let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
 
-    get_list_store(&tree_view_similar_images_finder).clear();
+    clean_tree_view(&tree_view_similar_images_finder);
     image_preview_similar_images.hide();
 
     let hash_size_index = combo_box_image_hash_size.active().unwrap() as usize;
@@ -683,6 +692,7 @@ fn similar_image_search(
         glib_stop_sender.send(Message::SimilarImages(sf)).unwrap();
     });
 }
+
 fn similar_video_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -697,7 +707,7 @@ fn similar_video_search(
     let check_button_settings_similar_videos_delete_outdated_cache = gui_data.settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
     let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
     let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
-    get_list_store(&tree_view_similar_videos_finder).clear();
+    clean_tree_view(&tree_view_similar_videos_finder);
 
     let tolerance = scale_similarity_similar_videos.value() as i32;
 
@@ -726,6 +736,7 @@ fn similar_video_search(
         glib_stop_sender.send(Message::SimilarVideos(sf)).unwrap();
     });
 }
+
 fn bad_symlinks_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -737,7 +748,7 @@ fn bad_symlinks_search(
     grid_progress_stages.hide();
 
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-    get_list_store(&tree_view_invalid_symlinks).clear();
+    clean_tree_view(&tree_view_invalid_symlinks);
 
     thread::spawn(move || {
         let mut isf = InvalidSymlinks::new();
@@ -752,6 +763,7 @@ fn bad_symlinks_search(
         glib_stop_sender.send(Message::InvalidSymlinks(isf)).unwrap();
     });
 }
+
 fn bad_extensions_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
@@ -763,7 +775,7 @@ fn bad_extensions_search(
     grid_progress_stages.show();
 
     let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
-    get_list_store(&tree_view_bad_extensions).clear();
+    clean_tree_view(&tree_view_bad_extensions);
 
     thread::spawn(move || {
         let mut be = BadExtensions::new();
@@ -779,4 +791,11 @@ fn bad_extensions_search(
         be.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
         glib_stop_sender.send(Message::BadExtensions(be)).unwrap();
     });
+}
+
+fn clean_tree_view(tree_view: &gtk4::TreeView) {
+    debug!("Start clean tree view");
+    let list_store = get_list_store(tree_view);
+    list_store.clear();
+    debug!("Cleared tree view");
 }

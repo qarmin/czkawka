@@ -1,20 +1,21 @@
-use crate::common_messages::Messages;
-
-#[derive(Clone, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Extensions {
     file_extensions: Vec<String>,
 }
 
 impl Extensions {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     /// After, extensions cannot contains any dot, commas etc.
-    pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String, text_messages: &mut Messages) {
+    pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) -> (Vec<String>, Vec<String>, Vec<String>) {
+        let mut messages = Vec::new();
+        let mut warnings = Vec::new();
+        let errors = Vec::new();
+
         if allowed_extensions.trim().is_empty() {
-            return;
+            return (messages, warnings, errors);
         }
         allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
         allowed_extensions = allowed_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
@@ -32,14 +33,12 @@ impl Extensions {
             }
 
             if extension[1..].contains('.') {
-                text_messages.warnings.push(format!("{extension} is not valid extension because contains dot inside"));
+                warnings.push(format!("{extension} is not valid extension because contains dot inside"));
                 continue;
             }
 
             if extension[1..].contains(' ') {
-                text_messages
-                    .warnings
-                    .push(format!("{extension} is not valid extension because contains empty space inside"));
+                warnings.push(format!("{extension} is not valid extension because contains empty space inside"));
                 continue;
             }
 
@@ -49,13 +48,11 @@ impl Extensions {
         }
 
         if self.file_extensions.is_empty() {
-            text_messages
-                .messages
-                .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
+            messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
+        (messages, warnings, errors)
     }
 
-    #[must_use]
     pub fn matches_filename(&self, file_name: &str) -> bool {
         // assert_eq!(file_name, file_name.to_lowercase());
         if !self.file_extensions.is_empty() && !self.file_extensions.iter().any(|e| file_name.ends_with(e)) {
@@ -64,7 +61,6 @@ impl Extensions {
         true
     }
 
-    #[must_use]
     pub fn using_custom_extensions(&self) -> bool {
         !self.file_extensions.is_empty()
     }

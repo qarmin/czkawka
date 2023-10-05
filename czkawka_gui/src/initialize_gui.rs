@@ -27,7 +27,7 @@ use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
 use crate::{delete_things, flg};
 
-pub fn initialize_gui(gui_data: &mut GuiData) {
+pub fn initialize_gui(gui_data: &GuiData) {
     //// Initialize button
     {
         let buttons = &gui_data.bottom_buttons.buttons_array;
@@ -273,7 +273,7 @@ pub fn initialize_gui(gui_data: &mut GuiData) {
 
         window_progress.connect_close_request(move |_| {
             stop_sender.send(()).unwrap();
-            gtk4::Inhibit(true)
+            glib::Propagation::Stop
         });
     }
 

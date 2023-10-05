@@ -10,9 +10,10 @@ use std::ffi::OsString;
 
 use futures::channel::mpsc;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
+use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
-use gtk4::{Application, Inhibit};
+use gtk4::Application;
 
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;
@@ -32,7 +33,7 @@ use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
-use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
+use czkawka_core::common::{get_number_of_threads, set_number_of_threads, setup_logger};
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::*;
 use gui_structs::gui_data::*;
@@ -70,6 +71,7 @@ mod tests;
 fn main() {
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
     application.connect_command_line(move |app, cmdline| {
+        setup_logger(false);
         build_ui(app, &cmdline.arguments());
         0
     });
@@ -77,15 +79,15 @@ fn main() {
 }
 
 fn build_ui(application: &Application, arguments: &[OsString]) {
-    let mut gui_data: GuiData = GuiData::new_with_application(application);
+    let gui_data: GuiData = GuiData::new_with_application(application);
 
     // Used for getting data from thread
-    let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+    let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(Priority::default());
 
     // Futures progress report
     let (progress_sender, progress_receiver): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
 
-    initialize_gui(&mut gui_data);
+    initialize_gui(&gui_data);
     validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup
     reset_configuration(false, &gui_data.upper_notebook, &gui_data.main_notebook, &gui_data.settings, &gui_data.text_view_errors); // Fallback for invalid loading setting project
     load_system_language(&gui_data); // Check for default system language, must be loaded after initializing GUI and before loading settings from file
@@ -138,6 +140,6 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
             // Save configuration at exit
         }
         taskbar_state.borrow_mut().release();
-        Inhibit(false)
+        glib::Propagation::Proceed
     });
 }

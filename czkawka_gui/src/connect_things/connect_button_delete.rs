@@ -353,14 +353,14 @@ pub fn empty_folder_remover(
         if !error_happened {
             if !use_trash {
                 match fs::remove_dir_all(get_full_name_from_path_name(&path, &name)) {
-                    Ok(_) => {
+                    Ok(()) => {
                         model.remove(&iter);
                     }
                     Err(_inspected) => error_happened = true,
                 }
             } else {
                 match trash::delete(get_full_name_from_path_name(&path, &name)) {
-                    Ok(_) => {
+                    Ok(()) => {
                         model.remove(&iter);
                     }
                     Err(_inspected) => error_happened = true,
@@ -420,7 +420,7 @@ pub fn basic_remove(
 
         if !use_trash {
             match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
-                Ok(_) => {
+                Ok(()) => {
                     model.remove(&iter);
                 }
 
@@ -435,7 +435,7 @@ pub fn basic_remove(
             }
         } else {
             match trash::delete(get_full_name_from_path_name(&path, &name)) {
-                Ok(_) => {
+                Ok(()) => {
                     model.remove(&iter);
                 }
                 Err(e) => {
@@ -503,7 +503,7 @@ pub fn tree_remove(
 
         model.remove(&iter);
 
-        map_with_path_to_delete.entry(path.clone()).or_insert_with(Vec::new).push(file_name);
+        map_with_path_to_delete.entry(path.clone()).or_default().push(file_name);
     }
 
     // Delete duplicated entries, and remove real files

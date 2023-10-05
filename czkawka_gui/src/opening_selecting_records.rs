@@ -1,5 +1,4 @@
 use gdk4::{Key, ModifierType};
-use glib::signal::Inhibit;
 use gtk4::prelude::*;
 use gtk4::GestureClick;
 
@@ -8,7 +7,12 @@ use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
-pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::EventControllerKey, _key_value: Key, key_code: u32, _modifier_type: ModifierType) -> Inhibit {
+pub fn opening_enter_function_ported_upper_directories(
+    event_controller: &gtk4::EventControllerKey,
+    _key_value: Key,
+    key_code: u32,
+    _modifier_type: ModifierType,
+) -> glib::Propagation {
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
@@ -32,7 +36,7 @@ pub fn opening_enter_function_ported_upper_directories(event_controller: &gtk4::
         }
     }
     // false // True catches signal, and don't send it to function, e.g. up button is caught and don't move selection
-    Inhibit(false)
+    glib::Propagation::Proceed
 }
 
 pub fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_clicks: i32, _b: f64, _c: f64) {
@@ -64,7 +68,7 @@ pub fn opening_double_click_function_directories(gesture_click: &GestureClick, n
     }
 }
 
-pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> Inhibit {
+pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> glib::Propagation {
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
     #[cfg(debug_assertions)]
     {
@@ -80,7 +84,7 @@ pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey
         nt_object.column_selection,
         nt_object.column_header,
     );
-    Inhibit(false) // True catches signal, and don't send it to function, e.g. up button is caught and don't move selection
+    glib::Propagation::Proceed // True catches signal, and don't send it to function, e.g. up button is caught and don't move selection
 }
 
 pub fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {

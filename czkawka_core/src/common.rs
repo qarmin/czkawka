@@ -12,10 +12,12 @@ use std::{fs, thread};
 use anyhow::Result;
 use directories_next::ProjectDirs;
 use futures::channel::mpsc::UnboundedSender;
+use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
+use log::{debug, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -35,11 +37,25 @@ pub fn get_number_of_threads() -> usize {
     }
 }
 
+fn filtering_messages(record: &Record) -> bool {
+    if let Some(module_path) = record.module_path() {
+        !["symphonia", "i18n_embed"].iter().any(|&x| module_path.contains(x))
+    } else {
+        true
+    }
+}
+
+pub fn setup_logger(disabled_printing: bool) {
+    let log_level = if disabled_printing { LevelFilter::Off } else { LevelFilter::Info };
+
+    let config = ConfigBuilder::default().set_level(log_level).set_message_filtering(Some(filtering_messages)).build();
+    handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
+}
+
 pub fn set_default_number_of_threads() {
     set_number_of_threads(num_cpus::get());
 }
 
-#[must_use]
 pub fn get_default_number_of_threads() -> usize {
     num_cpus::get()
 }
@@ -66,7 +82,7 @@ pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
 ];
 pub const HEIC_EXTENSIONS: &[&str] = &[".heif", ".heifs", ".heic", ".heics", ".avci", ".avcs", ".avif", ".avifs"];
 
-pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip"];
+pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip", ".jar"];
 
 pub const PDF_FILES_EXTENSIONS: &[&str] = &[".pdf"];
 
@@ -78,7 +94,8 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     ".mp4", ".mpv", ".flv", ".mp4a", ".webm", ".mpg", ".mp2", ".mpeg", ".m4p", ".m4v", ".avi", ".wmv", ".qt", ".mov", ".swf", ".mkv",
 ];
 
-pub const LOOP_DURATION: u32 = 200; //ms
+pub const LOOP_DURATION: u32 = 20; //ms
+pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
 pub struct Common();
 
@@ -195,7 +212,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     Some(DynamicImage::ImageRgb8(image))
 }
 
-#[must_use]
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
         (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
@@ -204,7 +220,6 @@ pub fn split_path(path: &Path) -> (String, String) {
     }
 }
 
-#[must_use]
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
     format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
 }
@@ -221,7 +236,6 @@ impl Common {
         );
     }
 
-    #[must_use]
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
         let mut path: &Path;
         let mut warnings: Vec<String> = Vec::new();
@@ -237,7 +251,7 @@ impl Common {
         }
         warnings
     }
-    #[must_use]
+
     pub fn delete_one_entry(entry: &str) -> String {
         let path: &Path = Path::new(entry);
         let mut warning: String = String::new();
@@ -252,7 +266,7 @@ impl Common {
     }
 
     /// Function to check if directory match expression
-    #[must_use]
+
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
             return true;
@@ -305,7 +319,6 @@ impl Common {
         true
     }
 
-    #[must_use]
     pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
         let path = path_to_change.as_ref();
 
@@ -365,7 +378,6 @@ pub fn check_folder_children(
     dir_result.push(next_folder);
 }
 
-#[must_use]
 pub fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
 where
     T: ResultEntry,
@@ -385,7 +397,6 @@ where
         .collect::<Vec<(T, Vec<T>)>>()
 }
 
-#[must_use]
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&UnboundedSender<ProgressData>>,
     current_stage: u8,
@@ -401,21 +412,28 @@ pub fn prepare_thread_handler_common(
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
         let atomic_counter = atomic_counter.clone();
-        thread::spawn(move || loop {
-            progress_send
-                .unbounded_send(ProgressData {
-                    checking_method,
-                    current_stage,
-                    max_stage,
-                    entries_checked: atomic_counter.load(Ordering::Relaxed),
-                    entries_to_check: max_value,
-                    tool_type,
-                })
-                .unwrap();
-            if !progress_thread_run.load(Ordering::Relaxed) {
-                break;
+        thread::spawn(move || {
+            let mut time_since_last_send = SystemTime::now();
+
+            loop {
+                if time_since_last_send.elapsed().unwrap().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
+                    progress_send
+                        .unbounded_send(ProgressData {
+                            checking_method,
+                            current_stage,
+                            max_stage,
+                            entries_checked: atomic_counter.load(Ordering::Relaxed),
+                            entries_to_check: max_value,
+                            tool_type,
+                        })
+                        .unwrap();
+                    time_since_last_send = SystemTime::now();
+                }
+                if !progress_thread_run.load(Ordering::Relaxed) {
+                    break;
+                }
+                sleep(Duration::from_millis(LOOP_DURATION as u64));
             }
-            sleep(Duration::from_millis(LOOP_DURATION as u64));
         })
     } else {
         thread::spawn(|| {})
@@ -424,8 +442,10 @@ pub fn prepare_thread_handler_common(
 }
 
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
+    debug!("Sending info to stop all threads");
     progress_thread_run.store(false, Ordering::Relaxed);
     progress_thread_handle.join().unwrap();
+    debug!("All threads stopped");
 }
 
 #[cfg(test)]

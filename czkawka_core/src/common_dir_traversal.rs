@@ -27,7 +27,7 @@ pub struct ProgressData {
     pub tool_type: ToolType,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum ToolType {
     Duplicate,
     EmptyFolders,
@@ -40,11 +40,13 @@ pub enum ToolType {
     SimilarImages,
     SimilarVideos,
     TemporaryFiles,
+    #[default]
     None,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
 pub enum CheckingMethod {
+    #[default]
     None,
     Name,
     SizeName,
@@ -62,6 +64,7 @@ pub struct FileEntry {
     pub hash: String,
     pub symlink_info: Option<SymlinkInfo>,
 }
+
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
@@ -161,7 +164,6 @@ impl<'a, 'b> Default for DirTraversalBuilder<'a, 'b, ()> {
 }
 
 impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
-    #[must_use]
     pub fn new() -> DirTraversalBuilder<'a, 'b, ()> {
         DirTraversalBuilder {
             group_by: None,
@@ -183,86 +185,72 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
 }
 
 impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
-    #[must_use]
     pub fn root_dirs(mut self, dirs: Vec<PathBuf>) -> Self {
         self.root_dirs = dirs;
         self
     }
 
-    #[must_use]
     pub fn stop_receiver(mut self, stop_receiver: Option<&'a Receiver<()>>) -> Self {
         self.stop_receiver = stop_receiver;
         self
     }
 
-    #[must_use]
     pub fn progress_sender(mut self, progress_sender: Option<&'b UnboundedSender<ProgressData>>) -> Self {
         self.progress_sender = progress_sender;
         self
     }
 
-    #[must_use]
     pub fn checking_method(mut self, checking_method: CheckingMethod) -> Self {
         self.checking_method = checking_method;
         self
     }
 
-    #[must_use]
     pub fn max_stage(mut self, max_stage: u8) -> Self {
         self.max_stage = max_stage;
         self
     }
 
-    #[must_use]
     pub fn minimal_file_size(mut self, minimal_file_size: u64) -> Self {
         self.minimal_file_size = Some(minimal_file_size);
         self
     }
 
-    #[must_use]
     pub fn maximal_file_size(mut self, maximal_file_size: u64) -> Self {
         self.maximal_file_size = Some(maximal_file_size);
         self
     }
 
-    #[must_use]
     pub fn collect(mut self, collect: Collect) -> Self {
         self.collect = collect;
         self
     }
 
-    #[must_use]
     pub fn directories(mut self, directories: Directories) -> Self {
         self.directories = Some(directories);
         self
     }
 
-    #[must_use]
     pub fn allowed_extensions(mut self, allowed_extensions: Extensions) -> Self {
         self.allowed_extensions = Some(allowed_extensions);
         self
     }
 
-    #[must_use]
     pub fn excluded_items(mut self, excluded_items: ExcludedItems) -> Self {
         self.excluded_items = Some(excluded_items);
         self
     }
 
-    #[must_use]
     pub fn recursive_search(mut self, recursive_search: bool) -> Self {
         self.recursive_search = recursive_search;
         self
     }
 
-    #[must_use]
     pub fn tool_type(mut self, tool_type: ToolType) -> Self {
         self.tool_type = tool_type;
         self
     }
 
     #[cfg(target_family = "unix")]
-    #[must_use]
     pub fn exclude_other_filesystems(mut self, exclude_other_filesystems: bool) -> Self {
         match self.directories {
             Some(ref mut directories) => directories.set_exclude_other_filesystems(exclude_other_filesystems),
@@ -489,7 +477,7 @@ where
                 all_warnings.extend(warnings);
                 for fe in fe_result {
                     let key = (self.group_by)(&fe);
-                    grouped_file_entries.entry(key).or_insert_with(Vec::new).push(fe);
+                    grouped_file_entries.entry(key).or_default().push(fe);
                 }
                 for current_folder in &set_as_not_empty_folder_list {
                     set_as_not_empty_folder(&mut folder_entries, current_folder);

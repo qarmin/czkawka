@@ -3,7 +3,7 @@ name = "czkawka_core"
 version = "6.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.67.1"
+rust-version = "1.70.0"
 description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -12,7 +12,7 @@ repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
 humansize = "2.1"
-rayon = "1.7"
+rayon = "1.8"
 crossbeam-channel = "0.5"
 
 # For saving/loading config files to specific directories
@@ -25,8 +25,8 @@ image = "0.24"
 hamming = "0.1"
 
 # Needed by same music
-bitflags = "2.3"
-lofty = "0.14"
+bitflags = "2.4"
+lofty = "0.16"
 
 # Futures - needed by async progress sender
 futures = "0.3.28"
@@ -41,11 +41,11 @@ rusty-chromaprint = "0.1"
 symphonia = { version = "0.5", features = ["all"] }
 
 # Hashes for duplicate files
-blake3 = "1.4"
+blake3 = "1.5"
 crc32fast = "1.3"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
-tempfile = "3.6"
+tempfile = "3.8"
 
 # Video Duplicates
 vid_dup_finder_lib = "0.1"
@@ -57,9 +57,9 @@ bincode = "1.3"
 serde_json = "1.0"
 
 # Language
-i18n-embed = { version = "0.13", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.6"
-rust-embed = "6.8"
+i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.7"
+rust-embed = "8.0"
 once_cell = "1.18"
 
 # Raw image files
@@ -78,6 +78,9 @@ libheif-sys = { version = "=1.14.2", optional = true } # 1.14.3 brake compilatio
 anyhow = { version = "1.0" }
 
 state = "0.6"
+
+log = "0.4.20"
+handsome_logger = "0.8"
 
 [features]
 default = []

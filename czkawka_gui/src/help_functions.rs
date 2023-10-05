@@ -4,7 +4,6 @@ use std::io::BufReader;
 use std::path::PathBuf;
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use glib::signal::Inhibit;
 use glib::Error;
 use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
@@ -378,6 +377,7 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnu
         }
     }
 }
+
 pub fn get_tree_view_name_from_notebook_enum(notebook_enum: NotebookMainEnum) -> &'static str {
     match notebook_enum {
         NotebookMainEnum::Duplicate => "tree_view_duplicate_finder",
@@ -401,6 +401,7 @@ pub fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookU
         e => panic!("{}", e),
     }
 }
+
 pub fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: NotebookUpperEnum) -> &'static str {
     match notebook_upper_enum {
         NotebookUpperEnum::IncludedDirectories => "tree_view_upper_included_directories",
@@ -799,11 +800,11 @@ pub fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, curre
     }
 }
 
-pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> Inhibit {
+pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> glib::Propagation {
     scale.set_increments(1_f64, 1_f64);
     scale.set_round_digits(0);
     scale.set_fill_level(value.round());
-    Inhibit(false)
+    glib::Propagation::Proceed
 }
 
 #[cfg(test)]

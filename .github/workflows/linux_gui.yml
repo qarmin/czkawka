@@ -12,7 +12,7 @@ jobs:
   linux-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.67.1 ]
+        toolchain: [ stable, 1.70.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
@@ -29,7 +29,7 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.67.1') }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.70.0') }}
 
       - name: Store Linux GUI Heif
         uses: actions/upload-artifact@v3
@@ -97,9 +97,9 @@ jobs:
           rm -rf czkawka_gui
           cp target/release/czkawka_gui .
           strip czkawka_gui
-          wget https://github.com/AppImage/pkg2appimage/releases/download/continuous/pkg2appimage-1807-x86_64.AppImage
-          chmod +x pkg2appimage-1807-x86_64.AppImage
-          ./pkg2appimage-1807-x86_64.AppImage misc/czkawka-appimage-recipe.yml
+          wget https://github.com/AppImageCommunity/pkg2appimage/releases/download/continuous/pkg2appimage--x86_64.AppImage -O pkg2.appimage
+          chmod +x ./pkg2.appimage
+          ./pkg2.appimage misc/czkawka-appimage-recipe.yml
           mv out/Czkawka*.AppImage out/czkawka_gui-minimal.AppImage
 
       - name: Minimal Appimage Upload

@@ -37,7 +37,7 @@ pub fn connect_settings(gui_data: &GuiData) {
 
         window_settings.connect_close_request(move |window| {
             window.hide();
-            gtk4::Inhibit(true)
+            glib::Propagation::Stop
         });
     }
 

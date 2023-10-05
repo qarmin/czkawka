@@ -8,7 +8,8 @@ use commands::Commands;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::{self, BigFile, SearchMode};
 use czkawka_core::broken_files::{self, BrokenFiles};
-use czkawka_core::common::set_number_of_threads;
+use czkawka_core::common::{set_number_of_threads, setup_logger};
+use czkawka_core::common_tool::CommonData;
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -29,6 +30,8 @@ mod commands;
 
 fn main() {
     let command = Args::parse().command;
+
+    setup_logger(true);
 
     #[cfg(debug_assertions)]
     println!("{command:?}");

@@ -1,23 +1,24 @@
 use std::path::Path;
 
 use crate::common::Common;
-use crate::common_messages::Messages;
 
-#[derive(Clone, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct ExcludedItems {
     pub items: Vec<String>,
 }
 
 impl ExcludedItems {
-    #[must_use]
     pub fn new() -> Self {
         Default::default()
     }
     /// Setting excluded items which needs to contains * wildcard
     /// Are a lot of slower than absolute path, so it should be used to heavy
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>, text_messages: &mut Messages) {
+    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) -> (Vec<String>, Vec<String>, Vec<String>) {
+        let messages: Vec<String> = Vec::new();
+        let mut warnings: Vec<String> = Vec::new();
+        let errors: Vec<String> = Vec::new();
         if excluded_items.is_empty() {
-            return;
+            return (messages, warnings, errors);
         }
 
         let expressions: Vec<String> = excluded_items;
@@ -43,15 +44,14 @@ impl ExcludedItems {
                 continue;
             }
             if !expression.contains('*') {
-                text_messages
-                    .warnings
-                    .push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
+                warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
                 continue;
             }
 
             checked_expressions.push(expression);
         }
         self.items = checked_expressions;
+        (messages, warnings, errors)
     }
 
     /// Checks whether a specified path is excluded from searching
