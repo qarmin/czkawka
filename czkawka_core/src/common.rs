@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::io::BufReader;
@@ -18,12 +19,14 @@ use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 use log::{debug, LevelFilter, Record};
+use serde::Deserialize;
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 use crate::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
+use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -153,6 +156,56 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
         return Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)));
     }
     None
+}
+
+pub fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool) -> (Messages, Option<BTreeMap<String, T>>)
+where
+    for<'a> T: Deserialize<'a>,
+{
+    debug!("Loading cache from file {} (or json alternative)", cache_file_name);
+    let mut text_messages = Messages::new();
+
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(cache_file_name, false, true, &mut text_messages.warnings) {
+        let mut hashmap_loaded_entries: BTreeMap<String, T>;
+        if let Some(file_handler) = file_handler {
+            let reader = BufReader::new(file_handler);
+            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
+                    debug!("Failed to load cache from file {:?}", cache_file);
+                    return (text_messages, None);
+                }
+            };
+        } else {
+            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            hashmap_loaded_entries = match serde_json::from_reader(reader) {
+                Ok(t) => t,
+                Err(e) => {
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
+                    debug!("Failed to load cache from file {:?}", cache_file);
+                    return (text_messages, None);
+                }
+            };
+        }
+
+        // Don't load cache data if destination file not exists
+        if delete_outdated_cache {
+            debug!("Starting to removing outdated cache entries");
+            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
+            debug!("Completed removing outdated cache entries");
+        }
+
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
+
+        debug!("Loaded cache from file {} (or json alternative)", cache_file_name);
+        return (text_messages, Some(hashmap_loaded_entries));
+    }
+    (text_messages, None)
 }
 
 #[cfg(feature = "heif")]

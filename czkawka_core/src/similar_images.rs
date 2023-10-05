@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::{DirEntry, File, Metadata};
 use std::io::{Write, *};
 use std::path::{Path, PathBuf};
@@ -19,8 +19,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
-    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, load_cache_from_file_generalized, open_cache_folder, prepare_thread_handler_common,
+    send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_messages::Messages;
@@ -89,7 +89,7 @@ pub struct SimilarImages {
     image_hashes: HashMap<ImHash, Vec<FileEntry>>,
     // Hashmap with image hashes and Vector with names of files
     similarity: u32,
-    images_to_check: HashMap<String, FileEntry>,
+    images_to_check: BTreeMap<String, FileEntry>,
     hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
@@ -273,24 +273,18 @@ impl SimilarImages {
         }
     }
 
-    fn hash_images_load_cache(&mut self) -> (HashMap<String, FileEntry>, HashMap<String, FileEntry>, HashMap<String, FileEntry>) {
+    fn hash_images_load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
         debug!("hash_images_load_cache - start, use cache: {}", self.common_data.use_cache);
         let loaded_hash_map;
 
-        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
-        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
+        let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.common_data.use_cache {
-            loaded_hash_map = match load_hashes_from_file(
-                &mut self.common_data.text_messages,
-                self.common_data.delete_outdated_cache,
-                self.hash_size,
-                self.hash_alg,
-                self.image_filter,
-            ) {
-                Some(t) => t,
-                None => Default::default(),
-            };
+            let (messages, loaded_items) =
+                load_cache_from_file_generalized::<FileEntry>(&get_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter), self.get_delete_outdated_cache());
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
             for (name, file_entry) in &self.images_to_check {
                 if !loaded_hash_map.contains_key(name) {
@@ -373,18 +367,19 @@ impl SimilarImages {
         true
     }
 
-    fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: HashMap<String, FileEntry>) {
+    fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: BTreeMap<String, FileEntry>) {
         debug!("save_to_cache - start, using cache: {}", self.common_data.use_cache);
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: HashMap<String, FileEntry> = loaded_hash_map;
+            let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
+            let save_also_as_json = self.get_save_also_as_json();
             save_hashes_to_file(
                 &all_results,
                 &mut self.common_data.text_messages,
-                self.common_data.save_also_as_json,
+                save_also_as_json,
                 self.hash_size,
                 self.hash_alg,
                 self.image_filter,
@@ -946,7 +941,7 @@ impl PrintResults for SimilarImages {
 }
 
 pub fn save_hashes_to_file(
-    hashmap: &HashMap<String, FileEntry>,
+    hashmap: &BTreeMap<String, FileEntry>,
     text_messages: &mut Messages,
     save_also_as_json: bool,
     hash_size: u8,
@@ -1028,7 +1023,7 @@ pub fn load_hashes_from_file(
     None
 }
 
-fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
+pub fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
     format!(
         "cache_similar_images_{}_{}_{}_50.bin",
         hash_size,

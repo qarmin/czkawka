@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
+use czkawka_core::common::load_cache_from_file_generalized;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
@@ -169,7 +170,12 @@ pub fn connect_settings(gui_data: &GuiData) {
                                 FilterType::Triangle,
                             ] {
                                 for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
-                                    if let Some(cache_entries) = czkawka_core::similar_images::load_hashes_from_file(&mut messages, true, *hash_size, *hash_alg, *image_filter) {
+                                    let (mut messages, loaded_items) = load_cache_from_file_generalized::<czkawka_core::similar_images::FileEntry>(
+                                        &czkawka_core::similar_images::get_cache_file(hash_size, hash_alg, image_filter),
+                                        true,
+                                    );
+
+                                    if let Some(cache_entries) = loaded_items {
                                         czkawka_core::similar_images::save_hashes_to_file(&cache_entries, &mut messages, false, *hash_size, *hash_alg, *image_filter);
                                     }
                                 }
@@ -196,8 +202,10 @@ pub fn connect_settings(gui_data: &GuiData) {
 
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
-                        let mut messages: Messages = Messages::new();
-                        if let Some(cache_entries) = czkawka_core::similar_videos::load_hashes_from_file(&mut messages, true) {
+                        let (mut messages, loaded_items) =
+                            load_cache_from_file_generalized::<czkawka_core::similar_videos::FileEntry>(&czkawka_core::similar_videos::get_cache_file(), true);
+
+                        if let Some(cache_entries) = loaded_items {
                             czkawka_core::similar_videos::save_hashes_to_file(&cache_entries, &mut messages, false);
                         }
 

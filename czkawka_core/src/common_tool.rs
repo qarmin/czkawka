@@ -103,6 +103,9 @@ pub trait CommonData {
     fn get_text_messages(&self) -> &Messages {
         &self.get_cd().text_messages
     }
+    fn get_text_messages_mut(&mut self) -> &mut Messages {
+        &mut self.get_cd_mut().text_messages
+    }
 
     fn set_save_also_as_json(&mut self, save_also_as_json: bool) {
         self.get_cd_mut().save_also_as_json = save_also_as_json;

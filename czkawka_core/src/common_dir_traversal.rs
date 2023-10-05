@@ -8,6 +8,7 @@ use std::time::UNIX_EPOCH;
 use crossbeam_channel::Receiver;
 use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_directory::Directories;
@@ -44,7 +45,7 @@ pub enum ToolType {
     None,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Default, Deserialize, Serialize)]
 pub enum CheckingMethod {
     #[default]
     None,
@@ -56,7 +57,7 @@ pub enum CheckingMethod {
     AudioContent,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -75,13 +76,13 @@ impl ResultEntry for FileEntry {
 
 const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct SymlinkInfo {
     pub destination_path: PathBuf,
     pub type_of_error: ErrorType,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Copy)]
+#[derive(Clone, Debug, PartialEq, Eq, Copy, Deserialize, Serialize)]
 pub enum ErrorType {
     InfiniteRecursion,
     NonExistentFile,

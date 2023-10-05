@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
-use std::io::{BufReader, BufWriter};
+use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -18,8 +18,8 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_folder_children, create_crash_message, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
-    IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
+    check_folder_children, create_crash_message, load_cache_from_file_generalized, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
+    AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_messages::Messages;
@@ -349,10 +349,9 @@ impl BrokenFiles {
         let files_to_check = mem::take(&mut self.files_to_check);
 
         if self.common_data.use_cache {
-            loaded_hash_map = match load_cache_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache) {
-                Some(t) => t,
-                None => Default::default(),
-            };
+            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(&get_cache_file(), self.get_delete_outdated_cache());
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
             for (name, file_entry) in files_to_check {
                 let checked_extension = check_extension_allowed(&file_entry.type_of_file, &self.checked_types); // Only broken
@@ -440,7 +439,8 @@ impl BrokenFiles {
             for (_name, file_entry) in loaded_hash_map {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_cache_to_file(&all_results, &mut self.common_data.text_messages, self.common_data.save_also_as_json);
+            let save_as_json = self.get_save_also_as_json();
+            save_cache_to_file(&all_results, &mut self.common_data.text_messages, save_as_json);
         }
         debug!("save_to_cache - end");
     }
@@ -569,45 +569,6 @@ fn save_cache_to_file(old_hashmap: &BTreeMap<String, FileEntry>, text_messages: 
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
     }
-}
-
-fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry>;
-        if let Some(file_handler) = file_handler {
-            let reader = BufReader::new(file_handler);
-            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                    return None;
-                }
-            };
-        } else {
-            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
-            hashmap_loaded_entries = match serde_json::from_reader(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
-                    return None;
-                }
-            };
-        }
-
-        // Don't load cache data if destination file not exists
-        if delete_outdated_cache {
-            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
-        }
-
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
-
-        return Some(hashmap_loaded_entries);
-    }
-    None
 }
 
 fn get_cache_file() -> String {
