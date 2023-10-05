@@ -40,6 +40,11 @@ pub struct FileEntry {
     pub type_of_file: TypeOfFile,
     pub error_string: String,
 }
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum TypeOfFile {

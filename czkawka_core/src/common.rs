@@ -1,3 +1,4 @@
+use rayon::iter::ParallelIterator;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
@@ -19,6 +20,7 @@ use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 use log::{debug, LevelFilter, Record};
+use rayon::prelude::*;
 use serde::Deserialize;
 
 // #[cfg(feature = "heif")]
@@ -160,16 +162,17 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
 
 pub fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool) -> (Messages, Option<BTreeMap<String, T>>)
 where
-    for<'a> T: Deserialize<'a>,
+    for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync,
 {
     debug!("Loading cache from file {} (or json alternative)", cache_file_name);
     let mut text_messages = Messages::new();
 
     if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(cache_file_name, false, true, &mut text_messages.warnings) {
-        let mut hashmap_loaded_entries: BTreeMap<String, T>;
+        let mut vec_loaded_entries: Vec<T>;
         if let Some(file_handler) = file_handler {
             let reader = BufReader::new(file_handler);
-            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
+
+            vec_loaded_entries = match bincode::deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
                     text_messages
@@ -181,7 +184,7 @@ where
             };
         } else {
             let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
-            hashmap_loaded_entries = match serde_json::from_reader(reader) {
+            vec_loaded_entries = match serde_json::from_reader(reader) {
                 Ok(t) => t,
                 Err(e) => {
                     text_messages
@@ -196,15 +199,20 @@ where
         // Don't load cache data if destination file not exists
         if delete_outdated_cache {
             debug!("Starting to removing outdated cache entries");
-            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
+            vec_loaded_entries = vec_loaded_entries.into_par_iter().filter(|file_entry| !file_entry.get_path().exists()).collect();
             debug!("Completed removing outdated cache entries");
         }
 
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
+        text_messages.messages.push(format!("Properly loaded {} cache entries.", vec_loaded_entries.len()));
 
-        debug!("Loaded cache from file {} (or json alternative)", cache_file_name);
-        return (text_messages, Some(hashmap_loaded_entries));
+        let map_loaded_entries = vec_loaded_entries
+            .into_iter()
+            .map(|file_entry| (file_entry.get_path().to_string_lossy().into_owned(), file_entry))
+            .collect();
+        debug!("Loaded cache from file {cache_file_name} (or json alternative)");
+        return (text_messages, Some(map_loaded_entries));
     }
+    debug!("Failed to load cache from file {cache_file_name} because not exists");
     (text_messages, None)
 }
 
