@@ -112,35 +112,33 @@ where
         }
 
         // Don't load cache data if destination file not exists
-        if delete_outdated_cache {
-            debug!("Starting to removing outdated cache entries");
-            let initial_number_of_entries = vec_loaded_entries.len();
-            vec_loaded_entries = vec_loaded_entries
-                .into_par_iter()
-                .filter(|file_entry| {
-                    if delete_outdated_cache && !file_entry.get_path().exists() {
+        debug!("Starting to removing outdated cache entries");
+        let initial_number_of_entries = vec_loaded_entries.len();
+        vec_loaded_entries = vec_loaded_entries
+            .into_par_iter()
+            .filter(|file_entry| {
+                if delete_outdated_cache && !file_entry.get_path().exists() {
+                    return false;
+                }
+
+                let file_entry_path_str = file_entry.get_path().to_string_lossy().to_string();
+                if let Some(used_file) = used_files.get(&file_entry_path_str) {
+                    if file_entry.get_size() != used_file.get_size() {
                         return false;
                     }
-
-                    let file_entry_path_str = file_entry.get_path().to_string_lossy().to_string();
-                    if let Some(used_file) = used_files.get(&file_entry_path_str) {
-                        if file_entry.get_size() != used_file.get_size() {
-                            return false;
-                        }
-                        if file_entry.get_modified_date() != used_file.get_modified_date() {
-                            return false;
-                        }
+                    if file_entry.get_modified_date() != used_file.get_modified_date() {
+                        return false;
                     }
+                }
 
-                    true
-                })
-                .collect();
-            debug!(
-                "Completed removing outdated cache entries, removed {} out of all {} entries",
-                initial_number_of_entries - vec_loaded_entries.len(),
-                initial_number_of_entries
-            );
-        }
+                true
+            })
+            .collect();
+        debug!(
+            "Completed removing outdated cache entries, removed {} out of all {} entries",
+            initial_number_of_entries - vec_loaded_entries.len(),
+            initial_number_of_entries
+        );
 
         text_messages.messages.push(format!("Properly loaded {} cache entries.", vec_loaded_entries.len()));
 
