@@ -83,7 +83,26 @@ where
     text_messages
 }
 
-pub fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
+pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
+where
+    for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync,
+{
+    let (text_messages, vec_loaded_cache) = load_cache_from_file_generalized(cache_file_name, delete_outdated_cache, used_files);
+    let Some(vec_loaded_entries) = vec_loaded_cache else {
+        return (text_messages, None);
+    };
+
+    debug!("Converting cache vec into map");
+    let map_loaded_entries: BTreeMap<String, T> = vec_loaded_entries
+        .into_iter()
+        .map(|file_entry| (file_entry.get_path().to_string_lossy().into_owned(), file_entry))
+        .collect();
+    debug!("Converted cache vec into map");
+
+    (text_messages, Some(map_loaded_entries))
+}
+
+fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<Vec<T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync,
 {
@@ -150,12 +169,8 @@ where
 
         text_messages.messages.push(format!("Properly loaded {} cache entries.", vec_loaded_entries.len()));
 
-        let map_loaded_entries: BTreeMap<_, _> = vec_loaded_entries
-            .into_iter()
-            .map(|file_entry| (file_entry.get_path().to_string_lossy().into_owned(), file_entry))
-            .collect();
-        debug!("Loaded cache from file {cache_file_name} (or json alternative) - {} results", map_loaded_entries.len());
-        return (text_messages, Some(map_loaded_entries));
+        debug!("Loaded cache from file {cache_file_name} (or json alternative) - {} results", vec_loaded_entries.len());
+        return (text_messages, Some(vec_loaded_entries));
     }
     debug!("Failed to load cache from file {cache_file_name} because not exists");
     (text_messages, None)

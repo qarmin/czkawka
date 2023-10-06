@@ -22,7 +22,7 @@ use crate::common::{
     check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS,
     IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
-use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized, save_cache_to_file_generalized};
+use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
@@ -287,7 +287,7 @@ impl SimilarImages {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<FileEntry>(
                 &get_similar_images_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
                 self.get_delete_outdated_cache(),
                 &self.images_to_check,

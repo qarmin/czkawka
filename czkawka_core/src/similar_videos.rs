@@ -16,7 +16,7 @@ use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
-use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized, save_cache_to_file_generalized};
+use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
@@ -265,7 +265,8 @@ impl SimilarVideos {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(&get_similar_videos_cache_file(), self.get_delete_outdated_cache(), &self.videos_to_check);
+            let (messages, loaded_items) =
+                load_cache_from_file_generalized_by_path::<FileEntry>(&get_similar_videos_cache_file(), self.get_delete_outdated_cache(), &self.videos_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 

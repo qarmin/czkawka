@@ -24,7 +24,7 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::{create_crash_message, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
-use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized, save_cache_to_file_generalized};
+use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -234,7 +234,7 @@ impl SameMusic {
 
         if self.common_data.use_cache {
             let (messages, loaded_items) =
-                load_cache_from_file_generalized::<MusicEntry>(get_similar_music_cache_file(checking_tags), self.get_delete_outdated_cache(), &self.music_to_check);
+                load_cache_from_file_generalized_by_path::<MusicEntry>(get_similar_music_cache_file(checking_tags), self.get_delete_outdated_cache(), &self.music_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 

@@ -19,6 +19,7 @@ use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
 use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common_cache::{get_duplicate_cache_file, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
@@ -596,13 +597,14 @@ impl DuplicateFinder {
                 }
             }
 
-            save_hashes_to_file(
+            let messages = save_cache_to_file_generalized(
+                &get_duplicate_cache_file(&self.hash_type, true),
                 &save_cache_to_hashmap,
-                &mut self.common_data.text_messages,
-                &self.hash_type,
-                true,
+                self.common_data.save_also_as_json,
                 self.minimal_prehash_cache_file_size,
             );
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+
             debug!("prehash_save_cache_at_exit - saving prehash cache end");
         }
     }
@@ -771,7 +773,15 @@ impl DuplicateFinder {
                 }
             }
         }
-        save_hashes_to_file(&all_results, &mut self.common_data.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
+
+        let messages = save_cache_to_file_generalized(
+            &get_duplicate_cache_file(&self.hash_type, false),
+            &all_results,
+            self.common_data.save_also_as_json,
+            self.minimal_cache_file_size,
+        );
+        self.get_text_messages_mut().extend_with_another_messages(messages);
+
         debug!("full_hashing_save_cache_at_exit - end");
     }
 
@@ -1316,32 +1326,6 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     }
     fs::remove_file(temp)?;
     result
-}
-
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, is_prehash: bool, minimal_cache_file_size: u64) {
-    if let Some(((file_handler, cache_file), (_json_file, _json_name))) = open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), true, false, &mut text_messages.warnings)
-    {
-        let mut writer = BufWriter::new(file_handler.unwrap()); // Unwrap cannot fail
-
-        let mut how_much = 0;
-        for file_entry in hashmap.values() {
-            if file_entry.size >= minimal_cache_file_size {
-                let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
-
-                if let Err(e) = writeln!(writer, "{string}") {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
-                    return;
-                }
-                how_much += 1;
-            }
-        }
-
-        text_messages
-            .messages
-            .push(flc!("core_saving_to_cache", generate_translation_hashmap(vec![("number", how_much.to_string())])));
-    }
 }
 
 pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
