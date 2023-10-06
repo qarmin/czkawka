@@ -2,7 +2,8 @@ use std::collections::BTreeMap;
 use std::default::Default;
 
 use czkawka_core::common_cache::{
-    get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized,
+    get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size,
+    save_cache_to_file_generalized,
 };
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
@@ -124,7 +125,13 @@ pub fn connect_settings(gui_data: &GuiData) {
                         let mut messages: Messages = Messages::new();
                         for use_prehash in [true, false] {
                             for type_of_hash in &[HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
-                                if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash, use_prehash) {
+                                let (mut messages, loaded_items) = load_cache_from_file_generalized_by_size::<czkawka_core::common_dir_traversal::FileEntry>(
+                                    &get_duplicate_cache_file(type_of_hash, use_prehash),
+                                    true,
+                                    &Default::default(),
+                                );
+
+                                if let Some(cache_entries) = loaded_items {
                                     let mut hashmap_to_save: BTreeMap<String, czkawka_core::common_dir_traversal::FileEntry> = Default::default();
                                     for (_, vec_file_entry) in cache_entries {
                                         for file_entry in vec_file_entry {
@@ -134,7 +141,9 @@ pub fn connect_settings(gui_data: &GuiData) {
 
                                     let minimal_cache_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024);
 
-                                    save_cache_to_file_generalized(&get_duplicate_cache_file(type_of_hash, use_prehash), &hashmap_to_save, false, minimal_cache_size);
+                                    let save_messages =
+                                        save_cache_to_file_generalized(&get_duplicate_cache_file(type_of_hash, use_prehash), &hashmap_to_save, false, minimal_cache_size);
+                                    messages.extend_with_another_messages(save_messages);
                                 }
                             }
 
