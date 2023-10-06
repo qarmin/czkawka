@@ -19,9 +19,10 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, load_cache_from_file_generalized, prepare_thread_handler_common, save_cache_to_file_generalized,
-    send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS,
+    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
+use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
@@ -287,7 +288,7 @@ impl SimilarImages {
 
         if self.common_data.use_cache {
             let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(
-                &get_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
+                &get_similar_images_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
                 self.get_delete_outdated_cache(),
                 &self.images_to_check,
             );
@@ -377,7 +378,7 @@ impl SimilarImages {
             }
 
             let messages = save_cache_to_file_generalized(
-                &get_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
+                &get_similar_images_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
                 &all_results,
                 self.common_data.save_also_as_json,
             );
@@ -938,15 +939,6 @@ impl PrintResults for SimilarImages {
     }
 }
 
-pub fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
-    format!(
-        "cache_similar_images_{}_{}_{}_61.bin",
-        hash_size,
-        convert_algorithm_to_string(hash_alg),
-        convert_filters_to_string(image_filter),
-    )
-}
-
 pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
         8 => 0,
@@ -995,7 +987,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPr
     }
 }
 
-fn convert_filters_to_string(image_filter: &FilterType) -> String {
+pub fn convert_filters_to_string(image_filter: &FilterType) -> String {
     match image_filter {
         FilterType::Lanczos3 => "Lanczos3",
         FilterType::Nearest => "Nearest",
@@ -1006,7 +998,7 @@ fn convert_filters_to_string(image_filter: &FilterType) -> String {
     .to_string()
 }
 
-fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
+pub fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
     match hash_alg {
         HashAlg::Mean => "Mean",
         HashAlg::Gradient => "Gradient",

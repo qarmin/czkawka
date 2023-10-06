@@ -18,9 +18,10 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_folder_children, create_crash_message, load_cache_from_file_generalized, prepare_thread_handler_common, save_cache_to_file_generalized,
-    send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
+    check_folder_children, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+    IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
+use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -356,7 +357,7 @@ impl BrokenFiles {
         let files_to_check = mem::take(&mut self.files_to_check);
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(&get_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
+            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(&get_broken_files_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
@@ -437,7 +438,7 @@ impl BrokenFiles {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
 
-            let messages = save_cache_to_file_generalized(&get_cache_file(), &all_results, self.common_data.save_also_as_json);
+            let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json);
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
         debug!("save_to_cache - end");
@@ -532,10 +533,6 @@ impl PrintResults for BrokenFiles {
             println!("{} - {}", file_entry.path.display(), file_entry.error_string);
         }
     }
-}
-
-fn get_cache_file() -> String {
-    "cache_broken_files_61.bin".to_string()
 }
 
 fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {

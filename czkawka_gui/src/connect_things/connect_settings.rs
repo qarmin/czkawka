@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
-use czkawka_core::common::{load_cache_from_file_generalized, save_cache_to_file_generalized};
+use czkawka_core::common_cache::{get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized, save_cache_to_file_generalized};
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
@@ -171,14 +171,14 @@ pub fn connect_settings(gui_data: &GuiData) {
                             ] {
                                 for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
                                     let (mut messages, loaded_items) = load_cache_from_file_generalized::<czkawka_core::similar_images::FileEntry>(
-                                        &czkawka_core::similar_images::get_cache_file(hash_size, hash_alg, image_filter),
+                                        &get_similar_images_cache_file(hash_size, hash_alg, image_filter),
                                         true,
                                         &Default::default(),
                                     );
 
                                     if let Some(cache_entries) = loaded_items {
                                         let save_messages =
-                                            save_cache_to_file_generalized(&czkawka_core::similar_images::get_cache_file(hash_size, hash_alg, image_filter), &cache_entries, false);
+                                            save_cache_to_file_generalized(&get_similar_images_cache_file(hash_size, hash_alg, image_filter), &cache_entries, false);
                                         messages.extend_with_another_messages(save_messages);
                                     }
                                 }
@@ -206,10 +206,10 @@ pub fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let (mut messages, loaded_items) =
-                            load_cache_from_file_generalized::<czkawka_core::similar_videos::FileEntry>(&czkawka_core::similar_videos::get_cache_file(), true, &Default::default());
+                            load_cache_from_file_generalized::<czkawka_core::similar_videos::FileEntry>(&get_similar_videos_cache_file(), true, &Default::default());
 
                         if let Some(cache_entries) = loaded_items {
-                            let save_messages = save_cache_to_file_generalized(&czkawka_core::similar_videos::get_cache_file(), &cache_entries, false);
+                            let save_messages = save_cache_to_file_generalized(&get_similar_videos_cache_file(), &cache_entries, false);
                             messages.extend_with_another_messages(save_messages);
                         }
 
