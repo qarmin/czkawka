@@ -438,7 +438,7 @@ impl BrokenFiles {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
 
-            let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json);
+            let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
         debug!("save_to_cache - end");

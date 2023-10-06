@@ -1,6 +1,7 @@
 use crate::common;
 use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
+use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
@@ -34,7 +35,12 @@ pub fn get_similar_music_cache_file(checking_tags: bool) -> &'static str {
     }
 }
 
-pub fn save_cache_to_file_generalized<T>(cache_file_name: &str, hashmap: &BTreeMap<String, T>, save_also_as_json: bool) -> Messages
+pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> String {
+    let prehash_str = if is_prehash { "_prehash" } else { "" };
+    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_61.bin")
+}
+
+pub fn save_cache_to_file_generalized<T>(cache_file_name: &str, hashmap: &BTreeMap<String, T>, save_also_as_json: bool, minimum_file_size: u64) -> Messages
 where
     T: Serialize + ResultEntry + Sized + Send + Sync,
 {
@@ -43,9 +49,11 @@ where
     if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
         common::open_cache_folder(cache_file_name, true, save_also_as_json, &mut text_messages.warnings)
     {
+        let hashmap_to_save = hashmap.values().filter(|t| t.get_size() >= minimum_file_size).collect::<Vec<_>>();
+
         {
             let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
-            if let Err(e) = bincode::serialize_into(writer, &hashmap.values().collect::<Vec<_>>()) {
+            if let Err(e) = bincode::serialize_into(writer, &hashmap_to_save) {
                 text_messages
                     .warnings
                     .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
@@ -57,7 +65,7 @@ where
         if save_also_as_json {
             if let Some(file_handler_json) = file_handler_json {
                 let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, &hashmap.values().collect::<Vec<_>>()) {
+                if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
                     text_messages
                         .warnings
                         .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
@@ -152,3 +160,44 @@ where
     debug!("Failed to load cache from file {cache_file_name} because not exists");
     (text_messages, None)
 }
+
+// pub fn save_hashes_to_file<T>(cache_file_name: &str, hashmap: &BTreeMap<String, Vec<T>>, save_also_as_json: bool) -> Messages
+// where
+//     T: Serialize + ResultEntry + Sized + Send + Sync,
+// {
+//     debug!("Saving cache to file {} (or also json alternative) - {} results", cache_file_name, hashmap.len());
+//     let mut text_messages = Messages::new();
+//     if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
+//         common::open_cache_folder(cache_file_name, true, save_also_as_json, &mut text_messages.warnings)
+//     {
+//         {
+//             let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+//             if let Err(e) = bincode::serialize_into(writer, &hashmap.values().collect::<Vec<_>>()) {
+//                 text_messages
+//                     .warnings
+//                     .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
+//                 debug!("Failed to save cache to file {:?}", cache_file);
+//                 return text_messages;
+//             }
+//             debug!("Saved binary to file {:?}", cache_file);
+//         }
+//         if save_also_as_json {
+//             if let Some(file_handler_json) = file_handler_json {
+//                 let writer = BufWriter::new(file_handler_json);
+//                 if let Err(e) = serde_json::to_writer(writer, &hashmap.values().collect::<Vec<_>>()) {
+//                     text_messages
+//                         .warnings
+//                         .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
+//                     debug!("Failed to save cache to file {:?}", cache_file_json);
+//                     return text_messages;
+//                 }
+//                 debug!("Saved json to file {:?}", cache_file_json);
+//             }
+//         }
+//
+//         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
+//     } else {
+//         debug!("Failed to save cache to file {cache_file_name} because not exists");
+//     }
+//     text_messages
+// }

@@ -381,6 +381,7 @@ impl SimilarImages {
                 &get_similar_images_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
                 &all_results,
                 self.common_data.save_also_as_json,
+                0,
             );
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
