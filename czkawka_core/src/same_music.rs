@@ -235,23 +235,15 @@ impl SameMusic {
         let mut non_cached_files_to_check: BTreeMap<String, MusicEntry> = Default::default();
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized::<MusicEntry>(get_cache_file(checking_tags), self.get_delete_outdated_cache());
+            let (messages, loaded_items) = load_cache_from_file_generalized::<MusicEntry>(get_cache_file(checking_tags), self.get_delete_outdated_cache(), &self.music_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (name, file_entry) in &self.music_to_check {
-                if !loaded_hash_map.contains_key(name) {
-                    // If loaded data doesn't contains current image info
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+            for (name, file_entry) in mem::take(&mut self.music_to_check) {
+                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
                 } else {
-                    let loaded_item = loaded_hash_map.get(name).unwrap();
-                    if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
-                        // When size or modification date of image changed, then it is clear that is different image
-                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                    } else {
-                        // Checking may be omitted when already there is entry with same size and modification date
-                        records_already_cached.insert(name.clone(), loaded_item.clone());
-                    }
+                    non_cached_files_to_check.insert(name, file_entry);
                 }
             }
         } else {

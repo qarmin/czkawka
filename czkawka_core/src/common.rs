@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime};
 use std::{fs, thread};
 
 #[cfg(feature = "heif")]
@@ -198,8 +198,7 @@ where
     }
     text_messages
 }
-
-pub fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool) -> (Messages, Option<BTreeMap<String, T>>)
+pub fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync,
 {
@@ -242,23 +241,18 @@ where
             vec_loaded_entries = vec_loaded_entries
                 .into_par_iter()
                 .filter(|file_entry| {
-                    if !file_entry.get_path().exists() {
+                    if delete_outdated_cache && !file_entry.get_path().exists() {
                         return false;
                     }
-                    let Ok(metadata) = file_entry.get_path().metadata() else {
-                        return false;
-                    };
-                    if metadata.len() != file_entry.get_size() {
-                        return false;
-                    }
-                    let Ok(modified) = metadata.modified() else {
-                        return false;
-                    };
-                    let Ok(secs) = modified.duration_since(UNIX_EPOCH) else {
-                        return false;
-                    };
-                    if secs.as_secs() != file_entry.get_modified_date() {
-                        return false;
+
+                    let file_entry_path_str = file_entry.get_path().to_string_lossy().to_string();
+                    if let Some(used_file) = used_files.get(&file_entry_path_str) {
+                        if file_entry.get_size() != used_file.get_size() {
+                            return false;
+                        }
+                        if file_entry.get_modified_date() != used_file.get_modified_date() {
+                            return false;
+                        }
                     }
 
                     true

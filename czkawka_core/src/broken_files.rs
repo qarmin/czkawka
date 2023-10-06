@@ -228,11 +228,8 @@ impl BrokenFiles {
         }
 
         let type_of_file = check_extension_availability(&file_name_lowercase);
-        if type_of_file == TypeOfFile::Unknown {
-            return None;
-        }
 
-        if !check_extension_allowed(&type_of_file, &self.checked_types) {
+        if !check_if_file_extension_is_allowed(&type_of_file, &self.checked_types) {
             return None;
         }
 
@@ -359,25 +356,15 @@ impl BrokenFiles {
         let files_to_check = mem::take(&mut self.files_to_check);
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(&get_cache_file(), self.get_delete_outdated_cache());
+            let (messages, loaded_items) = load_cache_from_file_generalized::<FileEntry>(&get_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
             for (name, file_entry) in files_to_check {
-                let checked_extension = check_extension_allowed(&file_entry.type_of_file, &self.checked_types); // Only broken
-
-                #[allow(clippy::if_same_then_else)]
-                if checked_extension && !loaded_hash_map.contains_key(&name) {
-                    // If loaded data doesn't contains current info
-                    non_cached_files_to_check.insert(name, file_entry.clone());
-                } else if checked_extension && file_entry.size != loaded_hash_map.get(&name).unwrap().size
-                    || file_entry.modified_date != loaded_hash_map.get(&name).unwrap().modified_date
-                {
-                    // When size or modification date of image changed, then it is clear that is different image
-                    non_cached_files_to_check.insert(name, file_entry);
+                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
                 } else {
-                    // Checking may be omitted when already there is entry with same size and modification date
-                    records_already_cached.insert(name.clone(), loaded_hash_map.get(&name).unwrap().clone());
+                    non_cached_files_to_check.insert(name, file_entry);
                 }
             }
         } else {
@@ -565,7 +552,7 @@ fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
     }
 }
 
-fn check_extension_allowed(type_of_file: &TypeOfFile, checked_types: &CheckedTypes) -> bool {
+fn check_if_file_extension_is_allowed(type_of_file: &TypeOfFile, checked_types: &CheckedTypes) -> bool {
     ((*type_of_file == TypeOfFile::Image) && ((*checked_types & CheckedTypes::IMAGE) == CheckedTypes::IMAGE))
         || ((*type_of_file == TypeOfFile::PDF) && ((*checked_types & CheckedTypes::PDF) == CheckedTypes::PDF))
         || ((*type_of_file == TypeOfFile::ArchiveZip) && ((*checked_types & CheckedTypes::ARCHIVE) == CheckedTypes::ARCHIVE))

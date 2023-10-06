@@ -19,6 +19,7 @@ pub mod temporary;
 
 pub mod bad_extensions;
 pub mod common;
+pub mod common_cache;
 pub mod common_dir_traversal;
 pub mod common_directory;
 pub mod common_extensions;
