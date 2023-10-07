@@ -11,6 +11,7 @@ use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
 use czkawka_core::common::get_default_number_of_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 
 use crate::flg;
@@ -59,11 +60,6 @@ const DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE: bool = false;
 
 pub const DEFAULT_MINIMAL_FILE_SIZE: &str = "16384";
 pub const DEFAULT_MAXIMAL_FILE_SIZE: &str = "999999999999";
-
-#[cfg(target_family = "unix")]
-const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*";
-#[cfg(not(target_family = "unix"))]
-const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*";
 
 #[cfg(target_family = "unix")]
 const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
