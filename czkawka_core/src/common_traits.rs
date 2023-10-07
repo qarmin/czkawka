@@ -14,4 +14,6 @@ pub trait PrintResults {
 
 pub trait ResultEntry {
     fn get_path(&self) -> &Path;
+    fn get_modified_date(&self) -> u64;
+    fn get_size(&self) -> u64;
 }

@@ -1,6 +1,10 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
+use czkawka_core::common_cache::{
+    get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size,
+    save_cache_to_file_generalized,
+};
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
@@ -121,20 +125,25 @@ pub fn connect_settings(gui_data: &GuiData) {
                         let mut messages: Messages = Messages::new();
                         for use_prehash in [true, false] {
                             for type_of_hash in &[HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
-                                if let Some(cache_entries) = czkawka_core::duplicate::load_hashes_from_file(&mut messages, true, type_of_hash, use_prehash) {
+                                let (mut messages, loaded_items) = load_cache_from_file_generalized_by_size::<czkawka_core::common_dir_traversal::FileEntry>(
+                                    &get_duplicate_cache_file(type_of_hash, use_prehash),
+                                    true,
+                                    &Default::default(),
+                                );
+
+                                if let Some(cache_entries) = loaded_items {
                                     let mut hashmap_to_save: BTreeMap<String, czkawka_core::common_dir_traversal::FileEntry> = Default::default();
                                     for (_, vec_file_entry) in cache_entries {
                                         for file_entry in vec_file_entry {
                                             hashmap_to_save.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
                                         }
                                     }
-                                    czkawka_core::duplicate::save_hashes_to_file(
-                                        &hashmap_to_save,
-                                        &mut messages,
-                                        type_of_hash,
-                                        use_prehash,
-                                        entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024),
-                                    );
+
+                                    let minimal_cache_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024);
+
+                                    let save_messages =
+                                        save_cache_to_file_generalized(&get_duplicate_cache_file(type_of_hash, use_prehash), &hashmap_to_save, false, minimal_cache_size);
+                                    messages.extend_with_another_messages(save_messages);
                                 }
                             }
 
@@ -169,8 +178,16 @@ pub fn connect_settings(gui_data: &GuiData) {
                                 FilterType::Triangle,
                             ] {
                                 for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
-                                    if let Some(cache_entries) = czkawka_core::similar_images::load_hashes_from_file(&mut messages, true, *hash_size, *hash_alg, *image_filter) {
-                                        czkawka_core::similar_images::save_hashes_to_file(&cache_entries, &mut messages, false, *hash_size, *hash_alg, *image_filter);
+                                    let (mut messages, loaded_items) = load_cache_from_file_generalized_by_path::<czkawka_core::similar_images::FileEntry>(
+                                        &get_similar_images_cache_file(hash_size, hash_alg, image_filter),
+                                        true,
+                                        &Default::default(),
+                                    );
+
+                                    if let Some(cache_entries) = loaded_items {
+                                        let save_messages =
+                                            save_cache_to_file_generalized(&get_similar_images_cache_file(hash_size, hash_alg, image_filter), &cache_entries, false, 0);
+                                        messages.extend_with_another_messages(save_messages);
                                     }
                                 }
                             }
@@ -196,9 +213,12 @@ pub fn connect_settings(gui_data: &GuiData) {
 
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
-                        let mut messages: Messages = Messages::new();
-                        if let Some(cache_entries) = czkawka_core::similar_videos::load_hashes_from_file(&mut messages, true) {
-                            czkawka_core::similar_videos::save_hashes_to_file(&cache_entries, &mut messages, false);
+                        let (mut messages, loaded_items) =
+                            load_cache_from_file_generalized_by_path::<czkawka_core::similar_videos::FileEntry>(&get_similar_videos_cache_file(), true, &Default::default());
+
+                        if let Some(cache_entries) = loaded_items {
+                            let save_messages = save_cache_to_file_generalized(&get_similar_videos_cache_file(), &cache_entries, false, 0);
+                            messages.extend_with_another_messages(save_messages);
                         }
 
                         messages.messages.push(flg!("cache_properly_cleared"));

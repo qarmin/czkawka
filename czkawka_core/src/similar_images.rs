@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::{DirEntry, File, Metadata};
 use std::io::{Write, *};
 use std::path::{Path, PathBuf};
@@ -19,11 +19,11 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
-    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS,
+    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
+use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
 use crate::flc;
@@ -50,6 +50,12 @@ pub struct FileEntry {
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
     }
 }
 
@@ -89,7 +95,7 @@ pub struct SimilarImages {
     image_hashes: HashMap<ImHash, Vec<FileEntry>>,
     // Hashmap with image hashes and Vector with names of files
     similarity: u32,
-    images_to_check: HashMap<String, FileEntry>,
+    images_to_check: BTreeMap<String, FileEntry>,
     hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
@@ -273,38 +279,27 @@ impl SimilarImages {
         }
     }
 
-    fn hash_images_load_cache(&mut self) -> (HashMap<String, FileEntry>, HashMap<String, FileEntry>, HashMap<String, FileEntry>) {
+    fn hash_images_load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
         debug!("hash_images_load_cache - start, use cache: {}", self.common_data.use_cache);
         let loaded_hash_map;
 
-        let mut records_already_cached: HashMap<String, FileEntry> = Default::default();
-        let mut non_cached_files_to_check: HashMap<String, FileEntry> = Default::default();
+        let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
+        let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.common_data.use_cache {
-            loaded_hash_map = match load_hashes_from_file(
-                &mut self.common_data.text_messages,
-                self.common_data.delete_outdated_cache,
-                self.hash_size,
-                self.hash_alg,
-                self.image_filter,
-            ) {
-                Some(t) => t,
-                None => Default::default(),
-            };
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<FileEntry>(
+                &get_similar_images_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
+                self.get_delete_outdated_cache(),
+                &self.images_to_check,
+            );
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (name, file_entry) in &self.images_to_check {
-                if !loaded_hash_map.contains_key(name) {
-                    // If loaded data doesn't contains current image info
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+            for (name, file_entry) in mem::take(&mut self.images_to_check) {
+                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
                 } else {
-                    let loaded_item = loaded_hash_map.get(name).unwrap();
-                    if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
-                        // When size or modification date of image changed, then it is clear that is different image
-                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                    } else {
-                        // Checking may be omitted when already there is entry with same size and modification date
-                        records_already_cached.insert(name.clone(), loaded_item.clone());
-                    }
+                    non_cached_files_to_check.insert(name, file_entry);
                 }
             }
         } else {
@@ -373,22 +368,22 @@ impl SimilarImages {
         true
     }
 
-    fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: HashMap<String, FileEntry>) {
+    fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: BTreeMap<String, FileEntry>) {
         debug!("save_to_cache - start, using cache: {}", self.common_data.use_cache);
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: HashMap<String, FileEntry> = loaded_hash_map;
+            let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
             for (file_entry, _hash) in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_hashes_to_file(
+
+            let messages = save_cache_to_file_generalized(
+                &get_similar_images_cache_file(&self.hash_size, &self.hash_alg, &self.image_filter),
                 &all_results,
-                &mut self.common_data.text_messages,
                 self.common_data.save_also_as_json,
-                self.hash_size,
-                self.hash_alg,
-                self.image_filter,
+                0,
             );
+            self.get_text_messages_mut().extend_with_another_messages(messages);
         }
         debug!("save_to_cache - end");
     }
@@ -945,98 +940,6 @@ impl PrintResults for SimilarImages {
     }
 }
 
-pub fn save_hashes_to_file(
-    hashmap: &HashMap<String, FileEntry>,
-    text_messages: &mut Messages,
-    save_also_as_json: bool,
-    hash_size: u8,
-    hash_alg: HashAlg,
-    image_filter: FilterType,
-) {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
-        open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), true, save_also_as_json, &mut text_messages.warnings)
-    {
-        {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
-            if let Err(e) = bincode::serialize_into(writer, hashmap) {
-                text_messages
-                    .warnings
-                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        }
-        if save_also_as_json {
-            if let Some(file_handler_json) = file_handler_json {
-                let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, hashmap) {
-                    text_messages
-                        .warnings
-                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
-                    return;
-                }
-            }
-        }
-
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
-    }
-}
-
-pub fn load_hashes_from_file(
-    text_messages: &mut Messages,
-    delete_outdated_cache: bool,
-    hash_size: u8,
-    hash_alg: HashAlg,
-    image_filter: FilterType,
-) -> Option<HashMap<String, FileEntry>> {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
-        open_cache_folder(&get_cache_file(&hash_size, &hash_alg, &image_filter), false, true, &mut text_messages.warnings)
-    {
-        let mut hashmap_loaded_entries: HashMap<String, FileEntry>;
-        if let Some(file_handler) = file_handler {
-            let reader = BufReader::new(file_handler);
-            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                    return None;
-                }
-            };
-        } else {
-            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
-            hashmap_loaded_entries = match serde_json::from_reader(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
-                    return None;
-                }
-            };
-        }
-
-        // Don't load cache data if destination file not exists
-        if delete_outdated_cache {
-            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
-        }
-
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
-
-        return Some(hashmap_loaded_entries);
-    }
-    None
-}
-
-fn get_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
-    format!(
-        "cache_similar_images_{}_{}_{}_50.bin",
-        hash_size,
-        convert_algorithm_to_string(hash_alg),
-        convert_filters_to_string(image_filter),
-    )
-}
-
 pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
         8 => 0,
@@ -1085,7 +988,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPr
     }
 }
 
-fn convert_filters_to_string(image_filter: &FilterType) -> String {
+pub fn convert_filters_to_string(image_filter: &FilterType) -> String {
     match image_filter {
         FilterType::Lanczos3 => "Lanczos3",
         FilterType::Nearest => "Nearest",
@@ -1096,7 +999,7 @@ fn convert_filters_to_string(image_filter: &FilterType) -> String {
     .to_string()
 }
 
-fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
+pub fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
     match hash_alg {
         HashAlg::Mean => "Mean",
         HashAlg::Gradient => "Gradient",

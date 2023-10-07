@@ -1,13 +1,12 @@
 use std::collections::BTreeMap;
-#[cfg(target_family = "unix")]
 use std::collections::HashSet;
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
-use std::io::{self, BufReader, BufWriter, Error, ErrorKind};
+use std::io::{self, BufWriter, Error, ErrorKind};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::atomic::Ordering;
 use std::{fs, mem};
 
@@ -18,13 +17,12 @@ use log::{debug, info};
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
-use crate::flc;
-use crate::localizer_core::generate_translation_hashmap;
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
@@ -480,7 +478,13 @@ impl DuplicateFinder {
             }
             DirTraversalResult::Stopped => false,
         };
-        debug!("check_file_size - after calculating size stats/duplicates");
+        debug!(
+            "check_file_size - after calculating size stats/duplicates, found in {} groups, {} files with same size | referenced {} groups, {} files",
+            self.files_with_identical_size.len(),
+            self.files_with_identical_size.values().map(Vec::len).sum::<usize>(),
+            self.files_with_identical_size_referenced.len(),
+            self.files_with_identical_size_referenced.values().map(|(_fe, vec)| vec.len()).sum::<usize>()
+        );
         res
     }
 
@@ -535,34 +539,39 @@ impl DuplicateFinder {
 
         if self.use_prehash_cache {
             debug!("prehash_load_cache_at_start - using prehash cache start");
-            loaded_hash_map = match load_hashes_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache, &self.hash_type, true) {
-                Some(t) => t,
-                None => Default::default(),
-            };
 
-            let mut loaded_hash_map2: BTreeMap<String, FileEntry> = Default::default();
-            for vec_file_entry in loaded_hash_map.values() {
-                for file_entry in vec_file_entry {
-                    loaded_hash_map2.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
-                }
-            }
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_size::<FileEntry>(
+                &get_duplicate_cache_file(&self.hash_type, true),
+                self.get_delete_outdated_cache(),
+                &self.files_with_identical_size,
+            );
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
-            #[allow(clippy::if_same_then_else)]
-            for vec_file_entry in self.files_with_identical_size.values() {
-                for file_entry in vec_file_entry {
-                    let name = file_entry.path.to_string_lossy().to_string();
-                    if !loaded_hash_map2.contains_key(&name) {
-                        // If loaded data doesn't contains current image info
-                        non_cached_files_to_check.entry(file_entry.size).or_default().push(file_entry.clone());
-                    } else if file_entry.size != loaded_hash_map2.get(&name).unwrap().size || file_entry.modified_date != loaded_hash_map2.get(&name).unwrap().modified_date {
-                        // When size or modification date of image changed, then it is clear that is different image
-                        non_cached_files_to_check.entry(file_entry.size).or_default().push(file_entry.clone());
-                    } else {
-                        // Checking may be omitted when already there is entry with same size and modification date
-                        records_already_cached.entry(file_entry.size).or_default().push(file_entry.clone());
+            debug!("prehash_load_cache_at_start - started diff between loaded and prechecked files");
+            for (size, mut vec_file_entry) in mem::take(&mut self.files_with_identical_size) {
+                if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
+                    // TODO maybe hashset is not needed when using < 4 elements
+                    let cached_path_entries = cached_vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
+                    for file_entry in vec_file_entry {
+                        if cached_path_entries.contains(&file_entry.path) {
+                            records_already_cached.entry(size).or_default().push(file_entry);
+                        } else {
+                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
+                        }
                     }
+                } else {
+                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
                 }
             }
+
+            debug!(
+                "prehash_load_cache_at_start - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
+                non_cached_files_to_check.values().map(Vec::len).sum::<usize>(),
+                format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+                records_already_cached.values().map(Vec::len).sum::<usize>(),
+                format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            );
         } else {
             debug!("prehash_load_cache_at_start - not using prehash cache start");
             loaded_hash_map = Default::default();
@@ -596,13 +605,14 @@ impl DuplicateFinder {
                 }
             }
 
-            save_hashes_to_file(
+            let messages = save_cache_to_file_generalized(
+                &get_duplicate_cache_file(&self.hash_type, true),
                 &save_cache_to_hashmap,
-                &mut self.common_data.text_messages,
-                &self.hash_type,
-                true,
+                self.common_data.save_also_as_json,
                 self.minimal_prehash_cache_file_size,
             );
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+
             debug!("prehash_save_cache_at_exit - saving prehash cache end");
         }
     }
@@ -691,35 +701,35 @@ impl DuplicateFinder {
 
         if self.common_data.use_cache {
             debug!("full_hashing_load_cache_at_start - using cache");
-            loaded_hash_map = match load_hashes_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache, &self.hash_type, false) {
-                Some(t) => t,
-                None => Default::default(),
-            };
+            let (messages, loaded_items) =
+                load_cache_from_file_generalized_by_size::<FileEntry>(&get_duplicate_cache_file(&self.hash_type, false), self.get_delete_outdated_cache(), &pre_checked_map);
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (size, vec_file_entry) in pre_checked_map {
-                #[allow(clippy::collapsible_if)]
-                if !loaded_hash_map.contains_key(&size) {
-                    // If loaded data doesn't contains current info
-                    non_cached_files_to_check.insert(size, vec_file_entry);
-                } else {
-                    let loaded_vec_file_entry = loaded_hash_map.get(&size).unwrap();
-
+            debug!("full_hashing_load_cache_at_start - started diff between loaded and prechecked files");
+            for (size, mut vec_file_entry) in pre_checked_map {
+                if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
+                    // TODO maybe hashset is not needed when using < 4 elements
+                    let cached_path_entries = cached_vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
                     for file_entry in vec_file_entry {
-                        let mut found: bool = false;
-                        for loaded_file_entry in loaded_vec_file_entry {
-                            if file_entry.path == loaded_file_entry.path && file_entry.modified_date == loaded_file_entry.modified_date {
-                                records_already_cached.entry(file_entry.size).or_default().push(loaded_file_entry.clone());
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if !found {
-                            non_cached_files_to_check.entry(file_entry.size).or_default().push(file_entry);
+                        if cached_path_entries.contains(&file_entry.path) {
+                            records_already_cached.entry(size).or_default().push(file_entry);
+                        } else {
+                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
                         }
                     }
+                } else {
+                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
                 }
             }
+
+            debug!(
+                "full_hashing_load_cache_at_start - completed diff between loaded and prechecked files - {}({}) non cached, {}({}) already cached",
+                non_cached_files_to_check.len(),
+                format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+                records_already_cached.len(),
+                format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            );
         } else {
             debug!("full_hashing_load_cache_at_start - not using cache");
             loaded_hash_map = Default::default();
@@ -771,7 +781,15 @@ impl DuplicateFinder {
                 }
             }
         }
-        save_hashes_to_file(&all_results, &mut self.common_data.text_messages, &self.hash_type, false, self.minimal_cache_file_size);
+
+        let messages = save_cache_to_file_generalized(
+            &get_duplicate_cache_file(&self.hash_type, false),
+            &all_results,
+            self.common_data.save_also_as_json,
+            self.minimal_cache_file_size,
+        );
+        self.get_text_messages_mut().extend_with_another_messages(messages);
+
         debug!("full_hashing_save_cache_at_exit - end");
     }
 
@@ -1318,112 +1336,6 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     result
 }
 
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, type_of_hash: &HashType, is_prehash: bool, minimal_cache_file_size: u64) {
-    if let Some(((file_handler, cache_file), (_json_file, _json_name))) = open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), true, false, &mut text_messages.warnings)
-    {
-        let mut writer = BufWriter::new(file_handler.unwrap()); // Unwrap cannot fail
-
-        let mut how_much = 0;
-        for file_entry in hashmap.values() {
-            if file_entry.size >= minimal_cache_file_size {
-                let string: String = format!("{}//{}//{}//{}", file_entry.path.display(), file_entry.size, file_entry.modified_date, file_entry.hash);
-
-                if let Err(e) = writeln!(writer, "{string}") {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to save some data to cache file {}, reason {}", cache_file.display(), e));
-                    return;
-                }
-                how_much += 1;
-            }
-        }
-
-        text_messages
-            .messages
-            .push(flc!("core_saving_to_cache", generate_translation_hashmap(vec![("number", how_much.to_string())])));
-    }
-}
-
-pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool, type_of_hash: &HashType, is_prehash: bool) -> Option<BTreeMap<u64, Vec<FileEntry>>> {
-    if let Some(((file_handler, cache_file), (_json_file, _json_name))) =
-        open_cache_folder(&get_file_hash_name(type_of_hash, is_prehash), false, false, &mut text_messages.warnings)
-    {
-        // Unwrap could fail when failed to open cache file, but json would exists
-        let Some(file_handler) = file_handler else {
-            return Default::default();
-        };
-        let reader = BufReader::new(file_handler);
-
-        let mut hashmap_loaded_entries: BTreeMap<u64, Vec<FileEntry>> = Default::default();
-
-        // Read the file line by line using the lines() iterator from std::io::BufRead.
-        for (index, line) in reader.lines().enumerate() {
-            let line = match line {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load line number {} from cache file {}, reason {}", index + 1, cache_file.display(), e));
-                    return None;
-                }
-            };
-            let uuu = line.split("//").collect::<Vec<&str>>();
-            if uuu.len() != 4 {
-                text_messages.warnings.push(format!(
-                    "Found invalid data(too much or too low amount of data) in line {} - ({}) in cache file {}",
-                    index + 1,
-                    line,
-                    cache_file.display()
-                ));
-                continue;
-            }
-            // Don't load cache data if destination file not exists
-            if !delete_outdated_cache || Path::new(uuu[0]).exists() {
-                let file_entry = FileEntry {
-                    path: PathBuf::from(uuu[0]),
-                    size: match uuu[1].parse::<u64>() {
-                        Ok(t) => t,
-                        Err(e) => {
-                            text_messages.warnings.push(format!(
-                                "Found invalid size value in line {} - ({}) in cache file {}, reason {}",
-                                index + 1,
-                                line,
-                                cache_file.display(),
-                                e
-                            ));
-                            continue;
-                        }
-                    },
-                    modified_date: match uuu[2].parse::<u64>() {
-                        Ok(t) => t,
-                        Err(e) => {
-                            text_messages.warnings.push(format!(
-                                "Found invalid modified date value in line {} - ({}) in cache file {}, reason {}",
-                                index + 1,
-                                line,
-                                cache_file.display(),
-                                e
-                            ));
-                            continue;
-                        }
-                    },
-                    hash: uuu[3].to_string(),
-                    symlink_info: None,
-                };
-                hashmap_loaded_entries.entry(file_entry.size).or_default().push(file_entry);
-            }
-        }
-
-        text_messages.messages.push(flc!(
-            "core_loading_from_cache",
-            generate_translation_hashmap(vec![("number", hashmap_loaded_entries.values().map(std::vec::Vec::len).sum::<usize>().to_string())])
-        ));
-
-        return Some(hashmap_loaded_entries);
-    }
-    None
-}
-
 pub trait MyHasher {
     fn update(&mut self, bytes: &[u8]);
     fn finalize(&self) -> String;
@@ -1451,11 +1363,6 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
         }
     }
     Ok(hasher.finalize())
-}
-
-fn get_file_hash_name(type_of_hash: &HashType, is_prehash: bool) -> String {
-    let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{type_of_hash:?}{prehash_str}.txt")
 }
 
 impl MyHasher for blake3::Hasher {
@@ -1502,6 +1409,7 @@ mod tests {
     use std::os::fs::MetadataExt;
     #[cfg(target_family = "unix")]
     use std::os::unix::fs::MetadataExt;
+    use std::path::PathBuf;
 
     use super::*;
 

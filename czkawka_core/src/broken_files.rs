@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
-use std::io::{BufReader, BufWriter};
+use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -18,11 +18,11 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_folder_children, create_crash_message, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+    check_folder_children, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
+use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
@@ -39,6 +39,17 @@ pub struct FileEntry {
     pub size: u64,
     pub type_of_file: TypeOfFile,
     pub error_string: String,
+}
+impl ResultEntry for FileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
@@ -218,11 +229,8 @@ impl BrokenFiles {
         }
 
         let type_of_file = check_extension_availability(&file_name_lowercase);
-        if type_of_file == TypeOfFile::Unknown {
-            return None;
-        }
 
-        if !check_extension_allowed(&type_of_file, &self.checked_types) {
+        if !check_if_file_extension_is_allowed(&type_of_file, &self.checked_types) {
             return None;
         }
 
@@ -349,26 +357,15 @@ impl BrokenFiles {
         let files_to_check = mem::take(&mut self.files_to_check);
 
         if self.common_data.use_cache {
-            loaded_hash_map = match load_cache_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache) {
-                Some(t) => t,
-                None => Default::default(),
-            };
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<FileEntry>(&get_broken_files_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
             for (name, file_entry) in files_to_check {
-                let checked_extension = check_extension_allowed(&file_entry.type_of_file, &self.checked_types); // Only broken
-
-                #[allow(clippy::if_same_then_else)]
-                if checked_extension && !loaded_hash_map.contains_key(&name) {
-                    // If loaded data doesn't contains current info
-                    non_cached_files_to_check.insert(name, file_entry.clone());
-                } else if checked_extension && file_entry.size != loaded_hash_map.get(&name).unwrap().size
-                    || file_entry.modified_date != loaded_hash_map.get(&name).unwrap().modified_date
-                {
-                    // When size or modification date of image changed, then it is clear that is different image
-                    non_cached_files_to_check.insert(name, file_entry);
+                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
                 } else {
-                    // Checking may be omitted when already there is entry with same size and modification date
-                    records_already_cached.insert(name.clone(), loaded_hash_map.get(&name).unwrap().clone());
+                    non_cached_files_to_check.insert(name, file_entry);
                 }
             }
         } else {
@@ -440,7 +437,9 @@ impl BrokenFiles {
             for (_name, file_entry) in loaded_hash_map {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_cache_to_file(&all_results, &mut self.common_data.text_messages, self.common_data.save_also_as_json);
+
+            let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
+            self.get_text_messages_mut().extend_with_another_messages(messages);
         }
         debug!("save_to_cache - end");
     }
@@ -536,84 +535,6 @@ impl PrintResults for BrokenFiles {
     }
 }
 
-fn save_cache_to_file(old_hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
-    let mut hashmap: BTreeMap<String, FileEntry> = Default::default();
-    for (path, fe) in old_hashmap {
-        if fe.size > 1024 {
-            hashmap.insert(path.clone(), fe.clone());
-        }
-    }
-    let hashmap = &hashmap;
-
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
-        {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
-            if let Err(e) = bincode::serialize_into(writer, hashmap) {
-                text_messages
-                    .warnings
-                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        }
-        if save_also_as_json {
-            if let Some(file_handler_json) = file_handler_json {
-                let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, hashmap) {
-                    text_messages
-                        .warnings
-                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
-                    return;
-                }
-            }
-        }
-
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
-    }
-}
-
-fn load_cache_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry>;
-        if let Some(file_handler) = file_handler {
-            let reader = BufReader::new(file_handler);
-            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                    return None;
-                }
-            };
-        } else {
-            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
-            hashmap_loaded_entries = match serde_json::from_reader(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
-                    return None;
-                }
-            };
-        }
-
-        // Don't load cache data if destination file not exists
-        if delete_outdated_cache {
-            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
-        }
-
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
-
-        return Some(hashmap_loaded_entries);
-    }
-    None
-}
-
-fn get_cache_file() -> String {
-    "cache_broken_files.bin".to_string()
-}
-
 fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
     if IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
         TypeOfFile::Image
@@ -628,7 +549,7 @@ fn check_extension_availability(file_name_lowercase: &str) -> TypeOfFile {
     }
 }
 
-fn check_extension_allowed(type_of_file: &TypeOfFile, checked_types: &CheckedTypes) -> bool {
+fn check_if_file_extension_is_allowed(type_of_file: &TypeOfFile, checked_types: &CheckedTypes) -> bool {
     ((*type_of_file == TypeOfFile::Image) && ((*checked_types & CheckedTypes::IMAGE) == CheckedTypes::IMAGE))
         || ((*type_of_file == TypeOfFile::PDF) && ((*checked_types & CheckedTypes::PDF) == CheckedTypes::PDF))
         || ((*type_of_file == TypeOfFile::ArchiveZip) && ((*checked_types & CheckedTypes::ARCHIVE) == CheckedTypes::ARCHIVE))

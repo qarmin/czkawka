@@ -53,4 +53,11 @@ impl Messages {
         self.warnings.extend(warnings);
         self.errors.extend(errors);
     }
+
+    pub fn extend_with_another_messages(&mut self, messages: Messages) {
+        let (messages, warnings, errors) = (messages.messages, messages.warnings, messages.errors);
+        self.messages.extend(messages);
+        self.warnings.extend(warnings);
+        self.errors.extend(errors);
+    }
 }

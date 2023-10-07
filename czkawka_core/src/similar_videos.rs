@@ -15,9 +15,9 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::{check_folder_children, open_cache_folder, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
 use crate::flc;
@@ -37,6 +37,12 @@ pub struct FileEntry {
 impl ResultEntry for FileEntry {
     fn get_path(&self) -> &Path {
         &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
     }
 }
 
@@ -259,24 +265,16 @@ impl SimilarVideos {
         let mut non_cached_files_to_check: BTreeMap<String, FileEntry> = Default::default();
 
         if self.common_data.use_cache {
-            loaded_hash_map = match load_hashes_from_file(&mut self.common_data.text_messages, self.common_data.delete_outdated_cache) {
-                Some(t) => t,
-                None => Default::default(),
-            };
+            let (messages, loaded_items) =
+                load_cache_from_file_generalized_by_path::<FileEntry>(&get_similar_videos_cache_file(), self.get_delete_outdated_cache(), &self.videos_to_check);
+            self.get_text_messages_mut().extend_with_another_messages(messages);
+            loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (name, file_entry) in &self.videos_to_check {
-                if !loaded_hash_map.contains_key(name) {
-                    // If loaded data doesn't contains current videos info
-                    non_cached_files_to_check.insert(name.clone(), file_entry.clone());
+            for (name, file_entry) in mem::take(&mut self.videos_to_check) {
+                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
                 } else {
-                    let loaded_item = loaded_hash_map.get(name).unwrap();
-                    if file_entry.size != loaded_item.size || file_entry.modified_date != loaded_item.modified_date {
-                        // When size or modification date of video changed, then it is clear that is different video
-                        non_cached_files_to_check.insert(name.clone(), file_entry.clone());
-                    } else {
-                        // Checking may be omitted when already there is entry with same size and modification date
-                        records_already_cached.insert(name.clone(), loaded_item.clone());
-                    }
+                    non_cached_files_to_check.insert(name, file_entry);
                 }
             }
         } else {
@@ -375,7 +373,9 @@ impl SimilarVideos {
             for file_entry in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            save_hashes_to_file(&all_results, &mut self.common_data.text_messages, self.common_data.save_also_as_json);
+
+            let messages = save_cache_to_file_generalized(&get_similar_videos_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
+            self.get_text_messages_mut().extend_with_another_messages(messages);
         }
         debug!("save_cache - end");
     }
@@ -510,76 +510,6 @@ impl PrintResults for SimilarVideos {
             }
         }
     }
-}
-
-pub fn save_hashes_to_file(hashmap: &BTreeMap<String, FileEntry>, text_messages: &mut Messages, save_also_as_json: bool) {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), true, save_also_as_json, &mut text_messages.warnings) {
-        {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
-            if let Err(e) = bincode::serialize_into(writer, hashmap) {
-                text_messages
-                    .warnings
-                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-                return;
-            }
-        }
-        if save_also_as_json {
-            if let Some(file_handler_json) = file_handler_json {
-                let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, hashmap) {
-                    text_messages
-                        .warnings
-                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
-                    return;
-                }
-            }
-        }
-
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
-    }
-}
-
-pub fn load_hashes_from_file(text_messages: &mut Messages, delete_outdated_cache: bool) -> Option<BTreeMap<String, FileEntry>> {
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(&get_cache_file(), false, true, &mut text_messages.warnings) {
-        let mut hashmap_loaded_entries: BTreeMap<String, FileEntry>;
-        if let Some(file_handler) = file_handler {
-            let reader = BufReader::new(file_handler);
-            hashmap_loaded_entries = match bincode::deserialize_from(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                    return None;
-                }
-            };
-        } else {
-            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
-            hashmap_loaded_entries = match serde_json::from_reader(reader) {
-                Ok(t) => t,
-                Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
-                    return None;
-                }
-            };
-        }
-
-        // Don't load cache data if destination file not exists
-        if delete_outdated_cache {
-            hashmap_loaded_entries.retain(|src_path, _file_entry| Path::new(src_path).exists());
-        }
-
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", hashmap_loaded_entries.len()));
-
-        return Some(hashmap_loaded_entries);
-    }
-    None
-}
-
-fn get_cache_file() -> String {
-    "cache_similar_videos.bin".to_string()
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {
