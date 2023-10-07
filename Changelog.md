@@ -1,5 +1,12 @@
 ## Version 6.1.0 - ?
-
+- BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure - [#1072](https://github.com/qarmin/czkawka/pull/1072)
+- Remove up to 170ms of delay after ending scan - [#1070](https://github.com/qarmin/czkawka/pull/1070)
+- Added logger with useful info when debugging app (level can be adjusted via e.g. `RUST_LOG=debug` env) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1070](https://github.com/qarmin/czkawka/pull/1070)
+- Core code cleanup - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1070](https://github.com/qarmin/czkawka/pull/1070)
+- Updated list of bad extensions and support for finding invalid jar files - [#1070](https://github.com/qarmin/czkawka/pull/1070)
+- Fix Windows gui crashes by using gtk 4.6 instead 4.8 or 4.10 - [#992](https://github.com/qarmin/czkawka/pull/992)
+- Fixed printing info about duplicated music files - [#1016](https://github.com/qarmin/czkawka/pull/1016)
+- Fixed printing info about duplicated video files - [#1017](https://github.com/qarmin/czkawka/pull/1017)
 
 ## Version 6.0.0 - 11.06.2023r
 - Add finding similar audio files by content - [#970](https://github.com/qarmin/czkawka/pull/970)

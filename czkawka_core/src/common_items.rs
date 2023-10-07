@@ -2,6 +2,11 @@ use std::path::Path;
 
 use crate::common::Common;
 
+#[cfg(target_family = "unix")]
+pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*";
+#[cfg(not(target_family = "unix"))]
+pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*,*:\\$RECYCLE.BIN\\*,*:\\$SysReset\\*,*:\\System Volume Information\\*,*:\\OneDriveTemp\\*,*:\\hiberfil.sys,*:\\pagefile.sys,*:\\swapfile.sys";
+
 #[derive(Debug, Clone, Default)]
 pub struct ExcludedItems {
     pub items: Vec<String>,
@@ -35,12 +40,7 @@ impl ExcludedItems {
             let expression = expression.replace("/", "\\");
 
             if expression == "DEFAULT" {
-                if cfg!(target_family = "unix") {
-                    checked_expressions.push("*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*".to_string());
-                }
-                if cfg!(target_family = "windows") {
-                    checked_expressions.push("*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*".to_string());
-                }
+                checked_expressions.push(DEFAULT_EXCLUDED_ITEMS.to_string());
                 continue;
             }
             if !expression.contains('*') {
