@@ -330,6 +330,7 @@ fn duplicate_search(
         df.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
         df.set_check_method(check_method);
         df.set_hash_type(hash_type);
+        df.set_save_also_as_json(loaded_common_items.save_also_as_json);
         df.set_ignore_hard_links(loaded_common_items.hide_hard_links);
         df.set_use_cache(loaded_common_items.use_cache);
         df.set_use_prehash_cache(use_prehash_cache);

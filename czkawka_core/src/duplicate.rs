@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-#[cfg(target_family = "unix")]
 use std::collections::HashSet;
 use std::fs::File;
 use std::hash::Hasher;
@@ -479,7 +478,13 @@ impl DuplicateFinder {
             }
             DirTraversalResult::Stopped => false,
         };
-        debug!("check_file_size - after calculating size stats/duplicates");
+        debug!(
+            "check_file_size - after calculating size stats/duplicates, found in {} groups, {} files with same size | referenced {} groups, {} files",
+            self.files_with_identical_size.len(),
+            self.files_with_identical_size.values().map(Vec::len).sum::<usize>(),
+            self.files_with_identical_size_referenced.len(),
+            self.files_with_identical_size_referenced.values().map(|(_fe, vec)| vec.len()).sum::<usize>()
+        );
         res
     }
 
@@ -543,21 +548,30 @@ impl DuplicateFinder {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (size, vec_file_entry) in mem::take(&mut self.files_with_identical_size) {
-                if let Some(vec_file_entry) = loaded_hash_map.get(&size) {
+            debug!("prehash_load_cache_at_start - started diff between loaded and prechecked files");
+            for (size, mut vec_file_entry) in mem::take(&mut self.files_with_identical_size) {
+                if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
                     // TODO maybe hashset is not needed when using < 4 elements
-                    let cached_path_entries = vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
+                    let cached_path_entries = cached_vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
                     for file_entry in vec_file_entry {
                         if cached_path_entries.contains(&file_entry.path) {
-                            records_already_cached.entry(size).or_default().push(file_entry.clone());
+                            records_already_cached.entry(size).or_default().push(file_entry);
                         } else {
-                            non_cached_files_to_check.entry(size).or_default().push(file_entry.clone());
+                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
                         }
                     }
                 } else {
-                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry.clone());
+                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
                 }
             }
+
+            debug!(
+                "prehash_load_cache_at_start - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
+                non_cached_files_to_check.values().map(Vec::len).sum::<usize>(),
+                format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+                records_already_cached.values().map(Vec::len).sum::<usize>(),
+                format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            );
         } else {
             debug!("prehash_load_cache_at_start - not using prehash cache start");
             loaded_hash_map = Default::default();
@@ -693,22 +707,29 @@ impl DuplicateFinder {
             loaded_hash_map = loaded_items.unwrap_or_default();
 
             debug!("full_hashing_load_cache_at_start - started diff between loaded and prechecked files");
-            for (size, vec_file_entry) in pre_checked_map {
-                if let Some(vec_file_entry) = loaded_hash_map.get(&size) {
+            for (size, mut vec_file_entry) in pre_checked_map {
+                if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
                     // TODO maybe hashset is not needed when using < 4 elements
-                    let cached_path_entries = vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
+                    let cached_path_entries = cached_vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
                     for file_entry in vec_file_entry {
                         if cached_path_entries.contains(&file_entry.path) {
-                            records_already_cached.entry(size).or_default().push(file_entry.clone());
+                            records_already_cached.entry(size).or_default().push(file_entry);
                         } else {
-                            non_cached_files_to_check.entry(size).or_default().push(file_entry.clone());
+                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
                         }
                     }
                 } else {
-                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry.clone());
+                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
                 }
             }
-            debug!("full_hashing_load_cache_at_start - completed diff between loaded and prechecked files");
+
+            debug!(
+                "full_hashing_load_cache_at_start - completed diff between loaded and prechecked files - {}({}) non cached, {}({}) already cached",
+                non_cached_files_to_check.len(),
+                format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+                records_already_cached.len(),
+                format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            );
         } else {
             debug!("full_hashing_load_cache_at_start - not using cache");
             loaded_hash_map = Default::default();
