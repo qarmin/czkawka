@@ -70,7 +70,7 @@ Sadly this doesn't work for all users, so feel free to update this part of docum
 
 
 ### Windows
-By default, all needed libraries are bundled with the app, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 4`
+By default, all needed libraries are bundled with the app except libheif library which allows to scan/use heif files, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 4`
 runtime from [**here**](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
 
 FFmpeg to be able to use Similar Videos, you can download and install from this [**link**](https://ffmpeg.org/).

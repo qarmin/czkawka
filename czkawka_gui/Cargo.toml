@@ -51,6 +51,7 @@ once_cell = "1.18"
 
 log = "0.4.20"
 handsome_logger = "0.8"
+fun_time = { version = "0.3.1", features = ["log"] }
 
 czkawka_core = { path = "../czkawka_core", version = "6.0.0", features = [] }
 gtk4 = { version = "0.7", default-features = false, features = ["v4_6"] }

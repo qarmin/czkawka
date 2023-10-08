@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.10.3 -->
+<!-- Created with Cambalache 0.16.0 -->
 <interface>
   <!-- interface-name popover_select.ui -->
-  <requires lib="gtk" version="4.0"/>
+  <requires lib="gtk" version="4.6"/>
   <object class="GtkPopover" id="popover_select">
     <property name="child">
       <object class="GtkBox">
