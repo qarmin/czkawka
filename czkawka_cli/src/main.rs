@@ -6,20 +6,20 @@ use clap::Parser;
 
 use commands::Commands;
 use czkawka_core::bad_extensions::BadExtensions;
-use czkawka_core::big_file::{self, BigFile, SearchMode};
-use czkawka_core::broken_files::{self, BrokenFiles};
+use czkawka_core::big_file::{BigFile, SearchMode};
+use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::{set_number_of_threads, setup_logger};
-use czkawka_core::common_tool::CommonData;
+use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results().
 use czkawka_core::common_traits::*;
 use czkawka_core::duplicate::DuplicateFinder;
-use czkawka_core::empty_files::{self, EmptyFiles};
+use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
-use czkawka_core::invalid_symlinks::{self, InvalidSymlinks};
+use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::{return_similarity_from_similarity_preset, test_image_conversion_speed, SimilarImages};
 use czkawka_core::similar_videos::SimilarVideos;
-use czkawka_core::temporary::{self, Temporary};
+use czkawka_core::temporary::Temporary;
 
 use crate::commands::{
     Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs, SimilarImagesArgs,
@@ -177,7 +177,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
     #[cfg(target_family = "unix")]
     bf.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     if delete_files {
-        bf.set_delete_method(big_file::DeleteMethod::Delete);
+        bf.set_delete_method(DeleteMethod::Delete);
     }
     if smallest_mode {
         bf.set_search_mode(SearchMode::SmallestFiles);
@@ -224,7 +224,7 @@ fn empty_files(empty_files: EmptyFilesArgs) {
     ef.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
 
     if delete_files {
-        ef.set_delete_method(empty_files::DeleteMethod::Delete);
+        ef.set_delete_method(DeleteMethod::Delete);
     }
 
     ef.find_empty_files(None, None);
@@ -266,7 +266,7 @@ fn temporary(temporary: TemporaryArgs) {
     tf.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
 
     if delete_files {
-        tf.set_delete_method(temporary::DeleteMethod::Delete);
+        tf.set_delete_method(DeleteMethod::Delete);
     }
 
     tf.find_temporary_files(None, None);
@@ -407,7 +407,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
     #[cfg(target_family = "unix")]
     ifs.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     if delete_files {
-        ifs.set_delete_method(invalid_symlinks::DeleteMethod::Delete);
+        ifs.set_delete_method(DeleteMethod::Delete);
     }
 
     ifs.find_invalid_links(None, None);
@@ -451,7 +451,7 @@ fn broken_files(broken_files: BrokenFilesArgs) {
     br.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
 
     if delete_files {
-        br.set_delete_method(broken_files::DeleteMethod::Delete);
+        br.set_delete_method(DeleteMethod::Delete);
     }
 
     br.find_broken_files(None, None);

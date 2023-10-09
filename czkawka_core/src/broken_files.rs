@@ -23,14 +23,8 @@ use crate::common::{
 };
 use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
-
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FileEntry {
@@ -443,6 +437,9 @@ impl BrokenFiles {
             }
             DeleteMethod::None => {
                 //Just do nothing
+            }
+            _ => {
+                unreachable!()
             }
         }
     }

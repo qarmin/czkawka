@@ -13,7 +13,7 @@ use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
 const TEMP_EXTENSIONS: &[&str] = &[
@@ -31,12 +31,6 @@ const TEMP_EXTENSIONS: &[&str] = &[
     ".download",
     ".partial",
 ];
-
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
 
 #[derive(Clone)]
 pub struct FileEntry {
@@ -194,6 +188,7 @@ impl Temporary {
             DeleteMethod::None => {
                 //Just do nothing
             }
+            _ => unreachable!(),
         }
     }
 }

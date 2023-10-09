@@ -9,14 +9,8 @@ use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
-
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
 
 #[derive(Default)]
 pub struct Info {
@@ -92,6 +86,7 @@ impl InvalidSymlinks {
             DeleteMethod::None => {
                 //Just do nothing
             }
+            _ => unreachable!(),
         }
     }
 }

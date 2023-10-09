@@ -21,7 +21,7 @@ use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_messages::Messages;
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
@@ -42,17 +42,6 @@ impl HashType {
             HashType::Xxh3 => Box::new(Xxh3::new()),
         }
     }
-}
-
-#[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
-pub enum DeleteMethod {
-    #[default]
-    None,
-    AllExceptNewest,
-    AllExceptOldest,
-    OneOldest,
-    OneNewest,
-    HardLink,
 }
 
 #[derive(Default)]
@@ -1236,11 +1225,13 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
         DeleteMethod::OneOldest | DeleteMethod::AllExceptNewest => values.max_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
         DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::HardLink => values.min_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
         DeleteMethod::None => values.next(),
+        _ => unreachable!(),
     };
     let q_index = q_index.map_or(0, |t| t.0);
     let n = match delete_method {
         DeleteMethod::OneNewest | DeleteMethod::OneOldest => 1,
         DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptOldest | DeleteMethod::None | DeleteMethod::HardLink => usize::MAX,
+        _ => unreachable!(),
     };
     for (index, file) in vector.iter().enumerate() {
         if q_index == index {
@@ -1267,6 +1258,7 @@ fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_message
                 }
             }
             DeleteMethod::None => Ok(None),
+            _ => unreachable!(),
         };
 
         match r {

@@ -106,9 +106,10 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
         3 => {
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
-            match item.checking_method {
-                CheckingMethod::AudioContent => label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item))),
-                _ => panic!(),
+            if item.checking_method == CheckingMethod::AudioContent {
+                label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item)));
+            } else {
+                panic!();
             }
         }
         _ => panic!(),

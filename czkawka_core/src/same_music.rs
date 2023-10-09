@@ -27,14 +27,8 @@ use symphonia::core::probe::Hint;
 use crate::common::{create_crash_message, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
 use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
-
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
 
 bitflags! {
     #[derive(PartialEq, Copy, Clone, Debug)]
@@ -1036,6 +1030,15 @@ fn get_approximate_conversion(what: &mut String) {
     *what = new_what;
 }
 
+impl CommonData for SameMusic {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::same_music::get_approximate_conversion;
@@ -1057,14 +1060,5 @@ mod tests {
         let mut what = "Kekistan (feat. roman) [Mix on Mix]".to_string();
         get_approximate_conversion(&mut what);
         assert_eq!(what, "Kekistan");
-    }
-}
-
-impl CommonData for SameMusic {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
     }
 }
