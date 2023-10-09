@@ -452,11 +452,8 @@ impl Default for BrokenFiles {
 }
 
 impl DebugPrint for BrokenFiles {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");

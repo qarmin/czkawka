@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
@@ -76,8 +75,8 @@ impl EmptyFolder {
         self.information.number_of_empty_folders = self.empty_folder_list.len();
     }
 
+    #[fun_time(message = "check_for_empty_folders")]
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_for_empty_folders - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -89,15 +88,13 @@ impl EmptyFolder {
             .max_stage(0)
             .build()
             .run();
-        debug!("check_for_empty_folders - collected folders to check");
-        let res = match result {
+
+        match result {
             DirTraversalResult::SuccessFiles { .. } => {
                 unreachable!()
             }
             DirTraversalResult::SuccessFolders { folder_entries, warnings } => {
-                // We need to set empty folder list
-                #[allow(unused_mut)] // Used is later by Windows build
-                for (mut name, folder_entry) in folder_entries {
+                for (name, folder_entry) in folder_entries {
                     if folder_entry.is_empty != FolderEmptiness::No {
                         self.empty_folder_list.insert(name, folder_entry);
                     }
@@ -108,11 +105,10 @@ impl EmptyFolder {
                 true
             }
             DirTraversalResult::Stopped => false,
-        };
-        debug!("check_for_empty_folders - end");
-        res
+        }
     }
 
+    #[fun_time(message = "delete_empty_folders")]
     fn delete_empty_folders(&mut self) {
         // Folders may be deleted or require too big privileges
         for name in self.empty_folder_list.keys() {
@@ -135,11 +131,8 @@ impl Default for EmptyFolder {
 }
 
 impl DebugPrint for EmptyFolder {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
 
@@ -151,6 +144,7 @@ impl DebugPrint for EmptyFolder {
 }
 
 impl SaveResults for EmptyFolder {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),

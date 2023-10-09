@@ -40,7 +40,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        !["symphonia", "i18n_embed"].iter().any(|&x| module_path.contains(x))
+        module_path.starts_with("czkawka")
     } else {
         true
     }
@@ -225,16 +225,6 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 }
 
 impl Common {
-    #[allow(unused_variables)]
-    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: &str) {
-        #[cfg(debug_assertions)]
-        println!(
-            "Execution of function \"{}\" took {:?}",
-            function_name,
-            end_time.duration_since(start_time).expect("Time cannot go reverse.")
-        );
-    }
-
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
         let mut path: &Path;
         let mut warnings: Vec<String> = Vec::new();

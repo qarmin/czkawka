@@ -854,7 +854,6 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
                 genre = tag_value.to_string();
             }
         }
-        // println!("{:?}", tag.items());
     }
 
     if let Ok(old_length_number) = length.parse::<u32>() {
@@ -864,7 +863,7 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
         if minutes != 0 || seconds != 0 {
             length = format!("{minutes}:{seconds:02}");
         } else if old_length_number > 0 {
-            // That means, that audio have length smaller that second, but length is properly read
+            // That means, that audio have length smaller that second, but length was properly read
             length = "0:01".to_string();
         } else {
             length = String::new();
@@ -890,12 +889,9 @@ impl Default for SameMusic {
 }
 
 impl DebugPrint for SameMusic {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     #[fun_time(message = "debug_print")]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");

@@ -410,12 +410,9 @@ impl Default for SimilarVideos {
 }
 
 impl DebugPrint for SimilarVideos {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     #[fun_time(message = "debug_print")]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
 

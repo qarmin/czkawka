@@ -694,10 +694,8 @@ impl SimilarImages {
                     collected_similar_images.insert(hash, vec_file_entry);
                 }
             }
-        } else {
-            if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance) {
-                return false;
-            }
+        } else if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance) {
+            return false;
         }
 
         self.verify_duplicated_items(&collected_similar_images);
@@ -768,13 +766,12 @@ impl SimilarImages {
         }
     }
 
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     #[allow(unused_variables)]
     // TODO this probably not works good when reference folders are used
     pub fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<FileEntry>>) {
-        #[cfg(not(debug_assertions))]
-        return;
+        if !cfg!(debug_assertions) {
+            return;
+        }
         // Validating if group contains duplicated results
         let mut result_hashset: HashSet<String> = Default::default();
         let mut found = false;
@@ -815,11 +812,8 @@ impl Default for SimilarImages {
 }
 
 impl DebugPrint for SimilarImages {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
 
@@ -1030,8 +1024,9 @@ fn debug_check_for_duplicated_things(
     all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
     numm: &str,
 ) {
-    #[cfg(not(debug_assertions))]
-    return;
+    if !cfg!(debug_assertions) {
+        return;
+    }
 
     if use_reference_folders {
         return;

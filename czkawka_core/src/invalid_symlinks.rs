@@ -98,11 +98,8 @@ impl Default for InvalidSymlinks {
 }
 
 impl DebugPrint for InvalidSymlinks {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");

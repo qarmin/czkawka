@@ -703,6 +703,7 @@ impl DuplicateFinder {
         {
             let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
 
+            debug!("Starting full hashing of {} files", non_cached_files_to_check.values().map(Vec::len).sum::<usize>());
             let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)> = non_cached_files_to_check
                 .into_par_iter()
                 .map(|(size, vec_file_entry)| {
@@ -729,6 +730,7 @@ impl DuplicateFinder {
                 })
                 .while_some()
                 .collect();
+            debug!("Finished full hashing");
 
             self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 
@@ -951,12 +953,9 @@ impl Default for DuplicateFinder {
 }
 
 impl DebugPrint for DuplicateFinder {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     /// Debugging printing - only available on debug build
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");

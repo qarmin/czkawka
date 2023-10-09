@@ -33,8 +33,9 @@ fn main() {
 
     setup_logger(true);
 
-    #[cfg(debug_assertions)]
-    println!("{command:?}");
+    if cfg!(debug_assertions) {
+        println!("{command:?}");
+    }
 
     match command {
         Commands::Duplicates(duplicates_args) => duplicates(duplicates_args),
@@ -106,7 +107,9 @@ fn duplicates(duplicates: DuplicatesArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
+    if !cfg!(debug_assertions) {
+        df.print_results();
+    }
     df.print_results();
     df.get_text_messages().print_messages();
 }
@@ -143,8 +146,9 @@ fn empty_folders(empty_folders: EmptyFoldersArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    ef.print_results();
+    if !cfg!(debug_assertions) {
+        ef.print_results();
+    }
     ef.get_text_messages().print_messages();
 }
 
@@ -192,8 +196,9 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    bf.print_results();
+    if !cfg!(debug_assertions) {
+        bf.print_results();
+    }
     bf.get_text_messages().print_messages();
 }
 
@@ -236,8 +241,9 @@ fn empty_files(empty_files: EmptyFilesArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    ef.print_results();
+    if !cfg!(debug_assertions) {
+        ef.print_results();
+    }
     ef.get_text_messages().print_messages();
 }
 
@@ -278,8 +284,9 @@ fn temporary(temporary: TemporaryArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    tf.print_results();
+    if !cfg!(debug_assertions) {
+        tf.print_results();
+    }
     tf.get_text_messages().print_messages();
 }
 
@@ -328,8 +335,9 @@ fn similar_images(similar_images: SimilarImagesArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    sf.print_results();
+    if !cfg!(debug_assertions) {
+        sf.print_results();
+    }
     sf.get_text_messages().print_messages();
 }
 
@@ -376,8 +384,9 @@ fn same_music(same_music: SameMusicArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    mf.print_results();
+    if !cfg!(debug_assertions) {
+        mf.print_results();
+    }
     mf.get_text_messages().print_messages();
 }
 
@@ -419,8 +428,9 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    ifs.print_results();
+    if !cfg!(debug_assertions) {
+        ifs.print_results();
+    }
     ifs.get_text_messages().print_messages();
 }
 
@@ -463,8 +473,9 @@ fn broken_files(broken_files: BrokenFilesArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    br.print_results();
+    if !cfg!(debug_assertions) {
+        br.print_results();
+    }
     br.get_text_messages().print_messages();
 }
 
@@ -508,8 +519,9 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
         }
     }
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    vr.print_results();
+    if !cfg!(debug_assertions) {
+        vr.print_results();
+    }
     vr.get_text_messages().print_messages();
 }
 
@@ -547,7 +559,8 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs) {
 
     be.find_bad_extensions_files(None, None);
 
-    #[cfg(not(debug_assertions))] // This will show too much probably unnecessary data to debug, comment line only if needed
-    be.print_results();
+    if !cfg!(debug_assertions) {
+        be.print_results();
+    }
     be.get_text_messages().print_messages();
 }

@@ -8,6 +8,7 @@ use std::time::UNIX_EPOCH;
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
+use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -498,6 +499,12 @@ where
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+
+        debug!(
+            "Collected {} files, {} folders",
+            grouped_file_entries.values().map(Vec::len).sum::<usize>(),
+            folder_entries.len()
+        );
 
         match collect {
             Collect::Files | Collect::InvalidSymlinks => DirTraversalResult::SuccessFiles {

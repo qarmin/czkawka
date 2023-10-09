@@ -222,12 +222,10 @@ impl BadExtensions {
             .recursive_search(self.common_data.recursive_search)
             .build()
             .run();
-        debug!("check_files - collected files");
-        let res = match result {
+
+        match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                if let Some(files_to_check) = grouped_file_entries.get(&()) {
-                    self.files_to_check = files_to_check.clone();
-                }
+                self.files_to_check = grouped_file_entries.into_values().flatten().collect();
                 self.common_data.text_messages.warnings.extend(warnings);
 
                 true
@@ -236,8 +234,7 @@ impl BadExtensions {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        };
-        res
+        }
     }
 
     #[fun_time(message = "look_for_bad_extensions_files")]
@@ -267,8 +264,7 @@ impl BadExtensions {
 
         self.information.number_of_files_with_bad_extension = self.bad_extensions_files.len();
 
-        // Clean unused data
-        self.files_to_check = Default::default();
+        debug!("Found {} files with invalid extension.", self.information.number_of_files_with_bad_extension);
 
         true
     }
@@ -407,11 +403,8 @@ impl Default for BadExtensions {
 }
 
 impl DebugPrint for BadExtensions {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");
@@ -421,6 +414,7 @@ impl DebugPrint for BadExtensions {
 }
 
 impl SaveResults for BadExtensions {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -462,6 +456,7 @@ impl SaveResults for BadExtensions {
 }
 
 impl PrintResults for BadExtensions {
+    #[fun_time(message = "print_results")]
     fn print_results(&self) {
         println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
         for file_entry in &self.bad_extensions_files {

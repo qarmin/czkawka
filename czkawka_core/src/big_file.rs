@@ -80,6 +80,7 @@ impl BigFile {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.common_data.tool_type);
 
+        debug!("Starting to search for big files");
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -133,6 +134,7 @@ impl BigFile {
                 }
             }
         }
+        debug!("Collected {} big files",);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -232,11 +234,8 @@ impl Default for BigFile {
 }
 
 impl DebugPrint for BigFile {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
 
