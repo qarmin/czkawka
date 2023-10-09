@@ -981,7 +981,6 @@ fn set_directories(tree_view_included_directories: &TreeView, tree_view_excluded
     }
 }
 
-/// Function do not allow to set invalid index to combobox because this would cause to show empty value and function would crash
 fn save_proper_value_to_combo_box(combo_box: &ComboBoxText, what_to_save: u32) {
     combo_box.set_active(Some(what_to_save));
     if combo_box.active().is_none() {
@@ -989,7 +988,6 @@ fn save_proper_value_to_combo_box(combo_box: &ComboBoxText, what_to_save: u32) {
     }
 }
 
-/// Reset configuration to defaults
 pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     // TODO Maybe add popup dialog to confirm resetting
     let text_view_errors = text_view_errors.clone();

@@ -10,9 +10,10 @@ use std::{mem, panic};
 
 use anyhow::Context;
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use lofty::{read_from, AudioFile, ItemKey, TaggedFileExt};
-use log::{debug, info};
+use log::debug;
 use rayon::prelude::*;
 use rusty_chromaprint::{match_fingerprints, Configuration, Fingerprinter};
 use serde::{Deserialize, Serialize};
@@ -95,14 +96,12 @@ impl FileEntry {
     }
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
 }
 
-/// Struct with required information's to work
 pub struct SameMusic {
     common_data: CommonToolData,
     information: Info,
@@ -138,14 +137,8 @@ impl SameMusic {
         }
     }
 
+    #[fun_time(message = "print_results")]
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding same music files");
-        let start_time = std::time::Instant::now();
-        self.find_same_music_internal(stop_receiver, progress_sender);
-        info!("Ended finding same music which took {:?}", start_time.elapsed());
-    }
-
-    fn find_same_music_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -183,6 +176,7 @@ impl SameMusic {
         self.debug_print();
     }
 
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
@@ -225,8 +219,8 @@ impl SameMusic {
         }
     }
 
+    #[fun_time(message = "load_cache")]
     fn load_cache(&mut self, checking_tags: bool) -> (BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>) {
-        debug!("load_cache - start, using cache {}", self.common_data.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, MusicEntry> = Default::default();
@@ -249,12 +243,11 @@ impl SameMusic {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.music_to_check, &mut non_cached_files_to_check);
         }
-        debug!("load_cache - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    #[fun_time(message = "save_cache")]
     fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: BTreeMap<String, MusicEntry>, checking_tags: bool) {
-        debug!("save_cache - start, using cache {}", self.common_data.use_cache);
         if !self.common_data.use_cache {
             return;
         }
@@ -267,11 +260,10 @@ impl SameMusic {
 
         let messages = save_cache_to_file_generalized(get_similar_music_cache_file(checking_tags), &all_results, self.common_data.save_also_as_json, 0);
         self.get_text_messages_mut().extend_with_another_messages(messages);
-        debug!("save_cache - end");
     }
 
+    #[fun_time(message = "calculate_fingerprint")]
     fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("calculate_fingerprint - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -313,12 +305,11 @@ impl SameMusic {
         if check_was_stopped.load(Ordering::Relaxed) {
             return false;
         }
-        debug!("calculate_fingerprint - end");
         true
     }
 
+    #[fun_time(message = "read_tags")]
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("read_tags - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -360,13 +351,11 @@ impl SameMusic {
             return false;
         }
 
-        debug!("read_tags - end");
-
         true
     }
 
+    #[fun_time(message = "check_for_duplicate_tags")]
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_for_duplicate_tags - start");
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type, self.common_data.tool_type);
 
@@ -462,12 +451,10 @@ impl SameMusic {
         // Clear unused data
         self.music_entries.clear();
 
-        debug!("check_for_duplicate_tags - end");
-
         true
     }
+    #[fun_time(message = "read_tags_to_files_similar_by_content")]
     fn read_tags_to_files_similar_by_content(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("read_tags_to_files_similar_by_content - start");
         let groups_to_check = max(self.duplicated_music_entries.len(), self.duplicated_music_entries_referenced.len());
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type, self.common_data.tool_type);
@@ -515,7 +502,6 @@ impl SameMusic {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        debug!("read_tags_to_files_similar_by_content - end");
         !check_was_stopped.load(Ordering::Relaxed)
     }
 
@@ -535,6 +521,7 @@ impl SameMusic {
         (base_files, files_to_compare)
     }
 
+    #[fun_time(message = "compare_fingerprints")]
     fn compare_fingerprints(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
@@ -542,7 +529,6 @@ impl SameMusic {
         base_files: Vec<MusicEntry>,
         files_to_compare: &[MusicEntry],
     ) -> Option<Vec<Vec<MusicEntry>>> {
-        debug!("compare_fingerprints - start");
         let mut used_paths: HashSet<String> = Default::default();
 
         let configuration = &self.hash_preset_config;
@@ -591,12 +577,11 @@ impl SameMusic {
                 duplicated_music_entries.push(music_entries);
             }
         }
-        debug!("compare_fingerprints - end");
         Some(duplicated_music_entries)
     }
 
+    #[fun_time(message = "check_for_duplicate_fingerprints")]
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_for_duplicate_fingerprints - start");
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type, self.common_data.tool_type);
@@ -629,10 +614,10 @@ impl SameMusic {
         // Clear unused data
         self.music_entries.clear();
 
-        debug!("check_for_duplicate_fingerprints - end");
         true
     }
 
+    #[fun_time(message = "check_music_item")]
     fn check_music_item(
         &self,
         old_duplicates: Vec<Vec<MusicEntry>>,
@@ -640,7 +625,6 @@ impl SameMusic {
         get_item: fn(&MusicEntry) -> &str,
         approximate_comparison: bool,
     ) -> Vec<Vec<MusicEntry>> {
-        debug!("check_music_item - start");
         let mut new_duplicates: Vec<_> = Default::default();
         let old_duplicates_len = old_duplicates.len();
         for vec_file_entry in old_duplicates {
@@ -662,11 +646,10 @@ impl SameMusic {
         }
         atomic_counter.fetch_add(old_duplicates_len, Ordering::Relaxed);
 
-        debug!("check_music_item - end");
         new_duplicates
     }
 
-    /// Function to delete files, from filed Vector
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
 
         // TODO
@@ -915,7 +898,7 @@ impl Default for SameMusic {
 impl DebugPrint for SameMusic {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
+    #[fun_time(message = "debug_print")]
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -931,6 +914,7 @@ impl DebugPrint for SameMusic {
 }
 
 impl SaveResults for SameMusic {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -988,8 +972,7 @@ impl SaveResults for SameMusic {
 }
 
 impl PrintResults for SameMusic {
-    /// Print information's about duplicated entries
-    /// Only needed for CLI
+    #[fun_time(message = "print_results")]
     fn print_results(&self) {
         println!("Found {} similar music files.\n", self.duplicated_music_entries.len());
         for vec_file_entry in &self.duplicated_music_entries {

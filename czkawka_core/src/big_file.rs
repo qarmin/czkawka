@@ -7,9 +7,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
-use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
@@ -36,13 +36,11 @@ pub enum DeleteMethod {
     Delete,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_real_files: usize,
 }
 
-/// Struct with required information's to work
 pub struct BigFile {
     common_data: CommonToolData,
     information: Info,
@@ -64,14 +62,8 @@ impl BigFile {
         }
     }
 
+    #[fun_time(message = "find_big_files")]
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding big files");
-        let start_time = std::time::Instant::now();
-        self.find_big_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding big files which took {:?}", start_time.elapsed());
-    }
-
-    fn find_big_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -81,8 +73,8 @@ impl BigFile {
         self.debug_print();
     }
 
+    #[fun_time(message = "look_for_big_files")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("look_for_big_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
@@ -151,8 +143,6 @@ impl BigFile {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         self.extract_n_biggest_files(old_map);
-
-        debug!("look_for_big_files - end");
         true
     }
 
@@ -193,8 +183,8 @@ impl BigFile {
         fe_result.push((fe.size, fe));
     }
 
+    #[fun_time(message = "extract_n_biggest_files")]
     pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
-        debug!("extract_n_biggest_files - start");
         let iter: Box<dyn Iterator<Item = _>>;
         if self.search_mode == SearchMode::SmallestFiles {
             iter = Box::new(old_map.into_iter());
@@ -222,10 +212,8 @@ impl BigFile {
                 break;
             }
         }
-        debug!("extract_n_biggest_files - end");
     }
 
-    /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
         match self.delete_method {
             DeleteMethod::Delete => {
@@ -251,7 +239,6 @@ impl Default for BigFile {
 impl DebugPrint for BigFile {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -267,7 +254,6 @@ impl DebugPrint for BigFile {
 }
 
 impl SaveResults for BigFile {
-    /// Saving results to provided file
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),

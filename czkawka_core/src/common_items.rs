@@ -16,8 +16,7 @@ impl ExcludedItems {
     pub fn new() -> Self {
         Default::default()
     }
-    /// Setting excluded items which needs to contains * wildcard
-    /// Are a lot of slower than absolute path, so it should be used to heavy
+
     pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) -> (Vec<String>, Vec<String>, Vec<String>) {
         let messages: Vec<String> = Vec::new();
         let mut warnings: Vec<String> = Vec::new();
@@ -54,7 +53,6 @@ impl ExcludedItems {
         (messages, warnings, errors)
     }
 
-    /// Checks whether a specified path is excluded from searching
     pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
         #[cfg(target_family = "windows")]
         let path = Common::normalize_windows_path(path);

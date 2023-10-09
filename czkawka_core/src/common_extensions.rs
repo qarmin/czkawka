@@ -1,3 +1,5 @@
+use crate::common_messages::Messages;
+
 #[derive(Debug, Clone, Default)]
 pub struct Extensions {
     file_extensions: Vec<String>,
@@ -9,13 +11,11 @@ impl Extensions {
     }
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     /// After, extensions cannot contains any dot, commas etc.
-    pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) -> (Vec<String>, Vec<String>, Vec<String>) {
-        let mut messages = Vec::new();
-        let mut warnings = Vec::new();
-        let errors = Vec::new();
+    pub fn set_allowed_extensions(&mut self, mut allowed_extensions: String) -> Messages {
+        let mut messages = Messages::new();
 
         if allowed_extensions.trim().is_empty() {
-            return (messages, warnings, errors);
+            return messages;
         }
         allowed_extensions = allowed_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
         allowed_extensions = allowed_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
@@ -33,12 +33,12 @@ impl Extensions {
             }
 
             if extension[1..].contains('.') {
-                warnings.push(format!("{extension} is not valid extension because contains dot inside"));
+                messages.warnings.push(format!("{extension} is not valid extension because contains dot inside"));
                 continue;
             }
 
             if extension[1..].contains(' ') {
-                warnings.push(format!("{extension} is not valid extension because contains empty space inside"));
+                messages.warnings.push(format!("{extension} is not valid extension because contains empty space inside"));
                 continue;
             }
 
@@ -48,9 +48,11 @@ impl Extensions {
         }
 
         if self.file_extensions.is_empty() {
-            messages.push("No valid extensions were provided, so allowing all extensions by default.".to_string());
+            messages
+                .messages
+                .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
         }
-        (messages, warnings, errors)
+        messages
     }
 
     pub fn matches_filename(&self, file_name: &str) -> bool {

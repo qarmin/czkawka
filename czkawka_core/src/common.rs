@@ -11,13 +11,14 @@ use std::{fs, thread};
 #[cfg(feature = "heif")]
 use anyhow::Result;
 use directories_next::ProjectDirs;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{debug, LevelFilter, Record};
+use log::{LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -66,7 +67,6 @@ pub fn set_number_of_threads(thread_number: usize) {
     rayon::ThreadPoolBuilder::new().num_threads(get_number_of_threads()).build_global().unwrap();
 }
 
-/// Class for common functions used across other class/functions
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
     ".cr2", ".ari",
@@ -225,7 +225,6 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 }
 
 impl Common {
-    /// Printing time which took between start and stop point and prints also function name
     #[allow(unused_variables)]
     pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: &str) {
         #[cfg(debug_assertions)]
@@ -264,8 +263,6 @@ impl Common {
         }
         warning
     }
-
-    /// Function to check if directory match expression
 
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
@@ -441,11 +438,10 @@ pub fn prepare_thread_handler_common(
     (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
 }
 
+#[fun_time(message = "send_info_and_wait_for_ending_all_threads")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
-    debug!("Sending info to stop all threads");
     progress_thread_run.store(false, Ordering::Relaxed);
     progress_thread_handle.join().unwrap();
-    debug!("All threads stopped");
 }
 
 #[cfg(test)]

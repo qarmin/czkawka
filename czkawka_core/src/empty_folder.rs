@@ -5,14 +5,14 @@ use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
+use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
 
-/// Struct to store most basics info about all folder
 pub struct EmptyFolder {
     common_data: CommonToolData,
     information: Info,
@@ -20,16 +20,12 @@ pub struct EmptyFolder {
     empty_folder_list: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_empty_folders: usize,
 }
 
-/// Method implementation for `EmptyFolder`
 impl EmptyFolder {
-    /// New function providing basics values
-
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::EmptyFolders),
@@ -47,14 +43,8 @@ impl EmptyFolder {
         &self.information
     }
 
+    #[fun_time(message = "find_empty_folders")]
     pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding empty folders");
-        let start_time = std::time::Instant::now();
-        self.find_empty_folders_internal(stop_receiver, progress_sender);
-        info!("Ended finding empty folders which took {:?}", start_time.elapsed());
-    }
-
-    fn find_empty_folders_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -67,12 +57,6 @@ impl EmptyFolder {
         self.debug_print();
     }
 
-    pub fn set_delete_folder(&mut self, delete_folder: bool) {
-        self.delete_folders = delete_folder;
-    }
-
-    /// Clean directory tree
-    /// If directory contains only 2 empty folders, then this directory should be removed instead two empty folders inside because it will produce another empty folder.
     fn optimize_folders(&mut self) {
         let mut new_directory_folders: BTreeMap<PathBuf, FolderEntry> = Default::default();
 
@@ -92,8 +76,6 @@ impl EmptyFolder {
         self.information.number_of_empty_folders = self.empty_folder_list.len();
     }
 
-    /// Function to check if folder are empty.
-    /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         debug!("check_for_empty_folders - start");
         let result = DirTraversalBuilder::new()
@@ -131,7 +113,6 @@ impl EmptyFolder {
         res
     }
 
-    /// Deletes earlier found empty folders
     fn delete_empty_folders(&mut self) {
         // Folders may be deleted or require too big privileges
         for name in self.empty_folder_list.keys() {
@@ -232,5 +213,10 @@ impl CommonData for EmptyFolder {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+}
+impl EmptyFolder {
+    pub fn set_delete_folder(&mut self, delete_folder: bool) {
+        self.delete_folders = delete_folder;
     }
 }

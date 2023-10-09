@@ -7,8 +7,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
@@ -44,13 +44,11 @@ pub struct FileEntry {
     pub modified_date: u64,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_temporary_files: usize,
 }
 
-/// Struct with required information's to work
 pub struct Temporary {
     common_data: CommonToolData,
     information: Info,
@@ -68,7 +66,8 @@ impl Temporary {
         }
     }
 
-    fn find_temporary_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    #[fun_time(message = "find_temporary_files")]
+    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -78,15 +77,8 @@ impl Temporary {
         self.debug_print();
     }
 
-    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding temporary files");
-        let start_time = std::time::Instant::now();
-        self.find_temporary_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding temporary files which took {:?}", start_time.elapsed());
-    }
-
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -156,7 +148,6 @@ impl Temporary {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         self.information.number_of_temporary_files = self.temporary_files.len();
 
-        debug!("check_files - end");
         true
     }
     pub fn get_file_entry(
@@ -188,7 +179,7 @@ impl Temporary {
         })
     }
 
-    /// Function to delete files, from filed Vector
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
         match self.delete_method {
             DeleteMethod::Delete => {
@@ -208,6 +199,7 @@ impl Temporary {
 }
 
 impl SaveResults for Temporary {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -249,6 +241,7 @@ impl SaveResults for Temporary {
 }
 
 impl PrintResults for Temporary {
+    #[fun_time(message = "print_results")]
     fn print_results(&self) {
         println!("Found {} temporary files.\n", self.information.number_of_temporary_files);
         for file_entry in &self.temporary_files {

@@ -8,8 +8,8 @@ use std::sync::Arc;
 use std::{fs, mem, panic};
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
 use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
 use pdf::PdfError;
@@ -73,7 +73,6 @@ bitflags! {
     }
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_broken_files: usize,
@@ -100,14 +99,8 @@ impl BrokenFiles {
         }
     }
 
+    #[fun_time(message = "find_broken_files")]
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding broken files");
-        let start_time = std::time::Instant::now();
-        self.find_broken_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding broken files which took {:?}", start_time.elapsed());
-    }
-
-    pub fn find_broken_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -137,8 +130,8 @@ impl BrokenFiles {
         self.delete_method = delete_method;
     }
 
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -206,8 +199,6 @@ impl BrokenFiles {
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-
-        debug!("check_files - end");
         true
     }
     fn get_file_entry(
@@ -348,8 +339,8 @@ impl BrokenFiles {
         }
     }
 
+    #[fun_time(message = "load_cache")]
     fn load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
-        debug!("load_cache - start (using cache {})", self.common_data.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -372,12 +363,11 @@ impl BrokenFiles {
             loaded_hash_map = Default::default();
             non_cached_files_to_check = files_to_check;
         }
-        debug!("load_cache - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    #[fun_time(message = "look_for_broken_files")]
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("look_for_broken_files - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
@@ -422,11 +412,10 @@ impl BrokenFiles {
         // Clean unused data
         self.files_to_check = Default::default();
 
-        debug!("look_for_broken_files - end");
         true
     }
+    #[fun_time(message = "save_to_cache")]
     fn save_to_cache(&mut self, vec_file_entry: &[FileEntry], loaded_hash_map: BTreeMap<String, FileEntry>) {
-        debug!("save_to_cache - start, using cache {}", self.common_data.use_cache);
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, FileEntry> = Default::default();
@@ -441,10 +430,8 @@ impl BrokenFiles {
             let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
-        debug!("save_to_cache - end");
     }
 
-    /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
         match self.delete_method {
             DeleteMethod::Delete => {
@@ -470,7 +457,6 @@ impl Default for BrokenFiles {
 impl DebugPrint for BrokenFiles {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -525,8 +511,6 @@ impl SaveResults for BrokenFiles {
 }
 
 impl PrintResults for BrokenFiles {
-    /// Print information's about duplicated entries
-    /// Only needed for CLI
     fn print_results(&self) {
         println!("Found {} broken files.\n", self.information.number_of_broken_files);
         for file_entry in &self.broken_files {

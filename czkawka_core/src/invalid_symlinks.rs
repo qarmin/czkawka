@@ -4,8 +4,9 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
+use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
@@ -17,20 +18,17 @@ pub enum DeleteMethod {
     Delete,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_invalid_symlinks: usize,
 }
 
-/// Struct with required information's to work
 pub struct InvalidSymlinks {
     common_data: CommonToolData,
     information: Info,
     invalid_symlinks: Vec<FileEntry>,
     delete_method: DeleteMethod,
 }
-
 impl InvalidSymlinks {
     pub fn new() -> Self {
         Self {
@@ -41,14 +39,8 @@ impl InvalidSymlinks {
         }
     }
 
+    #[fun_time(message = "find_invalid_links")]
     pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding invalid symlinks");
-        let start_time = std::time::Instant::now();
-        self.find_invalid_links_internal(stop_receiver, progress_sender);
-        info!("Ended finding invalid symlinks which took {:?}", start_time.elapsed());
-    }
-
-    fn find_invalid_links_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -58,21 +50,8 @@ impl InvalidSymlinks {
         self.debug_print();
     }
 
-    pub const fn get_invalid_symlinks(&self) -> &Vec<FileEntry> {
-        &self.invalid_symlinks
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
-    }
-
-    /// Check files for any with size == 0
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -86,7 +65,7 @@ impl InvalidSymlinks {
             .build()
             .run();
         debug!("check_files - collected files");
-        let res = match result {
+        match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 if let Some(((), invalid_symlinks)) = grouped_file_entries.into_iter().next() {
                     self.invalid_symlinks = invalid_symlinks;
@@ -97,12 +76,10 @@ impl InvalidSymlinks {
             }
             DirTraversalResult::SuccessFolders { .. } => unreachable!(),
             DirTraversalResult::Stopped => false,
-        };
-        debug!("check_files - end");
-        res
+        }
     }
 
-    /// Function to delete files, from filed Vector
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
         match self.delete_method {
             DeleteMethod::Delete => {
@@ -128,7 +105,6 @@ impl Default for InvalidSymlinks {
 impl DebugPrint for InvalidSymlinks {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -217,5 +193,19 @@ impl CommonData for InvalidSymlinks {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+}
+
+impl InvalidSymlinks {
+    pub const fn get_invalid_symlinks(&self) -> &Vec<FileEntry> {
+        &self.invalid_symlinks
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+
+    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.delete_method = delete_method;
     }
 }

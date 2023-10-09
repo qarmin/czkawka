@@ -4,8 +4,9 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
+use log::debug;
 
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
@@ -17,13 +18,11 @@ pub enum DeleteMethod {
     Delete,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_empty_files: usize,
 }
 
-/// Struct with required information's to work
 pub struct EmptyFiles {
     common_data: CommonToolData,
     information: Info,
@@ -50,14 +49,8 @@ impl EmptyFiles {
         }
     }
 
+    #[fun_time(message = "find_empty_files")]
     pub fn find_empty_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding empty files");
-        let start_time = std::time::Instant::now();
-        self.find_empty_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding empty files which took {:?}", start_time.elapsed());
-    }
-
-    fn find_empty_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -67,9 +60,8 @@ impl EmptyFiles {
         self.debug_print();
     }
 
-    /// Check files for any with size == 0
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -99,11 +91,10 @@ impl EmptyFiles {
             }
             DirTraversalResult::Stopped => false,
         };
-        debug!("check_files - end");
         res
     }
 
-    /// Function to delete files, from filed Vector
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
         match self.delete_method {
             DeleteMethod::Delete => {
@@ -129,7 +120,6 @@ impl Default for EmptyFiles {
 impl DebugPrint for EmptyFiles {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -144,6 +134,7 @@ impl DebugPrint for EmptyFiles {
 }
 
 impl SaveResults for EmptyFiles {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -185,8 +176,7 @@ impl SaveResults for EmptyFiles {
 }
 
 impl PrintResults for EmptyFiles {
-    /// Print information's about duplicated entries
-    /// Only needed for CLI
+    #[fun_time(message = "print_results")]
     fn print_results(&self) {
         println!("Found {} empty files.\n", self.information.number_of_empty_files);
         for file_entry in &self.empty_files {

@@ -8,8 +8,9 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
+use log::debug;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 
@@ -168,7 +169,6 @@ pub struct BadFileEntry {
     pub proper_extensions: String,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_files_with_bad_extension: usize,
@@ -193,14 +193,8 @@ impl BadExtensions {
         }
     }
 
+    #[fun_time(message = "find_bad_extensions_files")]
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding files with bad extensions");
-        let start_time = std::time::Instant::now();
-        self.find_bad_extensions_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding files with bad extensions which took {:?}", start_time.elapsed());
-    }
-
-    fn find_bad_extensions_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -213,8 +207,8 @@ impl BadExtensions {
         self.debug_print();
     }
 
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -243,12 +237,11 @@ impl BadExtensions {
             }
             DirTraversalResult::Stopped => false,
         };
-        debug!("check_files - end");
         res
     }
 
+    #[fun_time(message = "look_for_bad_extensions_files")]
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("look_for_bad_extensions_files - start");
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.get_cd().tool_type);
 
@@ -277,10 +270,10 @@ impl BadExtensions {
         // Clean unused data
         self.files_to_check = Default::default();
 
-        debug!("look_for_bad_extensions_files - end");
         true
     }
 
+    #[fun_time(message = "verify_extensions")]
     fn verify_extensions(
         &self,
         files_to_check: Vec<FileEntry>,
@@ -289,8 +282,7 @@ impl BadExtensions {
         check_was_stopped: &AtomicBool,
         hashmap_workarounds: &HashMap<&str, Vec<&str>>,
     ) -> Vec<BadFileEntry> {
-        debug!("verify_extensions - start");
-        let res = files_to_check
+        files_to_check
             .into_par_iter()
             .map(|file_entry| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
@@ -339,9 +331,7 @@ impl BadExtensions {
             .while_some()
             .filter(Option::is_some)
             .map(Option::unwrap)
-            .collect::<Vec<_>>();
-        debug!("verify_extensions - end");
-        res
+            .collect::<Vec<_>>()
     }
 
     fn get_and_validate_extension(&self, file_entry: &FileEntry, proper_extension: &str) -> Option<String> {
@@ -419,7 +409,6 @@ impl Default for BadExtensions {
 impl DebugPrint for BadExtensions {
     #[allow(dead_code)]
     #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
         #[cfg(not(debug_assertions))]
         {
@@ -473,8 +462,6 @@ impl SaveResults for BadExtensions {
 }
 
 impl PrintResults for BadExtensions {
-    /// Print information's about duplicated entries
-    /// Only needed for CLI
     fn print_results(&self) {
         println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
         for file_entry in &self.bad_extensions_files {

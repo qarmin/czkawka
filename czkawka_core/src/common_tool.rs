@@ -24,6 +24,18 @@ pub struct CommonToolData {
     pub(crate) use_reference_folders: bool,
 }
 
+#[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
+pub enum DeleteMethod {
+    #[default]
+    None,
+    Delete, // Just delete items
+    AllExceptNewest,
+    AllExceptOldest,
+    OneOldest,
+    OneNewest,
+    HardLink,
+}
+
 impl CommonToolData {
     pub fn new(tool_type: ToolType) -> Self {
         Self {
@@ -129,21 +141,17 @@ pub trait CommonData {
     }
 
     fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        let (messages, warnings, errors) = self.get_cd_mut().directories.set_included_directory(included_directory);
-        self.get_cd_mut().text_messages.extend_messages_with(messages, warnings, errors);
+        let messages = self.get_cd_mut().directories.set_included_directory(included_directory);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        let (messages, warnings, errors) = self.get_cd_mut().directories.set_excluded_directory(excluded_directory);
-        self.get_cd_mut().text_messages.messages.extend(messages);
-        self.get_cd_mut().text_messages.warnings.extend(warnings);
-        self.get_cd_mut().text_messages.errors.extend(errors);
+        let messages = self.get_cd_mut().directories.set_excluded_directory(excluded_directory);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
     fn set_allowed_extensions(&mut self, allowed_extensions: String) {
-        let (messages, warnings, errors) = self.get_cd_mut().allowed_extensions.set_allowed_extensions(allowed_extensions);
-        self.get_cd_mut().text_messages.messages.extend(messages);
-        self.get_cd_mut().text_messages.warnings.extend(warnings);
-        self.get_cd_mut().text_messages.errors.extend(errors);
+        let messages = self.get_cd_mut().allowed_extensions.set_allowed_extensions(allowed_extensions);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
@@ -155,8 +163,8 @@ pub trait CommonData {
 
     fn optimize_dirs_before_start(&mut self) {
         let recursive_search = self.get_cd().recursive_search;
-        let (messages, warnings, errors) = self.get_cd_mut().directories.optimize_directories(recursive_search);
-        self.get_cd_mut().text_messages.extend_messages_with(messages, warnings, errors);
+        let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn debug_print_common(&self) {
