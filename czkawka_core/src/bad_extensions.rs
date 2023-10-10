@@ -1,7 +1,5 @@
 use std::collections::{BTreeSet, HashMap};
-use std::fs::File;
 use std::io::prelude::*;
-use std::io::BufWriter;
 use std::mem;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -413,55 +411,20 @@ impl DebugPrint for BadExtensions {
     }
 }
 
-impl SaveResults for BadExtensions {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
+impl PrintResults for BadExtensions {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
+        )?;
+        writeln!(writer, "Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension)?;
 
-        if !self.bad_extensions_files.is_empty() {
-            writeln!(writer, "Found {} files with invalid extension.", self.information.number_of_files_with_bad_extension).unwrap();
-            for file_entry in &self.bad_extensions_files {
-                writeln!(writer, "{} ----- {}", file_entry.path.display(), file_entry.proper_extensions).unwrap();
-            }
-        } else {
-            write!(writer, "Not found any files with invalid extension.").unwrap();
-        }
-
-        true
-    }
-}
-
-impl PrintResults for BadExtensions {
-    #[fun_time(message = "print_results")]
-    fn print_results(&self) {
-        println!("Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension);
         for file_entry in &self.bad_extensions_files {
-            println!("{} ----- {}", file_entry.path.display(), file_entry.proper_extensions);
+            writeln!(writer, "{} ----- {}", file_entry.path.display(), file_entry.proper_extensions)?;
         }
+
+        Ok(())
     }
 }
 

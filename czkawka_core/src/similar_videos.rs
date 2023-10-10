@@ -19,7 +19,7 @@ use crate::common::{check_folder_children, prepare_thread_handler_common, send_i
 use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
-use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
 
@@ -423,66 +423,23 @@ impl DebugPrint for SimilarVideos {
     }
 }
 
-impl SaveResults for SimilarVideos {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
+impl PrintResults for SimilarVideos {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
         if !self.similar_vectors.is_empty() {
-            write!(writer, "{} videos which have similar friends\n\n", self.similar_vectors.len()).unwrap();
+            write!(writer, "{} videos which have similar friends\n\n", self.similar_vectors.len())?;
 
             for struct_similar in &self.similar_vectors {
-                writeln!(writer, "Found {} videos which have similar friends", struct_similar.len()).unwrap();
+                writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY)).unwrap();
+                    writeln!(writer, "{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY))?;
                 }
-                writeln!(writer).unwrap();
+                writeln!(writer)?;
             }
         } else {
-            write!(writer, "Not found any similar videos.").unwrap();
+            write!(writer, "Not found any similar videos.")?;
         }
 
-        true
-    }
-}
-
-impl PrintResults for SimilarVideos {
-    #[fun_time(message = "print_results")]
-    fn print_results(&self) {
-        if !self.similar_vectors.is_empty() {
-            println!("Found {} videos which have similar friends", self.similar_vectors.len());
-
-            for vec_file_entry in &self.similar_vectors {
-                for file_entry in vec_file_entry {
-                    println!("{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY));
-                }
-                println!();
-            }
-        }
+        Ok(())
     }
 }
 

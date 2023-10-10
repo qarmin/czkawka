@@ -16,7 +16,7 @@ use rayon::prelude::*;
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults};
 
 #[derive(Clone, Debug)]
 pub struct FileEntry {
@@ -248,61 +248,28 @@ impl DebugPrint for BigFile {
     }
 }
 
-impl SaveResults for BigFile {
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
+impl PrintResults for BigFile {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
+        )?;
 
         if self.information.number_of_real_files != 0 {
             if self.search_mode == SearchMode::BiggestFiles {
-                write!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
+                writeln!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files)?;
             } else {
-                write!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files).unwrap();
+                writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for (size, file_entry) in &self.big_files {
-                writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display()).unwrap();
+                writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display())?;
             }
         } else {
             write!(writer, "Not found any files.").unwrap();
         }
 
-        true
-    }
-}
-
-impl PrintResults for BigFile {
-    fn print_results(&self) {
-        if self.search_mode == SearchMode::BiggestFiles {
-            println!("{} the biggest files.\n\n", self.information.number_of_real_files);
-        } else {
-            println!("{} the smallest files.\n\n", self.information.number_of_real_files);
-        }
-        for (size, file_entry) in &self.big_files {
-            println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
-        }
+        Ok(())
     }
 }
 

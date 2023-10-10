@@ -26,7 +26,7 @@ use crate::common::{
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
-use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
 
 type ImHash = Vec<u8>;
@@ -831,40 +831,13 @@ impl DebugPrint for SimilarImages {
     }
 }
 
-impl SaveResults for SimilarImages {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
+impl PrintResults for SimilarImages {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
         if !self.similar_vectors.is_empty() {
-            write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
+            write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len())?;
 
             for struct_similar in &self.similar_vectors {
-                writeln!(writer, "Found {} images which have similar friends", struct_similar.len()).unwrap();
+                writeln!(writer, "Found {} images which have similar friends", struct_similar.len())?;
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
@@ -873,38 +846,15 @@ impl SaveResults for SimilarImages {
                         file_entry.dimensions,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
-                    )
-                    .unwrap();
+                    )?;
                 }
-                writeln!(writer).unwrap();
+                writeln!(writer)?;
             }
         } else {
-            write!(writer, "Not found any similar images.").unwrap();
+            write!(writer, "Not found any similar images.")?;
         }
 
-        true
-    }
-}
-
-impl PrintResults for SimilarImages {
-    #[fun_time(message = "print_results")]
-    fn print_results(&self) {
-        if !self.similar_vectors.is_empty() {
-            println!("Found {} images which have similar friends", self.similar_vectors.len());
-
-            for vec_file_entry in &self.similar_vectors {
-                for file_entry in vec_file_entry {
-                    println!(
-                        "{} - {} - {} - {}",
-                        file_entry.path.display(),
-                        file_entry.dimensions,
-                        format_size(file_entry.size, BINARY),
-                        get_string_from_similarity(&file_entry.similarity, self.hash_size)
-                    );
-                }
-                println!();
-            }
-        }
+        Ok(())
     }
 }
 

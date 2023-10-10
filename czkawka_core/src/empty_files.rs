@@ -123,55 +123,24 @@ impl DebugPrint for EmptyFiles {
     }
 }
 
-impl SaveResults for EmptyFiles {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
+impl PrintResults for EmptyFiles {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
+        )?;
 
         if !self.empty_files.is_empty() {
-            writeln!(writer, "Found {} empty files.", self.information.number_of_empty_files).unwrap();
+            writeln!(writer, "Found {} empty files.", self.information.number_of_empty_files)?;
             for file_entry in &self.empty_files {
-                writeln!(writer, "{}", file_entry.path.display()).unwrap();
+                writeln!(writer, "{}", file_entry.path.display())?;
             }
         } else {
-            write!(writer, "Not found any empty files.").unwrap();
+            write!(writer, "Not found any empty files.")?;
         }
 
-        true
-    }
-}
-
-impl PrintResults for EmptyFiles {
-    #[fun_time(message = "print_results")]
-    fn print_results(&self) {
-        println!("Found {} empty files.\n", self.information.number_of_empty_files);
-        for file_entry in &self.empty_files {
-            println!("{}", file_entry.path.display());
-        }
+        Ok(())
     }
 }
 

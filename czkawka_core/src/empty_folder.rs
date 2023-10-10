@@ -11,7 +11,7 @@ use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults};
 
 pub struct EmptyFolder {
     common_data: CommonToolData,
@@ -144,62 +144,19 @@ impl DebugPrint for EmptyFolder {
     }
 }
 
-impl SaveResults for EmptyFolder {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
+impl PrintResults for EmptyFolder {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
         if !self.empty_folder_list.is_empty() {
-            writeln!(
-                writer,
-                "-------------------------------------------------Empty folder list-------------------------------------------------"
-            )
-            .unwrap();
-            writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders).unwrap();
+            writeln!(writer, "--------------------------Empty folder list--------------------------")?;
+            writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders)?;
             for name in self.empty_folder_list.keys() {
-                writeln!(writer, "{}", name.display()).unwrap();
+                writeln!(writer, "{}", name.display())?;
             }
         } else {
-            write!(writer, "Not found any empty folders.").unwrap();
+            write!(writer, "Not found any empty folders.")?;
         }
 
-        true
-    }
-}
-
-impl PrintResults for EmptyFolder {
-    #[fun_time(message = "print_results")]
-    fn print_results(&self) {
-        if !self.empty_folder_list.is_empty() {
-            println!("Found {} empty folders", self.empty_folder_list.len());
-        }
-        for name in self.empty_folder_list.keys() {
-            println!("{}", name.display());
-        }
+        Ok(())
     }
 }
 

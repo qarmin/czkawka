@@ -1,8 +1,7 @@
 #![allow(clippy::needless_late_init)]
 
-use std::process;
-
 use clap::Parser;
+use log::error;
 
 use commands::Commands;
 use czkawka_core::bad_extensions::BadExtensions;
@@ -10,7 +9,7 @@ use czkawka_core::big_file::{BigFile, SearchMode};
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::{set_number_of_threads, setup_logger};
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
-#[allow(unused_imports)] // It is used in release for print_results().
+#[allow(unused_imports)] // It is used in release for print_results_to_output().
 use czkawka_core::common_traits::*;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
@@ -101,16 +100,14 @@ fn duplicates(duplicates: DuplicatesArgs) {
     df.find_duplicates(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !df.save_results_to_file(file_name) {
-            df.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = df.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        df.print_results();
+        df.print_results_to_output();
     }
-    df.print_results();
     df.get_text_messages().print_messages();
 }
 
@@ -140,14 +137,13 @@ fn empty_folders(empty_folders: EmptyFoldersArgs) {
     ef.find_empty_folders(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !ef.save_results_to_file(file_name) {
-            ef.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = ef.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        ef.print_results();
+        ef.print_results_to_output();
     }
     ef.get_text_messages().print_messages();
 }
@@ -190,14 +186,13 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
     bf.find_big_files(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !bf.save_results_to_file(file_name) {
-            bf.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = bf.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        bf.print_results();
+        bf.print_results_to_output();
     }
     bf.get_text_messages().print_messages();
 }
@@ -235,14 +230,13 @@ fn empty_files(empty_files: EmptyFilesArgs) {
     ef.find_empty_files(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !ef.save_results_to_file(file_name) {
-            ef.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = ef.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        ef.print_results();
+        ef.print_results_to_output();
     }
     ef.get_text_messages().print_messages();
 }
@@ -278,14 +272,13 @@ fn temporary(temporary: TemporaryArgs) {
     tf.find_temporary_files(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !tf.save_results_to_file(file_name) {
-            tf.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = tf.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        tf.print_results();
+        tf.print_results_to_output();
     }
     tf.get_text_messages().print_messages();
 }
@@ -329,14 +322,13 @@ fn similar_images(similar_images: SimilarImagesArgs) {
     sf.find_similar_images(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !sf.save_results_to_file(file_name) {
-            sf.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = sf.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        sf.print_results();
+        sf.print_results_to_output();
     }
     sf.get_text_messages().print_messages();
 }
@@ -378,14 +370,13 @@ fn same_music(same_music: SameMusicArgs) {
     mf.find_same_music(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !mf.save_results_to_file(file_name) {
-            mf.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = mf.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        mf.print_results();
+        mf.print_results_to_output();
     }
     mf.get_text_messages().print_messages();
 }
@@ -422,14 +413,13 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
     ifs.find_invalid_links(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !ifs.save_results_to_file(file_name) {
-            ifs.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = ifs.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        ifs.print_results();
+        ifs.print_results_to_output();
     }
     ifs.get_text_messages().print_messages();
 }
@@ -467,14 +457,13 @@ fn broken_files(broken_files: BrokenFilesArgs) {
     br.find_broken_files(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !br.save_results_to_file(file_name) {
-            br.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = br.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        br.print_results();
+        br.print_results_to_output();
     }
     br.get_text_messages().print_messages();
 }
@@ -513,14 +502,13 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
     vr.find_similar_videos(None, None);
 
     if let Some(file_name) = file_to_save.file_name() {
-        if !vr.save_results_to_file(file_name) {
-            vr.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = vr.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
     if !cfg!(debug_assertions) {
-        vr.print_results();
+        vr.print_results_to_output();
     }
     vr.get_text_messages().print_messages();
 }
@@ -550,17 +538,16 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs) {
     #[cfg(target_family = "unix")]
     be.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
 
+    be.find_bad_extensions_files(None, None);
+
     if let Some(file_name) = file_to_save.file_name() {
-        if !be.save_results_to_file(file_name) {
-            be.get_text_messages().print_messages();
-            process::exit(1);
+        if let Err(e) = be.print_results_to_file(file_name) {
+            error!("Failed to save results to file {e}");
         }
     }
 
-    be.find_bad_extensions_files(None, None);
-
     if !cfg!(debug_assertions) {
-        be.print_results();
+        be.print_results_to_output();
     }
     be.get_text_messages().print_messages();
 }

@@ -962,56 +962,35 @@ impl DebugPrint for DuplicateFinder {
     }
 }
 
-impl SaveResults for DuplicateFinder {
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
+impl PrintResults for DuplicateFinder {
+    fn write_results<T: Write>(&self, writer: &mut T) -> io::Result<()> {
+        writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
+        )?;
+
         match self.check_method {
             CheckingMethod::Name => {
                 if !self.files_with_identical_names.is_empty() {
                     writeln!(
                         writer,
                         "-------------------------------------------------Files with same names-------------------------------------------------"
-                    )
-                    .unwrap();
+                    )?;
                     writeln!(
                         writer,
                         "Found {} files in {} groups with same name(may have different content)",
                         self.information.number_of_duplicated_files_by_name, self.information.number_of_groups_by_name,
-                    )
-                    .unwrap();
+                    )?;
                     for (name, vector) in self.files_with_identical_names.iter().rev() {
-                        writeln!(writer, "Name - {} - {} files ", name, vector.len()).unwrap();
+                        writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
                         for j in vector {
-                            writeln!(writer, "{}", j.path.display()).unwrap();
+                            writeln!(writer, "{}", j.path.display())?;
                         }
-                        writeln!(writer).unwrap();
+                        writeln!(writer)?;
                     }
                 } else {
-                    write!(writer, "Not found any files with same names.").unwrap();
+                    write!(writer, "Not found any files with same names.")?;
                 }
             }
             CheckingMethod::SizeName => {
@@ -1019,23 +998,21 @@ impl SaveResults for DuplicateFinder {
                     writeln!(
                         writer,
                         "-------------------------------------------------Files with same size and names-------------------------------------------------"
-                    )
-                    .unwrap();
+                    )?;
                     writeln!(
                         writer,
                         "Found {} files in {} groups with same size and name(may have different content)",
                         self.information.number_of_duplicated_files_by_size_name, self.information.number_of_groups_by_size_name,
-                    )
-                    .unwrap();
+                    )?;
                     for ((size, name), vector) in self.files_with_identical_size_names.iter().rev() {
-                        writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len()).unwrap();
+                        writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
                         for j in vector {
-                            writeln!(writer, "{}", j.path.display()).unwrap();
+                            writeln!(writer, "{}", j.path.display())?;
                         }
-                        writeln!(writer).unwrap();
+                        writeln!(writer)?;
                     }
                 } else {
-                    write!(writer, "Not found any files with same size and names.").unwrap();
+                    write!(writer, "Not found any files with same size and names.")?;
                 }
             }
             CheckingMethod::Size => {
@@ -1043,24 +1020,22 @@ impl SaveResults for DuplicateFinder {
                     writeln!(
                         writer,
                         "-------------------------------------------------Files with same size-------------------------------------------------"
-                    )
-                    .unwrap();
+                    )?;
                     writeln!(
                         writer,
                         "Found {} duplicated files which in {} groups which takes {}.",
                         self.information.number_of_duplicated_files_by_size,
                         self.information.number_of_groups_by_size,
                         format_size(self.information.lost_space_by_size, BINARY)
-                    )
-                    .unwrap();
+                    )?;
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
-                        write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len()).unwrap();
+                        write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len())?;
                         for file_entry in vector {
-                            writeln!(writer, "{}", file_entry.path.display()).unwrap();
+                            writeln!(writer, "{}", file_entry.path.display())?;
                         }
                     }
                 } else {
-                    write!(writer, "Not found any duplicates.").unwrap();
+                    write!(writer, "Not found any duplicates.")?;
                 }
             }
             CheckingMethod::Hash => {
@@ -1068,114 +1043,30 @@ impl SaveResults for DuplicateFinder {
                     writeln!(
                         writer,
                         "-------------------------------------------------Files with same hashes-------------------------------------------------"
-                    )
-                    .unwrap();
+                    )?;
                     writeln!(
                         writer,
                         "Found {} duplicated files which in {} groups which takes {}.",
                         self.information.number_of_duplicated_files_by_hash,
                         self.information.number_of_groups_by_hash,
                         format_size(self.information.lost_space_by_hash, BINARY)
-                    )
-                    .unwrap();
+                    )?;
                     for (size, vectors_vector) in self.files_with_identical_hashes.iter().rev() {
                         for vector in vectors_vector {
-                            writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len()).unwrap();
+                            writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
                             for file_entry in vector {
-                                writeln!(writer, "{}", file_entry.path.display()).unwrap();
+                                writeln!(writer, "{}", file_entry.path.display())?;
                             }
                         }
                     }
                 } else {
-                    write!(writer, "Not found any duplicates.").unwrap();
+                    write!(writer, "Not found any duplicates.")?;
                 }
             }
             _ => panic!(),
         }
 
-        true
-    }
-}
-
-impl PrintResults for DuplicateFinder {
-    fn print_results(&self) {
-        let mut number_of_files: u64 = 0;
-        let mut number_of_groups: u64 = 0;
-
-        match self.check_method {
-            CheckingMethod::Name => {
-                for i in &self.files_with_identical_names {
-                    number_of_files += i.1.len() as u64;
-                    number_of_groups += 1;
-                }
-                println!("Found {number_of_files} files in {number_of_groups} groups with same name(may have different content)",);
-                for (name, vector) in &self.files_with_identical_names {
-                    println!("Name - {} - {} files ", name, vector.len());
-                    for j in vector {
-                        println!("{}", j.path.display());
-                    }
-                    println!();
-                }
-            }
-            CheckingMethod::SizeName => {
-                for i in &self.files_with_identical_size_names {
-                    number_of_files += i.1.len() as u64;
-                    number_of_groups += 1;
-                }
-                println!("Found {number_of_files} files in {number_of_groups} groups with same size and name(may have different content)",);
-                for ((size, name), vector) in &self.files_with_identical_size_names {
-                    println!("Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len());
-                    for j in vector {
-                        println!("{}", j.path.display());
-                    }
-                    println!();
-                }
-            }
-            CheckingMethod::Hash => {
-                for vector in self.files_with_identical_hashes.values() {
-                    for j in vector {
-                        number_of_files += j.len() as u64;
-                        number_of_groups += 1;
-                    }
-                }
-                println!(
-                    "Found {} duplicated files in {} groups with same content which took {}:",
-                    number_of_files,
-                    number_of_groups,
-                    format_size(self.information.lost_space_by_size, BINARY)
-                );
-                for (size, vector) in self.files_with_identical_hashes.iter().rev() {
-                    for j in vector {
-                        println!("Size - {} ({}) - {} files ", format_size(*size, BINARY), size, j.len());
-                        for k in j {
-                            println!("{}", k.path.display());
-                        }
-                        println!("----");
-                    }
-                    println!();
-                }
-            }
-            CheckingMethod::Size => {
-                for i in &self.files_with_identical_size {
-                    number_of_files += i.1.len() as u64;
-                    number_of_groups += 1;
-                }
-                println!(
-                    "Found {} files in {} groups with same size(may have different content) which took {}:",
-                    number_of_files,
-                    number_of_groups,
-                    format_size(self.information.lost_space_by_size, BINARY)
-                );
-                for (size, vector) in &self.files_with_identical_size {
-                    println!("Size - {} ({}) - {} files ", format_size(*size, BINARY), size, vector.len());
-                    for j in vector {
-                        println!("{}", j.path.display());
-                    }
-                    println!();
-                }
-            }
-            _ => panic!(),
-        }
+        Ok(())
     }
 }
 

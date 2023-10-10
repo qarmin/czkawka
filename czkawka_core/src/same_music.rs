@@ -907,40 +907,13 @@ impl DebugPrint for SameMusic {
     }
 }
 
-impl SaveResults for SameMusic {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
+impl PrintResults for SameMusic {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
         if !self.duplicated_music_entries.is_empty() {
-            writeln!(writer, "{} music files which have similar friends\n\n.", self.duplicated_music_entries.len()).unwrap();
+            writeln!(writer, "{} music files which have similar friends\n\n.", self.duplicated_music_entries.len())?;
 
             for vec_file_entry in &self.duplicated_music_entries {
-                writeln!(writer, "Found {} music files which have similar friends", vec_file_entry.len()).unwrap();
+                writeln!(writer, "Found {} music files which have similar friends", vec_file_entry.len())?;
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
@@ -958,32 +931,10 @@ impl SaveResults for SameMusic {
                 writeln!(writer).unwrap();
             }
         } else {
-            write!(writer, "Not found any similar music files.").unwrap();
+            write!(writer, "Not found any similar music files.")?;
         }
 
-        true
-    }
-}
-
-impl PrintResults for SameMusic {
-    #[fun_time(message = "print_results")]
-    fn print_results(&self) {
-        println!("Found {} similar music files.\n", self.duplicated_music_entries.len());
-        for vec_file_entry in &self.duplicated_music_entries {
-            for file_entry in vec_file_entry {
-                println!(
-                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
-                    file_entry.track_title,
-                    file_entry.track_artist,
-                    file_entry.year,
-                    file_entry.length,
-                    file_entry.genre,
-                    file_entry.bitrate,
-                    file_entry.path.display()
-                );
-            }
-            println!();
-        }
+        Ok(())
     }
 }
 

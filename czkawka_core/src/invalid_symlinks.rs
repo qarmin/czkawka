@@ -106,37 +106,10 @@ impl DebugPrint for InvalidSymlinks {
     }
 }
 
-impl SaveResults for InvalidSymlinks {
-    #[fun_time(message = "save_results_to_file")]
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
+impl PrintResults for InvalidSymlinks {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
         if !self.invalid_symlinks.is_empty() {
-            writeln!(writer, "Found {} invalid symlinks.", self.information.number_of_invalid_symlinks).unwrap();
+            writeln!(writer, "Found {} invalid symlinks.", self.information.number_of_invalid_symlinks)?;
             for file_entry in &self.invalid_symlinks {
                 writeln!(
                     writer,
@@ -147,30 +120,13 @@ impl SaveResults for InvalidSymlinks {
                         ErrorType::InfiniteRecursion => "Infinite Recursion",
                         ErrorType::NonExistentFile => "Non Existent File",
                     }
-                )
-                .unwrap();
+                )?;
             }
         } else {
-            write!(writer, "Not found any invalid symlinks.").unwrap();
+            write!(writer, "Not found any invalid symlinks.")?;
         }
-        true
-    }
-}
 
-impl PrintResults for InvalidSymlinks {
-    fn print_results(&self) {
-        println!("Found {} invalid symlinks.\n", self.information.number_of_invalid_symlinks);
-        for file_entry in &self.invalid_symlinks {
-            println!(
-                "{}\t\t{}\t\t{}",
-                file_entry.path.display(),
-                file_entry.symlink_info.clone().expect("invalid traversal result").destination_path.display(),
-                match file_entry.symlink_info.clone().expect("invalid traversal result").type_of_error {
-                    ErrorType::InfiniteRecursion => "Infinite Recursion",
-                    ErrorType::NonExistentFile => "Non Existent File",
-                }
-            );
-        }
+        Ok(())
     }
 }
 
