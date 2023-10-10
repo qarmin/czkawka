@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
-use std::fs::{DirEntry, File, Metadata};
-use std::io::{Write, *};
+use std::fs::{DirEntry, Metadata};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::time::SystemTime;
@@ -8,11 +8,12 @@ use std::{mem, panic};
 
 use bk_tree::BKTree;
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
-use log::{debug, info};
+use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -25,7 +26,7 @@ use crate::common::{
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
-use crate::common_traits::{DebugPrint, PrintResults, ResultEntry, SaveResults};
+use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
 
 type ImHash = Vec<u8>;
@@ -59,7 +60,6 @@ impl ResultEntry for FileEntry {
     }
 }
 
-/// Used by CLI tool when we cannot use directly values
 #[derive(Clone, Debug, Copy)]
 pub enum SimilarityPreset {
     Original,
@@ -72,7 +72,6 @@ pub enum SimilarityPreset {
     None,
 }
 
-/// Distance metric to use with the BK-tree.
 struct Hamming;
 
 impl bk_tree::Metric<ImHash> for Hamming {
@@ -85,7 +84,6 @@ impl bk_tree::Metric<ImHash> for Hamming {
     }
 }
 
-/// Struct to store most basics info about all folder
 pub struct SimilarImages {
     common_data: CommonToolData,
     information: Info,
@@ -102,17 +100,13 @@ pub struct SimilarImages {
     exclude_images_with_same_size: bool,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
 }
 
-/// Method implementation for `EmptyFolder`
 impl SimilarImages {
-    /// New function providing basics values
-
     pub fn new() -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::SimilarImages),
@@ -130,14 +124,8 @@ impl SimilarImages {
         }
     }
 
+    #[fun_time(message = "find_similar_images")]
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding similar images files");
-        let start_time = std::time::Instant::now();
-        self.find_similar_images_internal(stop_receiver, progress_sender);
-        info!("Ended finding similar images which took {:?}", start_time.elapsed());
-    }
-
-    pub fn find_similar_images_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
@@ -152,20 +140,11 @@ impl SimilarImages {
             self.common_data.stopped_search = true;
             return;
         }
-        // if self.delete_folders {
-        //     self.delete_empty_folders();
-        // }
         self.debug_print();
     }
 
-    // pub fn set_delete_folder(&mut self, delete_folder: bool) {
-    //     self.delete_folders = delete_folder;
-    // }
-
-    /// Function to check if folder are empty.
-    /// Parameter `initial_checking` for second check before deleting to be sure that checked folder is still empty
+    #[fun_time(message = "check_for_similar_images")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_for_similar_images - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.common_data.allowed_extensions.using_custom_extensions() {
@@ -246,7 +225,6 @@ impl SimilarImages {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        debug!("check_for_similar_images - end");
         true
     }
 
@@ -279,8 +257,8 @@ impl SimilarImages {
         }
     }
 
+    #[fun_time(message = "hash_images_load_cache")]
     fn hash_images_load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
-        debug!("hash_images_load_cache - start, use cache: {}", self.common_data.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -295,6 +273,7 @@ impl SimilarImages {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
+            debug!("hash_images-load_cache - starting calculating diff");
             for (name, file_entry) in mem::take(&mut self.images_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
                     records_already_cached.insert(name.clone(), cached_file_entry.clone());
@@ -302,11 +281,17 @@ impl SimilarImages {
                     non_cached_files_to_check.insert(name, file_entry);
                 }
             }
+            debug!(
+                "hash_images_load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
+                non_cached_files_to_check.len(),
+                format_size(non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(), BINARY),
+                records_already_cached.len(),
+                format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
+            );
         } else {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);
         }
-        debug!("hash_images_load_cache - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
@@ -317,8 +302,8 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
+    #[fun_time(message = "hash_images")]
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("hash_images - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -363,13 +348,11 @@ impl SimilarImages {
             return false;
         }
 
-        debug!("hash_images - end");
-
         true
     }
 
+    #[fun_time(message = "save_to_cache")]
     fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: BTreeMap<String, FileEntry>) {
-        debug!("save_to_cache - start, using cache: {}", self.common_data.use_cache);
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
@@ -385,7 +368,6 @@ impl SimilarImages {
             );
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
-        debug!("save_to_cache - end");
     }
 
     fn collect_image_file_entry(&self, mut file_entry: FileEntry) -> (FileEntry, ImHash) {
@@ -460,8 +442,8 @@ impl SimilarImages {
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
+    #[fun_time(message = "split_hashes")]
     fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, HashSet<ImHash>) {
-        debug!("split_hashes - start");
         let hashes_with_multiple_images: HashSet<ImHash> = all_hashed_images
             .iter()
             .filter_map(|(hash, vec_file_entry)| {
@@ -499,10 +481,10 @@ impl SimilarImages {
             }
             base_hashes = all_hashed_images.keys().cloned().collect::<Vec<_>>();
         }
-        debug!("split_hashes - end");
         (base_hashes, hashes_with_multiple_images)
     }
 
+    #[fun_time(message = "collect_hash_compare_result")]
     fn collect_hash_compare_result(
         &self,
         hashes_parents: HashMap<ImHash, u32>,
@@ -511,7 +493,6 @@ impl SimilarImages {
         collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
         hashes_similarity: HashMap<ImHash, (ImHash, u32)>,
     ) {
-        debug!("collect_hash_compare_result - start, use reference: {}", self.common_data.use_reference_folders);
         if self.common_data.use_reference_folders {
             // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
 
@@ -561,9 +542,9 @@ impl SimilarImages {
                 collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
             }
         }
-        debug!("collect_hash_compare_result - end");
     }
 
+    #[fun_time(message = "compare_hashes_with_non_zero_tolerance")]
     fn compare_hashes_with_non_zero_tolerance(
         &mut self,
         all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
@@ -572,7 +553,6 @@ impl SimilarImages {
         stop_receiver: Option<&Receiver<()>>,
         tolerance: u32,
     ) -> bool {
-        debug!("compare_hashes_with_non_zero_tolerance - start");
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
@@ -637,10 +617,10 @@ impl SimilarImages {
         debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
-        debug!("compare_hashes_with_non_zero_tolerance - end");
         true
     }
 
+    #[fun_time(message = "connect_results")]
     fn connect_results(
         &self,
         partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
@@ -648,7 +628,6 @@ impl SimilarImages {
         hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
         hashes_with_multiple_images: &HashSet<ImHash>,
     ) {
-        debug!("connect_results - start");
         for (original_hash, vec_compared_hashes) in partial_results {
             let mut number_of_added_child_items = 0;
             for (similarity, compared_hash) in vec_compared_hashes {
@@ -701,11 +680,10 @@ impl SimilarImages {
                 hashes_parents.insert((*original_hash).clone(), number_of_added_child_items);
             }
         }
-        debug!("connect_results - end");
     }
 
+    #[fun_time(message = "find_similar_hashes")]
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("find_similar_hashes - start");
         if self.image_hashes.is_empty() {
             return true;
         }
@@ -724,10 +702,8 @@ impl SimilarImages {
                     collected_similar_images.insert(hash, vec_file_entry);
                 }
             }
-        } else {
-            if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance) {
-                return false;
-            }
+        } else if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance) {
+            return false;
         }
 
         self.verify_duplicated_items(&collected_similar_images);
@@ -756,12 +732,11 @@ impl SimilarImages {
         self.images_to_check = Default::default();
         self.bktree = BKTree::new(Hamming);
 
-        debug!("find_similar_hashes - end");
         true
     }
 
+    #[fun_time(message = "exclude_items_with_same_size")]
     fn exclude_items_with_same_size(&mut self) {
-        debug!("exclude_items_with_same_size - start, exclude: {}", self.exclude_images_with_same_size);
         if self.exclude_images_with_same_size {
             for vec_file_entry in mem::take(&mut self.similar_vectors) {
                 let mut bt_sizes: BTreeSet<u64> = Default::default();
@@ -777,14 +752,10 @@ impl SimilarImages {
                 }
             }
         }
-        debug!("exclude_items_with_same_size - end");
     }
 
+    #[fun_time(message = "remove_multiple_records_from_reference_folders")]
     fn remove_multiple_records_from_reference_folders(&mut self) {
-        debug!(
-            "remove_multiple_records_from_reference_folders - start, use reference: {}",
-            self.common_data.use_reference_folders
-        );
         if self.common_data.use_reference_folders {
             self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
                 .into_iter()
@@ -801,16 +772,14 @@ impl SimilarImages {
                 })
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
-        debug!("remove_multiple_records_from_reference_folders - end");
     }
 
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     #[allow(unused_variables)]
     // TODO this probably not works good when reference folders are used
     pub fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<FileEntry>>) {
-        #[cfg(not(debug_assertions))]
-        return;
+        if !cfg!(debug_assertions) {
+            return;
+        }
         // Validating if group contains duplicated results
         let mut result_hashset: HashSet<String> = Default::default();
         let mut found = false;
@@ -851,11 +820,8 @@ impl Default for SimilarImages {
 }
 
 impl DebugPrint for SimilarImages {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
 
@@ -865,39 +831,13 @@ impl DebugPrint for SimilarImages {
     }
 }
 
-impl SaveResults for SimilarImages {
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
+impl PrintResults for SimilarImages {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
         if !self.similar_vectors.is_empty() {
-            write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len()).unwrap();
+            write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len())?;
 
             for struct_similar in &self.similar_vectors {
-                writeln!(writer, "Found {} images which have similar friends", struct_similar.len()).unwrap();
+                writeln!(writer, "Found {} images which have similar friends", struct_similar.len())?;
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
@@ -906,37 +846,15 @@ impl SaveResults for SimilarImages {
                         file_entry.dimensions,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
-                    )
-                    .unwrap();
+                    )?;
                 }
-                writeln!(writer).unwrap();
+                writeln!(writer)?;
             }
         } else {
-            write!(writer, "Not found any similar images.").unwrap();
+            write!(writer, "Not found any similar images.")?;
         }
 
-        true
-    }
-}
-
-impl PrintResults for SimilarImages {
-    fn print_results(&self) {
-        if !self.similar_vectors.is_empty() {
-            println!("Found {} images which have similar friends", self.similar_vectors.len());
-
-            for vec_file_entry in &self.similar_vectors {
-                for file_entry in vec_file_entry {
-                    println!(
-                        "{} - {} - {} - {}",
-                        file_entry.path.display(),
-                        file_entry.dimensions,
-                        format_size(file_entry.size, BINARY),
-                        get_string_from_similarity(&file_entry.similarity, self.hash_size)
-                    );
-                }
-                println!();
-            }
-        }
+        Ok(())
     }
 }
 
@@ -1064,8 +982,9 @@ fn debug_check_for_duplicated_things(
     all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
     numm: &str,
 ) {
-    #[cfg(not(debug_assertions))]
-    return;
+    if !cfg!(debug_assertions) {
+        return;
+    }
 
     if use_reference_folders {
         return;

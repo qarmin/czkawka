@@ -2,10 +2,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use czkawka_core::common_traits::PrintResults;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry};
-
-use czkawka_core::common_traits::SaveResults;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -33,63 +32,72 @@ pub fn connect_button_save(gui_data: &GuiData) {
     buttons_save.connect_clicked(move |_| {
         let file_name;
 
-        match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
+        let result = match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
             NotebookMainEnum::Duplicate => {
                 file_name = "results_duplicates.txt";
 
-                shared_duplication_state.borrow_mut().save_results_to_file(file_name);
+                shared_duplication_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::EmptyDirectories => {
                 file_name = "results_empty_folder.txt";
 
-                shared_empty_folders_state.borrow_mut().save_results_to_file(file_name);
+                shared_empty_folders_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::EmptyFiles => {
                 file_name = "results_empty_files.txt";
 
-                shared_empty_files_state.borrow_mut().save_results_to_file(file_name);
+                shared_empty_files_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::Temporary => {
                 file_name = "results_temporary_files.txt";
 
-                shared_temporary_files_state.borrow_mut().save_results_to_file(file_name);
+                shared_temporary_files_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::BigFiles => {
                 file_name = "results_big_files.txt";
 
-                shared_big_files_state.borrow_mut().save_results_to_file(file_name);
+                shared_big_files_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::SimilarImages => {
                 file_name = "results_similar_images.txt";
 
-                shared_similar_images_state.borrow_mut().save_results_to_file(file_name);
+                shared_similar_images_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::SimilarVideos => {
                 file_name = "results_similar_videos.txt";
 
-                shared_similar_videos_state.borrow_mut().save_results_to_file(file_name);
+                shared_similar_videos_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::SameMusic => {
                 file_name = "results_same_music.txt";
 
-                shared_same_music_state.borrow_mut().save_results_to_file(file_name);
+                shared_same_music_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::Symlinks => {
                 file_name = "results_invalid_symlinks.txt";
 
-                shared_same_invalid_symlinks.borrow_mut().save_results_to_file(file_name);
+                shared_same_invalid_symlinks.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::BrokenFiles => {
                 file_name = "results_broken_files.txt";
 
-                shared_broken_files_state.borrow_mut().save_results_to_file(file_name);
+                shared_broken_files_state.borrow_mut().print_results_to_file(file_name)
             }
             NotebookMainEnum::BadExtensions => {
                 file_name = "results_bad_extensions.txt";
 
-                shared_bad_extensions_state.borrow_mut().save_results_to_file(file_name);
+                shared_bad_extensions_state.borrow_mut().print_results_to_file(file_name)
+            }
+        };
+
+        match result {
+            Ok(()) => (),
+            Err(e) => {
+                entry_info.set_text(&format!("Failed to save results to file {e}"));
+                return;
             }
         }
+
         post_save_things(
             file_name,
             &to_notebook_main_enum(notebook_main.current_page().unwrap()),

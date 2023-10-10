@@ -4,11 +4,11 @@ use std::sync::Arc;
 use std::thread;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use glib::Sender;
 use gtk4::prelude::*;
 use gtk4::Grid;
-use log::debug;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
@@ -794,9 +794,8 @@ fn bad_extensions_search(
     });
 }
 
+#[fun_time(message = "clean_tree_view")]
 fn clean_tree_view(tree_view: &gtk4::TreeView) {
-    debug!("Start clean tree view");
     let list_store = get_list_store(tree_view);
     list_store.clear();
-    debug!("Cleared tree view");
 }

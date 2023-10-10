@@ -11,13 +11,14 @@ use std::{fs, thread};
 #[cfg(feature = "heif")]
 use anyhow::Result;
 use directories_next::ProjectDirs;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{debug, LevelFilter, Record};
+use log::{info, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -25,6 +26,7 @@ use crate::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_traits::ResultEntry;
+use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 
@@ -39,7 +41,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        !["symphonia", "i18n_embed"].iter().any(|&x| module_path.contains(x))
+        module_path.starts_with("czkawka")
     } else {
         true
     }
@@ -50,6 +52,14 @@ pub fn setup_logger(disabled_printing: bool) {
 
     let config = ConfigBuilder::default().set_level(log_level).set_message_filtering(Some(filtering_messages)).build();
     handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
+}
+
+pub fn print_version_mode() {
+    info!(
+        "Czkawka version: {}, was compiled with {} mode",
+        CZKAWKA_VERSION,
+        if cfg!(debug_assertions) { "debug" } else { "release" }
+    );
 }
 
 pub fn set_default_number_of_threads() {
@@ -66,7 +76,6 @@ pub fn set_number_of_threads(thread_number: usize) {
     rayon::ThreadPoolBuilder::new().num_threads(get_number_of_threads()).build_global().unwrap();
 }
 
-/// Class for common functions used across other class/functions
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     ".mrw", ".arw", ".srf", ".sr2", ".mef", ".orf", ".srw", ".erf", ".kdc", ".kdc", ".dcs", ".rw2", ".raf", ".dcr", ".dng", ".pef", ".crw", ".iiq", ".3fr", ".nrw", ".nef", ".mos",
     ".cr2", ".ari",
@@ -225,17 +234,6 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 }
 
 impl Common {
-    /// Printing time which took between start and stop point and prints also function name
-    #[allow(unused_variables)]
-    pub fn print_time(start_time: SystemTime, end_time: SystemTime, function_name: &str) {
-        #[cfg(debug_assertions)]
-        println!(
-            "Execution of function \"{}\" took {:?}",
-            function_name,
-            end_time.duration_since(start_time).expect("Time cannot go reverse.")
-        );
-    }
-
     pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
         let mut path: &Path;
         let mut warnings: Vec<String> = Vec::new();
@@ -264,8 +262,6 @@ impl Common {
         }
         warning
     }
-
-    /// Function to check if directory match expression
 
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
@@ -441,11 +437,10 @@ pub fn prepare_thread_handler_common(
     (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
 }
 
+#[fun_time(message = "send_info_and_wait_for_ending_all_threads")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
-    debug!("Sending info to stop all threads");
     progress_thread_run.store(false, Ordering::Relaxed);
     progress_thread_handle.join().unwrap();
-    debug!("All threads stopped");
 }
 
 #[cfg(test)]

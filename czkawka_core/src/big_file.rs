@@ -1,21 +1,22 @@
 use std::collections::BTreeMap;
 use std::fs;
-use std::fs::{DirEntry, File, Metadata};
-use std::io::{BufWriter, Write};
+use std::fs::{DirEntry, Metadata};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
-use log::{debug, info};
+use log::debug;
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
-use crate::common_traits::{DebugPrint, PrintResults, SaveResults};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_traits::{DebugPrint, PrintResults};
 
 #[derive(Clone, Debug)]
 pub struct FileEntry {
@@ -30,25 +31,16 @@ pub enum SearchMode {
     SmallestFiles,
 }
 
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
-
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_real_files: usize,
 }
 
-/// Struct with required information's to work
 pub struct BigFile {
     common_data: CommonToolData,
     information: Info,
     big_files: Vec<(u64, FileEntry)>,
     number_of_files_to_check: usize,
-    delete_method: DeleteMethod,
     search_mode: SearchMode,
 }
 
@@ -59,19 +51,12 @@ impl BigFile {
             information: Info::default(),
             big_files: Default::default(),
             number_of_files_to_check: 50,
-            delete_method: DeleteMethod::None,
             search_mode: SearchMode::BiggestFiles,
         }
     }
 
+    #[fun_time(message = "find_big_files")]
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding big files");
-        let start_time = std::time::Instant::now();
-        self.find_big_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding big files which took {:?}", start_time.elapsed());
-    }
-
-    fn find_big_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -81,8 +66,8 @@ impl BigFile {
         self.debug_print();
     }
 
+    #[fun_time(message = "look_for_big_files")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("look_for_big_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
@@ -94,6 +79,7 @@ impl BigFile {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.common_data.tool_type);
 
+        debug!("Starting to search for big files");
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -148,11 +134,12 @@ impl BigFile {
             }
         }
 
+        debug!("Collected {} files", old_map.len());
+
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         self.extract_n_biggest_files(old_map);
 
-        debug!("look_for_big_files - end");
         true
     }
 
@@ -193,8 +180,8 @@ impl BigFile {
         fe_result.push((fe.size, fe));
     }
 
+    #[fun_time(message = "extract_n_biggest_files")]
     pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
-        debug!("extract_n_biggest_files - start");
         let iter: Box<dyn Iterator<Item = _>>;
         if self.search_mode == SearchMode::SmallestFiles {
             iter = Box::new(old_map.into_iter());
@@ -222,12 +209,10 @@ impl BigFile {
                 break;
             }
         }
-        debug!("extract_n_biggest_files - end");
     }
 
-    /// Function to delete files, from filed Vector
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for (_, file_entry) in &self.big_files {
                     if fs::remove_file(&file_entry.path).is_err() {
@@ -238,6 +223,7 @@ impl BigFile {
             DeleteMethod::None => {
                 //Just do nothing
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -249,12 +235,8 @@ impl Default for BigFile {
 }
 
 impl DebugPrint for BigFile {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
 
@@ -266,62 +248,28 @@ impl DebugPrint for BigFile {
     }
 }
 
-impl SaveResults for BigFile {
-    /// Saving results to provided file
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
+impl PrintResults for BigFile {
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
             self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
+        )?;
 
         if self.information.number_of_real_files != 0 {
             if self.search_mode == SearchMode::BiggestFiles {
-                write!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files).unwrap();
+                writeln!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files)?;
             } else {
-                write!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files).unwrap();
+                writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for (size, file_entry) in &self.big_files {
-                writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display()).unwrap();
+                writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display())?;
             }
         } else {
             write!(writer, "Not found any files.").unwrap();
         }
 
-        true
-    }
-}
-
-impl PrintResults for BigFile {
-    fn print_results(&self) {
-        if self.search_mode == SearchMode::BiggestFiles {
-            println!("{} the biggest files.\n\n", self.information.number_of_real_files);
-        } else {
-            println!("{} the smallest files.\n\n", self.information.number_of_real_files);
-        }
-        for (size, file_entry) in &self.big_files {
-            println!("{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display());
-        }
+        Ok(())
     }
 }
 
@@ -345,10 +293,6 @@ impl BigFile {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 
     pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {

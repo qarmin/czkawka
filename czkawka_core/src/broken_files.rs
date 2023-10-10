@@ -1,15 +1,16 @@
 use std::collections::BTreeMap;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
-use std::io::BufWriter;
+
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::{fs, mem, panic};
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
+use log::debug;
 use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
 use pdf::PdfError;
@@ -23,14 +24,8 @@ use crate::common::{
 };
 use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
-
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FileEntry {
@@ -73,7 +68,6 @@ bitflags! {
     }
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_broken_files: usize,
@@ -84,7 +78,6 @@ pub struct BrokenFiles {
     information: Info,
     files_to_check: BTreeMap<String, FileEntry>,
     broken_files: Vec<FileEntry>,
-    delete_method: DeleteMethod,
     checked_types: CheckedTypes,
 }
 
@@ -94,20 +87,13 @@ impl BrokenFiles {
             common_data: CommonToolData::new(ToolType::BrokenFiles),
             information: Info::default(),
             files_to_check: Default::default(),
-            delete_method: DeleteMethod::None,
             broken_files: Default::default(),
             checked_types: CheckedTypes::PDF | CheckedTypes::AUDIO | CheckedTypes::IMAGE | CheckedTypes::ARCHIVE,
         }
     }
 
+    #[fun_time(message = "find_broken_files")]
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding broken files");
-        let start_time = std::time::Instant::now();
-        self.find_broken_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding broken files which took {:?}", start_time.elapsed());
-    }
-
-    pub fn find_broken_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -121,24 +107,8 @@ impl BrokenFiles {
         self.debug_print();
     }
 
-    pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
-        &self.broken_files
-    }
-
-    pub fn set_checked_types(&mut self, checked_types: CheckedTypes) {
-        self.checked_types = checked_types;
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
-    }
-
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -149,6 +119,7 @@ impl BrokenFiles {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None, self.common_data.tool_type);
 
+        debug!("check_files - starting to collect files");
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -191,6 +162,7 @@ impl BrokenFiles {
                     (dir_result, warnings, fe_result)
                 })
                 .collect();
+            debug!("check_files - collected files");
 
             // Advance the frontier
             folders_to_check.clear();
@@ -206,10 +178,9 @@ impl BrokenFiles {
         }
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-
-        debug!("check_files - end");
         true
     }
+
     fn get_file_entry(
         &self,
         metadata: &Metadata,
@@ -348,8 +319,8 @@ impl BrokenFiles {
         }
     }
 
+    #[fun_time(message = "load_cache")]
     fn load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
-        debug!("load_cache - start (using cache {})", self.common_data.use_cache);
         let loaded_hash_map;
 
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -372,17 +343,17 @@ impl BrokenFiles {
             loaded_hash_map = Default::default();
             non_cached_files_to_check = files_to_check;
         }
-        debug!("load_cache - end");
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    #[fun_time(message = "look_for_broken_files")]
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("look_for_broken_files - start");
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
 
+        debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, file_entry)| {
@@ -404,6 +375,7 @@ impl BrokenFiles {
             .filter(Option::is_some)
             .map(Option::unwrap)
             .collect::<Vec<FileEntry>>();
+        debug!("look_for_broken_files - ended finding for broken files");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -418,15 +390,14 @@ impl BrokenFiles {
             .collect();
 
         self.information.number_of_broken_files = self.broken_files.len();
-
+        debug!("Found {} broken files.", self.information.number_of_broken_files);
         // Clean unused data
         self.files_to_check = Default::default();
 
-        debug!("look_for_broken_files - end");
         true
     }
+    #[fun_time(message = "save_to_cache")]
     fn save_to_cache(&mut self, vec_file_entry: &[FileEntry], loaded_hash_map: BTreeMap<String, FileEntry>) {
-        debug!("save_to_cache - start, using cache {}", self.common_data.use_cache);
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, FileEntry> = Default::default();
@@ -441,12 +412,11 @@ impl BrokenFiles {
             let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
-        debug!("save_to_cache - end");
     }
 
-    /// Function to delete files, from filed Vector
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.broken_files {
                     if fs::remove_file(&file_entry.path).is_err() {
@@ -457,10 +427,26 @@ impl BrokenFiles {
             DeleteMethod::None => {
                 //Just do nothing
             }
+            _ => {
+                unreachable!()
+            }
         }
     }
 }
 
+impl BrokenFiles {
+    pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
+        &self.broken_files
+    }
+
+    pub fn set_checked_types(&mut self, checked_types: CheckedTypes) {
+        self.checked_types = checked_types;
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+}
 impl Default for BrokenFiles {
     fn default() -> Self {
         Self::new()
@@ -468,70 +454,32 @@ impl Default for BrokenFiles {
 }
 
 impl DebugPrint for BrokenFiles {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
-    /// Debugging printing - only available on debug build
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
-        println!("---------------DEBUG PRINT---------------");
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
-        println!("-----------------------------------------");
-    }
-}
-
-impl SaveResults for BrokenFiles {
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
-        if !self.broken_files.is_empty() {
-            writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files).unwrap();
-            for file_entry in &self.broken_files {
-                writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.error_string).unwrap();
-            }
-        } else {
-            write!(writer, "Not found any broken files.").unwrap();
-        }
-
-        true
     }
 }
 
 impl PrintResults for BrokenFiles {
-    /// Print information's about duplicated entries
-    /// Only needed for CLI
-    fn print_results(&self) {
-        println!("Found {} broken files.\n", self.information.number_of_broken_files);
-        for file_entry in &self.broken_files {
-            println!("{} - {}", file_entry.path.display(), file_entry.error_string);
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        writeln!(
+            writer,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
+        )?;
+
+        if !self.broken_files.is_empty() {
+            writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files)?;
+            for file_entry in &self.broken_files {
+                writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.error_string)?;
+            }
+        } else {
+            write!(writer, "Not found any broken files.")?;
         }
+
+        Ok(())
     }
 }
 

@@ -14,8 +14,8 @@ pub fn opening_enter_function_ported_upper_directories(
     _modifier_type: ModifierType,
 ) -> glib::Propagation {
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
-    #[cfg(debug_assertions)]
-    {
+
+    if cfg!(debug_assertions) {
         println!("key_code {key_code}");
     }
 
@@ -70,8 +70,7 @@ pub fn opening_double_click_function_directories(gesture_click: &GestureClick, n
 
 pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> glib::Propagation {
     let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
-    #[cfg(debug_assertions)]
-    {
+    if cfg!(debug_assertions) {
         println!("key_code {key_code}");
     }
 

@@ -1,19 +1,19 @@
 use std::fs;
-use std::fs::{DirEntry, File, Metadata};
+use std::fs::{DirEntry, Metadata};
 use std::io::prelude::*;
-use std::io::BufWriter;
+
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
+use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
 const TEMP_EXTENSIONS: &[&str] = &[
@@ -32,30 +32,21 @@ const TEMP_EXTENSIONS: &[&str] = &[
     ".partial",
 ];
 
-#[derive(Eq, PartialEq, Clone, Debug, Copy)]
-pub enum DeleteMethod {
-    None,
-    Delete,
-}
-
 #[derive(Clone)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
 }
 
-/// Info struck with helpful information's about results
 #[derive(Default)]
 pub struct Info {
     pub number_of_temporary_files: usize,
 }
 
-/// Struct with required information's to work
 pub struct Temporary {
     common_data: CommonToolData,
     information: Info,
     temporary_files: Vec<FileEntry>,
-    delete_method: DeleteMethod,
 }
 
 impl Temporary {
@@ -63,12 +54,12 @@ impl Temporary {
         Self {
             common_data: CommonToolData::new(ToolType::TemporaryFiles),
             information: Info::default(),
-            delete_method: DeleteMethod::None,
             temporary_files: vec![],
         }
     }
 
-    fn find_temporary_files_internal(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    #[fun_time(message = "find_temporary_files")]
+    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -78,15 +69,8 @@ impl Temporary {
         self.debug_print();
     }
 
-    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
-        info!("Starting finding temporary files");
-        let start_time = std::time::Instant::now();
-        self.find_temporary_files_internal(stop_receiver, progress_sender);
-        info!("Ended finding temporary files which took {:?}", start_time.elapsed());
-    }
-
+    #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
-        debug!("check_files - start");
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -156,7 +140,6 @@ impl Temporary {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         self.information.number_of_temporary_files = self.temporary_files.len();
 
-        debug!("check_files - end");
         true
     }
     pub fn get_file_entry(
@@ -188,9 +171,9 @@ impl Temporary {
         })
     }
 
-    /// Function to delete files, from filed Vector
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 let mut warnings = Vec::new();
                 for file_entry in &self.temporary_files {
@@ -203,57 +186,25 @@ impl Temporary {
             DeleteMethod::None => {
                 //Just do nothing
             }
+            _ => unreachable!(),
         }
-    }
-}
-
-impl SaveResults for Temporary {
-    fn save_results_to_file(&mut self, file_name: &str) -> bool {
-        let file_name: String = match file_name {
-            "" => "results.txt".to_string(),
-            k => k.to_string(),
-        };
-
-        let file_handler = match File::create(&file_name) {
-            Ok(t) => t,
-            Err(e) => {
-                self.common_data.text_messages.errors.push(format!("Failed to create file {file_name}, reason {e}"));
-                return false;
-            }
-        };
-        let mut writer = BufWriter::new(file_handler);
-
-        if let Err(e) = writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
-        ) {
-            self.common_data
-                .text_messages
-                .errors
-                .push(format!("Failed to save results to file {file_name}, reason {e}"));
-            return false;
-        }
-
-        if !self.temporary_files.is_empty() {
-            writeln!(writer, "Found {} temporary files.", self.information.number_of_temporary_files).unwrap();
-            for file_entry in &self.temporary_files {
-                writeln!(writer, "{}", file_entry.path.display()).unwrap();
-            }
-        } else {
-            write!(writer, "Not found any temporary files.").unwrap();
-        }
-
-        true
     }
 }
 
 impl PrintResults for Temporary {
-    fn print_results(&self) {
-        println!("Found {} temporary files.\n", self.information.number_of_temporary_files);
+    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        writeln!(
+            writer,
+            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
+        )?;
+        writeln!(writer, "Found {} temporary files.\n", self.information.number_of_temporary_files)?;
+
         for file_entry in &self.temporary_files {
-            println!("{}", file_entry.path.display());
+            writeln!(writer, "{}", file_entry.path.display())?;
         }
+
+        Ok(())
     }
 }
 
@@ -264,16 +215,12 @@ impl Default for Temporary {
 }
 
 impl DebugPrint for Temporary {
-    #[allow(dead_code)]
-    #[allow(unreachable_code)]
     fn debug_print(&self) {
-        #[cfg(not(debug_assertions))]
-        {
+        if !cfg!(debug_assertions) {
             return;
         }
         println!("### Information's");
         println!("Temporary list size - {}", self.temporary_files.len());
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
     }
 }
@@ -294,9 +241,5 @@ impl Temporary {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 }

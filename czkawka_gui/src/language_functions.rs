@@ -4,7 +4,6 @@ pub struct Language {
     pub short_text: &'static str,
 }
 
-/// Languages should be alphabetically sorted
 pub const LANGUAGES_ALL: [Language; 15] = [
     Language {
         combo_box_text: "English",

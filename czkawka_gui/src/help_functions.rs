@@ -595,7 +595,6 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: 
     (number_of_selected_items, number_of_selected_groups)
 }
 
-/// Counts how much headers/groups is in treeview
 pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
     let mut number_of_selected_groups = 0;
 

@@ -14,7 +14,7 @@ pub struct CommonToolData {
     pub(crate) allowed_extensions: Extensions,
     pub(crate) excluded_items: ExcludedItems,
     pub(crate) recursive_search: bool,
-    // delete_method: DeleteMethod, // ?
+    pub(crate) delete_method: DeleteMethod,
     pub(crate) maximal_file_size: u64,
     pub(crate) minimal_file_size: u64,
     pub(crate) stopped_search: bool,
@@ -22,6 +22,18 @@ pub struct CommonToolData {
     pub(crate) delete_outdated_cache: bool,
     pub(crate) save_also_as_json: bool,
     pub(crate) use_reference_folders: bool,
+}
+
+#[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
+pub enum DeleteMethod {
+    #[default]
+    None,
+    Delete, // Just delete items
+    AllExceptNewest,
+    AllExceptOldest,
+    OneOldest,
+    OneNewest,
+    HardLink,
 }
 
 impl CommonToolData {
@@ -33,6 +45,7 @@ impl CommonToolData {
             allowed_extensions: Extensions::new(),
             excluded_items: ExcludedItems::new(),
             recursive_search: true,
+            delete_method: DeleteMethod::None,
             maximal_file_size: u64::MAX,
             minimal_file_size: 8192,
             stopped_search: false,
@@ -128,22 +141,25 @@ pub trait CommonData {
         self.get_cd().use_reference_folders
     }
 
+    fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.get_cd_mut().delete_method = delete_method;
+    }
+    fn get_delete_method(&self) -> DeleteMethod {
+        self.get_cd().delete_method
+    }
+
     fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        let (messages, warnings, errors) = self.get_cd_mut().directories.set_included_directory(included_directory);
-        self.get_cd_mut().text_messages.extend_messages_with(messages, warnings, errors);
+        let messages = self.get_cd_mut().directories.set_included_directory(included_directory);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        let (messages, warnings, errors) = self.get_cd_mut().directories.set_excluded_directory(excluded_directory);
-        self.get_cd_mut().text_messages.messages.extend(messages);
-        self.get_cd_mut().text_messages.warnings.extend(warnings);
-        self.get_cd_mut().text_messages.errors.extend(errors);
+        let messages = self.get_cd_mut().directories.set_excluded_directory(excluded_directory);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
     fn set_allowed_extensions(&mut self, allowed_extensions: String) {
-        let (messages, warnings, errors) = self.get_cd_mut().allowed_extensions.set_allowed_extensions(allowed_extensions);
-        self.get_cd_mut().text_messages.messages.extend(messages);
-        self.get_cd_mut().text_messages.warnings.extend(warnings);
-        self.get_cd_mut().text_messages.errors.extend(errors);
+        let messages = self.get_cd_mut().allowed_extensions.set_allowed_extensions(allowed_extensions);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
@@ -155,8 +171,8 @@ pub trait CommonData {
 
     fn optimize_dirs_before_start(&mut self) {
         let recursive_search = self.get_cd().recursive_search;
-        let (messages, warnings, errors) = self.get_cd_mut().directories.optimize_directories(recursive_search);
-        self.get_cd_mut().text_messages.extend_messages_with(messages, warnings, errors);
+        let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn debug_print_common(&self) {
@@ -172,6 +188,7 @@ pub trait CommonData {
         println!("Use cache: {:?}", self.get_cd().use_cache);
         println!("Delete outdated cache: {:?}", self.get_cd().delete_outdated_cache);
         println!("Save also as json: {:?}", self.get_cd().save_also_as_json);
+        println!("Delete method: {:?}", self.get_cd().delete_method);
 
         println!("---------------DEBUG PRINT MESSAGES---------------");
         println!("Errors size - {}", self.get_cd().text_messages.errors.len());
