@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::{DirEntry, File, Metadata};
-use std::io::{Write, *};
+use std::fs::{DirEntry, Metadata};
+use std::io::Write;
 use std::mem;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;

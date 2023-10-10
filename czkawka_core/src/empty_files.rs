@@ -1,7 +1,6 @@
 use std::fs;
-use std::fs::File;
+
 use std::io::prelude::*;
-use std::io::BufWriter;
 
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;

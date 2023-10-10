@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
-use std::io::{self, BufWriter, Error, ErrorKind};
+use std::io::{self, Error, ErrorKind};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::Path;

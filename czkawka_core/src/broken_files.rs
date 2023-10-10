@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs::{DirEntry, File, Metadata};
 use std::io::prelude::*;
-use std::io::BufWriter;
+
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;

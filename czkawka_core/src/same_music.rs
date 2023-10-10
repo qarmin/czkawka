@@ -2,7 +2,7 @@ use std::cmp::max;
 use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::BufWriter;
+
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -12,8 +12,7 @@ use anyhow::Context;
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
-use humansize::format_size;
-use humansize::BINARY;
+use humansize::{format_size, BINARY};
 use lofty::{read_from, AudioFile, ItemKey, TaggedFileExt};
 use log::debug;
 use rayon::prelude::*;
