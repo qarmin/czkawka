@@ -273,6 +273,7 @@ impl SimilarImages {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
+            debug!("hash_images-load_cache - starting calculating diff");
             for (name, file_entry) in mem::take(&mut self.images_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
                     records_already_cached.insert(name.clone(), cached_file_entry.clone());
@@ -280,6 +281,13 @@ impl SimilarImages {
                     non_cached_files_to_check.insert(name, file_entry);
                 }
             }
+            debug!(
+                "hash_images_load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
+                non_cached_files_to_check.len(),
+                format_size(non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(), BINARY),
+                records_already_cached.len(),
+                format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
+            );
         } else {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);

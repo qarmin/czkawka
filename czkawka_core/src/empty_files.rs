@@ -21,7 +21,6 @@ pub struct EmptyFiles {
     common_data: CommonToolData,
     information: Info,
     empty_files: Vec<FileEntry>,
-    delete_method: DeleteMethod,
 }
 
 impl CommonData for EmptyFiles {
@@ -39,7 +38,6 @@ impl EmptyFiles {
             common_data: CommonToolData::new(ToolType::EmptyFiles),
             information: Info::default(),
             empty_files: vec![],
-            delete_method: DeleteMethod::None,
         }
     }
 
@@ -69,14 +67,14 @@ impl EmptyFiles {
             .recursive_search(self.common_data.recursive_search)
             .build()
             .run();
-        debug!("check_files - collected files to check");
-        let res = match result {
+
+        match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                if let Some(empty_files) = grouped_file_entries.get(&()) {
-                    self.empty_files = empty_files.clone();
-                }
+                self.empty_files = grouped_file_entries.into_values().flatten().collect();
                 self.information.number_of_empty_files = self.empty_files.len();
                 self.common_data.text_messages.warnings.extend(warnings);
+
+                debug!("Found {} empty files.", self.information.number_of_empty_files);
 
                 true
             }
@@ -84,13 +82,12 @@ impl EmptyFiles {
                 unreachable!()
             }
             DirTraversalResult::Stopped => false,
-        };
-        res
+        }
     }
 
     #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.empty_files {
                     if fs::remove_file(file_entry.path.clone()).is_err() {
@@ -121,7 +118,6 @@ impl DebugPrint for EmptyFiles {
         }
         println!("---------------DEBUG PRINT---------------");
         println!("Empty list size - {}", self.empty_files.len());
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
         println!("-----------------------------------------");
     }
@@ -186,9 +182,5 @@ impl EmptyFiles {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 }

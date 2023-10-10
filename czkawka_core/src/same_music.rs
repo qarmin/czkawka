@@ -12,6 +12,8 @@ use anyhow::Context;
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
+use humansize::format_size;
+use humansize::BINARY;
 use lofty::{read_from, AudioFile, ItemKey, TaggedFileExt};
 use log::debug;
 use rayon::prelude::*;
@@ -27,7 +29,7 @@ use symphonia::core::probe::Hint;
 use crate::common::{create_crash_message, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
 use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
 bitflags! {
@@ -103,7 +105,6 @@ pub struct SameMusic {
     music_entries: Vec<MusicEntry>,
     duplicated_music_entries: Vec<Vec<MusicEntry>>,
     duplicated_music_entries_referenced: Vec<(MusicEntry, Vec<MusicEntry>)>,
-    delete_method: DeleteMethod,
     music_similarity: MusicSimilarity,
     approximate_comparison: bool,
     check_type: CheckingMethod,
@@ -118,7 +119,6 @@ impl SameMusic {
             common_data: CommonToolData::new(ToolType::SameMusic),
             information: Info::default(),
             music_entries: Vec::with_capacity(2048),
-            delete_method: DeleteMethod::None,
             music_similarity: MusicSimilarity::NONE,
             duplicated_music_entries: vec![],
             music_to_check: Default::default(),
@@ -195,15 +195,16 @@ impl SameMusic {
             .max_stage(2)
             .build()
             .run();
+
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                if let Some(music_to_check) = grouped_file_entries.get(&()) {
-                    for fe in music_to_check {
-                        self.music_to_check.insert(fe.path.to_string_lossy().to_string(), fe.to_music_entry());
-                    }
-                }
+                self.music_to_check = grouped_file_entries
+                    .into_values()
+                    .flatten()
+                    .map(|fe| (fe.path.to_string_lossy().to_string(), fe.to_music_entry()))
+                    .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
-
+                debug!("check_files - Found {} music files.", self.music_to_check.len());
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => {
@@ -226,6 +227,7 @@ impl SameMusic {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
+            debug!("load_cache - Starting to check for differences");
             for (name, file_entry) in mem::take(&mut self.music_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
                     records_already_cached.insert(name.clone(), cached_file_entry.clone());
@@ -233,6 +235,13 @@ impl SameMusic {
                     non_cached_files_to_check.insert(name, file_entry);
                 }
             }
+            debug!(
+                "load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
+                non_cached_files_to_check.len(),
+                format_size(non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(), BINARY),
+                records_already_cached.len(),
+                format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
+            );
         } else {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.music_to_check, &mut non_cached_files_to_check);
@@ -264,7 +273,7 @@ impl SameMusic {
             prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type, self.common_data.tool_type);
         let configuration = &self.hash_preset_config;
 
-        // Clean for duplicate files
+        debug!("calculate_fingerprint - starting fingerprinting");
         let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
             .map(|(path, mut music_entry)| {
@@ -285,6 +294,7 @@ impl SameMusic {
             .filter(Option::is_some)
             .map(Option::unwrap)
             .collect::<Vec<_>>();
+        debug!("calculate_fingerprint - ended fingerprinting");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -453,7 +463,6 @@ impl SameMusic {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type, self.common_data.tool_type);
 
-        // TODO is ther a way to just run iterator and not collect any info?
         if !self.duplicated_music_entries.is_empty() {
             let _: Vec<_> = self
                 .duplicated_music_entries
@@ -675,10 +684,6 @@ impl SameMusic {
         &self.information
     }
 
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
-    }
-
     pub fn set_approximate_comparison(&mut self, approximate_comparison: bool) {
         self.approximate_comparison = approximate_comparison;
     }
@@ -897,7 +902,6 @@ impl DebugPrint for SameMusic {
         println!("---------------DEBUG PRINT---------------");
         println!("Found files music - {}", self.music_entries.len());
         println!("Found duplicated files music - {}", self.duplicated_music_entries.len());
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
         println!("-----------------------------------------");
     }

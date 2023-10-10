@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
+use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
@@ -101,7 +102,7 @@ impl EmptyFolder {
                 }
 
                 self.common_data.text_messages.warnings.extend(warnings);
-
+                debug!("Found {} empty folders.", self.empty_folder_list.len());
                 true
             }
             DirTraversalResult::Stopped => false,
@@ -191,6 +192,7 @@ impl SaveResults for EmptyFolder {
 }
 
 impl PrintResults for EmptyFolder {
+    #[fun_time(message = "print_results")]
     fn print_results(&self) {
         if !self.empty_folder_list.is_empty() {
             println!("Found {} empty folders", self.empty_folder_list.len());

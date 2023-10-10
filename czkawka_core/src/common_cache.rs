@@ -3,6 +3,7 @@ use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
 use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
+use fun_time::fun_time;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::debug;
@@ -40,11 +41,11 @@ pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> St
     format!("cache_duplicates_{type_of_hash:?}{prehash_str}_61.bin")
 }
 
+#[fun_time(message = "save_cache_to_file_generalized")]
 pub fn save_cache_to_file_generalized<T>(cache_file_name: &str, hashmap: &BTreeMap<String, T>, save_also_as_json: bool, minimum_file_size: u64) -> Messages
 where
     T: Serialize + ResultEntry + Sized + Send + Sync,
 {
-    debug!("Saving cache to file {} (or also json alternative) - {} results", cache_file_name, hashmap.len());
     let mut text_messages = Messages::new();
     if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
         common::open_cache_folder(cache_file_name, true, save_also_as_json, &mut text_messages.warnings)
@@ -83,6 +84,7 @@ where
     text_messages
 }
 
+#[fun_time(message = "load_cache_from_file_generalized_by_path")]
 pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
@@ -102,6 +104,7 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
+#[fun_time(message = "load_cache_from_file_generalized_by_size")]
 pub fn load_cache_from_file_generalized_by_size<T>(
     cache_file_name: &str,
     delete_outdated_cache: bool,
@@ -132,6 +135,7 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
+#[fun_time(message = "load_cache_from_file_generalized_by_path_from_size")]
 pub fn load_cache_from_file_generalized_by_path_from_size<T>(
     cache_file_name: &str,
     delete_outdated_cache: bool,
@@ -162,11 +166,11 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
+#[fun_time(message = "load_cache_from_file_generalized")]
 fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<Vec<T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
 {
-    debug!("Loading cache from file {} (or json alternative)", cache_file_name);
     let mut text_messages = Messages::new();
 
     if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = common::open_cache_folder(cache_file_name, false, true, &mut text_messages.warnings) {
@@ -198,8 +202,10 @@ where
             };
         }
 
-        // Don't load cache data if destination file not exists
-        debug!("Starting to removing outdated cache entries");
+        debug!(
+            "Starting removing outdated cache entries (removing non existent files from cache - {})",
+            delete_outdated_cache
+        );
         let initial_number_of_entries = vec_loaded_entries.len();
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()

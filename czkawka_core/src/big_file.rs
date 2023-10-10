@@ -10,6 +10,7 @@ use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
+use log::debug;
 use rayon::prelude::*;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
@@ -40,7 +41,6 @@ pub struct BigFile {
     information: Info,
     big_files: Vec<(u64, FileEntry)>,
     number_of_files_to_check: usize,
-    delete_method: DeleteMethod,
     search_mode: SearchMode,
 }
 
@@ -51,7 +51,6 @@ impl BigFile {
             information: Info::default(),
             big_files: Default::default(),
             number_of_files_to_check: 50,
-            delete_method: DeleteMethod::None,
             search_mode: SearchMode::BiggestFiles,
         }
     }
@@ -134,11 +133,13 @@ impl BigFile {
                 }
             }
         }
-        debug!("Collected {} big files",);
+
+        debug!("Collected {} files", old_map.len());
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         self.extract_n_biggest_files(old_map);
+
         true
     }
 
@@ -211,7 +212,7 @@ impl BigFile {
     }
 
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for (_, file_entry) in &self.big_files {
                     if fs::remove_file(&file_entry.path).is_err() {
@@ -325,10 +326,6 @@ impl BigFile {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 
     pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {

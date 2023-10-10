@@ -21,7 +21,6 @@ pub struct InvalidSymlinks {
     common_data: CommonToolData,
     information: Info,
     invalid_symlinks: Vec<FileEntry>,
-    delete_method: DeleteMethod,
 }
 impl InvalidSymlinks {
     pub fn new() -> Self {
@@ -29,7 +28,6 @@ impl InvalidSymlinks {
             common_data: CommonToolData::new(ToolType::InvalidSymlinks),
             information: Info::default(),
             invalid_symlinks: vec![],
-            delete_method: DeleteMethod::None,
         }
     }
 
@@ -58,14 +56,13 @@ impl InvalidSymlinks {
             .recursive_search(self.common_data.recursive_search)
             .build()
             .run();
-        debug!("check_files - collected files");
+
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                if let Some(((), invalid_symlinks)) = grouped_file_entries.into_iter().next() {
-                    self.invalid_symlinks = invalid_symlinks;
-                }
+                self.invalid_symlinks = grouped_file_entries.into_values().flatten().collect();
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
                 self.common_data.text_messages.warnings.extend(warnings);
+                debug!("Found {} invalid symlinks.", self.information.number_of_invalid_symlinks);
                 true
             }
             DirTraversalResult::SuccessFolders { .. } => unreachable!(),
@@ -75,7 +72,7 @@ impl InvalidSymlinks {
 
     #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.invalid_symlinks {
                     if fs::remove_file(file_entry.path.clone()).is_err() {
@@ -104,13 +101,13 @@ impl DebugPrint for InvalidSymlinks {
         }
         println!("---------------DEBUG PRINT---------------");
         println!("Invalid symlinks list size - {}", self.invalid_symlinks.len());
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
         println!("-----------------------------------------");
     }
 }
 
 impl SaveResults for InvalidSymlinks {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -161,8 +158,6 @@ impl SaveResults for InvalidSymlinks {
 }
 
 impl PrintResults for InvalidSymlinks {
-    /// Print information's about duplicated entries
-    /// Only needed for CLI
     fn print_results(&self) {
         println!("Found {} invalid symlinks.\n", self.information.number_of_invalid_symlinks);
         for file_entry in &self.invalid_symlinks {
@@ -195,9 +190,5 @@ impl InvalidSymlinks {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 }

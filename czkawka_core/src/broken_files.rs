@@ -10,6 +10,7 @@ use std::{fs, mem, panic};
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
+use log::debug;
 use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
 use pdf::PdfError;
@@ -77,7 +78,6 @@ pub struct BrokenFiles {
     information: Info,
     files_to_check: BTreeMap<String, FileEntry>,
     broken_files: Vec<FileEntry>,
-    delete_method: DeleteMethod,
     checked_types: CheckedTypes,
 }
 
@@ -87,7 +87,6 @@ impl BrokenFiles {
             common_data: CommonToolData::new(ToolType::BrokenFiles),
             information: Info::default(),
             files_to_check: Default::default(),
-            delete_method: DeleteMethod::None,
             broken_files: Default::default(),
             checked_types: CheckedTypes::PDF | CheckedTypes::AUDIO | CheckedTypes::IMAGE | CheckedTypes::ARCHIVE,
         }
@@ -108,22 +107,6 @@ impl BrokenFiles {
         self.debug_print();
     }
 
-    pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
-        &self.broken_files
-    }
-
-    pub fn set_checked_types(&mut self, checked_types: CheckedTypes) {
-        self.checked_types = checked_types;
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
-    }
-
     #[fun_time(message = "check_files")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
@@ -136,6 +119,7 @@ impl BrokenFiles {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None, self.common_data.tool_type);
 
+        debug!("check_files - starting to collect files");
         while !folders_to_check.is_empty() {
             if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -178,6 +162,7 @@ impl BrokenFiles {
                     (dir_result, warnings, fe_result)
                 })
                 .collect();
+            debug!("check_files - collected files");
 
             // Advance the frontier
             folders_to_check.clear();
@@ -195,6 +180,7 @@ impl BrokenFiles {
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         true
     }
+
     fn get_file_entry(
         &self,
         metadata: &Metadata,
@@ -367,6 +353,7 @@ impl BrokenFiles {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
 
+        debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, file_entry)| {
@@ -388,6 +375,7 @@ impl BrokenFiles {
             .filter(Option::is_some)
             .map(Option::unwrap)
             .collect::<Vec<FileEntry>>();
+        debug!("look_for_broken_files - ended finding for broken files");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -402,7 +390,7 @@ impl BrokenFiles {
             .collect();
 
         self.information.number_of_broken_files = self.broken_files.len();
-
+        debug!("Found {} broken files.", self.information.number_of_broken_files);
         // Clean unused data
         self.files_to_check = Default::default();
 
@@ -426,8 +414,9 @@ impl BrokenFiles {
         }
     }
 
+    #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.broken_files {
                     if fs::remove_file(&file_entry.path).is_err() {
@@ -445,6 +434,19 @@ impl BrokenFiles {
     }
 }
 
+impl BrokenFiles {
+    pub const fn get_broken_files(&self) -> &Vec<FileEntry> {
+        &self.broken_files
+    }
+
+    pub fn set_checked_types(&mut self, checked_types: CheckedTypes) {
+        self.checked_types = checked_types;
+    }
+
+    pub const fn get_information(&self) -> &Info {
+        &self.information
+    }
+}
 impl Default for BrokenFiles {
     fn default() -> Self {
         Self::new()
@@ -456,14 +458,12 @@ impl DebugPrint for BrokenFiles {
         if !cfg!(debug_assertions) {
             return;
         }
-        println!("---------------DEBUG PRINT---------------");
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
-        println!("-----------------------------------------");
     }
 }
 
 impl SaveResults for BrokenFiles {
+    #[fun_time(message = "save_results_to_file")]
     fn save_results_to_file(&mut self, file_name: &str) -> bool {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -505,6 +505,7 @@ impl SaveResults for BrokenFiles {
 }
 
 impl PrintResults for BrokenFiles {
+    #[fun_time(message = "print_results")]
     fn print_results(&self) {
         println!("Found {} broken files.\n", self.information.number_of_broken_files);
         for file_entry in &self.broken_files {

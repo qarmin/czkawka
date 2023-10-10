@@ -47,7 +47,6 @@ pub struct Temporary {
     common_data: CommonToolData,
     information: Info,
     temporary_files: Vec<FileEntry>,
-    delete_method: DeleteMethod,
 }
 
 impl Temporary {
@@ -55,7 +54,6 @@ impl Temporary {
         Self {
             common_data: CommonToolData::new(ToolType::TemporaryFiles),
             information: Info::default(),
-            delete_method: DeleteMethod::None,
             temporary_files: vec![],
         }
     }
@@ -175,7 +173,7 @@ impl Temporary {
 
     #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
-        match self.delete_method {
+        match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 let mut warnings = Vec::new();
                 for file_entry in &self.temporary_files {
@@ -258,7 +256,6 @@ impl DebugPrint for Temporary {
         }
         println!("### Information's");
         println!("Temporary list size - {}", self.temporary_files.len());
-        println!("Delete Method - {:?}", self.delete_method);
         self.debug_print_common();
     }
 }
@@ -279,9 +276,5 @@ impl Temporary {
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-
-    pub fn set_delete_method(&mut self, delete_method: DeleteMethod) {
-        self.delete_method = delete_method;
     }
 }

@@ -14,7 +14,7 @@ pub struct CommonToolData {
     pub(crate) allowed_extensions: Extensions,
     pub(crate) excluded_items: ExcludedItems,
     pub(crate) recursive_search: bool,
-    // delete_method: DeleteMethod, // ?
+    pub(crate) delete_method: DeleteMethod,
     pub(crate) maximal_file_size: u64,
     pub(crate) minimal_file_size: u64,
     pub(crate) stopped_search: bool,
@@ -45,6 +45,7 @@ impl CommonToolData {
             allowed_extensions: Extensions::new(),
             excluded_items: ExcludedItems::new(),
             recursive_search: true,
+            delete_method: DeleteMethod::None,
             maximal_file_size: u64::MAX,
             minimal_file_size: 8192,
             stopped_search: false,
@@ -140,6 +141,13 @@ pub trait CommonData {
         self.get_cd().use_reference_folders
     }
 
+    fn set_delete_method(&mut self, delete_method: DeleteMethod) {
+        self.get_cd_mut().delete_method = delete_method;
+    }
+    fn get_delete_method(&self) -> DeleteMethod {
+        self.get_cd().delete_method
+    }
+
     fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         let messages = self.get_cd_mut().directories.set_included_directory(included_directory);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
@@ -180,6 +188,7 @@ pub trait CommonData {
         println!("Use cache: {:?}", self.get_cd().use_cache);
         println!("Delete outdated cache: {:?}", self.get_cd().delete_outdated_cache);
         println!("Save also as json: {:?}", self.get_cd().save_also_as_json);
+        println!("Delete method: {:?}", self.get_cd().delete_method);
 
         println!("---------------DEBUG PRINT MESSAGES---------------");
         println!("Errors size - {}", self.get_cd().text_messages.errors.len());
