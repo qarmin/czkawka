@@ -7,7 +7,7 @@ use commands::Commands;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::{BigFile, SearchMode};
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::common::{set_number_of_threads, setup_logger};
+use czkawka_core::common::{print_version_mode, set_number_of_threads, setup_logger};
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results_to_output().
 use czkawka_core::common_traits::*;
@@ -31,6 +31,7 @@ fn main() {
     let command = Args::parse().command;
 
     setup_logger(true);
+    print_version_mode();
 
     if cfg!(debug_assertions) {
         println!("{command:?}");

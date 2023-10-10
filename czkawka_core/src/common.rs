@@ -18,7 +18,7 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{LevelFilter, Record};
+use log::{info, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -26,6 +26,7 @@ use crate::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_traits::ResultEntry;
+use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 
@@ -51,6 +52,14 @@ pub fn setup_logger(disabled_printing: bool) {
 
     let config = ConfigBuilder::default().set_level(log_level).set_message_filtering(Some(filtering_messages)).build();
     handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
+}
+
+pub fn print_version_mode() {
+    info!(
+        "Czkawka version: {}, was compiled with {} mode",
+        CZKAWKA_VERSION,
+        if cfg!(debug_assertions) { "debug" } else { "release" }
+    );
 }
 
 pub fn set_default_number_of_threads() {
