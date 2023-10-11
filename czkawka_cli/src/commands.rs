@@ -152,6 +152,10 @@ pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
+    #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[clap(flatten)]
     pub case_sensitive_name_comparison: CaseSensitiveNameComparison,
@@ -178,6 +182,10 @@ pub struct EmptyFoldersArgs {
     pub delete_folders: bool,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
+    #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
     pub exclude_other_filesystems: ExcludeOtherFilesystems,
@@ -201,6 +209,10 @@ pub struct BiggestFilesArgs {
     pub delete_files: bool,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
+    #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
     #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest")]
@@ -227,6 +239,10 @@ pub struct EmptyFilesArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
+    #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
@@ -247,6 +263,10 @@ pub struct TemporaryArgs {
     pub delete_files: bool,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
+    #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
     #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
@@ -293,6 +313,10 @@ pub struct SimilarImagesArgs {
     pub excluded_items: ExcludedItems,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
+    #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
     #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
@@ -348,6 +372,10 @@ pub struct SameMusicArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
+    #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
@@ -389,6 +417,10 @@ pub struct InvalidSymlinksArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
+    #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
@@ -412,6 +444,10 @@ pub struct BrokenFilesArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
+    #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
@@ -432,6 +468,10 @@ pub struct SimilarVideosArgs {
     // delete_files: bool, TODO
     #[clap(flatten)]
     pub file_to_save: FileToSave,
+    #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
     #[clap(flatten)]
     pub allowed_extensions: AllowedExtensions,
     #[clap(flatten)]
@@ -482,6 +522,10 @@ pub struct BadExtensionsArgs {
     pub allowed_extensions: AllowedExtensions,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
+    #[clap(flatten)]
+    pub json_compact_file_to_save: JsonCompactFileToSave,
+    #[clap(flatten)]
+    pub json_pretty_file_to_save: JsonPrettyFileToSave,
     #[clap(flatten)]
     pub not_recursive: NotRecursive,
     #[cfg(target_family = "unix")]
@@ -555,8 +599,20 @@ pub struct ExcludeOtherFilesystems {
 
 #[derive(Debug, clap::Args)]
 pub struct FileToSave {
-    #[clap(short, long, value_name = "file-name", help = "Saves the results into the file")]
+    #[clap(short, long, value_name = "file-name", help = "Saves the results into the formatted txt file")]
     pub file_to_save: Option<PathBuf>,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct JsonCompactFileToSave {
+    #[clap(short, long, value_name = "json-file-name", help = "Saves the results into the compact json file")]
+    pub compact_file_to_save: Option<PathBuf>,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct JsonPrettyFileToSave {
+    #[clap(short, long, value_name = "pretty-json-file-name", help = "Saves the results into the pretty json file")]
+    pub pretty_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -580,6 +636,24 @@ pub struct DryRun {
 impl FileToSave {
     pub fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.file_to_save {
+            return file_name.to_str();
+        }
+
+        None
+    }
+}
+impl JsonCompactFileToSave {
+    pub fn file_name(&self) -> Option<&str> {
+        if let Some(file_name) = &self.compact_file_to_save {
+            return file_name.to_str();
+        }
+
+        None
+    }
+}
+impl JsonPrettyFileToSave {
+    pub fn file_name(&self) -> Option<&str> {
+        if let Some(file_name) = &self.pretty_file_to_save {
             return file_name.to_str();
         }
 
