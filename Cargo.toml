@@ -3,9 +3,9 @@ members = [
     "czkawka_core",
     "czkawka_cli",
     "czkawka_gui",
-#    "czkawka_slint_gui",
 ]
 exclude = [
+    "ci_tester",
     "czkawka_slint_gui"
 ]
 resolver = "2"

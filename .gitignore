@@ -13,3 +13,6 @@ flatpak/
 *.profdata
 /lcov_report*
 /report
+ci_tester/target
+ci_tester/Cargo.lock
+czkawka_slint_gui/Cargo.lock
