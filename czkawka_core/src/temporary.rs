@@ -10,6 +10,7 @@ use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
+use serde::Serialize;
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
@@ -32,7 +33,7 @@ const TEMP_EXTENSIONS: &[&str] = &[
     ".partial",
 ];
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
@@ -205,6 +206,10 @@ impl PrintResults for Temporary {
         }
 
         Ok(())
+    }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        self.save_results_to_file_as_json_internal(file_name, &self.temporary_files, pretty_print)
     }
 }
 

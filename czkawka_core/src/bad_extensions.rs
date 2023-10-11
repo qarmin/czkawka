@@ -11,6 +11,7 @@ use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
+use serde::Serialize;
 
 use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
@@ -158,7 +159,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "xls"), // Not sure why xls is not recognized
 ];
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct BadFileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
@@ -425,6 +426,10 @@ impl PrintResults for BadExtensions {
         }
 
         Ok(())
+    }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        self.save_results_to_file_as_json_internal(file_name, &self.bad_extensions_files, pretty_print)
     }
 }
 

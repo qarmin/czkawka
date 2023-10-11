@@ -12,13 +12,14 @@ use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -39,7 +40,7 @@ pub struct Info {
 pub struct BigFile {
     common_data: CommonToolData,
     information: Info,
-    big_files: Vec<(u64, FileEntry)>,
+    big_files: Vec<FileEntry>,
     number_of_files_to_check: usize,
     search_mode: SearchMode,
 }
@@ -189,7 +190,7 @@ impl BigFile {
             iter = Box::new(old_map.into_iter().rev());
         }
 
-        for (size, mut vector) in iter {
+        for (_size, mut vector) in iter {
             if self.information.number_of_real_files < self.number_of_files_to_check {
                 if vector.len() > 1 {
                     vector.sort_unstable_by_key(|e| {
@@ -199,7 +200,7 @@ impl BigFile {
                 }
                 for file in vector {
                     if self.information.number_of_real_files < self.number_of_files_to_check {
-                        self.big_files.push((size, file));
+                        self.big_files.push(file);
                         self.information.number_of_real_files += 1;
                     } else {
                         break;
@@ -214,7 +215,7 @@ impl BigFile {
     fn delete_files(&mut self) {
         match self.common_data.delete_method {
             DeleteMethod::Delete => {
-                for (_, file_entry) in &self.big_files {
+                for file_entry in &self.big_files {
                     if fs::remove_file(&file_entry.path).is_err() {
                         self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
                     }
@@ -262,14 +263,18 @@ impl PrintResults for BigFile {
             } else {
                 writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
-            for (size, file_entry) in &self.big_files {
-                writeln!(writer, "{} ({}) - {}", format_size(*size, BINARY), size, file_entry.path.display())?;
+            for file_entry in &self.big_files {
+                writeln!(writer, "{} ({}) - {}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path.display())?;
             }
         } else {
             write!(writer, "Not found any files.").unwrap();
         }
 
         Ok(())
+    }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        self.save_results_to_file_as_json_internal(file_name, &self.big_files, pretty_print)
     }
 }
 
@@ -287,7 +292,7 @@ impl BigFile {
         self.search_mode = search_mode;
     }
 
-    pub const fn get_big_files(&self) -> &Vec<(u64, FileEntry)> {
+    pub const fn get_big_files(&self) -> &Vec<FileEntry> {
         &self.big_files
     }
 

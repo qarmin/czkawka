@@ -435,11 +435,31 @@ impl PrintResults for SimilarVideos {
                 }
                 writeln!(writer)?;
             }
+        } else if !self.similar_referenced_vectors.is_empty() {
+            write!(writer, "{} videos which have similar friends\n\n", self.similar_referenced_vectors.len())?;
+
+            for (fe, struct_similar) in &self.similar_referenced_vectors {
+                writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
+                writeln!(writer)?;
+                writeln!(writer, "{} - {}", fe.path.display(), format_size(fe.size, BINARY))?;
+                for file_entry in struct_similar {
+                    writeln!(writer, "{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY))?;
+                }
+                writeln!(writer)?;
+            }
         } else {
             write!(writer, "Not found any similar videos.")?;
         }
 
         Ok(())
+    }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        if self.get_use_reference() {
+            self.save_results_to_file_as_json_internal(file_name, &self.similar_referenced_vectors, pretty_print)
+        } else {
+            self.save_results_to_file_as_json_internal(file_name, &self.similar_vectors, pretty_print)
+        }
     }
 }
 

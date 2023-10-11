@@ -989,6 +989,24 @@ impl PrintResults for DuplicateFinder {
                         }
                         writeln!(writer)?;
                     }
+                } else if !self.files_with_identical_names_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same names in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with same name(may have different content)",
+                        self.information.number_of_duplicated_files_by_name, self.information.number_of_groups_by_name,
+                    )?;
+                    for (name, (file_entry, vector)) in self.files_with_identical_names_referenced.iter().rev() {
+                        writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
+                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                        for j in vector {
+                            writeln!(writer, "{}", j.path.display())?;
+                        }
+                        writeln!(writer)?;
+                    }
                 } else {
                     write!(writer, "Not found any files with same names.")?;
                 }
@@ -1006,6 +1024,24 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for ((size, name), vector) in self.files_with_identical_size_names.iter().rev() {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
+                        for j in vector {
+                            writeln!(writer, "{}", j.path.display())?;
+                        }
+                        writeln!(writer)?;
+                    }
+                } else if !self.files_with_identical_names_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same size and names in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with same size and name(may have different content)",
+                        self.information.number_of_duplicated_files_by_size_name, self.information.number_of_groups_by_size_name,
+                    )?;
+                    for ((size, name), (file_entry, vector)) in self.files_with_identical_size_names_referenced.iter().rev() {
+                        writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
+                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
                         for j in vector {
                             writeln!(writer, "{}", j.path.display())?;
                         }
@@ -1030,6 +1066,25 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
                         write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len())?;
+                        for file_entry in vector {
+                            writeln!(writer, "{}", file_entry.path.display())?;
+                        }
+                    }
+                } else if !self.files_with_identical_size_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same size in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} duplicated files which in {} groups which takes {}.",
+                        self.information.number_of_duplicated_files_by_size,
+                        self.information.number_of_groups_by_size,
+                        format_size(self.information.lost_space_by_size, BINARY)
+                    )?;
+                    for (size, (file_entry, vector)) in self.files_with_identical_size_referenced.iter().rev() {
+                        writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
+                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
                         for file_entry in vector {
                             writeln!(writer, "{}", file_entry.path.display())?;
                         }
@@ -1059,6 +1114,27 @@ impl PrintResults for DuplicateFinder {
                             }
                         }
                     }
+                } else if !self.files_with_identical_hashes_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same hashes in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} duplicated files which in {} groups which takes {}.",
+                        self.information.number_of_duplicated_files_by_hash,
+                        self.information.number_of_groups_by_hash,
+                        format_size(self.information.lost_space_by_hash, BINARY)
+                    )?;
+                    for (size, vectors_vector) in self.files_with_identical_hashes_referenced.iter().rev() {
+                        for (file_entry, vector) in vectors_vector {
+                            writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
+                            writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                            for file_entry in vector {
+                                writeln!(writer, "{}", file_entry.path.display())?;
+                            }
+                        }
+                    }
                 } else {
                     write!(writer, "Not found any duplicates.")?;
                 }
@@ -1067,6 +1143,26 @@ impl PrintResults for DuplicateFinder {
         }
 
         Ok(())
+    }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> io::Result<()> {
+        if self.get_use_reference() {
+            match self.check_method {
+                CheckingMethod::Name => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_names_referenced, pretty_print),
+                CheckingMethod::SizeName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_names_referenced, pretty_print),
+                CheckingMethod::Size => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_referenced, pretty_print),
+                CheckingMethod::Hash => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_hashes_referenced, pretty_print),
+                _ => panic!(),
+            }
+        } else {
+            match self.check_method {
+                CheckingMethod::Name => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_names, pretty_print),
+                CheckingMethod::SizeName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_names, pretty_print),
+                CheckingMethod::Size => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size, pretty_print),
+                CheckingMethod::Hash => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_hashes, pretty_print),
+                _ => panic!(),
+            }
+        }
     }
 }
 
