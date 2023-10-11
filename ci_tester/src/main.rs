@@ -3,16 +3,14 @@ use std::fs;
 use std::process::Command;
 use std::process::Stdio;
 
-// App runs - ./ci_tester PATH_TO_TEST_FILES PATH_TO_CZKAWKA
+// App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let path_to_test_files = args[1].clone();
     let path_to_czkawka = args[2].clone();
 
     remove_test_dir();
     run_with_good_status(&["ls"], false);
-    fs::copy(path_to_test_files, "TestFiles.zip").unwrap();
-    run_with_good_status(&["unzip", "TestFiles.zip", "-d", "TestFiles"], false);
+    unzip_files();
 
     let (files, folders, symlinks) = collect_all_files_and_dirs("TestFiles").unwrap();
     remove_test_dir();
@@ -92,9 +90,9 @@ fn remove_test_dir() {
 fn run_with_good_status(str_command: &[&str], print_messages: bool) {
     let mut command = Command::new(str_command[0]);
     let mut com = command.args(&str_command[1..]);
-    // if !print_messages {
-    //     com = com.stderr(Stdio::piped()).stdout(Stdio::piped());
-    // }
+    if !print_messages {
+        com = com.stderr(Stdio::piped()).stdout(Stdio::piped());
+    }
     let status = com.spawn().expect("failed to execute process").wait().unwrap();
     assert!(status.success());
 }

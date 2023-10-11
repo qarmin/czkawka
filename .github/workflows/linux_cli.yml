@@ -45,5 +45,5 @@ jobs:
           cargo build --release
           cd ..
           
-          ci_tester/target/release/ci_tester TestFiles.zip target/release/czkawka_cli
+          ci_tester/target/release/ci_tester target/release/czkawka_cli
         if: ${{ matrix.type == 'release' }}
