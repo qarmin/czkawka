@@ -6,7 +6,7 @@ use std::process::Stdio;
 // App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let path_to_czkawka = args[2].clone();
+    let path_to_czkawka = args[1].clone();
 
     remove_test_dir();
     run_with_good_status(&["ls"], false);
