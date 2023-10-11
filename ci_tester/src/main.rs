@@ -92,9 +92,9 @@ fn remove_test_dir() {
 fn run_with_good_status(str_command: &[&str], print_messages: bool) {
     let mut command = Command::new(str_command[0]);
     let mut com = command.args(&str_command[1..]);
-    if !print_messages {
-        com = com.stderr(Stdio::piped()).stdout(Stdio::piped());
-    }
+    // if !print_messages {
+    //     com = com.stderr(Stdio::piped()).stdout(Stdio::piped());
+    // }
     let status = com.spawn().expect("failed to execute process").wait().unwrap();
     assert!(status.success());
 }
