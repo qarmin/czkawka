@@ -37,27 +37,10 @@ impl Directories {
         let directories: Vec<PathBuf> = included_directory;
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
-        for directory in directories {
+        for mut directory in directories {
             if directory.to_string_lossy().contains('*') {
                 messages.warnings.push(flc!(
                     "core_directory_wildcard_no_supported",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-
-            #[cfg(not(target_family = "windows"))]
-            if directory.is_relative() {
-                messages.warnings.push(flc!(
-                    "core_directory_relative_path",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-            #[cfg(target_family = "windows")]
-            if directory.is_relative() && !directory.starts_with("\\") {
-                messages.warnings.push(flc!(
-                    "core_directory_relative_path",
                     generate_translation_hashmap(vec![("path", directory.display().to_string())])
                 ));
                 continue;
@@ -77,6 +60,20 @@ impl Directories {
                 ));
                 continue;
             }
+
+            // If not checking windows strange paths, try to canonicalize them
+            if !directory.starts_with("\\") {
+                let Ok(dir2) = directory.canonicalize() else {
+                    messages.warnings.push(flc!(
+                        "core_directory_must_exists",
+                        generate_translation_hashmap(vec![("path", directory.display().to_string())])
+                    ));
+                    continue;
+                };
+
+                directory = dir2;
+            }
+
             checked_directories.push(directory);
         }
 

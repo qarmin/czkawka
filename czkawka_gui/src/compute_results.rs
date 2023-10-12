@@ -957,11 +957,11 @@ fn computer_big_files(
 
             let vector = bf.get_big_files();
 
-            for (size, file_entry) in vector {
+            for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsBigFiles::SelectionButton as u32, &false),
-                    (ColumnsBigFiles::Size as u32, &(format_size(*size, BINARY))),
+                    (ColumnsBigFiles::Size as u32, &(format_size(file_entry.size, BINARY))),
                     (ColumnsBigFiles::Name as u32, &file),
                     (ColumnsBigFiles::Path as u32, &directory),
                     (
@@ -969,7 +969,7 @@ fn computer_big_files(
                         &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
                     ),
                     (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                    (ColumnsBigFiles::SizeAsBytes as u32, &(size)),
+                    (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
                 ];
                 list_store.set(&list_store.append(), &values);
             }

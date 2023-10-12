@@ -1,0 +1,11 @@
+[package]
+name = "ci_tester"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+state = "0.6.0"
+handsome_logger = "0.8.0"
+log = "0.4.20"

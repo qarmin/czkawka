@@ -2,14 +2,14 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use czkawka_core::common_traits::PrintResults;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry};
+
+use czkawka_core::common_traits::PrintResults;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
-use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 pub fn connect_button_save(gui_data: &GuiData) {
@@ -30,64 +30,18 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     buttons_save.connect_clicked(move |_| {
-        let file_name;
-
         let result = match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
-            NotebookMainEnum::Duplicate => {
-                file_name = "results_duplicates.txt";
-
-                shared_duplication_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::EmptyDirectories => {
-                file_name = "results_empty_folder.txt";
-
-                shared_empty_folders_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::EmptyFiles => {
-                file_name = "results_empty_files.txt";
-
-                shared_empty_files_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::Temporary => {
-                file_name = "results_temporary_files.txt";
-
-                shared_temporary_files_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::BigFiles => {
-                file_name = "results_big_files.txt";
-
-                shared_big_files_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::SimilarImages => {
-                file_name = "results_similar_images.txt";
-
-                shared_similar_images_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::SimilarVideos => {
-                file_name = "results_similar_videos.txt";
-
-                shared_similar_videos_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::SameMusic => {
-                file_name = "results_same_music.txt";
-
-                shared_same_music_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::Symlinks => {
-                file_name = "results_invalid_symlinks.txt";
-
-                shared_same_invalid_symlinks.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::BrokenFiles => {
-                file_name = "results_broken_files.txt";
-
-                shared_broken_files_state.borrow_mut().print_results_to_file(file_name)
-            }
-            NotebookMainEnum::BadExtensions => {
-                file_name = "results_bad_extensions.txt";
-
-                shared_bad_extensions_state.borrow_mut().print_results_to_file(file_name)
-            }
+            NotebookMainEnum::Duplicate => shared_duplication_state.borrow().save_all_in_one("results_duplicates"),
+            NotebookMainEnum::EmptyDirectories => shared_empty_folders_state.borrow().save_all_in_one("results_empty_directories"),
+            NotebookMainEnum::EmptyFiles => shared_empty_files_state.borrow().save_all_in_one("results_empty_files"),
+            NotebookMainEnum::Temporary => shared_temporary_files_state.borrow().save_all_in_one("results_temporary_files"),
+            NotebookMainEnum::BigFiles => shared_big_files_state.borrow().save_all_in_one("results_big_files"),
+            NotebookMainEnum::SimilarImages => shared_similar_images_state.borrow().save_all_in_one("results_similar_images"),
+            NotebookMainEnum::SimilarVideos => shared_similar_videos_state.borrow().save_all_in_one("results_similar_videos"),
+            NotebookMainEnum::SameMusic => shared_same_music_state.borrow().save_all_in_one("results_same_music"),
+            NotebookMainEnum::Symlinks => shared_same_invalid_symlinks.borrow().save_all_in_one("results_invalid_symlinks"),
+            NotebookMainEnum::BrokenFiles => shared_broken_files_state.borrow().save_all_in_one("results_broken_files"),
+            NotebookMainEnum::BadExtensions => shared_bad_extensions_state.borrow().save_all_in_one("results_bad_extensions"),
         };
 
         match result {
@@ -99,7 +53,6 @@ pub fn connect_button_save(gui_data: &GuiData) {
         }
 
         post_save_things(
-            file_name,
             &to_notebook_main_enum(notebook_main.current_page().unwrap()),
             &shared_buttons,
             &entry_info,
@@ -109,13 +62,12 @@ pub fn connect_button_save(gui_data: &GuiData) {
 }
 
 fn post_save_things(
-    file_name: &str,
     type_of_tab: &NotebookMainEnum,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     entry_info: &Entry,
     buttons_save: &Button,
 ) {
-    entry_info.set_text(flg!("save_results_to_file", generate_translation_hashmap(vec![("name", file_name.to_string())])).as_str());
+    entry_info.set_text(&flg!("save_results_to_file"));
     // Set state
     {
         buttons_save.hide();

@@ -127,6 +127,10 @@ impl PrintResults for InvalidSymlinks {
 
         Ok(())
     }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        self.save_results_to_file_as_json_internal(file_name, &self.invalid_symlinks, pretty_print)
+    }
 }
 
 impl CommonData for InvalidSymlinks {

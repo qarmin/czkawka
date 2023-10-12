@@ -924,16 +924,54 @@ impl PrintResults for SameMusic {
                         file_entry.genre,
                         file_entry.bitrate,
                         file_entry.path.display()
-                    )
-                    .unwrap();
+                    )?;
                 }
-                writeln!(writer).unwrap();
+                writeln!(writer)?;
+            }
+        } else if !self.duplicated_music_entries_referenced.is_empty() {
+            writeln!(writer, "{} music files which have similar friends\n\n.", self.duplicated_music_entries_referenced.len())?;
+            for (file_entry, vec_file_entry) in &self.duplicated_music_entries_referenced {
+                writeln!(writer, "Found {} music files which have similar friends", vec_file_entry.len())?;
+                writeln!(writer)?;
+                writeln!(
+                    writer,
+                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
+                    file_entry.track_title,
+                    file_entry.track_artist,
+                    file_entry.year,
+                    file_entry.length,
+                    file_entry.genre,
+                    file_entry.bitrate,
+                    file_entry.path.display()
+                )?;
+                for file_entry in vec_file_entry {
+                    writeln!(
+                        writer,
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
+                        file_entry.track_title,
+                        file_entry.track_artist,
+                        file_entry.year,
+                        file_entry.length,
+                        file_entry.genre,
+                        file_entry.bitrate,
+                        file_entry.path.display()
+                    )?;
+                }
+                writeln!(writer)?;
             }
         } else {
             write!(writer, "Not found any similar music files.")?;
         }
 
         Ok(())
+    }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        if self.get_use_reference() {
+            self.save_results_to_file_as_json_internal(file_name, &self.duplicated_music_entries_referenced, pretty_print)
+        } else {
+            self.save_results_to_file_as_json_internal(file_name, &self.duplicated_music_entries, pretty_print)
+        }
     }
 }
 

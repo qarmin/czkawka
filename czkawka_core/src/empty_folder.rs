@@ -158,6 +158,10 @@ impl PrintResults for EmptyFolder {
 
         Ok(())
     }
+
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
+        self.save_results_to_file_as_json_internal(file_name, &self.empty_folder_list.keys().collect::<Vec<_>>(), pretty_print)
+    }
 }
 
 impl CommonData for EmptyFolder {

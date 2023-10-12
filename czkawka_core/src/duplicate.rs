@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, HashSet};
+use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
@@ -813,30 +814,115 @@ impl DuplicateFinder {
 
         match self.check_method {
             CheckingMethod::Name => {
-                for vector in self.files_with_identical_names.values() {
-                    let _tuple: (u64, usize, usize) = delete_files(vector, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
-                }
+                let vec_files = self.files_with_identical_names.values().collect::<Vec<_>>();
+                delete_files(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
             }
             CheckingMethod::SizeName => {
-                for vector in self.files_with_identical_size_names.values() {
-                    let _tuple: (u64, usize, usize) = delete_files(vector, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
-                }
+                let vec_files = self.files_with_identical_size_names.values().collect::<Vec<_>>();
+                delete_files(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
             }
             CheckingMethod::Hash => {
-                for vector_vectors in self.files_with_identical_hashes.values() {
-                    for vector in vector_vectors {
-                        let _tuple: (u64, usize, usize) = delete_files(vector, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
-                    }
+                for vec_files in self.files_with_identical_hashes.values() {
+                    let vev: Vec<&Vec<FileEntry>> = vec_files.iter().collect::<Vec<_>>();
+                    delete_files(&vev, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
                 }
             }
             CheckingMethod::Size => {
-                for vector in self.files_with_identical_size.values() {
-                    let _tuple: (u64, usize, usize) = delete_files(vector, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
-                }
+                let vec_files = self.files_with_identical_size.values().collect::<Vec<_>>();
+                delete_files(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
             }
             _ => panic!(),
         }
     }
+}
+// Here we assume, that internal Vec<> have at least 1 object
+#[allow(clippy::ptr_arg)]
+fn delete_files(items: &Vec<&Vec<FileEntry>>, delete_method: &DeleteMethod, text_messages: &mut Messages, dryrun: bool) -> (u64, usize, usize) {
+    let res = items
+        .iter()
+        .map(|values| {
+            let mut gained_space: u64 = 0;
+            let mut removed_files: usize = 0;
+            let mut failed_to_remove_files: usize = 0;
+            let mut infos = Vec::new();
+            let mut errors = Vec::new();
+
+            let mut all_values = (*values).clone();
+            let len = all_values.len();
+
+            // Sorted from oldest to newest - from smallest value to bigger
+            all_values.sort_unstable_by_key(ResultEntry::get_modified_date);
+
+            if delete_method == &DeleteMethod::HardLink {
+                let original_file = &all_values[0];
+                for file_entry in &all_values[1..] {
+                    if dryrun {
+                        infos.push(format!(
+                            "Dryrun - would create hardlink from {:?} to {:?}",
+                            original_file.get_path(),
+                            original_file.get_path()
+                        ));
+                    } else {
+                        if dryrun {
+                            infos.push(format!("Replace file {:?} with hard link to {:?}", original_file.get_path(), file_entry.get_path()));
+                        } else {
+                            if let Err(e) = make_hard_link(original_file.get_path(), file_entry.get_path()) {
+                                errors.push(format!(
+                                    "Cannot create hard link from {:?} to {:?} - {}",
+                                    file_entry.get_path(),
+                                    original_file.get_path(),
+                                    e
+                                ));
+                                failed_to_remove_files += 1;
+                            } else {
+                                gained_space += 1;
+                                removed_files += 1;
+                            }
+                        }
+                    }
+                }
+
+                return (infos, errors, gained_space, removed_files, failed_to_remove_files);
+            }
+
+            let items = match delete_method {
+                DeleteMethod::Delete => &all_values,
+                DeleteMethod::AllExceptNewest => &all_values[..(len - 1)],
+                DeleteMethod::AllExceptOldest => &all_values[1..],
+                DeleteMethod::OneOldest => &all_values[..1],
+                DeleteMethod::OneNewest => &all_values[(len - 1)..],
+                DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
+            };
+
+            for i in items {
+                if dryrun {
+                    infos.push(format!("Dryrun - would delete file: {:?}", i.get_path()));
+                } else {
+                    if let Err(e) = std::fs::remove_file(i.get_path()) {
+                        errors.push(format!("Cannot delete file: {:?} - {e}", i.get_path()));
+                        failed_to_remove_files += 1;
+                    } else {
+                        removed_files += 1;
+                        gained_space += i.get_size();
+                    }
+                }
+            }
+            (infos, errors, gained_space, removed_files, failed_to_remove_files)
+        })
+        .collect::<Vec<_>>();
+
+    let mut gained_space = 0;
+    let mut removed_files = 0;
+    let mut failed_to_remove_files = 0;
+    for (infos, errors, gained_space_v, removed_files_v, failed_to_remove_files_v) in res {
+        text_messages.messages.extend(infos);
+        text_messages.errors.extend(errors);
+        gained_space += gained_space_v;
+        removed_files += removed_files_v;
+        failed_to_remove_files += failed_to_remove_files_v;
+    }
+
+    (gained_space, removed_files, failed_to_remove_files)
 }
 
 impl DuplicateFinder {
@@ -989,6 +1075,24 @@ impl PrintResults for DuplicateFinder {
                         }
                         writeln!(writer)?;
                     }
+                } else if !self.files_with_identical_names_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same names in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with same name(may have different content)",
+                        self.information.number_of_duplicated_files_by_name, self.information.number_of_groups_by_name,
+                    )?;
+                    for (name, (file_entry, vector)) in self.files_with_identical_names_referenced.iter().rev() {
+                        writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
+                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                        for j in vector {
+                            writeln!(writer, "{}", j.path.display())?;
+                        }
+                        writeln!(writer)?;
+                    }
                 } else {
                     write!(writer, "Not found any files with same names.")?;
                 }
@@ -1006,6 +1110,24 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for ((size, name), vector) in self.files_with_identical_size_names.iter().rev() {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
+                        for j in vector {
+                            writeln!(writer, "{}", j.path.display())?;
+                        }
+                        writeln!(writer)?;
+                    }
+                } else if !self.files_with_identical_names_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same size and names in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with same size and name(may have different content)",
+                        self.information.number_of_duplicated_files_by_size_name, self.information.number_of_groups_by_size_name,
+                    )?;
+                    for ((size, name), (file_entry, vector)) in self.files_with_identical_size_names_referenced.iter().rev() {
+                        writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
+                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
                         for j in vector {
                             writeln!(writer, "{}", j.path.display())?;
                         }
@@ -1030,6 +1152,25 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
                         write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len())?;
+                        for file_entry in vector {
+                            writeln!(writer, "{}", file_entry.path.display())?;
+                        }
+                    }
+                } else if !self.files_with_identical_size_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same size in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} duplicated files which in {} groups which takes {}.",
+                        self.information.number_of_duplicated_files_by_size,
+                        self.information.number_of_groups_by_size,
+                        format_size(self.information.lost_space_by_size, BINARY)
+                    )?;
+                    for (size, (file_entry, vector)) in self.files_with_identical_size_referenced.iter().rev() {
+                        writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
+                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
                         for file_entry in vector {
                             writeln!(writer, "{}", file_entry.path.display())?;
                         }
@@ -1059,6 +1200,27 @@ impl PrintResults for DuplicateFinder {
                             }
                         }
                     }
+                } else if !self.files_with_identical_hashes_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with same hashes in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} duplicated files which in {} groups which takes {}.",
+                        self.information.number_of_duplicated_files_by_hash,
+                        self.information.number_of_groups_by_hash,
+                        format_size(self.information.lost_space_by_hash, BINARY)
+                    )?;
+                    for (size, vectors_vector) in self.files_with_identical_hashes_referenced.iter().rev() {
+                        for (file_entry, vector) in vectors_vector {
+                            writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
+                            writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                            for file_entry in vector {
+                                writeln!(writer, "{}", file_entry.path.display())?;
+                            }
+                        }
+                    }
                 } else {
                     write!(writer, "Not found any duplicates.")?;
                 }
@@ -1068,71 +1230,26 @@ impl PrintResults for DuplicateFinder {
 
         Ok(())
     }
-}
 
-fn delete_files(vector: &[FileEntry], delete_method: &DeleteMethod, text_messages: &mut Messages, dryrun: bool) -> (u64, usize, usize) {
-    assert!(vector.len() > 1, "Vector length must be bigger than 1(This should be done in previous steps).");
-    let mut gained_space: u64 = 0;
-    let mut removed_files: usize = 0;
-    let mut failed_to_remove_files: usize = 0;
-    let mut values = vector.iter().enumerate();
-    let q_index = match delete_method {
-        DeleteMethod::OneOldest | DeleteMethod::AllExceptNewest => values.max_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
-        DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::HardLink => values.min_by(|(_, l), (_, r)| l.modified_date.cmp(&r.modified_date)),
-        DeleteMethod::None => values.next(),
-        _ => unreachable!(),
-    };
-    let q_index = q_index.map_or(0, |t| t.0);
-    let n = match delete_method {
-        DeleteMethod::OneNewest | DeleteMethod::OneOldest => 1,
-        DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptOldest | DeleteMethod::None | DeleteMethod::HardLink => usize::MAX,
-        _ => unreachable!(),
-    };
-    for (index, file) in vector.iter().enumerate() {
-        if q_index == index {
-            continue;
-        }
-        if removed_files + failed_to_remove_files >= n {
-            break;
-        }
-
-        let r = match delete_method {
-            DeleteMethod::OneOldest | DeleteMethod::OneNewest | DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptNewest => {
-                if dryrun {
-                    Ok(Some(format!("Delete {}", file.path.display())))
-                } else {
-                    fs::remove_file(&file.path).map(|()| None)
-                }
+    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> io::Result<()> {
+        if self.get_use_reference() {
+            match self.check_method {
+                CheckingMethod::Name => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_names_referenced, pretty_print),
+                CheckingMethod::SizeName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_names_referenced, pretty_print),
+                CheckingMethod::Size => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_referenced, pretty_print),
+                CheckingMethod::Hash => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_hashes_referenced, pretty_print),
+                _ => panic!(),
             }
-            DeleteMethod::HardLink => {
-                let src = &vector[q_index].path;
-                if dryrun {
-                    Ok(Some(format!("Replace file {} with hard link to {}", file.path.display(), src.display())))
-                } else {
-                    make_hard_link(src, &file.path).map(|()| None)
-                }
-            }
-            DeleteMethod::None => Ok(None),
-            _ => unreachable!(),
-        };
-
-        match r {
-            Err(e) => {
-                failed_to_remove_files += 1;
-                text_messages.warnings.push(format!("Failed to remove {} ({})", file.path.display(), e));
-            }
-            Ok(Some(msg)) => {
-                text_messages.messages.push(msg);
-                removed_files += 1;
-                gained_space += file.size;
-            }
-            Ok(None) => {
-                removed_files += 1;
-                gained_space += file.size;
+        } else {
+            match self.check_method {
+                CheckingMethod::Name => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_names, pretty_print),
+                CheckingMethod::SizeName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_names, pretty_print),
+                CheckingMethod::Size => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size, pretty_print),
+                CheckingMethod::Hash => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_hashes, pretty_print),
+                _ => panic!(),
             }
         }
     }
-    (gained_space, removed_files, failed_to_remove_files)
 }
 
 #[cfg(target_family = "windows")]
