@@ -508,7 +508,7 @@ impl DuplicateFinder {
         );
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
-        // dbg!(&non_cached_files_to_check);
+
         debug!("Starting calculating prehash");
         #[allow(clippy::type_complexity)]
         let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)> = non_cached_files_to_check

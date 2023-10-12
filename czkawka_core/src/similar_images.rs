@@ -783,7 +783,7 @@ impl SimilarImages {
         // Validating if group contains duplicated results
         let mut result_hashset: HashSet<String> = Default::default();
         let mut found = false;
-        // dbg!(collected_similar_images.len());
+
         for vec_file_entry in collected_similar_images.values() {
             if vec_file_entry.is_empty() {
                 println!("Empty group");
@@ -1338,7 +1338,6 @@ mod tests {
 
             similar_images.find_similar_hashes(None, None);
             let res = similar_images.get_similar_images();
-            // dbg!(&res);
             assert!(res.is_empty());
         }
     }
