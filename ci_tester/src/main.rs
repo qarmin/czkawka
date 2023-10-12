@@ -3,6 +3,13 @@ use std::fs;
 use std::process::Command;
 use std::process::Stdio;
 
+#[derive(Default, Clone, Debug)]
+struct CollectedFiles {
+    files: BTreeSet<String>,
+    folders: BTreeSet<String>,
+    symlinks: BTreeSet<String>,
+}
+
 // App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -12,66 +19,61 @@ fn main() {
     run_with_good_status(&["ls"], false);
     unzip_files();
 
-    let (files, folders, symlinks) = collect_all_files_and_dirs("TestFiles").unwrap();
+    let all_files = collect_all_files_and_dirs("TestFiles").unwrap();
     remove_test_dir();
 
     for _ in 0..5 {
-        test_empty_files(&path_to_czkawka, &files, &folders, &symlinks);
-        test_smallest_files(&path_to_czkawka, &files, &folders, &symlinks);
-        test_biggest_files(&path_to_czkawka, &files, &folders, &symlinks);
+        test_empty_files(&path_to_czkawka, &all_files);
+        test_smallest_files(&path_to_czkawka, &all_files);
+        test_biggest_files(&path_to_czkawka, &all_files);
     }
 
     println!("Completed checking");
 }
 
-fn test_biggest_files(path_to_czkawka: &str, all_files: &BTreeSet<String>, all_folders: &BTreeSet<String>, all_symlinks: &BTreeSet<String>) {
+fn run_test(
+    path_to_czkawka: &str,
+    arguments: &[&str],
+    all_files: &CollectedFiles,
+    expected_files_differences: Vec<&'static str>,
+    expected_folders_differences: Vec<&'static str>,
+    expected_symlinks_differences: Vec<&'static str>,
+) {
     unzip_files();
-    run_with_good_status(&[path_to_czkawka, "big", "-d", "TestFiles", "-n", "5", "-D"], true);
+    // Add path_to_czkawka to arguments
+    let mut all_arguments = vec![];
+    all_arguments.push(path_to_czkawka);
+    all_arguments.extend_from_slice(arguments);
+    run_with_good_status(&all_arguments, true);
+    file_folder_diffs(&all_files, expected_files_differences, expected_folders_differences, expected_symlinks_differences);
 
-    file_folder_diffs(
-        &all_files,
-        &all_folders,
-        &all_symlinks,
-        vec![
-            "Music/M4.mp3".to_string(),
-            "Videos/V3.webm".to_string(),
-            "Music/M3.flac".to_string(),
-            "Videos/V2.mp4".to_string(),
-            "Videos/V4.mp4".to_string(),
-        ],
-        vec![],
-        vec![],
-    );
     remove_test_dir();
 }
 
-fn test_smallest_files(path_to_czkawka: &str, all_files: &BTreeSet<String>, all_folders: &BTreeSet<String>, all_symlinks: &BTreeSet<String>) {
-    unzip_files();
-    run_with_good_status(&[path_to_czkawka, "big", "-d", "TestFiles", "-J", "-n", "5", "-D"], true);
-
-    file_folder_diffs(
-        &all_files,
-        &all_folders,
-        &all_symlinks,
-        vec![
-            "Broken/Br.jpg".to_string(),
-            "Broken/Br.mp3".to_string(),
-            "Broken/Br.pdf".to_string(),
-            "Broken/Br.zip".to_string(),
-            "EmptyFolders/ThreeButNot/KEKEKE".to_string(),
-        ],
+fn test_biggest_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
+    run_test(
+        path_to_czkawka,
+        &["big", "-d", "TestFiles", "-n", "5", "-D"],
+        all_files,
+        vec!["Music/M4.mp3", "Videos/V3.webm", "Music/M3.flac", "Videos/V2.mp4", "Videos/V4.mp4"],
         vec![],
         vec![],
     );
-    remove_test_dir();
 }
 
-fn test_empty_files(path_to_czkawka: &str, all_files: &BTreeSet<String>, all_folders: &BTreeSet<String>, all_symlinks: &BTreeSet<String>) {
-    unzip_files();
-    run_with_good_status(&[path_to_czkawka, "empty-files", "-d", "TestFiles", "-D"], true);
+fn test_smallest_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
+    run_test(
+        path_to_czkawka,
+        &["big", "-d", "TestFiles", "-J", "-n", "5", "-D"],
+        all_files,
+        vec!["Broken/Br.jpg", "Broken/Br.mp3", "Broken/Br.pdf", "Broken/Br.zip", "EmptyFolders/ThreeButNot/KEKEKE"],
+        vec![],
+        vec![],
+    );
+}
 
-    file_folder_diffs(&all_files, &all_folders, &all_symlinks, vec!["EmptyFile".to_string()], vec![], vec![]);
-    remove_test_dir();
+fn test_empty_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
+    run_test(path_to_czkawka, &["empty-files", "-d", "TestFiles", "-D"], all_files, vec!["EmptyFile"], vec![], vec![]);
 }
 
 ////////////////////////////////////
@@ -98,24 +100,25 @@ fn run_with_good_status(str_command: &[&str], print_messages: bool) {
 }
 
 fn file_folder_diffs(
-    file: &BTreeSet<String>,
-    folder: &BTreeSet<String>,
-    symlinks: &BTreeSet<String>,
-    mut expected_files_differences: Vec<String>,
-    mut expected_folders_differences: Vec<String>,
-    mut expected_symlinks_differences: Vec<String>,
+    all_files: &CollectedFiles,
+    mut expected_files_differences: Vec<&'static str>,
+    mut expected_folders_differences: Vec<&'static str>,
+    mut expected_symlinks_differences: Vec<&'static str>,
 ) {
-    let (current_files, current_folders, current_symlinks) = collect_all_files_and_dirs("TestFiles").unwrap();
-    let mut diff_files = file
-        .difference(&current_files)
+    let current_files = collect_all_files_and_dirs("TestFiles").unwrap();
+    let mut diff_files = all_files
+        .files
+        .difference(&current_files.files)
         .map(|e| e.strip_prefix("TestFiles/").unwrap().to_string())
         .collect::<Vec<_>>();
-    let mut diff_folders = folder
-        .difference(&current_folders)
+    let mut diff_folders = all_files
+        .folders
+        .difference(&current_files.folders)
         .map(|e| e.strip_prefix("TestFiles/").unwrap().to_string())
         .collect::<Vec<_>>();
-    let mut diff_symlinks = symlinks
-        .difference(&current_symlinks)
+    let mut diff_symlinks = all_files
+        .symlinks
+        .difference(&current_files.symlinks)
         .map(|e| e.strip_prefix("TestFiles/").unwrap().to_string())
         .collect::<Vec<_>>();
 
@@ -132,7 +135,7 @@ fn file_folder_diffs(
     assert_eq!(diff_symlinks, expected_symlinks_differences);
 }
 
-fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<(BTreeSet<String>, BTreeSet<String>, BTreeSet<String>)> {
+fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
     let mut files = BTreeSet::new();
     let mut folders = BTreeSet::new();
     let mut symlinks = BTreeSet::new();
@@ -160,5 +163,5 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<(BTreeSet<String>, B
 
     folders.remove(dir);
     // println!("Found {} files, {} folders and {} symlinks", files.len(), folders.len(), symlinks.len());
-    Ok((files, folders, symlinks))
+    Ok(CollectedFiles { files, folders, symlinks })
 }
